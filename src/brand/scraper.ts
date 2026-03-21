@@ -11,7 +11,13 @@ import type { BrandProfile, BrandColors, BrandTypography, BrandStyle, BrandLogo 
 export async function scrapeBrand(url: string, verbose: boolean): Promise<BrandProfile> {
   if (verbose) console.log(`    Fetching ${url}...`);
 
-  const html = await fetchPage(url);
+  let html: string;
+  try {
+    html = await fetchPage(url);
+  } catch (err: any) {
+    console.log(`    ⚠ Could not fetch URL (${err.message}). Using fallback brand extraction...`);
+    return buildFallbackProfile(url);
+  }
   const $ = cheerio.load(html);
 
   if (verbose) console.log('    Extracting CSS from page...');
@@ -528,4 +534,50 @@ function extractLogo($: cheerio.CheerioAPI, pageUrl: string): BrandLogo | null {
   }
 
   return null;
+}
+
+// ---- Fallback Brand Profile ----
+// When the brand URL cannot be fetched, extract domain name and
+// return a sensible default profile so the engine can still run.
+
+function buildFallbackProfile(url: string): BrandProfile {
+  let domain = '';
+  try { domain = new URL(url).hostname.replace('www.', ''); } catch {}
+  const brandName = domain.split('.')[0] || 'brand';
+
+  return {
+    sourceUrl: url,
+    colors: {
+      primary: '#3C087E',
+      secondary: '#030014',
+      accent: '#6b21a8',
+      background: '#ffffff',
+      surface: '#f8f9fa',
+      text: '#030014',
+      textMuted: '#6b7280',
+      success: '#10b981',
+      error: '#ef4444',
+      warning: '#f59e0b',
+      gradient: 'linear-gradient(135deg, #3C087E, #030014)',
+    },
+    typography: {
+      headingFont: 'Inter',
+      bodyFont: 'Inter',
+      fontImportUrl: 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap',
+      baseSize: 16,
+      headingSizes: { h1: 40, h2: 32, h3: 24 },
+      lineHeight: 1.6,
+      headingWeight: 700,
+      bodyWeight: 400,
+    },
+    style: {
+      borderRadius: '12px',
+      cardStyle: 'elevated',
+      buttonStyle: 'solid',
+      imageStyle: 'rounded',
+      mood: 'elegant',
+      spacing: { unit: 8, section: 64, element: 16 },
+    },
+    logo: undefined,
+  };
 }
