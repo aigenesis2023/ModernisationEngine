@@ -43,6 +43,11 @@ function printHelp(): void {
     --verbose            Enable detailed logging
     --help               Show this help message
 
+  Environment Variables:
+    ANTHROPIC_API_KEY    Enables AI vision analysis of SCORM images (recommended)
+    STABILITY_API_KEY    Use Stability AI for image generation
+    OPENAI_API_KEY       Use DALL-E 3 for image generation
+
   Example:
     npx ts-node src/cli.ts --scorm "./Test intro scene" --brand-url "https://example.com"
   `);

@@ -1,15 +1,19 @@
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { join, extname } from 'path';
 import type {
   CourseIR, ImageManifest, ImageIntelligenceEntry, EvolutionConfig,
   BrandProfile, AssetEntry,
 } from '../ir/types';
 import { generateImage } from './generator';
+import { analyzeImageWithVision, isVisionAvailable } from './vision';
 
 // ============================================================
-// Image Intelligence — Analyzes original SCORM images to
-// understand what they depict, then generates new brand-aligned
-// replacements via AI image generation.
+// Image Intelligence — Two-stage pipeline:
+//   1. ANALYZE: Use AI vision (Claude) to understand what each
+//      image depicts, its instructional role, and visual style.
+//      Falls back to metadata analysis when no API key is set.
+//   2. GENERATE: Use those rich descriptions to create new,
+//      higher-quality, brand-aligned replacements.
 // ============================================================
 
 export async function processImages(
@@ -26,12 +30,28 @@ export async function processImages(
 
   console.log(`    Found ${contentImages.length} content images to process`);
 
-  for (const asset of contentImages) {
-    const entry = analyzeImage(asset, course, config.scormInputDir);
-    entries.push(entry);
+  const useVision = isVisionAvailable();
+  if (useVision) {
+    console.log('    Using AI vision analysis (ANTHROPIC_API_KEY detected)');
+  } else {
+    console.log('    Using metadata-only analysis (set ANTHROPIC_API_KEY for AI vision)');
   }
 
-  // Generate new images (sequentially to avoid rate limits)
+  // Stage 1: Analyze all images
+  for (let i = 0; i < contentImages.length; i++) {
+    const asset = contentImages[i];
+    console.log(`    Analyzing image ${i + 1}/${contentImages.length}: ${asset.originalPath}...`);
+
+    const entry = await analyzeImage(asset, course, config.scormInputDir, useVision);
+    entries.push(entry);
+
+    if (config.verbose) {
+      console.log(`      Description: ${entry.description.substring(0, 100)}...`);
+      console.log(`      Role: ${entry.instructionalRole.substring(0, 80)}`);
+    }
+  }
+
+  // Stage 2: Generate new images
   if (!config.skipImageGen) {
     const brandHints = brand ? buildBrandHints(brand) : '';
 
@@ -60,51 +80,54 @@ export async function processImages(
   return { entries };
 }
 
-// ---- Image Analysis ----
+// ---- Image Analysis (Vision-first, metadata fallback) ----
 
-function isContentImage(asset: AssetEntry): boolean {
-  const url = asset.originalPath.toLowerCase();
+async function analyzeImage(
+  asset: AssetEntry,
+  course: CourseIR,
+  scormDir: string,
+  useVision: boolean,
+): Promise<ImageIntelligenceEntry> {
+  const fullPath = join(scormDir, asset.originalPath);
+  const slideContext = findSlideContextForAsset(asset.id, course);
+  const context = {
+    slideTitle: slideContext?.slideTitle || 'Unknown',
+    slideType: slideContext?.slideType || 'content',
+    courseTitle: course.meta.title,
+  };
 
-  // Skip tiny UI shapes (icons, buttons, radio indicators)
-  if (url.includes('shape') && (asset.sizeBytes || 0) < 5000) return false;
+  // Try vision-based analysis first
+  if (useVision && existsSync(fullPath)) {
+    try {
+      const vision = await analyzeImageWithVision(fullPath, context);
+      return {
+        originalAssetId: asset.id,
+        originalPath: asset.originalPath,
+        description: vision.description,
+        instructionalRole: vision.instructionalRole,
+        generationPrompt: vision.generationPrompt,
+        status: 'pending',
+      };
+    } catch (err: any) {
+      console.log(`      Vision analysis failed, falling back to metadata: ${err.message}`);
+    }
+  }
 
-  // Skip poster frames (duplicates of video content)
-  if (url.includes('poster_')) return false;
-
-  // Skip very small images (likely UI elements)
-  if (asset.sizeBytes && asset.sizeBytes < 2000) return false;
-
-  // Skip logos (these come from the brand, not regenerated)
-  if (url.includes('logo')) return false;
-
-  // Only process actual image formats
-  const ext = extname(url).toLowerCase();
-  if (!['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) return false;
-
-  return true;
+  // Fallback: metadata-based analysis
+  return analyzeFromMetadata(asset, course, scormDir);
 }
 
-function analyzeImage(
+function analyzeFromMetadata(
   asset: AssetEntry,
   course: CourseIR,
   scormDir: string,
 ): ImageIntelligenceEntry {
-  const fullPath = join(scormDir, asset.originalPath);
   const altText = findAltTextForAsset(asset.id, course);
   const slideContext = findSlideContextForAsset(asset.id, course);
 
-  // Build description from alt text and context
   const description = buildDescription(altText, slideContext, asset);
-
-  // Build instructional role
-  const instructionalRole = determineInstructionalRole(
-    asset, altText, slideContext
-  );
-
-  // Build generation prompt
-  const generationPrompt = buildGenerationPrompt(
-    description, instructionalRole, course.meta.title
-  );
+  const instructionalRole = determineInstructionalRole(asset, altText, slideContext);
+  const generationPrompt = buildGenerationPrompt(description, instructionalRole, course.meta.title);
 
   return {
     originalAssetId: asset.id,
@@ -115,6 +138,21 @@ function analyzeImage(
     status: 'pending',
   };
 }
+
+// ---- Content Image Filter ----
+
+function isContentImage(asset: AssetEntry): boolean {
+  const url = asset.originalPath.toLowerCase();
+  if (url.includes('shape') && (asset.sizeBytes || 0) < 5000) return false;
+  if (url.includes('poster_')) return false;
+  if (asset.sizeBytes && asset.sizeBytes < 2000) return false;
+  if (url.includes('logo')) return false;
+  const ext = extname(url).toLowerCase();
+  if (!['.jpg', '.jpeg', '.png', '.gif', '.webp'].includes(ext)) return false;
+  return true;
+}
+
+// ---- Metadata Helpers ----
 
 function findAltTextForAsset(assetId: number, course: CourseIR): string {
   for (const slide of course.slides) {
@@ -144,28 +182,20 @@ function buildDescription(
   asset: AssetEntry,
 ): string {
   const parts: string[] = [];
-
-  // Use alt text as primary description
   if (altText && !altText.startsWith('Rectangle') && altText.length > 3) {
-    // Clean up Storyline's auto-generated alt text (often just the filename)
     const cleaned = altText
       .replace(/\.(jpg|jpeg|png|gif|webp)$/i, '')
       .replace(/_/g, ' ')
-      .replace(/\s+\d+$/, '') // remove trailing numbers
+      .replace(/\s+\d+$/, '')
       .trim();
     parts.push(cleaned);
   }
-
-  // Add context from the slide it appears on
   if (context) {
     parts.push(`Used on "${context.slideTitle}" (${context.slideType} slide)`);
   }
-
-  // Add size context
   if (asset.sizeBytes && asset.sizeBytes > 100000) {
     parts.push('High-resolution content image');
   }
-
   return parts.join('. ') || 'Course-related image';
 }
 
@@ -175,24 +205,15 @@ function determineInstructionalRole(
   context: { slideTitle: string; slideType: string } | null,
 ): string {
   if (!context) return 'Supplementary visual';
-
   switch (context.slideType) {
-    case 'title':
-      return 'Hero/title visual — sets the tone and subject matter for the course';
-    case 'objectives':
-      return 'Supporting visual for learning objectives section';
-    case 'content':
-      return 'Illustrative content image — supports the learning material';
-    case 'form':
-      return 'Background/contextual image for the data collection section';
-    case 'branching':
-      return 'Background image for role/path selection interface';
-    case 'quiz':
-      return 'Visual context for assessment questions';
-    case 'results':
-      return 'Background visual for results/completion screen';
-    default:
-      return 'Course content image';
+    case 'title': return 'Hero/title visual — sets the tone and subject matter for the course';
+    case 'objectives': return 'Supporting visual for learning objectives section';
+    case 'content': return 'Illustrative content image — supports the learning material';
+    case 'form': return 'Background/contextual image for the data collection section';
+    case 'branching': return 'Background image for role/path selection interface';
+    case 'quiz': return 'Visual context for assessment questions';
+    case 'results': return 'Background visual for results/completion screen';
+    default: return 'Course content image';
   }
 }
 
@@ -201,38 +222,19 @@ function buildGenerationPrompt(
   instructionalRole: string,
   courseTitle: string,
 ): string {
-  // Create a high-quality image generation prompt
-  const parts: string[] = [];
-
-  // Subject from description
-  parts.push(description);
-
-  // Context from the course
-  parts.push(`for a professional eLearning course about "${courseTitle}"`);
-
-  // Quality modifiers
-  parts.push(
-    'Modern, clean, professional photography style. ' +
-    'High resolution, well-lit, corporate quality. ' +
-    'Suitable for professional training materials.'
-  );
-
-  return parts.join('. ');
+  return [
+    description,
+    `for a professional eLearning course about "${courseTitle}"`,
+    'Modern, clean, professional photography style. High resolution, well-lit, corporate quality. Suitable for professional training materials.',
+  ].join('. ');
 }
 
 function buildBrandHints(brand: BrandProfile): string {
   const hints: string[] = [];
-
-  // Color hints
   hints.push(`Brand colors: ${brand.colors.primary} and ${brand.colors.secondary}`);
-
-  // Mood
   hints.push(`${brand.style.mood} mood`);
-
-  // Image style
   if (brand.style.imageStyle === 'rounded') hints.push('soft rounded edges');
   if (brand.style.mood === 'corporate') hints.push('clean corporate aesthetic');
   if (brand.style.mood === 'friendly') hints.push('warm welcoming feel');
-
   return hints.join(', ');
 }
