@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://www.imsglobal.org/xsd/imsmd_rootv1p2p1"
+  xmlns="http://www.imsglobal.org/xsd/imsmd_rootv1p2p1"
+  elementFormDefault="unqualified" version="1.2.1">
+  <xsd:element name="lom" />
+</xsd:schema>
