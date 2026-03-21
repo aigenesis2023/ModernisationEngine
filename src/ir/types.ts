@@ -11,6 +11,8 @@ export interface CourseIR {
   questionBanks: QuestionBankIR[];
   assets: AssetManifest;
   navigation: NavigationMap;
+  variables: CourseVariable[];
+  extractionReport: ExtractionReport;
 }
 
 export interface CourseMeta {
@@ -44,6 +46,8 @@ export interface SlideIR {
   layers: SlideLayerIR[];
   timeline: TimelineIR;
   transitions: TransitionIR;
+  audioNarrationId?: number;        // global audio asset for this slide
+  triggers: TriggerIR[];            // action groups / event triggers
 }
 
 export interface SlideLayerIR {
@@ -51,6 +55,8 @@ export interface SlideLayerIR {
   name: string;
   elements: SlideElement[];
   timeline: TimelineIR;
+  audio: LayerAudioIR[];            // narration / SFX attached to this layer
+  triggers: TriggerIR[];            // action groups / event triggers on this layer
 }
 
 export type SlideElement =
@@ -61,7 +67,8 @@ export type SlideElement =
   | ButtonElement
   | ShapeElement
   | QuizElement
-  | FormElement;
+  | FormElement
+  | InteractionElement;
 
 export interface BaseElement {
   id: string;
@@ -121,6 +128,9 @@ export interface VideoElement extends BaseElement {
   originalPath: string;
   durationMs: number;
   posterPath?: string;
+  autoplay?: boolean;
+  loop?: boolean;
+  showControls?: boolean;
 }
 
 export interface AudioElement extends BaseElement {
@@ -134,6 +144,7 @@ export interface ButtonElement extends BaseElement {
   type: 'button';
   label: string;
   action: ButtonAction;
+  states: ObjectStateIR[];          // hover, selected, disabled etc.
 }
 
 export interface ButtonAction {
@@ -165,6 +176,99 @@ export interface FormFieldIR {
   fieldType: 'text' | 'email' | 'number' | 'textarea';
   variableName: string;
   required: boolean;
+  placeholder?: string;
+  maxChars?: number;
+  multiline?: boolean;
+}
+
+// ---- Interaction Element (sliders, dials, drag-drop, hotspots, 360°, etc.) ----
+
+export interface InteractionElement extends BaseElement {
+  type: 'interaction';
+  interactionType: string;          // 'slider' | 'dial' | 'drag-drop' | 'hotspot' | '360-image' | 'scrolling-panel' | 'marker' | string
+  label?: string;
+  variableName?: string;            // variable this interaction binds to
+  children: SlideElement[];         // nested content within the interaction
+}
+
+// ---- Object States (hover, selected, disabled, custom) ----
+
+export interface ObjectStateIR {
+  name: string;                     // e.g. '_default_Hover', '_default_Selected', 'ON'
+  label?: string;                   // different text content in this state
+  altText?: string;
+}
+
+// ---- Layer Audio ----
+
+export interface LayerAudioIR {
+  assetId: number;
+  originalPath: string;
+  durationMs?: number;
+}
+
+// ---- Triggers / Action Groups ----
+
+export interface TriggerIR {
+  id: string;
+  event: string;                    // e.g. 'onclick', 'onhover', 'ontimelinereached', 'onload'
+  actions: TriggerActionIR[];
+  conditions: TriggerConditionIR[];
+  targetObjectId?: string;          // which object triggers this
+}
+
+export interface TriggerActionIR {
+  kind: string;                     // 'show', 'hide', 'adjustvar', 'navigate', 'exe_actiongroup', etc.
+  targetId?: string;                // object/layer/slide being acted on
+  variable?: string;                // variable being adjusted
+  value?: string;                   // value being set
+  operator?: string;                // 'set', 'add', 'toggle', etc.
+}
+
+export interface TriggerConditionIR {
+  variable?: string;
+  operator: string;                 // 'eq', 'neq', 'gt', 'lt', etc.
+  value?: string;
+}
+
+// ---- Course Variables ----
+
+export interface CourseVariable {
+  id: string;
+  type: 'boolean' | 'number' | 'text';
+  defaultValue: string | number | boolean;
+}
+
+// ---- Extraction Report (self-diagnosis) ----
+
+export interface ExtractionReport {
+  totalObjectsFound: number;
+  totalObjectsExtracted: number;
+  totalObjectsSkipped: number;
+  totalTextContent: number;
+  totalButtons: number;
+  totalImages: number;
+  totalVideos: number;
+  totalAudio: number;
+  totalInteractions: number;
+  totalLayers: number;
+  totalLayersWithAudio: number;
+  totalVariables: number;
+  totalTriggers: number;
+  unknownObjectKinds: string[];     // any kind values we didn't recognise
+  warnings: string[];               // human-readable extraction warnings
+  coveragePercent: number;          // objectsExtracted / objectsFound * 100
+  slideReports: SlideExtractionReport[];
+}
+
+export interface SlideExtractionReport {
+  slideId: string;
+  slideTitle: string;
+  objectsFound: number;
+  objectsExtracted: number;
+  layersFound: number;
+  layersWithContent: number;
+  warnings: string[];
 }
 
 // ---- Quiz / Assessment IR ----
