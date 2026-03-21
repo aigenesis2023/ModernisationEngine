@@ -96,14 +96,50 @@ function detectSlideType(title: string, objects: any[], slideRef: any): SlideTyp
   return 'content';
 }
 
+// ---- Text Extraction from textLib ----
+
+// Storyline stores rich text in textLib[].vartext.blocks[].spans[].text
+// The data.vectorData.altText is a fallback accessibility string that is
+// often a shape name like "Rectangle 9 1". Always prefer textLib spans.
+function extractTextFromObj(obj: any): { text: string; fontSize?: number; fontFamily?: string; color?: string; textAlign?: string } {
+  const result: { text: string; fontSize?: number; fontFamily?: string; color?: string; textAlign?: string } = { text: '' };
+
+  if (obj.textLib?.length > 0) {
+    const textData = obj.textLib[0];
+    const blocks = textData.vartext?.blocks || [];
+    const spans = blocks.flatMap((b: any) => b.spans?.map((s: any) => s.text) || []);
+    result.text = spans.join('').trim();
+
+    // Extract style from first span
+    const firstSpan = blocks[0]?.spans?.[0]?.style;
+    if (firstSpan) {
+      result.fontSize = firstSpan.fontSize;
+      result.fontFamily = firstSpan.fontFamily?.split(',')[0]?.replace(/"/g, '').trim();
+      result.color = firstSpan.foregroundColor;
+    }
+    // Extract alignment from block style
+    const blockStyle = textData.vartext?.defaultBlockStyle;
+    if (blockStyle?.justification) {
+      result.textAlign = blockStyle.justification;
+    }
+  }
+
+  // Fall back to altText if textLib didn't produce content
+  if (!result.text) {
+    result.text = obj.data?.vectorData?.altText || '';
+  }
+
+  return result;
+}
+
 // ---- Element Extraction ----
 
-function extractTextRole(altText: string, accType: string, depth: number): TextRole {
-  const lower = altText.toLowerCase();
-  if (lower.startsWith('rectangle') || lower === '') return 'unknown';
+function extractTextRole(text: string, accType: string, depth: number): TextRole {
+  const lower = text.toLowerCase();
+  if (lower === '') return 'unknown';
   if (lower.includes('question')) return 'heading';
-  if (depth <= 3 && altText.length < 50) return 'heading';
-  if (altText.length > 100) return 'body';
+  if (depth <= 3 && text.length < 50) return 'heading';
+  if (text.length > 100) return 'body';
   if (lower.includes('click') || lower.includes('select') || lower.includes('choose')) return 'callout';
   return 'body';
 }
@@ -117,9 +153,29 @@ function extractImageRole(altText: string, width: number, height: number, depth:
   return 'content';
 }
 
+// Check if an altText/text is a decorative shape name that should be skipped as text
+function isDecorativeShapeName(text: string): boolean {
+  if (!text) return true;
+  const lower = text.toLowerCase();
+  return lower.startsWith('rectangle') ||
+    lower.startsWith('oval') ||
+    lower.startsWith('round') ||
+    lower.startsWith('freeform') ||
+    lower.startsWith('rectangular hotspot');
+}
+
+// Recursively extract elements from any Storyline object tree.
+// Storyline nests content deeply: stategroup → objgroup → vectorshape.
+// The old parser only looked at the top-level objects array which missed
+// all content inside stategroups (buttons, hover text, quiz choices) and
+// objgroups (grouped text/icon combos).
 function parseElements(objects: any[]): SlideElement[] {
   const elements: SlideElement[] = [];
+  extractElementsRecursive(objects, elements);
+  return elements;
+}
 
+function extractElementsRecursive(objects: any[], elements: SlideElement[]): void {
   for (const obj of objects) {
     const base = {
       id: obj.id || obj.referenceName || '',
@@ -133,6 +189,7 @@ function parseElements(objects: any[]): SlideElement[] {
     };
 
     if (obj.kind === 'vectorshape') {
+      const extracted = extractTextFromObj(obj);
       const altText = obj.data?.vectorData?.altText || '';
 
       if (obj.accType === 'image' && obj.imagelib?.length > 0) {
@@ -146,49 +203,96 @@ function parseElements(objects: any[]): SlideElement[] {
           instructionalRole: extractImageRole(img.altText || altText, base.width, base.height, base.depth),
         } as ImageElement);
       } else if (obj.accType === 'button') {
-        elements.push({
-          ...base,
-          type: 'button',
-          label: altText,
-          action: { kind: 'navigate' },
-        } as ButtonElement);
-      } else if (obj.accType === 'text') {
-        // Skip decorative rectangles
-        if (altText.startsWith('Rectangle') || altText.startsWith('Oval') || altText === '') {
+        const label = extracted.text || altText;
+        if (label && !isDecorativeShapeName(label)) {
+          elements.push({
+            ...base,
+            type: 'button',
+            label,
+            action: { kind: 'navigate' },
+          } as ButtonElement);
+        }
+      } else if (obj.accType === 'text' || obj.accType === 'radio') {
+        const content = extracted.text;
+        if (isDecorativeShapeName(content)) {
           elements.push({
             ...base,
             type: 'shape',
             role: base.depth <= 3 ? 'overlay' : 'decorative',
           } as ShapeElement);
-        } else {
+        } else if (content) {
           elements.push({
             ...base,
             type: 'text',
-            content: altText,
-            role: extractTextRole(altText, obj.accType, base.depth),
+            content,
+            role: extractTextRole(content, obj.accType, base.depth),
+            fontSize: extracted.fontSize,
+            fontFamily: extracted.fontFamily,
+            color: extracted.color,
+            textAlign: extracted.textAlign,
           } as TextElement);
         }
       }
+    } else if (obj.kind === 'video') {
+      // Video objects were previously ignored entirely
+      elements.push({
+        ...base,
+        type: 'video',
+        assetId: obj.videodata?.assetId ?? -1,
+        originalPath: obj.videodata?.url || '',
+        durationMs: obj.videodata?.duration || 0,
+        posterPath: obj.videodata?.posterUrl,
+      } as VideoElement);
     } else if (obj.kind === 'textinput') {
-      // Form fields handled at slide level
+      // Form fields — extracted separately by parseFormFields, but also
+      // extract the label text so it appears in the element list
+      const extracted = extractTextFromObj(obj);
+      if (extracted.text) {
+        elements.push({
+          ...base,
+          type: 'text',
+          content: extracted.text,
+          role: 'label' as TextRole,
+        } as TextElement);
+      }
     } else if (obj.kind === 'stategroup') {
-      // Quiz choices handled at slide level
+      // Stategroups contain interactive objects: quiz radio buttons, role
+      // selector buttons, tabbed panels, etc. Recurse into sub-objects to
+      // extract buttons, text, and images that were previously skipped.
+      if (obj.objects) {
+        extractElementsRecursive(obj.objects, elements);
+      }
+    } else if (obj.kind === 'objgroup') {
+      // Object groups bundle related elements (e.g. icon + description text).
+      // Recurse to extract all nested content.
+      if (obj.objects) {
+        extractElementsRecursive(obj.objects, elements);
+      }
     }
   }
-
-  return elements;
 }
 
 function parseFormFields(objects: any[]): FormFieldIR[] {
-  return objects
-    .filter(o => o.kind === 'textinput')
-    .map(o => ({
-      id: o.id || o.referenceName || '',
-      label: o.placeholder || '',
-      fieldType: o.numeric ? 'number' as const : 'text' as const,
-      variableName: o.bindto?.replace('_player.', '') || '',
-      required: false,
-    }));
+  const fields: FormFieldIR[] = [];
+  collectFormFields(objects, fields);
+  return fields;
+}
+
+function collectFormFields(objects: any[], fields: FormFieldIR[]): void {
+  for (const o of objects) {
+    if (o.kind === 'textinput') {
+      const text = extractTextFromObj(o).text;
+      fields.push({
+        id: o.id || o.referenceName || '',
+        label: text || o.placeholder || '',
+        fieldType: o.numeric ? 'number' as const : 'text' as const,
+        variableName: o.bindto?.replace('_player.', '') || '',
+        required: false,
+      });
+    }
+    // Recurse into nested objects
+    if (o.objects) collectFormFields(o.objects, fields);
+  }
 }
 
 function parseQuizQuestion(objects: any[]): QuestionIR | null {
@@ -197,25 +301,25 @@ function parseQuizQuestion(objects: any[]): QuestionIR | null {
   );
   if (stateGroups.length === 0) return null;
 
-  // Find question text: text object that isn't Rectangle/Question/Correct/Incorrect
+  // Find question text: top-level text object that isn't a decorative shape or label
   const textObjects = objects.filter(o => {
-    if (o.accType !== 'text') return false;
-    const alt = o.data?.vectorData?.altText || '';
-    return alt &&
-      !alt.startsWith('Rectangle') &&
-      !alt.startsWith('Round') &&
-      !alt.startsWith('Oval') &&
-      alt !== 'Question' &&
-      alt !== 'Correct' &&
-      alt !== 'Incorrect' &&
-      alt.length > 10;
+    if (o.kind !== 'vectorshape' || o.accType !== 'text') return false;
+    const text = extractTextFromObj(o).text;
+    return text &&
+      !isDecorativeShapeName(text) &&
+      text !== 'Question' &&
+      text !== 'Correct' &&
+      text !== 'Incorrect' &&
+      text.length > 10;
   });
 
-  const questionText = textObjects[0]?.data?.vectorData?.altText || 'Unknown question';
+  const questionText = textObjects.length > 0
+    ? extractTextFromObj(textObjects[0]).text
+    : 'Unknown question';
 
   const choices: ChoiceIR[] = stateGroups.map(sg => {
     const radio = sg.objects?.find((o: any) => o.accType === 'radio');
-    const choiceText = radio?.data?.vectorData?.altText || '';
+    const choiceText = radio ? extractTextFromObj(radio).text : (radio?.data?.vectorData?.altText || '');
     const isCorrect = choiceText.endsWith('*');
     return {
       id: sg.id,
@@ -225,13 +329,11 @@ function parseQuizQuestion(objects: any[]): QuestionIR | null {
   });
 
   // Find feedback text
-  const correctFeedback = objects.find(o =>
-    o.id?.includes('CorrectReview')
-  )?.data?.vectorData?.altText || 'Correct!';
+  const correctFeedbackObj = objects.find(o => o.id?.includes('CorrectReview'));
+  const correctFeedback = correctFeedbackObj ? extractTextFromObj(correctFeedbackObj).text || 'Correct!' : 'Correct!';
 
-  const incorrectFeedback = objects.find(o =>
-    o.id?.includes('IncorrectReview')
-  )?.data?.vectorData?.altText || 'Incorrect.';
+  const incorrectFeedbackObj = objects.find(o => o.id?.includes('IncorrectReview'));
+  const incorrectFeedback = incorrectFeedbackObj ? extractTextFromObj(incorrectFeedbackObj).text || 'Incorrect.' : 'Incorrect.';
 
   return {
     id: stateGroups[0].id + '_q',
