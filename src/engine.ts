@@ -1,3 +1,4 @@
+import { readFileSync } from 'fs';
 import type {
   EvolutionConfig,
   CourseIR,
@@ -51,6 +52,10 @@ export class EvolutionEngine {
   }
 
   private async scanBrand(): Promise<BrandProfile> {
+    if (this.config.brandJsonPath) {
+      console.log(`    Loading brand profile from ${this.config.brandJsonPath}`);
+      return JSON.parse(readFileSync(this.config.brandJsonPath, 'utf-8'));
+    }
     const { scrapeBrand } = await import('./brand/scraper');
     return scrapeBrand(this.config.brandUrl, this.config.verbose);
   }
@@ -61,6 +66,10 @@ export class EvolutionEngine {
   }
 
   private async processImages(course: CourseIR, brand: BrandProfile): Promise<ImageManifest> {
+    if (this.config.imageManifestPath) {
+      console.log(`    Loading image manifest from ${this.config.imageManifestPath}`);
+      return JSON.parse(readFileSync(this.config.imageManifestPath, 'utf-8'));
+    }
     if (this.config.skipImageGen) {
       console.log('    Skipping image generation (--skip-images)');
       return { entries: [] };

@@ -329,6 +329,8 @@ export interface EvolutionConfig {
   imageGenProvider: 'pollinations' | 'stability' | 'dalle' | 'none';
   skipImageGen: boolean;
   verbose: boolean;
+  brandJsonPath?: string;        // path to pre-extracted brand profile JSON
+  imageManifestPath?: string;    // path to pre-sourced image manifest JSON
 }
 
 // ---- Pipeline Phase Results ----

@@ -12,6 +12,8 @@ function parseArgs(args: string[]): Partial<EvolutionConfig> {
     if (arg === '--scorm' && args[i + 1]) config.scormInputDir = args[++i];
     else if (arg === '--brand-url' && args[i + 1]) config.brandUrl = args[++i];
     else if (arg === '--output' && args[i + 1]) config.outputDir = args[++i];
+    else if (arg === '--brand-json' && args[i + 1]) config.brandJsonPath = args[++i];
+    else if (arg === '--image-manifest' && args[i + 1]) config.imageManifestPath = args[++i];
     else if (arg === '--skip-images') config.skipImageGen = 'true';
     else if (arg === '--verbose') config.verbose = 'true';
     else if (arg === '--help') { printHelp(); process.exit(0); }
@@ -23,6 +25,8 @@ function parseArgs(args: string[]): Partial<EvolutionConfig> {
     imageGenProvider: 'pollinations',
     skipImageGen: config.skipImageGen === 'true',
     verbose: config.verbose === 'true',
+    brandJsonPath: config.brandJsonPath,
+    imageManifestPath: config.imageManifestPath,
   };
 }
 
@@ -39,6 +43,8 @@ function printHelp(): void {
 
   Options:
     --output <folder>    Output directory (default: ./output)
+    --brand-json <file>  Use pre-extracted brand profile JSON (skips URL scraping)
+    --image-manifest <f> Use pre-sourced image manifest JSON (skips AI image gen)
     --skip-images        Skip AI image generation
     --verbose            Enable detailed logging
     --help               Show this help message
