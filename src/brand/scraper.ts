@@ -15,8 +15,15 @@ export async function scrapeBrand(url: string, verbose: boolean): Promise<BrandP
   try {
     html = await fetchPage(url);
   } catch (err: any) {
-    console.log(`    ⚠ Could not fetch URL (${err.message}). Using fallback brand extraction...`);
-    return buildFallbackProfile(url);
+    if (verbose) console.log(`    ⚠ Direct fetch failed (${err.message}). Trying Tavily...`);
+    // Fallback to Tavily Extract API
+    const tavilyResult = await fetchViaTavily(url, verbose);
+    if (tavilyResult) {
+      html = tavilyResult;
+    } else {
+      console.log(`    ⚠ All fetch methods failed. Using default brand profile.`);
+      return buildFallbackProfile(url);
+    }
   }
   const $ = cheerio.load(html);
 
@@ -56,6 +63,98 @@ async function fetchPage(url: string): Promise<string> {
   }
 
   return response.text();
+}
+
+// ---- Tavily Fallback ----
+
+async function fetchViaTavily(url: string, verbose: boolean): Promise<string | null> {
+  const apiKey = process.env.TAVILY_API_KEY;
+  if (!apiKey) {
+    if (verbose) console.log('    TAVILY_API_KEY not set, skipping Tavily fallback.');
+    return null;
+  }
+
+  try {
+    if (verbose) console.log(`    Fetching via Tavily Extract API...`);
+    const response = await fetch('https://api.tavily.com/extract', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        urls: [url],
+        include_images: true,
+        format: 'text',
+      }),
+      timeout: 30000,
+    });
+
+    if (!response.ok) {
+      if (verbose) console.log(`    Tavily returned ${response.status}`);
+      return null;
+    }
+
+    const data = await response.json() as any;
+    const result = data?.results?.[0];
+    if (!result?.raw_content) {
+      if (verbose) console.log('    Tavily returned no content.');
+      return null;
+    }
+
+    if (verbose) console.log(`    Tavily extracted ${result.raw_content.length} chars`);
+
+    // Tavily returns plain text/markdown, not HTML. Wrap the content in
+    // minimal HTML so cheerio-based extraction still works. We also
+    // embed any inline style hints we can extract from the text content
+    // so our color/font parsers have something to work with.
+    const html = buildHtmlFromTavilyContent(result.raw_content, result.images, url);
+    return html;
+  } catch (err: any) {
+    if (verbose) console.log(`    Tavily fetch failed: ${err.message}`);
+    return null;
+  }
+}
+
+function buildHtmlFromTavilyContent(
+  rawContent: string,
+  images: { url: string; alt?: string }[] | undefined,
+  sourceUrl: string,
+): string {
+  // Extract any hex colors, rgb values, font names mentioned in the content
+  const hexColors = rawContent.match(/#[0-9a-fA-F]{3,8}\b/g) || [];
+  const rgbColors = rawContent.match(/rgba?\([^)]+\)/g) || [];
+
+  // Build inline CSS from discovered colors so our extractors can find them
+  const cssVars = hexColors.map((c, i) => `--extracted-color-${i}: ${c};`).join('\n  ');
+  const rgbVars = rgbColors.map((c, i) => `--extracted-rgb-${i}: ${c};`).join('\n  ');
+
+  // Try to find any og:image or logo references in the content
+  const logoImg = images?.find(img =>
+    img.url && (img.alt?.toLowerCase().includes('logo') || img.url.toLowerCase().includes('logo'))
+  );
+  const ogImg = images?.[0];
+
+  const logoHtml = logoImg
+    ? `<header><a class="logo"><img src="${logoImg.url}" alt="${logoImg.alt || 'Logo'}"></a></header>`
+    : '';
+  const ogMeta = ogImg
+    ? `<meta property="og:image" content="${ogImg.url}"><meta property="og:title" content="Logo">`
+    : '';
+
+  return `<!DOCTYPE html>
+<html><head>
+${ogMeta}
+<style>
+:root {
+  ${cssVars}
+  ${rgbVars}
+}
+</style>
+</head><body>
+${logoHtml}
+<div>${rawContent}</div>
+</body></html>`;
 }
 
 // ---- CSS Collection ----

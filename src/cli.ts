@@ -51,6 +51,7 @@ function printHelp(): void {
 
   Environment Variables:
     ANTHROPIC_API_KEY    Enables AI vision analysis of SCORM images (recommended)
+    TAVILY_API_KEY       Fallback brand scraper when direct fetch fails
     STABILITY_API_KEY    Use Stability AI for image generation
     OPENAI_API_KEY       Use DALL-E 3 for image generation
 
