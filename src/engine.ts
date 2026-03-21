@@ -23,7 +23,7 @@ export class EvolutionEngine {
     const transformed = await this.transform(course, brand);
 
     console.log('  Phase 4/6 — Processing images...');
-    const images = await this.processImages(transformed);
+    const images = await this.processImages(transformed, brand);
 
     console.log('  Phase 5/6 — Generating web application...');
     await this.generate(transformed, brand, images);
@@ -46,41 +46,35 @@ export class EvolutionEngine {
   }
 
   private async extract(): Promise<CourseIR> {
-    // Chunk 3 will implement this
     const { extractCourse } = await import('./extractor/scorm-parser');
     return extractCourse(this.config.scormInputDir, this.config.verbose);
   }
 
   private async scanBrand(): Promise<BrandProfile> {
-    // Chunk 4 will implement this
     const { scrapeBrand } = await import('./brand/scraper');
     return scrapeBrand(this.config.brandUrl, this.config.verbose);
   }
 
   private async transform(course: CourseIR, brand: BrandProfile): Promise<CourseIR> {
-    // Chunk 3 will enhance this — for now passthrough
     const { transformCourse } = await import('./transformer/index');
     return transformCourse(course, brand);
   }
 
-  private async processImages(course: CourseIR): Promise<ImageManifest> {
+  private async processImages(course: CourseIR, brand: BrandProfile): Promise<ImageManifest> {
     if (this.config.skipImageGen) {
       console.log('    Skipping image generation (--skip-images)');
       return { entries: [] };
     }
-    // Chunk 5 will implement this
     const { processImages } = await import('./images/analyzer');
-    return processImages(course, this.config);
+    return processImages(course, this.config, brand);
   }
 
   private async generate(course: CourseIR, brand: BrandProfile, images: ImageManifest): Promise<void> {
-    // Chunk 6 will implement this
     const { generateApp } = await import('./generator/index');
     return generateApp(course, brand, images, this.config);
   }
 
   private async package(): Promise<string> {
-    // Chunk 7 will implement this
     const { packageScorm } = await import('./packager/index');
     return packageScorm(this.config);
   }
