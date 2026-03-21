@@ -92,7 +92,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 
 .btn-ghost {
   background: transparent; color: var(--text-muted);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid rgba(255,255,255,0.12);
 }
 .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
 
@@ -102,7 +102,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
   border-radius: var(--radius);
   padding: calc(var(--spacing) * 3);
   width: 100%; max-width: 760px;
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
   transition: all var(--transition);
 }
 
@@ -112,6 +112,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
   color: white; text-align: center;
   padding: 0; justify-content: center; align-items: center;
   position: relative; overflow: hidden;
+  background-size: cover; background-position: center;
 }
 .slide-title::before {
   content: ''; position: absolute; inset: 0;
@@ -136,7 +137,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 }
 .form-group input, .form-group textarea {
   width: 100%; padding: calc(var(--spacing) * 1.5);
-  border: 2px solid rgba(0,0,0,0.1); border-radius: var(--radius);
+  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
   font-family: var(--font-body); font-size: 16px;
   transition: border-color var(--transition);
   background: var(--bg); color: var(--text);
@@ -156,7 +157,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .quiz-choice {
   display: flex; align-items: center; gap: calc(var(--spacing) * 1.5);
   padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
-  border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius);
+  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
   cursor: pointer; transition: all var(--transition);
   background: var(--surface); font-size: 16px;
 }
@@ -166,7 +167,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .quiz-choice.incorrect { border-color: var(--error); background: #ef444411; }
 .quiz-choice .indicator {
   width: 24px; height: 24px; border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.2); flex-shrink: 0;
+  border: 2px solid rgba(255,255,255,0.12); flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: all var(--transition);
 }
@@ -185,11 +186,11 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .branch-options { display: flex; gap: calc(var(--spacing) * 2); flex-wrap: wrap; justify-content: center; margin-top: calc(var(--spacing) * 3); }
 .branch-option {
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
-  border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius);
+  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
   cursor: pointer; transition: all var(--transition);
   text-align: center; min-width: 180px;
   background: var(--surface);
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 .branch-option:hover {
   border-color: var(--primary); transform: translateY(-4px);
@@ -231,7 +232,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .nav-bar {
   display: flex; justify-content: space-between; align-items: center;
   padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);
-  background: var(--surface); border-top: 1px solid rgba(0,0,0,0.06);
+  background: var(--surface); border-top: 1px solid rgba(255,255,255,0.08);
   flex-shrink: 0;
 }
 .nav-bar .slide-counter { color: var(--text-muted); font-size: 14px; }
@@ -240,7 +241,7 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .hero-image {
   width: 100%; max-width: 760px; border-radius: var(--radius);
   overflow: hidden; margin-bottom: calc(var(--spacing) * 3);
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
 .hero-image img { width: 100%; height: auto; display: block; }
 
@@ -367,10 +368,10 @@ window.addEventListener('beforeunload', function() { SCORM.finish(); });
 'use strict';
 var e = React.createElement;
 
-var SLIDES = [{"type":"title","title":"Test intro scene","texts":["EV Awareness & Safety"],"image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80","subtitle":"EV Awareness & Safety"},{"type":"objectives","title":"Learning Objectives","texts":["Introduction"],"image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"form","title":"Test intro scene","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","fields":[{"label":"Name","placeholder":"Name","fieldType":"text","variableName":"TextEntry9"},{"label":"Organisation","placeholder":"Organisation","fieldType":"text","variableName":"TextEntry10"},{"label":"Email","placeholder":"Email","fieldType":"text","variableName":"TextEntry3"}],"instruction":"Please enter your details and click next"},{"type":"branching","title":"Choose Your Path","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","instruction":"Click on the most relevant role to you.","greeting":"Welcome %name%","options":[{"label":"Non-Technical","value":"non-technical","quizBank":"QuestionDraw51"},{"label":"Semi-Technical","value":"semi-technical","quizBank":"QuestionDraw51"},{"label":"Technical","value":"technical","quizBank":"QuestionDraw71"}]},{"type":"branching","title":"EV Knowledge Assessment","image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80","instruction":"Choose your preferred assessment level","options":[{"label":"Take a short version of the EV Knowledge Test","value":"Take a short version of the EV Knowledge Test","quizBank":"QuestionDraw51"},{"label":"Take the Full version of the EV Knowledge Test","value":"Take the Full version of the EV Knowledge Test","quizBank":"QuestionDraw71"},{"label":"SKIP the EV Knowledge Test","value":"SKIP the EV Knowledge Test"}]},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"}];
+var SLIDES = [{"type":"title","title":"EV Awareness & Safety","texts":["EV Awareness & Safety"],"image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80"},{"type":"objectives","title":"Learning Objectives","texts":["Introduction"],"image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"form","title":"Your Details","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","fields":[{"label":"Name","placeholder":"Name","fieldType":"text","variableName":"TextEntry9"},{"label":"Organisation","placeholder":"Organisation","fieldType":"text","variableName":"TextEntry10"},{"label":"Email","placeholder":"Email","fieldType":"text","variableName":"TextEntry3"}],"instruction":"Please enter your details and click next"},{"type":"branching","title":"Choose Your Path","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","instruction":"Click on the most relevant role to you.","greeting":"Welcome %name%","options":[{"label":"Non-Technical","value":"non-technical","quizBank":"QuestionDraw51"},{"label":"Semi-Technical","value":"semi-technical","quizBank":"QuestionDraw51"},{"label":"Technical","value":"technical","quizBank":"QuestionDraw71"}]},{"type":"branching","title":"EV Knowledge Assessment","image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80","instruction":"Choose your preferred assessment level","options":[{"label":"Take a short version of the EV Knowledge Test","value":"Take a short version of the EV Knowledge Test","quizBank":"QuestionDraw51"},{"label":"Take the Full version of the EV Knowledge Test","value":"Take the Full version of the EV Knowledge Test","quizBank":"QuestionDraw71"},{"label":"SKIP the EV Knowledge Test","value":"SKIP the EV Knowledge Test"}]},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"}];
 var QUIZ_BANKS = [{"id":"QuestionDraw51","title":"QuestionDraw51","group":"non-technical","drawCount":10,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]},{"id":"QuestionDraw71","title":"QuestionDraw71","group":"technical","drawCount":20,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The on-board charger allows the vehicle battery to be charged from the mains supply.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A parallel hybrid  can use a combination of the engine and the electric motor to drive the wheels.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The engine in a series hybrid is used to drive the wheels.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The High Voltage battery capacity is measured in Kwh.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"In addition to the high voltage battery, electric vehicles usually have a smaller 12-volt battery as well.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]}];
 var MASTERY = 80;
-var COURSE_TITLE = "Test intro scene";
+var COURSE_TITLE = "EV Awareness & Safety";
 var LOGO_URL = "";
 var LOGO_ALT = "";
 
@@ -428,7 +429,6 @@ function App() {
     setQuizState('active');
     setSelectedChoice(null);
     setAnswered(false);
-    goNext();
   }
 
   function handleQuizAnswer(choiceIdx) {
@@ -447,12 +447,12 @@ function App() {
       setSelectedChoice(null);
       setAnswered(false);
     } else {
-      // Quiz complete
+      // Quiz complete — jump to results
       var finalScore = Math.round((correctCount + (answered && quizQuestions[quizIndex] && quizQuestions[quizIndex].choices[selectedChoice] && quizQuestions[quizIndex].choices[selectedChoice].isCorrect ? 1 : 0)) / totalQ * 100);
       setScore(finalScore);
       setQuizState('complete');
       SCORM.complete(finalScore, MASTERY);
-      goNext();
+      setCurrentSlide(totalSlides - 1);
     }
   }
 
@@ -469,8 +469,8 @@ function App() {
   function renderSlide() {
     if (!slide) return e('div', null, 'No slide data');
 
-    // If we're in active quiz mode and on a quiz slide
-    if (quizState === 'active' && slide.type === 'quiz' && quizQuestions.length > 0) {
+    // If we're in active quiz mode, always render the quiz
+    if (quizState === 'active' && quizQuestions.length > 0) {
       return renderQuizSlide();
     }
 
@@ -486,7 +486,10 @@ function App() {
   }
 
   function renderTitleSlide() {
-    return e('div', { className: 'slide slide-title' },
+    return e('div', { className: 'slide slide-title', style: slide.image ? {
+      backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url(' + slide.image + ')',
+      backgroundSize: 'cover', backgroundPosition: 'center'
+    } : {} },
       e('div', { className: 'content' },
         LOGO_URL ? e('img', { src: LOGO_URL, alt: LOGO_ALT, className: 'logo' }) : null,
         e('h1', null, slide.title || COURSE_TITLE),

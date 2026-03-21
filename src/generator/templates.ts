@@ -49,6 +49,9 @@ function generateCss(brand: BrandProfile): string {
   const b = brand.colors;
   const t = brand.typography;
   const s = brand.style;
+  const dark = isDarkTheme(brand);
+  const border = dark ? 'rgba(255,255,255,0.12)' : 'rgba(0,0,0,0.08)';
+  const borderLight = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.06)';
 
   return `
 :root {
@@ -132,7 +135,7 @@ ${generateButtonCss(brand)}
 
 .btn-ghost {
   background: transparent; color: var(--text-muted);
-  border: 1px solid rgba(0,0,0,0.1);
+  border: 1px solid ${border};
 }
 .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
 
@@ -152,6 +155,7 @@ ${generateButtonCss(brand)}
   color: white; text-align: center;
   padding: 0; justify-content: center; align-items: center;
   position: relative; overflow: hidden;
+  background-size: cover; background-position: center;
 }
 .slide-title::before {
   content: ''; position: absolute; inset: 0;
@@ -176,7 +180,7 @@ ${generateButtonCss(brand)}
 }
 .form-group input, .form-group textarea {
   width: 100%; padding: calc(var(--spacing) * 1.5);
-  border: 2px solid rgba(0,0,0,0.1); border-radius: var(--radius);
+  border: 2px solid ${border}; border-radius: var(--radius);
   font-family: var(--font-body); font-size: ${t.baseSize}px;
   transition: border-color var(--transition);
   background: var(--bg); color: var(--text);
@@ -196,7 +200,7 @@ ${generateButtonCss(brand)}
 .quiz-choice {
   display: flex; align-items: center; gap: calc(var(--spacing) * 1.5);
   padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
-  border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius);
+  border: 2px solid ${border}; border-radius: var(--radius);
   cursor: pointer; transition: all var(--transition);
   background: var(--surface); font-size: ${t.baseSize}px;
 }
@@ -206,7 +210,7 @@ ${generateButtonCss(brand)}
 .quiz-choice.incorrect { border-color: var(--error); background: ${b.error}11; }
 .quiz-choice .indicator {
   width: 24px; height: 24px; border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.2); flex-shrink: 0;
+  border: 2px solid ${border}; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   transition: all var(--transition);
 }
@@ -225,7 +229,7 @@ ${generateButtonCss(brand)}
 .branch-options { display: flex; gap: calc(var(--spacing) * 2); flex-wrap: wrap; justify-content: center; margin-top: calc(var(--spacing) * 3); }
 .branch-option {
   padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
-  border: 2px solid rgba(0,0,0,0.08); border-radius: var(--radius);
+  border: 2px solid ${border}; border-radius: var(--radius);
   cursor: pointer; transition: all var(--transition);
   text-align: center; min-width: 180px;
   background: var(--surface);
@@ -271,7 +275,7 @@ ${generateButtonCss(brand)}
 .nav-bar {
   display: flex; justify-content: space-between; align-items: center;
   padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);
-  background: var(--surface); border-top: 1px solid rgba(0,0,0,0.06);
+  background: var(--surface); border-top: 1px solid ${borderLight};
   flex-shrink: 0;
 }
 .nav-bar .slide-counter { color: var(--text-muted); font-size: 14px; }
@@ -322,16 +326,32 @@ function generateButtonCss(brand: BrandProfile): string {
 }
 
 function generateCardShadow(brand: BrandProfile): string {
+  const isDark = isDarkTheme(brand);
   switch (brand.style.cardStyle) {
     case 'elevated':
-      return 'box-shadow: 0 4px 20px rgba(0,0,0,0.08);';
+      return isDark
+        ? 'box-shadow: 0 4px 20px rgba(0,0,0,0.3);'
+        : 'box-shadow: 0 4px 20px rgba(0,0,0,0.08);';
     case 'glass':
-      return 'backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); box-shadow: 0 4px 20px rgba(0,0,0,0.06);';
+      return isDark
+        ? 'backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);'
+        : 'backdrop-filter: blur(10px); background: rgba(255,255,255,0.7); box-shadow: 0 4px 20px rgba(0,0,0,0.06);';
     case 'outlined':
-      return 'border: 1px solid rgba(0,0,0,0.1);';
+      return isDark
+        ? 'border: 1px solid rgba(255,255,255,0.12);'
+        : 'border: 1px solid ${border};';
     default:
       return '';
   }
+}
+
+function isDarkTheme(brand: BrandProfile): boolean {
+  const bg = brand.colors.background;
+  if (!bg.startsWith('#') || bg.length < 7) return false;
+  const r = parseInt(bg.slice(1, 3), 16);
+  const g = parseInt(bg.slice(3, 5), 16);
+  const b = parseInt(bg.slice(5, 7), 16);
+  return (r + g + b) / 3 < 80;
 }
 
 // ---- React App JS Generation ----
@@ -343,7 +363,16 @@ function generateAppJs(
 ): string {
   const slidesData = JSON.stringify(buildSlidesData(course, images));
   const quizData = JSON.stringify(buildQuizData(course));
-  const courseTitle = escJs(course.meta.title);
+  // Use the title slide's extracted text if the meta title looks like a project name
+  const titleSlide = course.slides.find(s => s.type === 'title');
+  const titleTexts = titleSlide?.elements
+    .filter((el): el is TextElement => el.type === 'text' && el.role !== 'unknown')
+    .map(el => el.content.trim())
+    .filter(t => t.length > 5) || [];
+  const bestTitle = titleTexts.find(t =>
+    !t.toLowerCase().includes('test') && !t.toLowerCase().includes('scene')
+  ) || course.meta.title;
+  const courseTitle = escJs(bestTitle);
   const masteryScore = course.meta.masteryScore;
   const logoUrl = brand.logo?.url ? escJs(brand.logo.url) : '';
   const logoAlt = brand.logo?.alt ? escJs(brand.logo.alt) : '';
@@ -413,7 +442,6 @@ function App() {
     setQuizState('active');
     setSelectedChoice(null);
     setAnswered(false);
-    goNext();
   }
 
   function handleQuizAnswer(choiceIdx) {
@@ -432,12 +460,12 @@ function App() {
       setSelectedChoice(null);
       setAnswered(false);
     } else {
-      // Quiz complete
+      // Quiz complete — jump to results
       var finalScore = Math.round((correctCount + (answered && quizQuestions[quizIndex] && quizQuestions[quizIndex].choices[selectedChoice] && quizQuestions[quizIndex].choices[selectedChoice].isCorrect ? 1 : 0)) / totalQ * 100);
       setScore(finalScore);
       setQuizState('complete');
       SCORM.complete(finalScore, MASTERY);
-      goNext();
+      setCurrentSlide(totalSlides - 1);
     }
   }
 
@@ -454,8 +482,8 @@ function App() {
   function renderSlide() {
     if (!slide) return e('div', null, 'No slide data');
 
-    // If we're in active quiz mode and on a quiz slide
-    if (quizState === 'active' && slide.type === 'quiz' && quizQuestions.length > 0) {
+    // If we're in active quiz mode, always render the quiz
+    if (quizState === 'active' && quizQuestions.length > 0) {
       return renderQuizSlide();
     }
 
@@ -471,7 +499,10 @@ function App() {
   }
 
   function renderTitleSlide() {
-    return e('div', { className: 'slide slide-title' },
+    return e('div', { className: 'slide slide-title', style: slide.image ? {
+      backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url(' + slide.image + ')',
+      backgroundSize: 'cover', backgroundPosition: 'center'
+    } : {} },
       e('div', { className: 'content' },
         LOGO_URL ? e('img', { src: LOGO_URL, alt: LOGO_ALT, className: 'logo' }) : null,
         e('h1', null, slide.title || COURSE_TITLE),
@@ -709,10 +740,21 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
 
     // Slide-type specific data
     switch (slide.type) {
-      case 'title':
-        data.title = course.meta.title;
-        if (texts.length > 0) data.subtitle = texts[0];
+      case 'title': {
+        // Use the most descriptive text as the title — the course meta title
+        // is often just the Storyline project name (e.g. "Test intro scene")
+        const descriptiveTitle = texts.find(t =>
+          t.length > 5 && !t.toLowerCase().includes('test') && !t.toLowerCase().includes('scene')
+        );
+        if (descriptiveTitle) {
+          data.title = descriptiveTitle;
+          data.subtitle = texts.find(t => t !== descriptiveTitle) || undefined;
+        } else {
+          data.title = course.meta.title;
+          if (texts.length > 0) data.subtitle = texts[0];
+        }
         break;
+      }
 
       case 'form': {
         const formEl = slide.elements.find((e): e is FormElement => e.type === 'form');
@@ -724,7 +766,7 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
             variableName: f.variableName,
           }));
         }
-        data.title = course.meta.title;
+        data.title = 'Your Details';
         const instruction = texts.find(t => t.toLowerCase().includes('enter') || t.toLowerCase().includes('please'));
         data.instruction = instruction || 'Please fill in your details';
         data.texts = undefined; // Form uses fields, not text paragraphs
