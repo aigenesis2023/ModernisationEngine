@@ -29,7 +29,7 @@ export class EvolutionEngine {
     await this.generate(transformed, brand, images);
 
     console.log('  Phase 6/6 — Packaging SCORM output...');
-    const outputPath = await this.package();
+    const outputPath = await this.package(transformed);
 
     const stats: PipelineStats = {
       totalSlides: transformed.slides.length,
@@ -74,9 +74,9 @@ export class EvolutionEngine {
     return generateApp(course, brand, images, this.config);
   }
 
-  private async package(): Promise<string> {
+  private async package(course: CourseIR): Promise<string> {
     const { packageScorm } = await import('./packager/index');
-    return packageScorm(this.config);
+    return packageScorm(this.config, course);
   }
 
   private printSummary(stats: PipelineStats): void {
