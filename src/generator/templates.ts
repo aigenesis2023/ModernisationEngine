@@ -522,11 +522,14 @@ function App() {
   }
 
   function renderBranchingSlide() {
+    var userName = formData['TextEntry9'] || '';
     return e('div', { className: 'slide slide-content' },
       e('div', { style: { textAlign: 'center', maxWidth: '760px' } },
         e('h2', null, slide.title),
         slide.instruction ? e('p', { style: { marginBottom: 'calc(var(--spacing) * 2)' } }, slide.instruction) : null,
-        slide.greeting ? e('p', { style: { fontSize: '18px', marginBottom: 'calc(var(--spacing) * 2)' } }, slide.greeting.replace('%name%', formData['TextEntry9'] || '')) : null,
+        slide.greeting ? e('p', { style: { fontSize: '18px', marginBottom: 'calc(var(--spacing) * 2)' } },
+          slide.greeting.replace('%name%', userName)
+        ) : null,
         e('div', { className: 'branch-options' },
           slide.options && slide.options.map(function(opt, i) {
             return e('div', {
@@ -534,8 +537,16 @@ function App() {
               key: i,
               onClick: function() {
                 setBranch(opt.value || opt.label);
-                if (opt.quizBank) { startQuiz(opt.quizBank); }
-                else { goNext(); }
+                if (opt.quizBank) {
+                  startQuiz(opt.quizBank);
+                } else {
+                  // Skip option — go to results with full marks
+                  setScore(100);
+                  setQuizState('complete');
+                  SCORM.complete(100, MASTERY);
+                  // Jump to last slide (results)
+                  setCurrentSlide(totalSlides - 1);
+                }
               }
             },
               e('h3', null, opt.label)
@@ -673,22 +684,27 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
       title: slide.title,
     };
 
-    // Extract text content
+    // Extract text content — filter out Storyline artifacts
     const texts = slide.elements
       .filter((e): e is TextElement => e.type === 'text' && e.role !== 'unknown')
-      .map(e => e.content)
-      .filter(t => t.length > 3);
+      .map(e => cleanText(e.content))
+      .filter(t => t.length > 3 && !isJunkText(t));
 
     if (texts.length > 0) data.texts = texts;
 
-    // Find hero/content image
+    // Find hero/content image — remap path to output assets folder
     const imgEl = slide.elements.find(
       (e): e is ImageElement => e.type === 'image' && ['hero', 'content', 'background'].includes(e.instructionalRole)
     );
     if (imgEl) {
-      // Check if we have a generated replacement
       const generated = images.entries.find(e => e.originalAssetId === imgEl.assetId && e.status === 'generated');
-      data.image = generated?.generatedPath || imgEl.originalPath;
+      if (generated?.generatedPath) {
+        data.image = generated.generatedPath;
+      } else {
+        // Remap to output assets path
+        const filename = imgEl.originalPath.split('/').pop() || '';
+        data.image = 'assets/images/' + filename;
+      }
     }
 
     // Slide-type specific data
@@ -702,47 +718,62 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
         const formEl = slide.elements.find((e): e is FormElement => e.type === 'form');
         if (formEl) {
           data.fields = formEl.fields.map(f => ({
-            label: f.label,
-            placeholder: f.label,
+            label: f.label.trim(),
+            placeholder: f.label.trim(),
             fieldType: f.fieldType,
             variableName: f.variableName,
           }));
         }
+        data.title = course.meta.title;
         const instruction = texts.find(t => t.toLowerCase().includes('enter') || t.toLowerCase().includes('please'));
         data.instruction = instruction || 'Please fill in your details';
+        data.texts = undefined; // Form uses fields, not text paragraphs
         break;
       }
 
       case 'branching': {
-        // Check if this is a role selector or pre-knowledge check
         const buttons = slide.elements.filter((e): e is ButtonElement => e.type === 'button');
         const instruction = texts.find(t => t.toLowerCase().includes('click') || t.toLowerCase().includes('select'));
         data.instruction = instruction;
 
-        // Check for greeting with name variable
+        // Greeting with name variable
         const greeting = texts.find(t => t.includes('%'));
         if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
 
         if (slide.title === 'Role Selector') {
+          data.title = 'Choose Your Path';
           data.options = [
             { label: 'Non-Technical', value: 'non-technical', quizBank: 'QuestionDraw51' },
             { label: 'Semi-Technical', value: 'semi-technical', quizBank: 'QuestionDraw51' },
             { label: 'Technical', value: 'technical', quizBank: 'QuestionDraw71' },
           ];
         } else if (slide.title === 'Pre-knowledge check') {
+          data.title = 'EV Knowledge Assessment';
+          data.instruction = 'Choose your preferred assessment level';
           data.options = buttons
             .filter(b => b.label && !b.label.includes('Hotspot') && b.label !== '<')
-            .map(b => ({ label: b.label, value: b.label }));
+            .map(b => {
+              const label = cleanText(b.label);
+              // Link pre-knowledge options to quiz banks too
+              const isShort = label.toLowerCase().includes('short');
+              const isSkip = label.toLowerCase().includes('skip');
+              return {
+                label,
+                value: label,
+                quizBank: isSkip ? undefined : (isShort ? 'QuestionDraw51' : 'QuestionDraw71'),
+              };
+            });
         }
+        data.texts = undefined; // Branching uses options, not text paragraphs
         break;
       }
 
       case 'quiz':
-        // Quiz rendering is handled dynamically from QUIZ_BANKS
         break;
 
       case 'results':
-        // Results rendering uses score state
+        data.title = 'Your Results';
+        data.texts = undefined;
         break;
     }
 
@@ -766,6 +797,28 @@ function buildQuizData(course: CourseIR): any[] {
       incorrectFeedback: q.incorrectFeedback,
     })),
   }));
+}
+
+// ---- Text Cleanup ----
+
+function cleanText(text: string): string {
+  return text
+    .replace(/\r\n/g, ' ')
+    .replace(/\r/g, ' ')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function isJunkText(text: string): boolean {
+  const lower = text.toLowerCase();
+  // Storyline shape names and artifacts
+  if (/^(round diagonal corner|rectangle|oval|shape)\s*\d*$/i.test(text)) return true;
+  // Storyline variable references
+  if (text.includes('%_player.') && text.includes('$PercentScore')) return true;
+  // Generic labels
+  if (lower === 'question' || lower === 'correct' || lower === 'incorrect') return true;
+  return false;
 }
 
 // ---- Helpers ----
