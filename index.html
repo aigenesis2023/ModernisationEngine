@@ -3,681 +3,206 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Test intro scene</title>
+  <title>Modernisation Engine</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
-:root {
-  --primary: #3C087E;
-  --secondary: #030014;
-  --accent: #7c3aed;
-  --bg: #030014;
-  --surface: #0f0a1e;
-  --text: #ffffff;
-  --text-muted: #a1a1aa;
-  --success: #10b981;
-  --error: #ef4444;
-  --warning: #f59e0b;
-  --radius: 12px;
-  --font-heading: 'Inter', system-ui, sans-serif;
-  --font-body: 'Inter', system-ui, sans-serif;
-  --spacing: 8px;
-  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
+    :root {
+      --primary: #7c3aed;
+      --primary-light: #a78bfa;
+      --bg: #0a0a0f;
+      --surface: #141420;
+      --surface-hover: #1e1e2e;
+      --border: #2a2a3a;
+      --text: #f0f0f5;
+      --text-muted: #8888a0;
+      --success: #10b981;
+      --error: #ef4444;
+      --radius: 12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 800px; margin: 0 auto; padding: 40px 24px; }
+    h1 {
+      font-size: 2rem; font-weight: 800;
+      background: linear-gradient(135deg, var(--primary-light), var(--primary));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle { color: var(--text-muted); margin-bottom: 40px; font-size: 1.05rem; }
 
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 48px 24px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--surface);
+      margin-bottom: 24px;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--primary);
+      background: var(--surface-hover);
+    }
+    .upload-zone.has-files {
+      border-color: var(--success);
+      border-style: solid;
+    }
+    .upload-zone h3 { font-size: 1.1rem; margin-bottom: 8px; }
+    .upload-zone p { color: var(--text-muted); font-size: 0.9rem; }
+    .upload-zone .icon { font-size: 2.5rem; margin-bottom: 12px; display: block; }
+    .file-count { color: var(--success); font-weight: 600; margin-top: 8px; }
 
-body {
-  font-family: var(--font-body);
-  font-size: 16px;
-  line-height: 1.6;
-  color: var(--text);
-  background: var(--bg);
-  -webkit-font-smoothing: antialiased;
-  overflow: hidden;
-}
+    /* Brand URL Input */
+    .input-group { margin-bottom: 24px; }
+    .input-group label {
+      display: block; font-weight: 600; margin-bottom: 8px; font-size: 0.95rem;
+    }
+    .input-group input {
+      width: 100%; padding: 12px 16px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); color: var(--text);
+      font-size: 1rem; outline: none; transition: border-color 0.2s;
+    }
+    .input-group input:focus { border-color: var(--primary); }
+    .input-group input::placeholder { color: var(--text-muted); }
+    .input-hint { color: var(--text-muted); font-size: 0.8rem; margin-top: 6px; }
 
-#root { width: 100vw; height: 100vh; overflow: hidden; }
+    /* Generate Button */
+    .btn-generate {
+      width: 100%; padding: 16px;
+      background: linear-gradient(135deg, var(--primary), #6d28d9);
+      color: white; border: none; border-radius: var(--radius);
+      font-size: 1.1rem; font-weight: 700; cursor: pointer;
+      transition: opacity 0.2s; margin-bottom: 32px;
+    }
+    .btn-generate:hover { opacity: 0.9; }
+    .btn-generate:disabled {
+      opacity: 0.4; cursor: not-allowed;
+    }
 
-/* ---- Layout ---- */
-.app { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.slide-container {
-  flex: 1; overflow-y: auto; overflow-x: hidden;
-  position: relative; scroll-behavior: smooth;
-}
-.slide {
-  min-height: 100%; padding: calc(var(--spacing) * 6) calc(var(--spacing) * 4);
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  animation: slideIn 0.5s ease-out;
-}
+    /* Progress Log */
+    .progress-section { display: none; }
+    .progress-section.active { display: block; }
+    .progress-header { font-weight: 700; margin-bottom: 12px; font-size: 1.1rem; }
+    .progress-bar-wrap {
+      height: 6px; background: var(--surface); border-radius: 3px;
+      margin-bottom: 16px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; width: 0%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--primary), var(--primary-light));
+      transition: width 0.4s ease;
+    }
+    .log {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 16px;
+      max-height: 300px; overflow-y: auto; font-size: 0.85rem;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      line-height: 1.8;
+    }
+    .log-entry { color: var(--text-muted); }
+    .log-entry.success { color: var(--success); }
+    .log-entry.error { color: var(--error); }
+    .log-entry.info { color: var(--primary-light); }
 
-@keyframes slideIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+    /* Result Section */
+    .result-section { display: none; margin-top: 32px; }
+    .result-section.active { display: block; }
+    .result-actions { display: flex; gap: 12px; margin-bottom: 16px; }
+    .btn-action {
+      flex: 1; padding: 14px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text);
+      border-radius: var(--radius); font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: all 0.2s;
+      text-align: center;
+    }
+    .btn-action:hover { background: var(--surface-hover); border-color: var(--primary); }
+    .btn-action.primary {
+      background: var(--primary); border-color: var(--primary); color: white;
+    }
 
-/* ---- Typography ---- */
-h1, h2, h3 {
-  font-family: var(--font-heading);
-  font-weight: 700;
-  line-height: 1.2;
-  letter-spacing: -0.02em;
-}
-h1 { font-size: 40px; margin-bottom: calc(var(--spacing) * 3); }
-h2 { font-size: 32px; margin-bottom: calc(var(--spacing) * 2); }
-h3 { font-size: 24px; margin-bottom: var(--spacing); }
-p { margin-bottom: var(--spacing); max-width: 680px; }
+    /* Preview Frame */
+    .preview-frame {
+      width: 100%; height: 500px; border: 1px solid var(--border);
+      border-radius: var(--radius); background: white;
+    }
 
-/* ---- Buttons ---- */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 4);
-  border: none; border-radius: var(--radius);
-  font-family: var(--font-body); font-size: 16px; font-weight: 600;
-  cursor: pointer; transition: all var(--transition);
-  text-decoration: none; min-width: 140px;
-}
-.btn:active { transform: scale(0.97); }
-.btn-primary {
-  background: var(--primary); color: white; border: none;
-}
-.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 4px 15px #3C087E44; }
-
-.btn-secondary {
-  background: transparent; color: var(--primary);
-  border: 2px solid var(--primary);
-}
-.btn-secondary:hover { background: var(--primary); color: white; }
-
-.btn-ghost {
-  background: transparent; color: var(--text-muted);
-  border: 1px solid rgba(255,255,255,0.12);
-}
-.btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
-
-/* ---- Cards ---- */
-.card {
-  background: var(--surface);
-  border-radius: var(--radius);
-  padding: calc(var(--spacing) * 3);
-  width: 100%; max-width: 760px;
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-  transition: all var(--transition);
-}
-
-/* ---- Title Slide ---- */
-.slide-title {
-  background: linear-gradient(135deg, #3C087E, #7c3aed);
-  color: white; text-align: center;
-  padding: 0; justify-content: center; align-items: center;
-  position: relative; overflow: hidden;
-  background-size: cover; background-position: center;
-}
-.slide-title::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);
-}
-.slide-title .content { position: relative; z-index: 2; max-width: 720px; }
-.slide-title h1 { font-size: 52px; margin-bottom: calc(var(--spacing) * 2); color: white; }
-.slide-title .subtitle { font-size: 19px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 4); }
-.slide-title .logo { max-width: 200px; max-height: 60px; margin-bottom: calc(var(--spacing) * 3); }
-.slide-title .btn { background: white; color: var(--primary); font-weight: 700; }
-.slide-title .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }
-
-/* ---- Content Slide ---- */
-.slide-content { background: var(--bg); }
-.slide-content .card { margin-bottom: calc(var(--spacing) * 2); }
-
-/* ---- Form Slide ---- */
-.form-group { margin-bottom: calc(var(--spacing) * 2); width: 100%; }
-.form-group label {
-  display: block; font-weight: 600; margin-bottom: calc(var(--spacing) * 0.5);
-  color: var(--text);
-}
-.form-group input, .form-group textarea {
-  width: 100%; padding: calc(var(--spacing) * 1.5);
-  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
-  font-family: var(--font-body); font-size: 16px;
-  transition: border-color var(--transition);
-  background: var(--bg); color: var(--text);
-}
-.form-group input:focus, .form-group textarea:focus {
-  outline: none; border-color: var(--primary);
-  box-shadow: 0 0 0 3px #3C087E22;
-}
-
-/* ---- Quiz Slide ---- */
-.quiz-question {
-  font-family: var(--font-heading); font-size: 24px;
-  font-weight: 700; margin-bottom: calc(var(--spacing) * 3);
-  text-align: center; max-width: 680px;
-}
-.quiz-choices { width: 100%; max-width: 560px; display: flex; flex-direction: column; gap: var(--spacing); }
-.quiz-choice {
-  display: flex; align-items: center; gap: calc(var(--spacing) * 1.5);
-  padding: calc(var(--spacing) * 2) calc(var(--spacing) * 2.5);
-  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
-  cursor: pointer; transition: all var(--transition);
-  background: var(--surface); font-size: 16px;
-}
-.quiz-choice:hover { border-color: var(--primary); transform: translateX(4px); }
-.quiz-choice.selected { border-color: var(--primary); background: #3C087E11; }
-.quiz-choice.correct { border-color: var(--success); background: #10b98111; }
-.quiz-choice.incorrect { border-color: var(--error); background: #ef444411; }
-.quiz-choice .indicator {
-  width: 24px; height: 24px; border-radius: 50%;
-  border: 2px solid rgba(255,255,255,0.12); flex-shrink: 0;
-  display: flex; align-items: center; justify-content: center;
-  transition: all var(--transition);
-}
-.quiz-choice.selected .indicator { border-color: var(--primary); background: var(--primary); }
-.quiz-choice.correct .indicator { border-color: var(--success); background: var(--success); }
-.quiz-choice.incorrect .indicator { border-color: var(--error); background: var(--error); }
-.quiz-feedback {
-  margin-top: calc(var(--spacing) * 2); padding: calc(var(--spacing) * 2);
-  border-radius: var(--radius); text-align: center; font-weight: 600;
-  animation: slideIn 0.3s ease-out;
-}
-.quiz-feedback.correct { background: #10b98115; color: var(--success); }
-.quiz-feedback.incorrect { background: #ef444415; color: var(--error); }
-
-/* ---- Branching Slide ---- */
-.branch-options { display: flex; gap: calc(var(--spacing) * 2); flex-wrap: wrap; justify-content: center; margin-top: calc(var(--spacing) * 3); }
-.branch-option {
-  padding: calc(var(--spacing) * 3) calc(var(--spacing) * 4);
-  border: 2px solid rgba(255,255,255,0.12); border-radius: var(--radius);
-  cursor: pointer; transition: all var(--transition);
-  text-align: center; min-width: 180px;
-  background: var(--surface);
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-.branch-option:hover {
-  border-color: var(--primary); transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-}
-.branch-option h3 { color: var(--primary); }
-
-/* ---- Results Slide ---- */
-.slide-results {
-  background: linear-gradient(135deg, #3C087E, #7c3aed);
-  color: white; text-align: center;
-}
-.score-circle {
-  width: 160px; height: 160px; border-radius: 50%;
-  border: 6px solid rgba(255,255,255,0.3);
-  display: flex; align-items: center; justify-content: center; flex-direction: column;
-  margin: calc(var(--spacing) * 3) auto;
-  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-.score-circle .score-value { font-size: 48px; font-weight: 700; font-family: var(--font-heading); }
-.score-circle .score-label { font-size: 14px; opacity: 0.8; }
-
-@keyframes scaleIn {
-  from { transform: scale(0); opacity: 0; }
-  to { transform: scale(1); opacity: 1; }
-}
-
-/* ---- Progress Bar ---- */
-.progress-bar {
-  height: 4px; background: #3C087E22;
-  position: sticky; top: 0; z-index: 100;
-}
-.progress-fill {
-  height: 100%; background: var(--primary);
-  transition: width 0.4s ease;
-}
-
-/* ---- Navigation ---- */
-.nav-bar {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);
-  background: var(--surface); border-top: 1px solid rgba(255,255,255,0.08);
-  flex-shrink: 0;
-}
-.nav-bar .slide-counter { color: var(--text-muted); font-size: 14px; }
-
-/* ---- Hero Image ---- */
-.hero-image {
-  width: 100%; max-width: 760px; border-radius: var(--radius);
-  overflow: hidden; margin-bottom: calc(var(--spacing) * 3);
-  backdrop-filter: blur(10px); background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 4px 20px rgba(0,0,0,0.2);
-}
-.hero-image img { width: 100%; height: auto; display: block; }
-
-/* ---- Responsive ---- */
-@media (max-width: 768px) {
-  .slide { padding: calc(var(--spacing) * 3) calc(var(--spacing) * 2); }
-  h1 { font-size: 28px; }
-  h2 { font-size: 24px; }
-  .slide-title h1 { font-size: 34px; }
-  .score-circle { width: 120px; height: 120px; }
-  .score-circle .score-value { font-size: 36px; }
-  .branch-options { flex-direction: column; align-items: center; }
-  .branch-option { width: 100%; max-width: 320px; }
-}
-</style>
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 24px 16px; }
+      h1 { font-size: 1.5rem; }
+      .result-actions { flex-direction: column; }
+    }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div class="container">
+    <h1>Modernisation Engine</h1>
+    <p class="subtitle">Upload a SCORM package + brand URL &rarr; get a beautiful modern course</p>
 
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <!-- SCORM Upload -->
+    <div class="upload-zone" id="uploadZone">
+      <span class="icon">&#128194;</span>
+      <h3>Drop SCORM folder here</h3>
+      <p>Or click to select files. Upload the extracted SCORM package folder.</p>
+      <div class="file-count" id="fileCount"></div>
+    </div>
+    <input type="file" id="fileInput" webkitdirectory multiple hidden>
 
-  <script>
-// SCORM 1.2 Communication Adapter
-var SCORM = (function() {
-  var api = null;
-  var initialized = false;
-  var completed = false;
+    <!-- Brand URL -->
+    <div class="input-group">
+      <label for="brandUrl">Brand URL</label>
+      <input type="url" id="brandUrl" placeholder="https://company.com" />
+      <p class="input-hint">The engine will scrape colors, fonts, and logo from this website</p>
+    </div>
 
-  function findAPI(win) {
-    var attempts = 0;
-    while (win && !win.API && attempts < 10) {
-      if (win.parent && win.parent !== win) { win = win.parent; }
-      else if (win.opener) { win = win.opener; }
-      else { break; }
-      attempts++;
-    }
-    return win ? win.API : null;
-  }
+    <!-- CORS Proxy -->
+    <div class="input-group">
+      <label for="corsProxy">CORS Proxy URL</label>
+      <input type="url" id="corsProxy" value="https://cors-proxy.leoduncan-elearning.workers.dev" />
+      <p class="input-hint">Your Cloudflare Worker CORS proxy for brand scraping</p>
+    </div>
 
-  function init() {
-    api = findAPI(window);
-    if (!api) {
-      console.warn('[SCORM] No LMS API found — running in standalone mode');
-      return false;
-    }
-    var result = api.LMSInitialize('');
-    initialized = (result === 'true' || result === true);
-    if (initialized) {
-      api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
-      api.LMSCommit('');
-    }
-    return initialized;
-  }
+    <!-- Generate -->
+    <button class="btn-generate" id="btnGenerate" disabled>Generate Modernised Course</button>
 
-  function setValue(key, value) {
-    if (!api || !initialized) return false;
-    var result = api.LMSSetValue(key, String(value));
-    api.LMSCommit('');
-    return result === 'true' || result === true;
-  }
+    <!-- Progress -->
+    <div class="progress-section" id="progressSection">
+      <div class="progress-header">Processing...</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar"></div></div>
+      <div class="log" id="log"></div>
+    </div>
 
-  function getValue(key) {
-    if (!api || !initialized) return '';
-    return api.LMSGetValue(key);
-  }
+    <!-- Result -->
+    <div class="result-section" id="resultSection">
+      <div class="result-actions">
+        <button class="btn-action primary" id="btnDownload">Download SCORM Package (.zip)</button>
+        <button class="btn-action" id="btnPreview">Preview Course</button>
+      </div>
+      <iframe class="preview-frame" id="previewFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+    </div>
+  </div>
 
-  function setScore(score, max, min) {
-    setValue('cmi.core.score.raw', score);
-    setValue('cmi.core.score.max', max || 100);
-    setValue('cmi.core.score.min', min || 0);
-  }
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
-  function setStatus(status) {
-    setValue('cmi.core.lesson_status', status);
-  }
-
-  function complete(score, passingScore) {
-    if (completed) return;
-    completed = true;
-    if (typeof score === 'number') {
-      setScore(score);
-      setStatus(score >= (passingScore || 80) ? 'passed' : 'failed');
-    } else {
-      setStatus('completed');
-    }
-  }
-
-  function suspend(data) {
-    if (data) setValue('cmi.suspend_data', JSON.stringify(data));
-    setValue('cmi.core.exit', 'suspend');
-  }
-
-  function getSuspendData() {
-    var raw = getValue('cmi.suspend_data');
-    try { return raw ? JSON.parse(raw) : null; }
-    catch(e) { return null; }
-  }
-
-  function finish() {
-    if (!api || !initialized) return;
-    api.LMSFinish('');
-  }
-
-  return {
-    init: init,
-    setValue: setValue,
-    getValue: getValue,
-    setScore: setScore,
-    setStatus: setStatus,
-    complete: complete,
-    suspend: suspend,
-    getSuspendData: getSuspendData,
-    finish: finish,
-    isConnected: function() { return initialized; }
-  };
-})();
-
-// Initialize on load, finish on unload
-window.addEventListener('load', function() { SCORM.init(); });
-window.addEventListener('beforeunload', function() { SCORM.finish(); });
-</script>
-  <script>
-'use strict';
-var e = React.createElement;
-
-var SLIDES = [{"type":"title","title":"EV Awareness & Safety","texts":["EV Awareness & Safety"],"image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80"},{"type":"objectives","title":"Learning Objectives","texts":["Introduction"],"image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"form","title":"Your Details","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","fields":[{"label":"Name","placeholder":"Name","fieldType":"text","variableName":"TextEntry9"},{"label":"Organisation","placeholder":"Organisation","fieldType":"text","variableName":"TextEntry10"},{"label":"Email","placeholder":"Email","fieldType":"text","variableName":"TextEntry3"}],"instruction":"Please enter your details and click next"},{"type":"branching","title":"Choose Your Path","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80","instruction":"Click on the most relevant role to you.","greeting":"Welcome %name%","options":[{"label":"Non-Technical","value":"non-technical","quizBank":"QuestionDraw51"},{"label":"Semi-Technical","value":"semi-technical","quizBank":"QuestionDraw51"},{"label":"Technical","value":"technical","quizBank":"QuestionDraw71"}]},{"type":"branching","title":"EV Knowledge Assessment","image":"https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80","instruction":"Choose your preferred assessment level","options":[{"label":"Take a short version of the EV Knowledge Test","value":"Take a short version of the EV Knowledge Test","quizBank":"QuestionDraw51"},{"label":"Take the Full version of the EV Knowledge Test","value":"Take the Full version of the EV Knowledge Test","quizBank":"QuestionDraw71"},{"label":"SKIP the EV Knowledge Test","value":"SKIP the EV Knowledge Test"}]},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"},{"type":"results","title":"Your Results","image":"https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80"}];
-var QUIZ_BANKS = [{"id":"QuestionDraw51","title":"QuestionDraw51","group":"non-technical","drawCount":10,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]},{"id":"QuestionDraw71","title":"QuestionDraw71","group":"technical","drawCount":20,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The on-board charger allows the vehicle battery to be charged from the mains supply.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A parallel hybrid  can use a combination of the engine and the electric motor to drive the wheels.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The engine in a series hybrid is used to drive the wheels.","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The High Voltage battery capacity is measured in Kwh.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"In addition to the high voltage battery, electric vehicles usually have a smaller 12-volt battery as well.","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]}];
-var MASTERY = 80;
-var COURSE_TITLE = "EV Awareness & Safety";
-var LOGO_URL = "";
-var LOGO_ALT = "";
-
-// ---- Utility ----
-function shuffleArray(arr) {
-  var a = arr.slice();
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-  }
-  return a;
-}
-
-// ---- App Component ----
-function App() {
-  var _s = React.useState(0), currentSlide = _s[0], setCurrentSlide = _s[1];
-  var _f = React.useState({}), formData = _f[0], setFormData = _f[1];
-  var _q = React.useState(null), quizState = _q[0], setQuizState = _q[1];
-  var _sc = React.useState(null), score = _sc[0], setScore = _sc[1];
-  var _sel = React.useState(null), selectedChoice = _sel[0], setSelectedChoice = _sel[1];
-  var _ans = React.useState(false), answered = _ans[0], setAnswered = _ans[1];
-  var _qi = React.useState(0), quizIndex = _qi[0], setQuizIndex = _qi[1];
-  var _corr = React.useState(0), correctCount = _corr[0], setCorrectCount = _corr[1];
-  var _tot = React.useState(0), totalQ = _tot[0], setTotalQ = _tot[1];
-  var _branch = React.useState(null), branch = _branch[0], setBranch = _branch[1];
-  var _quizQs = React.useState([]), quizQuestions = _quizQs[0], setQuizQuestions = _quizQs[1];
-
-  var slide = SLIDES[currentSlide];
-  var totalSlides = SLIDES.length;
-
-  function goNext() {
-    setSelectedChoice(null);
-    setAnswered(false);
-    if (currentSlide < totalSlides - 1) {
-      setCurrentSlide(currentSlide + 1);
-    }
-  }
-
-  function goPrev() {
-    if (currentSlide > 0) {
-      setSelectedChoice(null);
-      setAnswered(false);
-      setCurrentSlide(currentSlide - 1);
-    }
-  }
-
-  function startQuiz(bankId) {
-    var bank = QUIZ_BANKS.find(function(b) { return b.id === bankId; });
-    if (!bank) { goNext(); return; }
-    var qs = shuffleArray(bank.questions).slice(0, bank.drawCount);
-    setQuizQuestions(qs);
-    setQuizIndex(0);
-    setCorrectCount(0);
-    setTotalQ(qs.length);
-    setQuizState('active');
-    setSelectedChoice(null);
-    setAnswered(false);
-  }
-
-  function handleQuizAnswer(choiceIdx) {
-    if (answered) return;
-    setSelectedChoice(choiceIdx);
-    setAnswered(true);
-    var q = quizQuestions[quizIndex];
-    if (q && q.choices[choiceIdx] && q.choices[choiceIdx].isCorrect) {
-      setCorrectCount(correctCount + 1);
-    }
-  }
-
-  function nextQuestion() {
-    if (quizIndex < quizQuestions.length - 1) {
-      setQuizIndex(quizIndex + 1);
-      setSelectedChoice(null);
-      setAnswered(false);
-    } else {
-      // Quiz complete — jump to results
-      var finalScore = Math.round((correctCount + (answered && quizQuestions[quizIndex] && quizQuestions[quizIndex].choices[selectedChoice] && quizQuestions[quizIndex].choices[selectedChoice].isCorrect ? 1 : 0)) / totalQ * 100);
-      setScore(finalScore);
-      setQuizState('complete');
-      SCORM.complete(finalScore, MASTERY);
-      setCurrentSlide(totalSlides - 1);
-    }
-  }
-
-  function handleFormChange(field, value) {
-    var updated = Object.assign({}, formData);
-    updated[field] = value;
-    setFormData(updated);
-  }
-
-  // ---- Progress ----
-  var progress = ((currentSlide + 1) / totalSlides) * 100;
-
-  // ---- Render Slide ----
-  function renderSlide() {
-    if (!slide) return e('div', null, 'No slide data');
-
-    // If we're in active quiz mode, always render the quiz
-    if (quizState === 'active' && quizQuestions.length > 0) {
-      return renderQuizSlide();
-    }
-
-    switch (slide.type) {
-      case 'title': return renderTitleSlide();
-      case 'objectives': return renderObjectivesSlide();
-      case 'form': return renderFormSlide();
-      case 'branching': return renderBranchingSlide();
-      case 'quiz': return renderQuizSlide();
-      case 'results': return renderResultsSlide();
-      default: return renderContentSlide();
-    }
-  }
-
-  function renderTitleSlide() {
-    return e('div', { className: 'slide slide-title', style: slide.image ? {
-      backgroundImage: 'linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url(' + slide.image + ')',
-      backgroundSize: 'cover', backgroundPosition: 'center'
-    } : {} },
-      e('div', { className: 'content' },
-        LOGO_URL ? e('img', { src: LOGO_URL, alt: LOGO_ALT, className: 'logo' }) : null,
-        e('h1', null, slide.title || COURSE_TITLE),
-        slide.subtitle ? e('p', { className: 'subtitle' }, slide.subtitle) : null,
-        e('button', { className: 'btn', onClick: goNext }, 'Start Course')
-      )
-    );
-  }
-
-  function renderObjectivesSlide() {
-    return e('div', { className: 'slide slide-content' },
-      e('div', { className: 'card' },
-        e('h2', null, slide.title),
-        slide.texts && slide.texts.map(function(t, i) {
-          return e('p', { key: i }, t);
-        }),
-        slide.image ? e('div', { className: 'hero-image' },
-          e('img', { src: slide.image, alt: slide.title })
-        ) : null,
-        e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
-          e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
-        )
-      )
-    );
-  }
-
-  function renderFormSlide() {
-    return e('div', { className: 'slide slide-content' },
-      e('div', { className: 'card' },
-        e('h2', null, slide.title),
-        slide.instruction ? e('p', null, slide.instruction) : null,
-        slide.fields && slide.fields.map(function(f, i) {
-          return e('div', { className: 'form-group', key: i },
-            e('label', null, f.label || f.placeholder),
-            e('input', {
-              type: f.fieldType || 'text',
-              placeholder: f.placeholder,
-              value: formData[f.variableName] || '',
-              onChange: function(ev) { handleFormChange(f.variableName, ev.target.value); }
-            })
-          );
-        }),
-        e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
-          e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
-        )
-      )
-    );
-  }
-
-  function renderBranchingSlide() {
-    var userName = formData['TextEntry9'] || '';
-    return e('div', { className: 'slide slide-content' },
-      e('div', { style: { textAlign: 'center', maxWidth: '760px' } },
-        e('h2', null, slide.title),
-        slide.instruction ? e('p', { style: { marginBottom: 'calc(var(--spacing) * 2)' } }, slide.instruction) : null,
-        slide.greeting ? e('p', { style: { fontSize: '18px', marginBottom: 'calc(var(--spacing) * 2)' } },
-          slide.greeting.replace('%name%', userName)
-        ) : null,
-        e('div', { className: 'branch-options' },
-          slide.options && slide.options.map(function(opt, i) {
-            return e('div', {
-              className: 'branch-option',
-              key: i,
-              onClick: function() {
-                setBranch(opt.value || opt.label);
-                if (opt.quizBank) {
-                  startQuiz(opt.quizBank);
-                } else {
-                  // Skip option — go to results with full marks
-                  setScore(100);
-                  setQuizState('complete');
-                  SCORM.complete(100, MASTERY);
-                  // Jump to last slide (results)
-                  setCurrentSlide(totalSlides - 1);
-                }
-              }
-            },
-              e('h3', null, opt.label)
-            );
-          })
-        )
-      )
-    );
-  }
-
-  function renderQuizSlide() {
-    var q = quizQuestions[quizIndex];
-    if (!q) return e('div', { className: 'slide slide-content' }, e('p', null, 'Loading quiz...'));
-
-    return e('div', { className: 'slide slide-content' },
-      e('div', { style: { textAlign: 'center', width: '100%', maxWidth: '760px' } },
-        e('p', { style: { color: 'var(--text-muted)', marginBottom: 'var(--spacing)' } },
-          'Question ' + (quizIndex + 1) + ' of ' + totalQ
-        ),
-        e('div', { className: 'quiz-question' }, q.questionText),
-        e('div', { className: 'quiz-choices' },
-          q.choices.map(function(c, i) {
-            var cls = 'quiz-choice';
-            if (selectedChoice === i) cls += ' selected';
-            if (answered && c.isCorrect) cls += ' correct';
-            if (answered && selectedChoice === i && !c.isCorrect) cls += ' incorrect';
-            return e('div', {
-              className: cls, key: i,
-              onClick: function() { handleQuizAnswer(i); }
-            },
-              e('div', { className: 'indicator' },
-                answered ? (c.isCorrect ? '\u2713' : (selectedChoice === i ? '\u2717' : '')) : ''
-              ),
-              e('span', null, c.text)
-            );
-          })
-        ),
-        answered ? e('div', {
-          className: 'quiz-feedback ' + (q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect ? 'correct' : 'incorrect')
-        }, q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect ? (q.correctFeedback || 'Correct!') : (q.incorrectFeedback || 'Incorrect.')) : null,
-        answered ? e('div', { style: { marginTop: 'calc(var(--spacing) * 2)' } },
-          e('button', { className: 'btn btn-primary', onClick: nextQuestion },
-            quizIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'
-          )
-        ) : null
-      )
-    );
-  }
-
-  function renderResultsSlide() {
-    var displayScore = score !== null ? score : 0;
-    var passed = displayScore >= MASTERY;
-    return e('div', { className: 'slide slide-results' },
-      e('div', { className: 'content', style: { maxWidth: '500px' } },
-        e('h2', { style: { color: 'white' } }, slide.title || 'Your Results'),
-        e('div', { className: 'score-circle' },
-          e('div', { className: 'score-value' }, displayScore + '%'),
-          e('div', { className: 'score-label' }, passed ? 'Passed' : 'Not passed')
-        ),
-        e('p', { style: { color: 'rgba(255,255,255,0.85)', marginTop: 'calc(var(--spacing) * 2)' } },
-          passed
-            ? 'Congratulations! You have successfully completed this course.'
-            : 'You need ' + MASTERY + '% to pass. Please try again.'
-        ),
-        !passed ? e('button', {
-          className: 'btn', style: { marginTop: 'calc(var(--spacing) * 3)', background: 'white', color: 'var(--primary)' },
-          onClick: function() { setCurrentSlide(0); setQuizState(null); setScore(null); }
-        }, 'Restart Course') : null
-      )
-    );
-  }
-
-  function renderContentSlide() {
-    return e('div', { className: 'slide slide-content' },
-      e('div', { className: 'card' },
-        e('h2', null, slide.title),
-        slide.texts && slide.texts.map(function(t, i) {
-          return e('p', { key: i }, t);
-        }),
-        slide.image ? e('div', { className: 'hero-image' },
-          e('img', { src: slide.image, alt: slide.title })
-        ) : null,
-        e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
-          e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
-        )
-      )
-    );
-  }
-
-  // ---- Main Render ----
-  var showNav = slide && slide.type !== 'title' && slide.type !== 'results';
-  var isQuizActive = quizState === 'active';
-
-  return e('div', { className: 'app' },
-    e('div', { className: 'progress-bar' },
-      e('div', { className: 'progress-fill', style: { width: progress + '%' } })
-    ),
-    e('div', { className: 'slide-container' }, renderSlide()),
-    showNav && !isQuizActive ? e('div', { className: 'nav-bar' },
-      e('button', {
-        className: 'btn btn-ghost',
-        onClick: goPrev,
-        disabled: currentSlide === 0,
-        style: currentSlide === 0 ? { opacity: 0.3 } : {}
-      }, '\u2190 Back'),
-      e('span', { className: 'slide-counter' }, (currentSlide + 1) + ' / ' + totalSlides),
-      e('button', { className: 'btn btn-primary', onClick: goNext }, 'Next \u2192')
-    ) : null
-  );
-}
-
-// Mount
-ReactDOM.createRoot(document.getElementById('root')).render(e(App));
-</script>
+  <!-- Engine Modules -->
+  <script src="engine/scorm-parser.js"></script>
+  <script src="engine/brand-scraper.js"></script>
+  <script src="engine/generator-css.js"></script>
+  <script src="engine/generator-data.js"></script>
+  <script src="engine/generator-app.js"></script>
+  <script src="engine/packager.js"></script>
+  <script src="engine/app.js"></script>
 </body>
 </html>
