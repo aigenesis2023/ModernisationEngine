@@ -8,6 +8,26 @@
 window.GeneratorData = (function () {
   'use strict';
 
+  /**
+   * Detect Storyline's auto-generated question/slide type labels.
+   * Storyline uses its internal type name as the default slide title when
+   * the author doesn't provide one. These are universal across all exports.
+   */
+  function isStorylineTypeLabel(text) {
+    if (!text) return true;
+    var t = text.trim().toLowerCase();
+    var typeLabels = [
+      'pick one', 'pick many', 'pick all', 'true/false', 'true false',
+      'text entry', 'matching', 'sequence', 'fill in', 'fill in the blank',
+      'drag and drop', 'freeform', 'graded question', 'survey question',
+      'multiple choice', 'word bank', 'hotspot', 'untitled slide'
+    ];
+    // Exact match or match with trailing number ("Text Entry 1")
+    return typeLabels.some(function (label) {
+      return t === label || t.match(new RegExp('^' + label.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\s*\\d*$'));
+    });
+  }
+
   function resolveImage(img, generatedImages) {
     if (!img) return undefined;
     var generated = generatedImages && generatedImages.entries
@@ -161,9 +181,12 @@ window.GeneratorData = (function () {
         var lower = t.toLowerCase();
         return lower.includes('enter') || lower.includes('please') || lower.includes('fill');
       }) || 'Please fill in your details';
-      // Clean up auto-generated form titles like "Text Entry", "Text Entry 1"
+      // Clean up Storyline's auto-generated form titles
+      // Storyline uses its question type as the slide title ("Text Entry", "Freeform", etc.)
+      // These are not meaningful to learners — use context or a sensible default
       var formTitle = (slide.originalTitle || '').trim();
-      data.title = /^text\s*entry/i.test(formTitle) ? 'Your Details' : (formTitle || 'Your Details');
+      var isAutoTitle = !formTitle || isStorylineTypeLabel(formTitle);
+      data.title = isAutoTitle ? 'Your Details' : formTitle;
     }
 
     // Branching

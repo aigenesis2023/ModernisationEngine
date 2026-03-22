@@ -192,15 +192,25 @@ window.SCORMParser = (function () {
 
   // ---- Slide type detection ----
 
-  function detectSlideType(title, objects) {
+  /**
+   * Detect slide type from structural elements, not title keywords.
+   *
+   * Storyline slide types are determined by what objects are on the slide:
+   * - Quiz: has stategroups with radio/checkbox accType, OR title matches
+   *   Storyline's quiz type labels ("Pick One", "True/False", etc.)
+   * - Form: has textinput kind objects
+   * - Results: contains text referencing score/result variables
+   * - Title: first slide in course, or has minimal text with large imagery
+   * - Branching: has 3+ buttons without radio/checkbox (selection options)
+   * - Content: everything else
+   *
+   * Title keywords from specific courses (e.g., "Role Selector", "Pre-knowledge")
+   * are NOT used — those are course-specific, not structural.
+   */
+  function detectSlideType(title, objects, slideNumber) {
     const t = (title || '').toLowerCase();
-    if (t.includes('opening') || t === 'title') return 'title';
-    if (t.includes('learning objective')) return 'objectives';
-    if (t.includes('result')) return 'results';
-    if (t.includes('text entry')) return 'form';
-    if (t.includes('role selector') || t.includes('branch')) return 'branching';
-    if (t.includes('pre-knowledge') || t.includes('pre knowledge')) return 'branching';
 
+    // Structural detection: quiz elements (radio buttons, checkboxes)
     const hasRadio = objects.some(o =>
       o.kind === 'stategroup' && o.objects?.some(so => so.accType === 'radio')
     );
@@ -209,10 +219,52 @@ window.SCORMParser = (function () {
         so.accType === 'checkbox' || (so.referenceName || '').toLowerCase().includes('checkbox')
       )
     );
-    if (hasRadio || hasCheckbox || t.includes('pick one') || t.includes('pick many') ||
-        t.includes('true/false') || t.includes('true false') ||
-        t.includes('matching') || t.includes('sequence') || t.includes('fill in')) return 'quiz';
+    if (hasRadio || hasCheckbox) return 'quiz';
+
+    // Storyline's quiz type labels as slide titles (universal across all exports)
+    const quizTitlePatterns = [
+      'pick one', 'pick many', 'pick all', 'true/false', 'true false',
+      'matching', 'sequence', 'fill in', 'fill in the blank',
+      'drag and drop', 'freeform', 'word bank'
+    ];
+    if (quizTitlePatterns.some(p => t === p || t.startsWith(p + ' '))) return 'quiz';
+
+    // Structural detection: form inputs
     if (objects.some(o => o.kind === 'textinput')) return 'form';
+
+    // Structural detection: results — text containing score variable patterns
+    const allText = objects
+      .filter(o => o.kind === 'vectorshape')
+      .map(o => extractTextFromObj(o).text)
+      .join(' ');
+    if (allText.includes('%_player.Score') || allText.includes('%_player.Percent') ||
+        t.includes('result')) return 'results';
+
+    // Structural detection: title slide — first slide with minimal interactive elements
+    if (slideNumber === 1) return 'title';
+
+    // Structural detection: branching — 3+ non-nav buttons without quiz elements
+    // Buttons may be top-level or inside stategroups (Storyline's universal pattern
+    // for interactive buttons with hover/selected states)
+    const meaningfulButtons = [];
+    function findButtons(objs) {
+      for (const o of objs) {
+        if (o.kind === 'vectorshape' && o.accType === 'button') {
+          const label = extractTextFromObj(o).text || '';
+          if (label.length > 1 && !/^(<|>|prev|next|back|continue|submit)$/i.test(label.trim())) {
+            meaningfulButtons.push(o);
+          }
+        }
+        if (o.objects) findButtons(o.objects);
+      }
+    }
+    findButtons(objects);
+    if (meaningfulButtons.length >= 3) return 'branching';
+
+    // Structural detection: objectives — "objectives" or "learning" in title
+    // (this is a common e-learning convention, not specific to one course)
+    if (t.includes('objective') || t.includes('learning outcome')) return 'objectives';
+
     return 'content';
   }
 
@@ -436,7 +488,7 @@ window.SCORMParser = (function () {
   function parseSlide(slideId, slideData, slideNumber) {
     const layer0 = slideData.slideLayers?.[0];
     const objects = layer0?.objects || [];
-    const slideType = detectSlideType(slideData.title, objects);
+    const slideType = detectSlideType(slideData.title, objects, slideNumber);
     const elements = parseElements(objects);
 
     if (slideType === 'quiz') {
