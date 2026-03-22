@@ -43,6 +43,71 @@ window.GeneratorData = (function () {
     return isStorylineTypeLabel(text);
   }
 
+  /**
+   * Check if a layer name looks auto-generated (e.g. "Layer 1", "Layer 2").
+   * Storyline always names layers this way by default.
+   */
+  function isAutoLayerName(name) {
+    if (!name) return true;
+    return /^layer\s+\d+$/i.test(name.trim());
+  }
+
+  /**
+   * Extract first meaningful sentence from an array of text strings.
+   * Used to replace auto-generated layer names with actual content.
+   */
+  function extractFirstSentence(texts, maxLen) {
+    if (!texts || texts.length === 0) return null;
+    var combined = texts.join(' ').trim();
+    if (!combined) return null;
+    // Try to find first sentence
+    var match = combined.match(/^[^.!?]+[.!?]/);
+    var sentence = match ? match[0].trim() : combined;
+    if (sentence.length > (maxLen || 60)) {
+      sentence = sentence.substring(0, maxLen || 60).replace(/\s+\S*$/, '') + '...';
+    }
+    return sentence;
+  }
+
+  /**
+   * Detect the best layout for a slide based on its content characteristics.
+   * Used by the app renderer to choose between split, steps, narrative, etc.
+   */
+  function detectLayout(slide, data) {
+    var hasImage = !!(data.image || (data.images && data.images.length > 0));
+    var hasVideo = !!(data.video || (data.videos && data.videos && data.videos.length > 0));
+    var texts = data.texts || [];
+    var hasTexts = texts.length > 0;
+
+    // If slide has image AND text, use split layout
+    if (hasImage && hasTexts && !data.backgroundImage) {
+      return 'split';
+    }
+
+    // If no text, only image/video, it's media-focus
+    if (!hasTexts && (hasImage || hasVideo)) {
+      return 'media-focus';
+    }
+
+    // If all texts are short (< 100 chars each), could be steps
+    if (hasTexts && texts.length >= 2) {
+      var allShort = texts.every(function (t) { return t.length < 100; });
+      if (allShort && !hasImage) {
+        return 'steps';
+      }
+    }
+
+    // If any single text block is long (> 300 chars), it's narrative
+    if (hasTexts) {
+      var hasLongText = texts.some(function (t) { return t.length > 300; });
+      if (hasLongText) {
+        return 'narrative';
+      }
+    }
+
+    return 'default';
+  }
+
   function resolveImage(img, generatedImages) {
     if (!img) return undefined;
     var generated = generatedImages && generatedImages.entries
@@ -177,10 +242,21 @@ window.GeneratorData = (function () {
     // Layers with full content
     if (slide.layers.length > 0) {
       data.layers = slide.layers.map(function (layer) {
+        var layerTexts = layer.texts.map(function (t) { return t.content; }).filter(function (t) { return t.length > 0; });
+
+        // Clean auto-generated layer names
+        var layerName = layer.name;
+        if (isAutoLayerName(layerName)) {
+          var extracted = extractFirstSentence(layerTexts, 60);
+          if (extracted) {
+            layerName = extracted;
+          }
+        }
+
         var layerData = {
           id: layer.id,
-          name: layer.name,
-          texts: layer.texts.map(function (t) { return t.content; }).filter(function (t) { return t.length > 0; }),
+          name: layerName,
+          texts: layerTexts,
           image: layer.images.length > 0 ? resolveImage(layer.images[0], images) : undefined,
           interactions: layer.interactions.length > 0 ? layer.interactions : undefined
         };
@@ -349,6 +425,11 @@ window.GeneratorData = (function () {
           data.subtitle = subtitleSource;
         }
       }
+    }
+
+    // Detect content layout pattern
+    if (slide.presentation === 'narrative' || slide.presentation === 'media-feature' || !slide.presentation) {
+      data.layout = detectLayout(slide, data);
     }
 
     return data;
