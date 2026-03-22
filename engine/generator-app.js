@@ -522,10 +522,13 @@ window.GeneratorApp = (function () {
       '      slide.texts ? e("div", { className: "narrative-text" },\n' +
       '        slide.texts.map(function(t, i) { return e("p", { key: "t" + i }, t); })\n' +
       '      ) : null,\n' +
-      '      slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,\n' +
+      '      slide.images && slide.images.length > 1 ? e("div", { className: "image-grid" },\n' +
+      '        slide.images.map(function(img, i) { return e("div", { className: "hero-image", key: "img" + i }, e("img", { src: img.src, alt: img.alt || "" })); })\n' +
+      '      ) : slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,\n' +
       '      slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,\n' +
       '      slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,\n' +
-      '      renderLayers(slide)\n' +
+      '      renderLayers(slide),\n' +
+      '      renderInteractions(slide)\n' +
       '    );\n  }\n\n' +
 
       // --- Media feature slide ---

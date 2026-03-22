@@ -443,7 +443,13 @@ window.GeneratorCSS = (function () {
       '  overflow: hidden; margin: 1.5rem 0;\n' +
       '  ' + shadow + '\n' +
       '}\n' +
-      '.hero-image img { width: 100%; height: auto; display: block; }\n\n' +
+      '.hero-image img { width: 100%; height: auto; display: block; }\n' +
+      // Multi-image grid: when a slide has multiple content images
+      '.image-grid {\n' +
+      '  display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));\n' +
+      '  gap: 1rem; margin-bottom: 1.5rem;\n' +
+      '}\n' +
+      '.image-grid .hero-image { margin-bottom: 0; }\n\n' +
 
       '.media-feature { width: 100%; max-width: var(--wide-width); margin: 0 auto; }\n\n' +
 

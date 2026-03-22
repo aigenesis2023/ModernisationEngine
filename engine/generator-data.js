@@ -372,15 +372,23 @@ window.GeneratorData = (function () {
           }).filter(function (a) { return a.src; });
         }
 
-        // Layer videos
+        // Layer videos — resolve asset IDs same as slide-level videos
         if (layer.videos && layer.videos.length > 0) {
+          var courseAssets = coursePlan.assets || {};
+          var vAssets = courseAssets.videos || [];
           layerData.videos = layer.videos.map(function (v) {
-            return { src: resolveMediaPath(v.originalPath, 'media') };
+            var videoPath = v.originalPath;
+            if (!videoPath && v.assetId !== undefined && v.assetId !== -1) {
+              var asset = vAssets.find(function (a) { return a.id === v.assetId; });
+              if (asset) videoPath = asset.originalPath;
+            }
+            return { src: resolveMediaPath(videoPath, 'media') };
           }).filter(function (v) { return v.src; });
         }
 
         return layerData;
-      }).filter(function (l) { return l.texts.length > 0 || l.image || (l.interactions && l.interactions.length > 0); });
+      // Keep layers that have ANY content: text, image, interactions, OR videos
+      }).filter(function (l) { return l.texts.length > 0 || l.image || (l.interactions && l.interactions.length > 0) || (l.videos && l.videos.length > 0); });
 
       if (data.layers.length > 0) {
         data.interactionType = slide.interactionType || classifyInteraction(data.layers);
