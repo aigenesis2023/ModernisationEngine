@@ -376,7 +376,7 @@ window.SCORMParser = (function () {
             label: extracted.text || altText || 'Slider',
             variableName: obj.bindto?.replace('_player.', '') || undefined,
             dragPath: obj.dragpath || undefined });
-        } else if (obj.accType === 'text' || obj.accType === 'radio') {
+        } else if (obj.accType === 'text' || obj.accType === 'radio' || obj.accType === 'checkbox') {
           const content = extracted.text;
           if (isDecorativeShapeName(content)) {
             elements.push({ ...base, type: 'shape', role: base.depth <= 3 ? 'overlay' : 'decorative' });
