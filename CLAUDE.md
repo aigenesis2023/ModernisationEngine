@@ -156,18 +156,42 @@ assets/media/*        ← Video/audio files
 - All generated React uses `React.createElement` (no JSX, no build step)
 - `escJs()` and `escHtml()` for safe string embedding
 
-## CRITICAL: Engine Development Rule
+## CRITICAL: Engine Development Rules
 
-**Every change to the engine MUST be a universal improvement, NEVER a specific fix for a specific SCORM file or brand URL.**
+### Rule 1: Universal Improvements Only
+**Every change to the engine MUST be a universal improvement that works for ANY Articulate Storyline SCORM export, NEVER a specific fix for the test SCORM file or test brand URL.**
 
-The test SCORM folder and URL in the repo are just test data. When an issue is found in test output:
+The test SCORM folder (`TEST SCORM/`) and brand URL (`WEBSITE BRANDING REF.rtf`) in the repo are just test data. When an issue is found in test output:
 1. Ask "what CATEGORY of problem is this?" — not "how do I fix this specific text?"
 2. Build detection based on content characteristics (length, structure, semantic role) — not specific phrases or regex for known strings
 3. The improved output from the test SCORM should be a BYPRODUCT of a better engine, not the goal
 4. Every rule should make sense if you imagine a completely different SCORM course being processed
+5. NEVER hardcode slide IDs, variable names, quiz bank IDs, or any identifiers from the test data
 
 **Bad:** Adding a regex like `/click\s+on\s+the\s+most\s+relevant/i` to filter one course's instruction text
 **Good:** Building a classifier that detects ANY text whose purpose is to instruct users how to interact with the Storyline player
+
+**Bad:** `if (exitTarget.includes('6gVJ6ioVtxh'))` — hardcoded test SCORM slide ID
+**Good:** `var group = exitTarget.split('.').pop()` — uses the ID dynamically
+
+### Rule 2: Full Pipeline Testing
+**When testing and reviewing output, run the COMPLETE pipeline including AI image generation and real brand scraping.** Do not skip phases for speed — the images and brand styling are critical to the design and must be reviewed as the user would see them.
+
+Testing workflow:
+1. Run the full pipeline with the test SCORM + test brand URL (including image generation)
+2. Use Playwright to screenshot EVERY section, interaction, hover state, and navigation path
+3. Review the screenshots to identify issues
+4. For each issue, identify the CATEGORY of problem (not the specific instance)
+5. Build a universal engine fix that addresses the category
+6. Re-run the full pipeline and verify the fix works without breaking other sections
+
+### Rule 3: Complete Content Audit
+**The engine must capture and render ALL meaningful content from ANY Storyline SCORM export.** When reviewing output:
+- Cross-reference extracted content against the original SCORM data
+- Check that no slides, layers, interactions, or media were dropped
+- Verify the course structure (section order, grouping) reflects the original author's intent
+- Test all interactive elements: accordions, modals, branching, quizzes, forms
+- The output should feel like a modern reimagining of the same course, not a different course
 
 ## Common Pitfalls
 - **Script order in index.html matters** — content-planner after scorm-parser, generators after content-planner
