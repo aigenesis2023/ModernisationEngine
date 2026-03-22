@@ -369,6 +369,13 @@ window.SCORMParser = (function () {
           if (label && !isDecorativeShapeName(label)) {
             elements.push({ ...base, type: 'button', label, action: { kind: 'navigate' }, states: [] });
           }
+        } else if (obj.accType === 'slider') {
+          // Storyline slider: a draggable element bound to a variable
+          // Universal pattern: accType "slider" with dragpath, bound to a numeric variable
+          elements.push({ ...base, type: 'interaction', interactionType: 'slider',
+            label: extracted.text || altText || 'Slider',
+            variableName: obj.bindto?.replace('_player.', '') || undefined,
+            dragPath: obj.dragpath || undefined });
         } else if (obj.accType === 'text' || obj.accType === 'radio') {
           const content = extracted.text;
           if (isDecorativeShapeName(content)) {

@@ -527,6 +527,30 @@ window.GeneratorApp = (function () {
       '    return renderAccordion(slide);\n' +
       '  }\n\n' +
 
+      // --- Interaction rendering (sliders, hotspots, etc.) ---
+      // Universal Storyline interaction types rendered as web-native equivalents
+      '  function renderInteractions(slide) {\n' +
+      '    if (!slide.interactions || slide.interactions.length === 0) return null;\n' +
+      '    return e("div", { className: "interactions-container" },\n' +
+      '      slide.interactions.map(function(inter, i) {\n' +
+      '        if (inter.type === "slider") {\n' +
+      '          return e("div", { className: "slider-interaction", key: i },\n' +
+      '            inter.label ? e("label", null, inter.label) : null,\n' +
+      '            e("input", { type: "range", min: 0, max: 100, defaultValue: 50,\n' +
+      '              className: "styled-slider" })\n' +
+      '          );\n' +
+      '        }\n' +
+      '        if (inter.type === "hotspot") {\n' +
+      '          return e("div", { className: "hotspot-marker", key: i },\n' +
+      '            e("span", { className: "hotspot-dot" }),\n' +
+      '            inter.label ? e("span", { className: "hotspot-label" }, inter.label) : null\n' +
+      '          );\n' +
+      '        }\n' +
+      '        return null;\n' +
+      '      })\n' +
+      '    );\n' +
+      '  }\n\n' +
+
       // --- Flip cards (for short layer content) ---
       '  function renderFlipCards(slide) {\n' +
       '    return e("div", { className: "flip-cards-grid" },\n' +

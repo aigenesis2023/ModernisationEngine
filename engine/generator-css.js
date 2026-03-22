@@ -581,6 +581,33 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.bento-image img { width: 100%; height: auto; display: block; }\n\n' +
 
+      // ============ INTERACTIONS (universal) ============
+      '.interactions-container { margin: 1.5rem 0; }\n' +
+      '.slider-interaction {\n' +
+      '  display: flex; flex-direction: column; gap: 0.5rem;\n' +
+      '  padding: 1rem; background: var(--surface); border-radius: var(--radius);\n' +
+      '  margin-bottom: 1rem;\n' +
+      '}\n' +
+      '.slider-interaction label { font-weight: 600; font-size: 0.95rem; }\n' +
+      '.styled-slider {\n' +
+      '  -webkit-appearance: none; width: 100%; height: 8px;\n' +
+      '  border-radius: 4px; background: #e2e8f0; outline: none;\n' +
+      '}\n' +
+      '.styled-slider::-webkit-slider-thumb {\n' +
+      '  -webkit-appearance: none; width: 24px; height: 24px;\n' +
+      '  border-radius: 50%; background: var(--primary); cursor: pointer;\n' +
+      '  box-shadow: 0 2px 6px rgba(0,0,0,0.2);\n' +
+      '}\n' +
+      '.hotspot-marker {\n' +
+      '  display: inline-flex; align-items: center; gap: 0.5rem;\n' +
+      '  padding: 0.5rem 1rem; background: var(--surface); border-radius: var(--radius);\n' +
+      '  margin: 0.25rem; font-size: 0.9rem;\n' +
+      '}\n' +
+      '.hotspot-dot {\n' +
+      '  width: 12px; height: 12px; border-radius: 50%;\n' +
+      '  background: var(--primary); display: inline-block;\n' +
+      '}\n\n' +
+
       // ============ GLOSSARY ============
       '.glossary-grid {\n' +
       '  display: grid; grid-template-columns: 1fr; gap: 1rem;\n' +
