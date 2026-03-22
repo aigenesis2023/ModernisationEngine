@@ -126,8 +126,8 @@ window.GeneratorCSS = (function () {
       '.section {\n  position: relative;\n  padding: calc(var(--spacing) * 4) calc(var(--spacing) * 2);\n}\n' +
       '.section-inner {\n  max-width: var(--content-width);\n  margin: 0 auto;\n}\n\n' +
 
-      // Alternating section backgrounds
-      '.section:nth-child(even) {\n  background: var(--surface);\n}\n\n' +
+      // Alternating section backgrounds (exclude hero and results which have their own backgrounds)
+      '.section:nth-child(even):not(.section-hero):not(.section-results) {\n  background: var(--surface);\n}\n\n' +
 
       // Section divider
       '.section-divider {\n  width: 60px; height: 3px;\n  background: var(--primary);\n  margin: 0 auto calc(var(--spacing) * 3);\n  border-radius: 2px;\n}\n\n' +

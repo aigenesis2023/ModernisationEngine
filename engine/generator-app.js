@@ -118,7 +118,9 @@ window.GeneratorApp = (function () {
   function generateAppComponent() {
     return 'function App() {\n' +
       // --- State ---
-      '  var _f = React.useState({}), formData = _f[0], setFormData = _f[1];\n' +
+      '  var formDataRef = React.useRef({});\n' +
+      '  var _f = React.useState(0), formVersion = _f[0], setFormVersion = _f[1];\n' +
+      '  var formData = formDataRef.current;\n' +
       '  var _q = React.useState(null), quizState = _q[0], setQuizState = _q[1];\n' +
       '  var _sc = React.useState(null), score = _sc[0], setScore = _sc[1];\n' +
       '  var _sel = React.useState(null), selectedChoice = _sel[0], setSelectedChoice = _sel[1];\n' +
@@ -198,7 +200,7 @@ window.GeneratorApp = (function () {
       '    }\n' +
       '  }\n' +
       '  function handleFormChange(field, value) {\n' +
-      '    var updated = Object.assign({}, formData); updated[field] = value; setFormData(updated);\n' +
+      '    formDataRef.current[field] = value;\n' +
       '  }\n\n' +
 
       // --- Accordion toggle (per-slide keyed) ---
@@ -421,7 +423,7 @@ window.GeneratorApp = (function () {
       '          return e("div", { className: "form-group", key: i },\n' +
       '            e("label", null, f.label || f.placeholder),\n' +
       '            e("input", { type: f.fieldType || "text", placeholder: f.placeholder,\n' +
-      '              value: formData[f.variableName] || "",\n' +
+      '              defaultValue: "",\n' +
       '              onChange: function(ev) { handleFormChange(f.variableName, ev.target.value); }\n' +
       '            })\n          );\n        })\n' +
       '      )\n    );\n  }\n\n' +
