@@ -498,9 +498,9 @@ window.ContentPlanner = (function () {
         nameCandidate = texts.find(function (t) { return t.content.length > 3; });
       }
       if (nameCandidate) {
-        layerName = nameCandidate.content.substring(0, 60) + (nameCandidate.content.length > 60 ? '...' : '');
+        layerName = truncateAtWord(nameCandidate.content, 80);
       } else {
-        layerName = texts[0].content.substring(0, 50) + (texts[0].content.length > 50 ? '...' : '');
+        layerName = truncateAtWord(texts[0].content, 80);
       }
     }
 
@@ -579,6 +579,14 @@ window.ContentPlanner = (function () {
   }
 
   // ---- Text cleaning ----
+
+  function truncateAtWord(text, maxLen) {
+    if (!text || text.length <= maxLen) return text;
+    var truncated = text.substring(0, maxLen);
+    var lastSpace = truncated.lastIndexOf(' ');
+    if (lastSpace > maxLen * 0.6) truncated = truncated.substring(0, lastSpace);
+    return truncated + '...';
+  }
 
   function cleanTextContent(text) {
     return text

@@ -287,12 +287,7 @@ window.GeneratorApp = (function () {
 
       // --- Hero slide ---
       '  function renderHeroSlide(slide, key) {\n' +
-      '    var style = slide.image ? {\n' +
-      '      backgroundImage: "url(" + slide.image + ")",\n' +
-      '      backgroundSize: "cover", backgroundPosition: "center"\n' +
-      '    } : {};\n' +
-      '    var cls = slide.image ? "hero-bg" : "";\n' +
-      '    return e("div", { key: key, className: cls, style: style },\n' +
+      '    return e("div", { key: key },\n' +
       '      LOGO_URL ? e("img", { src: LOGO_URL, alt: LOGO_ALT, className: "logo" }) : null,\n' +
       '      e("h1", null, slide.title || COURSE_TITLE),\n' +
       '      slide.subtitle ? e("p", { className: "subtitle" }, slide.subtitle) : null,\n' +

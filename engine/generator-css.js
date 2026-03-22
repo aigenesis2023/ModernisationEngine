@@ -108,7 +108,9 @@ window.GeneratorCSS = (function () {
       'body {\n  font-family: var(--font-body);\n  font-size: ' + baseSizePx + 'px;\n' +
       '  line-height: ' + t.lineHeight + ';\n  color: var(--text);\n  background: var(--bg);\n' +
       '  -webkit-font-smoothing: antialiased;\n}\n\n' +
-      '#root { width: 100%; min-height: 100vh; }\n\n' +
+      '#root { width: 100%; min-height: 100vh; }\n' +
+      'img[alt]::after { content: attr(alt); display: block; padding: var(--spacing); text-align: center; color: var(--text-muted); font-size: 13px; }\n' +
+      'img { max-width: 100%; }\n\n' +
 
       // ============ TYPOGRAPHY ============
       'h1, h2, h3 {\n  font-family: var(--font-heading);\n  font-weight: ' + t.headingWeight + ';\n  line-height: 1.2;\n  letter-spacing: -0.02em;\n}\n' +
