@@ -1,7 +1,7 @@
 # CLAUDE.md — Modernisation Engine
 
 ## What This Project Is
-A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive web experiences. The user uploads a SCORM zip/folder, enters a brand URL, and gets a modernised SCORM package back.
+A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. The user uploads a SCORM zip/folder, enters a brand URL, and gets a modernised SCORM package back.
 
 ## Architecture
 
@@ -10,28 +10,30 @@ A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articula
 ```
 index.html                  ← UI: upload zone, brand URL input, preview, download
 engine/
-  app.js                    ← Orchestrator: wires the 5-phase pipeline
+  app.js                    ← Orchestrator: wires the 6-phase pipeline
   scorm-parser.js           ← Phase 1: Extracts CourseIR from Storyline data files
-  brand-scraper.js          ← Phase 2: Scrapes brand colors/fonts/logo from URL
-  image-generator.js        ← Phase 3: Generates AI images via Pollinations API
-  generator-data.js         ← Phase 4a: Converts CourseIR → slide/quiz JSON
-  generator-css.js          ← Phase 4b: Generates brand-aware mobile-first CSS
-  generator-app.js          ← Phase 4c: Generates React app + SCORM adapter as JS string
-  packager.js               ← Phase 5: Creates SCORM 1.2 zip with JSZip
+  content-planner.js        ← Phase 2: Intelligence layer — cleans, structures, plans presentation
+  brand-scraper.js          ← Phase 3: Scrapes brand colors/fonts/logo from URL
+  image-generator.js        ← Phase 4: Generates context-aware AI images via Pollinations API
+  generator-data.js         ← Phase 5a: Converts CoursePlan → section/quiz JSON
+  generator-css.js          ← Phase 5b: Generates brand-aware deep-scroll CSS
+  generator-app.js          ← Phase 5c: Generates deep-scroll React app + SCORM adapter
+  packager.js               ← Phase 6: Creates SCORM 1.2 zip with JSZip
 ```
 
 ### Module Loading Order (in index.html)
-JSZip CDN → scorm-parser → brand-scraper → image-generator → generator-css → generator-data → generator-app → packager → app.js
+JSZip CDN → scorm-parser → content-planner → brand-scraper → image-generator → generator-css → generator-data → generator-app → packager → app.js
 
 ### Data Flow
 ```
-SCORM Upload → SCORMParser.extractCourse() → CourseIR
-Brand URL    → BrandScraper.scrapeBrand()  → BrandProfile
-CourseIR     → ImageGenerator.generateImages(course, brand) → ImageManifest
-(CourseIR, BrandProfile, ImageManifest) → GeneratorApp.generateHtml() → HTML string
-  internally calls: GeneratorData.buildSlidesData() → slide JSON
-                    GeneratorData.buildQuizData()   → quiz JSON
-                    GeneratorCSS.generateCss()      → CSS string
+SCORM Upload → SCORMParser.extractCourse()     → CourseIR
+CourseIR     → ContentPlanner.planCourse()      → CoursePlan (sections, verification)
+Brand URL    → BrandScraper.scrapeBrand()       → BrandProfile
+CourseIR     → ImageGenerator.generateImages()  → ImageManifest
+(CoursePlan, BrandProfile, ImageManifest) → GeneratorApp.generateHtml() → HTML string
+  internally calls: GeneratorData.buildSectionsData() → section JSON
+                    GeneratorData.buildQuizData()      → quiz JSON
+                    GeneratorCSS.generateCss()         → CSS string
 HTML string → Packager.packageCourse() → SCORM zip blob → download
 ```
 
@@ -46,6 +48,39 @@ HTML string → Packager.packageCourse() → SCORM zip blob → download
   navigation, variables, extractionReport }
 ```
 
+### CoursePlan (output of content-planner.js)
+```
+{ meta, sections: [{ id, type, title, slides: [PlannedSlide] }],
+  quizBanks, navigation, variables, assets,
+  verification: { extracted, planned, contentRetention } }
+```
+
+### PlannedSlide
+```
+{ id, originalTitle, type, presentation,
+  content: { headings, bodyTexts, callouts, images, videos, audio },
+  layers: [{ id, name, texts, images, videos, audio, interactions, triggers }],
+  interactions, triggers, states, formFields, quizData }
+```
+
+### Presentation Types (set by content-planner.js)
+- `hero` — full-viewport title with gradient/image background
+- `narrative` — flowing text with optional images
+- `media-feature` — large video/image focal point
+- `interactive` — layers as accordion/modal/bento
+- `form` — input fields
+- `quiz` — inline quiz trigger
+- `branching` — path selection
+- `results` — score display
+
+### Section Types
+- `hero` — opening/title section
+- `content` — main learning content
+- `assessment` — quiz section
+- `form` — data collection
+- `branching` — path selection
+- `results` — completion/results
+
 ### Slide Types
 `title | objectives | form | branching | quiz | results | content`
 
@@ -53,53 +88,53 @@ HTML string → Packager.packageCourse() → SCORM zip blob → download
 ```
 { sourceUrl, colors: { primary, secondary, accent, background, surface, text, textMuted, success, error, warning, gradient },
   typography: { headingFont, bodyFont, headingWeight, baseSize, lineHeight, headingSizes, fontImportUrl },
-  style: { borderRadius, buttonStyle, cardStyle, spacing },
+  style: { borderRadius, buttonStyle, cardStyle, spacing, mood },
   logo: { url, alt } }
 ```
 
-### Layer Interaction Types (set by generator-data.js)
+### Layer Interaction Types
 - `accordion` — text-heavy layers → expandable panels
 - `modal` — layers with images → clickable tiles that open overlay
 - `bento` — 3+ short layers → CSS Grid tile layout
 
-## The 5-Step Modernisation Plan
+## The 6-Phase Pipeline
 
-| Step | Status | What It Does |
-|------|--------|--------------|
-| 1. Deep SCORM Extraction | ✅ DONE | Parse Storyline data into comprehensive CourseIR |
-| 2. Brand Intelligence | ✅ DONE | Scrape brand website for design tokens |
-| 3. Content Restructuring | ✅ DONE | Convert layers to Accordion/Modal/Bento; mobile-first CSS Grid |
-| 4. AI Image Generation | ✅ DONE | Generate context-aware images via Pollinations API |
-| 5. Polish & Packaging | 🔲 TODO | Final QA, edge cases, output quality |
+| Phase | What It Does |
+|-------|-------------|
+| 1. Deep SCORM Extraction | Parse Storyline data into comprehensive CourseIR |
+| 2. Content Intelligence | Clean noise, group into sections, classify presentation |
+| 3. Brand Intelligence | Scrape brand website for design tokens |
+| 4. AI Image Generation | Generate context-aware branded images via Pollinations |
+| 5. HTML Generation | Build deep-scroll React app with brand CSS |
+| 6. SCORM Packaging | Create valid SCORM 1.2 zip with manifest and assets |
 
-## Known Bugs
-
-### BUG: Brand colors not applied to image generation prompts
-**File:** `engine/image-generator.js`, lines 21-23
-**Problem:** Code checks `brand.colors.length > 0` but `brand.colors` is an object (not array), so the condition is always false. Image prompts never include brand palette.
-**Fix:** Convert `brand.colors` to values array: `Object.values(brand.colors).filter(c => typeof c === 'string' && c.startsWith('#'))`
-
-### BUG: brand.industry never set
-**File:** `engine/image-generator.js`, line 17
-**Problem:** Checks `brand.industry` but BrandScraper never sets this property.
-**Impact:** Low — just means industry context is missing from image prompts.
+## Output Experience
+- **Deep scroll layout** — continuous scrolling experience, no slide-by-slide navigation
+- **Section-based structure** — course grouped into logical sections (hero, content, quiz, results)
+- **Scroll-triggered animations** — IntersectionObserver reveals content as user scrolls
+- **Fixed progress bar** — shows scroll progress through the course
+- **Inline quiz** — quiz appears as a full-screen overlay when triggered
+- **Alternating section backgrounds** — visual rhythm between sections
+- **Mobile-first responsive** — works on all devices
 
 ## What Works Well
-- All 7 modules wire together correctly (exports/imports verified)
-- All 60+ CSS class names match between generator-app.js and generator-css.js
+- All 8 modules wire together correctly
+- Deep scroll layout with section-based structure
+- Content Intelligence layer filters noise and groups slides logically
 - Quiz logic is complete: pick-one, pick-many, true/false, text-entry
 - SCORM pass/fail reporting works (SCORM.complete → LMS API)
-- Error handling is robust with graceful fallbacks throughout
 - Brand scraper falls back to purple/elegant theme if scraping fails
-- Image generation skips failures and continues
+- Image generation includes brand colors and content context in prompts
+- Layer audio now preserved through to output
+- Content verification report tracks what was kept vs dropped
 
 ## Development Notes
 
 ### How to test locally
-Open `index.html` in a browser. Upload a SCORM zip or folder. Enter a brand URL. Click "Modernise". Preview result and download SCORM package.
+Open `index.html` in a browser. Upload a SCORM zip or folder. Enter a brand URL. Click "Generate". Preview result and download SCORM package.
 
 ### CORS proxy
-Brand scraping requires a CORS proxy (default: `https://corsproxy.io/?`). Set in the UI input field.
+Brand scraping requires a CORS proxy. Set in the UI input field.
 
 ### No npm/node required
 Everything runs in the browser. External deps loaded via CDN:
@@ -109,7 +144,7 @@ Everything runs in the browser. External deps loaded via CDN:
 ### Generated output structure
 ```
 imsmanifest.xml       ← SCORM 1.2 manifest
-index.html            ← Self-contained React app with embedded CSS + JS
+index.html            ← Self-contained deep-scroll React app with embedded CSS + JS
 assets/images/*       ← Original + AI-generated images
 assets/media/*        ← Video/audio files
 ```
@@ -122,7 +157,9 @@ assets/media/*        ← Video/audio files
 - `escJs()` and `escHtml()` for safe string embedding
 
 ## Common Pitfalls
-- **Script order in index.html matters** — generator-app.js depends on generator-data.js and generator-css.js
+- **Script order in index.html matters** — content-planner after scorm-parser, generators after content-planner
 - **brand.colors is an OBJECT** with named keys, not an array of hex strings
 - **Generated code is ES5** — the React app string must not use arrow functions, let/const, template literals
-- **Layer tabs were replaced** — old `activeLayer` state removed, replaced with `openPanels` (accordion) and `modalLayer` (modal)
+- **CoursePlan vs CourseIR** — generators now consume CoursePlan (from ContentPlanner), not raw CourseIR
+- **Deep scroll layout** — no slide navigation; content flows as continuous scroll with sections
+- **openPanels is now keyed by slideId** — format: `slideId_layerIndex` to support multiple accordion sections

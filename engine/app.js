@@ -163,28 +163,34 @@
       setProgress(30);
       log('SCORM parsing complete.', 'success');
 
-      // Phase 2: Scrape brand
-      log('Phase 2: Scraping brand from URL...', 'info');
+      // Phase 2: Content Intelligence
+      log('Phase 2: Analysing course structure...', 'info');
+      var coursePlan = ContentPlanner.planCourse(course, function (msg) { log('  ' + msg); });
+      setProgress(40);
+      log('Content planning complete.', 'success');
+
+      // Phase 3: Scrape brand
+      log('Phase 3: Scraping brand from URL...', 'info');
       var brandUrl = brandUrlInput.value.trim();
       var corsProxy = corsProxyInput.value.trim();
       var brand = await BrandScraper.scrapeBrand(brandUrl, corsProxy, function (msg) { log('  ' + msg); });
-      setProgress(50);
+      setProgress(55);
       log('Brand extraction complete.', 'success');
 
-      // Phase 3: AI Image Generation
-      log('Phase 3: Generating AI images...', 'info');
+      // Phase 4: AI Image Generation
+      log('Phase 4: Generating AI images...', 'info');
       var images = await ImageGenerator.generateImages(course, brand, function (msg) { log('  ' + msg); });
-      setProgress(65);
+      setProgress(70);
       log('Image generation complete.', 'success');
 
-      // Phase 4: Generate HTML
-      log('Phase 4: Generating modernised course...', 'info');
-      generatedHtml = GeneratorApp.generateHtml(course, brand, images);
-      setProgress(80);
+      // Phase 5: Generate HTML
+      log('Phase 5: Generating modernised course...', 'info');
+      generatedHtml = GeneratorApp.generateHtml(coursePlan, brand, images);
+      setProgress(85);
       log('Course HTML generated (' + (generatedHtml.length / 1024).toFixed(0) + ' KB)', 'success');
 
-      // Phase 5: Package SCORM
-      log('Phase 5: Creating SCORM package...', 'info');
+      // Phase 6: Package SCORM
+      log('Phase 6: Creating SCORM package...', 'info');
       generatedBlob = await Packager.packageCourse(generatedHtml, course, fileMap, images, function (msg) { log('  ' + msg); });
       setProgress(100);
       log('Done! Your modernised course is ready.', 'success');

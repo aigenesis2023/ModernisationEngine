@@ -63,42 +63,25 @@ window.Packager = (function () {
     var imagesFolder = assetsFolder.folder('images');
     var mediaFolder = assetsFolder.folder('media');
 
+    var seenImages = new Set();
+    var seenMedia = new Set();
     for (var [path, file] of fileMap) {
       var lower = path.toLowerCase();
-      // Copy images
-      if (lower.match(/\.(jpg|jpeg|png|gif|svg|webp)$/) && lower.includes('story_content')) {
-        var filename = path.split('/').pop();
-        var data = await file.arrayBuffer();
-        imagesFolder.file(filename, data);
-        assetCount++;
-      }
-      // Copy video/audio
-      if (lower.match(/\.(mp4|mp3|wav|ogg|webm)$/) && lower.includes('story_content')) {
-        var mFilename = path.split('/').pop();
-        var mData = await file.arrayBuffer();
-        mediaFolder.file(mFilename, mData);
-        assetCount++;
-      }
-    }
+      var isAssetDir = lower.includes('story_content') || lower.includes('html5');
+      if (!isAssetDir) continue;
 
-    // Also copy from html5/data area
-    for (var [path2, file2] of fileMap) {
-      var lower2 = path2.toLowerCase();
-      if (lower2.match(/\.(jpg|jpeg|png|gif|svg|webp)$/) && lower2.includes('html5')) {
-        var fn = path2.split('/').pop();
-        if (!imagesFolder.file(fn)) {
-          var d = await file2.arrayBuffer();
-          imagesFolder.file(fn, d);
-          assetCount++;
-        }
+      var filename = path.split('/').pop();
+      if (lower.match(/\.(jpg|jpeg|png|gif|svg|webp)$/) && !seenImages.has(filename)) {
+        seenImages.add(filename);
+        var imgData = await file.arrayBuffer();
+        imagesFolder.file(filename, imgData);
+        assetCount++;
       }
-      if (lower2.match(/\.(mp4|mp3|wav|ogg|webm)$/) && lower2.includes('html5')) {
-        var mfn = path2.split('/').pop();
-        if (!mediaFolder.file(mfn)) {
-          var md = await file2.arrayBuffer();
-          mediaFolder.file(mfn, md);
-          assetCount++;
-        }
+      if (lower.match(/\.(mp4|mp3|wav|ogg|webm)$/) && !seenMedia.has(filename)) {
+        seenMedia.add(filename);
+        var mediaData = await file.arrayBuffer();
+        mediaFolder.file(filename, mediaData);
+        assetCount++;
       }
     }
 

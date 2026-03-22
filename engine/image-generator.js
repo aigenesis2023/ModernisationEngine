@@ -14,23 +14,41 @@ window.ImageGenerator = (function () {
    */
   function buildPrompt(slideTitle, slideTexts, altText, role, brand) {
     var style = 'modern, professional, clean, high quality';
-    if (brand && brand.industry) style += ', ' + brand.industry + ' industry';
+    if (brand && brand.style && brand.style.mood) style += ', ' + brand.style.mood + ' style';
 
     // Use brand colors to guide the palette
     var colorHint = '';
-    if (brand && brand.colors && brand.colors.length > 0) {
-      var topColors = brand.colors.slice(0, 3).map(function (c) { return c.hex || c; });
-      colorHint = ', color palette using ' + topColors.join(' and ');
+    if (brand && brand.colors) {
+      var colorValues = Object.values(brand.colors).filter(function (c) {
+        return typeof c === 'string' && c.startsWith('#');
+      }).slice(0, 3);
+      if (colorValues.length > 0) {
+        colorHint = ', color palette using ' + colorValues.join(' and ');
+      }
     }
 
-    // Build context from slide content
+    // Build context from slide content — combine multiple sources for richer prompts
     var context = '';
-    if (altText && altText.length > 3 && !/^(image|photo|picture|shape|rectangle)/i.test(altText)) {
+
+    // Start with alt text if it's descriptive (not auto-generated placeholder names)
+    if (altText && altText.length > 3 && !/^(image|photo|picture|shape|rectangle|oval|group|placeholder)/i.test(altText)) {
       context = altText;
-    } else if (slideTexts && slideTexts.length > 0) {
-      // Use first meaningful text as context
-      context = slideTexts[0].substring(0, 120);
-    } else if (slideTitle) {
+    }
+
+    // Enrich with slide texts — summarize the topic for contextual relevance
+    if (slideTexts && slideTexts.length > 0) {
+      var meaningfulTexts = slideTexts.filter(function (t) {
+        return t.length > 10 && !/^(rectangle|oval|shape|slide|scene|question|correct|incorrect)/i.test(t.trim());
+      });
+      if (meaningfulTexts.length > 0) {
+        // Extract key phrases from the content to describe what the image should depict
+        var contentSummary = meaningfulTexts.slice(0, 2).join('. ').substring(0, 150);
+        context = context ? context + ', in the context of: ' + contentSummary : contentSummary;
+      }
+    }
+
+    // Fall back to slide title
+    if (!context && slideTitle) {
       context = slideTitle;
     }
 

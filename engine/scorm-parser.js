@@ -573,7 +573,7 @@ window.SCORMParser = (function () {
 
   // ---- Question bank builder ----
 
-  function buildQuestionBanks(scenes, slidesById, quizzes) {
+  function buildQuestionBanks(scenes, slidesById) {
     const banks = [];
     for (const scene of scenes) {
       if (!scene.slidedraws) continue;
@@ -652,7 +652,7 @@ window.SCORMParser = (function () {
     }).filter(s => s !== null);
 
     // Build question banks
-    const questionBanks = buildQuestionBanks(data.scenes || [], slidesById, data.quizzes || []);
+    const questionBanks = buildQuestionBanks(data.scenes || [], slidesById);
 
     // Compute durations
     const assetLib = data.assetLib || [];

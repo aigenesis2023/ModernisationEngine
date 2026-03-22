@@ -1,195 +1,244 @@
 /**
- * Data Builders — Converts CourseIR into simplified slide/quiz JSON
- * for the React app component. Part 2 of the generator.
+ * Data Builders — Converts CoursePlan into the JSON data structures
+ * consumed by the generated React app.
  *
- * Layer Interaction Classification:
- *   - accordion: text-heavy layers (click-to-reveal paragraphs)
- *   - modal: layers with images + text (detailed explorations)
- *   - bento: 3+ layers with mixed short content (visual tile grid)
+ * Now works from CoursePlan (output of ContentPlanner) instead of raw CourseIR.
+ * Produces section-based data for deep-scroll layout.
  */
 window.GeneratorData = (function () {
   'use strict';
 
-  function cleanText(text) {
-    return text.replace(/\r\n/g, ' ').replace(/\r/g, ' ').replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-  }
-
-  function isJunkText(text) {
-    var lower = text.toLowerCase();
-    if (/^(round diagonal corner|rectangle|oval|shape)\s*\d*$/i.test(text)) return true;
-    if (text.includes('%_player.') && text.includes('$PercentScore')) return true;
-    if (lower === 'question' || lower === 'correct' || lower === 'incorrect') return true;
-    return false;
-  }
-
-  function resolveImage(el, images) {
-    if (!el) return undefined;
-    var generated = images && images.entries
-      ? images.entries.find(function (e) { return e.originalAssetId === el.assetId && e.status === 'generated'; })
+  function resolveImage(img, generatedImages) {
+    if (!img) return undefined;
+    var generated = generatedImages && generatedImages.entries
+      ? generatedImages.entries.find(function (e) { return e.originalAssetId === img.assetId && e.status === 'generated'; })
       : null;
     if (generated && generated.generatedPath) return generated.generatedPath;
-    var filename = (el.originalPath || '').split('/').pop() || '';
+    var filename = (img.originalPath || '').split('/').pop() || '';
     return filename ? 'assets/images/' + filename : undefined;
   }
 
+  function resolveMediaPath(originalPath, folder) {
+    var filename = (originalPath || '').split('/').pop() || '';
+    return filename ? 'assets/' + folder + '/' + filename : undefined;
+  }
+
   /**
-   * Classify how layers should be rendered based on their content.
+   * Build the sections data array for the deep-scroll React app.
+   */
+  function buildSectionsData(coursePlan, images) {
+    return coursePlan.sections.map(function (section) {
+      return {
+        id: section.id,
+        type: section.type,
+        title: section.title,
+        slides: section.slides.map(function (slide) {
+          return buildSlideData(slide, images, coursePlan);
+        })
+      };
+    });
+  }
+
+  /**
+   * Build data for a single planned slide.
+   */
+  function buildSlideData(slide, images, coursePlan) {
+    var data = {
+      id: slide.id,
+      type: slide.type,
+      presentation: slide.presentation,
+      title: slide.originalTitle
+    };
+
+    // Text content
+    if (slide.content.headings.length > 0) {
+      data.headings = slide.content.headings.map(function (h) { return h.text; });
+    }
+    if (slide.content.bodyTexts.length > 0) {
+      data.texts = slide.content.bodyTexts;
+    }
+    if (slide.content.callouts.length > 0) {
+      data.callouts = slide.content.callouts;
+    }
+
+    // Images
+    var resolvedImages = slide.content.images.map(function (img) {
+      return {
+        src: resolveImage(img, images),
+        alt: img.altText || slide.originalTitle || '',
+        role: img.role
+      };
+    }).filter(function (img) { return img.src; });
+    if (resolvedImages.length > 0) data.images = resolvedImages;
+
+    // Legacy: single image for backward compat with title slides etc.
+    var heroImg = slide.content.images.find(function (img) { return img.role === 'hero' || img.role === 'background'; });
+    if (heroImg) data.image = resolveImage(heroImg, images);
+    if (!data.image && resolvedImages.length > 0) data.image = resolvedImages[0].src;
+
+    // Videos
+    if (slide.content.videos.length > 0) {
+      data.videos = slide.content.videos.map(function (v) {
+        return {
+          src: resolveMediaPath(v.originalPath, 'media'),
+          poster: v.posterPath ? resolveMediaPath(v.posterPath, 'images') : undefined,
+          durationMs: v.durationMs
+        };
+      }).filter(function (v) { return v.src; });
+      // Legacy single video
+      if (data.videos.length > 0) data.video = data.videos[0];
+    }
+
+    // Audio (slide-level AND layer audio AND narration)
+    var allAudio = slide.content.audio.map(function (a) {
+      return {
+        src: resolveMediaPath(a.originalPath, 'media'),
+        durationMs: a.durationMs,
+        isNarration: a.isNarration || false
+      };
+    }).filter(function (a) { return a.src; });
+    if (allAudio.length > 0) {
+      data.audio = allAudio[0];
+      if (allAudio.length > 1) data.allAudio = allAudio;
+    }
+
+    // Layers with full content
+    if (slide.layers.length > 0) {
+      data.layers = slide.layers.map(function (layer) {
+        var layerData = {
+          id: layer.id,
+          name: layer.name,
+          texts: layer.texts.map(function (t) { return t.content; }).filter(function (t) { return t.length > 0; }),
+          image: layer.images.length > 0 ? resolveImage(layer.images[0], images) : undefined,
+          interactions: layer.interactions.length > 0 ? layer.interactions : undefined
+        };
+
+        // Layer audio
+        if (layer.audio && layer.audio.length > 0) {
+          layerData.audio = layer.audio.map(function (a) {
+            return { src: resolveMediaPath(a.originalPath, 'media'), durationMs: a.durationMs };
+          }).filter(function (a) { return a.src; });
+        }
+
+        // Layer videos
+        if (layer.videos && layer.videos.length > 0) {
+          layerData.videos = layer.videos.map(function (v) {
+            return { src: resolveMediaPath(v.originalPath, 'media') };
+          }).filter(function (v) { return v.src; });
+        }
+
+        return layerData;
+      }).filter(function (l) { return l.texts.length > 0 || l.image || (l.interactions && l.interactions.length > 0); });
+
+      if (data.layers.length > 0) {
+        data.interactionType = slide.interactionType || classifyInteraction(data.layers);
+      } else {
+        delete data.layers;
+      }
+    }
+
+    // Interactions (hotspots, sliders, scroll panels)
+    if (slide.interactions.length > 0) {
+      data.interactions = slide.interactions;
+    }
+
+    // Element states
+    if (slide.states.length > 0) {
+      data.states = slide.states;
+    }
+
+    // Form fields
+    if (slide.formFields.length > 0) {
+      data.fields = slide.formFields.map(function (f) {
+        return {
+          label: f.label.trim(),
+          placeholder: f.label.trim(),
+          fieldType: f.fieldType,
+          variableName: f.variableName
+        };
+      });
+      data.instruction = slide.content.bodyTexts.find(function (t) {
+        var lower = t.toLowerCase();
+        return lower.includes('enter') || lower.includes('please') || lower.includes('fill');
+      }) || 'Please fill in your details';
+      data.title = slide.originalTitle || 'Your Details';
+    }
+
+    // Branching
+    if (slide.type === 'branching') {
+      data.title = slide.originalTitle || 'Choose Your Path';
+      var buttons = [];
+      // Pull buttons from elements (they're not in content since they're buttons)
+      // We need to look at raw slide data — but we have the callouts and texts
+      data.instruction = slide.content.bodyTexts.find(function (t) {
+        var lower = t.toLowerCase();
+        return lower.includes('click') || lower.includes('select') || lower.includes('choose');
+      });
+
+      // Greeting with variable substitution
+      var greeting = slide.content.bodyTexts.find(function (t) { return t.includes('%'); });
+      if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
+
+      // Options come from the original course plan
+      if (coursePlan && coursePlan.quizBanks) {
+        data.quizBankIds = coursePlan.quizBanks.map(function (qb) { return qb.id; });
+      }
+    }
+
+    // Quiz
+    if (slide.quizData) {
+      data.quiz = {
+        questionText: slide.quizData.questionText,
+        questionType: slide.quizData.questionType,
+        choices: slide.quizData.choices,
+        correctFeedback: slide.quizData.correctFeedback,
+        incorrectFeedback: slide.quizData.incorrectFeedback
+      };
+    }
+
+    // Results
+    if (slide.type === 'results') {
+      data.title = slide.originalTitle || 'Your Results';
+    }
+
+    // Title slide extras
+    if (slide.type === 'title') {
+      var descriptiveTitle = slide.content.headings[0]
+        ? slide.content.headings[0].text
+        : (slide.content.bodyTexts[0] || slide.originalTitle);
+      if (descriptiveTitle) {
+        data.title = descriptiveTitle;
+        var subtitleSource = slide.content.headings.length > 1
+          ? slide.content.headings[1].text
+          : slide.content.bodyTexts[0];
+        if (subtitleSource && subtitleSource !== descriptiveTitle) {
+          data.subtitle = subtitleSource;
+        }
+      }
+    }
+
+    return data;
+  }
+
+  /**
+   * Classify how layers should be rendered.
    */
   function classifyInteraction(layers) {
     if (!layers || layers.length === 0) return null;
-
     var hasImages = layers.some(function (l) { return l.image; });
     var avgTextLen = layers.reduce(function (sum, l) {
       return sum + (l.texts ? l.texts.join(' ').length : 0);
     }, 0) / layers.length;
-
-    // Bento grid: 3+ layers, each relatively short
     if (layers.length >= 3 && avgTextLen < 200) return 'bento';
-    // Modal: layers with images (detailed exploration)
     if (hasImages) return 'modal';
-    // Accordion: text-heavy content
     return 'accordion';
   }
 
-  function buildSlidesData(course, images) {
-    return course.slides.map(function (slide) {
-      var data = { type: slide.type, title: slide.title };
-
-      // Extract text content
-      var texts = slide.elements
-        .filter(function (el) { return el.type === 'text' && el.role !== 'unknown'; })
-        .map(function (el) { return cleanText(el.content); })
-        .filter(function (t) { return t.length > 3 && !isJunkText(t); });
-
-      if (texts.length > 0) data.texts = texts;
-
-      // Hero/content image
-      var imgEl = slide.elements.find(function (el) {
-        return el.type === 'image' && ['hero', 'content', 'background'].includes(el.instructionalRole);
-      });
-      if (imgEl) data.image = resolveImage(imgEl, images);
-
-      // Video element
-      var videoEl = slide.elements.find(function (el) { return el.type === 'video'; });
-      if (videoEl) {
-        var vFilename = (videoEl.originalPath || '').split('/').pop() || '';
-        data.video = {
-          src: 'assets/media/' + vFilename,
-          poster: videoEl.posterPath ? 'assets/images/' + videoEl.posterPath.split('/').pop() : undefined,
-        };
-      }
-
-      // Audio element
-      var audioEl = slide.elements.find(function (el) { return el.type === 'audio'; });
-      if (audioEl) {
-        var aFilename = (audioEl.originalPath || '').split('/').pop() || '';
-        data.audio = { src: 'assets/media/' + aFilename };
-      }
-
-      // Layer content — classify interaction type
-      if (slide.layers.length > 0) {
-        var layerData = slide.layers
-          .filter(function (l) { return l.elements.length > 0; })
-          .map(function (l) {
-            var layerTexts = l.elements
-              .filter(function (el) { return el.type === 'text' && el.role !== 'unknown'; })
-              .map(function (el) { return cleanText(el.content); })
-              .filter(function (t) { return t.length > 3 && !isJunkText(t); });
-            var layerImg = l.elements.find(function (el) {
-              return el.type === 'image' && ['hero', 'content'].includes(el.instructionalRole);
-            });
-            return {
-              name: l.name,
-              texts: layerTexts,
-              image: resolveImage(layerImg, images),
-            };
-          })
-          .filter(function (l) { return l.texts.length > 0 || l.image; });
-
-        if (layerData.length > 0) {
-          data.layers = layerData;
-          data.interactionType = classifyInteraction(layerData);
-        }
-      }
-
-      // Slide-type specific data
-      switch (slide.type) {
-        case 'title': {
-          var descriptiveTitle = texts.find(function (t) {
-            return t.length > 5 && !t.toLowerCase().includes('test') && !t.toLowerCase().includes('scene');
-          });
-          if (descriptiveTitle) {
-            data.title = descriptiveTitle;
-            data.subtitle = texts.find(function (t) { return t !== descriptiveTitle; }) || undefined;
-          } else {
-            data.title = course.meta.title;
-            if (texts.length > 0) data.subtitle = texts[0];
-          }
-          break;
-        }
-
-        case 'form': {
-          var formEl = slide.elements.find(function (el) { return el.type === 'form'; });
-          if (formEl) {
-            data.fields = formEl.fields.map(function (f) {
-              return { label: f.label.trim(), placeholder: f.label.trim(), fieldType: f.fieldType, variableName: f.variableName };
-            });
-          }
-          data.title = 'Your Details';
-          var instruction = texts.find(function (t) {
-            return t.toLowerCase().includes('enter') || t.toLowerCase().includes('please');
-          });
-          data.instruction = instruction || 'Please fill in your details';
-          data.texts = undefined;
-          break;
-        }
-
-        case 'branching': {
-          var buttons = slide.elements.filter(function (el) { return el.type === 'button'; });
-          var branchInstruction = texts.find(function (t) {
-            return t.toLowerCase().includes('click') || t.toLowerCase().includes('select');
-          });
-          data.instruction = branchInstruction;
-
-          var greeting = texts.find(function (t) { return t.includes('%'); });
-          if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
-
-          var quizBankIds = course.questionBanks.map(function (qb) { return qb.id; });
-          var branchButtons = buttons.filter(function (b) {
-            return b.label && !b.label.includes('Hotspot') && b.label !== '<' && b.label.length > 1;
-          });
-
-          if (branchButtons.length > 0) {
-            data.options = branchButtons.map(function (b, idx) {
-              var label = cleanText(b.label);
-              var lowerLabel = label.toLowerCase();
-              var quizBank;
-              if (b.action && b.action.targetSlideId) {
-                quizBank = undefined;
-              } else if (lowerLabel.includes('skip') || lowerLabel.includes('no thanks')) {
-                quizBank = undefined;
-              } else if (quizBankIds.length > 0) {
-                quizBank = quizBankIds[Math.min(idx, quizBankIds.length - 1)];
-              }
-              return { label: label, value: label, quizBank: quizBank };
-            });
-          }
-          data.texts = undefined;
-          break;
-        }
-
-        case 'results':
-          data.title = 'Your Results';
-          data.texts = undefined;
-          break;
-      }
-
-      return data;
-    });
-  }
-
-  function buildQuizData(course) {
-    return course.questionBanks.map(function (bank) {
+  /**
+   * Build quiz bank data (unchanged — quiz banks are already clean).
+   */
+  function buildQuizData(coursePlan) {
+    return (coursePlan.quizBanks || []).map(function (bank) {
       return {
         id: bank.id,
         title: bank.title,
@@ -201,12 +250,12 @@ window.GeneratorData = (function () {
             questionType: q.questionType,
             choices: q.choices.map(function (c) { return { text: c.text, isCorrect: c.isCorrect }; }),
             correctFeedback: q.correctFeedback,
-            incorrectFeedback: q.incorrectFeedback,
+            incorrectFeedback: q.incorrectFeedback
           };
-        }),
+        })
       };
     });
   }
 
-  return { buildSlidesData: buildSlidesData, buildQuizData: buildQuizData };
+  return { buildSectionsData: buildSectionsData, buildQuizData: buildQuizData };
 })();

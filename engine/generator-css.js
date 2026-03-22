@@ -1,9 +1,6 @@
 /**
- * CSS Generator — Produces brand-dynamic, mobile-first CSS from a BrandProfile.
- * Part 1 of the generator (split to avoid timeout).
- *
- * Layout: Mobile-first with fluid CSS Grid.
- * Components: Accordion, Modal, Bento Grid.
+ * CSS Generator — Produces brand-dynamic, mobile-first CSS for deep-scroll layout.
+ * Designed for a continuous scrolling experience with distinct section styles.
  */
 window.GeneratorCSS = (function () {
   'use strict';
@@ -55,7 +52,6 @@ window.GeneratorCSS = (function () {
     var shadow = cardShadow(brand);
     var btnCss = buttonCss(brand);
 
-    // Fluid font sizes (mobile base, scale up on desktop)
     var h1Mobile = Math.round(t.headingSizes.h1 * 0.65);
     var h2Mobile = Math.round(t.headingSizes.h2 * 0.7);
     var h3Mobile = Math.round(t.headingSizes.h3 * 0.8);
@@ -78,30 +74,78 @@ window.GeneratorCSS = (function () {
       '  --font-body: \'' + t.bodyFont + '\', system-ui, sans-serif;\n' +
       '  --spacing: ' + s.spacing.unit + 'px;\n' +
       '  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n' +
+      '  --content-width: 760px;\n' +
+      '  --wide-width: 1080px;\n' +
       '}\n\n' +
 
-      // ============ RESET & BASE (mobile-first) ============
+      // ============ RESET & BASE ============
       '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n' +
+      'html { scroll-behavior: smooth; }\n' +
       'body {\n  font-family: var(--font-body);\n  font-size: ' + t.baseSize + 'px;\n' +
       '  line-height: ' + t.lineHeight + ';\n  color: var(--text);\n  background: var(--bg);\n' +
-      '  -webkit-font-smoothing: antialiased;\n  overflow: hidden;\n}\n\n' +
-      '#root { width: 100vw; height: 100vh; overflow: hidden; }\n\n' +
-      '.app { width: 100%; height: 100%; display: flex; flex-direction: column; }\n' +
-      '.slide-container {\n  flex: 1; overflow-y: auto; overflow-x: hidden;\n  position: relative; scroll-behavior: smooth;\n}\n\n' +
+      '  -webkit-font-smoothing: antialiased;\n}\n\n' +
+      '#root { width: 100%; min-height: 100vh; }\n\n' +
 
-      // ============ TYPOGRAPHY (mobile-first) ============
+      // ============ TYPOGRAPHY ============
       'h1, h2, h3 {\n  font-family: var(--font-heading);\n  font-weight: ' + t.headingWeight + ';\n  line-height: 1.2;\n  letter-spacing: -0.02em;\n}\n' +
       'h1 { font-size: ' + h1Mobile + 'px; margin-bottom: calc(var(--spacing) * 2); }\n' +
       'h2 { font-size: ' + h2Mobile + 'px; margin-bottom: calc(var(--spacing) * 1.5); }\n' +
       'h3 { font-size: ' + h3Mobile + 'px; margin-bottom: var(--spacing); }\n' +
       'p { margin-bottom: var(--spacing); max-width: 680px; }\n\n' +
 
-      // ============ SLIDE (mobile-first) ============
-      '.slide {\n  min-height: 100%; padding: calc(var(--spacing) * 3) calc(var(--spacing) * 2);\n' +
-      '  display: flex; flex-direction: column; align-items: center; justify-content: center;\n' +
-      '  gap: calc(var(--spacing) * 2);\n' +
-      '  animation: slideIn 0.5s ease-out;\n}\n\n' +
-      '@keyframes slideIn {\n  from { opacity: 0; transform: translateY(20px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n' +
+      // ============ DEEP SCROLL LAYOUT ============
+      '.course-scroll {\n  width: 100%;\n}\n\n' +
+
+      // ============ SECTIONS ============
+      '.section {\n  position: relative;\n  padding: calc(var(--spacing) * 4) calc(var(--spacing) * 2);\n}\n' +
+      '.section-inner {\n  max-width: var(--content-width);\n  margin: 0 auto;\n}\n\n' +
+
+      // Alternating section backgrounds
+      '.section:nth-child(even) {\n  background: var(--surface);\n}\n\n' +
+
+      // Section divider
+      '.section-divider {\n  width: 60px; height: 3px;\n  background: var(--primary);\n  margin: 0 auto calc(var(--spacing) * 3);\n  border-radius: 2px;\n}\n\n' +
+
+      // ============ PROGRESS BAR (sticky top) ============
+      '.progress-bar {\n  position: fixed; top: 0; left: 0; right: 0;\n  height: 4px; background: ' + b.primary + '22;\n  z-index: 1000;\n}\n' +
+      '.progress-fill {\n  height: 100%; background: var(--primary);\n  transition: width 0.15s ease;\n}\n\n' +
+
+      // ============ HERO SECTION (full viewport) ============
+      '.section-hero {\n  min-height: 100vh;\n  display: flex; align-items: center; justify-content: center;\n' +
+      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  color: white; text-align: center;\n  padding: 0; position: relative; overflow: hidden;\n}\n' +
+      '.section-hero::before {\n  content: \'\'; position: absolute; inset: 0;\n' +
+      '  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);\n}\n' +
+      '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); }\n' +
+      '.section-hero h1 { font-size: ' + Math.round(t.headingSizes.h1 * 0.85) + 'px; color: white; }\n' +
+      '.section-hero .subtitle { font-size: ' + Math.round(t.baseSize * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
+      '.section-hero .logo { max-width: 160px; max-height: 50px; margin-bottom: calc(var(--spacing) * 2); }\n' +
+      '.section-hero .btn { background: white; color: var(--primary); font-weight: 700; }\n' +
+      '.section-hero .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }\n\n' +
+
+      // Hero with background image
+      '.hero-bg {\n  background-size: cover; background-position: center;\n}\n' +
+      '.hero-bg::after {\n  content: \'\'; position: absolute; inset: 0;\n' +
+      '  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7));\n}\n\n' +
+
+      // ============ SCROLL INDICATOR ============
+      '.scroll-indicator {\n  position: absolute; bottom: calc(var(--spacing) * 3);\n  left: 50%; transform: translateX(-50%);\n' +
+      '  color: rgba(255,255,255,0.6); font-size: 13px;\n  display: flex; flex-direction: column; align-items: center; gap: 8px;\n' +
+      '  animation: bounce 2s infinite;\n}\n' +
+      '@keyframes bounce {\n  0%, 100% { transform: translateX(-50%) translateY(0); }\n  50% { transform: translateX(-50%) translateY(8px); }\n}\n\n' +
+
+      // ============ CONTENT BLOCKS ============
+      '.content-block {\n  margin-bottom: calc(var(--spacing) * 3);\n}\n' +
+      '.content-block:last-child { margin-bottom: 0; }\n\n' +
+
+      // Narrative text flow
+      '.narrative-text {\n  max-width: 680px;\n}\n' +
+      '.narrative-text p {\n  font-size: ' + Math.round(t.baseSize * 1.05) + 'px;\n  line-height: 1.8;\n  color: var(--text);\n}\n\n' +
+
+      // Callout box
+      '.callout {\n  padding: calc(var(--spacing) * 2);\n  border-left: 4px solid var(--primary);\n' +
+      '  background: ' + b.primary + '08;\n  border-radius: 0 var(--radius) var(--radius) 0;\n' +
+      '  margin: calc(var(--spacing) * 2) 0;\n  font-style: italic;\n  color: var(--text-muted);\n}\n\n' +
 
       // ============ BUTTONS ============
       '.btn {\n  display: inline-flex; align-items: center; justify-content: center; gap: 8px;\n' +
@@ -120,23 +164,21 @@ window.GeneratorCSS = (function () {
 
       // ============ CARD ============
       '.card {\n  background: var(--surface);\n  border-radius: var(--radius);\n  padding: calc(var(--spacing) * 2);\n' +
-      '  width: 100%; max-width: 760px;\n  ' + shadow + '\n  transition: all var(--transition);\n}\n\n' +
+      '  width: 100%; max-width: var(--content-width);\n  ' + shadow + '\n  transition: all var(--transition);\n}\n\n' +
 
-      // ============ TITLE SLIDE ============
-      '.slide-title {\n  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
-      '  color: white; text-align: center;\n  padding: 0; justify-content: center; align-items: center;\n' +
-      '  position: relative; overflow: hidden;\n  background-size: cover; background-position: center;\n}\n' +
-      '.slide-title::before {\n  content: \'\'; position: absolute; inset: 0;\n' +
-      '  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);\n}\n' +
-      '.slide-title .content { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); }\n' +
-      '.slide-title h1 { font-size: ' + Math.round(t.headingSizes.h1 * 0.85) + 'px; margin-bottom: calc(var(--spacing) * 2); color: white; }\n' +
-      '.slide-title .subtitle { font-size: ' + Math.round(t.baseSize * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
-      '.slide-title .logo { max-width: 160px; max-height: 50px; margin-bottom: calc(var(--spacing) * 2); }\n' +
-      '.slide-title .btn { background: white; color: var(--primary); font-weight: 700; }\n' +
-      '.slide-title .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }\n\n' +
+      // ============ MEDIA ============
+      '.hero-image {\n  width: 100%; border-radius: var(--radius);\n' +
+      '  overflow: hidden; margin-bottom: calc(var(--spacing) * 2);\n  ' + shadow + '\n}\n' +
+      '.hero-image img { width: 100%; height: auto; display: block; }\n\n' +
 
-      // ============ CONTENT SLIDE ============
-      '.slide-content { background: var(--bg); }\n\n' +
+      '.media-feature {\n  width: 100%; max-width: var(--wide-width);\n  margin: 0 auto;\n}\n\n' +
+
+      '.video-container {\n  width: 100%; border-radius: var(--radius);\n' +
+      '  overflow: hidden; margin-bottom: calc(var(--spacing) * 2);\n  ' + shadow + '\n}\n' +
+      '.video-container video { width: 100%; height: auto; display: block; background: #000; }\n\n' +
+
+      '.audio-container {\n  width: 100%;\n  margin-bottom: calc(var(--spacing) * 2);\n}\n' +
+      '.audio-container audio { width: 100%; border-radius: var(--radius); }\n\n' +
 
       // ============ FORMS ============
       '.form-group { margin-bottom: calc(var(--spacing) * 2); width: 100%; }\n' +
@@ -148,18 +190,8 @@ window.GeneratorCSS = (function () {
       '.form-group input:focus, .form-group textarea:focus {\n  outline: none; border-color: var(--primary);\n' +
       '  box-shadow: 0 0 0 3px ' + b.primary + '22;\n}\n\n' +
 
-      // ============ HERO IMAGE / VIDEO / AUDIO ============
-      '.hero-image {\n  width: 100%; border-radius: var(--radius);\n' +
-      '  overflow: hidden; margin-bottom: calc(var(--spacing) * 2);\n  ' + shadow + '\n}\n' +
-      '.hero-image img { width: 100%; height: auto; display: block; }\n\n' +
-      '.video-container {\n  width: 100%; border-radius: var(--radius);\n' +
-      '  overflow: hidden; margin-bottom: calc(var(--spacing) * 2);\n  ' + shadow + '\n}\n' +
-      '.video-container video { width: 100%; height: auto; display: block; background: #000; }\n\n' +
-      '.audio-container {\n  width: 100%;\n  margin-bottom: calc(var(--spacing) * 2);\n}\n' +
-      '.audio-container audio { width: 100%; border-radius: var(--radius); }\n\n' +
-
       // ============ ACCORDION ============
-      '.accordion {\n  width: 100%; max-width: 760px;\n}\n' +
+      '.accordion {\n  width: 100%; max-width: var(--content-width);\n}\n' +
       '.accordion-item {\n  border: 1px solid ' + border + ';\n  border-radius: var(--radius);\n' +
       '  margin-bottom: var(--spacing);\n  overflow: hidden;\n  transition: all var(--transition);\n}\n' +
       '.accordion-item.open {\n  border-color: var(--primary);\n  ' + shadow + '\n}\n' +
@@ -178,7 +210,7 @@ window.GeneratorCSS = (function () {
       '@keyframes accordionOpen {\n  from { opacity: 0; transform: translateY(-8px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n' +
 
       // ============ MODAL ============
-      '.modal-triggers {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: var(--spacing);\n  width: 100%; max-width: 760px;\n}\n' +
+      '.modal-triggers {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: var(--spacing);\n  width: 100%; max-width: var(--content-width);\n}\n' +
       '.modal-trigger-tile {\n  display: flex; align-items: center;\n' +
       '  border: 1px solid ' + border + '; border-radius: var(--radius);\n' +
       '  overflow: hidden; cursor: pointer;\n  background: var(--surface); transition: all var(--transition);\n' +
@@ -215,7 +247,7 @@ window.GeneratorCSS = (function () {
       '.modal-image img { width: 100%; height: auto; display: block; }\n\n' +
 
       // ============ BENTO GRID ============
-      '.bento-grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: var(--spacing);\n  width: 100%; max-width: 760px;\n}\n' +
+      '.bento-grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: var(--spacing);\n  width: 100%; max-width: var(--content-width);\n}\n' +
       '.bento-tile {\n  background: var(--surface);\n  border-radius: var(--radius);\n' +
       '  padding: calc(var(--spacing) * 2);\n' +
       '  border: 1px solid ' + border + ';\n' +
@@ -227,7 +259,7 @@ window.GeneratorCSS = (function () {
       '.bento-image img { width: 100%; height: auto; display: block; }\n\n' +
 
       // ============ BRANCHING ============
-      '.branch-container { text-align: center; width: 100%; max-width: 760px; }\n' +
+      '.branch-container { text-align: center; width: 100%; max-width: var(--content-width); margin: 0 auto; }\n' +
       '.greeting { font-size: ' + Math.round(t.baseSize * 1.1) + 'px; margin-bottom: calc(var(--spacing) * 2); }\n' +
       '.branch-grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: calc(var(--spacing) * 1.5);\n  margin-top: calc(var(--spacing) * 2);\n}\n' +
       '.branch-option {\n  padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);\n' +
@@ -239,7 +271,9 @@ window.GeneratorCSS = (function () {
       '.branch-option h3 { color: var(--primary); margin-bottom: 0; }\n\n' +
 
       // ============ QUIZ ============
-      '.quiz-container { text-align: center; width: 100%; max-width: 760px; }\n' +
+      '.quiz-section {\n  min-height: 80vh;\n  display: flex; align-items: center; justify-content: center;\n' +
+      '  padding: calc(var(--spacing) * 4) calc(var(--spacing) * 2);\n}\n' +
+      '.quiz-container { text-align: center; width: 100%; max-width: var(--content-width); }\n' +
       '.quiz-counter { color: var(--text-muted); margin-bottom: var(--spacing); }\n' +
       '.quiz-question {\n  font-family: var(--font-heading); font-size: ' + h3Mobile + 'px;\n' +
       '  font-weight: ' + t.headingWeight + '; margin-bottom: calc(var(--spacing) * 2);\n  text-align: center; max-width: 680px; margin-left: auto; margin-right: auto;\n}\n' +
@@ -262,7 +296,7 @@ window.GeneratorCSS = (function () {
       '.quiz-choice .indicator.checkbox { border-radius: 4px; }\n' +
       '.quiz-choice.selected .indicator.checkbox { border-color: var(--primary); background: var(--primary); }\n' +
       '.quiz-feedback {\n  margin-top: calc(var(--spacing) * 2); padding: calc(var(--spacing) * 1.5);\n' +
-      '  border-radius: var(--radius); text-align: center; font-weight: 600;\n  animation: slideIn 0.3s ease-out;\n}\n' +
+      '  border-radius: var(--radius); text-align: center; font-weight: 600;\n}\n' +
       '.quiz-feedback.correct { background: ' + b.success + '15; color: var(--success); }\n' +
       '.quiz-feedback.incorrect { background: ' + b.error + '15; color: var(--error); }\n\n' +
       '.quiz-text-entry { width: 100%; max-width: 560px; margin: var(--spacing) auto; }\n' +
@@ -274,8 +308,9 @@ window.GeneratorCSS = (function () {
       '  box-shadow: 0 0 0 3px ' + b.primary + '22;\n}\n\n' +
 
       // ============ RESULTS ============
-      '.slide-results {\n  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n  color: white; text-align: center;\n}\n' +
-      '.slide-results .content { max-width: 500px; }\n' +
+      '.section-results {\n  min-height: 80vh;\n  display: flex; align-items: center; justify-content: center;\n' +
+      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n  color: white; text-align: center;\n}\n' +
+      '.section-results .section-inner { max-width: 500px; }\n' +
       '.score-circle {\n  width: 120px; height: 120px; border-radius: 50%;\n  border: 6px solid rgba(255,255,255,0.3);\n' +
       '  display: flex; align-items: center; justify-content: center; flex-direction: column;\n' +
       '  margin: calc(var(--spacing) * 2) auto;\n  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);\n}\n' +
@@ -285,37 +320,45 @@ window.GeneratorCSS = (function () {
       '.btn-restart { margin-top: calc(var(--spacing) * 2); background: white; color: var(--primary); border: none; font-weight: 700; }\n\n' +
       '@keyframes scaleIn {\n  from { transform: scale(0); opacity: 0; }\n  to { transform: scale(1); opacity: 1; }\n}\n\n' +
 
-      // ============ PROGRESS & NAV ============
-      '.progress-bar {\n  height: 4px; background: ' + b.primary + '22;\n  position: sticky; top: 0; z-index: 100;\n}\n' +
-      '.progress-fill {\n  height: 100%; background: var(--primary);\n  transition: width 0.4s ease;\n}\n\n' +
-      '.nav-bar {\n  display: flex; justify-content: space-between; align-items: center;\n' +
-      '  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);\n' +
-      '  background: var(--surface); border-top: 1px solid ' + borderLight + ';\n  flex-shrink: 0;\n}\n' +
-      '.nav-bar .slide-counter { color: var(--text-muted); font-size: 13px; }\n\n' +
+      // ============ SCROLL ANIMATIONS ============
+      '.scroll-reveal {\n  opacity: 0; transform: translateY(30px);\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n' +
+      '.scroll-reveal.visible {\n  opacity: 1; transform: translateY(0);\n}\n\n' +
 
-      // ============ DESKTOP BREAKPOINT (≥768px) ============
+      // ============ SECTION TABLE OF CONTENTS ============
+      '.toc {\n  position: fixed; right: calc(var(--spacing) * 2); top: 50%;\n  transform: translateY(-50%); z-index: 500;\n  display: none;\n}\n' +
+      '.toc-dot {\n  width: 10px; height: 10px; border-radius: 50%;\n  background: ' + border + '; margin-bottom: 8px;\n' +
+      '  cursor: pointer; transition: all var(--transition);\n}\n' +
+      '.toc-dot.active { background: var(--primary); transform: scale(1.4); }\n' +
+      '.toc-dot:hover { background: var(--primary); }\n\n' +
+
+      // ============ DESKTOP (>=768px) ============
       '@media (min-width: 768px) {\n' +
-      '  .slide { padding: calc(var(--spacing) * 6) calc(var(--spacing) * 4); gap: calc(var(--spacing) * 3); }\n' +
-      '  h1 { font-size: ' + t.headingSizes.h1 + 'px; margin-bottom: calc(var(--spacing) * 3); }\n' +
-      '  h2 { font-size: ' + t.headingSizes.h2 + 'px; margin-bottom: calc(var(--spacing) * 2); }\n' +
+      '  .section { padding: calc(var(--spacing) * 8) calc(var(--spacing) * 4); }\n' +
+      '  h1 { font-size: ' + t.headingSizes.h1 + 'px; }\n' +
+      '  h2 { font-size: ' + t.headingSizes.h2 + 'px; }\n' +
       '  h3 { font-size: ' + t.headingSizes.h3 + 'px; }\n' +
+      '  .section-hero h1 { font-size: ' + Math.round(t.headingSizes.h1 * 1.3) + 'px; }\n' +
+      '  .section-hero .logo { max-width: 200px; max-height: 60px; }\n' +
       '  .card { padding: calc(var(--spacing) * 3); }\n' +
-      '  .slide-title h1 { font-size: ' + Math.round(t.headingSizes.h1 * 1.3) + 'px; }\n' +
-      '  .slide-title .logo { max-width: 200px; max-height: 60px; }\n' +
       '  .btn { padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 4); min-width: 140px; }\n' +
-      '  .nav-bar { padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3); }\n' +
       '  .score-circle { width: 160px; height: 160px; }\n' +
       '  .score-circle .score-value { font-size: 48px; }\n' +
       '  .quiz-question { font-size: ' + t.headingSizes.h3 + 'px; }\n' +
-      // Grid layouts scale up on desktop
       '  .bento-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }\n' +
       '  .branch-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }\n' +
       '  .modal-triggers { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }\n' +
       '  .tile-thumb { width: 100px; height: 100px; }\n' +
       '  .modal-content { padding: calc(var(--spacing) * 3); }\n' +
+      '  .toc { display: flex; flex-direction: column; align-items: center; }\n' +
+      '}\n\n' +
+
+      // ============ LARGE DESKTOP (>=1200px) ============
+      '@media (min-width: 1200px) {\n' +
+      '  .section-inner { max-width: var(--wide-width); }\n' +
+      '  .narrative-text { max-width: 760px; }\n' +
       '}\n'
     );
   }
 
-  return { generateCss: generateCss, isDarkTheme: isDarkTheme };
+  return { generateCss: generateCss };
 })();
