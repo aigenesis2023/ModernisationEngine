@@ -136,13 +136,35 @@ window.SCORMParser = (function () {
 
   // ---- Role detection ----
 
-  function extractTextRole(text, accType, depth) {
-    const lower = text.toLowerCase();
-    if (!lower) return 'unknown';
-    if (lower.includes('question')) return 'heading';
-    if (depth <= 3 && text.length < 50) return 'heading';
-    if (text.length > 100) return 'body';
-    if (lower.includes('click') || lower.includes('select') || lower.includes('choose')) return 'callout';
+  /**
+   * Classify text role using Storyline's universal visual properties.
+   *
+   * In Storyline, text role is encoded visually, not semantically:
+   * - fontSize: larger = heading (typically 18-36px), smaller = body (10-16px)
+   * - text length: headings are short (<80 chars), body text is longer
+   * - accType: already classified by Storyline (text, button, radio, etc.)
+   *
+   * We combine fontSize and length since either alone can be misleading
+   * (a short body text could look like a heading by length alone).
+   */
+  function extractTextRole(text, accType, depth, fontSize) {
+    if (!text) return 'unknown';
+    var len = text.length;
+    var size = fontSize || 14;
+
+    // Large font (>=20px) and short text = heading
+    if (size >= 20 && len < 80) return 'heading';
+
+    // Large font and longer text = still a heading/subheading if under ~150 chars
+    if (size >= 20 && len < 150) return 'heading';
+
+    // Medium font (15-19px) and short text = could be subheading or callout
+    if (size >= 15 && len < 60) return 'callout';
+
+    // Long text at any size = body
+    if (len > 100) return 'body';
+
+    // Short text at small font = label or body
     return 'body';
   }
 
@@ -305,7 +327,7 @@ window.SCORMParser = (function () {
           if (isDecorativeShapeName(content)) {
             elements.push({ ...base, type: 'shape', role: base.depth <= 3 ? 'overlay' : 'decorative' });
           } else if (content) {
-            elements.push({ ...base, type: 'text', content, role: extractTextRole(content, obj.accType, base.depth),
+            elements.push({ ...base, type: 'text', content, role: extractTextRole(content, obj.accType, base.depth, extracted.fontSize),
               fontSize: extracted.fontSize, fontFamily: extracted.fontFamily, color: extracted.color, textAlign: extracted.textAlign });
           }
         }
