@@ -67,11 +67,9 @@ window.GeneratorApp = (function () {
 
     var courseTitle = escJs(coursePlan.meta.title);
     var masteryScore = coursePlan.meta.masteryScore;
-    // Logo from brand scraping is deliberately disabled — web scraping cannot
+    // Logo from brand scraping is deliberately removed — web scraping cannot
     // reliably distinguish a company logo from other images on a page.
     // This would produce incorrect results across different brand websites.
-    var logoUrl = '';
-    var logoAlt = '';
 
     // Determine if the course uses locked navigation
     // In Storyline, this is indicated by slideLock or NavigationRestriction action groups.
@@ -94,9 +92,7 @@ window.GeneratorApp = (function () {
       'var PASS_STATUS = ' + JSON.stringify(coursePlan.meta.passStatus || 'passed') + ';\n' +
       'var FAIL_STATUS = ' + JSON.stringify(coursePlan.meta.failStatus || 'failed') + ';\n' +
       'var COURSE_LOCKED = ' + (courseLocked ? 'true' : 'false') + ';\n' +
-      'var COURSE_TITLE = ' + JSON.stringify(courseTitle) + ';\n' +
-      'var LOGO_URL = ' + JSON.stringify(logoUrl) + ';\n' +
-      'var LOGO_ALT = ' + JSON.stringify(logoAlt) + ';\n\n' +
+      'var COURSE_TITLE = ' + JSON.stringify(courseTitle) + ';\n\n' +
       'function shuffleArray(arr) {\n' +
       '  var a = arr.slice();\n' +
       '  for (var i = a.length - 1; i > 0; i--) {\n' +
@@ -124,7 +120,7 @@ window.GeneratorApp = (function () {
       '          observer.unobserve(entry.target);\n' +
       '        }\n' +
       '      });\n' +
-      '    }, { threshold: 0.05 });\n' +
+      '    }, { threshold: 0.1 });\n' +
       '    observer.observe(el);\n' +
       '    return function() { observer.disconnect(); };\n' +
       '  }, []);\n' +
@@ -336,7 +332,6 @@ window.GeneratorApp = (function () {
       // --- Hero slide ---
       '  function renderHeroSlide(slide, key) {\n' +
       '    return e("div", { key: key },\n' +
-      '      LOGO_URL ? e("img", { src: LOGO_URL, alt: LOGO_ALT, className: "logo" }) : null,\n' +
       '      e("h1", null, slide.title || COURSE_TITLE),\n' +
       '      slide.subtitle ? e("p", { className: "subtitle" }, slide.subtitle) : null,\n' +
       '      slide.texts && slide.texts.length > 0 && slide.texts[0] !== slide.title ? e("p", { className: "subtitle" }, slide.texts[0]) : null,\n' +

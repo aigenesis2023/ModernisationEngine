@@ -60,7 +60,9 @@ window.ContentPlanner = (function () {
         'round diagonal corner', 'rounded rectangle', 'caption',
         'textbox', 'placeholder', 'frame', 'panel', 'box', 'object',
         'item', 'element', 'block', 'region', 'zone', 'area', 'hotspot',
-        'marker', 'dial', 'slider', 'scrolling panel', 'trigger'
+        'marker', 'dial', 'slider', 'scrolling panel', 'trigger',
+        'pentagon', 'hexagon', 'triangle', 'circle', 'star', 'diamond',
+        'trapezoid', 'parallelogram', 'cross', 'arrow', 'chevron'
       ];
       if (genericTerms.indexOf(word) !== -1) return true;
     }
@@ -100,6 +102,12 @@ window.ContentPlanner = (function () {
 
     // Repeated tick/check/cross markers used in tables
     if (/^(tick|check|cross|x)\s*(icon)?\s*\d*$/i.test(t)) return true;
+
+    // Table accessibility descriptions: "Table with N columns and N rows"
+    if (/^table\s+with\s+\d+\s+columns?\s+and\s+\d+\s+rows?$/i.test(t)) return true;
+
+    // "Left/Right/Up/Down Arrow N" — directional shape labels
+    if (/^(left|right|up|down)\s+arrow\s*\d*$/i.test(t)) return true;
 
     return false;
   }
@@ -841,8 +849,17 @@ window.ContentPlanner = (function () {
       .replace(/\r\n/g, ' ')
       .replace(/\r/g, ' ')
       .replace(/\n/g, ' ')
-      .replace(/\s+/g, ' ')
+      // Remove embedded icon/shape alt-text references
+      // Universal Storyline pattern: "word(s) icon N" embedded in longer text
+      .replace(/\b[\w\s-]*(?:icon|arrow)\s*\d+\b/gi, '')
+      // Remove "Line N" references (connector shapes)
+      .replace(/\bLine\s+\d+\b/g, '')
+      // Remove variable placeholders
       .replace(/%_player\.\w+%/g, '')
+      // Remove caret-escaped characters from Storyline: "100^%^"
+      .replace(/\^([%&])\^/g, '$1')
+      // Clean up extra whitespace from removals
+      .replace(/\s+/g, ' ')
       .trim();
   }
 

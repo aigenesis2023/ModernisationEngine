@@ -142,10 +142,9 @@ window.GeneratorCSS = (function () {
       '  color: white; text-align: center;\n  padding: 0; position: relative; overflow: hidden;\n}\n' +
       '.section-hero::before {\n  content: \'\'; position: absolute; inset: 0;\n' +
       '  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);\n}\n' +
-      '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); padding-bottom: calc(var(--spacing) * 8); }\n' +
+      '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); }\n' +
       '.section-hero h1 { font-size: ' + Math.round(h1Px * 0.85) + 'px; color: white; }\n' +
       '.section-hero .subtitle { font-size: ' + Math.round(baseSizePx * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
-      '.section-hero .logo { max-width: 160px; max-height: 50px; margin-bottom: calc(var(--spacing) * 2); }\n' +
       '.section-hero .btn { background: white; color: var(--primary); font-weight: 700; }\n' +
       '.section-hero .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }\n\n' +
 
@@ -155,10 +154,10 @@ window.GeneratorCSS = (function () {
       '  background: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7));\n}\n\n' +
 
       // ============ SCROLL INDICATOR ============
-      '.scroll-indicator {\n  position: absolute; bottom: calc(var(--spacing) * 3);\n  left: 50%; transform: translateX(-50%);\n' +
+      '.scroll-indicator {\n  margin-top: calc(var(--spacing) * 4);\n' +
       '  color: rgba(255,255,255,0.6); font-size: 13px;\n  display: flex; flex-direction: column; align-items: center; gap: 8px;\n' +
       '  animation: bounce 2s infinite;\n}\n' +
-      '@keyframes bounce {\n  0%, 100% { transform: translateX(-50%) translateY(0); }\n  50% { transform: translateX(-50%) translateY(8px); }\n}\n\n' +
+      '@keyframes bounce {\n  0%, 100% { transform: translateY(0); }\n  50% { transform: translateY(8px); }\n}\n\n' +
 
       // ============ CONTENT BLOCKS ============
       '.content-block {\n  margin-bottom: calc(var(--spacing) * 3);\n}\n' +
@@ -337,6 +336,7 @@ window.GeneratorCSS = (function () {
       '.section-results {\n  min-height: 80vh;\n  display: flex; align-items: center; justify-content: center;\n' +
       '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n  color: white; text-align: center;\n}\n' +
       '.section-results .section-inner { max-width: 500px; }\n' +
+      '.section-results h1, .section-results h2, .section-results h3, .section-results p { color: white; }\n' +
       '.score-circle {\n  width: 120px; height: 120px; border-radius: 50%;\n  border: 6px solid rgba(255,255,255,0.3);\n' +
       '  display: flex; align-items: center; justify-content: center; flex-direction: column;\n' +
       '  margin: calc(var(--spacing) * 2) auto;\n  animation: scaleIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);\n}\n' +
@@ -347,9 +347,8 @@ window.GeneratorCSS = (function () {
       '@keyframes scaleIn {\n  from { transform: scale(0); opacity: 0; }\n  to { transform: scale(1); opacity: 1; }\n}\n\n' +
 
       // ============ SCROLL ANIMATIONS ============
-      '.scroll-reveal {\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n' +
-      '.scroll-reveal.visible {\n  animation: revealIn 0.6s ease both;\n}\n' +
-      '@keyframes revealIn {\n  from { opacity: 0.3; transform: translateY(20px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n' +
+      '.scroll-reveal {\n  opacity: 0; transform: translateY(20px);\n}\n' +
+      '.scroll-reveal.visible {\n  opacity: 1; transform: translateY(0);\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n\n' +
 
       // ============ SECTION TABLE OF CONTENTS ============
       '.toc {\n  position: fixed; right: calc(var(--spacing) * 2); top: 50%;\n  transform: translateY(-50%); z-index: 500;\n  display: none;\n}\n' +
@@ -374,7 +373,6 @@ window.GeneratorCSS = (function () {
       '  h2 { font-size: ' + h2Px + 'px; }\n' +
       '  h3 { font-size: ' + h3Px + 'px; }\n' +
       '  .section-hero h1 { font-size: ' + Math.round(h1Px * 1.3) + 'px; }\n' +
-      '  .section-hero .logo { max-width: 200px; max-height: 60px; }\n' +
       '  .card { padding: calc(var(--spacing) * 3); }\n' +
       '  .btn { padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 4); min-width: 140px; }\n' +
       '  .score-circle { width: 160px; height: 160px; }\n' +
