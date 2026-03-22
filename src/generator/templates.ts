@@ -1,7 +1,7 @@
 import type {
   CourseIR, BrandProfile, ImageManifest, SlideIR, SlideElement,
-  TextElement, ImageElement, ButtonElement, QuizElement, FormElement,
-  QuestionBankIR, QuestionIR,
+  TextElement, ImageElement, VideoElement, AudioElement, ButtonElement,
+  QuizElement, FormElement, QuestionBankIR, QuestionIR, InteractionElement,
 } from '../ir/types';
 import { generateScormAdapterJs } from './scorm-adapter';
 
@@ -288,6 +288,73 @@ ${generateButtonCss(brand)}
 }
 .hero-image img { width: 100%; height: auto; display: block; }
 
+/* ---- Video Player ---- */
+.video-container {
+  width: 100%; max-width: 760px; border-radius: var(--radius);
+  overflow: hidden; margin-bottom: calc(var(--spacing) * 3);
+  ${generateCardShadow(brand)}
+}
+.video-container video {
+  width: 100%; height: auto; display: block;
+  background: #000;
+}
+
+/* ---- Audio Player ---- */
+.audio-container {
+  width: 100%; max-width: 560px;
+  margin-bottom: calc(var(--spacing) * 2);
+}
+.audio-container audio {
+  width: 100%; border-radius: var(--radius);
+}
+
+/* ---- Slide Layers (tabs) ---- */
+.layer-tabs {
+  display: flex; gap: 4px; margin-bottom: calc(var(--spacing) * 2);
+  border-bottom: 2px solid ${border}; width: 100%; max-width: 760px;
+}
+.layer-tab {
+  padding: calc(var(--spacing) * 1.2) calc(var(--spacing) * 2.5);
+  border: none; background: transparent; cursor: pointer;
+  font-family: var(--font-body); font-size: ${t.baseSize * 0.9}px;
+  color: var(--text-muted); font-weight: 600;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px; transition: all var(--transition);
+}
+.layer-tab:hover { color: var(--text); }
+.layer-tab.active {
+  color: var(--primary); border-bottom-color: var(--primary);
+}
+.layer-content {
+  width: 100%; max-width: 760px;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* ---- Text Entry Quiz ---- */
+.quiz-text-entry {
+  width: 100%; max-width: 560px;
+  margin: calc(var(--spacing) * 2) auto;
+}
+.quiz-text-entry input, .quiz-text-entry textarea {
+  width: 100%; padding: calc(var(--spacing) * 2);
+  border: 2px solid ${border}; border-radius: var(--radius);
+  font-family: var(--font-body); font-size: ${t.baseSize}px;
+  background: var(--bg); color: var(--text);
+  transition: border-color var(--transition);
+}
+.quiz-text-entry input:focus, .quiz-text-entry textarea:focus {
+  outline: none; border-color: var(--primary);
+  box-shadow: 0 0 0 3px ${b.primary}22;
+}
+
+/* ---- Checkbox (pick-many) ---- */
+.quiz-choice .indicator.checkbox {
+  border-radius: 4px;
+}
+.quiz-choice.selected .indicator.checkbox {
+  border-color: var(--primary); background: var(--primary);
+}
+
 /* ---- Responsive ---- */
 @media (max-width: 768px) {
   .slide { padding: calc(var(--spacing) * 3) calc(var(--spacing) * 2); }
@@ -405,19 +472,25 @@ function App() {
   var _q = React.useState(null), quizState = _q[0], setQuizState = _q[1];
   var _sc = React.useState(null), score = _sc[0], setScore = _sc[1];
   var _sel = React.useState(null), selectedChoice = _sel[0], setSelectedChoice = _sel[1];
+  var _selMulti = React.useState([]), selectedChoices = _selMulti[0], setSelectedChoices = _selMulti[1];
   var _ans = React.useState(false), answered = _ans[0], setAnswered = _ans[1];
   var _qi = React.useState(0), quizIndex = _qi[0], setQuizIndex = _qi[1];
   var _corr = React.useState(0), correctCount = _corr[0], setCorrectCount = _corr[1];
   var _tot = React.useState(0), totalQ = _tot[0], setTotalQ = _tot[1];
   var _branch = React.useState(null), branch = _branch[0], setBranch = _branch[1];
   var _quizQs = React.useState([]), quizQuestions = _quizQs[0], setQuizQuestions = _quizQs[1];
+  var _textAns = React.useState(''), textAnswer = _textAns[0], setTextAnswer = _textAns[1];
+  var _activeLayer = React.useState(0), activeLayer = _activeLayer[0], setActiveLayer = _activeLayer[1];
 
   var slide = SLIDES[currentSlide];
   var totalSlides = SLIDES.length;
 
   function goNext() {
     setSelectedChoice(null);
+    setSelectedChoices([]);
+    setTextAnswer('');
     setAnswered(false);
+    setActiveLayer(0);
     if (currentSlide < totalSlides - 1) {
       setCurrentSlide(currentSlide + 1);
     }
@@ -426,7 +499,10 @@ function App() {
   function goPrev() {
     if (currentSlide > 0) {
       setSelectedChoice(null);
+      setSelectedChoices([]);
+      setTextAnswer('');
       setAnswered(false);
+      setActiveLayer(0);
       setCurrentSlide(currentSlide - 1);
     }
   }
@@ -446,18 +522,51 @@ function App() {
 
   function handleQuizAnswer(choiceIdx) {
     if (answered) return;
+    var q = quizQuestions[quizIndex];
+    if (!q) return;
+
+    if (q.questionType === 'pick-many') {
+      // Toggle selection for multi-select
+      var updated = selectedChoices.slice();
+      var pos = updated.indexOf(choiceIdx);
+      if (pos >= 0) { updated.splice(pos, 1); } else { updated.push(choiceIdx); }
+      setSelectedChoices(updated);
+      return; // Don't auto-submit — wait for explicit submit
+    }
+
+    // Single-select (pick-one, true-false)
     setSelectedChoice(choiceIdx);
     setAnswered(true);
-    var q = quizQuestions[quizIndex];
-    if (q && q.choices[choiceIdx] && q.choices[choiceIdx].isCorrect) {
+    if (q.choices[choiceIdx] && q.choices[choiceIdx].isCorrect) {
       setCorrectCount(correctCount + 1);
     }
+  }
+
+  function submitMultiAnswer() {
+    if (answered) return;
+    setAnswered(true);
+    var q = quizQuestions[quizIndex];
+    if (!q) return;
+    // Check if all correct choices are selected and no incorrect ones
+    var allCorrect = q.choices.every(function(c, i) {
+      var isSelected = selectedChoices.indexOf(i) >= 0;
+      return c.isCorrect ? isSelected : !isSelected;
+    });
+    if (allCorrect) setCorrectCount(correctCount + 1);
+  }
+
+  function submitTextAnswer() {
+    if (answered) return;
+    setAnswered(true);
+    // Text entry — always counted as attempted, no auto-grading
   }
 
   function nextQuestion() {
     if (quizIndex < quizQuestions.length - 1) {
       setQuizIndex(quizIndex + 1);
       setSelectedChoice(null);
+      setSelectedChoices([]);
+      setTextAnswer('');
       setAnswered(false);
     } else {
       // Quiz complete — jump to results
@@ -521,6 +630,12 @@ function App() {
         }),
         slide.image ? e('div', { className: 'hero-image' },
           e('img', { src: slide.image, alt: slide.title })
+        ) : null,
+        slide.video ? e('div', { className: 'video-container' },
+          e('video', { controls: true, preload: 'metadata', poster: slide.video.poster || undefined, src: slide.video.src })
+        ) : null,
+        slide.audio ? e('div', { className: 'audio-container' },
+          e('audio', { controls: true, preload: 'metadata', src: slide.audio.src })
         ) : null,
         e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
           e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
@@ -592,32 +707,77 @@ function App() {
     var q = quizQuestions[quizIndex];
     if (!q) return e('div', { className: 'slide slide-content' }, e('p', null, 'Loading quiz...'));
 
+    var qType = q.questionType || 'pick-one';
+    var isMulti = qType === 'pick-many';
+    var isTextEntry = qType === 'text-entry';
+
+    // Determine if answer was correct for feedback
+    var wasCorrect = false;
+    if (answered && !isTextEntry) {
+      if (isMulti) {
+        wasCorrect = q.choices.every(function(c, i) {
+          var isSel = selectedChoices.indexOf(i) >= 0;
+          return c.isCorrect ? isSel : !isSel;
+        });
+      } else {
+        wasCorrect = q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect;
+      }
+    }
+
     return e('div', { className: 'slide slide-content' },
       e('div', { style: { textAlign: 'center', width: '100%', maxWidth: '760px' } },
         e('p', { style: { color: 'var(--text-muted)', marginBottom: 'var(--spacing)' } },
           'Question ' + (quizIndex + 1) + ' of ' + totalQ
         ),
         e('div', { className: 'quiz-question' }, q.questionText),
+
+        // Text entry questions
+        isTextEntry ? e('div', { className: 'quiz-text-entry' },
+          e('input', {
+            type: 'text',
+            placeholder: 'Type your answer...',
+            value: textAnswer,
+            disabled: answered,
+            onChange: function(ev) { setTextAnswer(ev.target.value); },
+            onKeyDown: function(ev) { if (ev.key === 'Enter' && textAnswer.trim()) submitTextAnswer(); }
+          }),
+          !answered && textAnswer.trim() ? e('div', { style: { marginTop: 'calc(var(--spacing) * 2)' } },
+            e('button', { className: 'btn btn-primary', onClick: submitTextAnswer }, 'Submit Answer')
+          ) : null
+        ) :
+
+        // Choice-based questions (pick-one, pick-many, true-false)
         e('div', { className: 'quiz-choices' },
           q.choices.map(function(c, i) {
             var cls = 'quiz-choice';
-            if (selectedChoice === i) cls += ' selected';
+            var isSel = isMulti ? selectedChoices.indexOf(i) >= 0 : selectedChoice === i;
+            if (isSel) cls += ' selected';
             if (answered && c.isCorrect) cls += ' correct';
-            if (answered && selectedChoice === i && !c.isCorrect) cls += ' incorrect';
+            if (answered && isSel && !c.isCorrect) cls += ' incorrect';
             return e('div', {
               className: cls, key: i,
               onClick: function() { handleQuizAnswer(i); }
             },
-              e('div', { className: 'indicator' },
-                answered ? (c.isCorrect ? '\\u2713' : (selectedChoice === i ? '\\u2717' : '')) : ''
+              e('div', { className: 'indicator' + (isMulti ? ' checkbox' : '') },
+                answered ? (c.isCorrect ? '\\u2713' : (isSel ? '\\u2717' : '')) :
+                (isSel ? (isMulti ? '\\u2713' : '\\u25CF') : '')
               ),
               e('span', null, c.text)
             );
           })
         ),
+
+        // Submit button for pick-many (before answering)
+        isMulti && !answered && selectedChoices.length > 0 ? e('div', { style: { marginTop: 'calc(var(--spacing) * 2)' } },
+          e('button', { className: 'btn btn-primary', onClick: submitMultiAnswer }, 'Submit Answer')
+        ) : null,
+
+        // Feedback
         answered ? e('div', {
-          className: 'quiz-feedback ' + (q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect ? 'correct' : 'incorrect')
-        }, q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect ? (q.correctFeedback || 'Correct!') : (q.incorrectFeedback || 'Incorrect.')) : null,
+          className: 'quiz-feedback ' + (isTextEntry ? 'correct' : (wasCorrect ? 'correct' : 'incorrect'))
+        }, isTextEntry ? 'Answer submitted' : (wasCorrect ? (q.correctFeedback || 'Correct!') : (q.incorrectFeedback || 'Incorrect.'))) : null,
+
+        // Next button
         answered ? e('div', { style: { marginTop: 'calc(var(--spacing) * 2)' } },
           e('button', { className: 'btn btn-primary', onClick: nextQuestion },
             quizIndex < quizQuestions.length - 1 ? 'Next Question' : 'See Results'
@@ -660,9 +820,42 @@ function App() {
         slide.image ? e('div', { className: 'hero-image' },
           e('img', { src: slide.image, alt: slide.title })
         ) : null,
-        e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
-          e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
+        slide.video ? e('div', { className: 'video-container' },
+          e('video', {
+            controls: true, preload: 'metadata',
+            poster: slide.video.poster || undefined,
+            src: slide.video.src
+          })
+        ) : null,
+        slide.audio ? e('div', { className: 'audio-container' },
+          e('audio', { controls: true, preload: 'metadata', src: slide.audio.src })
+        ) : null
+      ),
+
+      // Layer content as tabs
+      slide.layers && slide.layers.length > 0 ? e('div', { style: { width: '100%', maxWidth: '760px', marginTop: 'calc(var(--spacing) * 2)' } },
+        e('div', { className: 'layer-tabs' },
+          slide.layers.map(function(layer, i) {
+            return e('button', {
+              className: 'layer-tab' + (activeLayer === i ? ' active' : ''),
+              key: i,
+              onClick: function() { setActiveLayer(i); }
+            }, layer.name);
+          })
+        ),
+        e('div', { className: 'layer-content card' },
+          slide.layers[activeLayer] && slide.layers[activeLayer].texts.map(function(t, i) {
+            return e('p', { key: i }, t);
+          }),
+          slide.layers[activeLayer] && slide.layers[activeLayer].image ?
+            e('div', { className: 'hero-image' },
+              e('img', { src: slide.layers[activeLayer].image, alt: slide.layers[activeLayer].name })
+            ) : null
         )
+      ) : null,
+
+      e('div', { style: { marginTop: 'calc(var(--spacing) * 3)', textAlign: 'center' } },
+        e('button', { className: 'btn btn-primary', onClick: goNext }, 'Continue')
       )
     );
   }
@@ -702,6 +895,9 @@ interface SlideData {
   subtitle?: string;
   texts?: string[];
   image?: string;
+  video?: { src: string; poster?: string };
+  audio?: { src: string };
+  layers?: { name: string; texts: string[]; image?: string }[];
   instruction?: string;
   greeting?: string;
   fields?: any[];
@@ -736,6 +932,49 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
         const filename = imgEl.originalPath.split('/').pop() || '';
         data.image = 'assets/images/' + filename;
       }
+    }
+
+    // Find video element
+    const videoEl = slide.elements.find(
+      (e): e is VideoElement => e.type === 'video'
+    );
+    if (videoEl) {
+      const filename = videoEl.originalPath.split('/').pop() || '';
+      data.video = {
+        src: 'assets/media/' + filename,
+        poster: videoEl.posterPath ? 'assets/images/' + videoEl.posterPath.split('/').pop() : undefined,
+      };
+    }
+
+    // Find audio element (narration)
+    const audioEl = slide.elements.find(
+      (e): e is AudioElement => e.type === 'audio'
+    );
+    if (audioEl) {
+      const filename = audioEl.originalPath.split('/').pop() || '';
+      data.audio = { src: 'assets/media/' + filename };
+    }
+
+    // Extract layer content (beyond the base layer)
+    if (slide.layers.length > 0) {
+      const layerData = slide.layers
+        .filter(l => l.elements.length > 0)
+        .map(l => {
+          const layerTexts = l.elements
+            .filter((e): e is TextElement => e.type === 'text' && e.role !== 'unknown')
+            .map(e => cleanText(e.content))
+            .filter(t => t.length > 3 && !isJunkText(t));
+          const layerImg = l.elements.find(
+            (e): e is ImageElement => e.type === 'image' && ['hero', 'content'].includes(e.instructionalRole)
+          );
+          return {
+            name: l.name,
+            texts: layerTexts,
+            image: layerImg ? 'assets/images/' + (layerImg.originalPath.split('/').pop() || '') : undefined,
+          };
+        })
+        .filter(l => l.texts.length > 0 || l.image);
+      if (layerData.length > 0) data.layers = layerData;
     }
 
     // Slide-type specific data
@@ -782,29 +1021,28 @@ function buildSlidesData(course: CourseIR, images: ImageManifest): SlideData[] {
         const greeting = texts.find(t => t.includes('%'));
         if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
 
-        if (slide.title === 'Role Selector') {
-          data.title = 'Choose Your Path';
-          data.options = [
-            { label: 'Non-Technical', value: 'non-technical', quizBank: 'QuestionDraw51' },
-            { label: 'Semi-Technical', value: 'semi-technical', quizBank: 'QuestionDraw51' },
-            { label: 'Technical', value: 'technical', quizBank: 'QuestionDraw71' },
-          ];
-        } else if (slide.title === 'Pre-knowledge check') {
-          data.title = 'EV Knowledge Assessment';
-          data.instruction = 'Choose your preferred assessment level';
-          data.options = buttons
-            .filter(b => b.label && !b.label.includes('Hotspot') && b.label !== '<')
-            .map(b => {
-              const label = cleanText(b.label);
-              // Link pre-knowledge options to quiz banks too
-              const isShort = label.toLowerCase().includes('short');
-              const isSkip = label.toLowerCase().includes('skip');
-              return {
-                label,
-                value: label,
-                quizBank: isSkip ? undefined : (isShort ? 'QuestionDraw51' : 'QuestionDraw71'),
-              };
-            });
+        // Data-driven: build options from extracted buttons and triggers
+        const quizBankIds = course.questionBanks.map(qb => qb.id);
+        const branchButtons = buttons
+          .filter(b => b.label && !b.label.includes('Hotspot') && b.label !== '<' && b.label.length > 1);
+
+        if (branchButtons.length > 0) {
+          data.options = branchButtons.map((b, idx) => {
+            const label = cleanText(b.label);
+            const lowerLabel = label.toLowerCase();
+            // Try to match button to a quiz bank by action target or heuristics
+            let quizBank: string | undefined;
+            if (b.action?.targetSlideId) {
+              // Direct navigation — no quiz
+              quizBank = undefined;
+            } else if (lowerLabel.includes('skip') || lowerLabel.includes('no thanks')) {
+              quizBank = undefined;
+            } else if (quizBankIds.length > 0) {
+              // Assign quiz banks round-robin or by index
+              quizBank = quizBankIds[Math.min(idx, quizBankIds.length - 1)];
+            }
+            return { label, value: label, quizBank };
+          });
         }
         data.texts = undefined; // Branching uses options, not text paragraphs
         break;
@@ -831,6 +1069,7 @@ function buildQuizData(course: CourseIR): any[] {
     drawCount: bank.drawCount,
     questions: bank.questions.map(q => ({
       questionText: q.questionText,
+      questionType: q.questionType,
       choices: q.choices.map(c => ({
         text: c.text,
         isCorrect: c.isCorrect,
