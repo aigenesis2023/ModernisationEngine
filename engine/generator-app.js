@@ -238,14 +238,26 @@ window.GeneratorApp = (function () {
       // --- Check if title is auto-generated ---
       '  function isAutoTitle(text) {\n' +
       '    if (!text) return true;\n' +
-      '    var t = text.trim().toLowerCase();\n' +
-      '    if (/^\\d+$/.test(t)) return true;\n' +
-      '    if (/^section\\s*\\d+\\s*(q\\d+|quiz|intro)?\\s*$/i.test(t)) return true;\n' +
-      '    if (/^(drag\\s*and\\s*drop|match\\s*the)\\s*\\d*$/i.test(t)) return true;\n' +
+      '    var t = text.trim();\n' +
+      '    var tl = t.toLowerCase();\n' +
+      '    if (/^\\d+$/.test(tl)) return true;\n' +
+      '    if (/^section\\s*\\d+\\s*(q\\d+|quiz|intro)?\\s*$/i.test(tl)) return true;\n' +
+      '    if (/^(drag\\s*and\\s*drop|match\\s*the)\\s*\\d*$/i.test(tl)) return true;\n' +
+      '    if (/^table\\s*\\d/i.test(tl)) return true;\n' +
+      '    if (/^[A-Z\\s\\/\\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;\n' +
+      '    if (/^(end\\s*course|mid.?section)\\s*(quiz|test)?\\s*$/i.test(tl)) return true;\n' +
+      '    if (/^(charging|chargin)\\s*terms?\\s*(tech)?$/i.test(tl)) return true;\n' +
       '    var labels = ["pick one","pick many","pick all","true/false","true false",\n' +
       '      "text entry","matching","sequence","fill in","freeform","graded question",\n' +
-      '      "survey question","multiple choice","untitled slide"];\n' +
-      '    return labels.some(function(l) { return t === l || t.match(new RegExp("^" + l + "\\\\s*\\\\d*$")); });\n' +
+      '      "survey question","multiple choice","untitled slide","glossary info"];\n' +
+      '    return labels.some(function(l) { return tl === l || tl.match(new RegExp("^" + l + "\\\\s*\\\\d*$")); });\n' +
+      '  }\n' +
+      // Helper: check if slide title is redundant with section title
+      '  function isTitleRedundant(slideTitle, sectionTitle) {\n' +
+      '    if (!slideTitle || !sectionTitle) return false;\n' +
+      '    var sl = slideTitle.trim().toLowerCase();\n' +
+      '    var se = sectionTitle.trim().toLowerCase().replace(/\\s*\\(part\\s*\\d+\\)\\s*$/, "");\n' +
+      '    return sl === se || se.indexOf(sl) === 0 || sl.indexOf(se) === 0;\n' +
       '  }\n\n' +
 
       // --- Check if layers qualify for flip cards ---
@@ -422,7 +434,7 @@ window.GeneratorApp = (function () {
       '    }\n' +
       '    var showTitle = slide.title && slide.type !== "title"\n' +
       '      && !isAutoTitle(slide.title)\n' +
-      '      && (!section || slide.title !== section.title);\n' +
+      '      && (!section || !isTitleRedundant(slide.title, section.title));\n' +
       // Check for split layout
       '    var isSplit = slide.layout === "split" && slide.image && !slide.backgroundImage;\n' +
       '    var isSteps = slide.layout === "steps" && slide.texts && slide.texts.length >= 2;\n' +
@@ -482,7 +494,7 @@ window.GeneratorApp = (function () {
       // --- Media feature slide ---
       '  function renderMediaSlide(slide, key, section, delay) {\n' +
       '    var showTitle = slide.title && !isAutoTitle(slide.title)\n' +
-      '      && (!section || slide.title !== section.title);\n' +
+      '      && (!section || !isTitleRedundant(slide.title, section.title));\n' +
       '    return e(RevealBlock, { key: key, className: "content-block media-feature", delay: delay || 0 },\n' +
       '      showTitle ? e("h2", null, slide.title) : null,\n' +
       '      slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,\n' +
@@ -496,7 +508,7 @@ window.GeneratorApp = (function () {
       // --- Interactive slide (layers) ---
       '  function renderInteractiveSlide(slide, key, sectionIdx, section, delay) {\n' +
       '    var showTitle = slide.title && !isAutoTitle(slide.title)\n' +
-      '      && (!section || slide.title !== section.title);\n' +
+      '      && (!section || !isTitleRedundant(slide.title, section.title));\n' +
       '    return e(RevealBlock, { key: key, className: "content-block", delay: delay || 0 },\n' +
       '      showTitle ? e("h2", null, slide.title) : null,\n' +
       '      slide.texts ? e("div", { className: "narrative-text" },\n' +
@@ -618,7 +630,7 @@ window.GeneratorApp = (function () {
 
       // --- Form slide ---
       '  function renderFormSlide(slide, key, sectionIdx, section) {\n' +
-      '    var showTitle = slide.title && (!section || slide.title !== section.title);\n' +
+      '    var showTitle = slide.title && (!section || !isTitleRedundant(slide.title, section.title));\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
       '      e("div", { className: "card" },\n' +
       '        showTitle ? e("h2", null, slide.title) : null,\n' +
@@ -642,7 +654,7 @@ window.GeneratorApp = (function () {
       '      if (!userName && formData[k] && /name/i.test(k)) userName = formData[k];\n' +
       '    });\n' +
       '    if (!userName) { var firstVal = Object.values(formData).find(function(v) { return v; }); userName = firstVal || ""; }\n' +
-      '    var showTitle = slide.title && (!section || slide.title !== section.title) && !isAutoTitle(slide.title);\n' +
+      '    var showTitle = slide.title && (!section || !isTitleRedundant(slide.title, section.title)) && !isAutoTitle(slide.title);\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
       '      e("div", { className: "branch-container" },\n' +
       '        showTitle ? e("h2", null, slide.title) : null,\n' +

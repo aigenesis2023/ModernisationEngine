@@ -1001,14 +1001,25 @@ function App() {
 
   function isAutoTitle(text) {
     if (!text) return true;
-    var t = text.trim().toLowerCase();
-    if (/^\d+$/.test(t)) return true;
-    if (/^section\s*\d+\s*(q\d+|quiz|intro)?\s*$/i.test(t)) return true;
-    if (/^(drag\s*and\s*drop|match\s*the)\s*\d*$/i.test(t)) return true;
+    var t = text.trim();
+    var tl = t.toLowerCase();
+    if (/^\d+$/.test(tl)) return true;
+    if (/^section\s*\d+\s*(q\d+|quiz|intro)?\s*$/i.test(tl)) return true;
+    if (/^(drag\s*and\s*drop|match\s*the)\s*\d*$/i.test(tl)) return true;
+    if (/^table\s*\d/i.test(tl)) return true;
+    if (/^[A-Z\s\/\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;
+    if (/^(end\s*course|mid.?section)\s*(quiz|test)?\s*$/i.test(tl)) return true;
+    if (/^(charging|chargin)\s*terms?\s*(tech)?$/i.test(tl)) return true;
     var labels = ["pick one","pick many","pick all","true/false","true false",
       "text entry","matching","sequence","fill in","freeform","graded question",
-      "survey question","multiple choice","untitled slide"];
-    return labels.some(function(l) { return t === l || t.match(new RegExp("^" + l + "\\s*\\d*$")); });
+      "survey question","multiple choice","untitled slide","glossary info"];
+    return labels.some(function(l) { return tl === l || tl.match(new RegExp("^" + l + "\\s*\\d*$")); });
+  }
+  function isTitleRedundant(slideTitle, sectionTitle) {
+    if (!slideTitle || !sectionTitle) return false;
+    var sl = slideTitle.trim().toLowerCase();
+    var se = sectionTitle.trim().toLowerCase().replace(/\s*\(part\s*\d+\)\s*$/, "");
+    return sl === se || se.indexOf(sl) === 0 || sl.indexOf(se) === 0;
   }
 
   function shouldUseFlipCards(slide) {
@@ -1151,7 +1162,7 @@ function App() {
     }
     var showTitle = slide.title && slide.type !== "title"
       && !isAutoTitle(slide.title)
-      && (!section || slide.title !== section.title);
+      && (!section || !isTitleRedundant(slide.title, section.title));
     var isSplit = slide.layout === "split" && slide.image && !slide.backgroundImage;
     var isSteps = slide.layout === "steps" && slide.texts && slide.texts.length >= 2;
     var isReverse = delay ? (Math.floor(delay / 100) % 2 === 1) : false;
@@ -1208,7 +1219,7 @@ function App() {
 
   function renderMediaSlide(slide, key, section, delay) {
     var showTitle = slide.title && !isAutoTitle(slide.title)
-      && (!section || slide.title !== section.title);
+      && (!section || !isTitleRedundant(slide.title, section.title));
     return e(RevealBlock, { key: key, className: "content-block media-feature", delay: delay || 0 },
       showTitle ? e("h2", null, slide.title) : null,
       slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,
@@ -1222,7 +1233,7 @@ function App() {
 
   function renderInteractiveSlide(slide, key, sectionIdx, section, delay) {
     var showTitle = slide.title && !isAutoTitle(slide.title)
-      && (!section || slide.title !== section.title);
+      && (!section || !isTitleRedundant(slide.title, section.title));
     return e(RevealBlock, { key: key, className: "content-block", delay: delay || 0 },
       showTitle ? e("h2", null, slide.title) : null,
       slide.texts ? e("div", { className: "narrative-text" },
@@ -1344,7 +1355,7 @@ function App() {
   }
 
   function renderFormSlide(slide, key, sectionIdx, section) {
-    var showTitle = slide.title && (!section || slide.title !== section.title);
+    var showTitle = slide.title && (!section || !isTitleRedundant(slide.title, section.title));
     return e(RevealBlock, { key: key, className: "content-block" },
       e("div", { className: "card" },
         showTitle ? e("h2", null, slide.title) : null,
@@ -1371,7 +1382,7 @@ function App() {
       if (!userName && formData[k] && /name/i.test(k)) userName = formData[k];
     });
     if (!userName) { var firstVal = Object.values(formData).find(function(v) { return v; }); userName = firstVal || ""; }
-    var showTitle = slide.title && (!section || slide.title !== section.title) && !isAutoTitle(slide.title);
+    var showTitle = slide.title && (!section || !isTitleRedundant(slide.title, section.title)) && !isAutoTitle(slide.title);
     return e(RevealBlock, { key: key, className: "content-block" },
       e("div", { className: "branch-container" },
         showTitle ? e("h2", null, slide.title) : null,
