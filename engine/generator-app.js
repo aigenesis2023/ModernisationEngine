@@ -132,15 +132,15 @@ window.GeneratorApp = (function () {
       '  var _ta = React.useState(""), textAnswer = _ta[0], setTextAnswer = _ta[1];\n' +
       '  var _openPanels = React.useState({}), openPanels = _openPanels[0], setOpenPanels = _openPanels[1];\n' +
       '  var _modalLayer = React.useState(null), modalLayer = _modalLayer[0], setModalLayer = _modalLayer[1];\n' +
-      '  var _progress = React.useState(0), scrollProgress = _progress[0], setScrollProgress = _progress[1];\n\n' +
-
-      // --- Scroll progress tracking ---
+      // --- Scroll progress tracking (uses direct DOM, not React state, to avoid re-renders) ---
       '  React.useEffect(function() {\n' +
+      '    var fill = document.querySelector(".progress-fill");\n' +
+      '    if (!fill) return;\n' +
       '    function handleScroll() {\n' +
       '      var scrollTop = window.scrollY || document.documentElement.scrollTop;\n' +
       '      var docHeight = document.documentElement.scrollHeight - window.innerHeight;\n' +
-      '      var progress = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;\n' +
-      '      setScrollProgress(Math.min(100, Math.round(progress)));\n' +
+      '      var progress = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;\n' +
+      '      fill.style.width = progress + "%";\n' +
       '    }\n' +
       '    window.addEventListener("scroll", handleScroll, { passive: true });\n' +
       '    return function() { window.removeEventListener("scroll", handleScroll); };\n' +
@@ -216,7 +216,7 @@ window.GeneratorApp = (function () {
 
       // --- Main render ---
       '  return e("div", null,\n' +
-      '    e("div", { className: "progress-bar" }, e("div", { className: "progress-fill", style: { width: scrollProgress + "%" } })),\n' +
+      '    e("div", { className: "progress-bar" }, e("div", { className: "progress-fill", style: { width: "0%" } })),\n' +
       '    e("div", { className: "course-scroll" },\n' +
       '      SECTIONS.map(function(section, si) {\n' +
       '        return renderSection(section, si);\n' +
