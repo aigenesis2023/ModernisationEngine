@@ -447,7 +447,10 @@ window.GeneratorApp = (function () {
       '                if (opt.quizBank) { startQuiz(opt.quizBank); }\n' +
       '                else { setScore(100); setQuizState("complete"); SCORM.complete(100, MASTERY); }\n' +
       '              }\n' +
-      '            }, e("h3", null, opt.label));\n' +
+      '            },\n' +
+      '            e("h3", null, opt.label),\n' +
+      '            opt.description ? e("p", { style: { fontSize: "14px", color: "var(--text-muted)", marginTop: "calc(var(--spacing) * 0.5)", marginBottom: 0 } }, opt.description) : null\n' +
+      '          );\n' +
       '          })\n        )\n      )\n    );\n  }\n\n' +
 
       // --- Inline quiz trigger (in scroll) ---

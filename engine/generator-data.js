@@ -170,18 +170,17 @@ window.GeneratorData = (function () {
     if (slide.type === 'branching') {
       data.title = slide.originalTitle || 'Choose Your Path';
 
-      // Include descriptive body texts (exclude greetings and short UI text)
+      // Collect descriptive body texts (exclude greetings and short UI text)
       var descriptiveTexts = slide.content.bodyTexts.filter(function (t) {
-        return t.length > 30 && !t.includes('%');
+        return t.length > 20 && !t.includes('%');
       });
-      if (descriptiveTexts.length > 0) {
-        data.texts = descriptiveTexts;
-      }
 
-      // Include headings that provide context
-      if (slide.content.headings.length > 0) {
-        data.headings = slide.content.headings.map(function (h) { return h.text; });
-      }
+      // Collect headings that provide context
+      var headingTexts = slide.content.headings.map(function (h) { return h.text; });
+
+      // These will be paired with options if counts match, otherwise shown standalone
+      data._descriptiveTexts = descriptiveTexts;
+      data._headingTexts = headingTexts;
 
       // Greeting with universal variable substitution
       var greeting = slide.content.bodyTexts.find(function (t) { return t.includes('%'); });
@@ -193,6 +192,16 @@ window.GeneratorData = (function () {
         : [];
 
       if (slide.buttons && slide.buttons.length > 0) {
+        // Try to pair descriptions with options
+        var descs = data._descriptiveTexts || [];
+        var heads = data._headingTexts || [];
+        // Check if any single source matches option count, or combined
+        var combined = heads.concat(descs);
+        var pairSource = (heads.length === slide.buttons.length) ? heads
+          : (descs.length === slide.buttons.length) ? descs
+          : (combined.length === slide.buttons.length) ? combined
+          : null;
+
         data.options = slide.buttons.map(function (btn, idx) {
           var label = btn.label;
           var lowerLabel = label.toLowerCase();
@@ -202,14 +211,58 @@ window.GeneratorData = (function () {
           } else if (quizBankIds.length > 0) {
             quizBank = quizBankIds[Math.min(idx, quizBankIds.length - 1)];
           }
-          return { label: label, value: label, quizBank: quizBank };
+          var opt = { label: label, value: label, quizBank: quizBank };
+          if (pairSource && pairSource[idx]) opt.description = pairSource[idx];
+          return opt;
         });
+
+        if (pairSource) {
+          // Descriptions paired with options — remove standalone display
+          delete data.texts;
+          delete data.headings;
+        } else {
+          // Show unpaired descriptions as standalone text
+          if (descs.length > 0) data.texts = descs;
+          if (heads.length > 0) data.headings = heads;
+        }
       }
 
       // Also pass quiz bank IDs for reference
       if (quizBankIds.length > 0) {
         data.quizBankIds = quizBankIds;
       }
+
+      // Extract context text from layers
+      // In Storyline branching, layers often contain:
+      //   - An explanatory intro paragraph (longest text, explains what the options mean)
+      //   - Response texts (what happens when each option is picked)
+      // We show the intro as context text above the options
+      if (slide.layers && slide.layers.length > 0) {
+        var layerTexts = slide.layers
+          .filter(function (l) { return l.texts && l.texts.length > 0; })
+          .map(function (l) {
+            return l.texts.map(function (t) { return t.content || t; }).join(' ');
+          });
+
+        if (layerTexts.length > 0) {
+          // Find the longest text — likely the explanatory intro
+          var longestIdx = 0;
+          layerTexts.forEach(function (t, i) {
+            if (t.length > layerTexts[longestIdx].length) longestIdx = i;
+          });
+
+          // Only show as intro if it's significantly longer (explanatory, not a response)
+          var longestText = layerTexts[longestIdx];
+          if (longestText.length > 100) {
+            if (!data.texts) data.texts = [];
+            data.texts.unshift(longestText);
+          }
+        }
+      }
+
+      // Clean up temp fields
+      delete data._descriptiveTexts;
+      delete data._headingTexts;
     }
 
     // Quiz
