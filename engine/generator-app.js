@@ -880,8 +880,10 @@ window.GeneratorApp = (function () {
       '  <style>' + css + '</style>\n' +
       '</head>\n<body>\n' +
       '  <div id="root"></div>\n\n' +
-      '  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>\n' +
-      '  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>\n\n' +
+      '  <script src="lib/react.min.js"></script>\n' +
+      '  <script>if(!window.React){document.write(\'<script src="https://unpkg.com/react@18/umd/react.production.min.js"><\\/script>\')}</script>\n' +
+      '  <script src="lib/react-dom.min.js"></script>\n' +
+      '  <script>if(!window.ReactDOM){document.write(\'<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"><\\/script>\')}</script>\n\n' +
       '  <script>' + scormJs + '</script>\n' +
       '  <script>' + appJs + '</script>\n' +
       '</body>\n</html>';

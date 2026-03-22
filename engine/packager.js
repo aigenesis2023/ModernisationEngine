@@ -90,6 +90,20 @@ window.Packager = (function () {
     }
 
     log('Copied ' + assetCount + ' media assets');
+    // Download React/ReactDOM and include in the package for offline LMS support
+    try {
+      var reactJs = await fetch('https://unpkg.com/react@18/umd/react.production.min.js').then(function(r) { return r.text(); });
+      var reactDomJs = await fetch('https://unpkg.com/react-dom@18/umd/react-dom.production.min.js').then(function(r) { return r.text(); });
+      if (reactJs.length > 1000) {
+        var libFolder = zip.folder('lib');
+        libFolder.file('react.min.js', reactJs);
+        libFolder.file('react-dom.min.js', reactDomJs);
+        log('Included React/ReactDOM in package for offline LMS support');
+      }
+    } catch (e) {
+      log('Could not download React for packaging — CDN fallback will be used');
+    }
+
     log('Generating zip file...');
 
     var blob = await zip.generateAsync({
