@@ -2,6 +2,11 @@
  * React App Generator + SCORM Adapter
  * Produces the runtime JS that gets embedded in the output course HTML.
  * Part 3 of the generator.
+ *
+ * Interactive Components:
+ *   - Accordion: click-to-reveal text panels
+ *   - Modal: image + text detail overlays
+ *   - Bento Grid: tile-based layout for multiple short layers
  */
 window.GeneratorApp = (function () {
   'use strict';
@@ -63,7 +68,6 @@ window.GeneratorApp = (function () {
     var slidesData = JSON.stringify(GeneratorData.buildSlidesData(course, images));
     var quizData = JSON.stringify(GeneratorData.buildQuizData(course));
 
-    // Find best title from title slide text
     var titleSlide = course.slides.find(function (s) { return s.type === 'title'; });
     var titleTexts = titleSlide ? titleSlide.elements
       .filter(function (el) { return el.type === 'text' && el.role !== 'unknown'; })
@@ -98,6 +102,7 @@ window.GeneratorApp = (function () {
 
   function generateAppComponent() {
     return 'function App() {\n' +
+      // --- State ---
       '  var _s = React.useState(0), currentSlide = _s[0], setCurrentSlide = _s[1];\n' +
       '  var _f = React.useState({}), formData = _f[0], setFormData = _f[1];\n' +
       '  var _q = React.useState(null), quizState = _q[0], setQuizState = _q[1];\n' +
@@ -111,19 +116,27 @@ window.GeneratorApp = (function () {
       '  var _br = React.useState(null), branch = _br[0], setBranch = _br[1];\n' +
       '  var _qqs = React.useState([]), quizQuestions = _qqs[0], setQuizQuestions = _qqs[1];\n' +
       '  var _ta = React.useState(""), textAnswer = _ta[0], setTextAnswer = _ta[1];\n' +
-      '  var _al = React.useState(0), activeLayer = _al[0], setActiveLayer = _al[1];\n\n' +
+      // Interactive component state
+      '  var _openPanels = React.useState([]), openPanels = _openPanels[0], setOpenPanels = _openPanels[1];\n' +
+      '  var _modalLayer = React.useState(null), modalLayer = _modalLayer[0], setModalLayer = _modalLayer[1];\n\n' +
       '  var slide = SLIDES[currentSlide];\n' +
       '  var totalSlides = SLIDES.length;\n\n' +
+
+      // --- Navigation ---
       '  function goNext() {\n' +
-      '    setSelectedChoice(null); setSelectedChoices([]); setTextAnswer(""); setAnswered(false); setActiveLayer(0);\n' +
+      '    setSelectedChoice(null); setSelectedChoices([]); setTextAnswer(""); setAnswered(false);\n' +
+      '    setOpenPanels([]); setModalLayer(null);\n' +
       '    if (currentSlide < totalSlides - 1) setCurrentSlide(currentSlide + 1);\n' +
       '  }\n' +
       '  function goPrev() {\n' +
       '    if (currentSlide > 0) {\n' +
-      '      setSelectedChoice(null); setSelectedChoices([]); setTextAnswer(""); setAnswered(false); setActiveLayer(0);\n' +
+      '      setSelectedChoice(null); setSelectedChoices([]); setTextAnswer(""); setAnswered(false);\n' +
+      '      setOpenPanels([]); setModalLayer(null);\n' +
       '      setCurrentSlide(currentSlide - 1);\n' +
       '    }\n' +
-      '  }\n' +
+      '  }\n\n' +
+
+      // --- Quiz logic (preserved exactly) ---
       '  function startQuiz(bankId) {\n' +
       '    var bank = QUIZ_BANKS.find(function(b) { return b.id === bankId; });\n' +
       '    if (!bank) { goNext(); return; }\n' +
@@ -168,6 +181,15 @@ window.GeneratorApp = (function () {
       '  function handleFormChange(field, value) {\n' +
       '    var updated = Object.assign({}, formData); updated[field] = value; setFormData(updated);\n' +
       '  }\n\n' +
+
+      // --- Accordion toggle ---
+      '  function togglePanel(idx) {\n' +
+      '    var updated = openPanels.slice();\n' +
+      '    var pos = updated.indexOf(idx);\n' +
+      '    if (pos >= 0) updated.splice(pos, 1); else updated.push(idx);\n' +
+      '    setOpenPanels(updated);\n' +
+      '  }\n\n' +
+
       '  var progress = ((currentSlide + 1) / totalSlides) * 100;\n\n' +
       generateRenderFunctions() +
       '  var showNav = slide && slide.type !== "title" && slide.type !== "results";\n' +
@@ -179,6 +201,16 @@ window.GeneratorApp = (function () {
       '      e("button", { className: "btn btn-ghost", onClick: goPrev, disabled: currentSlide === 0, style: currentSlide === 0 ? { opacity: 0.3 } : {} }, "\\u2190 Back"),\n' +
       '      e("span", { className: "slide-counter" }, (currentSlide + 1) + " / " + totalSlides),\n' +
       '      e("button", { className: "btn btn-primary", onClick: goNext }, "Next \\u2192")\n' +
+      '    ) : null,\n' +
+      // Modal overlay
+      '    modalLayer !== null && slide && slide.layers && slide.layers[modalLayer] ? e("div", { className: "modal-overlay", onClick: function() { setModalLayer(null); } },\n' +
+      '      e("div", { className: "modal-content", onClick: function(ev) { ev.stopPropagation(); } },\n' +
+      '        e("button", { className: "modal-close", onClick: function() { setModalLayer(null); } }, "\\u2715"),\n' +
+      '        e("h3", null, slide.layers[modalLayer].name),\n' +
+      '        slide.layers[modalLayer].image ? e("div", { className: "modal-image" },\n' +
+      '          e("img", { src: slide.layers[modalLayer].image, alt: slide.layers[modalLayer].name })) : null,\n' +
+      '        slide.layers[modalLayer].texts && slide.layers[modalLayer].texts.map(function(t, i) { return e("p", { key: i }, t); })\n' +
+      '      )\n' +
       '    ) : null\n' +
       '  );\n' +
       '}\n\n';
@@ -190,13 +222,15 @@ window.GeneratorApp = (function () {
       '    if (quizState === "active" && quizQuestions.length > 0) return renderQuizSlide();\n' +
       '    switch (slide.type) {\n' +
       '      case "title": return renderTitleSlide();\n' +
-      '      case "objectives": return renderObjectivesSlide();\n' +
+      '      case "objectives": return renderContentSlide();\n' +
       '      case "form": return renderFormSlide();\n' +
       '      case "branching": return renderBranchingSlide();\n' +
       '      case "quiz": return renderQuizSlide();\n' +
       '      case "results": return renderResultsSlide();\n' +
       '      default: return renderContentSlide();\n' +
       '    }\n  }\n\n' +
+
+      // --- Title slide ---
       '  function renderTitleSlide() {\n' +
       '    return e("div", { className: "slide slide-title", style: slide.image ? {\n' +
       '      backgroundImage: "linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url(" + slide.image + ")",\n' +
@@ -208,17 +242,8 @@ window.GeneratorApp = (function () {
       '        slide.subtitle ? e("p", { className: "subtitle" }, slide.subtitle) : null,\n' +
       '        e("button", { className: "btn", onClick: goNext }, "Start Course")\n' +
       '      )\n    );\n  }\n\n' +
-      '  function renderObjectivesSlide() {\n' +
-      '    return e("div", { className: "slide slide-content" },\n' +
-      '      e("div", { className: "card" },\n' +
-      '        e("h2", null, slide.title),\n' +
-      '        slide.texts && slide.texts.map(function(t, i) { return e("p", { key: i }, t); }),\n' +
-      '        slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title })) : null,\n' +
-      '        slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,\n' +
-      '        slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,\n' +
-      '        e("div", { style: { marginTop: "calc(var(--spacing) * 3)", textAlign: "center" } },\n' +
-      '          e("button", { className: "btn btn-primary", onClick: goNext }, "Continue")\n' +
-      '        )\n      )\n    );\n  }\n\n' +
+
+      // --- Form slide ---
       '  function renderFormSlide() {\n' +
       '    return e("div", { className: "slide slide-content" },\n' +
       '      e("div", { className: "card" },\n' +
@@ -231,18 +256,20 @@ window.GeneratorApp = (function () {
       '              value: formData[f.variableName] || "",\n' +
       '              onChange: function(ev) { handleFormChange(f.variableName, ev.target.value); }\n' +
       '            })\n          );\n        }),\n' +
-      '        e("div", { style: { marginTop: "calc(var(--spacing) * 3)", textAlign: "center" } },\n' +
+      '        e("div", { className: "actions" },\n' +
       '          e("button", { className: "btn btn-primary", onClick: goNext }, "Continue"))\n' +
       '      )\n    );\n  }\n\n' +
+
+      // --- Branching slide ---
       '  function renderBranchingSlide() {\n' +
       '    var userName = formData["TextEntry9"] || "";\n' +
       '    return e("div", { className: "slide slide-content" },\n' +
-      '      e("div", { style: { textAlign: "center", maxWidth: "760px" } },\n' +
+      '      e("div", { className: "branch-container" },\n' +
       '        e("h2", null, slide.title),\n' +
-      '        slide.instruction ? e("p", { style: { marginBottom: "calc(var(--spacing) * 2)" } }, slide.instruction) : null,\n' +
-      '        slide.greeting ? e("p", { style: { fontSize: "18px", marginBottom: "calc(var(--spacing) * 2)" } },\n' +
+      '        slide.instruction ? e("p", null, slide.instruction) : null,\n' +
+      '        slide.greeting ? e("p", { className: "greeting" },\n' +
       '          slide.greeting.replace("%name%", userName)) : null,\n' +
-      '        e("div", { className: "branch-options" },\n' +
+      '        e("div", { className: "branch-grid" },\n' +
       '          slide.options && slide.options.map(function(opt, i) {\n' +
       '            return e("div", { className: "branch-option", key: i,\n' +
       '              onClick: function() {\n' +
@@ -252,6 +279,8 @@ window.GeneratorApp = (function () {
       '              }\n' +
       '            }, e("h3", null, opt.label));\n' +
       '          })\n        )\n      )\n    );\n  }\n\n' +
+
+      // --- Quiz slide (preserved exactly) ---
       '  function renderQuizSlide() {\n' +
       '    var q = quizQuestions[quizIndex];\n' +
       '    if (!q) return e("div", { className: "slide slide-content" }, e("p", null, "Loading quiz..."));\n' +
@@ -265,15 +294,15 @@ window.GeneratorApp = (function () {
       '      } else { wasCorrect = q.choices[selectedChoice] && q.choices[selectedChoice].isCorrect; }\n' +
       '    }\n' +
       '    return e("div", { className: "slide slide-content" },\n' +
-      '      e("div", { style: { textAlign: "center", width: "100%", maxWidth: "760px" } },\n' +
-      '        e("p", { style: { color: "var(--text-muted)", marginBottom: "var(--spacing)" } }, "Question " + (quizIndex + 1) + " of " + totalQ),\n' +
+      '      e("div", { className: "quiz-container" },\n' +
+      '        e("p", { className: "quiz-counter" }, "Question " + (quizIndex + 1) + " of " + totalQ),\n' +
       '        e("div", { className: "quiz-question" }, q.questionText),\n' +
       '        isTextEntry ? e("div", { className: "quiz-text-entry" },\n' +
       '          e("input", { type: "text", placeholder: "Type your answer...", value: textAnswer, disabled: answered,\n' +
       '            onChange: function(ev) { setTextAnswer(ev.target.value); },\n' +
       '            onKeyDown: function(ev) { if (ev.key === "Enter" && textAnswer.trim()) submitTextAnswer(); }\n' +
       '          }),\n' +
-      '          !answered && textAnswer.trim() ? e("div", { style: { marginTop: "calc(var(--spacing) * 2)" } },\n' +
+      '          !answered && textAnswer.trim() ? e("div", { className: "actions" },\n' +
       '            e("button", { className: "btn btn-primary", onClick: submitTextAnswer }, "Submit Answer")) : null\n' +
       '        ) :\n' +
       '        e("div", { className: "quiz-choices" },\n' +
@@ -289,32 +318,90 @@ window.GeneratorApp = (function () {
       '              ),\n' +
       '              e("span", null, c.text)\n' +
       '            );\n          })\n        ),\n' +
-      '        isMulti && !answered && selectedChoices.length > 0 ? e("div", { style: { marginTop: "calc(var(--spacing) * 2)" } },\n' +
+      '        isMulti && !answered && selectedChoices.length > 0 ? e("div", { className: "actions" },\n' +
       '          e("button", { className: "btn btn-primary", onClick: submitMultiAnswer }, "Submit Answer")) : null,\n' +
       '        answered ? e("div", { className: "quiz-feedback " + (isTextEntry ? "correct" : (wasCorrect ? "correct" : "incorrect")) },\n' +
       '          isTextEntry ? "Answer submitted" : (wasCorrect ? (q.correctFeedback || "Correct!") : (q.incorrectFeedback || "Incorrect."))) : null,\n' +
-      '        answered ? e("div", { style: { marginTop: "calc(var(--spacing) * 2)" } },\n' +
+      '        answered ? e("div", { className: "actions" },\n' +
       '          e("button", { className: "btn btn-primary", onClick: nextQuestion },\n' +
       '            quizIndex < quizQuestions.length - 1 ? "Next Question" : "See Results")) : null\n' +
       '      )\n    );\n  }\n\n' +
+
+      // --- Results slide (preserved exactly) ---
       '  function renderResultsSlide() {\n' +
       '    var displayScore = score !== null ? score : 0;\n' +
       '    var passed = displayScore >= MASTERY;\n' +
       '    return e("div", { className: "slide slide-results" },\n' +
-      '      e("div", { className: "content", style: { maxWidth: "500px" } },\n' +
-      '        e("h2", { style: { color: "white" } }, slide.title || "Your Results"),\n' +
+      '      e("div", { className: "content" },\n' +
+      '        e("h2", null, slide.title || "Your Results"),\n' +
       '        e("div", { className: "score-circle" },\n' +
       '          e("div", { className: "score-value" }, displayScore + "%"),\n' +
       '          e("div", { className: "score-label" }, passed ? "Passed" : "Not passed")\n' +
       '        ),\n' +
-      '        e("p", { style: { color: "rgba(255,255,255,0.85)", marginTop: "calc(var(--spacing) * 2)" } },\n' +
+      '        e("p", { className: "results-msg" },\n' +
       '          passed ? "Congratulations! You have successfully completed this course."\n' +
       '            : "You need " + MASTERY + "% to pass. Please try again."),\n' +
       '        !passed ? e("button", {\n' +
-      '          className: "btn", style: { marginTop: "calc(var(--spacing) * 3)", background: "white", color: "var(--primary)" },\n' +
+      '          className: "btn btn-restart",\n' +
       '          onClick: function() { setCurrentSlide(0); setQuizState(null); setScore(null); }\n' +
       '        }, "Restart Course") : null\n' +
       '      )\n    );\n  }\n\n' +
+
+      // --- Content slide with interactive layers ---
+      '  function renderLayers() {\n' +
+      '    if (!slide.layers || slide.layers.length === 0) return null;\n' +
+      '    var type = slide.interactionType || "accordion";\n' +
+      '    if (type === "bento") return renderBentoGrid();\n' +
+      '    if (type === "modal") return renderModalTriggers();\n' +
+      '    return renderAccordion();\n' +
+      '  }\n\n' +
+
+      // --- Accordion component ---
+      '  function renderAccordion() {\n' +
+      '    return e("div", { className: "accordion" },\n' +
+      '      slide.layers.map(function(layer, i) {\n' +
+      '        var isOpen = openPanels.indexOf(i) >= 0;\n' +
+      '        return e("div", { className: "accordion-item" + (isOpen ? " open" : ""), key: i },\n' +
+      '          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(i); } },\n' +
+      '            e("span", null, layer.name),\n' +
+      '            e("span", { className: "accordion-icon" }, isOpen ? "\\u2212" : "\\u002B")\n' +
+      '          ),\n' +
+      '          isOpen ? e("div", { className: "accordion-panel" },\n' +
+      '            layer.image ? e("div", { className: "hero-image" }, e("img", { src: layer.image, alt: layer.name })) : null,\n' +
+      '            layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); })\n' +
+      '          ) : null\n' +
+      '        );\n' +
+      '      })\n    );\n  }\n\n' +
+
+      // --- Modal trigger tiles ---
+      '  function renderModalTriggers() {\n' +
+      '    return e("div", { className: "modal-triggers" },\n' +
+      '      slide.layers.map(function(layer, i) {\n' +
+      '        return e("div", { className: "modal-trigger-tile", key: i,\n' +
+      '          onClick: function() { setModalLayer(i); }\n' +
+      '        },\n' +
+      '          layer.image ? e("div", { className: "tile-thumb" },\n' +
+      '            e("img", { src: layer.image, alt: layer.name })) : null,\n' +
+      '          e("div", { className: "tile-label" },\n' +
+      '            e("span", null, layer.name),\n' +
+      '            e("span", { className: "tile-arrow" }, "\\u2192")\n' +
+      '          )\n' +
+      '        );\n' +
+      '      })\n    );\n  }\n\n' +
+
+      // --- Bento grid ---
+      '  function renderBentoGrid() {\n' +
+      '    return e("div", { className: "bento-grid" },\n' +
+      '      slide.layers.map(function(layer, i) {\n' +
+      '        return e("div", { className: "bento-tile", key: i },\n' +
+      '          layer.image ? e("div", { className: "bento-image" },\n' +
+      '            e("img", { src: layer.image, alt: layer.name })) : null,\n' +
+      '          e("h3", null, layer.name),\n' +
+      '          layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); })\n' +
+      '        );\n' +
+      '      })\n    );\n  }\n\n' +
+
+      // --- Content slide ---
       '  function renderContentSlide() {\n' +
       '    return e("div", { className: "slide slide-content" },\n' +
       '      e("div", { className: "card" },\n' +
@@ -324,18 +411,8 @@ window.GeneratorApp = (function () {
       '        slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,\n' +
       '        slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null\n' +
       '      ),\n' +
-      '      slide.layers && slide.layers.length > 0 ? e("div", { style: { width: "100%", maxWidth: "760px", marginTop: "calc(var(--spacing) * 2)" } },\n' +
-      '        e("div", { className: "layer-tabs" },\n' +
-      '          slide.layers.map(function(layer, i) {\n' +
-      '            return e("button", { className: "layer-tab" + (activeLayer === i ? " active" : ""), key: i,\n' +
-      '              onClick: function() { setActiveLayer(i); } }, layer.name);\n' +
-      '          })\n        ),\n' +
-      '        e("div", { className: "layer-content card" },\n' +
-      '          slide.layers[activeLayer] && slide.layers[activeLayer].texts.map(function(t, i) { return e("p", { key: i }, t); }),\n' +
-      '          slide.layers[activeLayer] && slide.layers[activeLayer].image ?\n' +
-      '            e("div", { className: "hero-image" }, e("img", { src: slide.layers[activeLayer].image, alt: slide.layers[activeLayer].name })) : null\n' +
-      '        )\n      ) : null,\n' +
-      '      e("div", { style: { marginTop: "calc(var(--spacing) * 3)", textAlign: "center" } },\n' +
+      '      renderLayers(),\n' +
+      '      e("div", { className: "actions" },\n' +
       '        e("button", { className: "btn btn-primary", onClick: goNext }, "Continue"))\n' +
       '    );\n  }\n\n';
   }

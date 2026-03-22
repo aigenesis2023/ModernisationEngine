@@ -1,6 +1,11 @@
 /**
  * Data Builders — Converts CourseIR into simplified slide/quiz JSON
  * for the React app component. Part 2 of the generator.
+ *
+ * Layer Interaction Classification:
+ *   - accordion: text-heavy layers (click-to-reveal paragraphs)
+ *   - modal: layers with images + text (detailed explorations)
+ *   - bento: 3+ layers with mixed short content (visual tile grid)
  */
 window.GeneratorData = (function () {
   'use strict';
@@ -15,6 +20,35 @@ window.GeneratorData = (function () {
     if (text.includes('%_player.') && text.includes('$PercentScore')) return true;
     if (lower === 'question' || lower === 'correct' || lower === 'incorrect') return true;
     return false;
+  }
+
+  function resolveImage(el, images) {
+    if (!el) return undefined;
+    var generated = images && images.entries
+      ? images.entries.find(function (e) { return e.originalAssetId === el.assetId && e.status === 'generated'; })
+      : null;
+    if (generated && generated.generatedPath) return generated.generatedPath;
+    var filename = (el.originalPath || '').split('/').pop() || '';
+    return filename ? 'assets/images/' + filename : undefined;
+  }
+
+  /**
+   * Classify how layers should be rendered based on their content.
+   */
+  function classifyInteraction(layers) {
+    if (!layers || layers.length === 0) return null;
+
+    var hasImages = layers.some(function (l) { return l.image; });
+    var avgTextLen = layers.reduce(function (sum, l) {
+      return sum + (l.texts ? l.texts.join(' ').length : 0);
+    }, 0) / layers.length;
+
+    // Bento grid: 3+ layers, each relatively short
+    if (layers.length >= 3 && avgTextLen < 200) return 'bento';
+    // Modal: layers with images (detailed exploration)
+    if (hasImages) return 'modal';
+    // Accordion: text-heavy content
+    return 'accordion';
   }
 
   function buildSlidesData(course, images) {
@@ -33,17 +67,7 @@ window.GeneratorData = (function () {
       var imgEl = slide.elements.find(function (el) {
         return el.type === 'image' && ['hero', 'content', 'background'].includes(el.instructionalRole);
       });
-      if (imgEl) {
-        var generated = images && images.entries
-          ? images.entries.find(function (e) { return e.originalAssetId === imgEl.assetId && e.status === 'generated'; })
-          : null;
-        if (generated && generated.generatedPath) {
-          data.image = generated.generatedPath;
-        } else {
-          var filename = (imgEl.originalPath || '').split('/').pop() || '';
-          data.image = 'assets/images/' + filename;
-        }
-      }
+      if (imgEl) data.image = resolveImage(imgEl, images);
 
       // Video element
       var videoEl = slide.elements.find(function (el) { return el.type === 'video'; });
@@ -62,7 +86,7 @@ window.GeneratorData = (function () {
         data.audio = { src: 'assets/media/' + aFilename };
       }
 
-      // Layer content
+      // Layer content — classify interaction type
       if (slide.layers.length > 0) {
         var layerData = slide.layers
           .filter(function (l) { return l.elements.length > 0; })
@@ -74,25 +98,18 @@ window.GeneratorData = (function () {
             var layerImg = l.elements.find(function (el) {
               return el.type === 'image' && ['hero', 'content'].includes(el.instructionalRole);
             });
-            var layerImgPath;
-            if (layerImg) {
-              var layerGenerated = images && images.entries
-                ? images.entries.find(function (e) { return e.originalAssetId === layerImg.assetId && e.status === 'generated'; })
-                : null;
-              if (layerGenerated && layerGenerated.generatedPath) {
-                layerImgPath = layerGenerated.generatedPath;
-              } else {
-                layerImgPath = 'assets/images/' + (layerImg.originalPath || '').split('/').pop();
-              }
-            }
             return {
               name: l.name,
               texts: layerTexts,
-              image: layerImgPath,
+              image: resolveImage(layerImg, images),
             };
           })
           .filter(function (l) { return l.texts.length > 0 || l.image; });
-        if (layerData.length > 0) data.layers = layerData;
+
+        if (layerData.length > 0) {
+          data.layers = layerData;
+          data.interactionType = classifyInteraction(layerData);
+        }
       }
 
       // Slide-type specific data
