@@ -386,9 +386,14 @@ window.SCORMParser = (function () {
           }
         }
       } else if (obj.kind === 'video') {
-        elements.push({ ...base, type: 'video', assetId: obj.videodata?.assetId ?? -1,
-          originalPath: obj.videodata?.url || '', durationMs: obj.videodata?.duration || 0,
-          posterPath: obj.videodata?.posterUrl });
+        // Storyline stores video data at obj.data.videodata (not obj.videodata)
+        // The videodata contains assetId which maps to assetLib for the actual URL
+        const vdata = obj.data?.videodata || obj.videodata || {};
+        elements.push({ ...base, type: 'video', assetId: vdata.assetId ?? -1,
+          originalPath: vdata.url || '', durationMs: vdata.duration || 0,
+          posterAssetId: vdata.posterAssetId,
+          posterPath: vdata.posterUrl,
+          altText: vdata.altText || '' });
       } else if (obj.kind === 'textinput') {
         const extracted = extractTextFromObj(obj);
         if (extracted.text) {

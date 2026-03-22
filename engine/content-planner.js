@@ -696,7 +696,8 @@ window.ContentPlanner = (function () {
           assetId: el.assetId,
           originalPath: el.originalPath,
           durationMs: el.durationMs,
-          posterPath: el.posterPath
+          posterPath: el.posterPath,
+          posterAssetId: el.posterAssetId
         });
       }
 

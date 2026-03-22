@@ -300,12 +300,30 @@ window.GeneratorData = (function () {
     // Override images array to exclude backgrounds
     if (contentImgs.length > 0) data.images = contentImgs;
 
-    // Videos
+    // Videos — resolve asset IDs to file paths when originalPath is empty.
+    // Storyline stores video URLs in the global assetLib, not in individual
+    // video objects. The video element only has an assetId.
     if (slide.content.videos.length > 0) {
+      var courseAssets = coursePlan.assets || {};
+      var videoAssets = courseAssets.videos || [];
+      var imageAssets = courseAssets.images || [];
+
       data.videos = slide.content.videos.map(function (v) {
+        var videoPath = v.originalPath;
+        // If originalPath is empty, resolve from asset manifest
+        if (!videoPath && v.assetId !== undefined && v.assetId !== -1) {
+          var asset = videoAssets.find(function (a) { return a.id === v.assetId; });
+          if (asset) videoPath = asset.originalPath;
+        }
+        var posterPath = v.posterPath;
+        // Resolve poster from posterAssetId if available
+        if (!posterPath && v.posterAssetId !== undefined) {
+          var posterAsset = imageAssets.find(function (a) { return a.id === v.posterAssetId; });
+          if (posterAsset) posterPath = posterAsset.originalPath;
+        }
         return {
-          src: resolveMediaPath(v.originalPath, 'media'),
-          poster: v.posterPath ? resolveMediaPath(v.posterPath, 'images') : undefined,
+          src: resolveMediaPath(videoPath, 'media'),
+          poster: posterPath ? resolveMediaPath(posterPath, 'images') : undefined,
           durationMs: v.durationMs
         };
       }).filter(function (v) { return v.src; });
