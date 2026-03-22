@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-22T08:35:54.503Z",
+  "generatedAt": "2026-03-22T08:40:01.086Z",
   "extraction": {
     "meta": {
       "title": "Test intro scene",
@@ -534,7 +534,7 @@
             "type": "objectives",
             "presentation": "interactive",
             "headingCount": 0,
-            "bodyTextCount": 1,
+            "bodyTextCount": 0,
             "calloutCount": 0,
             "imageCount": 1,
             "videoCount": 0,
@@ -546,14 +546,12 @@
             "hasQuiz": false,
             "hasForm": false,
             "headings": [],
-            "bodyTexts": [
-              "Introduction"
-            ],
+            "bodyTexts": [],
             "callouts": [],
             "layerNames": [
               "You should inform your colleagues of your current trained le...",
               "This first level online course does not in any way qualify y...",
-              "Click on the arrows to explore the learning objectives"
+              "This training course is designed to improve your knowledge o..."
             ]
           },
           {
@@ -563,7 +561,7 @@
             "presentation": "form",
             "headingCount": 0,
             "bodyTextCount": 1,
-            "calloutCount": 1,
+            "calloutCount": 0,
             "imageCount": 2,
             "videoCount": 0,
             "audioCount": 0,
@@ -577,9 +575,7 @@
             "bodyTexts": [
               "EV Awareness & Safety"
             ],
-            "callouts": [
-              "Please enter your details and click next"
-            ],
+            "callouts": [],
             "layerNames": []
           }
         ]
@@ -597,7 +593,7 @@
             "presentation": "branching",
             "headingCount": 1,
             "bodyTextCount": 2,
-            "calloutCount": 1,
+            "calloutCount": 0,
             "imageCount": 2,
             "videoCount": 0,
             "audioCount": 0,
@@ -614,9 +610,7 @@
               "Site logistics, car parking and movements, valeting.",
               "Bodyshop & workshop technicians, Workshop manager."
             ],
-            "callouts": [
-              "Click on the most relevant role to you."
-            ],
+            "callouts": [],
             "layerNames": []
           }
         ]
@@ -668,7 +662,7 @@
             "type": "results",
             "presentation": "results",
             "headingCount": 0,
-            "bodyTextCount": 1,
+            "bodyTextCount": 0,
             "calloutCount": 0,
             "imageCount": 1,
             "videoCount": 0,
@@ -680,9 +674,7 @@
             "hasQuiz": false,
             "hasForm": false,
             "headings": [],
-            "bodyTexts": [
-              "Results"
-            ],
+            "bodyTexts": [],
             "callouts": [],
             "layerNames": [
               "It looks like you might need some help understanding electri...",
@@ -703,7 +695,7 @@
             "type": "results",
             "presentation": "results",
             "headingCount": 0,
-            "bodyTextCount": 1,
+            "bodyTextCount": 0,
             "calloutCount": 0,
             "imageCount": 1,
             "videoCount": 0,
@@ -715,9 +707,7 @@
             "hasQuiz": false,
             "hasForm": false,
             "headings": [],
-            "bodyTexts": [
-              "Results"
-            ],
+            "bodyTexts": [],
             "callouts": [],
             "layerNames": [
               "It looks like you might need some help understanding electri...",
@@ -744,8 +734,8 @@
       "planned": {
         "totalSections": 5,
         "totalSlides": 7,
-        "textsKept": 10,
-        "textsDropped": 3,
+        "textsKept": 5,
+        "textsDropped": 8,
         "imagesKept": 11,
         "videosKept": 1,
         "audioKept": 0,
@@ -754,7 +744,7 @@
         "interactionsKept": 0,
         "statesKept": 0
       },
-      "contentRetention": 88
+      "contentRetention": 68
     }
   },
   "brandProfile": {

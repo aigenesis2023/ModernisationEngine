@@ -15,6 +15,7 @@ window.ContentPlanner = (function () {
 
   // ---- Noise detection ----
 
+  // Exact match junk (decorative elements, Storyline internals)
   var JUNK_TEXT_PATTERNS = [
     /^(rectangle|oval|shape|round diagonal corner|freeform|group)\s*\d*$/i,
     /^(slide|scene)\s*\d+(\.\d+)?$/i,
@@ -25,19 +26,55 @@ window.ContentPlanner = (function () {
     /^text\s*\d*$/i,
     /^(shape|image|picture|photo|button)\s*\d+$/i,
     /%_player\.[^%]+%/,
-    /^\s*$/
+    /^\s*$/,
+    /^results?$/i,
+    /^introduction$/i
   ];
 
-  var JUNK_VARIABLE_PATTERNS = [
-    /^_player\./,
-    /^TextEntry\d+$/,
-    /^NumericEntry\d+$/,
-    /^SliderVar\d+$/
+  // Storyline UI instruction text — these tell users how to interact with the
+  // Storyline player and are not meaningful course content in the modernised version
+  var STORYLINE_UI_PATTERNS = [
+    /click\s*(on\s*)?(the\s+)?(arrow|tab|button|icon|image|next|menu|item)/i,
+    /click\s*(on\s*)?(each|the|an?)\s+(arrow|tab|button|icon|image|item|topic|section)/i,
+    /click\s*(on\s*)?here\s+to/i,
+    /click\s+to\s+(continue|proceed|begin|start|advance|move|go)/i,
+    /tap\s+(on\s*)?(the\s+)?(arrow|tab|button|icon|image|next)/i,
+    /select\s+(the|an?|each)\s+(arrow|tab|button|icon|image|item|topic)/i,
+    /press\s+(the\s+)?(next|back|forward|arrow|play)\s*(button)?/i,
+    /drag\s+(the|each|an?)\s+(item|image|word|phrase|answer)/i,
+    /hover\s+over/i,
+    /mouse\s+over/i,
+    /roll\s+over/i,
+    /use\s+the\s+(arrows?|buttons?|tabs?|slider|scroll\s*bar|menu)/i,
+    /navigate\s+(using|with|by)/i,
+    /explore\s+the\s+(tabs?|buttons?|arrows?|menu|topics?|sections?|items?)/i,
+    /click\s+on\s+the\s+arrows?\s+to\s+explore/i,
+    /swipe\s+(left|right|up|down)/i,
+    /scroll\s+(down|up)\s+to\s+(continue|see|view|read)/i,
+    /click\s+on\s+the\s+most\s+relevant/i,
+    /click\s+(on\s+)?(the\s+)?most\s+relevant/i,
+    /choose\s+(the|your)\s+(most\s+)?(relevant|appropriate|correct)/i,
+    /make\s+your\s+(selection|choice)/i,
+    /click\s+(on\s+)?(a|the|your)\s+(response|answer|option|choice)/i
   ];
 
   function isJunkText(text) {
     if (!text || text.length < 2) return true;
     return JUNK_TEXT_PATTERNS.some(function (p) { return p.test(text.trim()); });
+  }
+
+  /**
+   * Detect Storyline UI instruction text that shouldn't appear in the modernised course.
+   * These are instructions about how to interact with the Storyline player.
+   */
+  function isStorylineUIText(text) {
+    if (!text) return false;
+    var cleaned = text.trim();
+    // Short text that is purely an instruction
+    if (cleaned.length < 80) {
+      return STORYLINE_UI_PATTERNS.some(function (p) { return p.test(cleaned); });
+    }
+    return false;
   }
 
   function isNavigationElement(el) {
@@ -51,6 +88,7 @@ window.ContentPlanner = (function () {
 
   function isMeaningfulText(text) {
     if (!text || isJunkText(text)) return false;
+    if (isStorylineUIText(text)) return false;
     var cleaned = text.replace(/\s+/g, ' ').trim();
     return cleaned.length > 3;
   }

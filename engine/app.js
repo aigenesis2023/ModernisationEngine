@@ -18,7 +18,6 @@
   var resultSection = document.getElementById('resultSection');
   var btnDownload = document.getElementById('btnDownload');
   var btnPreview = document.getElementById('btnPreview');
-  var previewFrame = document.getElementById('previewFrame');
 
   // State
   var fileMap = new Map(); // relativePath -> File
@@ -197,10 +196,6 @@
 
       // Show results
       resultSection.classList.add('active');
-
-      // Load preview
-      var previewUrl = URL.createObjectURL(new Blob([generatedHtml], { type: 'text/html' }));
-      previewFrame.src = previewUrl;
 
     } catch (err) {
       log('Error: ' + err.message, 'error');
