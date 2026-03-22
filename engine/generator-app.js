@@ -67,22 +67,6 @@ window.GeneratorApp = (function () {
 
     var courseTitle = escJs(coursePlan.meta.title);
     var masteryScore = coursePlan.meta.masteryScore;
-    // Logo from brand scraping is deliberately removed — web scraping cannot
-    // reliably distinguish a company logo from other images on a page.
-    // This would produce incorrect results across different brand websites.
-
-    // Determine if the course uses locked navigation
-    // In Storyline, this is indicated by slideLock or NavigationRestriction action groups.
-    // If the author allowed free navigation, we respect that in the deep-scroll output.
-    // Only check content/form/interactive slides for locking — results and quiz
-    // slides always have NavigationRestriction (they're terminal), which doesn't
-    // mean the course content is locked.
-    var lockableTypes = ['content', 'title', 'objectives', 'form', 'branching'];
-    var courseLocked = coursePlan.sections.some(function (section) {
-      return section.slides.some(function (slide) {
-        return lockableTypes.indexOf(slide.type) !== -1 && (slide.locked || slide.hasNavRestriction);
-      });
-    });
 
     return '"use strict";\n' +
       'var e = React.createElement;\n' +
@@ -91,7 +75,6 @@ window.GeneratorApp = (function () {
       'var MASTERY = ' + masteryScore + ';\n' +
       'var PASS_STATUS = ' + JSON.stringify(coursePlan.meta.passStatus || 'passed') + ';\n' +
       'var FAIL_STATUS = ' + JSON.stringify(coursePlan.meta.failStatus || 'failed') + ';\n' +
-      'var COURSE_LOCKED = ' + (courseLocked ? 'true' : 'false') + ';\n' +
       'var COURSE_TITLE = ' + JSON.stringify(courseTitle) + ';\n\n' +
       'function shuffleArray(arr) {\n' +
       '  var a = arr.slice();\n' +
@@ -147,9 +130,9 @@ window.GeneratorApp = (function () {
       '  var _ta = React.useState(""), textAnswer = _ta[0], setTextAnswer = _ta[1];\n' +
       '  var _openPanels = React.useState({}), openPanels = _openPanels[0], setOpenPanels = _openPanels[1];\n' +
       '  var _bankId = React.useState(null), activeBankId = _bankId[0], setActiveBankId = _bankId[1];\n' +
-      '  var _completed = React.useState({ 0: true }), completedSections = _completed[0], setCompletedSections = _completed[1];\n' +
       '  var _modalLayer = React.useState(null), modalLayer = _modalLayer[0], setModalLayer = _modalLayer[1];\n' +
-      // --- Scroll progress tracking (uses direct DOM, not React state, to avoid re-renders) ---
+
+      // --- Scroll progress tracking ---
       '  React.useEffect(function() {\n' +
       '    var fill = document.querySelector(".progress-fill");\n' +
       '    if (!fill) return;\n' +
@@ -172,6 +155,15 @@ window.GeneratorApp = (function () {
       '    setQuizState("active"); setSelectedChoice(null); setAnswered(false);\n' +
       '    setActiveBankId(bankId);\n' +
       '  }\n' +
+
+      // Start quiz from inline section questions (not from a bank)
+      '  function startSectionQuiz(questions) {\n' +
+      '    var qs = shuffleArray(questions);\n' +
+      '    setQuizQuestions(qs); setQuizIndex(0); setCorrectCount(0); setTotalQ(qs.length);\n' +
+      '    setQuizState("active"); setSelectedChoice(null); setSelectedChoices([]); setAnswered(false);\n' +
+      '    setActiveBankId(null);\n' +
+      '  }\n' +
+
       '  function handleQuizAnswer(choiceIdx) {\n' +
       '    if (answered) return;\n' +
       '    var q = quizQuestions[quizIndex]; if (!q) return;\n' +
@@ -210,44 +202,37 @@ window.GeneratorApp = (function () {
       '      var finalScore = Math.round((correctCount + lastCorrect) / totalQ * 100);\n' +
       '      setScore(finalScore); setQuizState("complete");\n' +
       '      SCORM.complete(finalScore, MASTERY);\n' +
-      '      // Scroll to results section\n' +
       '      var resultsEl = document.querySelector(".section-results");\n' +
-      '      if (resultsEl) resultsEl.scrollIntoView({ behavior: "smooth" });\n' +
+      '      if (resultsEl) setTimeout(function() { resultsEl.scrollIntoView({ behavior: "smooth" }); }, 100);\n' +
       '    }\n' +
-      '  }\n' +
-      // --- Section completion tracking ---\n' +
-      '  function completeSection(idx) {\n' +
-      '    if (completedSections[idx]) return;\n' +
-      '    var updated = Object.assign({}, completedSections);\n' +
-      '    updated[idx] = true;\n' +
-      '    setCompletedSections(updated);\n' +
-      '  }\n' +
-      '  function isSectionUnlocked(idx) {\n' +
-      '    if (!COURSE_LOCKED) return true;\n' +
-      '    if (idx === 0) return true;\n' +
-      '    return !!completedSections[idx - 1];\n' +
       '  }\n\n' +
+
       '  function handleFormChange(field, value) {\n' +
       '    formDataRef.current[field] = value;\n' +
       '  }\n\n' +
 
-      // --- Accordion toggle (per-slide keyed) ---
-      '  function togglePanel(slideId, idx, sectionIdx, totalLayers) {\n' +
+      // --- Accordion toggle ---
+      '  function togglePanel(slideId, idx) {\n' +
       '    var key = slideId + "_" + idx;\n' +
       '    var updated = Object.assign({}, openPanels);\n' +
       '    updated[key] = !updated[key];\n' +
       '    setOpenPanels(updated);\n' +
-      '    // Check if all panels in this slide have been opened at least once\n' +
-      '    if (totalLayers && sectionIdx !== undefined) {\n' +
-      '      var allOpened = true;\n' +
-      '      for (var li = 0; li < totalLayers; li++) {\n' +
-      '        if (!updated[slideId + "_" + li] && !openPanels[slideId + "_" + li]) { allOpened = false; break; }\n' +
-      '      }\n' +
-      '      if (allOpened) completeSection(sectionIdx);\n' +
-      '    }\n' +
       '  }\n' +
       '  function isPanelOpen(slideId, idx) {\n' +
       '    return !!openPanels[slideId + "_" + idx];\n' +
+      '  }\n\n' +
+
+      // --- Check if title is auto-generated ---
+      '  function isAutoTitle(text) {\n' +
+      '    if (!text) return true;\n' +
+      '    var t = text.trim().toLowerCase();\n' +
+      '    if (/^\\d+$/.test(t)) return true;\n' +
+      '    if (/^section\\s*\\d+\\s*(q\\d+|quiz|intro)?\\s*$/i.test(t)) return true;\n' +
+      '    if (/^(drag\\s*and\\s*drop|match\\s*the)\\s*\\d*$/i.test(t)) return true;\n' +
+      '    var labels = ["pick one","pick many","pick all","true/false","true false",\n' +
+      '      "text entry","matching","sequence","fill in","freeform","graded question",\n' +
+      '      "survey question","multiple choice","untitled slide"];\n' +
+      '    return labels.some(function(l) { return t === l || t.match(new RegExp("^" + l + "\\\\s*\\\\d*$")); });\n' +
       '  }\n\n' +
 
       generateRenderFunctions() +
@@ -275,20 +260,16 @@ window.GeneratorApp = (function () {
       // --- ScrollReveal wrapper ---
       '  function RevealBlock(props) {\n' +
       '    var ref = useScrollReveal();\n' +
-      '    return e("div", { ref: ref, className: "scroll-reveal " + (props.className || "") }, props.children);\n' +
+      '    return e("div", { ref: ref, className: "scroll-reveal " + (props.className || ""), style: props.style || null }, props.children);\n' +
       '  }\n\n' +
 
       // --- Section renderer ---
       '  function renderSection(section, sectionIndex) {\n' +
-      '    // Results sections: only show after quiz complete, and only the one\n' +
-      '    // that matches the quiz bank the user took.\n' +
-      '    // In Storyline, each quiz bank (slidedraw) has an exitaction pointing\n' +
-      '    // to a specific results slide. The bank\'s "group" field stores that\n' +
-      '    // results slide ID. We match it against the section\'s slide ID.\n' +
+      // Results sections: only show after quiz complete
       '    if (section.type === "results") {\n' +
       '      if (quizState !== "complete") return null;\n' +
       '      var resultsSections = SECTIONS.filter(function(s) { return s.type === "results"; });\n' +
-      '      if (resultsSections.length > 1) {\n' +
+      '      if (resultsSections.length > 1 && activeBankId) {\n' +
       '        var thisSlideId = section.slides[0] ? section.slides[0].id : "";\n' +
       '        var bankExitsHere = QUIZ_BANKS.some(function(qb) {\n' +
       '          return qb.group === thisSlideId && qb.id === activeBankId;\n' +
@@ -299,34 +280,68 @@ window.GeneratorApp = (function () {
       '    var sectionClass = "section";\n' +
       '    if (section.type === "hero") sectionClass = "section section-hero";\n' +
       '    else if (section.type === "results") sectionClass = "section section-results";\n' +
-      '    var locked = !isSectionUnlocked(sectionIndex);\n' +
-      '    if (locked) sectionClass += " section-locked";\n' +
+      // Section title for non-hero, non-results sections
+      '    var showSectionTitle = section.type !== "hero" && section.type !== "results"\n' +
+      '      && section.title && !isAutoTitle(section.title);\n' +
       '    return e("div", { className: sectionClass, key: "s" + sectionIndex, id: "section-" + sectionIndex },\n' +
-      '      locked ? e("div", { className: "lock-overlay" },\n' +
-      '        e("div", { className: "lock-icon" }, "\\uD83D\\uDD12"),\n' +
-      '        e("p", null, "Complete the section above to continue")\n' +
-      '      ) : null,\n' +
       '      e("div", { className: "section-inner" },\n' +
+      '        showSectionTitle ? e("h2", { className: "section-title" }, section.title) : null,\n' +
+      // Assessment sections: render one unified "Start Assessment" card
+      '        section.type === "assessment" ? renderAssessmentSection(section, sectionIndex) :\n' +
       '        section.slides.map(function(slide, slideIdx) {\n' +
-      '          return renderSlide(slide, sectionIndex, slideIdx);\n' +
+      '          return renderSlide(slide, sectionIndex, slideIdx, section);\n' +
       '        })\n' +
       '      )\n' +
       '    );\n' +
       '  }\n\n' +
 
-      // --- Slide renderer (dispatches by presentation type) ---
-      '  function renderSlide(slide, si, idx) {\n' +
+      // --- Assessment section renderer ---
+      '  function renderAssessmentSection(section, sectionIndex) {\n' +
+      // Collect all questions: from sectionQuizQuestions or from individual slides
+      '    var questions = section.sectionQuizQuestions || [];\n' +
+      '    if (questions.length === 0) {\n' +
+      '      section.slides.forEach(function(slide) {\n' +
+      '        if (slide.quiz) questions.push(slide.quiz);\n' +
+      '      });\n' +
+      '    }\n' +
+      // If there are quiz banks, check if any bank matches
+      '    var matchingBank = null;\n' +
+      '    if (QUIZ_BANKS.length > 0) {\n' +
+      '      QUIZ_BANKS.forEach(function(bank) {\n' +
+      '        section.slides.forEach(function(slide) {\n' +
+      '          if (slide.type === "quiz" && !matchingBank) matchingBank = bank;\n' +
+      '        });\n' +
+      '      });\n' +
+      '    }\n' +
+      '    var assessmentTitle = section.title || "Assessment";\n' +
+      '    var questionCount = matchingBank ? matchingBank.drawCount : questions.length;\n' +
+      '    return e(RevealBlock, { className: "content-block", key: "assess-" + sectionIndex },\n' +
+      '      e("div", { className: "assessment-card" },\n' +
+      '        e("h2", null, assessmentTitle),\n' +
+      '        e("p", null, questionCount > 0 ? questionCount + " question" + (questionCount !== 1 ? "s" : "") : "Test your knowledge"),\n' +
+      '        e("div", { className: "actions" },\n' +
+      '          e("button", { className: "btn btn-primary", onClick: function() {\n' +
+      '            if (matchingBank) { startQuiz(matchingBank.id); }\n' +
+      '            else if (questions.length > 0) { startSectionQuiz(questions); }\n' +
+      '          } }, "Start Assessment")\n' +
+      '        )\n' +
+      '      )\n' +
+      '    );\n' +
+      '  }\n\n' +
+
+      // --- Slide renderer ---
+      '  function renderSlide(slide, si, idx, section) {\n' +
       '    var key = "sl_" + si + "_" + idx;\n' +
       '    switch (slide.presentation) {\n' +
-      '      case "hero": completeSection(si); return renderHeroSlide(slide, key);\n' +
+      '      case "hero": return renderHeroSlide(slide, key);\n' +
       '      case "results": return renderResultsSlide(slide, key);\n' +
-      '      case "branching": return renderBranchingSlide(slide, key, si);\n' +
-      '      case "form": return renderFormSlide(slide, key, si);\n' +
-      '      case "quiz": return renderInlineQuiz(slide, key);\n' +
-      '      case "media-feature": completeSection(si); return renderMediaSlide(slide, key);\n' +
-      '      case "interactive": return renderInteractiveSlide(slide, key, si);\n' +
-      '      case "narrative": completeSection(si); return renderNarrativeSlide(slide, key);\n' +
-      '      default: completeSection(si); return renderNarrativeSlide(slide, key);\n' +
+      '      case "branching": return renderBranchingSlide(slide, key, si, section);\n' +
+      '      case "form": return renderFormSlide(slide, key, si, section);\n' +
+      '      case "quiz": return null;\n' +  // Quiz slides handled by assessment section
+      '      case "media-feature": return renderMediaSlide(slide, key, section);\n' +
+      '      case "interactive": return renderInteractiveSlide(slide, key, si, section);\n' +
+      '      case "narrative": return renderNarrativeSlide(slide, key, section);\n' +
+      '      default: return renderNarrativeSlide(slide, key, section);\n' +
       '    }\n  }\n\n' +
 
       // --- Hero slide ---
@@ -339,15 +354,19 @@ window.GeneratorApp = (function () {
       '    );\n  }\n\n' +
 
       // --- Narrative content slide ---
-      '  function renderNarrativeSlide(slide, key) {\n' +
+      '  function renderNarrativeSlide(slide, key, section) {\n' +
       '    var blockProps = { key: key, className: "content-block" };\n' +
       '    if (slide.backgroundImage) {\n' +
       '      blockProps.className = "content-block has-bg-image";\n' +
       '      blockProps.style = { backgroundImage: "url(" + slide.backgroundImage + ")", backgroundSize: "cover", backgroundPosition: "center" };\n' +
       '    }\n' +
+      // Don't show slide title if it matches section title (redundant) or is auto-generated
+      '    var showTitle = slide.title && slide.type !== "title"\n' +
+      '      && !isAutoTitle(slide.title)\n' +
+      '      && (!section || slide.title !== section.title);\n' +
       '    return e(RevealBlock, blockProps,\n' +
       '      slide.backgroundImage ? e("div", { className: "bg-overlay" }) : null,\n' +
-      '      slide.title && slide.type !== "title" ? e("h2", null, slide.title) : null,\n' +
+      '      showTitle ? e("h2", null, slide.title) : null,\n' +
       '      slide.headings ? slide.headings.map(function(h, i) { return e("h3", { key: "h" + i }, h); }) : null,\n' +
       '      slide.callouts ? slide.callouts.map(function(c, i) { return e("div", { key: "c" + i, className: "callout" }, c); }) : null,\n' +
       '      slide.texts ? e("div", { className: "narrative-text" },\n' +
@@ -360,9 +379,11 @@ window.GeneratorApp = (function () {
       '    );\n  }\n\n' +
 
       // --- Media feature slide ---
-      '  function renderMediaSlide(slide, key) {\n' +
+      '  function renderMediaSlide(slide, key, section) {\n' +
+      '    var showTitle = slide.title && !isAutoTitle(slide.title)\n' +
+      '      && (!section || slide.title !== section.title);\n' +
       '    return e(RevealBlock, { key: key, className: "content-block media-feature" },\n' +
-      '      slide.title ? e("h2", null, slide.title) : null,\n' +
+      '      showTitle ? e("h2", null, slide.title) : null,\n' +
       '      slide.video ? e("div", { className: "video-container" }, e("video", { controls: true, preload: "metadata", poster: slide.video.poster, src: slide.video.src })) : null,\n' +
       '      !slide.video && slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,\n' +
       '      slide.texts ? e("div", { className: "narrative-text" },\n' +
@@ -372,42 +393,47 @@ window.GeneratorApp = (function () {
       '    );\n  }\n\n' +
 
       // --- Interactive slide (layers) ---
-      '  function renderInteractiveSlide(slide, key, sectionIdx) {\n' +
+      '  function renderInteractiveSlide(slide, key, sectionIdx, section) {\n' +
+      '    var showTitle = slide.title && !isAutoTitle(slide.title)\n' +
+      '      && (!section || slide.title !== section.title);\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
-      '      slide.title ? e("h2", null, slide.title) : null,\n' +
+      '      showTitle ? e("h2", null, slide.title) : null,\n' +
       '      slide.texts ? e("div", { className: "narrative-text" },\n' +
       '        slide.texts.map(function(t, i) { return e("p", { key: "t" + i }, t); })\n' +
       '      ) : null,\n' +
       '      slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,\n' +
       '      slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,\n' +
-      '      renderLayers(slide, sectionIdx)\n' +
+      '      renderLayers(slide)\n' +
       '    );\n  }\n\n' +
 
       // --- Layer rendering ---
-      '  function renderLayers(slide, sectionIdx) {\n' +
+      '  function renderLayers(slide) {\n' +
       '    if (!slide.layers || slide.layers.length === 0) return null;\n' +
       '    var type = slide.interactionType || "accordion";\n' +
-      '    if (type === "bento") return renderBentoGrid(slide, sectionIdx);\n' +
+      '    if (type === "bento") return renderBentoGrid(slide);\n' +
       '    if (type === "modal") return renderModalTriggers(slide);\n' +
-      '    return renderAccordion(slide, sectionIdx);\n' +
+      '    return renderAccordion(slide);\n' +
       '  }\n\n' +
 
-      // --- Accordion ---
-      '  function renderAccordion(slide, sectionIdx) {\n' +
+      // --- Accordion (CSS max-height transition, always in DOM) ---
+      '  function renderAccordion(slide) {\n' +
       '    return e("div", { className: "accordion" },\n' +
       '      slide.layers.map(function(layer, i) {\n' +
       '        var isOpen = isPanelOpen(slide.id, i);\n' +
       '        return e("div", { className: "accordion-item" + (isOpen ? " open" : ""), key: i },\n' +
-      '          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i, sectionIdx, slide.layers.length); } },\n' +
+      '          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i); } },\n' +
       '            e("span", null, layer.name),\n' +
-      '            e("span", { className: "accordion-icon" }, isOpen ? "\\u2212" : "\\u002B")\n' +
+      '            e("span", { className: "accordion-icon" }, "\\u002B")\n' +
       '          ),\n' +
-      '          isOpen ? e("div", { className: "accordion-panel" },\n' +
-      '            layer.image ? e("div", { className: "hero-image" }, e("img", { src: layer.image, alt: layer.name })) : null,\n' +
-      '            layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); }),\n' +
-      '            layer.audio && layer.audio.length > 0 ? e("div", { className: "audio-container" },\n' +
-      '              e("audio", { controls: true, preload: "metadata", src: layer.audio[0].src })) : null\n' +
-      '          ) : null\n' +
+      // Panel is ALWAYS in the DOM — CSS max-height handles show/hide
+      '          e("div", { className: "accordion-panel" },\n' +
+      '            e("div", { className: "accordion-panel-inner" },\n' +
+      '              layer.image ? e("div", { className: "hero-image" }, e("img", { src: layer.image, alt: layer.name })) : null,\n' +
+      '              layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); }),\n' +
+      '              layer.audio && layer.audio.length > 0 ? e("div", { className: "audio-container" },\n' +
+      '                e("audio", { controls: true, preload: "metadata", src: layer.audio[0].src })) : null\n' +
+      '            )\n' +
+      '          )\n' +
       '        );\n' +
       '      })\n    );\n  }\n\n' +
 
@@ -444,9 +470,7 @@ window.GeneratorApp = (function () {
       '    );\n  }\n\n' +
 
       // --- Bento grid ---
-      '  function renderBentoGrid(slide, sectionIdx) {\n' +
-      '    // Bento shows all content at once — section is complete when visible\n' +
-      '    if (sectionIdx !== undefined) completeSection(sectionIdx);\n' +
+      '  function renderBentoGrid(slide) {\n' +
       '    return e("div", { className: "bento-grid" },\n' +
       '      slide.layers.map(function(layer, i) {\n' +
       '        var showName = layer.name && layer.texts && layer.texts.length > 0\n' +
@@ -461,11 +485,12 @@ window.GeneratorApp = (function () {
       '      })\n    );\n  }\n\n' +
 
       // --- Form slide ---
-      '  function renderFormSlide(slide, key, sectionIdx) {\n' +
+      '  function renderFormSlide(slide, key, sectionIdx, section) {\n' +
+      '    var showTitle = slide.title && (!section || slide.title !== section.title);\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
       '      e("div", { className: "card" },\n' +
-      '        e("h2", null, slide.title),\n' +
-      '        slide.instruction ? e("p", null, slide.instruction) : null,\n' +
+      '        showTitle ? e("h2", null, slide.title) : null,\n' +
+      '        slide.instruction ? e("p", { style: { color: "var(--text-muted)" } }, slide.instruction) : null,\n' +
       '        slide.fields && slide.fields.map(function(f, i) {\n' +
       '          return e("div", { className: "form-group", key: i },\n' +
       '            e("label", null, f.label || f.placeholder),\n' +
@@ -473,55 +498,39 @@ window.GeneratorApp = (function () {
       '              defaultValue: "",\n' +
       '              onChange: function(ev) { handleFormChange(f.variableName, ev.target.value); }\n' +
       '            })\n          );\n        }),\n' +
-      '        e("div", { className: "actions", style: { marginTop: "calc(var(--spacing) * 2)" } },\n' +
-      '          e("button", { className: "btn btn-primary", onClick: function() { completeSection(sectionIdx); } }, "Continue")\n' +
+      '        e("div", { className: "actions" },\n' +
+      '          e("button", { className: "btn btn-primary", onClick: function() {} }, "Continue")\n' +
       '        )\n' +
       '      )\n    );\n  }\n\n' +
 
       // --- Branching slide ---
-      '  function renderBranchingSlide(slide, key, sectionIdx) {\n' +
-      '    // Find user name from any form field that looks like a name field\n' +
+      '  function renderBranchingSlide(slide, key, sectionIdx, section) {\n' +
       '    var userName = "";\n' +
       '    Object.keys(formData).forEach(function(k) {\n' +
       '      if (!userName && formData[k] && /name/i.test(k)) userName = formData[k];\n' +
       '    });\n' +
       '    if (!userName) { var firstVal = Object.values(formData).find(function(v) { return v; }); userName = firstVal || ""; }\n' +
+      '    var showTitle = slide.title && (!section || slide.title !== section.title) && !isAutoTitle(slide.title);\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
       '      e("div", { className: "branch-container" },\n' +
-      '        e("h2", null, slide.title),\n' +
+      '        showTitle ? e("h2", null, slide.title) : null,\n' +
       '        slide.greeting ? e("p", { className: "greeting" },\n' +
       '          slide.greeting.replace("%name%", userName)) : null,\n' +
       '        slide.headings ? slide.headings.map(function(h, i) { return e("p", { key: "bh" + i, style: { fontWeight: 600 } }, h); }) : null,\n' +
-      '        slide.texts ? slide.texts.map(function(t, i) { return e("p", { key: "bt" + i, style: { maxWidth: "680px", margin: "0 auto", marginBottom: "var(--spacing)" } }, t); }) : null,\n' +
+      '        slide.texts ? slide.texts.map(function(t, i) { return e("p", { key: "bt" + i, style: { maxWidth: "680px", margin: "0 auto 1rem" } }, t); }) : null,\n' +
       '        e("div", { className: "branch-grid" },\n' +
       '          slide.options && slide.options.map(function(opt, i) {\n' +
       '            return e("div", { className: "branch-option", key: i,\n' +
       '              onClick: function() {\n' +
       '                setBranch(opt.value || opt.label);\n' +
-      '                completeSection(sectionIdx);\n' +
       '                if (opt.quizBank) { startQuiz(opt.quizBank); }\n' +
       '                else { setScore(100); setQuizState("complete"); SCORM.complete(100, MASTERY); }\n' +
       '              }\n' +
       '            },\n' +
       '            e("h3", null, opt.label),\n' +
-      '            opt.description ? e("p", { style: { fontSize: "14px", color: "var(--text-muted)", marginTop: "calc(var(--spacing) * 0.5)", marginBottom: 0 } }, opt.description) : null\n' +
+      '            opt.description ? e("p", { style: { fontSize: "0.85rem", color: "var(--text-muted)", marginTop: "0.5rem", marginBottom: 0 } }, opt.description) : null\n' +
       '          );\n' +
       '          })\n        )\n      )\n    );\n  }\n\n' +
-
-      // --- Inline quiz trigger (in scroll) ---
-      '  function renderInlineQuiz(slide, key) {\n' +
-      '    if (!slide.quiz) return renderNarrativeSlide(slide, key);\n' +
-      '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
-      '      e("div", { className: "card", style: { textAlign: "center" } },\n' +
-      '        e("h2", null, slide.title || "Knowledge Check"),\n' +
-      '        e("p", null, "A quiz awaits — test your understanding."),\n' +
-      '        e("div", { className: "actions" },\n' +
-      '          e("button", { className: "btn btn-primary", onClick: function() {\n' +
-      '            var qs = [slide.quiz]; setQuizQuestions(qs); setQuizIndex(0); setCorrectCount(0); setTotalQ(1);\n' +
-      '            setQuizState("active"); setSelectedChoice(null); setAnswered(false);\n' +
-      '          } }, "Start Quiz")\n' +
-      '        )\n' +
-      '      )\n    );\n  }\n\n' +
 
       // --- Full quiz slide (overlay) ---
       '  function renderQuizSlide() {\n' +
@@ -591,7 +600,6 @@ window.GeneratorApp = (function () {
 
   /**
    * Main entry: generate the complete output HTML document.
-   * Now takes CoursePlan instead of raw CourseIR.
    */
   function generateHtml(coursePlan, brand, images) {
     var css = GeneratorCSS.generateCss(brand);
