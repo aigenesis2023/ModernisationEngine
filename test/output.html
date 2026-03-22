@@ -896,7 +896,16 @@ p:last-child { margin-bottom: 0; }
     } else { setValue("cmi.core.lesson_status", "completed"); }
   }
   function finish() { if (api && initialized) api.LMSFinish(""); }
-  return { init: init, setValue: setValue, setScore: setScore, complete: complete, finish: finish };
+  function getSuspendData() {
+    if (!api || !initialized) return null;
+    try { return api.LMSGetValue("cmi.suspend_data"); } catch(e) { return null; }
+  }
+  function setSuspendData(data) { setValue("cmi.suspend_data", data); }
+  function getStatus() {
+    if (!api || !initialized) return null;
+    try { return api.LMSGetValue("cmi.core.lesson_status"); } catch(e) { return null; }
+  }
+  return { init: init, setValue: setValue, setScore: setScore, complete: complete, finish: finish, getSuspendData: getSuspendData, setSuspendData: setSuspendData, getStatus: getStatus };
 })();
 window.addEventListener("load", function() { SCORM.init(); });
 window.addEventListener("beforeunload", function() { SCORM.finish(); });
@@ -966,8 +975,28 @@ function App() {
       var docHeight = document.documentElement.scrollHeight - window.innerHeight;
       var progress = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;
       fill.style.width = progress + "%";
+      // Auto-complete: if no quizzes exist and user scrolled >90%, mark course complete
+      if (progress >= 90 && QUIZ_BANKS.length === 0 && !score) {
+        setScore(100); setQuizState("complete");
+        SCORM.complete();
+      }
+      // Save bookmark every 10% scroll
+      if (progress % 10 < 2) {
+        SCORM.setSuspendData(JSON.stringify({ scroll: progress }));
+      }
     }
     window.addEventListener("scroll", handleScroll, { passive: true });
+    // Restore bookmark on load
+    var saved = SCORM.getSuspendData();
+    if (saved) {
+      try {
+        var data = JSON.parse(saved);
+        if (data.scroll > 5) {
+          var target = document.documentElement.scrollHeight * (data.scroll / 100);
+          setTimeout(function() { window.scrollTo(0, target); }, 500);
+        }
+      } catch(e) {}
+    }
     return function() { window.removeEventListener("scroll", handleScroll); };
   }, []);
 

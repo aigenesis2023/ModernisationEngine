@@ -55,7 +55,16 @@ window.GeneratorApp = (function () {
       '    } else { setValue("cmi.core.lesson_status", "completed"); }\n' +
       '  }\n' +
       '  function finish() { if (api && initialized) api.LMSFinish(""); }\n' +
-      '  return { init: init, setValue: setValue, setScore: setScore, complete: complete, finish: finish };\n' +
+      '  function getSuspendData() {\n' +
+      '    if (!api || !initialized) return null;\n' +
+      '    try { return api.LMSGetValue("cmi.suspend_data"); } catch(e) { return null; }\n' +
+      '  }\n' +
+      '  function setSuspendData(data) { setValue("cmi.suspend_data", data); }\n' +
+      '  function getStatus() {\n' +
+      '    if (!api || !initialized) return null;\n' +
+      '    try { return api.LMSGetValue("cmi.core.lesson_status"); } catch(e) { return null; }\n' +
+      '  }\n' +
+      '  return { init: init, setValue: setValue, setScore: setScore, complete: complete, finish: finish, getSuspendData: getSuspendData, setSuspendData: setSuspendData, getStatus: getStatus };\n' +
       '})();\n' +
       'window.addEventListener("load", function() { SCORM.init(); });\n' +
       'window.addEventListener("beforeunload", function() { SCORM.finish(); });\n';
@@ -151,8 +160,28 @@ window.GeneratorApp = (function () {
       '      var docHeight = document.documentElement.scrollHeight - window.innerHeight;\n' +
       '      var progress = docHeight > 0 ? Math.min(100, Math.round((scrollTop / docHeight) * 100)) : 0;\n' +
       '      fill.style.width = progress + "%";\n' +
+      '      // Auto-complete: if no quizzes exist and user scrolled >90%, mark course complete\n' +
+      '      if (progress >= 90 && QUIZ_BANKS.length === 0 && !score) {\n' +
+      '        setScore(100); setQuizState("complete");\n' +
+      '        SCORM.complete();\n' +
+      '      }\n' +
+      '      // Save bookmark every 10% scroll\n' +
+      '      if (progress % 10 < 2) {\n' +
+      '        SCORM.setSuspendData(JSON.stringify({ scroll: progress }));\n' +
+      '      }\n' +
       '    }\n' +
       '    window.addEventListener("scroll", handleScroll, { passive: true });\n' +
+      '    // Restore bookmark on load\n' +
+      '    var saved = SCORM.getSuspendData();\n' +
+      '    if (saved) {\n' +
+      '      try {\n' +
+      '        var data = JSON.parse(saved);\n' +
+      '        if (data.scroll > 5) {\n' +
+      '          var target = document.documentElement.scrollHeight * (data.scroll / 100);\n' +
+      '          setTimeout(function() { window.scrollTo(0, target); }, 500);\n' +
+      '        }\n' +
+      '      } catch(e) {}\n' +
+      '    }\n' +
       '    return function() { window.removeEventListener("scroll", handleScroll); };\n' +
       '  }, []);\n\n' +
 
