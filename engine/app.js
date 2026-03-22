@@ -36,11 +36,75 @@
   });
   uploadZone.addEventListener('drop', function (ev) {
     ev.preventDefault(); uploadZone.classList.remove('dragover');
+    // Use DataTransferItem API to handle dropped folders properly
+    var items = ev.dataTransfer.items;
+    if (items && items.length > 0) {
+      var entries = [];
+      for (var i = 0; i < items.length; i++) {
+        var entry = items[i].webkitGetAsEntry && items[i].webkitGetAsEntry();
+        if (entry) entries.push(entry);
+      }
+      if (entries.length > 0) {
+        handleDroppedEntries(entries);
+        return;
+      }
+    }
+    // Fallback for browsers without webkitGetAsEntry
     handleFiles(ev.dataTransfer.files);
   });
   fileInput.addEventListener('change', function () {
     handleFiles(fileInput.files);
   });
+
+  function handleDroppedEntries(entries) {
+    fileMap.clear();
+    var pending = 0;
+    var topLevelName = (entries.length === 1 && entries[0].isDirectory) ? entries[0].name : null;
+
+    function readEntry(entry, path) {
+      if (entry.isFile) {
+        pending++;
+        entry.file(function (file) {
+          var relativePath = path;
+          // Strip top-level folder name (same as handleFiles does)
+          if (topLevelName) {
+            var parts = relativePath.split('/');
+            if (parts.length > 1 && parts[0] === topLevelName) parts.shift();
+            relativePath = parts.join('/');
+          }
+          fileMap.set(relativePath, file);
+          pending--;
+          if (pending === 0) onFilesReady();
+        });
+      } else if (entry.isDirectory) {
+        pending++;
+        var reader = entry.createReader();
+        var allEntries = [];
+        (function readBatch() {
+          reader.readEntries(function (batch) {
+            if (batch.length === 0) {
+              pending--;
+              allEntries.forEach(function (e) { readEntry(e, path + '/' + e.name); });
+              if (pending === 0) onFilesReady();
+            } else {
+              allEntries = allEntries.concat(Array.from(batch));
+              readBatch();
+            }
+          });
+        })();
+      }
+    }
+
+    entries.forEach(function (entry) {
+      readEntry(entry, entry.name);
+    });
+
+    function onFilesReady() {
+      fileCountEl.textContent = fileMap.size + ' files loaded';
+      uploadZone.classList.add('has-files');
+      updateGenerateButton();
+    }
+  }
 
   function handleFiles(files) {
     fileMap.clear();

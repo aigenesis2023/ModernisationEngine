@@ -24,7 +24,21 @@ window.SCORMParser = (function () {
         }
       }
     }
-    if (!file) throw new Error('File not found: ' + relativePath);
+    if (!file) {
+      // Last resort: match just the filename portion
+      const fileName = relativePath.split('/').pop().toLowerCase();
+      for (const [key, val] of fileMap) {
+        if (key.split('/').pop().toLowerCase() === fileName) {
+          file = val;
+          break;
+        }
+      }
+    }
+    if (!file) {
+      // Log available keys for debugging
+      const available = Array.from(fileMap.keys()).slice(0, 20).join(', ');
+      throw new Error('File not found: ' + relativePath + ' (available: ' + available + '...)');
+    }
     return await file.text();
   }
 
