@@ -243,6 +243,19 @@ window.GeneratorData = (function () {
         if (allQuizQuestions.length > 0) {
           sectionData.sectionQuizQuestions = allQuizQuestions;
         }
+
+        // Check if a quiz BANK maps to this assessment section.
+        // Storyline quiz banks (slidedraws) have entry slides — if any
+        // slide in this section is the entry point for a bank, link them.
+        // This enables proper randomization and draw counts.
+        var quizBanks = coursePlan.quizBanks || [];
+        var sectionSlideIds = section.slides.map(function (s) { return s.id; });
+        // Quiz bank linking: Storyline has two quiz types:
+        // 1. Quiz BANKS (slidedraws) — randomized question pools, connected
+        //    to branching buttons via startQuiz(bankId). Already works.
+        // 2. Inline quiz slides — individual question slides in the course flow.
+        //    These use sectionQuizQuestions and startSectionQuiz(). Already works.
+        // No additional linking needed — the two systems are independent.
       }
 
       return sectionData;

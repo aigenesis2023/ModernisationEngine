@@ -1206,16 +1206,8 @@ function App() {
         if (slide.quiz) questions.push(slide.quiz);
       });
     }
-    var matchingBank = null;
-    if (QUIZ_BANKS.length > 0) {
-      QUIZ_BANKS.forEach(function(bank) {
-        section.slides.forEach(function(slide) {
-          if (slide.type === "quiz" && !matchingBank) matchingBank = bank;
-        });
-      });
-    }
     var assessmentTitle = section.title || "Assessment";
-    var questionCount = matchingBank ? matchingBank.drawCount : questions.length;
+    var questionCount = questions.length;
     return e(RevealBlock, { className: "content-block", key: "assess-" + sectionIndex },
       e("div", { className: "assessment-card" },
         e("span", { className: "assessment-icon" }, "\uD83D\uDCDD"),
@@ -1223,8 +1215,7 @@ function App() {
         e("p", null, questionCount > 0 ? questionCount + " question" + (questionCount !== 1 ? "s" : "") + " to test your knowledge" : "Test your knowledge"),
         e("div", { className: "actions" },
           e("button", { className: "btn btn-primary", onClick: function() {
-            if (matchingBank) { startQuiz(matchingBank.id); }
-            else if (questions.length > 0) { startSectionQuiz(questions); }
+            if (questions.length > 0) { startSectionQuiz(questions); }
           } }, "Begin Assessment")
         )
       )

@@ -407,16 +407,8 @@ window.GeneratorApp = (function () {
       '      });\n' +
       '    }\n' +
       // Check for matching quiz bank
-      '    var matchingBank = null;\n' +
-      '    if (QUIZ_BANKS.length > 0) {\n' +
-      '      QUIZ_BANKS.forEach(function(bank) {\n' +
-      '        section.slides.forEach(function(slide) {\n' +
-      '          if (slide.type === "quiz" && !matchingBank) matchingBank = bank;\n' +
-      '        });\n' +
-      '      });\n' +
-      '    }\n' +
       '    var assessmentTitle = section.title || "Assessment";\n' +
-      '    var questionCount = matchingBank ? matchingBank.drawCount : questions.length;\n' +
+      '    var questionCount = questions.length;\n' +
       '    return e(RevealBlock, { className: "content-block", key: "assess-" + sectionIndex },\n' +
       '      e("div", { className: "assessment-card" },\n' +
       '        e("span", { className: "assessment-icon" }, "\\uD83D\\uDCDD"),\n' +
@@ -424,8 +416,7 @@ window.GeneratorApp = (function () {
       '        e("p", null, questionCount > 0 ? questionCount + " question" + (questionCount !== 1 ? "s" : "") + " to test your knowledge" : "Test your knowledge"),\n' +
       '        e("div", { className: "actions" },\n' +
       '          e("button", { className: "btn btn-primary", onClick: function() {\n' +
-      '            if (matchingBank) { startQuiz(matchingBank.id); }\n' +
-      '            else if (questions.length > 0) { startSectionQuiz(questions); }\n' +
+      '            if (questions.length > 0) { startSectionQuiz(questions); }\n' +
       '          } }, "Begin Assessment")\n' +
       '        )\n' +
       '      )\n' +
