@@ -747,9 +747,12 @@ window.SCORMParser = (function () {
 
     const slides = mainSlideRefs.map((ref, index) => {
       const slideId = ref.id.split('.').pop() || ref.id;
+      const sceneId = ref.id.includes('.') ? ref.id.split('.')[0] : '';
       const slideData = slidesById.get(slideId);
       if (!slideData) return null;
-      return parseSlide(slideId, slideData, index + 1);
+      const slide = parseSlide(slideId, slideData, index + 1);
+      slide.sceneId = sceneId;
+      return slide;
     }).filter(s => s !== null);
 
     // Build question banks

@@ -343,9 +343,16 @@ window.ContentPlanner = (function () {
     var sections = [];
     var currentSection = null;
 
+    var lastSceneId = null;
+
     for (var i = 0; i < contentSlides.length; i++) {
       var slide = contentSlides[i];
       var shouldBreak = false;
+
+      // Scene boundary: Storyline scenes are the author's logical grouping.
+      // A new scene always starts a new section (unless it's a results/quiz continuation).
+      var sceneChanged = slide.sceneId && slide.sceneId !== lastSceneId;
+      lastSceneId = slide.sceneId || lastSceneId;
 
       // Start a new section on:
       if (slide.type === 'title') shouldBreak = true;
@@ -359,6 +366,7 @@ window.ContentPlanner = (function () {
         // Group consecutive quiz slides into one assessment section
         if (!currentSection || currentSection.type !== 'assessment') shouldBreak = true;
       }
+      else if (sceneChanged) shouldBreak = true;
       else if (!currentSection) shouldBreak = true;
 
       // Also break when the slide type significantly differs from the current section
