@@ -1,0 +1,22 @@
+{
+  "entries": [
+    {
+      "originalAssetId": 0,
+      "originalPath": "story_content/6FsIKpGsVCv_P_0_313_1922_1060.jpg",
+      "description": "Close-up of a red electric vehicle plugged into a charging station",
+      "instructionalRole": "Hero image for opening and pre-knowledge check slides",
+      "generationPrompt": "Modern electric vehicle charging at a sleek charging station, close-up view, professional photography, warm lighting",
+      "generatedPath": "https://images.unsplash.com/photo-1593941707882-a5bba14938c7?w=1200&q=80",
+      "status": "generated"
+    },
+    {
+      "originalAssetId": 5,
+      "originalPath": "story_content/6JpJu1LzRVa_P_0_119_2048_1151.jpg",
+      "description": "White electric car being charged with a blue cable at an outdoor charging station",
+      "instructionalRole": "Hero image for learning objectives, role selector, and results slides",
+      "generationPrompt": "Electric vehicle at a modern charging station, wide shot, clean professional look, daylight",
+      "generatedPath": "https://images.unsplash.com/photo-1558618666-fcd25c85f82e?w=1200&q=80",
+      "status": "generated"
+    }
+  ]
+}
