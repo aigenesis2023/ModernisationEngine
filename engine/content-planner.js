@@ -251,6 +251,9 @@ window.ContentPlanner = (function () {
     // Pattern: verb + "to" + action (under 30 chars)
     var isShortCommand = t.length < 30 && /^(click|tap|press|touch)\s+to\s+/i.test(t);
 
+    // "Hover over" is always a player instruction
+    if (/^hover\s+over/i.test(lower)) return true;
+
     // It's a player instruction if it has an interaction verb + UI target,
     // or starts with an instruction phrase, or has nav verb + nav target,
     // or is a short "verb to action" command
@@ -1109,7 +1112,7 @@ window.ContentPlanner = (function () {
   }
 
   function cleanTextContent(text) {
-    return text
+    var cleaned = text
       .replace(/\r\n/g, ' ')
       .replace(/\r/g, ' ')
       .replace(/\n/g, ' ')
@@ -1125,6 +1128,18 @@ window.ContentPlanner = (function () {
       // Clean up extra whitespace from removals
       .replace(/\s+/g, ' ')
       .trim();
+
+    // Strip leading player instructions from the start of long text blocks.
+    // Storyline concatenates player instructions with content text.
+    // Pattern: "Hover over..." or "Click on the..." followed by content.
+    if (cleaned.length > 100) {
+      cleaned = cleaned
+        .replace(/^(Hover\s+over\s+[^.]+\.\s*)/i, '')
+        .replace(/^(Click\s+on\s+the\s+button\s+[^.]+\.\s*)/i, '')
+        .trim();
+    }
+
+    return cleaned;
   }
 
   function cleanButtonLabel(label) {

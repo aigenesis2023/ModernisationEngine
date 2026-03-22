@@ -428,8 +428,9 @@ window.GeneratorData = (function () {
           .map(function (l) {
             // Deduplicate layer texts (Storyline often has same text in multiple states)
             var seen = {};
-            var unique = l.texts.map(function (t) { return t.content || t; })
+            var unique = l.texts.map(function (t) { return (typeof t === 'object' ? t.content : t) || ''; })
               .filter(function (t) {
+                if (typeof t !== 'string' || !t.trim()) return false;
                 var key = t.trim().toLowerCase();
                 if (seen[key]) return false;
                 seen[key] = true;
@@ -505,8 +506,8 @@ window.GeneratorData = (function () {
     // through any code path (bodyTexts, layer context, branching descriptions).
     if (data.texts && data.texts.length > 0) {
       data.texts = data.texts.map(function (t) {
-        return removeInternalRepetition(t);
-      });
+        return typeof t === 'string' ? removeInternalRepetition(t) : t;
+      }).filter(function (t) { return t && (typeof t === 'string' ? t.trim().length > 0 : true); });
     }
 
     return data;
