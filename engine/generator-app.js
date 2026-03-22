@@ -67,8 +67,11 @@ window.GeneratorApp = (function () {
 
     var courseTitle = escJs(coursePlan.meta.title);
     var masteryScore = coursePlan.meta.masteryScore;
-    var logoUrl = brand.logo && brand.logo.url ? escJs(brand.logo.url) : '';
-    var logoAlt = brand.logo && brand.logo.alt ? escJs(brand.logo.alt) : '';
+    // Logo from brand scraping is deliberately disabled — web scraping cannot
+    // reliably distinguish a company logo from other images on a page.
+    // This would produce incorrect results across different brand websites.
+    var logoUrl = '';
+    var logoAlt = '';
 
     return '"use strict";\n' +
       'var e = React.createElement;\n' +
