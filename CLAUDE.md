@@ -197,7 +197,9 @@ When you see an issue in the test output, you MUST follow this sequence. Do NOT 
 
 ### Testing Requirements
 - Run the COMPLETE pipeline (brand scraping + AI image generation) — don't skip phases
-- Use Playwright to screenshot every section, interaction, and state
+- Do NOT take Playwright screenshots unless the user explicitly asks for them — it's slow. The user previews via the GitHub Pages URL instead.
+- Only take screenshots and save to `test/screenshots/` when the user says "take screenshots" or "update screenshots"
+- When screenshots ARE taken, overwrite the existing files (don't accumulate old ones)
 - For each issue found, write down the CATEGORY before touching code
 - After implementing, re-run and verify the category is handled — not just the specific instance
 

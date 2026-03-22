@@ -142,7 +142,7 @@ window.GeneratorCSS = (function () {
       '  color: white; text-align: center;\n  padding: 0; position: relative; overflow: hidden;\n}\n' +
       '.section-hero::before {\n  content: \'\'; position: absolute; inset: 0;\n' +
       '  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);\n}\n' +
-      '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); }\n' +
+      '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); padding-bottom: calc(var(--spacing) * 8); }\n' +
       '.section-hero h1 { font-size: ' + Math.round(h1Px * 0.85) + 'px; color: white; }\n' +
       '.section-hero .subtitle { font-size: ' + Math.round(baseSizePx * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
       '.section-hero .logo { max-width: 160px; max-height: 50px; margin-bottom: calc(var(--spacing) * 2); }\n' +
