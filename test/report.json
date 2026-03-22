@@ -1,0 +1,803 @@
+{
+  "generatedAt": "2026-03-22T08:35:54.503Z",
+  "extraction": {
+    "meta": {
+      "title": "Test intro scene",
+      "courseId": "_5nmnqzflqyU",
+      "scormVersion": "1.2",
+      "masteryScore": 80,
+      "totalSlides": 7,
+      "totalAudioDurationMs": 1907,
+      "totalVideoDurationMs": 13883
+    },
+    "slideCount": 7,
+    "slides": [
+      {
+        "id": "6PHP67HzAfO",
+        "title": "Opening",
+        "type": "title",
+        "slideNumber": 1,
+        "elementCount": 13,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "image",
+          "video",
+          "shape",
+          "shape",
+          "button",
+          "text",
+          "shape",
+          "image",
+          "shape",
+          "shape"
+        ],
+        "layerCount": 1,
+        "layerNames": [
+          "Layer 1"
+        ],
+        "triggerCount": 3,
+        "hasAudio": false
+      },
+      {
+        "id": "5oBKAOaplIi",
+        "title": "Learning Objectives",
+        "type": "objectives",
+        "slideNumber": 2,
+        "elementCount": 5,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "shape",
+          "text"
+        ],
+        "layerCount": 3,
+        "layerNames": [
+          "Layer 1",
+          "Layer 2",
+          "Layer 3"
+        ],
+        "triggerCount": 1,
+        "hasAudio": false
+      },
+      {
+        "id": "5l79ARwxLmt",
+        "title": "Text Entry ",
+        "type": "form",
+        "slideNumber": 3,
+        "elementCount": 9,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "shape",
+          "text",
+          "image",
+          "text",
+          "button",
+          "form"
+        ],
+        "layerCount": 0,
+        "layerNames": [],
+        "triggerCount": 6,
+        "hasAudio": false
+      },
+      {
+        "id": "5qTAlMk2jlu",
+        "title": "Role Selector",
+        "type": "branching",
+        "slideNumber": 4,
+        "elementCount": 20,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "shape",
+          "text",
+          "button",
+          "text",
+          "shape",
+          "shape",
+          "button",
+          "text",
+          "shape",
+          "shape",
+          "button",
+          "text",
+          "shape",
+          "shape",
+          "text",
+          "image",
+          "button"
+        ],
+        "layerCount": 1,
+        "layerNames": [
+          "Layer 1"
+        ],
+        "triggerCount": 1,
+        "hasAudio": false
+      },
+      {
+        "id": "6X0JgCQ9g4V",
+        "title": "Pre-knowledge check",
+        "type": "branching",
+        "slideNumber": 5,
+        "elementCount": 9,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "button",
+          "shape",
+          "button",
+          "button",
+          "button",
+          "shape"
+        ],
+        "layerCount": 4,
+        "layerNames": [
+          "Layer 1",
+          "Layer 2",
+          "Layer 3",
+          "Layer 4"
+        ],
+        "triggerCount": 1,
+        "hasAudio": false
+      },
+      {
+        "id": "6gVJ6ioVtxh",
+        "title": "Results Slide (Non-tech group)",
+        "type": "results",
+        "slideNumber": 6,
+        "elementCount": 8,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "button",
+          "shape",
+          "text",
+          "shape",
+          "text"
+        ],
+        "layerCount": 2,
+        "layerNames": [
+          "Layer 1",
+          "Layer 2"
+        ],
+        "triggerCount": 1,
+        "hasAudio": false
+      },
+      {
+        "id": "6ikVHG8x6rz",
+        "title": "Results Slide (Technical group)",
+        "type": "results",
+        "slideNumber": 7,
+        "elementCount": 8,
+        "elementTypes": [
+          "image",
+          "shape",
+          "shape",
+          "button",
+          "shape",
+          "text",
+          "shape",
+          "text"
+        ],
+        "layerCount": 2,
+        "layerNames": [
+          "Layer 1",
+          "Layer 2"
+        ],
+        "triggerCount": 1,
+        "hasAudio": false
+      }
+    ],
+    "questionBanks": [
+      {
+        "id": "QuestionDraw51",
+        "title": "QuestionDraw51",
+        "group": "non-technical",
+        "questionCount": 15
+      },
+      {
+        "id": "QuestionDraw71",
+        "title": "QuestionDraw71",
+        "group": "technical",
+        "questionCount": 20
+      }
+    ],
+    "variables": [
+      {
+        "id": "QuizAdvanceModeWarningShown",
+        "type": "boolean",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6fJNfTdCpgk",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5oxTpoQQnT2",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5fmLdGfxGA2",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6HIVJm9fsC5",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6527cPQqffc",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6cMfB02CQal",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5calMw4whXk",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5n7pRWzeBZV",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6etX87TPaTT",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6N1CT3OZxTS",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6LN2pAz4U6T",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6C7ujnEZNML",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5fpCk3FQOIi",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5toVCHWZu3x",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6ACWhaeLkKu",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_5iR10nT2Tg7",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_6qUXuu6kq8C",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_69Jf0MqlU2a",
+        "type": "text",
+        "defaultValue": ""
+      },
+      {
+        "id": "CurrentQuiz_63JMX32XMP3",
+        "type": "text",
+        "defaultValue": ""
+      }
+    ],
+    "navigation": {
+      "entrySlideId": "6PHP67HzAfO",
+      "links": [
+        {
+          "fromSlideId": "6PHP67HzAfO",
+          "toSlideId": "5oBKAOaplIi",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "5oBKAOaplIi",
+          "toSlideId": "5l79ARwxLmt",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "5l79ARwxLmt",
+          "toSlideId": "5qTAlMk2jlu",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "5qTAlMk2jlu",
+          "toSlideId": "6X0JgCQ9g4V",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "6X0JgCQ9g4V",
+          "toSlideId": "6fJNfTdCpgk",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6X0JgCQ9g4V",
+          "toSlideId": "6X0JgCQ9g4V",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "6X0JgCQ9g4V",
+          "toSlideId": "6lk8WI43x3g",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6gVJ6ioVtxh",
+          "toSlideId": "6lk8WI43x3g",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6gVJ6ioVtxh",
+          "toSlideId": "nextviewedslide",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "6ikVHG8x6rz",
+          "toSlideId": "nextviewedslide",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "6fJNfTdCpgk",
+          "toSlideId": "6gVJ6ioVtxh",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "6lk8WI43x3g",
+          "toSlideId": "6ikVHG8x6rz",
+          "type": "next"
+        },
+        {
+          "fromSlideId": "5oxTpoQQnT2",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5fmLdGfxGA2",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6HIVJm9fsC5",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6527cPQqffc",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6cMfB02CQal",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5calMw4whXk",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5n7pRWzeBZV",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6etX87TPaTT",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6N1CT3OZxTS",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6LN2pAz4U6T",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6C7ujnEZNML",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5fpCk3FQOIi",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5toVCHWZu3x",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6ACWhaeLkKu",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "5iR10nT2Tg7",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "6qUXuu6kq8C",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "69Jf0MqlU2a",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "63JMX32XMP3",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "61dlJdBnaqb",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        },
+        {
+          "fromSlideId": "68MmCKBXPcm",
+          "toSlideId": "playnextdrawslide",
+          "type": "draw"
+        }
+      ]
+    },
+    "extractionReport": {
+      "totalObjectsFound": 129,
+      "totalObjectsExtracted": 129,
+      "totalObjectsSkipped": 0,
+      "totalTextContent": 29,
+      "totalButtons": 28,
+      "totalImages": 11,
+      "totalVideos": 1,
+      "totalAudio": 0,
+      "totalInteractions": 0,
+      "totalLayers": 13,
+      "totalLayersWithAudio": 0,
+      "totalVariables": 172,
+      "totalTriggers": 26,
+      "unknownObjectKinds": [],
+      "warnings": [],
+      "coveragePercent": 100
+    }
+  },
+  "plan": {
+    "sectionCount": 5,
+    "sections": [
+      {
+        "id": "section_0",
+        "type": "hero",
+        "title": "Opening",
+        "slideCount": 3,
+        "slides": [
+          {
+            "id": "6PHP67HzAfO",
+            "title": "Opening",
+            "type": "title",
+            "presentation": "hero",
+            "headingCount": 0,
+            "bodyTextCount": 1,
+            "calloutCount": 0,
+            "imageCount": 3,
+            "videoCount": 1,
+            "audioCount": 0,
+            "layerCount": 0,
+            "interactionCount": 0,
+            "triggerCount": 3,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [],
+            "bodyTexts": [
+              "EV Awareness & Safety"
+            ],
+            "callouts": [],
+            "layerNames": []
+          },
+          {
+            "id": "5oBKAOaplIi",
+            "title": "Learning Objectives",
+            "type": "objectives",
+            "presentation": "interactive",
+            "headingCount": 0,
+            "bodyTextCount": 1,
+            "calloutCount": 0,
+            "imageCount": 1,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 3,
+            "interactionCount": 0,
+            "triggerCount": 1,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [],
+            "bodyTexts": [
+              "Introduction"
+            ],
+            "callouts": [],
+            "layerNames": [
+              "You should inform your colleagues of your current trained le...",
+              "This first level online course does not in any way qualify y...",
+              "Click on the arrows to explore the learning objectives"
+            ]
+          },
+          {
+            "id": "5l79ARwxLmt",
+            "title": "Text Entry ",
+            "type": "form",
+            "presentation": "form",
+            "headingCount": 0,
+            "bodyTextCount": 1,
+            "calloutCount": 1,
+            "imageCount": 2,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 0,
+            "interactionCount": 0,
+            "triggerCount": 6,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": true,
+            "headings": [],
+            "bodyTexts": [
+              "EV Awareness & Safety"
+            ],
+            "callouts": [
+              "Please enter your details and click next"
+            ],
+            "layerNames": []
+          }
+        ]
+      },
+      {
+        "id": "section_1",
+        "type": "branching",
+        "title": "Role Selector",
+        "slideCount": 1,
+        "slides": [
+          {
+            "id": "5qTAlMk2jlu",
+            "title": "Role Selector",
+            "type": "branching",
+            "presentation": "branching",
+            "headingCount": 1,
+            "bodyTextCount": 2,
+            "calloutCount": 1,
+            "imageCount": 2,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 0,
+            "interactionCount": 0,
+            "triggerCount": 1,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [
+              "Service advisor, customer liaison."
+            ],
+            "bodyTexts": [
+              "Site logistics, car parking and movements, valeting.",
+              "Bodyshop & workshop technicians, Workshop manager."
+            ],
+            "callouts": [
+              "Click on the most relevant role to you."
+            ],
+            "layerNames": []
+          }
+        ]
+      },
+      {
+        "id": "section_2",
+        "type": "branching",
+        "title": "Pre-knowledge check",
+        "slideCount": 1,
+        "slides": [
+          {
+            "id": "6X0JgCQ9g4V",
+            "title": "Pre-knowledge check",
+            "type": "branching",
+            "presentation": "branching",
+            "headingCount": 0,
+            "bodyTextCount": 0,
+            "calloutCount": 0,
+            "imageCount": 1,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 4,
+            "interactionCount": 0,
+            "triggerCount": 1,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [],
+            "bodyTexts": [],
+            "callouts": [],
+            "layerNames": [
+              "OK. Let’s jump straight into the EV Safety and Awareness e-l...",
+              "OK. Let’s test your existing knowledge of EV Safety and Awar...",
+              "OK. Let’s test your existing knowledge of EV Safety and Awar...",
+              "This course will begin with a short quiz designed to help yo..."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "section_3",
+        "type": "results",
+        "title": "Your Results",
+        "slideCount": 1,
+        "slides": [
+          {
+            "id": "6gVJ6ioVtxh",
+            "title": "Results Slide (Non-tech group)",
+            "type": "results",
+            "presentation": "results",
+            "headingCount": 0,
+            "bodyTextCount": 1,
+            "calloutCount": 0,
+            "imageCount": 1,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 2,
+            "interactionCount": 0,
+            "triggerCount": 1,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [],
+            "bodyTexts": [
+              "Results"
+            ],
+            "callouts": [],
+            "layerNames": [
+              "It looks like you might need some help understanding electri...",
+              "Well done! It looks like you’re already pretty knowledgeable..."
+            ]
+          }
+        ]
+      },
+      {
+        "id": "section_4",
+        "type": "results",
+        "title": "Your Results",
+        "slideCount": 1,
+        "slides": [
+          {
+            "id": "6ikVHG8x6rz",
+            "title": "Results Slide (Technical group)",
+            "type": "results",
+            "presentation": "results",
+            "headingCount": 0,
+            "bodyTextCount": 1,
+            "calloutCount": 0,
+            "imageCount": 1,
+            "videoCount": 0,
+            "audioCount": 0,
+            "layerCount": 2,
+            "interactionCount": 0,
+            "triggerCount": 1,
+            "stateCount": 0,
+            "hasQuiz": false,
+            "hasForm": false,
+            "headings": [],
+            "bodyTexts": [
+              "Results"
+            ],
+            "callouts": [],
+            "layerNames": [
+              "It looks like you might need some help understanding electri...",
+              "Well done! It looks like you’re already pretty knowledgeable..."
+            ]
+          }
+        ]
+      }
+    ],
+    "verification": {
+      "extracted": {
+        "totalSlides": 7,
+        "totalElements": 72,
+        "totalTexts": 13,
+        "totalImages": 11,
+        "totalVideos": 1,
+        "totalAudio": 0,
+        "totalLayers": 13,
+        "totalTriggers": 26,
+        "totalInteractions": 0,
+        "totalStates": 0,
+        "totalVariables": 172
+      },
+      "planned": {
+        "totalSections": 5,
+        "totalSlides": 7,
+        "textsKept": 10,
+        "textsDropped": 3,
+        "imagesKept": 11,
+        "videosKept": 1,
+        "audioKept": 0,
+        "layersKept": 11,
+        "triggersKept": 25,
+        "interactionsKept": 0,
+        "statesKept": 0
+      },
+      "contentRetention": 88
+    }
+  },
+  "brandProfile": {
+    "sourceUrl": "https://www.backgrounds.supply/?ref=onepagelove",
+    "colors": {
+      "primary": "#6366f1",
+      "secondary": "#8b5cf6",
+      "accent": "#ec4899",
+      "background": "#ffffff",
+      "surface": "#f8f9fa",
+      "text": "#1a1a2e",
+      "textMuted": "#6b7280",
+      "success": "#10b981",
+      "error": "#ef4444",
+      "warning": "#f59e0b",
+      "gradient": "linear-gradient(135deg, #6366f1, #8b5cf6)"
+    },
+    "typography": {
+      "headingFont": "Inter",
+      "bodyFont": "Inter",
+      "fontImportUrl": "https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap",
+      "baseSize": 16,
+      "headingSizes": {
+        "h1": 40,
+        "h2": 32,
+        "h3": 24
+      },
+      "lineHeight": 1.6,
+      "headingWeight": 700,
+      "bodyWeight": 400
+    },
+    "style": {
+      "borderRadius": "12px",
+      "cardStyle": "elevated",
+      "buttonStyle": "gradient",
+      "imageStyle": "rounded",
+      "mood": "creative",
+      "spacing": {
+        "unit": 8,
+        "section": 64,
+        "element": 16
+      }
+    }
+  },
+  "outputSizeKB": 57
+}

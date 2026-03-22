@@ -167,10 +167,9 @@ window.GeneratorData = (function () {
     // Branching
     if (slide.type === 'branching') {
       data.title = slide.originalTitle || 'Choose Your Path';
-      var buttons = [];
-      // Pull buttons from elements (they're not in content since they're buttons)
-      // We need to look at raw slide data — but we have the callouts and texts
-      data.instruction = slide.content.bodyTexts.find(function (t) {
+
+      // Instruction text
+      data.instruction = slide.content.callouts[0] || slide.content.bodyTexts.find(function (t) {
         var lower = t.toLowerCase();
         return lower.includes('click') || lower.includes('select') || lower.includes('choose');
       });
@@ -179,9 +178,28 @@ window.GeneratorData = (function () {
       var greeting = slide.content.bodyTexts.find(function (t) { return t.includes('%'); });
       if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
 
-      // Options come from the original course plan
-      if (coursePlan && coursePlan.quizBanks) {
-        data.quizBankIds = coursePlan.quizBanks.map(function (qb) { return qb.id; });
+      // Build options from extracted buttons
+      var quizBankIds = coursePlan && coursePlan.quizBanks
+        ? coursePlan.quizBanks.map(function (qb) { return qb.id; })
+        : [];
+
+      if (slide.buttons && slide.buttons.length > 0) {
+        data.options = slide.buttons.map(function (btn, idx) {
+          var label = btn.label;
+          var lowerLabel = label.toLowerCase();
+          var quizBank;
+          if (lowerLabel.includes('skip') || lowerLabel.includes('no thanks')) {
+            quizBank = undefined;
+          } else if (quizBankIds.length > 0) {
+            quizBank = quizBankIds[Math.min(idx, quizBankIds.length - 1)];
+          }
+          return { label: label, value: label, quizBank: quizBank };
+        });
+      }
+
+      // Also pass quiz bank IDs for reference
+      if (quizBankIds.length > 0) {
+        data.quizBankIds = quizBankIds;
       }
     }
 

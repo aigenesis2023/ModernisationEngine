@@ -215,15 +215,23 @@ window.ContentPlanner = (function () {
         });
       }
 
-      // Capture button states
-      if (el.type === 'button' && !isNavigationElement(el) && el.states && el.states.length > 0) {
-        plan.states.push({
-          elementId: el.id,
-          label: el.label,
-          states: el.states.map(function (s) {
-            return { name: s.name, label: s.label, altText: s.altText };
-          })
+      // Capture meaningful buttons (for branching options and states)
+      if (el.type === 'button' && !isNavigationElement(el)) {
+        if (!plan.buttons) plan.buttons = [];
+        plan.buttons.push({
+          id: el.id,
+          label: cleanButtonLabel(el.label),
+          action: el.action
         });
+        if (el.states && el.states.length > 0) {
+          plan.states.push({
+            elementId: el.id,
+            label: el.label,
+            states: el.states.map(function (s) {
+              return { name: s.name, label: s.label, altText: s.altText };
+            })
+          });
+        }
       }
 
       // Capture form fields
@@ -332,9 +340,26 @@ window.ContentPlanner = (function () {
       };
     });
 
+    // Improve generic layer names using content
+    var layerName = layer.name;
+    if (/^Layer\s*\d*$/i.test(layerName) && texts.length > 0) {
+      // Prefer a unique, descriptive text (long enough to be meaningful, not too long)
+      var nameCandidate = texts.find(function (t) {
+        return t.content.length > 20 && t.content.length < 80;
+      });
+      if (!nameCandidate) {
+        nameCandidate = texts.find(function (t) { return t.content.length > 3; });
+      }
+      if (nameCandidate) {
+        layerName = nameCandidate.content.substring(0, 60) + (nameCandidate.content.length > 60 ? '...' : '');
+      } else {
+        layerName = texts[0].content.substring(0, 50) + (texts[0].content.length > 50 ? '...' : '');
+      }
+    }
+
     return {
       id: layer.id,
-      name: layer.name,
+      name: layerName,
       texts: texts,
       images: images,
       videos: videos,
@@ -409,6 +434,15 @@ window.ContentPlanner = (function () {
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
       .replace(/%_player\.\w+%/g, '')
+      .trim();
+  }
+
+  function cleanButtonLabel(label) {
+    return (label || '')
+      .replace(/\r\n/g, ' ')
+      .replace(/\r/g, ' ')
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
       .trim();
   }
 
