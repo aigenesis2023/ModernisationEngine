@@ -589,6 +589,7 @@ var QUIZ_BANKS = [{"id":"QuestionDraw51","title":"QuestionDraw51","group":"6gVJ6
 var MASTERY = 80;
 var PASS_STATUS = "pass";
 var FAIL_STATUS = "incomplete";
+var COURSE_LOCKED = false;
 var COURSE_TITLE = "Test intro scene";
 var LOGO_URL = "";
 var LOGO_ALT = "";
@@ -711,6 +712,7 @@ function App() {
     setCompletedSections(updated);
   }
   function isSectionUnlocked(idx) {
+    if (!COURSE_LOCKED) return true;
     if (idx === 0) return true;
     return !!completedSections[idx - 1];
   }

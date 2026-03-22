@@ -311,6 +311,8 @@ window.ContentPlanner = (function () {
       originalTitle: slide.title,
       type: slide.type,
       slideNumber: slide.slideNumber,
+      locked: slide.locked || false,
+      hasNavRestriction: slide.hasNavRestriction || false,
       presentation: 'standard',
       content: {
         headings: [],

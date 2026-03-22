@@ -73,6 +73,19 @@ window.GeneratorApp = (function () {
     var logoUrl = '';
     var logoAlt = '';
 
+    // Determine if the course uses locked navigation
+    // In Storyline, this is indicated by slideLock or NavigationRestriction action groups.
+    // If the author allowed free navigation, we respect that in the deep-scroll output.
+    // Only check content/form/interactive slides for locking — results and quiz
+    // slides always have NavigationRestriction (they're terminal), which doesn't
+    // mean the course content is locked.
+    var lockableTypes = ['content', 'title', 'objectives', 'form', 'branching'];
+    var courseLocked = coursePlan.sections.some(function (section) {
+      return section.slides.some(function (slide) {
+        return lockableTypes.indexOf(slide.type) !== -1 && (slide.locked || slide.hasNavRestriction);
+      });
+    });
+
     return '"use strict";\n' +
       'var e = React.createElement;\n' +
       'var SECTIONS = ' + sectionsData + ';\n' +
@@ -80,6 +93,7 @@ window.GeneratorApp = (function () {
       'var MASTERY = ' + masteryScore + ';\n' +
       'var PASS_STATUS = ' + JSON.stringify(coursePlan.meta.passStatus || 'passed') + ';\n' +
       'var FAIL_STATUS = ' + JSON.stringify(coursePlan.meta.failStatus || 'failed') + ';\n' +
+      'var COURSE_LOCKED = ' + (courseLocked ? 'true' : 'false') + ';\n' +
       'var COURSE_TITLE = ' + JSON.stringify(courseTitle) + ';\n' +
       'var LOGO_URL = ' + JSON.stringify(logoUrl) + ';\n' +
       'var LOGO_ALT = ' + JSON.stringify(logoAlt) + ';\n\n' +
@@ -213,6 +227,7 @@ window.GeneratorApp = (function () {
       '    setCompletedSections(updated);\n' +
       '  }\n' +
       '  function isSectionUnlocked(idx) {\n' +
+      '    if (!COURSE_LOCKED) return true;\n' +
       '    if (idx === 0) return true;\n' +
       '    return !!completedSections[idx - 1];\n' +
       '  }\n\n' +

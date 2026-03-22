@@ -558,9 +558,21 @@ window.SCORMParser = (function () {
       pausesParent: layer.pauseParent || false,
     }));
 
+    // Detect navigation restrictions from Storyline's universal patterns:
+    // - slideLock: author explicitly locked this slide
+    // - NavigationRestrictionNextSlide_*: custom next-button behaviour
+    // - resume: whether slide state persists (indicates important interaction)
+    const hasNavRestriction = slideData.slideLock ||
+      (slideData.actionGroups && Object.keys(slideData.actionGroups).some(
+        k => k.startsWith('NavigationRestrictionNextSlide_')
+      ));
+
     return { id: slideId, title: slideData.title, type: slideType, slideNumber,
       elements, layers, timeline, transitions: transition,
-      audioNarrationId: slideData.globalAudioId || undefined, triggers };
+      audioNarrationId: slideData.globalAudioId || undefined, triggers,
+      locked: slideData.slideLock || false,
+      hasNavRestriction: hasNavRestriction || false,
+      resume: slideData.resume || false };
   }
 
   // ---- Asset manifest builder ----
