@@ -259,6 +259,17 @@ window.ContentPlanner = (function () {
     if (slide.type === 'title') return slide.title || 'Welcome';
     if (slide.type === 'results') return 'Your Results';
     if (slide.type === 'branching') return slide.title || 'Choose Your Path';
+
+    // Form slides often have unhelpful titles like "Text Entry" or "Text Entry 1"
+    // — derive a better title from the form content or use a sensible default
+    if (slide.type === 'form') {
+      var title = (slide.title || '').trim();
+      if (!title || /^text\s*entry/i.test(title)) {
+        return 'Your Details';
+      }
+      return title;
+    }
+
     if (sectionIndex === 0) return slide.title || 'Introduction';
     return slide.title || 'Section ' + (sectionIndex + 1);
   }
@@ -541,7 +552,13 @@ window.ContentPlanner = (function () {
         return sum + l.texts.reduce(function (s, t) { return s + t.content.length; }, 0);
       }, 0) / plan.layers.length;
 
-      if (plan.layers.length >= 3 && avgTextLen < 200) {
+      // Bento works best for short, glanceable content (key facts, stats, short points)
+      // Use max text length to avoid cramming paragraphs into tiles
+      var maxTextLen = plan.layers.reduce(function (max, l) {
+        return Math.max(max, l.texts.reduce(function (s, t) { return s + t.content.length; }, 0));
+      }, 0);
+
+      if (plan.layers.length >= 3 && avgTextLen < 100 && maxTextLen < 150) {
         plan.interactionType = 'bento';
       } else if (layerHasImages) {
         plan.interactionType = 'modal';

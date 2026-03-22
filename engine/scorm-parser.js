@@ -589,8 +589,9 @@ window.SCORMParser = (function () {
         }
         if (questions.length > 0) {
           const exitTarget = draw.exitaction?.objRef?.value || '';
-          const group = exitTarget.includes('6gVJ6ioVtxh') ? 'non-technical' :
-                        exitTarget.includes('6ikVHG8x6rz') ? 'technical' : 'general';
+          // Use exit target slide ID as the group — this universally links
+          // quiz banks to their results slides without hardcoded IDs
+          const group = exitTarget ? exitTarget.split('.').pop() : 'general';
           banks.push({ id: draw.lmsId || 'bank_' + banks.length,
             title: draw.lmsId || 'Question Bank ' + (banks.length + 1),
             drawCount: draw.shufflecount || questions.length, questions, group });

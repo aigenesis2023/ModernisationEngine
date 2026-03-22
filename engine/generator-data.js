@@ -161,22 +161,31 @@ window.GeneratorData = (function () {
         var lower = t.toLowerCase();
         return lower.includes('enter') || lower.includes('please') || lower.includes('fill');
       }) || 'Please fill in your details';
-      data.title = slide.originalTitle || 'Your Details';
+      // Clean up auto-generated form titles like "Text Entry", "Text Entry 1"
+      var formTitle = (slide.originalTitle || '').trim();
+      data.title = /^text\s*entry/i.test(formTitle) ? 'Your Details' : (formTitle || 'Your Details');
     }
 
     // Branching
     if (slide.type === 'branching') {
       data.title = slide.originalTitle || 'Choose Your Path';
 
-      // Instruction text
-      data.instruction = slide.content.callouts[0] || slide.content.bodyTexts.find(function (t) {
-        var lower = t.toLowerCase();
-        return lower.includes('click') || lower.includes('select') || lower.includes('choose');
+      // Include descriptive body texts (exclude greetings and short UI text)
+      var descriptiveTexts = slide.content.bodyTexts.filter(function (t) {
+        return t.length > 30 && !t.includes('%');
       });
+      if (descriptiveTexts.length > 0) {
+        data.texts = descriptiveTexts;
+      }
 
-      // Greeting with variable substitution
+      // Include headings that provide context
+      if (slide.content.headings.length > 0) {
+        data.headings = slide.content.headings.map(function (h) { return h.text; });
+      }
+
+      // Greeting with universal variable substitution
       var greeting = slide.content.bodyTexts.find(function (t) { return t.includes('%'); });
-      if (greeting) data.greeting = greeting.replace(/%_player\.TextEntry\d+%/g, '%name%');
+      if (greeting) data.greeting = greeting.replace(/%_player\.[^%]+%/g, '%name%');
 
       // Build options from extracted buttons
       var quizBankIds = coursePlan && coursePlan.quizBanks

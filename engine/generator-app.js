@@ -240,6 +240,24 @@ window.GeneratorApp = (function () {
 
       // --- Section renderer ---
       '  function renderSection(section, sectionIndex) {\n' +
+      '    // Hide results sections until quiz is complete\n' +
+      '    if (section.type === "results") {\n' +
+      '      if (quizState !== "complete") return null;\n' +
+      '      // If multiple results sections exist, only show the one whose slide ID\n' +
+      '      // matches the quiz bank group (exit target) the user took\n' +
+      '      var resultsSections = SECTIONS.filter(function(s) { return s.type === "results"; });\n' +
+      '      if (resultsSections.length > 1 && branch) {\n' +
+      '        var matchesBank = QUIZ_BANKS.some(function(qb) {\n' +
+      '          return qb.group === section.slides[0].id;\n' +
+      '        });\n' +
+      '        if (!matchesBank) {\n' +
+      '          var takenBank = QUIZ_BANKS.find(function(qb) {\n' +
+      '            return qb.group === section.slides[0].id;\n' +
+      '          });\n' +
+      '          if (!takenBank) return null;\n' +
+      '        }\n' +
+      '      }\n' +
+      '    }\n' +
       '    var sectionClass = "section";\n' +
       '    if (section.type === "hero") sectionClass = "section section-hero";\n' +
       '    else if (section.type === "results") sectionClass = "section section-results";\n' +
@@ -413,13 +431,19 @@ window.GeneratorApp = (function () {
 
       // --- Branching slide ---
       '  function renderBranchingSlide(slide, key) {\n' +
-      '    var userName = formData["TextEntry9"] || "";\n' +
+      '    // Find user name from any form field that looks like a name field\n' +
+      '    var userName = "";\n' +
+      '    Object.keys(formData).forEach(function(k) {\n' +
+      '      if (!userName && formData[k] && /name/i.test(k)) userName = formData[k];\n' +
+      '    });\n' +
+      '    if (!userName) { var firstVal = Object.values(formData).find(function(v) { return v; }); userName = firstVal || ""; }\n' +
       '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
       '      e("div", { className: "branch-container" },\n' +
       '        e("h2", null, slide.title),\n' +
-      '        slide.instruction ? e("p", null, slide.instruction) : null,\n' +
       '        slide.greeting ? e("p", { className: "greeting" },\n' +
       '          slide.greeting.replace("%name%", userName)) : null,\n' +
+      '        slide.headings ? slide.headings.map(function(h, i) { return e("p", { key: "bh" + i, style: { fontWeight: 600 } }, h); }) : null,\n' +
+      '        slide.texts ? slide.texts.map(function(t, i) { return e("p", { key: "bt" + i, style: { maxWidth: "680px", margin: "0 auto", marginBottom: "var(--spacing)" } }, t); }) : null,\n' +
       '        e("div", { className: "branch-grid" },\n' +
       '          slide.options && slide.options.map(function(opt, i) {\n' +
       '            return e("div", { className: "branch-option", key: i,\n' +
