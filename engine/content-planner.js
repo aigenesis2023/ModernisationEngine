@@ -577,15 +577,30 @@ window.ContentPlanner = (function () {
         return sum + l.texts.reduce(function (s, t) { return s + t.content.length; }, 0);
       }, 0) / plan.layers.length;
 
-      // Bento works best for short, glanceable content (key facts, stats, short points)
-      // Use max text length to avoid cramming paragraphs into tiles
+      // Layer interaction classification based on content characteristics:
+      //
+      // BENTO GRID: 3-6 layers with SHORT text (key facts, bullet points).
+      //   Storyline authors use this pattern for "at a glance" information.
+      //   avgTextLen < 100 and maxTextLen < 150 chars per layer.
+      //
+      // MODAL: Layers with images — each layer is a visual topic.
+      //   Storyline authors use this for "click to explore" image galleries.
+      //
+      // ACCORDION: All other cases — text-heavy layers that need expansion.
+      //   Storyline authors use this for detailed content that shouldn't
+      //   all be visible at once.
+      //
+      // These thresholds come from typical Storyline content patterns:
+      // - "Key fact" layers: 30-80 chars (1-2 sentences)
+      // - "Detail" layers: 100-300+ chars (full paragraphs)
+      // - 7+ layers is too many for a grid, always use accordion
       var maxTextLen = plan.layers.reduce(function (max, l) {
         return Math.max(max, l.texts.reduce(function (s, t) { return s + t.content.length; }, 0));
       }, 0);
 
-      if (plan.layers.length >= 3 && avgTextLen < 100 && maxTextLen < 150) {
+      if (plan.layers.length >= 3 && plan.layers.length <= 6 && avgTextLen < 100 && maxTextLen < 150) {
         plan.interactionType = 'bento';
-      } else if (layerHasImages) {
+      } else if (layerHasImages && plan.layers.length <= 8) {
         plan.interactionType = 'modal';
       } else {
         plan.interactionType = 'accordion';
