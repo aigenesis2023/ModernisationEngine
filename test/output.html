@@ -1008,11 +1008,9 @@ function App() {
     if (/^(drag\s*and\s*drop|match\s*the)\s*\d*$/i.test(tl)) return true;
     if (/^table\s*\d/i.test(tl)) return true;
     if (/^[A-Z\s\/\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;
-    if (/^(end\s*course|mid.?section)\s*(quiz|test)?\s*$/i.test(tl)) return true;
-    if (/^(charging|chargin)\s*terms?\s*(tech)?$/i.test(tl)) return true;
     var labels = ["pick one","pick many","pick all","true/false","true false",
       "text entry","matching","sequence","fill in","freeform","graded question",
-      "survey question","multiple choice","untitled slide","glossary info"];
+      "survey question","multiple choice","untitled slide"];
     return labels.some(function(l) { return tl === l || tl.match(new RegExp("^" + l + "\\s*\\d*$")); });
   }
   function isTitleRedundant(slideTitle, sectionTitle) {

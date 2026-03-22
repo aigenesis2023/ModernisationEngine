@@ -156,6 +156,28 @@ assets/media/*        ← Video/audio files
 - All generated React uses `React.createElement` (no JSX, no build step)
 - `escJs()` and `escHtml()` for safe string embedding
 
+## ⛔ ABSOLUTE RULE — READ THIS BEFORE EVERY SINGLE CODE CHANGE
+
+**Fixing the test course output is WORTHLESS and HARMFUL.** Any change that improves
+the output for the test SCORM file but wouldn't help a completely different Storyline
+course is a WASTE OF TIME and creates a FALSE SENSE OF PROGRESS. It makes the preview
+look good while hiding real engine weaknesses.
+
+**Before writing ANY code, ask:** "If someone uploaded a Storyline course about
+cooking safety, marine biology, or HR compliance, would this change help THAT course?"
+If the answer is no or maybe, DO NOT MAKE THE CHANGE.
+
+**Specific things that are ALWAYS WRONG:**
+- Adding specific text strings from the test course to any filter/regex
+- Tuning thresholds/regex patterns until the test output "looks right"
+- Adding word lists derived from the test course content
+- Any fix where you're looking at the test output and thinking "how do I make THIS look better"
+
+**What IS allowed:**
+- Rules based on Storyline's EXPORT FORMAT (data structures, object types, naming patterns)
+- Classification based on STRUCTURAL PROPERTIES (font size, position, depth, element type)
+- Patterns that exist in ALL Storyline exports (textLib, imagelib, slideLayers, actionGroups)
+
 ## CRITICAL: Engine Development Process
 
 ### The Golden Rule

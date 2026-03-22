@@ -162,9 +162,11 @@ window.GeneratorData = (function () {
     var entries = [];
     // Match: capitalized term (possibly with /, -, parentheses) followed by
     // a definition that starts with a lowercase word or common article
-    // Term boundary: stop at capitalized words that are common definition starters
-    // "Converts", "An", "The", "A" when followed by lowercase
-    var pattern = /([A-Z][A-Za-z\/\-]+(?:[\s\/\-]+(?!(?:A|An|The|In|Is|Are|Was|Has|Can|May|Used|Converts|Provides|Changes|Keeps|Manages|Takes)\s)[A-Z][A-Za-z\/\-]+)*(?:\s*\([^)]+\))?)\s+([A-Za-z][^]*?)(?=\.\s+[A-Z][A-Z]|\.\s+[A-Z][a-z]+(?:[\s\/\-]+[A-Z]|[\s\/\-]+\()|\s*$)/g;
+    // Term boundary: stop at capitalized words that are common English articles/prepositions
+    // These are STRUCTURAL English language patterns, not content-specific
+    // A term in a glossary is always a NOUN PHRASE. When we hit a word that starts
+    // a SENTENCE (article, pronoun, verb), that's the definition beginning.
+    var pattern = /([A-Z][A-Za-z\/\-]+(?:[\s\/\-]+(?!(?:A|An|The|In|Is|Are|Was|Has|Can|May|If|It|As|By|To|Or|No|So|Do)\s)[A-Z][A-Za-z\/\-]+)*(?:\s*\([^)]+\))?)\s+([A-Za-z][^]*?)(?=\.\s+[A-Z][A-Z]|\.\s+[A-Z][a-z]+(?:[\s\/\-]+[A-Z]|[\s\/\-]+\()|\s*$)/g;
 
     var match;
     while ((match = pattern.exec(combined)) !== null) {

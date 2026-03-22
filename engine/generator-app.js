@@ -245,11 +245,9 @@ window.GeneratorApp = (function () {
       '    if (/^(drag\\s*and\\s*drop|match\\s*the)\\s*\\d*$/i.test(tl)) return true;\n' +
       '    if (/^table\\s*\\d/i.test(tl)) return true;\n' +
       '    if (/^[A-Z\\s\\/\\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;\n' +
-      '    if (/^(end\\s*course|mid.?section)\\s*(quiz|test)?\\s*$/i.test(tl)) return true;\n' +
-      '    if (/^(charging|chargin)\\s*terms?\\s*(tech)?$/i.test(tl)) return true;\n' +
       '    var labels = ["pick one","pick many","pick all","true/false","true false",\n' +
       '      "text entry","matching","sequence","fill in","freeform","graded question",\n' +
-      '      "survey question","multiple choice","untitled slide","glossary info"];\n' +
+      '      "survey question","multiple choice","untitled slide"];\n' +
       '    return labels.some(function(l) { return tl === l || tl.match(new RegExp("^" + l + "\\\\s*\\\\d*$")); });\n' +
       '  }\n' +
       // Helper: check if slide title is redundant with section title
