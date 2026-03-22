@@ -178,6 +178,13 @@ If the answer is no or maybe, DO NOT MAKE THE CHANGE.
 - Classification based on STRUCTURAL PROPERTIES (font size, position, depth, element type)
 - Patterns that exist in ALL Storyline exports (textLib, imagelib, slideLayers, actionGroups)
 
+**Branding source of truth:**
+The brand URL website is the ONLY source of truth for visual branding (colors,
+fonts, gradients, button styles, mood). The original SCORM course's colors and
+styling are IRRELEVANT — the engine is RE-BRANDING the course. Never extract
+or use the original course's accent colors, font choices, or visual styles.
+The SCORM file provides CONTENT and STRUCTURE. The brand URL provides VISUAL IDENTITY.
+
 ## CRITICAL: Engine Development Process
 
 ### The Golden Rule
