@@ -452,7 +452,8 @@ window.GeneratorApp = (function () {
       '          )\n' +
       '        ),\n' +
       '        slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,\n' +
-      '        renderLayers(slide)\n' +
+      '        renderLayers(slide),\n' +
+      '        renderInteractions(slide)\n' +
       '      );\n' +
       '    }\n' +
       // Numbered steps layout
@@ -471,7 +472,8 @@ window.GeneratorApp = (function () {
       '        ),\n' +
       '        slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,\n' +
       '        slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,\n' +
-      '        renderLayers(slide)\n' +
+      '        renderLayers(slide),\n' +
+      '        renderInteractions(slide)\n' +
       '      );\n' +
       '    }\n' +
       // Default narrative
