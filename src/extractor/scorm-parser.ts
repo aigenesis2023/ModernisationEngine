@@ -8,6 +8,8 @@ import {
   buildAssetManifest,
   buildNavigationMap,
   buildQuestionBanks,
+  parseVariables,
+  buildExtractionReport,
 } from './storyline-parser';
 
 // ---- SCORM Manifest Parser ----
@@ -133,18 +135,31 @@ export async function extractCourse(scormDir: string, verbose: boolean): Promise
     author: metaInfo.author,
   };
 
+  // Parse course variables
+  const variables = parseVariables(storylineData.variables);
+
+  // Build extraction report
+  const extractionReport = buildExtractionReport(slides, variables);
+
   const course: CourseIR = {
     meta,
     slides,
     questionBanks,
     assets,
     navigation,
+    variables,
+    extractionReport,
   };
 
   if (verbose) {
     console.log(`    Extracted: ${slides.length} slides, ${questionBanks.length} question banks`);
     console.log(`    Questions: ${questionBanks.reduce((sum, qb) => sum + qb.questions.length, 0)}`);
     console.log(`    Assets: ${assets.images.length} images, ${assets.videos.length} videos, ${assets.audio.length} audio`);
+    console.log(`    Variables: ${variables.length}, Triggers: ${extractionReport.totalTriggers}`);
+    console.log(`    Coverage: ${extractionReport.coveragePercent}% (${extractionReport.totalObjectsExtracted}/${extractionReport.totalObjectsFound} objects)`);
+    if (extractionReport.unknownObjectKinds.length > 0) {
+      console.log(`    Unknown kinds: ${extractionReport.unknownObjectKinds.join(', ')}`);
+    }
   }
 
   return course;

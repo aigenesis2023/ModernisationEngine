@@ -5,7 +5,9 @@ import type {
   AudioElement, ButtonElement, ShapeElement, QuizElement, FormElement,
   FormFieldIR, QuestionIR, ChoiceIR, QuestionBankIR, TimelineIR, TimelineEvent,
   TransitionIR, SlideLayerIR, TextRole, ImageRole, AssetManifest, AssetEntry,
-  NavigationMap, NavigationLink,
+  NavigationMap, NavigationLink, CourseVariable, TriggerIR, TriggerActionIR,
+  TriggerConditionIR, ObjectStateIR, LayerAudioIR, InteractionElement,
+  ExtractionReport, SlideExtractionReport,
 } from '../ir/types';
 
 // Storyline wraps JSON in: window.globalProvideData('type', 'JSON_STRING')
@@ -73,6 +75,129 @@ export function parseDataJs(scormDir: string): StorylineData {
   };
 }
 
+// ---- Variable Extraction ----
+
+export function parseVariables(rawVars: any[]): CourseVariable[] {
+  return rawVars.map(v => ({
+    id: v.id || v.name || '',
+    type: v.type === 'boolean' || v.type === 'tf' ? 'boolean' as const :
+          v.type === 'number' ? 'number' as const : 'text' as const,
+    defaultValue: v.val ?? v.defaultVal ?? v.defaultValue ?? '',
+  }));
+}
+
+// ---- Trigger / Action Group Extraction ----
+
+function parseTriggers(timelineData: any, objects: any[]): TriggerIR[] {
+  const triggers: TriggerIR[] = [];
+
+  // Extract from timeline events
+  const events = timelineData?.events || [];
+  for (const evt of events) {
+    const actions: TriggerActionIR[] = [];
+    for (const a of evt.actions || []) {
+      actions.push({
+        kind: a.kind || 'unknown',
+        targetId: a.objRef?.value || a.layerRef?.value || a.slideRef?.value || undefined,
+        variable: a.variable || undefined,
+        value: a.value != null ? String(a.value) : undefined,
+        operator: a.operator || undefined,
+      });
+    }
+    if (actions.length > 0) {
+      triggers.push({
+        id: evt.id || `trigger_${triggers.length}`,
+        event: evt.kind || 'ontimelinetick',
+        actions,
+        conditions: parseConditions(evt.conditions),
+        targetObjectId: evt.objRef?.value || undefined,
+      });
+    }
+  }
+
+  // Extract from object-level triggers (useHandCursor buttons, etc.)
+  collectObjectTriggers(objects, triggers);
+
+  return triggers;
+}
+
+function collectObjectTriggers(objects: any[], triggers: TriggerIR[]): void {
+  for (const obj of objects) {
+    if (obj.actionGroups && Array.isArray(obj.actionGroups)) {
+      for (const ag of obj.actionGroups) {
+        const actions: TriggerActionIR[] = (ag.actions || []).map((a: any) => ({
+          kind: a.kind || 'unknown',
+          targetId: a.objRef?.value || a.layerRef?.value || a.slideRef?.value || undefined,
+          variable: a.variable || undefined,
+          value: a.value != null ? String(a.value) : undefined,
+          operator: a.operator || undefined,
+        }));
+        if (actions.length > 0) {
+          triggers.push({
+            id: ag.id || `obj_trigger_${triggers.length}`,
+            event: ag.event || 'onclick',
+            actions,
+            conditions: parseConditions(ag.conditions),
+            targetObjectId: obj.id || obj.referenceName || undefined,
+          });
+        }
+      }
+    }
+    // Recurse into nested objects
+    if (obj.objects) collectObjectTriggers(obj.objects, triggers);
+  }
+}
+
+function parseConditions(raw: any): TriggerConditionIR[] {
+  if (!raw || !Array.isArray(raw)) return [];
+  return raw.map((c: any) => ({
+    variable: c.variable || undefined,
+    operator: c.operator || 'eq',
+    value: c.value != null ? String(c.value) : undefined,
+  }));
+}
+
+// ---- State Extraction from stategroups ----
+
+function extractStates(obj: any): ObjectStateIR[] {
+  const states: ObjectStateIR[] = [];
+  if (obj.kind !== 'stategroup' || !obj.states) return states;
+
+  for (const state of obj.states) {
+    const name = state.name || state.id || '';
+    // Skip the default state — it's just the normal appearance
+    if (name === '_default_Normal' || name === 'Normal') continue;
+    const label = state.objects?.[0] ? extractTextFromObj(state.objects[0]).text : undefined;
+    states.push({
+      name,
+      label: label || undefined,
+      altText: state.altText || undefined,
+    });
+  }
+  return states;
+}
+
+// ---- Audio Extraction ----
+
+function extractLayerAudio(objects: any[]): LayerAudioIR[] {
+  const audio: LayerAudioIR[] = [];
+  collectAudio(objects, audio);
+  return audio;
+}
+
+function collectAudio(objects: any[], audio: LayerAudioIR[]): void {
+  for (const obj of objects) {
+    if (obj.kind === 'audio') {
+      audio.push({
+        assetId: obj.audiodata?.assetId ?? obj.assetId ?? -1,
+        originalPath: obj.audiodata?.url || obj.url || '',
+        durationMs: obj.audiodata?.duration || obj.duration || 0,
+      });
+    }
+    if (obj.objects) collectAudio(obj.objects, audio);
+  }
+}
+
 // ---- Slide Type Detection ----
 
 function detectSlideType(title: string, objects: any[], slideRef: any): SlideType {
@@ -84,11 +209,19 @@ function detectSlideType(title: string, objects: any[], slideRef: any): SlideTyp
   if (titleLower.includes('role selector') || titleLower.includes('branch')) return 'branching';
   if (titleLower.includes('pre-knowledge') || titleLower.includes('pre knowledge')) return 'branching';
 
-  // Check for quiz elements (stategroups with radio buttons)
+  // Check for quiz elements (stategroups with radio buttons or checkboxes)
   const hasRadio = objects.some(o =>
     o.kind === 'stategroup' && o.objects?.some((so: any) => so.accType === 'radio')
   );
-  if (hasRadio || titleLower.includes('pick one') || titleLower.includes('pick many')) return 'quiz';
+  const hasCheckbox = objects.some(o =>
+    o.kind === 'stategroup' && o.objects?.some((so: any) =>
+      so.accType === 'checkbox' || (so.referenceName || '').toLowerCase().includes('checkbox')
+    )
+  );
+  if (hasRadio || hasCheckbox || titleLower.includes('pick one') ||
+      titleLower.includes('pick many') || titleLower.includes('true/false') ||
+      titleLower.includes('true false') || titleLower.includes('matching') ||
+      titleLower.includes('sequence') || titleLower.includes('fill in')) return 'quiz';
 
   // Check for text inputs
   if (objects.some(o => o.kind === 'textinput')) return 'form';
@@ -255,22 +388,86 @@ function extractElementsRecursive(objects: any[], elements: SlideElement[]): voi
           role: 'label' as TextRole,
         } as TextElement);
       }
+    } else if (obj.kind === 'audio') {
+      elements.push({
+        ...base,
+        type: 'audio',
+        assetId: obj.audiodata?.assetId ?? obj.assetId ?? -1,
+        originalPath: obj.audiodata?.url || obj.url || '',
+        durationMs: obj.audiodata?.duration || obj.duration || 0,
+      } as AudioElement);
     } else if (obj.kind === 'stategroup') {
-      // Stategroups contain interactive objects: quiz radio buttons, role
-      // selector buttons, tabbed panels, etc. Recurse into sub-objects to
-      // extract buttons, text, and images that were previously skipped.
+      // Extract states (hover, selected, disabled, custom)
+      const states = extractStates(obj);
+
+      // Check if this is an interactive object (slider, dial, marker, etc.)
+      const refName = (obj.referenceName || '').toLowerCase();
+      if (refName.includes('slider') || refName.includes('dial') || refName.includes('marker')) {
+        elements.push({
+          ...base,
+          type: 'interaction',
+          interactionType: refName.includes('slider') ? 'slider' :
+                           refName.includes('dial') ? 'dial' : 'marker',
+          label: extractTextFromObj(obj).text || obj.referenceName || '',
+          variableName: obj.bindto?.replace('_player.', '') || undefined,
+          children: [],
+        } as InteractionElement);
+      }
+
+      // Recurse into sub-objects for nested content (radio buttons, text, etc.)
       if (obj.objects) {
-        extractElementsRecursive(obj.objects, elements);
+        // For buttons within stategroups, attach states
+        const childElements: SlideElement[] = [];
+        extractElementsRecursive(obj.objects, childElements);
+        for (const child of childElements) {
+          if (child.type === 'button' && states.length > 0) {
+            (child as ButtonElement).states = states;
+          }
+          elements.push(child);
+        }
       }
     } else if (obj.kind === 'objgroup') {
-      // Object groups bundle related elements (e.g. icon + description text).
-      // Recurse to extract all nested content.
+      // Check for scrolling panels or hotspots
+      const refName = (obj.referenceName || '').toLowerCase();
+      if (refName.includes('scrolling panel')) {
+        const children: SlideElement[] = [];
+        if (obj.objects) extractElementsRecursive(obj.objects, children);
+        elements.push({
+          ...base,
+          type: 'interaction',
+          interactionType: 'scrolling-panel',
+          label: obj.referenceName || '',
+          children,
+        } as InteractionElement);
+      } else if (refName.includes('hotspot')) {
+        elements.push({
+          ...base,
+          type: 'interaction',
+          interactionType: 'hotspot',
+          label: obj.referenceName || '',
+          children: [],
+        } as InteractionElement);
+      } else {
+        // Regular object group — recurse to extract all nested content
+        if (obj.objects) {
+          extractElementsRecursive(obj.objects, elements);
+        }
+      }
+    } else {
+      // Track unknown kinds for the extraction report
+      if (obj.kind) {
+        unknownKinds.add(obj.kind);
+      }
+      // Still recurse into unknown objects in case they contain nested content
       if (obj.objects) {
         extractElementsRecursive(obj.objects, elements);
       }
     }
   }
 }
+
+// Track unknown object kinds across the parse
+const unknownKinds = new Set<string>();
 
 function parseFormFields(objects: any[]): FormFieldIR[] {
   const fields: FormFieldIR[] = [];
@@ -295,13 +492,7 @@ function collectFormFields(objects: any[], fields: FormFieldIR[]): void {
   }
 }
 
-function parseQuizQuestion(objects: any[]): QuestionIR | null {
-  const stateGroups = objects.filter(o =>
-    o.kind === 'stategroup' && o.objects?.some((so: any) => so.accType === 'radio')
-  );
-  if (stateGroups.length === 0) return null;
-
-  // Find question text: top-level text object that isn't a decorative shape or label
+function findQuestionText(objects: any[]): string {
   const textObjects = objects.filter(o => {
     if (o.kind !== 'vectorshape' || o.accType !== 'text') return false;
     const text = extractTextFromObj(o).text;
@@ -312,14 +503,81 @@ function parseQuizQuestion(objects: any[]): QuestionIR | null {
       text !== 'Incorrect' &&
       text.length > 10;
   });
+  return textObjects.length > 0 ? extractTextFromObj(textObjects[0]).text : 'Unknown question';
+}
 
-  const questionText = textObjects.length > 0
-    ? extractTextFromObj(textObjects[0]).text
-    : 'Unknown question';
+function findFeedback(objects: any[]): { correct: string; incorrect: string } {
+  const correctObj = objects.find(o => o.id?.includes('CorrectReview'));
+  const incorrectObj = objects.find(o => o.id?.includes('IncorrectReview'));
+  return {
+    correct: correctObj ? extractTextFromObj(correctObj).text || 'Correct!' : 'Correct!',
+    incorrect: incorrectObj ? extractTextFromObj(incorrectObj).text || 'Incorrect.' : 'Incorrect.',
+  };
+}
 
-  const choices: ChoiceIR[] = stateGroups.map(sg => {
-    const radio = sg.objects?.find((o: any) => o.accType === 'radio');
-    const choiceText = radio ? extractTextFromObj(radio).text : (radio?.data?.vectorData?.altText || '');
+function parseQuizQuestion(objects: any[]): QuestionIR | null {
+  // Detect radio buttons (pick-one)
+  const radioGroups = objects.filter(o =>
+    o.kind === 'stategroup' && o.objects?.some((so: any) => so.accType === 'radio')
+  );
+
+  // Detect checkboxes (pick-many / multiple response)
+  const checkboxGroups = objects.filter(o =>
+    o.kind === 'stategroup' && o.objects?.some((so: any) =>
+      so.accType === 'checkbox' || (so.referenceName || '').toLowerCase().includes('checkbox')
+    )
+  );
+
+  // Detect text inputs (text-entry / fill-in-the-blank)
+  const textInputs = objects.filter(o => o.kind === 'textinput');
+
+  // Detect true/false by checking if there are exactly 2 radio choices with true/false text
+  const isTrueFalse = radioGroups.length === 2 && radioGroups.every(sg => {
+    const text = (sg.objects?.find((o: any) => o.accType === 'radio') ?
+      extractTextFromObj(sg.objects.find((o: any) => o.accType === 'radio')).text : '').toLowerCase();
+    return text === 'true' || text === 'false';
+  });
+
+  // Determine question type and extract choices
+  let questionType: QuestionIR['questionType'];
+  let choices: ChoiceIR[] = [];
+  let stateGroups: any[] = [];
+
+  if (isTrueFalse) {
+    questionType = 'true-false';
+    stateGroups = radioGroups;
+  } else if (checkboxGroups.length > 0) {
+    questionType = 'pick-many';
+    stateGroups = checkboxGroups;
+  } else if (radioGroups.length > 0) {
+    questionType = 'pick-one';
+    stateGroups = radioGroups;
+  } else if (textInputs.length > 0) {
+    questionType = 'text-entry';
+    const questionText = findQuestionText(objects);
+    const feedback = findFeedback(objects);
+    return {
+      id: (textInputs[0].id || 'textentry') + '_q',
+      questionText,
+      questionType,
+      choices: [],
+      correctFeedback: feedback.correct,
+      incorrectFeedback: feedback.incorrect,
+      points: 10,
+      shuffleChoices: false,
+    };
+  } else {
+    return null;
+  }
+
+  const questionText = findQuestionText(objects);
+  const feedback = findFeedback(objects);
+
+  choices = stateGroups.map(sg => {
+    const choiceObj = sg.objects?.find((o: any) =>
+      o.accType === 'radio' || o.accType === 'checkbox'
+    );
+    const choiceText = choiceObj ? extractTextFromObj(choiceObj).text : '';
     const isCorrect = choiceText.endsWith('*');
     return {
       id: sg.id,
@@ -328,20 +586,13 @@ function parseQuizQuestion(objects: any[]): QuestionIR | null {
     };
   });
 
-  // Find feedback text
-  const correctFeedbackObj = objects.find(o => o.id?.includes('CorrectReview'));
-  const correctFeedback = correctFeedbackObj ? extractTextFromObj(correctFeedbackObj).text || 'Correct!' : 'Correct!';
-
-  const incorrectFeedbackObj = objects.find(o => o.id?.includes('IncorrectReview'));
-  const incorrectFeedback = incorrectFeedbackObj ? extractTextFromObj(incorrectFeedbackObj).text || 'Incorrect.' : 'Incorrect.';
-
   return {
     id: stateGroups[0].id + '_q',
     questionText,
-    questionType: 'pick-one',
+    questionType,
     choices,
-    correctFeedback,
-    incorrectFeedback,
+    correctFeedback: feedback.correct,
+    incorrectFeedback: feedback.incorrect,
     points: 10,
     shuffleChoices: false,
   };
@@ -409,7 +660,10 @@ export function parseSlide(
     direction: slideData.transDir,
   };
 
-  // Parse additional layers
+  // Parse triggers from timeline and objects
+  const triggers = parseTriggers(timelineData, objects);
+
+  // Parse additional layers (with audio and triggers)
   const layers: SlideLayerIR[] = (slideData.slideLayers || []).slice(1).map((layer: any, i: number) => ({
     id: layer.id || `layer_${i + 1}`,
     name: layer.name || `Layer ${i + 1}`,
@@ -418,6 +672,8 @@ export function parseSlide(
       durationMs: layer.timeline?.duration || 5000,
       events: [],
     },
+    audio: extractLayerAudio(layer.objects || []),
+    triggers: parseTriggers(layer.timeline, layer.objects || []),
   }));
 
   return {
@@ -429,6 +685,8 @@ export function parseSlide(
     layers,
     timeline,
     transitions: transition,
+    audioNarrationId: slideData.globalAudioId || undefined,
+    triggers,
   };
 }
 
@@ -499,6 +757,81 @@ export function buildNavigationMap(slideMap: any, scenes: any[]): NavigationMap 
   }
 
   return { entrySlideId, links };
+}
+
+// ---- Extraction Report Builder ----
+
+export function buildExtractionReport(slides: SlideIR[], variables: CourseVariable[]): ExtractionReport {
+  let totalObjectsFound = 0;
+  let totalObjectsExtracted = 0;
+  let totalText = 0;
+  let totalButtons = 0;
+  let totalImages = 0;
+  let totalVideos = 0;
+  let totalAudio = 0;
+  let totalInteractions = 0;
+  let totalLayers = 0;
+  let totalLayersWithAudio = 0;
+  let totalTriggers = 0;
+  const slideReports: SlideExtractionReport[] = [];
+
+  for (const slide of slides) {
+    const allElements = [...slide.elements, ...slide.layers.flatMap(l => l.elements)];
+    const layerAudioCount = slide.layers.filter(l => l.audio && l.audio.length > 0).length;
+
+    totalLayers += slide.layers.length;
+    totalLayersWithAudio += layerAudioCount;
+    totalTriggers += slide.triggers.length + slide.layers.reduce((s, l) => s + l.triggers.length, 0);
+
+    for (const el of allElements) {
+      totalObjectsExtracted++;
+      switch (el.type) {
+        case 'text': totalText++; break;
+        case 'button': totalButtons++; break;
+        case 'image': totalImages++; break;
+        case 'video': totalVideos++; break;
+        case 'audio': totalAudio++; break;
+        case 'interaction': totalInteractions++; break;
+      }
+    }
+
+    slideReports.push({
+      slideId: slide.id,
+      slideTitle: slide.title,
+      objectsFound: allElements.length,
+      objectsExtracted: allElements.length,
+      layersFound: slide.layers.length,
+      layersWithContent: slide.layers.filter(l => l.elements.length > 0).length,
+      warnings: [],
+    });
+  }
+
+  totalObjectsFound = totalObjectsExtracted + unknownKinds.size;
+  const coveragePercent = totalObjectsFound > 0
+    ? Math.round((totalObjectsExtracted / totalObjectsFound) * 100)
+    : 100;
+
+  return {
+    totalObjectsFound,
+    totalObjectsExtracted,
+    totalObjectsSkipped: totalObjectsFound - totalObjectsExtracted,
+    totalTextContent: totalText,
+    totalButtons,
+    totalImages,
+    totalVideos,
+    totalAudio,
+    totalInteractions,
+    totalLayers,
+    totalLayersWithAudio,
+    totalVariables: variables.length,
+    totalTriggers,
+    unknownObjectKinds: Array.from(unknownKinds),
+    warnings: unknownKinds.size > 0
+      ? [`Unknown object kinds encountered: ${Array.from(unknownKinds).join(', ')}`]
+      : [],
+    coveragePercent,
+    slideReports,
+  };
 }
 
 // ---- Question Bank Builder ----
