@@ -434,6 +434,34 @@ window.SCORMParser = (function () {
         } else if (obj.objects) {
           extractElementsRecursive(obj.objects, elements, slideWidth, slideHeight);
         }
+      } else if (obj.kind === 'table') {
+        // Storyline table: has rowsCount, colsCount, headerRows, and objects (cells)
+        // Extract cell content as structured table data
+        const children = [];
+        if (obj.objects) extractElementsRecursive(obj.objects, children, slideWidth, slideHeight);
+        elements.push({ ...base, type: 'interaction', interactionType: 'table',
+          rows: obj.rowsCount || 0, cols: obj.colsCount || 0,
+          headerRows: obj.headerRows || 0,
+          label: 'Table', children });
+      } else if (obj.kind === 'scrollarea') {
+        // Storyline scroll area: contains scrollable content
+        if (obj.objects) extractElementsRecursive(obj.objects, elements, slideWidth, slideHeight);
+      } else if (obj.kind === 'threesixtyimage') {
+        // Storyline 360-degree image: interactive panoramic view
+        elements.push({ ...base, type: 'interaction', interactionType: '360-image',
+          label: '360° View' });
+      } else if (obj.kind === 'image') {
+        // Standalone image objects (zoomable images in Storyline)
+        // These have zoomdata but the actual image reference may be in imagelib
+        if (obj.imagelib && obj.imagelib.length > 0) {
+          const img = obj.imagelib[0];
+          const role = extractImageRole(img.altText || '', base.width, base.height, base.depth, slideWidth, slideHeight, img.url);
+          elements.push({ ...base, type: 'image', assetId: img.assetId ?? -1,
+            originalPath: img.url || '', altText: img.altText || '',
+            instructionalRole: role,
+            originalWidth: img.width || base.width,
+            originalHeight: img.height || base.height });
+        }
       } else {
         if (obj.kind) unknownKinds.add(obj.kind);
         if (obj.objects) extractElementsRecursive(obj.objects, elements, slideWidth, slideHeight);
