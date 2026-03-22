@@ -283,14 +283,14 @@ window.GeneratorApp = (function () {
 
       // --- Main render ---
       '  return e("div", null,\n' +
-      '    e("div", { className: "progress-bar" }, e("div", { className: "progress-fill", style: { width: "0%" } })),\n' +
-      '    e("div", { className: "course-scroll" },\n' +
+      '    e("div", { className: "progress-bar", role: "progressbar", "aria-label": "Course progress", "aria-valuemin": "0", "aria-valuemax": "100" }, e("div", { className: "progress-fill", style: { width: "0%" } })),\n' +
+      '    e("main", { className: "course-scroll", role: "main" },\n' +
       '      SECTIONS.map(function(section, si) {\n' +
       '        return renderSection(section, si);\n' +
       '      })\n' +
       '    ),\n' +
       // Quiz overlay when active
-      '    quizState === "active" && quizQuestions.length > 0 ? e("div", { className: "quiz-section", style: {\n' +
+      '    quizState === "active" && quizQuestions.length > 0 ? e("div", { className: "quiz-section", role: "dialog", "aria-label": "Quiz", style: {\n' +
       '      position: "fixed", inset: 0, zIndex: 900, background: "var(--bg)", overflowY: "auto"\n' +
       '    } }, renderQuizSlide()) : null,\n' +
       // Modal overlay
@@ -605,7 +605,7 @@ window.GeneratorApp = (function () {
       '        var isOpen = isPanelOpen(slide.id, i);\n' +
       '        var triggerLabel = getAccordionLabel(layer);\n' +
       '        return e("div", { className: "accordion-item" + (isOpen ? " open" : ""), key: i },\n' +
-      '          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i); } },\n' +
+      '          e("button", { className: "accordion-trigger", "aria-expanded": isOpen ? "true" : "false", onClick: function() { togglePanel(slide.id, i); } },\n' +
       '            e("span", null, triggerLabel),\n' +
       '            e("span", { className: "accordion-icon" }, "\\u203A")\n' +
       '          ),\n' +

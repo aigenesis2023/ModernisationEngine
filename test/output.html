@@ -1370,7 +1370,7 @@ function App() {
         var isOpen = isPanelOpen(slide.id, i);
         var triggerLabel = getAccordionLabel(layer);
         return e("div", { className: "accordion-item" + (isOpen ? " open" : ""), key: i },
-          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i); } },
+          e("button", { className: "accordion-trigger", "aria-expanded": isOpen ? "true" : "false", onClick: function() { togglePanel(slide.id, i); } },
             e("span", null, triggerLabel),
             e("span", { className: "accordion-icon" }, "\u203A")
           ),
@@ -1597,13 +1597,13 @@ function App() {
   }
 
   return e("div", null,
-    e("div", { className: "progress-bar" }, e("div", { className: "progress-fill", style: { width: "0%" } })),
-    e("div", { className: "course-scroll" },
+    e("div", { className: "progress-bar", role: "progressbar", "aria-label": "Course progress", "aria-valuemin": "0", "aria-valuemax": "100" }, e("div", { className: "progress-fill", style: { width: "0%" } })),
+    e("main", { className: "course-scroll", role: "main" },
       SECTIONS.map(function(section, si) {
         return renderSection(section, si);
       })
     ),
-    quizState === "active" && quizQuestions.length > 0 ? e("div", { className: "quiz-section", style: {
+    quizState === "active" && quizQuestions.length > 0 ? e("div", { className: "quiz-section", role: "dialog", "aria-label": "Quiz", style: {
       position: "fixed", inset: 0, zIndex: 900, background: "var(--bg)", overflowY: "auto"
     } }, renderQuizSlide()) : null,
     modalLayer !== null ? renderModalOverlay() : null
