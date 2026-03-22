@@ -556,7 +556,12 @@ window.GeneratorApp = (function () {
       '          e("div", { className: "accordion-panel" },\n' +
       '            e("div", { className: "accordion-panel-inner" },\n' +
       '              layer.image ? e("div", { className: "hero-image" }, e("img", { src: layer.image, alt: layer.name })) : null,\n' +
-      '              layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); }),\n' +
+      '              layer.texts && layer.texts.filter(function(t, j) {\n' +
+      '                if (j !== 0) return true;\n' +
+      '                var compareLen = Math.min(t.length, triggerLabel.length, 60);\n' +
+      '                if (compareLen < 10) return true;\n' +
+      '                return t.substring(0, compareLen).toLowerCase() !== triggerLabel.substring(0, compareLen).toLowerCase().replace(/\\.\\.\\.$/,"");\n' +
+      '              }).map(function(t, j) { return e("p", { key: j }, t); }),\n' +
       '              layer.audio && layer.audio.length > 0 ? e("div", { className: "audio-container" },\n' +
       '                e("audio", { controls: true, preload: "metadata", src: layer.audio[0].src })) : null\n' +
       '            )\n' +

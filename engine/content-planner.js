@@ -73,6 +73,13 @@ window.ContentPlanner = (function () {
     // Bare number used as slide title: "0", "1", "2" etc.
     if (/^\d+$/.test(t)) return true;
 
+    // "Table N" or "Table 01 Drag and Drop - X" — Storyline internal naming for
+    // drag-and-drop and table-based slides
+    if (/^table\s+\d/i.test(t)) return true;
+
+    // ALL CAPS internal names like "TABLE SUMMARY", "GHOST / LABELS"
+    if (/^[A-Z\s\/\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;
+
     return false;
   }
 
@@ -217,7 +224,7 @@ window.ContentPlanner = (function () {
     // UI element targets — things you interact with in a player, not course content
     var uiTargets = ['arrow', 'button', 'tab', 'icon', 'menu', 'item', 'option',
       'slider', 'scrollbar', 'scroll bar', 'hotspot', 'tile', 'card',
-      'panel', 'section', 'link', 'image', 'thumbnail', 'marker'];
+      'panel', 'section', 'link', 'image', 'thumbnail', 'marker', 'submit'];
     var hasUITarget = uiTargets.some(function (t) { return lower.includes(t); });
 
     // Navigation action targets
@@ -228,10 +235,17 @@ window.ContentPlanner = (function () {
     var hasNavTarget = navTargets.some(function (t) { return lower.includes(t); });
 
     // Instruction starters — text that begins with telling the user what to do
-    var instructionStarters = ['click on', 'tap on', 'drag the', 'hover over',
-      'use the', 'select the', 'choose the', 'press the', 'scroll down',
-      'scroll up', 'swipe', 'navigate', 'make your selection', 'make your choice'];
+    var instructionStarters = ['click on', 'tap on', 'drag the', 'drag each',
+      'hover over', 'use the', 'select the', 'choose the', 'press the',
+      'scroll down', 'scroll up', 'swipe', 'navigate', 'make your selection',
+      'make your choice', 'move the image'];
     var startsWithInstruction = instructionStarters.some(function (s) { return lower.startsWith(s); });
+
+    // "clicking and dragging" — physical interaction instruction
+    if (lower.indexOf('clicking and dragging') !== -1) return true;
+
+    // "hit submit" / "and then hit" — Storyline submit instruction
+    if (/\bhit\s+submit\b/i.test(lower) || /\band\s+then\s+hit\b/i.test(lower)) return true;
 
     // Very short interaction commands: "Click to reveal", "Tap to continue"
     // Pattern: verb + "to" + action (under 30 chars)
@@ -409,6 +423,69 @@ window.ContentPlanner = (function () {
       currentSection.slides.push(planSlide(slide));
     }
 
+    // Post-process: consolidate slides with similar titles (common prefix 10+ chars)
+    sections.forEach(function (section) {
+      if (section.slides.length < 2) return;
+      var consolidated = [];
+      var i = 0;
+      while (i < section.slides.length) {
+        var current = section.slides[i];
+        var currentTitle = (current.originalTitle || '').trim();
+        // Find consecutive slides with a shared prefix of 10+ chars
+        var group = [current];
+        var j = i + 1;
+        while (j < section.slides.length && currentTitle.length >= 10) {
+          var nextTitle = (section.slides[j].originalTitle || '').trim();
+          var prefixLen = 0;
+          var maxCheck = Math.min(currentTitle.length, nextTitle.length);
+          while (prefixLen < maxCheck && currentTitle.charAt(prefixLen) === nextTitle.charAt(prefixLen)) {
+            prefixLen++;
+          }
+          if (prefixLen >= 10) {
+            group.push(section.slides[j]);
+            j++;
+          } else {
+            break;
+          }
+        }
+        if (group.length > 1) {
+          // Merge group into a single slide: combine all body texts, headings, layers
+          var merged = group[0];
+          for (var k = 1; k < group.length; k++) {
+            var donor = group[k];
+            if (donor.content) {
+              if (donor.content.bodyTexts) {
+                merged.content.bodyTexts = merged.content.bodyTexts.concat(donor.content.bodyTexts);
+              }
+              if (donor.content.headings) {
+                donor.content.headings.forEach(function (h) {
+                  // Only add heading if not duplicated
+                  var exists = merged.content.headings.some(function (mh) {
+                    return mh.text.toLowerCase() === h.text.toLowerCase();
+                  });
+                  if (!exists) merged.content.headings.push(h);
+                });
+              }
+              if (donor.content.images) {
+                merged.content.images = merged.content.images.concat(donor.content.images);
+              }
+              if (donor.content.callouts) {
+                merged.content.callouts = merged.content.callouts.concat(donor.content.callouts);
+              }
+            }
+            if (donor.layers && donor.layers.length > 0) {
+              merged.layers = (merged.layers || []).concat(donor.layers);
+            }
+          }
+          consolidated.push(merged);
+        } else {
+          consolidated.push(current);
+        }
+        i = j;
+      }
+      section.slides = consolidated;
+    });
+
     // Post-process: deduplicate section titles
     var titleCounts = {};
     sections.forEach(function (s) {
@@ -466,7 +543,11 @@ window.ContentPlanner = (function () {
   function deriveSectionTitle(slide, sectionIndex) {
     if (slide.type === 'title') return cleanSectionTitle(slide.title) || 'Welcome';
     if (slide.type === 'results') return 'Your Results';
-    if (slide.type === 'branching') return cleanSectionTitle(slide.title) || 'Choose Your Path';
+    if (slide.type === 'branching') {
+      var branchTitle = (slide.title || '').trim();
+      if (!branchTitle || isAutogeneratedLabel(branchTitle)) return 'Choose Your Path';
+      return cleanSectionTitle(branchTitle);
+    }
 
     // Quiz/assessment sections: Storyline uses internal names like "Section 3 Q1",
     // "Pick One", "Drag and Drop 1". Use a meaningful default instead.
@@ -652,6 +733,7 @@ window.ContentPlanner = (function () {
     if (slide.layers && slide.layers.length > 0) {
       plan.layers = slide.layers
         .filter(function (l) { return l.elements && l.elements.length > 0; })
+        .filter(function (l) { return !isDragDropFeedbackLayer(l); })
         .map(function (layer) { return planLayer(layer); })
         .filter(function (l) { return l.hasContent; });
     }
@@ -709,22 +791,46 @@ window.ContentPlanner = (function () {
    */
   function removeInternalRepetition(text) {
     if (!text || text.length < 80) return text;
-    // Split into sentences (rough)
+
+    // Strategy 1: Split on sentence boundaries (periods, !, ?) and deduplicate
     var sentences = text.split(/(?<=[.!?])\s+/).filter(function (s) { return s.trim().length > 10; });
-    if (sentences.length < 4) return text;
+    if (sentences.length >= 4) {
+      var seen = {};
+      var unique = sentences.filter(function (s) {
+        var key = s.trim().toLowerCase();
+        if (seen[key]) return false;
+        seen[key] = true;
+        return true;
+      });
 
-    var seen = {};
-    var unique = sentences.filter(function (s) {
-      var key = s.trim().toLowerCase();
-      if (seen[key]) return false;
-      seen[key] = true;
-      return true;
-    });
-
-    // If we removed a significant number of duplicates, return cleaned version
-    if (unique.length < sentences.length * 0.8) {
-      return unique.join(' ');
+      if (unique.length < sentences.length * 0.8) {
+        return unique.join(' ');
+      }
     }
+
+    // Strategy 2: Sliding window phrase repetition detection.
+    // Storyline often concatenates content WITHOUT periods — just space-separated.
+    // If the same phrase of 8+ words appears twice, remove the second occurrence.
+    var words = text.split(/\s+/);
+    if (words.length >= 16) {
+      var windowSize = 8;
+      var phraseSeen = {};
+      var cutIndex = -1;
+      for (var i = 0; i <= words.length - windowSize; i++) {
+        var phrase = words.slice(i, i + windowSize).join(' ').toLowerCase();
+        if (phraseSeen[phrase] !== undefined && i - phraseSeen[phrase] >= windowSize) {
+          cutIndex = i;
+          break;
+        }
+        if (phraseSeen[phrase] === undefined) {
+          phraseSeen[phrase] = i;
+        }
+      }
+      if (cutIndex > 0) {
+        return words.slice(0, cutIndex).join(' ');
+      }
+    }
+
     return text;
   }
 
@@ -736,6 +842,37 @@ window.ContentPlanner = (function () {
       seen[key] = true;
       return true;
     });
+  }
+
+  /**
+   * Detect drag-and-drop feedback layers.
+   * Storyline drag-and-drop slides have feedback layers containing confirmation
+   * prompts ("Are you happy with your answer?") and result displays ("ICE =",
+   * "BEV ="). These are interaction feedback, not learning content.
+   */
+  function isDragDropFeedbackLayer(layer) {
+    if (!layer || !layer.elements) return false;
+    var textElements = layer.elements.filter(function (el) {
+      return el.type === 'text' && el.content && el.content.trim().length > 0;
+    });
+    if (textElements.length === 0) return false;
+
+    var allTexts = textElements.map(function (el) { return el.content.trim(); });
+    var combined = allTexts.join(' ').toLowerCase();
+
+    // Confirmation prompt pattern
+    if (combined.indexOf('are you happy with your answer') !== -1) return true;
+
+    // Check if most texts are short abbreviation = value patterns (e.g. "ICE =", "BEV =")
+    var abbrevCount = 0;
+    allTexts.forEach(function (t) {
+      // Matches "XXX =" or "XXX = something" where XXX is short (1-6 chars)
+      if (/^[A-Za-z0-9\/\-]{1,6}\s*=/.test(t.trim())) abbrevCount++;
+    });
+    // If majority of texts are abbreviation=value patterns, it's feedback
+    if (abbrevCount > 0 && abbrevCount >= allTexts.length * 0.5) return true;
+
+    return false;
   }
 
   /**

@@ -40,6 +40,10 @@ window.GeneratorData = (function () {
     if (/^\d+$/.test(t)) return true;
     // "Section N QN" pattern
     if (/^section\s+\d+\s+q\d+$/i.test(t)) return true;
+    // "Table N" or "Table 01 Drag and Drop - X" — Storyline internal naming
+    if (/^table\s+\d/i.test(t)) return true;
+    // ALL CAPS internal names like "TABLE SUMMARY", "GHOST / LABELS"
+    if (/^[A-Z\s\/\-]{4,}$/.test(t) && t === t.toUpperCase() && t.length < 30) return true;
     return isStorylineTypeLabel(text);
   }
 
