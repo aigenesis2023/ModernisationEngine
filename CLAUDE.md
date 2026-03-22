@@ -156,42 +156,61 @@ assets/media/*        ← Video/audio files
 - All generated React uses `React.createElement` (no JSX, no build step)
 - `escJs()` and `escHtml()` for safe string embedding
 
-## CRITICAL: Engine Development Rules
+## CRITICAL: Engine Development Process
 
-### Rule 1: Universal Improvements Only
-**Every change to the engine MUST be a universal improvement that works for ANY Articulate Storyline SCORM export, NEVER a specific fix for the test SCORM file or test brand URL.**
+### The Golden Rule
+**The test SCORM file and brand URL are diagnostic tools, not the product.** They exist to REVEAL categories of problems that the engine must solve for ALL Storyline SCORM exports. Every engine change must be designed by studying how Storyline works universally, not by looking at what went wrong with one specific course.
 
-The test SCORM folder (`TEST SCORM/`) and brand URL (`WEBSITE BRANDING REF.rtf`) in the repo are just test data. When an issue is found in test output:
-1. Ask "what CATEGORY of problem is this?" — not "how do I fix this specific text?"
-2. Build detection based on content characteristics (length, structure, semantic role) — not specific phrases or regex for known strings
-3. The improved output from the test SCORM should be a BYPRODUCT of a better engine, not the goal
-4. Every rule should make sense if you imagine a completely different SCORM course being processed
-5. NEVER hardcode slide IDs, variable names, quiz bank IDs, or any identifiers from the test data
+### Mandatory Process — Follow This BEFORE Writing Any Code
 
-**Bad:** Adding a regex like `/click\s+on\s+the\s+most\s+relevant/i` to filter one course's instruction text
-**Good:** Building a classifier that detects ANY text whose purpose is to instruct users how to interact with the Storyline player
+When you see an issue in the test output, you MUST follow this sequence. Do NOT skip steps.
 
-**Bad:** `if (exitTarget.includes('6gVJ6ioVtxh'))` — hardcoded test SCORM slide ID
-**Good:** `var group = exitTarget.split('.').pop()` — uses the ID dynamically
+**Step 1: Name the category, not the symptom.**
+- BAD: "The text 'Layer 1' is showing as a heading" → leads to fixing one string
+- GOOD: "Auto-generated layer names are being rendered as content headings" → leads to a universal classifier
 
-### Rule 2: Full Pipeline Testing
-**When testing and reviewing output, run the COMPLETE pipeline including AI image generation and real brand scraping.** Do not skip phases for speed — the images and brand styling are critical to the design and must be reviewed as the user would see them.
+**Step 2: Research how Storyline produces this category universally.**
+- How does Storyline name layers? (Always "Layer N" by default, authors can rename them)
+- What other auto-generated patterns exist? (Shape names, variable names, slide titles)
+- What does this look like in a DIFFERENT course? (Would a cooking course have the same issue?)
 
-Testing workflow:
-1. Run the full pipeline with the test SCORM + test brand URL (including image generation)
-2. Use Playwright to screenshot EVERY section, interaction, hover state, and navigation path
-3. Review the screenshots to identify issues
-4. For each issue, identify the CATEGORY of problem (not the specific instance)
-5. Build a universal engine fix that addresses the category
-6. Re-run the full pipeline and verify the fix works without breaking other sections
+**Step 3: Design the rule based on structural patterns, not specific content.**
+- The rule should reference Storyline's export FORMAT (object kinds, naming patterns, data structures)
+- It should use content CHARACTERISTICS (length, position, semantic structure) not specific values
+- Test the rule mentally: "If I ran a completely different Storyline course through this rule, would it still make correct decisions?"
 
-### Rule 3: Complete Content Audit
-**The engine must capture and render ALL meaningful content from ANY Storyline SCORM export.** When reviewing output:
-- Cross-reference extracted content against the original SCORM data
-- Check that no slides, layers, interactions, or media were dropped
-- Verify the course structure (section order, grouping) reflects the original author's intent
-- Test all interactive elements: accordions, modals, branching, quizzes, forms
-- The output should feel like a modern reimagining of the same course, not a different course
+**Step 4: Implement and verify.**
+- The test SCORM output should improve as a BYPRODUCT
+- If you find yourself checking "does this fix the specific issue I saw?" you've gone wrong — check "does this handle the CATEGORY correctly?"
+
+### What "Specific Fix" Looks Like (DO NOT DO THIS)
+- Changing a threshold because it looks better for this course's text (`60 → 80 chars`)
+- Adding a regex that matches text from the test course
+- Hardcoding any slide ID, variable name, or quiz bank ID from the test data
+- Checking if output "looks right" for the test course without asking "would this work for a 50-slide compliance training course?"
+
+### What "Universal Improvement" Looks Like (DO THIS)
+- Studying Storyline's `textLib` structure to understand how text roles are encoded
+- Building classification based on `fontSize`, `depth`, `fontWeight` — properties ALL Storyline exports have
+- Using the navigation graph (`slideMap.slideRefs[].linksTo[]`) to understand branching — this structure is identical in every export
+- Detecting auto-generated names by pattern (`generic_noun + optional_number`) since Storyline ALWAYS generates names this way
+
+### Testing Requirements
+- Run the COMPLETE pipeline (brand scraping + AI image generation) — don't skip phases
+- Use Playwright to screenshot every section, interaction, and state
+- For each issue found, write down the CATEGORY before touching code
+- After implementing, re-run and verify the category is handled — not just the specific instance
+
+### Universal Problem Categories
+The engine must handle these categories for ANY Storyline SCORM export:
+1. **Authoring artefacts** — auto-generated names, player instructions, variable placeholders, structural labels
+2. **Content role classification** — inferring heading vs body vs callout vs feedback from text characteristics
+3. **Course structure reconstruction** — grouping slides into logical sections based on scene boundaries and slide type
+4. **Layer interaction mapping** — presenting Storyline layers as web-native components (accordion/modal/bento)
+5. **Branching & navigation** — preserving the author's intended course flow and decision points
+6. **Form field reconstruction** — building proper web forms from Storyline textinput objects
+7. **Quiz & assessment preservation** — maintaining all question types, scoring, and feedback
+8. **Asset path resolution** — correctly referencing images, video, and audio with fallbacks
 
 ## Common Pitfalls
 - **Script order in index.html matters** — content-planner after scorm-parser, generators after content-planner
