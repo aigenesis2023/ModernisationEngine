@@ -194,7 +194,8 @@ window.GeneratorCSS = (function () {
       // ============ MEDIA ============
       '.hero-image {\n  width: 100%; border-radius: var(--radius);\n' +
       '  overflow: hidden; margin-bottom: calc(var(--spacing) * 2);\n  ' + shadow + '\n}\n' +
-      '.hero-image img { width: 100%; height: auto; display: block; }\n\n' +
+      '.hero-image img { width: 100%; height: auto; display: block; }\n' +
+      '.hero-image img[src=""], .hero-image img:not([src]) { display: none; }\n\n' +
 
       '.media-feature {\n  width: 100%; max-width: var(--wide-width);\n  margin: 0 auto;\n}\n\n' +
 
