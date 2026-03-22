@@ -1,0 +1,8 @@
+{
+  "name": "Modernisation Engine",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:22",
+  "features": {
+    "ghcr.io/anthropics/devcontainer-feature/claude-code:latest": {}
+  },
+  "postCreateCommand": "echo '✅ Claude Code is ready. Type: claude' && claude --version"
+}

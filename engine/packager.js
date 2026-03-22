@@ -43,10 +43,11 @@ window.Packager = (function () {
    * @param {string} html - The generated course HTML
    * @param {object} course - The CourseIR object
    * @param {Map} fileMap - Original uploaded files (for copying assets)
+   * @param {object} images - Generated images object with entries array
    * @param {Function} log - Logging function
    * @returns {Promise<Blob>} - The zip as a Blob
    */
-  async function packageCourse(html, course, fileMap, log) {
+  async function packageCourse(html, course, fileMap, images, log) {
     log('Creating SCORM package...');
     var zip = new JSZip();
 

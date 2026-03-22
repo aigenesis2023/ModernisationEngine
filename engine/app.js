@@ -171,16 +171,21 @@
       setProgress(50);
       log('Brand extraction complete.', 'success');
 
-      // Phase 3: Generate HTML
-      log('Phase 3: Generating modernised course...', 'info');
-      var images = { entries: [] }; // placeholder — no AI image gen yet
+      // Phase 3: AI Image Generation
+      log('Phase 3: Generating AI images...', 'info');
+      var images = await ImageGenerator.generateImages(course, brand, function (msg) { log('  ' + msg); });
+      setProgress(65);
+      log('Image generation complete.', 'success');
+
+      // Phase 4: Generate HTML
+      log('Phase 4: Generating modernised course...', 'info');
       generatedHtml = GeneratorApp.generateHtml(course, brand, images);
-      setProgress(70);
+      setProgress(80);
       log('Course HTML generated (' + (generatedHtml.length / 1024).toFixed(0) + ' KB)', 'success');
 
-      // Phase 4: Package SCORM
-      log('Phase 4: Creating SCORM package...', 'info');
-      generatedBlob = await Packager.packageCourse(generatedHtml, course, fileMap, function (msg) { log('  ' + msg); });
+      // Phase 5: Package SCORM
+      log('Phase 5: Creating SCORM package...', 'info');
+      generatedBlob = await Packager.packageCourse(generatedHtml, course, fileMap, images, function (msg) { log('  ' + msg); });
       setProgress(100);
       log('Done! Your modernised course is ready.', 'success');
 
