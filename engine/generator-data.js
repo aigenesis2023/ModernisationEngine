@@ -142,25 +142,57 @@ window.GeneratorData = (function () {
    * This is a universal pattern — glossaries in any authoring tool
    * follow this term/definition structure.
    */
+  /**
+   * Parse glossary text into term+definition pairs.
+   *
+   * Storyline glossaries have a consistent pattern:
+   * "Term Definition text that starts lowercase. Next Term Another definition..."
+   *
+   * The key insight: terms are Title Cased or ALL CAPS, and definitions
+   * start with a lowercase word or article (a, an, the, in, etc.)
+   *
+   * Strategy: scan through words, detect where a capitalized phrase
+   * transitions to a lowercase definition.
+   */
   function parseGlossaryEntries(texts) {
     if (!texts || texts.length === 0) return null;
-    var combined = texts.join(' ');
-    if (combined.length < 100) return null;
+    var combined = texts.join(' ').trim();
+    if (combined.length < 200) return null;
 
-    // Try to split on known glossary term patterns
-    // Pattern: capitalized multi-word term followed by definition
-    // e.g. "Arc/Flash A sudden release..." "BEV (Battery Electric Vehicle) A vehicle..."
     var entries = [];
-    var termPattern = /(?:^|\.\s+)([A-Z][A-Za-z\/\-]+(?:\s+[A-Z][A-Za-z\/\-]+)*(?:\s*\([^)]+\))?)\s+/g;
-    var parts = combined.split(termPattern);
+    // Match: capitalized term (possibly with /, -, parentheses) followed by
+    // a definition that starts with a lowercase word or common article
+    // Term boundary: stop at capitalized words that are common definition starters
+    // "Converts", "An", "The", "A" when followed by lowercase
+    var pattern = /([A-Z][A-Za-z\/\-]+(?:[\s\/\-]+(?!(?:A|An|The|In|Is|Are|Was|Has|Can|May|Used|Converts|Provides|Changes|Keeps|Manages|Takes)\s)[A-Z][A-Za-z\/\-]+)*(?:\s*\([^)]+\))?)\s+([A-Za-z][^]*?)(?=\.\s+[A-Z][A-Z]|\.\s+[A-Z][a-z]+(?:[\s\/\-]+[A-Z]|[\s\/\-]+\()|\s*$)/g;
 
-    // If splitting produced meaningful pairs
-    if (parts.length >= 3) {
-      for (var i = 1; i < parts.length; i += 2) {
-        var term = (parts[i] || '').trim();
-        var def = (parts[i + 1] || '').trim().replace(/\.\s*$/, '');
-        if (term && def && def.length > 10) {
-          entries.push({ term: term, definition: def });
+    var match;
+    while ((match = pattern.exec(combined)) !== null) {
+      var term = match[1].trim();
+      var def = match[2].trim().replace(/\.\s*$/, '');
+      // Filter out junk: term must be 2+ chars, definition must be substantial
+      if (term.length >= 2 && def.length >= 15 && term.length < 80) {
+        entries.push({ term: term, definition: def });
+      }
+    }
+
+    // Fallback: split on sentence boundaries and extract term + definition
+    if (entries.length < 5) {
+      entries = [];
+      // Split on period followed by space and capital letter (sentence boundary)
+      var sentences = combined.split(/\.\s+(?=[A-Z])/);
+      for (var i = 0; i < sentences.length; i++) {
+        var s = sentences[i].trim().replace(/\.\s*$/, '');
+        if (!s || s.length < 20) continue;
+        // Term is the leading capitalized phrase before the first lowercase word
+        // that isn't a short connector (of, and, or, for, in, with, to)
+        var termMatch = s.match(/^((?:[A-Z][A-Za-z\/\-]*(?:\s*[\(][^)]*[\)])?(?:\s+(?:of|and|or|for|in|with|to|&|\/)\s+[A-Z][A-Za-z\/\-]*|\s+[A-Z][A-Za-z\/\-]*)*))\s+(.*)/);
+        if (termMatch) {
+          var term = termMatch[1].trim();
+          var def = termMatch[2].trim();
+          if (term.length >= 2 && term.length < 80 && def.length >= 10) {
+            entries.push({ term: term, definition: def });
+          }
         }
       }
     }
