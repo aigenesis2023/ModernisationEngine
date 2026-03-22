@@ -727,7 +727,26 @@ window.GeneratorCSS = (function () {
       '  display: flex; align-items: center; justify-content: center;\n' +
       '  padding: 3rem 1.5rem;\n' +
       '}\n' +
-      '.quiz-container { text-align: center; width: 100%; max-width: 640px; margin: 0 auto; }\n' +
+      '.quiz-container {\n' +
+      '  width: 100%; max-width: 900px; margin: 0 auto;\n' +
+      '  display: flex; flex-direction: column; align-items: center;\n' +
+      '}\n' +
+      // On wider screens, use split layout: question left, choices right
+      '@media (min-width: 768px) {\n' +
+      '  .quiz-container {\n' +
+      '    display: grid; grid-template-columns: 1fr 1fr;\n' +
+      '    gap: 2rem; align-items: start; text-align: left;\n' +
+      '  }\n' +
+      '  .quiz-progress-bar { grid-column: 1 / -1; }\n' +
+      '  .quiz-counter { grid-column: 1 / -1; text-align: center; }\n' +
+      '  .quiz-question { text-align: left; max-width: none; margin: 0;\n' +
+      '    display: flex; flex-direction: column; justify-content: center;\n' +
+      '    min-height: 200px; }\n' +
+      '  .quiz-feedback { grid-column: 1 / -1; }\n' +
+      '  .quiz-choices { margin: 0; max-width: none; }\n' +
+      '  .actions { grid-column: 1 / -1; text-align: center; }\n' +
+      '  .quiz-text-entry { grid-column: 1 / -1; }\n' +
+      '}\n' +
       // Quiz progress bar
       '.quiz-progress-bar {\n' +
       '  width: 100%; height: 6px;\n' +
