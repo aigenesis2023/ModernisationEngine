@@ -581,6 +581,25 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.bento-image img { width: 100%; height: auto; display: block; }\n\n' +
 
+      // ============ TABLE ============
+      '.table-container {\n' +
+      '  width: 100%; overflow-x: auto; margin: 1.5rem 0;\n' +
+      '  border-radius: var(--radius); ' + shadow + '\n' +
+      '}\n' +
+      '.styled-table {\n' +
+      '  width: 100%; border-collapse: collapse;\n' +
+      '  font-size: 0.95rem;\n' +
+      '}\n' +
+      '.styled-table th {\n' +
+      '  background: var(--primary); color: white;\n' +
+      '  padding: 0.75rem 1rem; text-align: left; font-weight: 600;\n' +
+      '}\n' +
+      '.styled-table td {\n' +
+      '  padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0;\n' +
+      '}\n' +
+      '.styled-table tbody tr:nth-child(even) { background: var(--surface); }\n' +
+      '.styled-table tbody tr:hover { background: #edf2f7; }\n\n' +
+
       // ============ INTERACTIONS (universal) ============
       '.interactions-container { margin: 1.5rem 0; }\n' +
       '.slider-interaction {\n' +

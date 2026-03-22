@@ -546,6 +546,27 @@ window.GeneratorApp = (function () {
       '            inter.label ? e("span", { className: "hotspot-label" }, inter.label) : null\n' +
       '          );\n' +
       '        }\n' +
+      '        if (inter.type === "table" && inter.children && inter.children.length > 0) {\n' +
+      '          var cellTexts = inter.children.filter(function(c) { return c.type === "text" && c.content; }).map(function(c) { return c.content; });\n' +
+      '          var cols = inter.cols || Math.ceil(Math.sqrt(cellTexts.length));\n' +
+      '          var rows = [];\n' +
+      '          for (var r = 0; r < cellTexts.length; r += cols) {\n' +
+      '            rows.push(cellTexts.slice(r, r + cols));\n' +
+      '          }\n' +
+      '          var isHeader = inter.headerRows > 0;\n' +
+      '          return e("div", { className: "table-container", key: i },\n' +
+      '            e("table", { className: "styled-table" },\n' +
+      '              isHeader && rows.length > 0 ? e("thead", null,\n' +
+      '                e("tr", null, rows[0].map(function(cell, ci) { return e("th", { key: ci }, cell); }))\n' +
+      '              ) : null,\n' +
+      '              e("tbody", null,\n' +
+      '                rows.slice(isHeader ? 1 : 0).map(function(row, ri) {\n' +
+      '                  return e("tr", { key: ri }, row.map(function(cell, ci) { return e("td", { key: ci }, cell); }));\n' +
+      '                })\n' +
+      '              )\n' +
+      '            )\n' +
+      '          );\n' +
+      '        }\n' +
       '        return null;\n' +
       '      })\n' +
       '    );\n' +
