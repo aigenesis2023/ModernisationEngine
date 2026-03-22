@@ -15,6 +15,12 @@ const { JSDOM } = require('jsdom');
 const FAST_MODE = process.argv.includes('--fast');
 const CORS_PROXY = 'https://cors-proxy.leoduncan-elearning.workers.dev';
 
+// Allow specifying SCORM folder: node test/generate.js --scorm EV
+const scormArgIdx = process.argv.indexOf('--scorm');
+const SCORM_FOLDER = scormArgIdx !== -1 && process.argv[scormArgIdx + 1]
+  ? process.argv[scormArgIdx + 1]
+  : 'TEST SCORM';
+
 // Set up browser-like globals for the IIFE modules
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', { url: 'http://localhost' });
 global.window = dom.window;
@@ -84,8 +90,8 @@ function readBrandUrl() {
   return match ? match[0] : null;
 }
 
-// Build fileMap from TEST SCORM folder
-const scormDir = path.join(__dirname, '..', 'TEST SCORM');
+// Build fileMap from SCORM folder
+const scormDir = path.join(__dirname, '..', SCORM_FOLDER);
 
 function buildFileMap(dir, prefix) {
   const map = new Map();
@@ -111,10 +117,11 @@ function buildFileMap(dir, prefix) {
 async function run() {
   console.log('=== Modernisation Engine Test Pipeline ===');
   console.log('Mode: ' + (FAST_MODE ? 'FAST (no images)' : 'FULL (with brand scraping + AI images)'));
+  console.log('SCORM folder: ' + SCORM_FOLDER);
   console.log('');
 
   // Build file map
-  console.log('Building file map from TEST SCORM folder...');
+  console.log('Building file map from ' + SCORM_FOLDER + ' folder...');
   const fileMap = buildFileMap(scormDir, '');
   console.log('Loaded ' + fileMap.size + ' files');
 
