@@ -479,6 +479,17 @@ window.ContentPlanner = (function () {
             if (donor.layers && donor.layers.length > 0) {
               merged.layers = (merged.layers || []).concat(donor.layers);
             }
+            // Preserve interactions from merged slides
+            if (donor.interactions && donor.interactions.length > 0) {
+              merged.interactions = (merged.interactions || []).concat(donor.interactions);
+            }
+            // Preserve videos and audio from merged slides
+            if (donor.content.videos && donor.content.videos.length > 0) {
+              merged.content.videos = (merged.content.videos || []).concat(donor.content.videos);
+            }
+            if (donor.content.audio && donor.content.audio.length > 0) {
+              merged.content.audio = (merged.content.audio || []).concat(donor.content.audio);
+            }
           }
           consolidated.push(merged);
         } else {
