@@ -340,7 +340,13 @@ window.GeneratorApp = (function () {
 
       // --- Narrative content slide ---
       '  function renderNarrativeSlide(slide, key) {\n' +
-      '    return e(RevealBlock, { key: key, className: "content-block" },\n' +
+      '    var blockProps = { key: key, className: "content-block" };\n' +
+      '    if (slide.backgroundImage) {\n' +
+      '      blockProps.className = "content-block has-bg-image";\n' +
+      '      blockProps.style = { backgroundImage: "url(" + slide.backgroundImage + ")", backgroundSize: "cover", backgroundPosition: "center" };\n' +
+      '    }\n' +
+      '    return e(RevealBlock, blockProps,\n' +
+      '      slide.backgroundImage ? e("div", { className: "bg-overlay" }) : null,\n' +
       '      slide.title && slide.type !== "title" ? e("h2", null, slide.title) : null,\n' +
       '      slide.headings ? slide.headings.map(function(h, i) { return e("h3", { key: "h" + i }, h); }) : null,\n' +
       '      slide.callouts ? slide.callouts.map(function(c, i) { return e("div", { key: "c" + i, className: "callout" }, c); }) : null,\n' +

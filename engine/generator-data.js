@@ -91,10 +91,23 @@ window.GeneratorData = (function () {
     }).filter(function (img) { return img.src; });
     if (resolvedImages.length > 0) data.images = resolvedImages;
 
-    // Legacy: single image for backward compat with title slides etc.
-    var heroImg = slide.content.images.find(function (img) { return img.role === 'hero' || img.role === 'background'; });
+    // Separate background images from content images.
+    // Background images should be used as section/slide backgrounds with overlays,
+    // not displayed inline as content.
+    var bgImg = slide.content.images.find(function (img) { return img.role === 'background'; });
+    var heroImg = slide.content.images.find(function (img) { return img.role === 'hero'; });
+    var contentImgs = resolvedImages.filter(function (img) { return img.role !== 'background'; });
+
+    if (bgImg) {
+      data.backgroundImage = resolveImage(bgImg, images);
+    }
+
+    // Legacy: single image for backward compat — prefer hero, then content, skip background
     if (heroImg) data.image = resolveImage(heroImg, images);
-    if (!data.image && resolvedImages.length > 0) data.image = resolvedImages[0].src;
+    if (!data.image && contentImgs.length > 0) data.image = contentImgs[0].src;
+
+    // Override images array to exclude backgrounds (shown via CSS, not inline)
+    if (contentImgs.length > 0) data.images = contentImgs;
 
     // Videos
     if (slide.content.videos.length > 0) {

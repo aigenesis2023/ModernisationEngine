@@ -197,6 +197,16 @@ window.GeneratorCSS = (function () {
       '.hero-image img { width: 100%; height: auto; display: block; }\n' +
       '.hero-image img[src=""], .hero-image img:not([src]) { display: none; }\n\n' +
 
+      '/* Background image slides: original SCORM background with overlay */\n' +
+      '.has-bg-image {\n  position: relative; border-radius: var(--radius);\n' +
+      '  min-height: 300px; padding: calc(var(--spacing) * 3);\n' +
+      '  color: white;\n}\n' +
+      '.has-bg-image h2, .has-bg-image h3, .has-bg-image p { color: white; position: relative; z-index: 2; }\n' +
+      '.has-bg-image .narrative-text { position: relative; z-index: 2; }\n' +
+      '.bg-overlay {\n  position: absolute; inset: 0; border-radius: inherit;\n' +
+      '  background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);\n' +
+      '  z-index: 1;\n}\n\n' +
+
       '.media-feature {\n  width: 100%; max-width: var(--wide-width);\n  margin: 0 auto;\n}\n\n' +
 
       '.video-container {\n  width: 100%; border-radius: var(--radius);\n' +
