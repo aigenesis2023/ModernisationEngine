@@ -400,8 +400,10 @@ window.SCORMParser = (function () {
           elements.push({ ...base, type: 'text', content: extracted.text, role: 'label' });
         }
       } else if (obj.kind === 'audio') {
-        elements.push({ ...base, type: 'audio', assetId: obj.audiodata?.assetId ?? obj.assetId ?? -1,
-          originalPath: obj.audiodata?.url || obj.url || '', durationMs: obj.audiodata?.duration || obj.duration || 0 });
+        // Storyline may store audio data at obj.data.audiodata or obj.audiodata
+        const adata = obj.data?.audiodata || obj.audiodata || {};
+        elements.push({ ...base, type: 'audio', assetId: adata.assetId ?? obj.assetId ?? -1,
+          originalPath: adata.url || obj.url || '', durationMs: adata.duration || obj.duration || 0 });
       } else if (obj.kind === 'stategroup') {
         const states = extractStates(obj);
         const refName = (obj.referenceName || '').toLowerCase();
