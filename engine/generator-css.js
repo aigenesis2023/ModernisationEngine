@@ -358,6 +358,15 @@ window.GeneratorCSS = (function () {
       '.toc-dot.active { background: var(--primary); transform: scale(1.4); }\n' +
       '.toc-dot:hover { background: var(--primary); }\n\n' +
 
+      // ============ SECTION LOCKING ============
+      '.section-locked {\n  position: relative;\n  pointer-events: none;\n  user-select: none;\n}\n' +
+      '.section-locked .section-inner {\n  filter: blur(4px); opacity: 0.4;\n  transition: filter 0.4s ease, opacity 0.4s ease;\n}\n' +
+      '.lock-overlay {\n  position: absolute; inset: 0; z-index: 10;\n' +
+      '  display: flex; flex-direction: column; align-items: center; justify-content: center;\n' +
+      '  pointer-events: auto;\n}\n' +
+      '.lock-icon {\n  font-size: 48px; margin-bottom: var(--spacing);\n}\n' +
+      '.lock-overlay p {\n  color: var(--text-muted); font-size: 14px;\n  max-width: 300px; text-align: center;\n}\n\n' +
+
       // ============ DESKTOP (>=768px) ============
       '@media (min-width: 768px) {\n' +
       '  .section { padding: calc(var(--spacing) * 8) calc(var(--spacing) * 4); }\n' +

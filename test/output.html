@@ -486,6 +486,28 @@ p { margin-bottom: var(--spacing); max-width: 680px; }
 .toc-dot.active { background: var(--primary); transform: scale(1.4); }
 .toc-dot:hover { background: var(--primary); }
 
+.section-locked {
+  position: relative;
+  pointer-events: none;
+  user-select: none;
+}
+.section-locked .section-inner {
+  filter: blur(4px); opacity: 0.4;
+  transition: filter 0.4s ease, opacity 0.4s ease;
+}
+.lock-overlay {
+  position: absolute; inset: 0; z-index: 10;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  pointer-events: auto;
+}
+.lock-icon {
+  font-size: 48px; margin-bottom: var(--spacing);
+}
+.lock-overlay p {
+  color: var(--text-muted); font-size: 14px;
+  max-width: 300px; text-align: center;
+}
+
 @media (min-width: 768px) {
   .section { padding: calc(var(--spacing) * 8) calc(var(--spacing) * 4); }
   h1 { font-size: 48px; }
@@ -615,6 +637,8 @@ function App() {
   var _qqs = React.useState([]), quizQuestions = _qqs[0], setQuizQuestions = _qqs[1];
   var _ta = React.useState(""), textAnswer = _ta[0], setTextAnswer = _ta[1];
   var _openPanels = React.useState({}), openPanels = _openPanels[0], setOpenPanels = _openPanels[1];
+  var _bankId = React.useState(null), activeBankId = _bankId[0], setActiveBankId = _bankId[1];
+  var _completed = React.useState({ 0: true }), completedSections = _completed[0], setCompletedSections = _completed[1];
   var _modalLayer = React.useState(null), modalLayer = _modalLayer[0], setModalLayer = _modalLayer[1];
   React.useEffect(function() {
     var fill = document.querySelector(".progress-fill");
@@ -635,6 +659,7 @@ function App() {
     var qs = shuffleArray(bank.questions).slice(0, bank.drawCount);
     setQuizQuestions(qs); setQuizIndex(0); setCorrectCount(0); setTotalQ(qs.length);
     setQuizState("active"); setSelectedChoice(null); setAnswered(false);
+    setActiveBankId(bankId);
   }
   function handleQuizAnswer(choiceIdx) {
     if (answered) return;
@@ -679,15 +704,34 @@ function App() {
       if (resultsEl) resultsEl.scrollIntoView({ behavior: "smooth" });
     }
   }
+  function completeSection(idx) {
+    if (completedSections[idx]) return;
+    var updated = Object.assign({}, completedSections);
+    updated[idx] = true;
+    setCompletedSections(updated);
+  }
+  function isSectionUnlocked(idx) {
+    if (idx === 0) return true;
+    return !!completedSections[idx - 1];
+  }
+
   function handleFormChange(field, value) {
     formDataRef.current[field] = value;
   }
 
-  function togglePanel(slideId, idx) {
+  function togglePanel(slideId, idx, sectionIdx, totalLayers) {
     var key = slideId + "_" + idx;
     var updated = Object.assign({}, openPanels);
     updated[key] = !updated[key];
     setOpenPanels(updated);
+    // Check if all panels in this slide have been opened at least once
+    if (totalLayers && sectionIdx !== undefined) {
+      var allOpened = true;
+      for (var li = 0; li < totalLayers; li++) {
+        if (!updated[slideId + "_" + li] && !openPanels[slideId + "_" + li]) { allOpened = false; break; }
+      }
+      if (allOpened) completeSection(sectionIdx);
+    }
   }
   function isPanelOpen(slideId, idx) {
     return !!openPanels[slideId + "_" + idx];
@@ -699,28 +743,32 @@ function App() {
   }
 
   function renderSection(section, sectionIndex) {
-    // Hide results sections until quiz is complete
+    // Results sections: only show after quiz complete, and only the one
+    // that matches the quiz bank the user took.
+    // In Storyline, each quiz bank (slidedraw) has an exitaction pointing
+    // to a specific results slide. The bank's "group" field stores that
+    // results slide ID. We match it against the section's slide ID.
     if (section.type === "results") {
       if (quizState !== "complete") return null;
-      // If multiple results sections exist, only show the one whose slide ID
-      // matches the quiz bank group (exit target) the user took
       var resultsSections = SECTIONS.filter(function(s) { return s.type === "results"; });
-      if (resultsSections.length > 1 && branch) {
-        var matchesBank = QUIZ_BANKS.some(function(qb) {
-          return qb.group === section.slides[0].id;
+      if (resultsSections.length > 1) {
+        var thisSlideId = section.slides[0] ? section.slides[0].id : "";
+        var bankExitsHere = QUIZ_BANKS.some(function(qb) {
+          return qb.group === thisSlideId && qb.id === activeBankId;
         });
-        if (!matchesBank) {
-          var takenBank = QUIZ_BANKS.find(function(qb) {
-            return qb.group === section.slides[0].id;
-          });
-          if (!takenBank) return null;
-        }
+        if (!bankExitsHere) return null;
       }
     }
     var sectionClass = "section";
     if (section.type === "hero") sectionClass = "section section-hero";
     else if (section.type === "results") sectionClass = "section section-results";
+    var locked = !isSectionUnlocked(sectionIndex);
+    if (locked) sectionClass += " section-locked";
     return e("div", { className: sectionClass, key: "s" + sectionIndex, id: "section-" + sectionIndex },
+      locked ? e("div", { className: "lock-overlay" },
+        e("div", { className: "lock-icon" }, "\uD83D\uDD12"),
+        e("p", null, "Complete the section above to continue")
+      ) : null,
       e("div", { className: "section-inner" },
         section.slides.map(function(slide, slideIdx) {
           return renderSlide(slide, sectionIndex, slideIdx);
@@ -732,15 +780,15 @@ function App() {
   function renderSlide(slide, si, idx) {
     var key = "sl_" + si + "_" + idx;
     switch (slide.presentation) {
-      case "hero": return renderHeroSlide(slide, key);
+      case "hero": completeSection(si); return renderHeroSlide(slide, key);
       case "results": return renderResultsSlide(slide, key);
-      case "branching": return renderBranchingSlide(slide, key);
-      case "form": return renderFormSlide(slide, key);
+      case "branching": return renderBranchingSlide(slide, key, si);
+      case "form": return renderFormSlide(slide, key, si);
       case "quiz": return renderInlineQuiz(slide, key);
-      case "media-feature": return renderMediaSlide(slide, key);
-      case "interactive": return renderInteractiveSlide(slide, key);
-      case "narrative": return renderNarrativeSlide(slide, key);
-      default: return renderNarrativeSlide(slide, key);
+      case "media-feature": completeSection(si); return renderMediaSlide(slide, key);
+      case "interactive": return renderInteractiveSlide(slide, key, si);
+      case "narrative": completeSection(si); return renderNarrativeSlide(slide, key);
+      default: completeSection(si); return renderNarrativeSlide(slide, key);
     }
   }
 
@@ -781,7 +829,7 @@ function App() {
     );
   }
 
-  function renderInteractiveSlide(slide, key) {
+  function renderInteractiveSlide(slide, key, sectionIdx) {
     return e(RevealBlock, { key: key, className: "content-block" },
       slide.title ? e("h2", null, slide.title) : null,
       slide.texts ? e("div", { className: "narrative-text" },
@@ -789,24 +837,24 @@ function App() {
       ) : null,
       slide.image ? e("div", { className: "hero-image" }, e("img", { src: slide.image, alt: slide.title || "" })) : null,
       slide.audio ? e("div", { className: "audio-container" }, e("audio", { controls: true, preload: "metadata", src: slide.audio.src })) : null,
-      renderLayers(slide)
+      renderLayers(slide, sectionIdx)
     );
   }
 
-  function renderLayers(slide) {
+  function renderLayers(slide, sectionIdx) {
     if (!slide.layers || slide.layers.length === 0) return null;
     var type = slide.interactionType || "accordion";
-    if (type === "bento") return renderBentoGrid(slide);
+    if (type === "bento") return renderBentoGrid(slide, sectionIdx);
     if (type === "modal") return renderModalTriggers(slide);
-    return renderAccordion(slide);
+    return renderAccordion(slide, sectionIdx);
   }
 
-  function renderAccordion(slide) {
+  function renderAccordion(slide, sectionIdx) {
     return e("div", { className: "accordion" },
       slide.layers.map(function(layer, i) {
         var isOpen = isPanelOpen(slide.id, i);
         return e("div", { className: "accordion-item" + (isOpen ? " open" : ""), key: i },
-          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i); } },
+          e("button", { className: "accordion-trigger", onClick: function() { togglePanel(slide.id, i, sectionIdx, slide.layers.length); } },
             e("span", null, layer.name),
             e("span", { className: "accordion-icon" }, isOpen ? "\u2212" : "\u002B")
           ),
@@ -854,7 +902,9 @@ function App() {
     );
   }
 
-  function renderBentoGrid(slide) {
+  function renderBentoGrid(slide, sectionIdx) {
+    // Bento shows all content at once — section is complete when visible
+    if (sectionIdx !== undefined) completeSection(sectionIdx);
     return e("div", { className: "bento-grid" },
       slide.layers.map(function(layer, i) {
         var showName = layer.name && layer.texts && layer.texts.length > 0
@@ -870,7 +920,7 @@ function App() {
     );
   }
 
-  function renderFormSlide(slide, key) {
+  function renderFormSlide(slide, key, sectionIdx) {
     return e(RevealBlock, { key: key, className: "content-block" },
       e("div", { className: "card" },
         e("h2", null, slide.title),
@@ -883,12 +933,15 @@ function App() {
               onChange: function(ev) { handleFormChange(f.variableName, ev.target.value); }
             })
           );
-        })
+        }),
+        e("div", { className: "actions", style: { marginTop: "calc(var(--spacing) * 2)" } },
+          e("button", { className: "btn btn-primary", onClick: function() { completeSection(sectionIdx); } }, "Continue")
+        )
       )
     );
   }
 
-  function renderBranchingSlide(slide, key) {
+  function renderBranchingSlide(slide, key, sectionIdx) {
     // Find user name from any form field that looks like a name field
     var userName = "";
     Object.keys(formData).forEach(function(k) {
@@ -907,6 +960,7 @@ function App() {
             return e("div", { className: "branch-option", key: i,
               onClick: function() {
                 setBranch(opt.value || opt.label);
+                completeSection(sectionIdx);
                 if (opt.quizBank) { startQuiz(opt.quizBank); }
                 else { setScore(100); setQuizState("complete"); SCORM.complete(100, MASTERY); }
               }
