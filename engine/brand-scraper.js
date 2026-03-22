@@ -80,6 +80,18 @@ window.BrandScraper = (function () {
 
   // ---- Color Extraction ----
 
+  /**
+   * Compute perceived luminance using the standard formula.
+   * Returns 0-1 range.
+   */
+  function perceivedLuminance(hex) {
+    if (!hex || !hex.startsWith('#') || hex.length < 7) return 0.5;
+    var r = parseInt(hex.slice(1, 3), 16);
+    var g = parseInt(hex.slice(3, 5), 16);
+    var b = parseInt(hex.slice(5, 7), 16);
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  }
+
   function extractColors(css, doc) {
     const colorMap = new Map();
 
@@ -106,7 +118,7 @@ window.BrandScraper = (function () {
     const themeColor = doc.querySelector('meta[name="theme-color"]');
     if (themeColor) recordColor(colorMap, normalizeColor(themeColor.getAttribute('content') || ''), 'theme-color');
 
-    return assignColorRoles(colorMap);
+    return assignColorRoles(colorMap, css);
   }
 
   function recordColor(map, color, context) {
@@ -188,7 +200,7 @@ window.BrandScraper = (function () {
     );
   }
 
-  function assignColorRoles(map) {
+  function assignColorRoles(map, cssText) {
     const entries = Array.from(map.values())
       .filter(e => e.normalized.startsWith('#') && e.normalized.length >= 7)
       .sort((a, b) => b.count - a.count);
@@ -208,16 +220,45 @@ window.BrandScraper = (function () {
       .sort((a, b) => getColorSaturation(b.normalized) - getColorSaturation(a.normalized));
     const accent = accentCandidates[0]?.normalized || lighten(primary, 20);
 
-    const bgCandidate = entries.find(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('background')));
-    const background = bgCandidate?.normalized || '#ffffff';
-    const surface = entries.find(e => getColorLuminance(e.normalized) > 230 && e.normalized !== background)?.normalized || '#f8f9fa';
-    const textColor = entries.find(e => getColorLuminance(e.normalized) < 60 && e.contexts.some(c => c.includes('color')))?.normalized || '#1a1a2e';
+    // Detect body/root background — look for dark backgrounds too
+    var bgCandidateLight = entries.find(function(e) { return getColorLuminance(e.normalized) > 200 && e.contexts.some(function(c) { return c.includes('background'); }); });
+    var bgCandidateDark = entries.find(function(e) { return getColorLuminance(e.normalized) < 60 && e.contexts.some(function(c) { return c.includes('background'); }); });
+
+    // Check if the page is predominantly dark-themed:
+    // count dark bg occurrences vs light bg occurrences
+    var darkBgCount = entries.filter(function(e) { return getColorLuminance(e.normalized) < 80 && e.contexts.some(function(c) { return c.includes('background'); }); })
+      .reduce(function(sum, e) { return sum + e.count; }, 0);
+    var lightBgCount = entries.filter(function(e) { return getColorLuminance(e.normalized) > 200 && e.contexts.some(function(c) { return c.includes('background'); }); })
+      .reduce(function(sum, e) { return sum + e.count; }, 0);
+
+    var isDark = darkBgCount > lightBgCount && bgCandidateDark;
+
+    var background, surface, textColor;
+    if (isDark) {
+      background = bgCandidateDark.normalized;
+      surface = entries.find(function(e) { return getColorLuminance(e.normalized) < 80 && e.normalized !== background; })?.normalized || lighten(background, 15);
+      textColor = entries.find(function(e) { return getColorLuminance(e.normalized) > 200 && e.contexts.some(function(c) { return c.includes('color'); }); })?.normalized || '#f0f0f0';
+    } else {
+      background = bgCandidateLight?.normalized || '#ffffff';
+      surface = entries.find(function(e) { return getColorLuminance(e.normalized) > 230 && e.normalized !== background; })?.normalized || '#f8f9fa';
+      textColor = entries.find(function(e) { return getColorLuminance(e.normalized) < 60 && e.contexts.some(function(c) { return c.includes('color'); }); })?.normalized || '#1a1a2e';
+    }
+
+    // Extract multi-stop gradient from CSS if present
+    var gradientMatch = (cssText || '').match(/linear-gradient\([^)]*(?:,\s*(?:#[0-9a-fA-F]{3,8}|rgba?\([^)]+\))){2,}[^)]*\)/);
+    var gradient;
+    if (gradientMatch) {
+      gradient = gradientMatch[0];
+    } else if (entries.length >= 2) {
+      gradient = 'linear-gradient(135deg, ' + primary + ', ' + secondary + ')';
+    }
 
     return {
-      primary, secondary, accent, background, surface,
-      text: textColor, textMuted: lighten(textColor, 40),
+      primary: primary, secondary: secondary, accent: accent,
+      background: background, surface: surface,
+      text: textColor, textMuted: isDark ? darken(textColor, 40) : lighten(textColor, 40),
       success: '#10b981', error: '#ef4444', warning: '#f59e0b',
-      gradient: entries.length >= 2 ? 'linear-gradient(135deg, ' + primary + ', ' + secondary + ')' : undefined,
+      gradient: gradient,
     };
   }
 
@@ -284,39 +325,85 @@ window.BrandScraper = (function () {
   // ---- Style Extraction ----
 
   function extractStyle(css) {
-    const radiusValues = [];
-    for (const match of css.matchAll(/border-radius\s*:\s*(\d+(?:\.\d+)?)\s*px/gi)) {
+    var radiusValues = [];
+    for (var match of css.matchAll(/border-radius\s*:\s*(\d+(?:\.\d+)?)\s*px/gi)) {
       radiusValues.push(parseFloat(match[1]));
     }
-    const medianRadius = radiusValues.length > 0
-      ? radiusValues.sort((a, b) => a - b)[Math.floor(radiusValues.length / 2)] : 8;
+    var medianRadius = radiusValues.length > 0
+      ? radiusValues.sort(function(a, b) { return a - b; })[Math.floor(radiusValues.length / 2)] : 8;
 
-    const hasBoxShadow = /box-shadow\s*:/i.test(css);
-    const hasBackdropFilter = /backdrop-filter\s*:/i.test(css);
-    const hasBorder = /border\s*:\s*1px/i.test(css);
-    const cardStyle = hasBackdropFilter ? 'glass' : hasBoxShadow ? 'elevated' : hasBorder ? 'outlined' : 'flat';
+    var hasBoxShadow = /box-shadow\s*:/i.test(css);
+    var hasBackdropFilter = /backdrop-filter\s*:/i.test(css);
+    var hasBorder = /border\s*:\s*1px/i.test(css);
 
-    const hasGradientBtn = /\.btn[^{]*\{[^}]*gradient/i.test(css) || /button[^{]*\{[^}]*gradient/i.test(css);
-    const hasOutlineBtn = /\.btn[^{]*outline|\.btn-outline/i.test(css);
-    const buttonStyle = hasGradientBtn ? 'gradient' : hasOutlineBtn ? 'outline' : 'solid';
+    // Glassmorphism: requires both semi-transparent backgrounds AND backdrop-filter
+    var hasTransparentBg = /rgba\(\s*\d+\s*,\s*\d+\s*,\s*\d+\s*,\s*0?\.[0-4]\d*\s*\)/i.test(css);
+    var cardStyle = (hasBackdropFilter && hasTransparentBg) ? 'glass' :
+      hasBackdropFilter ? 'glass' :
+      hasBoxShadow ? 'elevated' : hasBorder ? 'outlined' : 'flat';
 
-    const imgRadiusMatch = css.match(/img[^{]*\{[^}]*border-radius\s*:\s*(\d+)/i);
-    const imgRadius = imgRadiusMatch ? parseInt(imgRadiusMatch[1]) : medianRadius;
-    const imageStyle = imgRadius >= 50 ? 'circular' : imgRadius >= 8 ? 'rounded' : 'sharp';
+    // Button border-radius detection — look at button/btn/a elements specifically
+    var btnRadiusValues = [];
+    // Match border-radius in rules that target buttons, links styled as buttons, or .btn classes
+    var btnRadiusPatterns = [
+      /(?:button|\.btn|a\.btn|\.cta|input\[type=.?submit)[^{]*\{[^}]*border-radius\s*:\s*(\d+(?:\.\d+)?)\s*px/gi,
+      /border-radius\s*:\s*(\d+(?:\.\d+)?)\s*px[^}]*(?:cursor\s*:\s*pointer)/gi,
+    ];
+    for (var p = 0; p < btnRadiusPatterns.length; p++) {
+      for (var brm of css.matchAll(btnRadiusPatterns[p])) {
+        btnRadiusValues.push(parseFloat(brm[1]));
+      }
+    }
+    // Also check for 50% or 9999px radius patterns (pill)
+    var hasPillRadius = /border-radius\s*:\s*(9999|999|200|50%)\s*px?/i.test(css);
 
-    const mood = cardStyle === 'glass' ? 'creative' : medianRadius >= 20 ? 'friendly' :
+    var hasGradientBtn = /\.btn[^{]*\{[^}]*gradient/i.test(css) || /button[^{]*\{[^}]*gradient/i.test(css);
+    var hasOutlineBtn = /\.btn[^{]*outline|\.btn-outline/i.test(css);
+
+    // Determine button style: check radius first for pill, then gradient/outline
+    var maxBtnRadius = btnRadiusValues.length > 0 ? Math.max.apply(null, btnRadiusValues) : 0;
+    var buttonStyle;
+    if (hasPillRadius || maxBtnRadius > 50) {
+      buttonStyle = 'pill';
+    } else if (maxBtnRadius > 8) {
+      buttonStyle = 'rounded';
+    } else if (hasGradientBtn) {
+      buttonStyle = 'gradient';
+    } else if (hasOutlineBtn) {
+      buttonStyle = 'outline';
+    } else {
+      buttonStyle = 'solid';
+    }
+
+    var imgRadiusMatch = css.match(/img[^{]*\{[^}]*border-radius\s*:\s*(\d+)/i);
+    var imgRadius = imgRadiusMatch ? parseInt(imgRadiusMatch[1]) : medianRadius;
+    var imageStyle = imgRadius >= 50 ? 'circular' : imgRadius >= 8 ? 'rounded' : 'sharp';
+
+    var mood = cardStyle === 'glass' ? 'creative' : medianRadius >= 20 ? 'friendly' :
       medianRadius <= 4 && /text-transform\s*:\s*uppercase/i.test(css) ? 'corporate' :
       /monospace|code|terminal/i.test(css) ? 'technical' : 'elegant';
 
-    const paddingValues = [];
-    for (const match of css.matchAll(/padding\s*:\s*(\d+(?:\.\d+)?)\s*px/gi)) {
-      paddingValues.push(parseFloat(match[1]));
+    var paddingValues = [];
+    for (var pm of css.matchAll(/padding\s*:\s*(\d+(?:\.\d+)?)\s*px/gi)) {
+      paddingValues.push(parseFloat(pm[1]));
     }
-    const spacingUnit = paddingValues.length > 0
-      ? Math.round(paddingValues.sort((a, b) => a - b)[Math.floor(paddingValues.length / 4)] / 4) * 4 || 8 : 8;
+    var spacingUnit = paddingValues.length > 0
+      ? Math.round(paddingValues.sort(function(a, b) { return a - b; })[Math.floor(paddingValues.length / 4)] / 4) * 4 || 8 : 8;
+
+    // Detect dark/light theme from background colors found in CSS
+    // We check body, html, :root backgrounds
+    var bodyBgMatch = css.match(/(?:body|html|:root)\s*\{[^}]*background(?:-color)?\s*:\s*(#[0-9a-fA-F]{3,8})/i);
+    var theme = 'light';
+    if (bodyBgMatch) {
+      var bgHex = normalizeColor(bodyBgMatch[1]);
+      if (perceivedLuminance(bgHex) < 0.3) {
+        theme = 'dark';
+      }
+    }
 
     return {
-      borderRadius: medianRadius + 'px', cardStyle, buttonStyle, imageStyle, mood,
+      borderRadius: medianRadius + 'px', cardStyle: cardStyle, buttonStyle: buttonStyle,
+      imageStyle: imageStyle, mood: mood, theme: theme,
       spacing: { unit: spacingUnit, section: spacingUnit * 8, element: spacingUnit * 2 },
     };
   }
@@ -372,7 +459,7 @@ window.BrandScraper = (function () {
       },
       style: {
         borderRadius: '12px', cardStyle: 'elevated', buttonStyle: 'solid',
-        imageStyle: 'rounded', mood: 'elegant',
+        imageStyle: 'rounded', mood: 'elegant', theme: 'light',
         spacing: { unit: 8, section: 64, element: 16 },
       },
       logo: undefined,

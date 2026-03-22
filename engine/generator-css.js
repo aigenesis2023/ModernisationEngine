@@ -7,24 +7,45 @@ window.GeneratorCSS = (function () {
   'use strict';
 
   function isDarkTheme(brand) {
+    // Check explicit theme from scraper
+    if (brand.style && brand.style.theme === 'dark') return true;
+    if (brand.style && brand.style.mood === 'dark') return true;
+    // Check background color luminance
     var bg = brand.colors.background;
-    if (!bg.startsWith('#') || bg.length < 7) return false;
+    if (!bg || !bg.startsWith('#') || bg.length < 7) return false;
     var r = parseInt(bg.slice(1, 3), 16);
     var g = parseInt(bg.slice(3, 5), 16);
     var b = parseInt(bg.slice(5, 7), 16);
-    return (r + g + b) / 3 < 80;
+    return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.3;
+  }
+
+  /**
+   * Check if the heading font is a display/editorial style that benefits from
+   * negative letter-spacing. Universal: works for any font name.
+   */
+  function isDisplayFont(brand) {
+    var t = brand.typography;
+    var name = (t.headingFont || '').toLowerCase();
+    if (/display|editorial|note|poster|banner|headline/.test(name)) return true;
+    if (t.headingWeight >= 800) return true;
+    return false;
   }
 
   function buttonCss(brand) {
     var b = brand.colors;
+    var grad = b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')';
+    var pillRadius = brand.style.buttonStyle === 'pill' ? '\n  border-radius: 200px;' : '';
     switch (brand.style.buttonStyle) {
       case 'gradient':
-        return '.btn-primary {\n  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') +
-          ';\n  color: white; border: none;\n}\n.btn-primary:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 25px ' + b.primary + '33; }';
+        return '.btn-primary {\n  background: ' + grad +
+          ';\n  color: white; border: none;' + pillRadius + '\n}\n.btn-primary:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 25px ' + b.primary + '33; }';
       case 'outline':
-        return '.btn-primary {\n  background: transparent; color: var(--primary);\n  border: 2px solid var(--primary);\n}\n.btn-primary:hover { background: var(--primary); color: white; }';
+        return '.btn-primary {\n  background: transparent; color: var(--primary);\n  border: 2px solid var(--primary);' + pillRadius + '\n}\n.btn-primary:hover { background: var(--primary); color: white; }';
+      case 'pill':
+        return '.btn-primary {\n  background: var(--primary); color: white; border: none;\n  border-radius: 200px;\n}\n' +
+          '.btn-primary:hover { background: ' + grad + '; transform: translateY(-2px); box-shadow: 0 8px 25px ' + b.primary + '33; }';
       default:
-        return '.btn-primary {\n  background: var(--primary); color: white; border: none;\n}\n.btn-primary:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 25px ' + b.primary + '33; }';
+        return '.btn-primary {\n  background: var(--primary); color: white; border: none;' + pillRadius + '\n}\n.btn-primary:hover { opacity: 0.92; transform: translateY(-2px); box-shadow: 0 8px 25px ' + b.primary + '33; }';
     }
   }
 
@@ -54,6 +75,16 @@ window.GeneratorCSS = (function () {
     var shadow = cardShadow(brand);
     var btnCss = buttonCss(brand);
     var surfaceAlt = dark ? 'rgba(255,255,255,0.03)' : '#f7f8fa';
+    var grad = b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')';
+    var isPill = s.buttonStyle === 'pill';
+    var pillRadius = isPill ? '200px' : 'var(--radius)';
+    var isGlass = s.cardStyle === 'glass';
+    var glassBg = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.03)';
+    var glassBorder = dark ? '1px solid rgba(255,255,255,0.12)' : '1px solid rgba(0,0,0,0.06)';
+    var glassBlur = 'backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);';
+    var displayFont = isDisplayFont(brand);
+    var headingLetterSpacing = displayFont ? '-0.03em' : '-0.02em';
+    var bodyWeight = t.bodyWeight || 400;
 
     return (
       // ============ CSS VARIABLES ============
@@ -72,9 +103,11 @@ window.GeneratorCSS = (function () {
       '  --radius: ' + s.borderRadius + ';\n' +
       '  --font-heading: \'' + t.headingFont + '\', system-ui, sans-serif;\n' +
       '  --font-body: \'' + t.bodyFont + '\', system-ui, sans-serif;\n' +
+      '  --gradient: ' + grad + ';\n' +
       '  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n' +
       '  --content-width: 800px;\n' +
       '  --wide-width: 1080px;\n' +
+      '  --btn-radius: ' + pillRadius + ';\n' +
       '}\n\n' +
 
       // ============ RESET & BASE ============
@@ -83,6 +116,7 @@ window.GeneratorCSS = (function () {
       'body {\n' +
       '  font-family: var(--font-body);\n' +
       '  font-size: 16px;\n' +
+      '  font-weight: ' + bodyWeight + ';\n' +
       '  line-height: 1.75;\n' +
       '  color: var(--text);\n' +
       '  background: var(--bg);\n' +
@@ -98,7 +132,7 @@ window.GeneratorCSS = (function () {
       '  font-family: var(--font-heading);\n' +
       '  font-weight: ' + t.headingWeight + ';\n' +
       '  line-height: 1.15;\n' +
-      '  letter-spacing: -0.02em;\n' +
+      '  letter-spacing: ' + headingLetterSpacing + ';\n' +
       '  color: var(--text);\n' +
       '}\n' +
       'h1 { font-size: 2.25rem; margin-bottom: 1.5rem; }\n' +
@@ -118,7 +152,7 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.progress-fill {\n' +
       '  height: 100%;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(90deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  transition: width 0.15s ease;\n' +
       '  border-radius: 0 2px 2px 0;\n' +
       '}\n\n' +
@@ -145,7 +179,7 @@ window.GeneratorCSS = (function () {
       '.section-title::after {\n' +
       '  content: ""; position: absolute;\n' +
       '  bottom: 0; left: 0; width: 60px; height: 3px;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(90deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  border-radius: 3px;\n' +
       '}\n\n' +
 
@@ -158,7 +192,7 @@ window.GeneratorCSS = (function () {
       '.section-hero {\n' +
       '  min-height: 100vh;\n' +
       '  display: flex; align-items: center; justify-content: center;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  background-size: 200% 200%;\n' +
       '  animation: heroGradient 12s ease infinite;\n' +
       '  color: white; text-align: center;\n' +
@@ -286,7 +320,7 @@ window.GeneratorCSS = (function () {
       '  position: absolute; left: -3rem; top: 2px;\n' +
       '  width: 32px; height: 32px;\n' +
       '  border-radius: 50%;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  color: white; font-weight: 700; font-size: 0.85rem;\n' +
       '  display: flex; align-items: center; justify-content: center;\n' +
       '  z-index: 1;\n' +
@@ -318,7 +352,7 @@ window.GeneratorCSS = (function () {
       '  ' + shadow + '\n' +
       '}\n' +
       '.flip-card-front {\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  color: white;\n' +
       '}\n' +
       '.flip-card-front h3 { color: white; font-size: 1.1rem; margin: 0; }\n' +
@@ -379,7 +413,7 @@ window.GeneratorCSS = (function () {
       '.btn {\n' +
       '  display: inline-flex; align-items: center; justify-content: center; gap: 8px;\n' +
       '  padding: 0.85rem 2.25rem;\n' +
-      '  border: none; border-radius: var(--radius);\n' +
+      '  border: none; border-radius: var(--btn-radius);\n' +
       '  font-family: var(--font-body); font-size: 0.95rem; font-weight: 600;\n' +
       '  cursor: pointer; transition: all var(--transition);\n' +
       '  text-decoration: none; min-width: 140px;\n' +
@@ -388,17 +422,18 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.btn:active { transform: scale(0.97); }\n' +
       btnCss + '\n\n' +
-      '.btn-secondary {\n  background: transparent; color: var(--primary);\n  border: 2px solid var(--primary);\n}\n' +
+      '.btn-secondary {\n  background: transparent; color: var(--primary);\n  border: 2px solid var(--primary); border-radius: var(--btn-radius);\n}\n' +
       '.btn-secondary:hover { background: var(--primary); color: white; }\n\n' +
       '.actions { margin-top: 2rem; text-align: center; }\n\n' +
 
       // ============ CARD ============
       '.card {\n' +
-      '  background: var(--surface);\n' +
+      '  background: ' + (isGlass ? glassBg : 'var(--surface)') + ';\n' +
       '  border-radius: var(--radius);\n' +
       '  padding: 2.5rem;\n' +
       '  width: 100%; max-width: var(--content-width);\n' +
       '  ' + shadow + '\n' +
+      (isGlass ? '  ' + glassBlur + '\n  border: ' + glassBorder + ';\n' : '') +
       '  transition: all var(--transition);\n' +
       '}\n\n' +
 
@@ -431,10 +466,11 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.form-group input, .form-group textarea {\n' +
       '  width: 100%; padding: 0.85rem 1rem;\n' +
-      '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
+      '  border: 2px solid ' + border + '; border-radius: var(--btn-radius);\n' +
       '  font-family: var(--font-body); font-size: 1rem;\n' +
       '  transition: border-color var(--transition), box-shadow var(--transition);\n' +
-      '  background: var(--bg); color: var(--text);\n' +
+      '  background: ' + (isGlass ? glassBg : 'var(--bg)') + '; color: var(--text);\n' +
+      (isGlass ? '  ' + glassBlur + '\n' : '') +
       '}\n' +
       '.form-group input:focus, .form-group textarea:focus {\n' +
       '  outline: none; border-color: var(--primary);\n' +
@@ -462,7 +498,8 @@ window.GeneratorCSS = (function () {
       '.accordion-trigger {\n' +
       '  width: 100%; display: flex; justify-content: space-between; align-items: center;\n' +
       '  padding: 1.125rem 1.5rem;\n' +
-      '  background: transparent; border: none; cursor: pointer;\n' +
+      '  background: ' + (isGlass ? glassBg : 'transparent') + '; border: none; cursor: pointer;\n' +
+      (isGlass ? '  ' + glassBlur + '\n' : '') +
       '  font-family: var(--font-heading); font-size: 1rem;\n' +
       '  font-weight: 600; color: var(--text); text-align: left;\n' +
       '  transition: color var(--transition), background var(--transition);\n' +
@@ -568,7 +605,7 @@ window.GeneratorCSS = (function () {
       '.bento-tile::before {\n' +
       '  content: ""; position: absolute; top: 0; left: 0; right: 0;\n' +
       '  height: 3px;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(90deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  opacity: 0; transition: opacity var(--transition);\n' +
       '}\n' +
       '.bento-tile:hover::before { opacity: 1; }\n' +
@@ -595,10 +632,10 @@ window.GeneratorCSS = (function () {
       '  padding: 0.75rem 1rem; text-align: left; font-weight: 600;\n' +
       '}\n' +
       '.styled-table td {\n' +
-      '  padding: 0.75rem 1rem; border-bottom: 1px solid #e2e8f0;\n' +
+      '  padding: 0.75rem 1rem; border-bottom: 1px solid ' + border + ';\n' +
       '}\n' +
       '.styled-table tbody tr:nth-child(even) { background: var(--surface); }\n' +
-      '.styled-table tbody tr:hover { background: #edf2f7; }\n\n' +
+      '.styled-table tbody tr:hover { background: var(--surface-alt); }\n\n' +
 
       // ============ INTERACTIONS (universal) ============
       '.interactions-container { margin: 1.5rem 0; }\n' +
@@ -660,15 +697,16 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.branch-option {\n' +
       '  padding: 2rem;\n' +
-      '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
+      '  border: 2px solid ' + border + '; border-radius: var(--btn-radius);\n' +
       '  cursor: pointer; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n' +
-      '  text-align: center; background: var(--surface);\n' +
+      '  text-align: center; background: ' + (isGlass ? glassBg : 'var(--surface)') + ';\n' +
+      (isGlass ? '  ' + glassBlur + '\n' : '') +
       '  -webkit-tap-highlight-color: transparent;\n' +
       '  position: relative; overflow: hidden;\n' +
       '}\n' +
       '.branch-option::before {\n' +
       '  content: ""; position: absolute; inset: 0;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  opacity: 0; transition: opacity 0.3s ease;\n' +
       '}\n' +
       '.branch-option:hover::before { opacity: 0.04; }\n' +
@@ -699,7 +737,7 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.quiz-progress-fill {\n' +
       '  height: 100%;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(90deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  border-radius: 3px;\n' +
       '  transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);\n' +
       '}\n' +
@@ -723,9 +761,10 @@ window.GeneratorCSS = (function () {
       '.quiz-choice {\n' +
       '  display: flex; align-items: center; gap: 1rem;\n' +
       '  padding: 1.125rem 1.5rem;\n' +
-      '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
+      '  border: 2px solid ' + border + '; border-radius: var(--btn-radius);\n' +
       '  cursor: pointer; transition: all 0.25s ease;\n' +
-      '  background: var(--surface); font-size: 1rem;\n' +
+      '  background: ' + (isGlass ? glassBg : 'var(--surface)') + '; font-size: 1rem;\n' +
+      (isGlass ? '  ' + glassBlur + '\n' : '') +
       '  text-align: left; -webkit-tap-highlight-color: transparent;\n' +
       '}\n' +
       '.quiz-choice:hover { border-color: var(--primary); background: ' + b.primary + '05; }\n' +
@@ -794,7 +833,7 @@ window.GeneratorCSS = (function () {
       '.assessment-card::before {\n' +
       '  content: ""; position: absolute; top: 0; left: 0; right: 0;\n' +
       '  height: 4px;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(90deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '}\n' +
       '.assessment-icon {\n' +
       '  font-size: 3rem; margin-bottom: 1rem;\n' +
@@ -810,7 +849,7 @@ window.GeneratorCSS = (function () {
       '.section-results {\n' +
       '  min-height: 80vh;\n' +
       '  display: flex; align-items: center; justify-content: center;\n' +
-      '  background: ' + (b.gradient || 'linear-gradient(135deg, ' + b.primary + ', ' + b.secondary + ')') + ';\n' +
+      '  background: var(--gradient);\n' +
       '  color: white; text-align: center;\n' +
       '  position: relative; overflow: hidden;\n' +
       '}\n' +
@@ -848,7 +887,7 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.btn-restart {\n' +
       '  margin-top: 2rem; background: white; color: var(--primary);\n' +
-      '  border: none; font-weight: 700;\n' +
+      '  border: none; font-weight: 700; border-radius: var(--btn-radius);\n' +
       '}\n' +
       '.btn-restart:hover {\n' +
       '  transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2);\n' +
