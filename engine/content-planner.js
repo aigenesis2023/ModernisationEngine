@@ -426,79 +426,12 @@ window.ContentPlanner = (function () {
       currentSection.slides.push(planSlide(slide));
     }
 
-    // Post-process: consolidate slides with similar titles (common prefix 10+ chars)
-    sections.forEach(function (section) {
-      if (section.slides.length < 2) return;
-      var consolidated = [];
-      var i = 0;
-      while (i < section.slides.length) {
-        var current = section.slides[i];
-        var currentTitle = (current.originalTitle || '').trim();
-        // Find consecutive slides with a shared prefix of 10+ chars
-        var group = [current];
-        var j = i + 1;
-        while (j < section.slides.length && currentTitle.length >= 10) {
-          var nextTitle = (section.slides[j].originalTitle || '').trim();
-          var prefixLen = 0;
-          var maxCheck = Math.min(currentTitle.length, nextTitle.length);
-          while (prefixLen < maxCheck && currentTitle.charAt(prefixLen) === nextTitle.charAt(prefixLen)) {
-            prefixLen++;
-          }
-          if (prefixLen >= 10) {
-            group.push(section.slides[j]);
-            j++;
-          } else {
-            break;
-          }
-        }
-        if (group.length > 1) {
-          // Merge group into a single slide: combine all body texts, headings, layers
-          var merged = group[0];
-          for (var k = 1; k < group.length; k++) {
-            var donor = group[k];
-            if (donor.content) {
-              if (donor.content.bodyTexts) {
-                merged.content.bodyTexts = merged.content.bodyTexts.concat(donor.content.bodyTexts);
-              }
-              if (donor.content.headings) {
-                donor.content.headings.forEach(function (h) {
-                  // Only add heading if not duplicated
-                  var exists = merged.content.headings.some(function (mh) {
-                    return mh.text.toLowerCase() === h.text.toLowerCase();
-                  });
-                  if (!exists) merged.content.headings.push(h);
-                });
-              }
-              if (donor.content.images) {
-                merged.content.images = merged.content.images.concat(donor.content.images);
-              }
-              if (donor.content.callouts) {
-                merged.content.callouts = merged.content.callouts.concat(donor.content.callouts);
-              }
-            }
-            if (donor.layers && donor.layers.length > 0) {
-              merged.layers = (merged.layers || []).concat(donor.layers);
-            }
-            // Preserve interactions from merged slides
-            if (donor.interactions && donor.interactions.length > 0) {
-              merged.interactions = (merged.interactions || []).concat(donor.interactions);
-            }
-            // Preserve videos and audio from merged slides
-            if (donor.content.videos && donor.content.videos.length > 0) {
-              merged.content.videos = (merged.content.videos || []).concat(donor.content.videos);
-            }
-            if (donor.content.audio && donor.content.audio.length > 0) {
-              merged.content.audio = (merged.content.audio || []).concat(donor.content.audio);
-            }
-          }
-          consolidated.push(merged);
-        } else {
-          consolidated.push(current);
-        }
-        i = j;
-      }
-      section.slides = consolidated;
-    });
+    // NOTE: Slide consolidation (merging slides with similar titles) was REMOVED.
+    // It used a 10-char title prefix match to merge consecutive slides, which
+    // could incorrectly merge unrelated slides in other courses where slides
+    // share a chapter prefix (e.g., "Chapter 1: Intro" + "Chapter 1: Summary"
+    // share 11 chars but are different content). Each slide is kept as its own
+    // content block — the deep-scroll layout handles this naturally.
 
     // Post-process 1: Improve generic section titles using content headings.
     // When a section title is a generic fallback (Choose Your Path, Section N intro,
@@ -584,7 +517,7 @@ window.ContentPlanner = (function () {
   function cleanSectionTitle(title) {
     if (!title) return title;
     var t = title.trim();
-    // ALL CAPS internal names like "GHOST / LABELS", "TABLE SUMMARY"
+    // ALL CAPS internal names (Storyline authors use these for internal labels)
     if (/^[A-Z\s\/\-&]+$/.test(t) && t.length < 30) {
       t = t.toLowerCase().replace(/\b\w/g, function(c) { return c.toUpperCase(); });
     }
