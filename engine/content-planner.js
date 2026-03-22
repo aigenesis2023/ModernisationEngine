@@ -811,14 +811,20 @@ window.ContentPlanner = (function () {
     // Strategy 2: Sliding window phrase repetition detection.
     // Storyline often concatenates content WITHOUT periods — just space-separated.
     // If the same phrase of 8+ words appears twice, remove the second occurrence.
+    // Normalize words: strip special characters (em dashes, etc.) that break matching.
     var words = text.split(/\s+/);
-    if (words.length >= 16) {
-      var windowSize = 8;
+    var normalizedWords = words.map(function (w) {
+      return w.toLowerCase().replace(/[^\w]/g, '');
+    }).filter(function (w) { return w.length > 0; });
+
+    if (normalizedWords.length >= 16) {
+      var windowSize = 6; // Reduced from 8 to catch more patterns
       var phraseSeen = {};
       var cutIndex = -1;
-      for (var i = 0; i <= words.length - windowSize; i++) {
-        var phrase = words.slice(i, i + windowSize).join(' ').toLowerCase();
+      for (var i = 0; i <= normalizedWords.length - windowSize; i++) {
+        var phrase = normalizedWords.slice(i, i + windowSize).join(' ');
         if (phraseSeen[phrase] !== undefined && i - phraseSeen[phrase] >= windowSize) {
+          // Map back from normalized index to original word index
           cutIndex = i;
           break;
         }
@@ -827,7 +833,21 @@ window.ContentPlanner = (function () {
         }
       }
       if (cutIndex > 0) {
-        return words.slice(0, cutIndex).join(' ');
+        // Map normalized index back to original text: take first cutIndex words
+        // (approximately, since some normalized words were filtered)
+        var origWords = text.split(/\s+/);
+        var normalCount = 0;
+        var origCut = 0;
+        for (var wi = 0; wi < origWords.length; wi++) {
+          var nw = origWords[wi].toLowerCase().replace(/[^\w]/g, '');
+          if (nw.length > 0) {
+            if (normalCount >= cutIndex) { origCut = wi; break; }
+            normalCount++;
+          }
+        }
+        if (origCut > 0) {
+          return origWords.slice(0, origCut).join(' ');
+        }
       }
     }
 

@@ -426,7 +426,16 @@ window.GeneratorData = (function () {
         var layerTexts = slide.layers
           .filter(function (l) { return l.texts && l.texts.length > 0; })
           .map(function (l) {
-            return l.texts.map(function (t) { return t.content || t; }).join(' ');
+            // Deduplicate layer texts (Storyline often has same text in multiple states)
+            var seen = {};
+            var unique = l.texts.map(function (t) { return t.content || t; })
+              .filter(function (t) {
+                var key = t.trim().toLowerCase();
+                if (seen[key]) return false;
+                seen[key] = true;
+                return true;
+              });
+            return unique.join(' ');
           });
 
         if (layerTexts.length > 0) {
@@ -437,8 +446,15 @@ window.GeneratorData = (function () {
 
           var longestText = layerTexts[longestIdx];
           if (longestText.length > 100) {
-            if (!data.texts) data.texts = [];
-            data.texts.unshift(longestText);
+            // Don't add if significantly overlaps with existing texts
+            var existingTexts = (data.texts || []).join(' ').toLowerCase();
+            var isRedundant = existingTexts.length > 50 &&
+              (existingTexts.indexOf(longestText.substring(0, 50).toLowerCase()) >= 0 ||
+               longestText.toLowerCase().indexOf(existingTexts.substring(0, 50)) >= 0);
+            if (!isRedundant) {
+              if (!data.texts) data.texts = [];
+              data.texts.unshift(longestText);
+            }
           }
         }
       }
@@ -484,7 +500,52 @@ window.GeneratorData = (function () {
       data.layout = detectLayout(slide, data);
     }
 
+    // Final text cleanup: remove internal repetition from all text entries.
+    // This catches repeated content from Storyline states/layers that survived
+    // through any code path (bodyTexts, layer context, branching descriptions).
+    if (data.texts && data.texts.length > 0) {
+      data.texts = data.texts.map(function (t) {
+        return removeInternalRepetition(t);
+      });
+    }
+
     return data;
+  }
+
+  /**
+   * Remove internally repeated content within a text block.
+   * Uses normalized word comparison to handle special characters (em dashes, etc.)
+   */
+  function removeInternalRepetition(text) {
+    if (!text || text.length < 100) return text;
+    var words = text.split(/\s+/);
+    var normalized = words.map(function (w) {
+      return w.toLowerCase().replace(/[^\w]/g, '');
+    }).filter(function (w) { return w.length > 0; });
+    if (normalized.length < 12) return text;
+    var windowSize = 6;
+    var phraseSeen = {};
+    var cutIndex = -1;
+    for (var i = 0; i <= normalized.length - windowSize; i++) {
+      var phrase = normalized.slice(i, i + windowSize).join(' ');
+      if (phraseSeen[phrase] !== undefined && i - phraseSeen[phrase] >= windowSize) {
+        cutIndex = i;
+        break;
+      }
+      if (phraseSeen[phrase] === undefined) phraseSeen[phrase] = i;
+    }
+    if (cutIndex > 0) {
+      var origWords = text.split(/\s+/);
+      var nc = 0;
+      for (var wi = 0; wi < origWords.length; wi++) {
+        var nw = origWords[wi].toLowerCase().replace(/[^\w]/g, '');
+        if (nw.length > 0) {
+          if (nc >= cutIndex) return origWords.slice(0, wi).join(' ');
+          nc++;
+        }
+      }
+    }
+    return text;
   }
 
   /**
