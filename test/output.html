@@ -1610,6 +1610,14 @@ function App() {
   );
 }
 
+var ErrorBoundary = function(props) {
+  var _err = React.useState(null), error = _err[0], setError = _err[1];
+  if (error) return e("div", { style: { padding: "2rem", textAlign: "center", color: "var(--text-muted)" } },
+    e("p", null, "This section could not be displayed."),
+    e("button", { className: "btn btn-primary", onClick: function() { setError(null); } }, "Try Again"));
+  try { return props.children; } catch (err) { setError(err); return null; }
+};
+
 ReactDOM.createRoot(document.getElementById("root")).render(e(App));
 </script>
 </body>

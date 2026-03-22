@@ -84,6 +84,14 @@ window.GeneratorApp = (function () {
       '  }\n  return a;\n}\n\n' +
       generateScrollRevealHook() +
       generateAppComponent() +
+      // Error boundary — prevents a single component crash from breaking the entire course\n' +
+      'var ErrorBoundary = function(props) {\n' +
+      '  var _err = React.useState(null), error = _err[0], setError = _err[1];\n' +
+      '  if (error) return e("div", { style: { padding: "2rem", textAlign: "center", color: "var(--text-muted)" } },\n' +
+      '    e("p", null, "This section could not be displayed."),\n' +
+      '    e("button", { className: "btn btn-primary", onClick: function() { setError(null); } }, "Try Again"));\n' +
+      '  try { return props.children; } catch (err) { setError(err); return null; }\n' +
+      '};\n\n' +
       'ReactDOM.createRoot(document.getElementById("root")).render(e(App));\n';
   }
 
