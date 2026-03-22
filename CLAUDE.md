@@ -156,6 +156,19 @@ assets/media/*        ← Video/audio files
 - All generated React uses `React.createElement` (no JSX, no build step)
 - `escJs()` and `escHtml()` for safe string embedding
 
+## CRITICAL: Engine Development Rule
+
+**Every change to the engine MUST be a universal improvement, NEVER a specific fix for a specific SCORM file or brand URL.**
+
+The test SCORM folder and URL in the repo are just test data. When an issue is found in test output:
+1. Ask "what CATEGORY of problem is this?" — not "how do I fix this specific text?"
+2. Build detection based on content characteristics (length, structure, semantic role) — not specific phrases or regex for known strings
+3. The improved output from the test SCORM should be a BYPRODUCT of a better engine, not the goal
+4. Every rule should make sense if you imagine a completely different SCORM course being processed
+
+**Bad:** Adding a regex like `/click\s+on\s+the\s+most\s+relevant/i` to filter one course's instruction text
+**Good:** Building a classifier that detects ANY text whose purpose is to instruct users how to interact with the Storyline player
+
 ## Common Pitfalls
 - **Script order in index.html matters** — content-planner after scorm-parser, generators after content-planner
 - **brand.colors is an OBJECT** with named keys, not an array of hex strings

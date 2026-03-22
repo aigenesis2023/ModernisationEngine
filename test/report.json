@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-22T08:40:01.086Z",
+  "generatedAt": "2026-03-22T08:47:32.469Z",
   "extraction": {
     "meta": {
       "title": "Test intro scene",
@@ -592,7 +592,7 @@
             "type": "branching",
             "presentation": "branching",
             "headingCount": 1,
-            "bodyTextCount": 2,
+            "bodyTextCount": 3,
             "calloutCount": 0,
             "imageCount": 2,
             "videoCount": 0,
@@ -607,6 +607,7 @@
               "Service advisor, customer liaison."
             ],
             "bodyTexts": [
+              "Welcome",
               "Site logistics, car parking and movements, valeting.",
               "Bodyshop & workshop technicians, Workshop manager."
             ],
@@ -734,8 +735,8 @@
       "planned": {
         "totalSections": 5,
         "totalSlides": 7,
-        "textsKept": 5,
-        "textsDropped": 8,
+        "textsKept": 6,
+        "textsDropped": 7,
         "imagesKept": 11,
         "videosKept": 1,
         "audioKept": 0,
@@ -744,7 +745,7 @@
         "interactionsKept": 0,
         "statesKept": 0
       },
-      "contentRetention": 68
+      "contentRetention": 72
     }
   },
   "brandProfile": {
