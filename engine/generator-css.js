@@ -581,6 +581,30 @@ window.GeneratorCSS = (function () {
       '}\n' +
       '.bento-image img { width: 100%; height: auto; display: block; }\n\n' +
 
+      // ============ GLOSSARY ============
+      '.glossary-grid {\n' +
+      '  display: grid; grid-template-columns: 1fr; gap: 1rem;\n' +
+      '  max-width: var(--content-width); margin: 0 auto;\n' +
+      '}\n' +
+      '@media (min-width: 768px) { .glossary-grid { grid-template-columns: 1fr 1fr; } }\n' +
+      '.glossary-card {\n' +
+      '  background: var(--surface); border-radius: var(--radius);\n' +
+      '  padding: 1.5rem; border-left: 3px solid var(--primary);\n' +
+      '  transition: transform 0.2s, box-shadow 0.2s;\n' +
+      '}\n' +
+      '.glossary-card:hover {\n' +
+      '  transform: translateY(-2px);\n' +
+      '  box-shadow: 0 4px 12px rgba(0,0,0,0.08);\n' +
+      '}\n' +
+      '.glossary-card dt {\n' +
+      '  font-weight: 700; color: var(--primary); font-size: 1rem;\n' +
+      '  margin-bottom: 0.5rem;\n' +
+      '}\n' +
+      '.glossary-card dd {\n' +
+      '  margin: 0; font-size: 0.95rem; line-height: 1.6;\n' +
+      '  color: var(--text-muted);\n' +
+      '}\n\n' +
+
       // ============ BRANCHING ============
       '.branch-container { text-align: center; width: 100%; max-width: var(--content-width); margin: 0 auto; }\n' +
       '.greeting { font-size: 1.15rem; margin-bottom: 1.5rem; color: var(--text); }\n' +

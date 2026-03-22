@@ -326,8 +326,25 @@ window.GeneratorApp = (function () {
       '          e("h2", { className: "section-title" }, section.title)) : null,\n' +
       // Assessment sections: render one unified "Start Assessment" card
       '        section.type === "assessment" ? renderAssessmentSection(section, sectionIndex) :\n' +
+      '        section.type === "glossary" && section.glossaryEntries ? renderGlossarySection(section) :\n' +
       '        section.slides.map(function(slide, slideIdx) {\n' +
       '          return renderSlide(slide, sectionIndex, slideIdx, section);\n' +
+      '        })\n' +
+      '      )\n' +
+      '    );\n' +
+      '  }\n\n' +
+
+      // --- Glossary section renderer ---
+      '  function renderGlossarySection(section) {\n' +
+      '    return e(RevealBlock, { className: "" },\n' +
+      '      e("div", { className: "glossary-grid" },\n' +
+      '        section.glossaryEntries.map(function(entry, i) {\n' +
+      '          return e(RevealBlock, { key: i, delay: i * 50, className: "" },\n' +
+      '            e("div", { className: "glossary-card" },\n' +
+      '              e("dt", null, entry.term),\n' +
+      '              e("dd", null, entry.definition)\n' +
+      '            )\n' +
+      '          );\n' +
       '        })\n' +
       '      )\n' +
       '    );\n' +

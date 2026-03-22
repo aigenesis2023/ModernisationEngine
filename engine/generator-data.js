@@ -128,16 +128,64 @@ window.GeneratorData = (function () {
   /**
    * Build the sections data array for the deep-scroll React app.
    */
+  /**
+   * Parse glossary text into term+definition pairs.
+   * Storyline glossaries typically have terms as capitalized phrases
+   * followed by their definitions. Common patterns:
+   * - "Term Definition text..." where Term is title-cased
+   * - Terms are separated by the start of the next capitalized phrase
+   *
+   * This is a universal pattern — glossaries in any authoring tool
+   * follow this term/definition structure.
+   */
+  function parseGlossaryEntries(texts) {
+    if (!texts || texts.length === 0) return null;
+    var combined = texts.join(' ');
+    if (combined.length < 100) return null;
+
+    // Try to split on known glossary term patterns
+    // Pattern: capitalized multi-word term followed by definition
+    // e.g. "Arc/Flash A sudden release..." "BEV (Battery Electric Vehicle) A vehicle..."
+    var entries = [];
+    var termPattern = /(?:^|\.\s+)([A-Z][A-Za-z\/\-]+(?:\s+[A-Z][A-Za-z\/\-]+)*(?:\s*\([^)]+\))?)\s+/g;
+    var parts = combined.split(termPattern);
+
+    // If splitting produced meaningful pairs
+    if (parts.length >= 3) {
+      for (var i = 1; i < parts.length; i += 2) {
+        var term = (parts[i] || '').trim();
+        var def = (parts[i + 1] || '').trim().replace(/\.\s*$/, '');
+        if (term && def && def.length > 10) {
+          entries.push({ term: term, definition: def });
+        }
+      }
+    }
+
+    return entries.length >= 3 ? entries : null;
+  }
+
   function buildSectionsData(coursePlan, images) {
     return coursePlan.sections.map(function (section) {
+      var isGlossary = /glossary/i.test(section.title);
+
       var sectionData = {
         id: section.id,
-        type: section.type,
+        type: isGlossary ? 'glossary' : section.type,
         title: section.title,
         slides: section.slides.map(function (slide) {
           return buildSlideData(slide, images, coursePlan);
         })
       };
+
+      // Parse glossary entries from text content
+      if (isGlossary && sectionData.slides.length > 0) {
+        var glossarySlide = sectionData.slides[0];
+        var allTexts = (glossarySlide.texts || []);
+        var parsed = parseGlossaryEntries(allTexts);
+        if (parsed) {
+          sectionData.glossaryEntries = parsed;
+        }
+      }
 
       // For assessment sections, collect ALL quiz questions from all slides
       // into a single array so the app can present one unified assessment
