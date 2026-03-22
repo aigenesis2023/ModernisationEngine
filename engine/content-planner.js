@@ -537,14 +537,25 @@ window.ContentPlanner = (function () {
       }
 
       if (el.type === 'image' && el.assetId !== -1) {
-        plan.content.images.push({
-          assetId: el.assetId,
-          originalPath: el.originalPath,
-          altText: el.altText,
-          role: el.instructionalRole || 'content',
-          width: el.width,
-          height: el.height
-        });
+        var imgRole = el.instructionalRole || 'content';
+
+        // Skip decorative and icon images — they're UI chrome, not course content.
+        // These are universal Storyline artefacts: gradient overlays, shape fills,
+        // navigation markers, and tiny decorative elements.
+        if (imgRole === 'decorative' || imgRole === 'icon') {
+          // Skip — don't include in output
+        } else {
+          plan.content.images.push({
+            assetId: el.assetId,
+            originalPath: el.originalPath,
+            altText: el.altText,
+            role: imgRole,
+            width: el.width,
+            height: el.height,
+            originalWidth: el.originalWidth,
+            originalHeight: el.originalHeight
+          });
+        }
       }
 
       if (el.type === 'video') {

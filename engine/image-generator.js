@@ -117,6 +117,7 @@ window.ImageGenerator = (function () {
             assetId: el.assetId,
             altText: el.altText,
             role: el.instructionalRole,
+            originalPath: el.originalPath || '',
             slideTitle: slide.title,
             slideTexts: slideTexts,
             width: Math.min(el.width || 960, 1280),
@@ -136,6 +137,7 @@ window.ImageGenerator = (function () {
               assetId: el.assetId,
               altText: el.altText,
               role: el.instructionalRole,
+              originalPath: el.originalPath || '',
               slideTitle: layer.name || slide.title,
               slideTexts: layerTexts,
               width: Math.min(el.width || 960, 1280),
@@ -183,18 +185,35 @@ window.ImageGenerator = (function () {
         });
         log('  Generated successfully.');
       } catch (err) {
-        log('  Failed: ' + err.message);
-        entries.push({
-          originalAssetId: task.assetId,
-          status: 'failed',
-          error: err.message,
-          prompt: prompt,
-        });
+        // Fallback: use original SCORM image when AI generation fails.
+        // Background images work well as section backgrounds or hero images.
+        // Content images can be displayed inline.
+        if (task.originalPath) {
+          log('    Using original image as fallback: ' + task.originalPath);
+          entries.push({
+            originalAssetId: task.assetId,
+            status: 'original',
+            generatedPath: 'assets/images/' + task.originalPath.split('/').pop(),
+            originalPath: task.originalPath,
+            role: task.role,
+            prompt: prompt,
+          });
+        } else {
+          log('    Failed: ' + err.message);
+          entries.push({
+            originalAssetId: task.assetId,
+            status: 'failed',
+            error: err.message,
+            prompt: prompt,
+          });
+        }
       }
     }
 
     var successCount = entries.filter(function (e) { return e.status === 'generated'; }).length;
-    log(successCount + '/' + tasks.length + ' images generated successfully.');
+    var fallbackCount = entries.filter(function (e) { return e.status === 'original'; }).length;
+    var failCount = entries.filter(function (e) { return e.status === 'failed'; }).length;
+    log(successCount + ' AI generated, ' + fallbackCount + ' original fallback, ' + failCount + ' failed.');
 
     return { entries: entries };
   }

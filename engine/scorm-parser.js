@@ -168,12 +168,56 @@ window.SCORMParser = (function () {
     return 'body';
   }
 
-  function extractImageRole(altText, width, height, depth) {
+  /**
+   * Classify an image's role based on its characteristics relative to the slide.
+   *
+   * Universal Storyline image roles:
+   * - background: fills most/all of the slide, positioned at origin, low depth
+   *   → these are decorative backgrounds behind text/interactive content
+   * - hero: large prominent image (>50% of slide area) but not quite full-slide
+   *   → feature images meant to be seen alongside content
+   * - content: medium-sized image positioned alongside text
+   *   → diagrams, photos, illustrations that are part of the learning
+   * - icon: small image (<100px in either dimension)
+   *   → navigation markers, decorative icons, badges
+   * - decorative: Shape-based images (Shape*.png pattern) that are UI decoration
+   *   → gradients, overlays, borders, shadows
+   *
+   * @param {string} altText - image alt text or original filename
+   * @param {number} objWidth - display width on slide
+   * @param {number} objHeight - display height on slide
+   * @param {number} depth - z-order depth
+   * @param {number} slideWidth - slide width (typically 960)
+   * @param {number} slideHeight - slide height (typically 540)
+   * @param {string} imgUrl - original image file path
+   */
+  function extractImageRole(altText, objWidth, objHeight, depth, slideWidth, slideHeight, imgUrl) {
+    slideWidth = slideWidth || 960;
+    slideHeight = slideHeight || 540;
     const lower = (altText || '').toLowerCase();
+    const url = (imgUrl || '').toLowerCase();
+
+    // Shape-based decorative images (universal Storyline pattern: "Shape" + hash)
+    if (/\/shape[a-z0-9]+\./i.test(url)) return 'decorative';
+
+    // Logo detection
     if (lower.includes('logo')) return 'logo';
-    if (width >= 900 && height >= 400) return 'hero';
-    if (depth <= 2 && width >= 800) return 'background';
-    if (width < 100 || height < 100) return 'icon';
+
+    // Icon: very small images
+    if (objWidth < 80 || objHeight < 80) return 'icon';
+
+    // Calculate coverage: what % of the slide does this image fill?
+    var slideArea = slideWidth * slideHeight;
+    var imgArea = objWidth * objHeight;
+    var coverage = imgArea / slideArea;
+
+    // Background: covers >85% of slide, positioned near origin, low depth
+    if (coverage > 0.85 && depth <= 3) return 'background';
+
+    // Hero: covers >40% of slide — large feature image
+    if (coverage > 0.4) return 'hero';
+
+    // Content: everything else that's reasonably sized
     return 'content';
   }
 
@@ -292,13 +336,13 @@ window.SCORMParser = (function () {
 
   // ---- Element extraction (recursive) ----
 
-  function parseElements(objects) {
+  function parseElements(objects, slideWidth, slideHeight) {
     const elements = [];
-    extractElementsRecursive(objects, elements);
+    extractElementsRecursive(objects, elements, slideWidth || 960, slideHeight || 540);
     return elements;
   }
 
-  function extractElementsRecursive(objects, elements) {
+  function extractElementsRecursive(objects, elements, slideWidth, slideHeight) {
     for (const obj of objects) {
       const base = {
         id: obj.id || obj.referenceName || '',
@@ -314,9 +358,12 @@ window.SCORMParser = (function () {
 
         if (obj.accType === 'image' && obj.imagelib?.length > 0) {
           const img = obj.imagelib[0];
+          const role = extractImageRole(img.altText || altText, base.width, base.height, base.depth, slideWidth, slideHeight, img.url);
           elements.push({ ...base, type: 'image', assetId: img.assetId ?? -1,
             originalPath: img.url || '', altText: img.altText || altText,
-            instructionalRole: extractImageRole(img.altText || altText, base.width, base.height, base.depth) });
+            instructionalRole: role,
+            originalWidth: img.width || base.width,
+            originalHeight: img.height || base.height });
         } else if (obj.accType === 'button') {
           const label = extracted.text || altText;
           if (label && !isDecorativeShapeName(label)) {
@@ -354,7 +401,7 @@ window.SCORMParser = (function () {
         }
         if (obj.objects) {
           const childElements = [];
-          extractElementsRecursive(obj.objects, childElements);
+          extractElementsRecursive(obj.objects, childElements, slideWidth, slideHeight);
           for (const child of childElements) {
             if (child.type === 'button' && states.length > 0) child.states = states;
             elements.push(child);
@@ -364,18 +411,18 @@ window.SCORMParser = (function () {
         const refName = (obj.referenceName || '').toLowerCase();
         if (refName.includes('scrolling panel')) {
           const children = [];
-          if (obj.objects) extractElementsRecursive(obj.objects, children);
+          if (obj.objects) extractElementsRecursive(obj.objects, children, slideWidth, slideHeight);
           elements.push({ ...base, type: 'interaction', interactionType: 'scrolling-panel',
             label: obj.referenceName || '', children });
         } else if (refName.includes('hotspot')) {
           elements.push({ ...base, type: 'interaction', interactionType: 'hotspot',
             label: obj.referenceName || '', children: [] });
         } else if (obj.objects) {
-          extractElementsRecursive(obj.objects, elements);
+          extractElementsRecursive(obj.objects, elements, slideWidth, slideHeight);
         }
       } else {
         if (obj.kind) unknownKinds.add(obj.kind);
-        if (obj.objects) extractElementsRecursive(obj.objects, elements);
+        if (obj.objects) extractElementsRecursive(obj.objects, elements, slideWidth, slideHeight);
       }
     }
   }
@@ -511,7 +558,9 @@ window.SCORMParser = (function () {
     const layer0 = slideData.slideLayers?.[0];
     const objects = layer0?.objects || [];
     const slideType = detectSlideType(slideData.title, objects, slideNumber);
-    const elements = parseElements(objects);
+    const slideWidth = slideData.width || 960;
+    const slideHeight = slideData.height || 540;
+    const elements = parseElements(objects, slideWidth, slideHeight);
 
     if (slideType === 'quiz') {
       const question = parseQuizQuestion(objects);
@@ -549,7 +598,7 @@ window.SCORMParser = (function () {
 
     const layers = (slideData.slideLayers || []).slice(1).map((layer, i) => ({
       id: layer.id || 'layer_' + (i + 1), name: layer.name || 'Layer ' + (i + 1),
-      elements: parseElements(layer.objects || []),
+      elements: parseElements(layer.objects || [], slideWidth, slideHeight),
       timeline: { durationMs: layer.timeline?.duration || 5000, events: [] },
       audio: extractLayerAudio(layer.objects || []),
       triggers: parseTriggers(layer.timeline, layer.objects || []),
