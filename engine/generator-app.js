@@ -102,9 +102,10 @@ window.GeneratorApp = (function () {
       '      entries.forEach(function(entry) {\n' +
       '        if (entry.isIntersecting) {\n' +
       '          entry.target.classList.add("visible");\n' +
+      '          observer.unobserve(entry.target);\n' +
       '        }\n' +
       '      });\n' +
-      '    }, { threshold: 0.1, rootMargin: "0px 0px -50px 0px" });\n' +
+      '    }, { threshold: 0.05 });\n' +
       '    observer.observe(el);\n' +
       '    return function() { observer.disconnect(); };\n' +
       '  }, []);\n' +
@@ -277,7 +278,7 @@ window.GeneratorApp = (function () {
       '      LOGO_URL ? e("img", { src: LOGO_URL, alt: LOGO_ALT, className: "logo" }) : null,\n' +
       '      e("h1", null, slide.title || COURSE_TITLE),\n' +
       '      slide.subtitle ? e("p", { className: "subtitle" }, slide.subtitle) : null,\n' +
-      '      slide.texts && slide.texts.length > 0 ? e("p", { className: "subtitle" }, slide.texts[0]) : null,\n' +
+      '      slide.texts && slide.texts.length > 0 && slide.texts[0] !== slide.title ? e("p", { className: "subtitle" }, slide.texts[0]) : null,\n' +
       '      e("div", { className: "scroll-indicator" }, e("span", null, "Scroll to begin"), e("span", null, "\\u2193"))\n' +
       '    );\n  }\n\n' +
 
@@ -384,10 +385,13 @@ window.GeneratorApp = (function () {
       '  function renderBentoGrid(slide) {\n' +
       '    return e("div", { className: "bento-grid" },\n' +
       '      slide.layers.map(function(layer, i) {\n' +
+      '        var showName = layer.name && layer.texts && layer.texts.length > 0\n' +
+      '          ? !layer.texts.some(function(t) { return layer.name.indexOf(t.substring(0, 30)) === 0 || t.indexOf(layer.name.replace("...", "")) === 0; })\n' +
+      '          : !!layer.name;\n' +
       '        return e("div", { className: "bento-tile", key: i },\n' +
       '          layer.image ? e("div", { className: "bento-image" },\n' +
       '            e("img", { src: layer.image, alt: layer.name })) : null,\n' +
-      '          e("h3", null, layer.name),\n' +
+      '          showName ? e("h3", null, layer.name) : null,\n' +
       '          layer.texts && layer.texts.map(function(t, j) { return e("p", { key: j }, t); })\n' +
       '        );\n' +
       '      })\n    );\n  }\n\n' +

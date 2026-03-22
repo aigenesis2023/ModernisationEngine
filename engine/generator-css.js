@@ -42,6 +42,23 @@ window.GeneratorCSS = (function () {
     }
   }
 
+  // Parse a size string like "3rem", "16px", or a plain number into a numeric px value
+  function parseSizePx(val, fallback) {
+    if (typeof val === 'number') return val;
+    if (typeof val !== 'string') return fallback || 16;
+    var num = parseFloat(val);
+    if (isNaN(num)) return fallback || 16;
+    if (val.indexOf('rem') !== -1) return Math.round(num * 16);
+    if (val.indexOf('em') !== -1) return Math.round(num * 16);
+    return Math.round(num);
+  }
+
+  // Parse spacing value — could be "1.5rem", "24px", or a number
+  function parseSpacingPx(val) {
+    if (typeof val === 'object' && val !== null) return val.unit || 24;
+    return parseSizePx(val, 24);
+  }
+
   function generateCss(brand) {
     var b = brand.colors;
     var t = brand.typography;
@@ -52,9 +69,16 @@ window.GeneratorCSS = (function () {
     var shadow = cardShadow(brand);
     var btnCss = buttonCss(brand);
 
-    var h1Mobile = Math.round(t.headingSizes.h1 * 0.65);
-    var h2Mobile = Math.round(t.headingSizes.h2 * 0.7);
-    var h3Mobile = Math.round(t.headingSizes.h3 * 0.8);
+    // Normalize sizes to numeric px values
+    var baseSizePx = parseSizePx(t.baseSize, 16);
+    var h1Px = parseSizePx(t.headingSizes.h1, 48);
+    var h2Px = parseSizePx(t.headingSizes.h2, 36);
+    var h3Px = parseSizePx(t.headingSizes.h3, 24);
+    var spacingPx = parseSpacingPx(s.spacing);
+
+    var h1Mobile = Math.round(h1Px * 0.65);
+    var h2Mobile = Math.round(h2Px * 0.7);
+    var h3Mobile = Math.round(h3Px * 0.8);
 
     return (
       // ============ CSS VARIABLES ============
@@ -72,7 +96,7 @@ window.GeneratorCSS = (function () {
       '  --radius: ' + s.borderRadius + ';\n' +
       '  --font-heading: \'' + t.headingFont + '\', system-ui, sans-serif;\n' +
       '  --font-body: \'' + t.bodyFont + '\', system-ui, sans-serif;\n' +
-      '  --spacing: ' + s.spacing.unit + 'px;\n' +
+      '  --spacing: ' + spacingPx + 'px;\n' +
       '  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);\n' +
       '  --content-width: 760px;\n' +
       '  --wide-width: 1080px;\n' +
@@ -81,7 +105,7 @@ window.GeneratorCSS = (function () {
       // ============ RESET & BASE ============
       '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }\n\n' +
       'html { scroll-behavior: smooth; }\n' +
-      'body {\n  font-family: var(--font-body);\n  font-size: ' + t.baseSize + 'px;\n' +
+      'body {\n  font-family: var(--font-body);\n  font-size: ' + baseSizePx + 'px;\n' +
       '  line-height: ' + t.lineHeight + ';\n  color: var(--text);\n  background: var(--bg);\n' +
       '  -webkit-font-smoothing: antialiased;\n}\n\n' +
       '#root { width: 100%; min-height: 100vh; }\n\n' +
@@ -117,8 +141,8 @@ window.GeneratorCSS = (function () {
       '.section-hero::before {\n  content: \'\'; position: absolute; inset: 0;\n' +
       '  background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.1) 0%, transparent 60%);\n}\n' +
       '.section-hero .section-inner { position: relative; z-index: 2; max-width: 720px; padding: calc(var(--spacing) * 2); }\n' +
-      '.section-hero h1 { font-size: ' + Math.round(t.headingSizes.h1 * 0.85) + 'px; color: white; }\n' +
-      '.section-hero .subtitle { font-size: ' + Math.round(t.baseSize * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
+      '.section-hero h1 { font-size: ' + Math.round(h1Px * 0.85) + 'px; color: white; }\n' +
+      '.section-hero .subtitle { font-size: ' + Math.round(baseSizePx * 1.1) + 'px; opacity: 0.85; margin-bottom: calc(var(--spacing) * 3); }\n' +
       '.section-hero .logo { max-width: 160px; max-height: 50px; margin-bottom: calc(var(--spacing) * 2); }\n' +
       '.section-hero .btn { background: white; color: var(--primary); font-weight: 700; }\n' +
       '.section-hero .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.2); }\n\n' +
@@ -140,7 +164,7 @@ window.GeneratorCSS = (function () {
 
       // Narrative text flow
       '.narrative-text {\n  max-width: 680px;\n}\n' +
-      '.narrative-text p {\n  font-size: ' + Math.round(t.baseSize * 1.05) + 'px;\n  line-height: 1.8;\n  color: var(--text);\n}\n\n' +
+      '.narrative-text p {\n  font-size: ' + Math.round(baseSizePx * 1.05) + 'px;\n  line-height: 1.8;\n  color: var(--text);\n}\n\n' +
 
       // Callout box
       '.callout {\n  padding: calc(var(--spacing) * 2);\n  border-left: 4px solid var(--primary);\n' +
@@ -151,7 +175,7 @@ window.GeneratorCSS = (function () {
       '.btn {\n  display: inline-flex; align-items: center; justify-content: center; gap: 8px;\n' +
       '  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 3);\n' +
       '  border: none; border-radius: var(--radius);\n' +
-      '  font-family: var(--font-body); font-size: ' + t.baseSize + 'px; font-weight: 600;\n' +
+      '  font-family: var(--font-body); font-size: ' + baseSizePx + 'px; font-weight: 600;\n' +
       '  cursor: pointer; transition: all var(--transition);\n  text-decoration: none; min-width: 120px;\n' +
       '  -webkit-tap-highlight-color: transparent;\n}\n' +
       '.btn:active { transform: scale(0.97); }\n' +
@@ -185,7 +209,7 @@ window.GeneratorCSS = (function () {
       '.form-group label {\n  display: block; font-weight: 600; margin-bottom: calc(var(--spacing) * 0.5);\n  color: var(--text);\n}\n' +
       '.form-group input, .form-group textarea {\n  width: 100%; padding: calc(var(--spacing) * 1.5);\n' +
       '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
-      '  font-family: var(--font-body); font-size: ' + t.baseSize + 'px;\n' +
+      '  font-family: var(--font-body); font-size: ' + baseSizePx + 'px;\n' +
       '  transition: border-color var(--transition);\n  background: var(--bg); color: var(--text);\n}\n' +
       '.form-group input:focus, .form-group textarea:focus {\n  outline: none; border-color: var(--primary);\n' +
       '  box-shadow: 0 0 0 3px ' + b.primary + '22;\n}\n\n' +
@@ -198,7 +222,7 @@ window.GeneratorCSS = (function () {
       '.accordion-trigger {\n  width: 100%; display: flex; justify-content: space-between; align-items: center;\n' +
       '  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);\n' +
       '  background: var(--surface); border: none; cursor: pointer;\n' +
-      '  font-family: var(--font-heading); font-size: ' + Math.round(t.baseSize * 1.05) + 'px;\n' +
+      '  font-family: var(--font-heading); font-size: ' + Math.round(baseSizePx * 1.05) + 'px;\n' +
       '  font-weight: 600; color: var(--text); text-align: left;\n' +
       '  transition: all var(--transition);\n  -webkit-tap-highlight-color: transparent;\n}\n' +
       '.accordion-trigger:hover { color: var(--primary); }\n' +
@@ -220,7 +244,7 @@ window.GeneratorCSS = (function () {
       '.tile-thumb img { width: 100%; height: 100%; object-fit: cover; }\n' +
       '.tile-label {\n  flex: 1; display: flex; justify-content: space-between; align-items: center;\n' +
       '  padding: var(--spacing) calc(var(--spacing) * 1.5);\n' +
-      '  font-weight: 600; font-size: ' + Math.round(t.baseSize * 0.95) + 'px;\n}\n' +
+      '  font-weight: 600; font-size: ' + Math.round(baseSizePx * 0.95) + 'px;\n}\n' +
       '.tile-arrow { color: var(--primary); font-size: 18px; }\n\n' +
 
       '.modal-overlay {\n  position: fixed; inset: 0; z-index: 1000;\n' +
@@ -260,7 +284,7 @@ window.GeneratorCSS = (function () {
 
       // ============ BRANCHING ============
       '.branch-container { text-align: center; width: 100%; max-width: var(--content-width); margin: 0 auto; }\n' +
-      '.greeting { font-size: ' + Math.round(t.baseSize * 1.1) + 'px; margin-bottom: calc(var(--spacing) * 2); }\n' +
+      '.greeting { font-size: ' + Math.round(baseSizePx * 1.1) + 'px; margin-bottom: calc(var(--spacing) * 2); }\n' +
       '.branch-grid {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: calc(var(--spacing) * 1.5);\n  margin-top: calc(var(--spacing) * 2);\n}\n' +
       '.branch-option {\n  padding: calc(var(--spacing) * 2.5) calc(var(--spacing) * 3);\n' +
       '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
@@ -281,7 +305,7 @@ window.GeneratorCSS = (function () {
       '.quiz-choice {\n  display: flex; align-items: center; gap: calc(var(--spacing) * 1.5);\n' +
       '  padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);\n' +
       '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
-      '  cursor: pointer; transition: all var(--transition);\n  background: var(--surface); font-size: ' + t.baseSize + 'px;\n' +
+      '  cursor: pointer; transition: all var(--transition);\n  background: var(--surface); font-size: ' + baseSizePx + 'px;\n' +
       '  text-align: left; -webkit-tap-highlight-color: transparent;\n}\n' +
       '.quiz-choice:hover { border-color: var(--primary); }\n' +
       '.quiz-choice.selected { border-color: var(--primary); background: ' + b.primary + '11; }\n' +
@@ -302,7 +326,7 @@ window.GeneratorCSS = (function () {
       '.quiz-text-entry { width: 100%; max-width: 560px; margin: var(--spacing) auto; }\n' +
       '.quiz-text-entry input, .quiz-text-entry textarea {\n  width: 100%; padding: calc(var(--spacing) * 1.5);\n' +
       '  border: 2px solid ' + border + '; border-radius: var(--radius);\n' +
-      '  font-family: var(--font-body); font-size: ' + t.baseSize + 'px;\n' +
+      '  font-family: var(--font-body); font-size: ' + baseSizePx + 'px;\n' +
       '  background: var(--bg); color: var(--text);\n  transition: border-color var(--transition);\n}\n' +
       '.quiz-text-entry input:focus, .quiz-text-entry textarea:focus {\n  outline: none; border-color: var(--primary);\n' +
       '  box-shadow: 0 0 0 3px ' + b.primary + '22;\n}\n\n' +
@@ -321,8 +345,9 @@ window.GeneratorCSS = (function () {
       '@keyframes scaleIn {\n  from { transform: scale(0); opacity: 0; }\n  to { transform: scale(1); opacity: 1; }\n}\n\n' +
 
       // ============ SCROLL ANIMATIONS ============
-      '.scroll-reveal {\n  opacity: 0; transform: translateY(30px);\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n' +
-      '.scroll-reveal.visible {\n  opacity: 1; transform: translateY(0);\n}\n\n' +
+      '.scroll-reveal {\n  transition: opacity 0.6s ease, transform 0.6s ease;\n}\n' +
+      '.scroll-reveal.visible {\n  animation: revealIn 0.6s ease both;\n}\n' +
+      '@keyframes revealIn {\n  from { opacity: 0.3; transform: translateY(20px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n\n' +
 
       // ============ SECTION TABLE OF CONTENTS ============
       '.toc {\n  position: fixed; right: calc(var(--spacing) * 2); top: 50%;\n  transform: translateY(-50%); z-index: 500;\n  display: none;\n}\n' +
@@ -334,16 +359,16 @@ window.GeneratorCSS = (function () {
       // ============ DESKTOP (>=768px) ============
       '@media (min-width: 768px) {\n' +
       '  .section { padding: calc(var(--spacing) * 8) calc(var(--spacing) * 4); }\n' +
-      '  h1 { font-size: ' + t.headingSizes.h1 + 'px; }\n' +
-      '  h2 { font-size: ' + t.headingSizes.h2 + 'px; }\n' +
-      '  h3 { font-size: ' + t.headingSizes.h3 + 'px; }\n' +
-      '  .section-hero h1 { font-size: ' + Math.round(t.headingSizes.h1 * 1.3) + 'px; }\n' +
+      '  h1 { font-size: ' + h1Px + 'px; }\n' +
+      '  h2 { font-size: ' + h2Px + 'px; }\n' +
+      '  h3 { font-size: ' + h3Px + 'px; }\n' +
+      '  .section-hero h1 { font-size: ' + Math.round(h1Px * 1.3) + 'px; }\n' +
       '  .section-hero .logo { max-width: 200px; max-height: 60px; }\n' +
       '  .card { padding: calc(var(--spacing) * 3); }\n' +
       '  .btn { padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 4); min-width: 140px; }\n' +
       '  .score-circle { width: 160px; height: 160px; }\n' +
       '  .score-circle .score-value { font-size: 48px; }\n' +
-      '  .quiz-question { font-size: ' + t.headingSizes.h3 + 'px; }\n' +
+      '  .quiz-question { font-size: ' + h3Px + 'px; }\n' +
       '  .bento-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }\n' +
       '  .branch-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }\n' +
       '  .modal-triggers { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }\n' +

@@ -201,7 +201,16 @@ window.ContentPlanner = (function () {
       if (slide.type === 'title') shouldBreak = true;
       else if (slide.type === 'results') shouldBreak = true;
       else if (slide.type === 'branching') shouldBreak = true;
+      else if (slide.type === 'form') shouldBreak = true;
+      else if (slide.type === 'quiz') shouldBreak = true;
       else if (!currentSection) shouldBreak = true;
+
+      // Also break when the slide type significantly differs from the current section
+      // (e.g., objectives after a title, content after form)
+      if (currentSection && !shouldBreak) {
+        var prevType = currentSection.slides[currentSection.slides.length - 1].type;
+        if (prevType === 'title' && slide.type !== 'title') shouldBreak = true;
+      }
 
       // Also break if there's a big topic shift (title keywords change significantly)
       if (currentSection && currentSection.slides.length >= 5 && slide.type === 'content') {
