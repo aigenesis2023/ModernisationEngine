@@ -74,10 +74,21 @@ window.GeneratorData = (function () {
             var layerImg = l.elements.find(function (el) {
               return el.type === 'image' && ['hero', 'content'].includes(el.instructionalRole);
             });
+            var layerImgPath;
+            if (layerImg) {
+              var layerGenerated = images && images.entries
+                ? images.entries.find(function (e) { return e.originalAssetId === layerImg.assetId && e.status === 'generated'; })
+                : null;
+              if (layerGenerated && layerGenerated.generatedPath) {
+                layerImgPath = layerGenerated.generatedPath;
+              } else {
+                layerImgPath = 'assets/images/' + (layerImg.originalPath || '').split('/').pop();
+              }
+            }
             return {
               name: l.name,
               texts: layerTexts,
-              image: layerImg ? 'assets/images/' + (layerImg.originalPath || '').split('/').pop() : undefined,
+              image: layerImgPath,
             };
           })
           .filter(function (l) { return l.texts.length > 0 || l.image; });
