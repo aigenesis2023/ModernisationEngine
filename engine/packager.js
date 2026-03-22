@@ -67,7 +67,11 @@ window.Packager = (function () {
     var seenMedia = new Set();
     for (var [path, file] of fileMap) {
       var lower = path.toLowerCase();
-      var isAssetDir = lower.includes('story_content') || lower.includes('html5');
+      // Storyline exports assets in multiple directories:
+      // - story_content/ — images, audio, video, fonts
+      // - html5/ — CSS, scripts, fonts
+      // - mobile/ — mobile-optimized images (often used for backgrounds)
+      var isAssetDir = lower.includes('story_content') || lower.includes('html5') || lower.includes('mobile');
       if (!isAssetDir) continue;
 
       var filename = path.split('/').pop();
