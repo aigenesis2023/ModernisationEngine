@@ -553,6 +553,9 @@ window.SCORMParser = (function () {
       timeline: { durationMs: layer.timeline?.duration || 5000, events: [] },
       audio: extractLayerAudio(layer.objects || []),
       triggers: parseTriggers(layer.timeline, layer.objects || []),
+      // Storyline layer properties that inform presentation
+      isModal: layer.modal || false,
+      pausesParent: layer.pauseParent || false,
     }));
 
     return { id: slideId, title: slideData.title, type: slideType, slideNumber,
@@ -714,10 +717,21 @@ window.SCORMParser = (function () {
     // Build navigation map
     const navigation = buildNavigationMap(data.slideMap, data.scenes || []);
 
-    // Parse main slides
+    // Filter content scenes using isMessageScene flag (universal in all Storyline exports)
+    // Message scenes contain system dialogs (resume prompts, error messages), not course content
+    const contentScenes = (data.scenes || []).filter(s => !s.isMessageScene);
+    const contentSceneIds = new Set(contentScenes.map(s => s.id || ''));
+
+    // Parse main slides — filter by content scenes, not by ID pattern matching
     const slideRefs = data.slideMap?.slideRefs || [];
-    const mainSlideRefs = slideRefs.filter(ref =>
-      ref.type === 'slide' && !ref.id.includes('Prompt') && !ref.id.includes('Msg'));
+    const mainSlideRefs = slideRefs.filter(ref => {
+      if (ref.type !== 'slide') return false;
+      // Use scene ID from the slide ref (format: sceneId.slideId)
+      const sceneId = ref.id.includes('.') ? ref.id.split('.')[0] : '';
+      // If we have scene data, use isMessageScene flag; otherwise fall back to ID check
+      if (contentSceneIds.size > 0 && sceneId) return contentSceneIds.has(sceneId);
+      return !ref.id.includes('Prompt') && !ref.id.includes('Msg');
+    });
 
     const slides = mainSlideRefs.map((ref, index) => {
       const slideId = ref.id.split('.').pop() || ref.id;
@@ -740,13 +754,51 @@ window.SCORMParser = (function () {
     // Extraction report
     const extractionReport = buildExtractionReport(slides, variables);
 
+    // Extract scoring configuration from data.js (more authoritative than manifest)
+    // scorings[] contains the actual pass/fail thresholds and status labels
+    const scorings = (data.scorings || []).map(s => ({
+      type: s.type || 'quiz',
+      passPercent: s.passPercent || manifest.masteryScore || 80,
+      passStatus: s.passStatus || 'pass',
+      failStatus: s.failStatus || 'incomplete',
+      viewThreshold: s.viewThreshold || 0,
+    }));
+    const primaryScoring = scorings[0] || {};
+    const masteryScore = primaryScoring.passPercent || manifest.masteryScore || 80;
+
+    // Extract quiz metadata from quizzes[] (survey flag, scoring type)
+    const quizMeta = (data.quizzes || []).map(q => ({
+      id: q.id,
+      title: q.lmstext || '',
+      isSurvey: q.issurvey || false,
+      passPercent: q.passPercent || masteryScore,
+      scoreType: q.scoretype || 'all',
+      submitUnanswered: q.submitunanswered || 'viewed',
+    }));
+
+    // Extract project color palette from colorGroups[] (fallback for brand scraping)
+    const projectColors = (data.colorGroups || []).reduce(function (colors, group) {
+      if (group.colors) {
+        group.colors.forEach(function (c) {
+          if (c.name && c.val) colors[c.name] = c.val;
+        });
+      }
+      return colors;
+    }, {});
+
+    // Extract font library
+    const projectFonts = (data.fontLib || []).map(f => f.name || f.family || '').filter(f => f);
+
     const meta = { title: manifest.title, courseId: manifest.courseId, scormVersion: manifest.scormVersion,
-      masteryScore: manifest.masteryScore, totalSlides: slides.length, totalAudioDurationMs, totalVideoDurationMs };
+      masteryScore: masteryScore, totalSlides: slides.length, totalAudioDurationMs, totalVideoDurationMs,
+      passStatus: primaryScoring.passStatus, failStatus: primaryScoring.failStatus };
 
     log('Extracted: ' + slides.length + ' slides, ' + questionBanks.length + ' question banks');
     log('Coverage: ' + extractionReport.coveragePercent + '%');
+    if (quizMeta.some(q => q.isSurvey)) log('  Contains survey questions (ungraded)');
 
-    return { meta, slides, questionBanks, assets, navigation, variables, extractionReport };
+    return { meta, slides, questionBanks, assets, navigation, variables, extractionReport,
+      quizMeta, projectColors, projectFonts, scorings };
   }
 
   return { extractCourse };

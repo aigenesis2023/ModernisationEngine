@@ -51,7 +51,7 @@ window.GeneratorApp = (function () {
       '    if (completed) return; completed = true;\n' +
       '    if (typeof score === "number") {\n' +
       '      setScore(score);\n' +
-      '      setValue("cmi.core.lesson_status", score >= (passingScore || 80) ? "passed" : "failed");\n' +
+      '      setValue("cmi.core.lesson_status", score >= (passingScore || 80) ? PASS_STATUS : FAIL_STATUS);\n' +
       '    } else { setValue("cmi.core.lesson_status", "completed"); }\n' +
       '  }\n' +
       '  function finish() { if (api && initialized) api.LMSFinish(""); }\n' +
@@ -75,6 +75,8 @@ window.GeneratorApp = (function () {
       'var SECTIONS = ' + sectionsData + ';\n' +
       'var QUIZ_BANKS = ' + quizData + ';\n' +
       'var MASTERY = ' + masteryScore + ';\n' +
+      'var PASS_STATUS = ' + JSON.stringify(coursePlan.meta.passStatus || 'passed') + ';\n' +
+      'var FAIL_STATUS = ' + JSON.stringify(coursePlan.meta.failStatus || 'failed') + ';\n' +
       'var COURSE_TITLE = ' + JSON.stringify(courseTitle) + ';\n' +
       'var LOGO_URL = ' + JSON.stringify(logoUrl) + ';\n' +
       'var LOGO_ALT = ' + JSON.stringify(logoAlt) + ';\n\n' +

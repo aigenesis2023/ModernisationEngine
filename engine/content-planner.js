@@ -538,6 +538,9 @@ window.ContentPlanner = (function () {
       audio: audio,
       interactions: interactions,
       triggers: layerTriggers,
+      // Pass through Storyline's structural hints for presentation
+      isModal: layer.isModal || false,
+      pausesParent: layer.pausesParent || false,
       hasContent: texts.length > 0 || images.length > 0 || videos.length > 0 || interactions.length > 0
     };
   }
@@ -598,7 +601,13 @@ window.ContentPlanner = (function () {
         return Math.max(max, l.texts.reduce(function (s, t) { return s + t.content.length; }, 0));
       }, 0);
 
-      if (plan.layers.length >= 3 && plan.layers.length <= 6 && avgTextLen < 100 && maxTextLen < 150) {
+      // Check if Storyline explicitly marks any layers as modal
+      var hasModalLayers = plan.layers.some(function (l) { return l.isModal; });
+
+      if (hasModalLayers) {
+        // Storyline's modal flag = author intended these as overlay panels
+        plan.interactionType = 'modal';
+      } else if (plan.layers.length >= 3 && plan.layers.length <= 6 && avgTextLen < 100 && maxTextLen < 150) {
         plan.interactionType = 'bento';
       } else if (layerHasImages && plan.layers.length <= 8) {
         plan.interactionType = 'modal';
