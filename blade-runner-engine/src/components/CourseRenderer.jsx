@@ -79,18 +79,25 @@ function ArticleSection({ article, blocks, components, index }) {
       className={`relative ${article._classes || ''}`}
       style={{
         background: sectionBg,
-        paddingTop: index === 0 ? '48px' : '56px',
-        paddingBottom: '56px',
+        paddingTop: index === 0 ? 'calc(var(--spacing-section, 56px) * 0.85)' : 'var(--spacing-section, 56px)',
+        paddingBottom: 'var(--spacing-section, 56px)',
       }}
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
       transition={{ duration: 0.6 }}
     >
-      <div className="max-w-[860px] mx-auto px-6 md:px-10">
+      <div
+        className="mx-auto"
+        style={{
+          maxWidth: 'var(--content-max-width, 860px)',
+          paddingLeft: 'var(--spacing-content-padding, 24px)',
+          paddingRight: 'var(--spacing-content-padding, 24px)',
+        }}
+      >
         {/* Section title with accent bar */}
         {article.displayTitle && (
           <motion.div
-            className="mb-8"
+            style={{ marginBottom: 'var(--spacing-section-heading, 28px)' }}
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.15 }}
@@ -115,7 +122,7 @@ function ArticleSection({ article, blocks, components, index }) {
         )}
 
         {/* Blocks within this article */}
-        <div className="space-y-8">
+        <div className="flex flex-col" style={{ gap: 'var(--spacing-block-gap, 32px)' }}>
           {blocks.map((block, bi) => (
             <BlockRow
               key={block._id}
@@ -154,7 +161,7 @@ function BlockRow({ block, components, blockIndex }) {
       ref={ref}
       data-block-id={block._id}
       className={`
-        ${isSelfStyled ? '' : 'rounded-2xl p-6 md:p-8'}
+        ${isSelfStyled ? '' : 'rounded-2xl'}
         ${isSplit ? 'grid grid-cols-1 md:grid-cols-2 gap-8 items-start' : ''}
       `}
       style={isSelfStyled ? {} : {
@@ -163,6 +170,7 @@ function BlockRow({ block, components, blockIndex }) {
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         boxShadow: 'var(--ui-card-shadow, 0 4px 16px rgba(0, 0, 0, 0.08))',
+        padding: 'var(--spacing-block-padding, 24px)',
       }}
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}

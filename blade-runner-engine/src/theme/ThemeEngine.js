@@ -125,6 +125,27 @@ export function applyBrand(brand) {
     root.style.setProperty('--ui-radius-lg', Math.min(32, r * 1.5) + 'px');
   }
 
+  // Spacing — derived from brand spacing unit (scraped from the brand site)
+  // These drive all layout spacing in CourseRenderer so different brand
+  // densities (compact corporate vs airy creative) produce different layouts.
+  const unit = s.spacing?.unit || 8;
+  const sectionSpacing = s.spacing?.section || unit * 7;
+  const elementSpacing = s.spacing?.element || unit * 2;
+
+  root.style.setProperty('--spacing-unit', unit + 'px');
+  root.style.setProperty('--spacing-section', sectionSpacing + 'px');
+  root.style.setProperty('--spacing-section-heading', Math.round(sectionSpacing * 0.5) + 'px');
+  root.style.setProperty('--spacing-block-gap', Math.round(sectionSpacing * 0.45) + 'px');
+  root.style.setProperty('--spacing-block-padding', Math.max(16, unit * 3) + 'px');
+  root.style.setProperty('--spacing-content-padding', Math.max(16, unit * 2.5) + 'px');
+
+  // Content max-width adapts to brand mood:
+  // corporate/technical = narrower (better for dense text)
+  // creative/friendly = wider (more visual breathing room)
+  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 800 :
+                   s.mood === 'creative' || s.mood === 'friendly' ? 920 : 860;
+  root.style.setProperty('--content-max-width', maxWidth + 'px');
+
   // Theme-aware glass, shadows, and headings
   const themeVars = computeThemeVars(brand);
   for (const [key, value] of Object.entries(themeVars)) {
@@ -186,6 +207,21 @@ export function generateBrandCSS(brand) {
     css += `  --ui-radius-sm: ${Math.max(4, r / 2)}px;\n`;
     css += `  --ui-radius-lg: ${Math.min(32, r * 1.5)}px;\n`;
   }
+
+  // Spacing
+  const unit = s.spacing?.unit || 8;
+  const sectionSpacing = s.spacing?.section || unit * 7;
+  const elementSpacing = s.spacing?.element || unit * 2;
+  css += `  --spacing-unit: ${unit}px;\n`;
+  css += `  --spacing-section: ${sectionSpacing}px;\n`;
+  css += `  --spacing-section-heading: ${Math.round(sectionSpacing * 0.5)}px;\n`;
+  css += `  --spacing-block-gap: ${Math.round(sectionSpacing * 0.45)}px;\n`;
+  css += `  --spacing-block-padding: ${Math.max(16, unit * 3)}px;\n`;
+  css += `  --spacing-content-padding: ${Math.max(16, unit * 2.5)}px;\n`;
+
+  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 800 :
+                   s.mood === 'creative' || s.mood === 'friendly' ? 920 : 860;
+  css += `  --content-max-width: ${maxWidth}px;\n`;
 
   // Theme-aware variables — critical for the static build
   const themeVars = computeThemeVars(brand);
