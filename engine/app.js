@@ -220,14 +220,32 @@
       }
       // Ensure brand has minimum required structure
       if (!brand || !brand.colors) {
-        log('Using fallback brand profile', 'info');
-        brand = {
-          colors: { primary: '#0ea5e9', secondary: '#6366f1', accent: '#22d3ee',
-            background: '#0a0a12', surface: '#12121e', text: '#e8e8f0',
-            textMuted: '#6b6b80', gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)' },
-          typography: { headingFont: 'Inter', bodyFont: 'Inter' },
-          style: { borderRadius: '16px', mood: 'dark' }
-        };
+        // Try to use SCORM project colors/fonts as fallback before generic defaults
+        var scormColors = course.projectColors || {};
+        var scormFonts = course.projectFonts || [];
+        var hasSCORMColors = scormColors.AccentColor || scormColors.PrimaryColor;
+
+        if (hasSCORMColors) {
+          log('Using SCORM project colors as brand fallback', 'info');
+          var primary = scormColors.AccentColor || scormColors.PrimaryColor || '#0ea5e9';
+          brand = {
+            colors: { primary: primary, secondary: scormColors.PrimaryColor || primary,
+              accent: scormColors.AccentColor || primary,
+              background: '#0a0a12', surface: '#12121e', text: '#e8e8f0',
+              textMuted: '#6b6b80', gradient: 'linear-gradient(135deg, ' + primary + ', ' + (scormColors.PrimaryColor || primary) + ')' },
+            typography: { headingFont: scormFonts[0] || 'Inter', bodyFont: scormFonts[1] || scormFonts[0] || 'Inter' },
+            style: { borderRadius: '16px', mood: 'dark' }
+          };
+        } else {
+          log('Using generic fallback brand profile', 'info');
+          brand = {
+            colors: { primary: '#0ea5e9', secondary: '#6366f1', accent: '#22d3ee',
+              background: '#0a0a12', surface: '#12121e', text: '#e8e8f0',
+              textMuted: '#6b6b80', gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)' },
+            typography: { headingFont: 'Inter', bodyFont: 'Inter' },
+            style: { borderRadius: '16px', mood: 'dark' }
+          };
+        }
       }
       setProgress(55);
       log('Brand extraction complete.', 'success');

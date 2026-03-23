@@ -42,10 +42,9 @@ export function applyBrand(brand) {
     root.style.setProperty('--brand-glow', `0 0 30px rgba(${r}, ${g}, ${b}, 0.15)`);
   }
 
-  // Typography
+  // Typography — fonts
   if (t.headingFont) {
     root.style.setProperty('--font-heading', `'${t.headingFont}', 'Inter', system-ui, sans-serif`);
-    // Inject font import if available
     if (t.fontImportUrl && !document.querySelector(`link[href*="${t.headingFont}"]`)) {
       const link = document.createElement('link');
       link.rel = 'stylesheet';
@@ -56,6 +55,19 @@ export function applyBrand(brand) {
   if (t.bodyFont) {
     root.style.setProperty('--font-body', `'${t.bodyFont}', 'Inter', system-ui, sans-serif`);
   }
+
+  // Typography — sizes, weights, line-height (scraped from brand site)
+  if (t.baseSize) {
+    root.style.setProperty('--font-base-size', t.baseSize + 'px');
+  }
+  if (t.headingSizes) {
+    if (t.headingSizes.h1) root.style.setProperty('--font-h1', t.headingSizes.h1 + 'px');
+    if (t.headingSizes.h2) root.style.setProperty('--font-h2', t.headingSizes.h2 + 'px');
+    if (t.headingSizes.h3) root.style.setProperty('--font-h3', t.headingSizes.h3 + 'px');
+  }
+  if (t.headingWeight) root.style.setProperty('--font-heading-weight', t.headingWeight);
+  if (t.bodyWeight) root.style.setProperty('--font-body-weight', t.bodyWeight);
+  if (t.lineHeight) root.style.setProperty('--font-line-height', t.lineHeight);
 
   // UI Style
   if (s.borderRadius) {

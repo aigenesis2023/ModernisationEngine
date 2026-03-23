@@ -174,8 +174,9 @@ function BlockRow({ block, components, blockIndex }) {
 
 // Main Course Renderer
 export default function CourseRenderer() {
-  const { course, contentObjects, articles, blocks, components } = useCourseStore();
+  const { course, contentObjects, articles, blocks, components, brand } = useCourseStore();
   const setScrollProgress = useCourseStore((s) => s.setScrollProgress);
+  const logo = brand?.logo;
 
   // Track scroll progress
   useEffect(() => {
@@ -218,6 +219,15 @@ export default function CourseRenderer() {
           style={{ background: 'var(--brand-surface)' }}
         >
           <div className="max-w-[860px] mx-auto">
+            {logo?.url && (
+              <img
+                src={logo.url}
+                alt={logo.alt || 'Logo'}
+                className="mx-auto mb-8"
+                style={{ maxHeight: '60px', maxWidth: '200px', objectFit: 'contain' }}
+                onError={(e) => { e.target.style.display = 'none'; }}
+              />
+            )}
             <h1
               className="text-4xl md:text-6xl font-bold tracking-tight mb-3"
               style={{
@@ -261,6 +271,15 @@ export default function CourseRenderer() {
           borderTop: '1px solid var(--ui-glass-border)',
         }}
       >
+        {logo?.url && (
+          <img
+            src={logo.url}
+            alt={logo.alt || 'Logo'}
+            className="mx-auto mb-6 opacity-60"
+            style={{ maxHeight: '40px', maxWidth: '160px', objectFit: 'contain' }}
+            onError={(e) => { e.target.style.display = 'none'; }}
+          />
+        )}
         <p>Modernised with the Blade Runner Engine</p>
       </footer>
     </div>

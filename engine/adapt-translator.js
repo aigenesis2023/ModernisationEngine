@@ -301,7 +301,27 @@ window.AdaptTranslator = (function () {
     });
 
     // Determine component type based on presentation and content
-    if (presentation === 'hero' || section.type === 'hero') {
+    if (presentation === 'results' || section.type === 'results') {
+      // Results/score slide — render as styled text with score placeholder
+      var resultsTitle = headings[0] || slide.originalTitle || 'Your Results';
+      var resultsBody = textsToBody(allTexts);
+      if (!resultsBody) {
+        resultsBody = '<p>Your score will be displayed here when you complete the assessment.</p>';
+      }
+      var compId = idManager.nextComponent(blockId);
+      components.push({
+        _id: compId,
+        _parentId: blockId,
+        _type: 'component',
+        _component: 'text',
+        _classes: 'results-display',
+        _layout: 'full',
+        title: resultsTitle,
+        displayTitle: resultsTitle,
+        body: resultsBody,
+        instruction: ''
+      });
+    } else if (presentation === 'hero' || section.type === 'hero') {
       // Hero: full-viewport splash with animated title and optional background image
       var compId = idManager.nextComponent(blockId);
       var heroGraphic = contentImages.length > 0 ? {

@@ -26,6 +26,13 @@
   --ui-button-radius: 9999px;
   --font-heading: 'Satoshi', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
+  --font-base-size: 16px;
+  --font-h1: 40px;
+  --font-h2: 32px;
+  --font-h3: 24px;
+  --font-heading-weight: 700;
+  --font-body-weight: 400;
+  --font-line-height: 1.7;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,12 +45,13 @@ html {
 
 body {
   font-family: var(--font-body);
+  font-weight: var(--font-body-weight);
   background: var(--brand-bg);
   color: var(--brand-text);
-  line-height: 1.7;
+  line-height: var(--font-line-height);
   min-height: 100vh;
   overflow-x: hidden;
-  font-size: 16px;
+  font-size: var(--font-base-size);
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
