@@ -36,7 +36,7 @@ export default function GraphicText({ data = {} }) {
   return (
     <motion.section
       ref={ref}
-      className="w-full px-4 sm:px-6 py-12 sm:py-20"
+      className="w-full py-6 sm:py-8"
     >
       <div
         className="max-w-5xl mx-auto rounded-xl border overflow-hidden"
@@ -88,7 +88,7 @@ export default function GraphicText({ data = {} }) {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={imageVariants}
-              className="relative min-h-[200px] sm:min-h-[320px]"
+              className="relative min-h-[250px] sm:min-h-[380px]"
               style={{ order: imageOnLeft ? 1 : 2 }}
             >
               <img

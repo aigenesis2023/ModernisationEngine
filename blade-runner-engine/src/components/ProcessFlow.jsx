@@ -64,7 +64,7 @@ export default function ProcessFlow({ data = {} }) {
   const nodes = data._nodes || [];
 
   return (
-    <section ref={ref} className="w-full px-4 sm:px-6 py-12 sm:py-20">
+    <section ref={ref} className="w-full py-6 sm:py-8">
       <div className="max-w-3xl mx-auto">
         {title && (
           <motion.h2

@@ -42,7 +42,7 @@ export default function VideoTranscript({ data = {} }) {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       variants={fadeInUp}
-      className="w-full flex justify-center px-4 sm:px-6 py-12 sm:py-20"
+      className="w-full flex justify-center py-6 sm:py-8"
     >
       <div
         className="w-full rounded-xl border overflow-hidden"

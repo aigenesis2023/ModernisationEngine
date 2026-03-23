@@ -59,7 +59,7 @@ export default function StatCallout({ data = {} }) {
   const items = data._items || [];
 
   return (
-    <section ref={ref} className="w-full px-4 sm:px-6 py-12 sm:py-20">
+    <section ref={ref} className="w-full py-6 sm:py-8">
       <div className="max-w-5xl mx-auto">
         {title && (
           <motion.h2
@@ -97,7 +97,7 @@ export default function StatCallout({ data = {} }) {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={cardVariants}
-              className="rounded-xl border p-6 sm:p-8 text-center"
+              className="rounded-xl border p-8 sm:p-10 text-center"
               style={{
                 background: 'var(--ui-glass, rgba(255, 255, 255, 0.06))',
                 backdropFilter: 'blur(16px)',
@@ -107,7 +107,7 @@ export default function StatCallout({ data = {} }) {
               }}
             >
               <div
-                className="text-4xl sm:text-5xl font-bold tracking-tight mb-2"
+                className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-3"
                 style={{
                   background: 'var(--brand-gradient, linear-gradient(135deg, var(--brand-primary), var(--brand-accent)))',
                   WebkitBackgroundClip: 'text',
@@ -121,7 +121,7 @@ export default function StatCallout({ data = {} }) {
               </div>
               {item.label && (
                 <div
-                  className="text-sm leading-snug"
+                  className="text-sm sm:text-base leading-snug mt-1"
                   style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))' }}
                 >
                   {item.label}

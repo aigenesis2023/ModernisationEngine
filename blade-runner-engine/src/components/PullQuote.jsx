@@ -17,7 +17,7 @@ export default function PullQuote({ data = {} }) {
       initial={{ opacity: 0, x: -24 }}
       animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -24 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full max-w-3xl mx-auto px-4 py-10 sm:py-16"
+      className="w-full max-w-3xl mx-auto py-6 sm:py-8"
     >
       <div className="relative pl-6 sm:pl-8">
         {/* Accent bar */}

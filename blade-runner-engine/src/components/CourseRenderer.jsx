@@ -79,8 +79,8 @@ function ArticleSection({ article, blocks, components, index }) {
       className={`relative ${article._classes || ''}`}
       style={{
         background: sectionBg,
-        paddingTop: index === 0 ? 'calc(var(--spacing-section, 56px) * 0.85)' : 'var(--spacing-section, 56px)',
-        paddingBottom: 'var(--spacing-section, 56px)',
+        paddingTop: index === 0 ? 'calc(var(--spacing-section, 80px) * 0.85)' : 'var(--spacing-section, 80px)',
+        paddingBottom: 'var(--spacing-section, 80px)',
       }}
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
@@ -89,31 +89,35 @@ function ArticleSection({ article, blocks, components, index }) {
       <div
         className="mx-auto"
         style={{
-          maxWidth: 'var(--content-max-width, 860px)',
-          paddingLeft: 'var(--spacing-content-padding, 24px)',
-          paddingRight: 'var(--spacing-content-padding, 24px)',
+          maxWidth: 'var(--content-max-width, 1000px)',
+          paddingLeft: 'var(--spacing-content-padding, 32px)',
+          paddingRight: 'var(--spacing-content-padding, 32px)',
         }}
       >
         {/* Section title with accent bar */}
         {article.displayTitle && (
           <motion.div
-            style={{ marginBottom: 'var(--spacing-section-heading, 28px)' }}
+            style={{ marginBottom: 'var(--spacing-section-heading, 48px)' }}
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.15 }}
           >
             <div
-              className="w-12 h-1 rounded-full mb-4"
-              style={{ background: 'var(--brand-gradient)' }}
+              className="rounded-full mb-5"
+              style={{
+                width: '48px',
+                height: '4px',
+                background: 'var(--brand-gradient)',
+              }}
             />
             <h2
               className="tracking-tight"
               style={{
                 fontFamily: 'var(--font-heading)',
-                fontSize: 'var(--font-h2, 32px)',
+                fontSize: 'clamp(28px, 4vw, var(--font-h2, 36px))',
                 fontWeight: 'var(--font-heading-weight, 700)',
                 color: 'var(--brand-primary)',
-                lineHeight: 1.2,
+                lineHeight: 1.15,
               }}
             >
               {article.displayTitle}
@@ -122,7 +126,7 @@ function ArticleSection({ article, blocks, components, index }) {
         )}
 
         {/* Blocks within this article */}
-        <div className="flex flex-col" style={{ gap: 'var(--spacing-block-gap, 32px)' }}>
+        <div className="flex flex-col" style={{ gap: 'var(--spacing-block-gap, 40px)' }}>
           {blocks.map((block, bi) => (
             <BlockRow
               key={block._id}
@@ -152,7 +156,7 @@ function BlockRow({ block, components, blockIndex }) {
     'graphic', 'hero', 'graphic-text', 'bento', 'media', 'branching', 'narrative',
     'data-table', 'textinput', 'mcq', 'comparison', 'stat-callout', 'full-bleed',
     'labeled-image', 'image-gallery', 'process-flow', 'flashcard', 'video-transcript',
-    'tabs',
+    'tabs', 'timeline', 'pullquote', 'key-term', 'checklist',
   ];
   const isSelfStyled = components.length === 1 && selfStyledTypes.includes(components[0]._component);
 
@@ -170,7 +174,7 @@ function BlockRow({ block, components, blockIndex }) {
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
         boxShadow: 'var(--ui-card-shadow, 0 4px 16px rgba(0, 0, 0, 0.08))',
-        padding: 'var(--spacing-block-padding, 24px)',
+        padding: 'var(--spacing-block-padding, 32px)',
       }}
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -238,7 +242,7 @@ export default function CourseRenderer() {
           className="pt-20 pb-12 px-6 md:px-10 text-center"
           style={{ background: 'var(--brand-surface)' }}
         >
-          <div className="max-w-[860px] mx-auto">
+          <div className="max-w-[1000px] mx-auto">
             {logo?.url && (
               <img
                 src={logo.url}

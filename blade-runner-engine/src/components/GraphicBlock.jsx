@@ -38,7 +38,7 @@ export default function GraphicBlock({ data = {} }) {
       initial="hidden"
       animate={isInView ? 'visible' : 'hidden'}
       variants={scaleUp}
-      className="w-full px-4 sm:px-6 py-10 sm:py-16 flex flex-col items-center"
+      className="w-full py-6 sm:py-8 flex flex-col items-center"
     >
       {/* Title above image */}
       {title && (

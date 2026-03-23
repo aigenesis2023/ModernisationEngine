@@ -50,8 +50,13 @@ export default function FullBleedImage({ data = {} }) {
         />
       </motion.div>
 
-      {/* Dark overlay */}
-      <div className="absolute inset-0 bg-black/55" />
+      {/* Dark overlay with gradient for text readability */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.6) 100%)',
+        }}
+      />
 
       {/* Content overlay */}
       {(title || body) && (

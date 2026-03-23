@@ -107,11 +107,12 @@ export function applyBrand(brand) {
   }
 
   // Typography — sizes, weights, line-height
-  if (t.baseSize) root.style.setProperty('--font-base-size', t.baseSize + 'px');
+  // Enforce minimum heading sizes for visual hierarchy regardless of brand data
+  if (t.baseSize) root.style.setProperty('--font-base-size', Math.max(15, t.baseSize) + 'px');
   if (t.headingSizes) {
-    if (t.headingSizes.h1) root.style.setProperty('--font-h1', t.headingSizes.h1 + 'px');
-    if (t.headingSizes.h2) root.style.setProperty('--font-h2', t.headingSizes.h2 + 'px');
-    if (t.headingSizes.h3) root.style.setProperty('--font-h3', t.headingSizes.h3 + 'px');
+    if (t.headingSizes.h1) root.style.setProperty('--font-h1', Math.max(40, t.headingSizes.h1) + 'px');
+    if (t.headingSizes.h2) root.style.setProperty('--font-h2', Math.max(32, t.headingSizes.h2) + 'px');
+    if (t.headingSizes.h3) root.style.setProperty('--font-h3', Math.max(22, t.headingSizes.h3) + 'px');
   }
   if (t.headingWeight) root.style.setProperty('--font-heading-weight', t.headingWeight);
   if (t.bodyWeight) root.style.setProperty('--font-body-weight', t.bodyWeight);
@@ -129,21 +130,21 @@ export function applyBrand(brand) {
   // These drive all layout spacing in CourseRenderer so different brand
   // densities (compact corporate vs airy creative) produce different layouts.
   const unit = s.spacing?.unit || 8;
-  const sectionSpacing = s.spacing?.section || unit * 7;
+  const sectionSpacing = Math.max(72, s.spacing?.section || unit * 10);
   const elementSpacing = s.spacing?.element || unit * 2;
 
   root.style.setProperty('--spacing-unit', unit + 'px');
   root.style.setProperty('--spacing-section', sectionSpacing + 'px');
-  root.style.setProperty('--spacing-section-heading', Math.round(sectionSpacing * 0.5) + 'px');
-  root.style.setProperty('--spacing-block-gap', Math.round(sectionSpacing * 0.45) + 'px');
-  root.style.setProperty('--spacing-block-padding', Math.max(16, unit * 3) + 'px');
-  root.style.setProperty('--spacing-content-padding', Math.max(16, unit * 2.5) + 'px');
+  root.style.setProperty('--spacing-section-heading', Math.round(sectionSpacing * 0.6) + 'px');
+  root.style.setProperty('--spacing-block-gap', Math.round(sectionSpacing * 0.5) + 'px');
+  root.style.setProperty('--spacing-block-padding', Math.max(28, unit * 4) + 'px');
+  root.style.setProperty('--spacing-content-padding', Math.max(32, unit * 4) + 'px');
 
   // Content max-width adapts to brand mood:
   // corporate/technical = narrower (better for dense text)
   // creative/friendly = wider (more visual breathing room)
-  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 800 :
-                   s.mood === 'creative' || s.mood === 'friendly' ? 920 : 860;
+  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 960 :
+                   s.mood === 'creative' || s.mood === 'friendly' ? 1060 : 1000;
   root.style.setProperty('--content-max-width', maxWidth + 'px');
 
   // Theme-aware glass, shadows, and headings
@@ -210,17 +211,17 @@ export function generateBrandCSS(brand) {
 
   // Spacing
   const unit = s.spacing?.unit || 8;
-  const sectionSpacing = s.spacing?.section || unit * 7;
+  const sectionSpacing = Math.max(72, s.spacing?.section || unit * 10);
   const elementSpacing = s.spacing?.element || unit * 2;
   css += `  --spacing-unit: ${unit}px;\n`;
   css += `  --spacing-section: ${sectionSpacing}px;\n`;
-  css += `  --spacing-section-heading: ${Math.round(sectionSpacing * 0.5)}px;\n`;
-  css += `  --spacing-block-gap: ${Math.round(sectionSpacing * 0.45)}px;\n`;
-  css += `  --spacing-block-padding: ${Math.max(16, unit * 3)}px;\n`;
-  css += `  --spacing-content-padding: ${Math.max(16, unit * 2.5)}px;\n`;
+  css += `  --spacing-section-heading: ${Math.round(sectionSpacing * 0.6)}px;\n`;
+  css += `  --spacing-block-gap: ${Math.round(sectionSpacing * 0.5)}px;\n`;
+  css += `  --spacing-block-padding: ${Math.max(28, unit * 4)}px;\n`;
+  css += `  --spacing-content-padding: ${Math.max(32, unit * 4)}px;\n`;
 
-  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 800 :
-                   s.mood === 'creative' || s.mood === 'friendly' ? 920 : 860;
+  const maxWidth = s.mood === 'corporate' || s.mood === 'technical' ? 960 :
+                   s.mood === 'creative' || s.mood === 'friendly' ? 1060 : 1000;
   css += `  --content-max-width: ${maxWidth}px;\n`;
 
   // Theme-aware variables — critical for the static build

@@ -31,7 +31,7 @@ function BentoCard({ item, index, isFirst, isInView, totalItems }) {
       className="bento-card group relative rounded-xl border overflow-hidden cursor-default"
       style={{
         gridColumn: shouldSpan ? 'span 2' : 'span 1',
-        minHeight: hasGraphic ? '240px' : 'auto',
+        minHeight: hasGraphic ? '300px' : 'auto',
         background: 'var(--ui-glass, rgba(255, 255, 255, 0.03))',
         backdropFilter: 'blur(16px)',
         WebkitBackdropFilter: 'blur(16px)',
@@ -65,7 +65,7 @@ function BentoCard({ item, index, isFirst, isInView, totalItems }) {
       {/* Content overlay */}
       <div
         className="relative z-10 flex flex-col justify-end h-full p-6 sm:p-8"
-        style={{ minHeight: hasGraphic ? '240px' : undefined }}
+        style={{ minHeight: hasGraphic ? '300px' : undefined }}
       >
         {item.title && (
           <h3
@@ -107,7 +107,7 @@ export default function BentoGrid({ data = {} }) {
   return (
     <motion.section
       ref={ref}
-      className="w-full px-4 sm:px-6 py-12 sm:py-20"
+      className="w-full py-6 sm:py-8"
     >
       <div className="max-w-6xl mx-auto">
         {/* Section heading */}
