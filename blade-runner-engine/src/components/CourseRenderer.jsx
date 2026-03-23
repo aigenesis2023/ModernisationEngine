@@ -40,7 +40,7 @@ function ArticleSection({ article, blocks, components, index }) {
   const isEven = index % 2 === 0;
   const sectionBg = isAssessment || isResults
     ? 'var(--brand-surface, #12121e)'
-    : isEven ? 'transparent' : 'var(--brand-surface, #12121e)';
+    : isEven ? 'transparent' : 'var(--section-alt-bg, var(--brand-surface, #12121e))';
 
   // Hero sections are full-width (no max-width container)
   const isHero = (article._classes || '').includes('section-hero');
@@ -162,7 +162,7 @@ function BlockRow({ block, components, blockIndex }) {
         border: '1px solid var(--ui-glass-border)',
         backdropFilter: 'blur(12px)',
         WebkitBackdropFilter: 'blur(12px)',
-        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
+        boxShadow: 'var(--ui-card-shadow, 0 4px 16px rgba(0, 0, 0, 0.08))',
       }}
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}

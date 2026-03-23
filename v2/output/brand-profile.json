@@ -4,10 +4,10 @@
     "primary": "#6366f1",
     "secondary": "#a855f7",
     "accent": "#3b82f6",
-    "background": "#e0e0ff",
-    "surface": "#f8f9fa",
-    "text": "#1a1a2e",
-    "textMuted": "#424256",
+    "background": "#000000",
+    "surface": "#121212",
+    "text": "#f0f0f0",
+    "textMuted": "#c8c8c8",
     "success": "#10b981",
     "error": "#ef4444",
     "warning": "#f59e0b",
@@ -40,5 +40,5 @@
       "element": 16
     }
   },
-  "scrapedAt": "2026-03-23T13:06:28.961Z"
+  "scrapedAt": "2026-03-23T13:19:57.664Z"
 }

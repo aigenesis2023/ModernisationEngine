@@ -171,10 +171,10 @@ function extractColors(css, doc) {
   const themeColor = doc.querySelector('meta[name="theme-color"]');
   if (themeColor) record(normalizeColor(themeColor.getAttribute('content') || ''), 'theme-color');
 
-  return assignColorRoles(colorMap, css);
+  return assignColorRoles(colorMap, css, doc);
 }
 
-function assignColorRoles(map, cssText) {
+function assignColorRoles(map, cssText, doc) {
   const entries = Array.from(map.values())
     .filter(e => e.normalized.startsWith('#') && e.normalized.length >= 7)
     .sort((a, b) => b.count - a.count);
@@ -194,24 +194,79 @@ function assignColorRoles(map, cssText) {
     .sort((a, b) => getColorSaturation(b.normalized) - getColorSaturation(a.normalized));
   const accent = accentCandidates[0]?.normalized || lighten(primary, 20);
 
-  // Detect background
-  const darkBgCount = entries.filter(e => getColorLuminance(e.normalized) < 80 && e.contexts.some(c => c.includes('background')))
-    .reduce((sum, e) => sum + e.count, 0);
-  const lightBgCount = entries.filter(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('background')))
-    .reduce((sum, e) => sum + e.count, 0);
+  // ─── Background detection ─────────────────────────────────────
+  // PRIORITY 1: Explicit body/html/:root background in CSS
+  // This is the most reliable signal — it's what the browser actually renders.
+  let explicitBodyBg = null;
+  const bodyBgMatch = cssText.match(/(?:body|html)\s*\{[^}]*?background(?:-color)?\s*:\s*([^;}\s]+)/i);
+  if (bodyBgMatch) {
+    const val = bodyBgMatch[1].trim();
+    if (val.startsWith('#') || val.startsWith('rgb')) {
+      explicitBodyBg = normalizeColor(val);
+    }
+  }
 
-  const bgCandidateDark = entries.find(e => getColorLuminance(e.normalized) < 60 && e.contexts.some(c => c.includes('background')));
-  const bgCandidateLight = entries.find(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('background')));
-  const isDark = darkBgCount > lightBgCount && bgCandidateDark;
+  // Also check inline style on body/html elements in the DOM
+  if (!explicitBodyBg && doc) {
+    for (const tag of ['body', 'html']) {
+      const el = doc.querySelector(tag);
+      if (el) {
+        const inlineStyle = el.getAttribute('style') || '';
+        const inlineBgMatch = inlineStyle.match(/background(?:-color)?\s*:\s*([^;]+)/i);
+        if (inlineBgMatch) {
+          const val = inlineBgMatch[1].trim();
+          if (val.startsWith('#') || val.startsWith('rgb')) {
+            explicitBodyBg = normalizeColor(val);
+            break;
+          }
+        }
+      }
+    }
+  }
 
+  // Also check CSS variables on :root that set background
+  if (!explicitBodyBg) {
+    const rootBgVarMatch = cssText.match(/:root\s*\{[^}]*?--[\w-]*(?:bg|background)[\w-]*\s*:\s*([^;}\s]+)/i);
+    if (rootBgVarMatch) {
+      const val = rootBgVarMatch[1].trim();
+      if (val.startsWith('#') || val.startsWith('rgb')) {
+        explicitBodyBg = normalizeColor(val);
+      }
+    }
+  }
+
+  // PRIORITY 2: Fall back to counting background colors in CSS
+  // But only if we didn't find an explicit body/html background
+  let isDark = false;
   let background, surface, textColor;
+
+  if (explicitBodyBg) {
+    // Trust the explicit body background
+    isDark = perceivedLuminance(explicitBodyBg) < 0.45;
+    background = explicitBodyBg;
+  } else {
+    // Count approach as fallback
+    const darkBgCount = entries.filter(e => getColorLuminance(e.normalized) < 80 && e.contexts.some(c => c.includes('background')))
+      .reduce((sum, e) => sum + e.count, 0);
+    const lightBgCount = entries.filter(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('background')))
+      .reduce((sum, e) => sum + e.count, 0);
+
+    const bgCandidateDark = entries.find(e => getColorLuminance(e.normalized) < 60 && e.contexts.some(c => c.includes('background')));
+    const bgCandidateLight = entries.find(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('background')));
+    isDark = darkBgCount > lightBgCount && !!bgCandidateDark;
+    background = isDark ? (bgCandidateDark?.normalized || '#0a0a12') : (bgCandidateLight?.normalized || '#ffffff');
+  }
+
+  // For near-black/near-white backgrounds that isNearBlackOrWhite would have filtered,
+  // we still want to use them — they ARE the real background
   if (isDark) {
-    background = bgCandidateDark.normalized;
-    surface = entries.find(e => getColorLuminance(e.normalized) < 80 && e.normalized !== background)?.normalized || lighten(background, 15);
+    surface = entries.find(e => {
+      const lum = getColorLuminance(e.normalized);
+      return lum > 10 && lum < 80 && e.normalized !== background;
+    })?.normalized || lighten(background, 18);
     textColor = entries.find(e => getColorLuminance(e.normalized) > 200 && e.contexts.some(c => c.includes('color')))?.normalized || '#f0f0f0';
   } else {
-    background = bgCandidateLight?.normalized || '#ffffff';
-    surface = entries.find(e => getColorLuminance(e.normalized) > 230 && e.normalized !== background)?.normalized || '#f8f9fa';
+    surface = entries.find(e => getColorLuminance(e.normalized) > 220 && e.normalized !== background)?.normalized || '#f8f9fa';
     textColor = entries.find(e => getColorLuminance(e.normalized) < 60 && e.contexts.some(c => c.includes('color')))?.normalized || '#1a1a2e';
   }
 
