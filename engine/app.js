@@ -176,21 +176,24 @@
       setProgress(55);
       log('Brand extraction complete.', 'success');
 
-      // Phase 4: AI Image Generation
-      log('Phase 4: Generating AI images...', 'info');
-      var images = await ImageGenerator.generateImages(course, brand, function (msg) { log('  ' + msg); }, fileMap);
+      // Phase 4: Translate to Adapt JSON
+      log('Phase 4: Translating to Adapt format...', 'info');
+      var adaptJson = AdaptTranslator.translate(coursePlan, brand, function (msg) { log('  ' + msg); });
+      // Disable trickle for free-scroll experience
+      adaptJson.course._trickle = { _isEnabled: false };
       setProgress(70);
-      log('Image generation complete.', 'success');
+      log('Adapt JSON generated: ' + adaptJson.components.length + ' components', 'success');
 
-      // Phase 5: Generate HTML
-      log('Phase 5: Generating modernised course...', 'info');
-      generatedHtml = GeneratorApp.generateHtml(coursePlan, brand, images);
-      setProgress(85);
-      log('Course HTML generated (' + (generatedHtml.length / 1024).toFixed(0) + ' KB)', 'success');
+      // Phase 5: Generate brand CSS
+      log('Phase 5: Applying brand styling...', 'info');
+      var brandCSS = AdaptTranslator.generateBrandCSS(brand);
+      generatedHtml = null; // Not used in Adapt mode
+      setProgress(80);
+      log('Brand CSS generated (' + (brandCSS.length / 1024).toFixed(1) + ' KB)', 'success');
 
       // Phase 6: Package SCORM
       log('Phase 6: Creating SCORM package...', 'info');
-      generatedBlob = await Packager.packageCourse(generatedHtml, course, fileMap, images, function (msg) { log('  ' + msg); });
+      generatedBlob = await AdaptPackager.packageCourse(adaptJson, brandCSS, fileMap, coursePlan, function (msg) { log('  ' + msg); });
       setProgress(100);
       log('Done! Your modernised course is ready.', 'success');
 
@@ -219,9 +222,15 @@
   // ---- Preview Toggle ----
 
   btnPreview.addEventListener('click', function () {
-    if (!generatedHtml) return;
-    var previewUrl = URL.createObjectURL(new Blob([generatedHtml], { type: 'text/html' }));
-    window.open(previewUrl, '_blank');
+    if (!generatedBlob) return;
+    // For Adapt output, preview requires serving from a directory.
+    // For now, trigger download — future: serve via backend
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(generatedBlob);
+    a.download = 'modernised-course.zip';
+    a.click();
+    URL.revokeObjectURL(a.href);
+    log('Download started. Unzip and open index.html to preview, or upload to your LMS.', 'info');
   });
 
 })();
