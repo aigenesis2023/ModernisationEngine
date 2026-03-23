@@ -77,34 +77,32 @@ export function applyBrand(brand) {
     root.style.setProperty('--ui-radius-lg', Math.min(32, r * 1.5) + 'px');
   }
 
-  // Glass intensity based on theme (dark/light) and mood
-  // The brand scraper detects theme from CSS body background color
-  const theme = s.theme || (s.mood === 'dark' ? 'dark' : '');
-  const mood = s.mood || 'default';
-  const isLight = theme === 'light';
+  // Glass intensity based on ACTUAL background luminance
+  // Don't trust the theme string — compute from the real background color
+  // The brand scraper can misclassify (e.g. theme=light but bg=#383838)
+  function hexLuminance(hex) {
+    if (!hex || !hex.startsWith('#') || hex.length < 7) return 0.5;
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    return 0.299 * r + 0.587 * g + 0.114 * b;
+  }
 
-  if (isLight) {
-    // Light mode: glass uses dark overlays (visible on white/light backgrounds)
-    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.7)');
-    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.08)');
-    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.85)');
-    root.style.setProperty('--brand-glow', `0 4px 24px rgba(0, 0, 0, 0.06)`);
-    // Ensure selection color has contrast
-    root.style.setProperty('--ui-selection-bg', c.primary || '#2563eb');
-    root.style.setProperty('--ui-selection-text', '#ffffff');
-  } else if (theme === 'dark' || mood === 'bold') {
+  const bgColor = c.background || '#0a0a12';
+  const bgLum = hexLuminance(bgColor);
+  const isActuallyLight = bgLum > 0.55; // Use real brightness, not theme string
+
+  if (isActuallyLight) {
+    // Light background: glass cards use subtle shadows and light fills
+    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.75)');
+    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.10)');
+    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.90)');
+    root.style.setProperty('--brand-glow', '0 4px 24px rgba(0, 0, 0, 0.08)');
+  } else {
+    // Dark background: glass cards use white light overlays
     root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.06)');
     root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.12)');
     root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.10)');
-  } else if (mood === 'minimal' || mood === 'clean') {
-    root.style.setProperty('--ui-glass', 'rgba(0, 0, 0, 0.03)');
-    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.08)');
-    root.style.setProperty('--ui-glass-hover', 'rgba(0, 0, 0, 0.06)');
-  } else {
-    // Creative/default — slightly more visible glass
-    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.05)');
-    root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.10)');
-    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.08)');
   }
 
   // Button style from brand

@@ -67,10 +67,10 @@ export default function HeroSplash({ data = {} }) {
       <div
         className="relative z-10 mx-auto max-w-3xl px-6 py-16 text-center rounded-2xl border"
         style={{
-          background: 'rgba(255, 255, 255, 0.04)',
+          background: 'var(--ui-glass)',
           backdropFilter: 'blur(24px)',
           WebkitBackdropFilter: 'blur(24px)',
-          borderColor: 'rgba(255, 255, 255, 0.08)',
+          borderColor: 'var(--ui-glass-border)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
         }}
       >

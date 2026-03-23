@@ -161,7 +161,7 @@ export default function MCQPro({ data = {} }) {
               disabled={submitted}
               className="w-full flex items-center gap-4 px-5 py-4 rounded-xl border text-left cursor-pointer disabled:cursor-default"
               style={{
-                background: 'rgba(255, 255, 255, 0.04)',
+                background: 'var(--ui-glass)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 borderColor,

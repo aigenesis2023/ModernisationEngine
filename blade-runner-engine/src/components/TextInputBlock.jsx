@@ -53,10 +53,10 @@ export default function TextInputBlock({ data = {} }) {
         className="w-full rounded-xl border p-8 sm:p-12"
         style={{
           maxWidth: '680px',
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
+          borderColor: 'var(--ui-glass-border)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
@@ -111,7 +111,7 @@ export default function TextInputBlock({ data = {} }) {
                   onBlur={function () { setFocusedIndex(-1); }}
                   className="w-full rounded-lg px-4 py-3 text-base outline-none"
                   style={{
-                    background: 'rgba(255, 255, 255, 0.05)',
+                    background: 'var(--ui-glass)',
                     border: '1px solid ' + (isFocused
                       ? 'var(--brand-primary, #8b5cf6)'
                       : 'rgba(255, 255, 255, 0.08)'),

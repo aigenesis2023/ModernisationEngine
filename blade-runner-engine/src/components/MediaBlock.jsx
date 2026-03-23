@@ -50,10 +50,10 @@ export default function MediaBlock({ data = {} }) {
         className="w-full rounded-xl border overflow-hidden"
         style={{
           maxWidth: '860px',
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
+          borderColor: 'var(--ui-glass-border)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >

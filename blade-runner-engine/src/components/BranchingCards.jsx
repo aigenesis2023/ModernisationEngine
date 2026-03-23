@@ -103,12 +103,12 @@ export default function BranchingCards({ data = {} }) {
                 style={{
                   background: isSelected
                     ? 'rgba(139, 92, 246, 0.08)'
-                    : 'rgba(255, 255, 255, 0.03)',
+                    : 'var(--ui-glass)',
                   backdropFilter: 'blur(16px)',
                   WebkitBackdropFilter: 'blur(16px)',
                   borderColor: isSelected
                     ? 'var(--brand-primary, #8b5cf6)'
-                    : 'rgba(255, 255, 255, 0.06)',
+                    : 'var(--ui-glass-border)',
                   boxShadow: isSelected
                     ? '0 0 0 1px var(--brand-primary, #8b5cf6), 0 8px 32px rgba(139, 92, 246, 0.15)'
                     : '0 4px 24px rgba(0, 0, 0, 0.2)',
@@ -142,7 +142,7 @@ export default function BranchingCards({ data = {} }) {
                   style={{
                     background: isSelected
                       ? 'var(--brand-primary, #8b5cf6)'
-                      : 'rgba(255, 255, 255, 0.06)',
+                      : 'var(--ui-glass-hover)',
                     color: isSelected
                       ? '#ffffff'
                       : 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))',

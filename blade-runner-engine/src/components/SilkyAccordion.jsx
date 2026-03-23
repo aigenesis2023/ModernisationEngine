@@ -196,7 +196,7 @@ export default function SilkyAccordion({ data = {} }) {
                       className="px-5 pb-5 text-sm leading-relaxed"
                       style={{
                         color: 'var(--brand-text, rgba(255, 255, 255, 0.8))',
-                        borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+                        borderTop: '1px solid var(--ui-glass-border)',
                         paddingTop: '1rem',
                       }}
                       dangerouslySetInnerHTML={{ __html: item.body || '' }}

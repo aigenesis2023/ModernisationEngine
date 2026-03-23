@@ -72,10 +72,10 @@ export default function NarrativeSlider({ data = {} }) {
         transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
         className="rounded-2xl border overflow-hidden"
         style={{
-          background: 'rgba(255, 255, 255, 0.04)',
+          background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.08)',
+          borderColor: 'var(--ui-glass-border)',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
         }}
       >
@@ -132,7 +132,7 @@ export default function NarrativeSlider({ data = {} }) {
         {/* Navigation bar */}
         <div
           className="flex items-center justify-between px-6 py-4"
-          style={{ borderTop: '1px solid rgba(255, 255, 255, 0.06)' }}
+          style={{ borderTop: '1px solid var(--ui-glass-border)' }}
         >
           {/* Previous button */}
           <button
@@ -141,7 +141,7 @@ export default function NarrativeSlider({ data = {} }) {
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
             style={{
               color: 'var(--brand-text, rgba(255, 255, 255, 0.8))',
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'var(--ui-glass)',
               transition: 'background 0.2s ease',
             }}
             aria-label="Previous item"
@@ -184,7 +184,7 @@ export default function NarrativeSlider({ data = {} }) {
             className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium disabled:opacity-25 cursor-pointer disabled:cursor-not-allowed"
             style={{
               color: 'var(--brand-text, rgba(255, 255, 255, 0.8))',
-              background: 'rgba(255, 255, 255, 0.06)',
+              background: 'var(--ui-glass)',
               transition: 'background 0.2s ease',
             }}
             aria-label="Next item"

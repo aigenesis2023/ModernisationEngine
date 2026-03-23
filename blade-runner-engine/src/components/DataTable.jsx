@@ -90,10 +90,10 @@ export default function DataTable({ data = {} }) {
         className="w-full rounded-xl border overflow-hidden"
         style={{
           maxWidth: '900px',
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
+          borderColor: 'var(--ui-glass-border)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
@@ -102,10 +102,10 @@ export default function DataTable({ data = {} }) {
           <div
             className="sticky top-0 z-10 px-6 sm:px-8 py-4 border-b"
             style={{
-              background: 'rgba(10, 10, 26, 0.9)',
+              background: 'var(--brand-surface, rgba(10, 10, 26, 0.9))',
               backdropFilter: 'blur(12px)',
               WebkitBackdropFilter: 'blur(12px)',
-              borderColor: 'rgba(255, 255, 255, 0.08)',
+              borderColor: 'var(--ui-glass-border)',
             }}
           >
             <h2
@@ -140,7 +140,7 @@ export default function DataTable({ data = {} }) {
                             key={colIdx}
                             className="px-6 sm:px-8 py-3 text-sm sm:text-base border-b"
                             style={{
-                              borderColor: 'rgba(255, 255, 255, 0.04)',
+                              borderColor: 'var(--ui-glass-border)',
                               color: colIdx === 0
                                 ? 'var(--brand-text, rgba(255, 255, 255, 0.85))'
                                 : 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))',
@@ -159,7 +159,7 @@ export default function DataTable({ data = {} }) {
                           <td
                             key={'empty-' + k}
                             className="px-6 sm:px-8 py-3 border-b"
-                            style={{ borderColor: 'rgba(255, 255, 255, 0.04)' }}
+                            style={{ borderColor: 'var(--ui-glass-border)' }}
                           />
                         );
                       })}
