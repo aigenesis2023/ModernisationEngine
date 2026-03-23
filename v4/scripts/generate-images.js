@@ -21,9 +21,9 @@ const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const HF_TOKEN = process.env.HF_TOKEN || '';
 
-const OUTPUT_DIR = path.resolve('v3/output/images');
-const LAYOUT_PATH = path.resolve('v3/output/course-layout.json');
-const BRAND_PATH = path.resolve('v3/output/brand-profile.json');
+const OUTPUT_DIR = path.resolve('v4/output/images');
+const LAYOUT_PATH = path.resolve('v4/output/course-layout.json');
+const BRAND_PATH = path.resolve('v4/output/brand-profile.json');
 
 // Rate limiting: 3s between requests (HF free tier)
 const DELAY_MS = 3000;
