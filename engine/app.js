@@ -220,6 +220,42 @@
       }
 
       if (templateHtml) {
+        // Embed images as base64 data URLs so they work from blob:// preview
+        log('  Embedding images...', 'info');
+        var imageMap = {}; // filename → data URL
+        var embedCount = 0;
+        for (var imgEntry of fileMap) {
+          var imgPath = imgEntry[0], imgFile = imgEntry[1];
+          if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(imgPath)) {
+            try {
+              var imgBuf = await imgFile.arrayBuffer();
+              var imgBytes = new Uint8Array(imgBuf);
+              // Only embed images under 500KB to keep HTML size reasonable
+              if (imgBytes.length < 2097152) {
+                var binary = '';
+                for (var bi = 0; bi < imgBytes.length; bi++) binary += String.fromCharCode(imgBytes[bi]);
+                var ext = imgPath.split('.').pop().toLowerCase();
+                var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
+                           ext === 'png' ? 'image/png' :
+                           ext === 'gif' ? 'image/gif' :
+                           ext === 'svg' ? 'image/svg+xml' : 'image/' + ext;
+                var dataUrl = 'data:' + mime + ';base64,' + btoa(binary);
+                imageMap['course/en/images/' + imgPath.split('/').pop()] = dataUrl;
+                embedCount++;
+              }
+            } catch (e) {}
+          }
+        }
+        log('  Embedded ' + embedCount + ' images', 'info');
+
+        // Replace image paths in components with data URLs
+        var componentsStr = JSON.stringify(adaptJson.components);
+        for (var imgKey in imageMap) {
+          // Replace all occurrences of the path with the data URL
+          componentsStr = componentsStr.split(imgKey).join(imageMap[imgKey]);
+        }
+        adaptJson.components = JSON.parse(componentsStr);
+
         // Inject course data + brand data into the template
         var injectScript = '<script>\n';
         injectScript += 'window.courseData = ' + JSON.stringify(adaptJson) + ';\n';

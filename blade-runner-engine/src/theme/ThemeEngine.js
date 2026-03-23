@@ -14,7 +14,10 @@ export function applyBrand(brand) {
   const s = brand.style || {};
 
   // Colors
-  if (c.primary) root.style.setProperty('--brand-primary', c.primary);
+  if (c.primary) {
+    root.style.setProperty('--brand-primary', c.primary);
+    root.style.setProperty('--brand-heading', c.primary);
+  }
   if (c.secondary) root.style.setProperty('--brand-secondary', c.secondary);
   if (c.accent) root.style.setProperty('--brand-accent', c.accent);
   if (c.background) root.style.setProperty('--brand-bg', c.background);
