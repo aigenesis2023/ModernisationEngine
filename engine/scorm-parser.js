@@ -569,8 +569,13 @@ window.SCORMParser = (function () {
 
   function collectObjectTriggers(objects, triggers) {
     for (const obj of objects) {
-      if (obj.actionGroups && Array.isArray(obj.actionGroups)) {
-        for (const ag of obj.actionGroups) {
+      // Storyline stores actionGroups as an OBJECT (key-value map), not array.
+      // Keys are action group names (e.g., "ActGrpSetHoverState", "_show").
+      // This is universal across ALL Storyline exports.
+      if (obj.actionGroups && typeof obj.actionGroups === 'object' && !Array.isArray(obj.actionGroups)) {
+        for (const [agName, ag] of Object.entries(obj.actionGroups)) {
+          // Skip hover/disabled state management — these are UI chrome, not content triggers
+          if (/^ActGrp(Set|Clear)(Hover|Disabled|Down|Checked|Unchecked|State)/i.test(agName)) continue;
           const actions = (ag.actions || []).map(a => ({
             kind: a.kind || 'unknown',
             targetId: a.objRef?.value || a.layerRef?.value || a.slideRef?.value || undefined,
@@ -579,8 +584,24 @@ window.SCORMParser = (function () {
             operator: a.operator || undefined,
           }));
           if (actions.length > 0) {
-            triggers.push({ id: ag.id || 'obj_trigger_' + triggers.length, event: ag.event || 'onclick',
+            triggers.push({ id: agName || 'obj_trigger_' + triggers.length, event: 'onclick',
               actions, conditions: parseConditions(ag.conditions), targetObjectId: obj.id || obj.referenceName || undefined });
+          }
+        }
+      }
+      // Also handle object-level events (onrelease, onpress, etc.)
+      if (obj.events) {
+        for (const evt of obj.events) {
+          const actions = (evt.actions || []).map(a => ({
+            kind: a.kind || 'unknown',
+            targetId: a.objRef?.value || a.layerRef?.value || a.slideRef?.value || undefined,
+            variable: a.variable || undefined,
+            value: a.value != null ? String(a.value) : undefined,
+            operator: a.operator || undefined,
+          }));
+          if (actions.length > 0) {
+            triggers.push({ id: evt.id || 'obj_event_' + triggers.length, event: evt.kind || 'onclick',
+              actions, conditions: [], targetObjectId: obj.id || obj.referenceName || undefined });
           }
         }
       }
