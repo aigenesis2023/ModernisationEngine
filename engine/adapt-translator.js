@@ -872,7 +872,8 @@ window.AdaptTranslator = (function () {
         // (Quiz questions are excluded from dedup — they should always appear)
         comps = comps.filter(function(comp) {
           if (comp._component === 'mcq') return true; // Always keep quiz questions
-          var contentKey = (comp.displayTitle || '') + '||' + (comp.body || '').replace(/<[^>]*>/g, '').trim();
+          var imgKey = (comp._graphic && comp._graphic.large) ? comp._graphic.large : '';
+          var contentKey = (comp.displayTitle || '') + '||' + (comp.body || '').replace(/<[^>]*>/g, '').trim() + '||' + imgKey;
           if (contentKey.length < 5) return true; // Don't dedup very short/empty content
           if (seenContentHashes.has(contentKey)) return false;
           seenContentHashes.add(contentKey);
