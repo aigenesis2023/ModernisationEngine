@@ -30,8 +30,12 @@ window.ImageGenerator = (function () {
     // Build context from slide content — combine multiple sources for richer prompts
     var context = '';
 
-    // Start with alt text if it's descriptive (not auto-generated placeholder names)
-    if (altText && altText.length > 3 && !/^(image|photo|picture|shape|rectangle|oval|group|placeholder)/i.test(altText)) {
+    // Start with alt text if it's descriptive (not auto-generated placeholder names
+    // or application export names like "Adobe Express - file (6).png")
+    if (altText && altText.length > 3 &&
+        !/^(image|photo|picture|shape|rectangle|oval|group|placeholder)/i.test(altText) &&
+        !/^(adobe|canva|figma|photoshop|illustrator|express|stock)/i.test(altText) &&
+        !/\.(png|jpg|jpeg|gif|svg|webp|bmp|tiff)$/i.test(altText.trim())) {
       context = altText;
     }
 
@@ -163,15 +167,37 @@ window.ImageGenerator = (function () {
 
     log('Generating ' + tasks.length + ' AI image(s)...');
 
-    // Process images sequentially to avoid overwhelming the API
+    // Track whether the AI API is responding. If the first request fails,
+    // skip all subsequent API calls and use original images immediately.
+    // This prevents wasting 10-15 seconds per image on a dead API.
+    var apiAvailable = true;
+
     for (var i = 0; i < tasks.length; i++) {
       var task = tasks[i];
       var prompt = buildPrompt(task.slideTitle, task.slideTexts, task.altText, task.role, brand);
       log('  Image ' + (i + 1) + '/' + tasks.length + ': ' + prompt.substring(0, 80) + '...');
 
+      // If API already failed, skip straight to fallback (instant)
+      if (!apiAvailable) {
+        if (task.originalPath) {
+          log('    Using original (API unavailable): ' + task.originalPath);
+          entries.push({
+            originalAssetId: task.assetId,
+            status: 'original',
+            generatedPath: 'assets/images/' + task.originalPath.split('/').pop(),
+            originalPath: task.originalPath,
+            role: task.role,
+            prompt: prompt,
+          });
+        } else {
+          entries.push({ originalAssetId: task.assetId, status: 'failed',
+            error: 'API unavailable', prompt: prompt });
+        }
+        continue;
+      }
+
       try {
-        // Normalize dimensions to reasonable sizes
-        var w = Math.round(task.width / 2) * 2; // ensure even
+        var w = Math.round(task.width / 2) * 2;
         var h = Math.round(task.height / 2) * 2;
         w = Math.max(512, Math.min(w, 1280));
         h = Math.max(384, Math.min(h, 720));
@@ -183,13 +209,13 @@ window.ImageGenerator = (function () {
           generatedPath: dataUrl,
           prompt: prompt,
         });
-        log('  Generated successfully.');
+        log('    Generated successfully.');
       } catch (err) {
-        // Fallback: use original SCORM image when AI generation fails.
-        // Background images work well as section backgrounds or hero images.
-        // Content images can be displayed inline.
+        // First failure = mark API as unavailable for remaining images
+        apiAvailable = false;
+        log('    AI generation failed (' + err.message + ') — using originals for remaining images.');
+
         if (task.originalPath) {
-          log('    Using original image as fallback: ' + task.originalPath);
           entries.push({
             originalAssetId: task.assetId,
             status: 'original',
@@ -199,13 +225,8 @@ window.ImageGenerator = (function () {
             prompt: prompt,
           });
         } else {
-          log('    Failed: ' + err.message);
-          entries.push({
-            originalAssetId: task.assetId,
-            status: 'failed',
-            error: err.message,
-            prompt: prompt,
-          });
+          entries.push({ originalAssetId: task.assetId, status: 'failed',
+            error: err.message, prompt: prompt });
         }
       }
     }
