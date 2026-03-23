@@ -65,7 +65,7 @@ export default function HeroSplash({ data = {} }) {
 
       {/* Glassmorphism card */}
       <div
-        className="relative z-10 mx-auto max-w-3xl px-6 py-16 text-center rounded-2xl border"
+        className="relative z-10 mx-4 sm:mx-auto max-w-3xl px-5 sm:px-8 py-12 sm:py-16 text-center rounded-2xl border"
         style={{
           background: 'var(--ui-glass)',
           backdropFilter: 'blur(24px)',
@@ -75,8 +75,8 @@ export default function HeroSplash({ data = {} }) {
         }}
       >
         {/* Animated title */}
-        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6"
-            style={{ color: 'var(--brand-heading, #ffffff)', wordBreak: 'keep-all', overflowWrap: 'normal' }}>
+        <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold tracking-tight leading-tight mb-6"
+            style={{ color: 'var(--brand-heading, #ffffff)' }}>
           {letters.map((char, i) => (
             <motion.span
               key={`${i}-${char}`}

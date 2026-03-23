@@ -90,7 +90,7 @@ function ArticleSection({ article, blocks, components, index }) {
         {/* Section title with accent bar */}
         {article.displayTitle && (
           <motion.div
-            className="mb-12"
+            className="mb-8"
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.15 }}
@@ -115,7 +115,7 @@ function ArticleSection({ article, blocks, components, index }) {
         )}
 
         {/* Blocks within this article */}
-        <div className="space-y-10">
+        <div className="space-y-8">
           {blocks.map((block, bi) => (
             <BlockRow
               key={block._id}

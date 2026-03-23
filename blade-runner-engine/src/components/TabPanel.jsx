@@ -58,8 +58,12 @@ export default function TabPanel({ data = {} }) {
       >
         {/* Tab buttons */}
         <div
-          className="flex overflow-x-auto gap-1 px-2 pt-2"
-          style={{ borderBottom: '1px solid var(--ui-glass-border)' }}
+          className="flex overflow-x-auto gap-0 scrollbar-hide"
+          style={{
+            borderBottom: '2px solid var(--ui-glass-border)',
+            msOverflowStyle: 'none',
+            scrollbarWidth: 'none',
+          }}
         >
           {items.map((item, i) => {
             const isActive = activeTab === i;
@@ -67,15 +71,17 @@ export default function TabPanel({ data = {} }) {
               <button
                 key={i}
                 onClick={() => setActiveTab(i)}
-                className="relative px-4 py-3 text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0 rounded-t-lg"
+                className="relative px-5 py-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer flex-shrink-0"
                 style={{
                   color: isActive
                     ? 'var(--brand-heading, #ffffff)'
                     : 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))',
-                  background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
-                  borderBottom: isActive ? '2px solid var(--brand-primary, #8b5cf6)' : '2px solid transparent',
-                  transition: 'color 0.2s ease, background 0.2s ease, border-color 0.2s ease',
-                  marginBottom: '-1px',
+                  background: 'transparent',
+                  transition: 'color 0.2s ease',
+                  marginBottom: '-2px',
+                  borderBottom: isActive
+                    ? '2px solid var(--brand-primary, #8b5cf6)'
+                    : '2px solid transparent',
                 }}
               >
                 {item.title || `Tab ${i + 1}`}
