@@ -1267,33 +1267,52 @@ window.ContentPlanner = (function () {
     // Storyline manifest titles are often internal names like "Test intro scene"
     var meta = Object.assign({}, courseIR.meta);
     var manifestTitle = (meta.title || '').trim();
-    if (!manifestTitle || manifestTitle.length < 5 || /^(test|untitled|my project|course|new|scene)/i.test(manifestTitle)) {
-      // Try to find a better title from headings, section titles, or body text
+    // Generic titles to skip when deriving a course title
+    var genericTitles = /^(opening|introduction|intro|welcome|start|home|title|cover|landing|overview|getting started|section|module|unit|lesson|part|chapter|scene|slide|page|test|untitled|my project|course|new)\b/i;
+
+    if (!manifestTitle || manifestTitle.length < 5 || genericTitles.test(manifestTitle)) {
+      // Try to find a meaningful title from content
       var bestTitle = null;
 
-      // Strategy 1: First content section's first heading
+      // Strategy 1: Find the first NON-GENERIC section title or heading
       for (var si = 0; si < sections.length && !bestTitle; si++) {
         var s = sections[si];
-        // Also check the section title itself
-        if (s.title && s.title.length > 5 && s.title.length < 80) {
+        // Skip hero/results/system sections — their titles are usually generic
+        if (s.type === 'hero' || s.type === 'results' || s.type === 'system') continue;
+
+        // Check section title (skip if generic)
+        if (s.title && s.title.length > 8 && s.title.length < 80 && !genericTitles.test(s.title)) {
           bestTitle = s.title;
           break;
         }
+        // Check headings within slides
         for (var sli = 0; sli < s.slides.length && !bestTitle; sli++) {
           var sl = s.slides[sli];
           if (sl.content && sl.content.headings && sl.content.headings.length > 0) {
             var h = sl.content.headings[0];
             var hText = typeof h === 'string' ? h : h.text || '';
-            if (hText.length > 5 && hText.length < 80) {
+            if (hText.length > 8 && hText.length < 80 && !genericTitles.test(hText)) {
               bestTitle = hText;
             }
           }
         }
       }
 
-      // Strategy 2: Use manifest title + first section title as combined title
-      if (!bestTitle && manifestTitle && sections.length > 0 && sections[0].title) {
-        bestTitle = manifestTitle + ' — ' + sections[0].title;
+      // Strategy 2: Combine manifest title + first meaningful section title
+      if (!bestTitle) {
+        for (var si2 = 0; si2 < sections.length; si2++) {
+          var s2 = sections[si2];
+          if (s2.title && s2.title.length > 5 && !genericTitles.test(s2.title)) {
+            bestTitle = manifestTitle ? (manifestTitle + ' — ' + s2.title) : s2.title;
+            break;
+          }
+        }
+      }
+
+      // Strategy 3: Use manifest title as-is if we found nothing better
+      if (!bestTitle && manifestTitle && manifestTitle.length >= 2) {
+        // Keep short manifest title but don't override — at least it's something
+        bestTitle = null;
       }
 
       if (bestTitle) {

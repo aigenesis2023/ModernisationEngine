@@ -560,10 +560,15 @@ window.AdaptTranslator = (function () {
           small: adaptImagePath(imgSrc)
         }
       });
-    } else if (!hasImage && allTexts.length >= 4 && allTexts.every(function(t) { return t.length < 120; })) {
-      // 4+ short text items without images → BentoGrid
-      var bentoItems = allTexts.map(function (t) {
-        return { title: t, body: '' };
+    } else if (allTexts.length >= 4 && allTexts.every(function(t) { return t.length < 120; })) {
+      // 4+ short text items → BentoGrid (with optional images)
+      var bentoItems = allTexts.map(function (t, idx) {
+        var itemGraphic = (contentImages[idx]) ? {
+          src: adaptImagePath(contentImages[idx]),
+          large: adaptImagePath(contentImages[idx]),
+          alt: getImageAlt(contentImages[idx])
+        } : null;
+        return { title: t, body: '', _graphic: itemGraphic };
       });
       var compId = idManager.nextComponent(blockId);
       components.push({
@@ -595,12 +600,32 @@ window.AdaptTranslator = (function () {
         instruction: ''
       });
     } else {
-      // Default: text or graphic component
+      // Default fallback — still try to use images if available
       var displayTitle = headings[0] || '';
       var body = textsToBody(headings.length > 1 ? headings.slice(1).concat(allTexts) : allTexts);
 
-      // If there's an image but no text, use graphic component
-      if (hasImage && allTexts.length === 0) {
+      // Image + any text → graphic-text split (catches slides that fell through earlier checks)
+      if (hasImage && (body || displayTitle)) {
+        var fallbackImg = contentImages[0];
+        var compId = idManager.nextComponent(blockId);
+        components.push({
+          _id: compId,
+          _parentId: blockId,
+          _type: 'component',
+          _component: 'graphic-text',
+          _classes: '',
+          _layout: 'full',
+          title: displayTitle,
+          displayTitle: displayTitle,
+          body: body,
+          instruction: '',
+          _graphic: {
+            alt: getImageAlt(fallbackImg),
+            large: adaptImagePath(fallbackImg),
+            small: adaptImagePath(fallbackImg)
+          }
+        });
+      } else if (hasImage && allTexts.length === 0) {
         var imgData = contentImages[0];
         var imgSrc = getImageSrc(imgData);
         var compId = idManager.nextComponent(blockId);

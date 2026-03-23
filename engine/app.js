@@ -181,9 +181,10 @@
       log('Phase 1: Parsing SCORM package (' + fileMap.size + ' files)...', 'info');
       setProgress(10);
       var course = await SCORMParser.extractCourse(fileMap, function (msg) { log('  ' + msg); });
+      var totalElements = course.slides.reduce(function(s,sl) { return s + (sl.elements||[]).length; }, 0);
+      var totalLayers = course.slides.reduce(function(s,sl) { return s + (sl.layers||[]).length; }, 0);
       log('Phase 1 done (' + (Date.now() - phaseStart) + 'ms): ' +
-        course.slides.length + ' slides, ' +
-        (course.slides.reduce(function(s,sl) { return s + (sl.objects||[]).length; }, 0)) + ' objects', 'success');
+        course.slides.length + ' slides, ' + totalElements + ' elements, ' + totalLayers + ' layers', 'success');
       setProgress(30);
 
       // Phase 2: Content Intelligence
@@ -286,8 +287,8 @@
         // This prevents bloat from unused SCORM assets
         log('  Embedding referenced images...', 'info');
         var imageMap = {}; // filename → data URL
-        var MAX_TOTAL_EMBED = 6 * 1024 * 1024; // 6MB total cap for all images
-        var MAX_SINGLE_IMAGE = 800 * 1024; // 800KB per image (educational images can be larger)
+        var MAX_TOTAL_EMBED = 10 * 1024 * 1024; // 10MB total cap for all images
+        var MAX_SINGLE_IMAGE = 1500 * 1024; // 1.5MB per image (Storyline exports large educational images)
 
         // Stringify ALL course data to find image references everywhere
         // (components have _graphic fields, accordion body HTML has <img> tags, etc.)
