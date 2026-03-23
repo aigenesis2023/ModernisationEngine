@@ -2,10 +2,13 @@
 /**
  * V2 Image Generator
  *
- * Reads course-layout.json, generates images via Pollinations API,
+ * Reads course-layout.json, generates images via Hugging Face Inference API,
  * and updates the layout JSON with actual image paths.
  *
- * Usage: node v2/scripts/generate-images.js
+ * Usage:
+ *   HF_TOKEN=hf_... node v2/scripts/generate-images.js
+ *   node v2/scripts/generate-images.js                    # reads from env
+ *
  * Input:  v2/output/course-layout.json
  * Output: v2/output/images/*.jpg + updated course-layout.json
  */
@@ -13,27 +16,34 @@
 const fs = require('fs');
 const path = require('path');
 
-const POLLINATIONS_BASE = 'https://image.pollinations.ai/prompt';
+// ─── Config ──────────────────────────────────────────────────────────
+const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
+const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
+const HF_TOKEN = process.env.HF_TOKEN || '';
+
 const OUTPUT_DIR = path.resolve('v2/output/images');
 const LAYOUT_PATH = path.resolve('v2/output/course-layout.json');
 const BRAND_PATH = path.resolve('v2/output/brand-profile.json');
 
-// Rate limiting: 2s between requests
-const DELAY_MS = 2000;
-const RETRY_DELAY_MS = 5000;
+// Rate limiting: 3s between requests (HF free tier)
+const DELAY_MS = 3000;
+const RETRY_DELAY_MS = 8000;
+
+// HF Inference has max dimensions — we generate at supported sizes
+// then the renderer scales them via CSS. FLUX.1-schnell supports up to 1024.
+const MAX_DIM = 1024;
 
 // ─── Dimensions by component type ────────────────────────────────────
 const DIMENSIONS = {
-  hero:           { width: 1920, height: 1080 },
-  graphic:        { width: 1920, height: 1080 },
-  'graphic-text': { width: 800,  height: 600  },
-  bento:          { width: 600,  height: 400  },
-  narrative:      { width: 800,  height: 600  },
-  'full-bleed':   { width: 1920, height: 800  },
-  'labeled-image':{ width: 1200, height: 800  },
-  'image-gallery':{ width: 600,  height: 400  },
-  // Default for anything else
-  default:        { width: 800,  height: 600  },
+  hero:           { width: 1024, height: 576  },  // 16:9
+  graphic:        { width: 1024, height: 576  },  // 16:9
+  'graphic-text': { width: 768,  height: 576  },  // 4:3
+  bento:          { width: 576,  height: 384  },  // 3:2
+  narrative:      { width: 768,  height: 576  },  // 4:3
+  'full-bleed':   { width: 1024, height: 432  },  // ~12:5
+  'labeled-image':{ width: 1024, height: 680  },  // 3:2
+  'image-gallery':{ width: 576,  height: 384  },  // 3:2
+  default:        { width: 768,  height: 576  },
 };
 
 function getDimensions(componentType) {
@@ -42,7 +52,13 @@ function getDimensions(componentType) {
 
 function parseDimensionString(dimStr) {
   const match = (dimStr || '').match(/(\d+)x(\d+)/);
-  if (match) return { width: +match[1], height: +match[2] };
+  if (match) {
+    // Clamp to max supported dimensions
+    return {
+      width: Math.min(+match[1], MAX_DIM),
+      height: Math.min(+match[2], MAX_DIM),
+    };
+  }
   return DIMENSIONS.default;
 }
 
@@ -72,40 +88,75 @@ function perceivedLuminance(hex) {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
-// ─── Image download ──────────────────────────────────────────────────
-async function downloadImage(prompt, dimensions, outputFilename) {
+// ─── Image generation via Hugging Face ───────────────────────────────
+async function generateImage(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
-  const seed = hashString(outputFilename);
-  const enhancedPrompt = `${prompt}, high resolution, sharp details, no text, no watermarks`;
-  const encodedPrompt = encodeURIComponent(enhancedPrompt);
-  const url = `${POLLINATIONS_BASE}/${encodedPrompt}?width=${width}&height=${height}&seed=${seed}&nologo=true&enhance=true`;
-
   const outputPath = path.join(OUTPUT_DIR, outputFilename);
 
-  // Skip if already exists
+  // Skip if already exists and is a real image
   if (fs.existsSync(outputPath)) {
     const stats = fs.statSync(outputPath);
-    if (stats.size > 1000) {
+    if (stats.size > 5000) {
       console.log(`  Skip (exists): ${outputFilename}`);
       return outputPath;
     }
   }
 
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  const enhancedPrompt = `${prompt}, high resolution, sharp details, no text, no watermarks`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      console.log(`  Downloading: ${outputFilename} (attempt ${attempt})...`);
-      const resp = await fetch(url, { signal: AbortSignal.timeout(60000) });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+      console.log(`  Generating: ${outputFilename} (attempt ${attempt})...`);
+
+      const resp = await fetch(HF_API_URL, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${HF_TOKEN}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          inputs: enhancedPrompt,
+          parameters: { width, height },
+        }),
+        signal: AbortSignal.timeout(120000), // 2 min timeout — generation can be slow
+      });
+
+      // HF returns 503 when model is loading — wait and retry
+      if (resp.status === 503) {
+        const body = await resp.json().catch(() => ({}));
+        const waitTime = (body.estimated_time || 20) * 1000;
+        console.log(`  Model loading, waiting ${Math.round(waitTime / 1000)}s...`);
+        await sleep(Math.min(waitTime, 30000));
+        continue;
+      }
+
+      // HF returns 429 for rate limiting
+      if (resp.status === 429) {
+        console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      if (!resp.ok) {
+        const errText = await resp.text().catch(() => '');
+        throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 200)}`);
+      }
 
       const buffer = Buffer.from(await resp.arrayBuffer());
-      if (buffer.length < 500) throw new Error('Response too small — likely error page');
+
+      // Verify it's actually an image (not JSON error)
+      if (buffer.length < 1000) {
+        const text = buffer.toString('utf-8');
+        if (text.includes('"error"')) throw new Error(`API error: ${text.substring(0, 200)}`);
+      }
 
       fs.writeFileSync(outputPath, buffer);
       console.log(`  Saved: ${outputFilename} (${Math.round(buffer.length / 1024)}KB)`);
       return outputPath;
+
     } catch (err) {
       console.log(`  Failed (attempt ${attempt}): ${err.message}`);
-      if (attempt < 2) {
+      if (attempt < 3) {
         await sleep(RETRY_DELAY_MS);
       }
     }
@@ -115,21 +166,19 @@ async function downloadImage(prompt, dimensions, outputFilename) {
   return null;
 }
 
-function hashString(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 // ─── Process all components ──────────────────────────────────────────
-async function generateImages() {
+async function main() {
+  // Check for token
+  if (!HF_TOKEN) {
+    console.error('Error: HF_TOKEN environment variable not set.');
+    console.error('Usage: HF_TOKEN=hf_... node v2/scripts/generate-images.js');
+    process.exit(1);
+  }
+
   // Load layout
   if (!fs.existsSync(LAYOUT_PATH)) {
     console.error('Error: course-layout.json not found at', LAYOUT_PATH);
@@ -147,14 +196,11 @@ async function generateImages() {
   // Ensure output directory
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  let totalImages = 0;
-  let successImages = 0;
   const queue = [];
 
   // Collect all image generation tasks
   for (const section of layout.sections) {
     for (const comp of section.components) {
-      // Single image prompt
       if (comp.imagePrompt) {
         const dims = getDimensions(comp.type);
         queue.push({
@@ -167,7 +213,6 @@ async function generateImages() {
         });
       }
 
-      // Multiple image prompts
       if (comp.imagePrompts && Array.isArray(comp.imagePrompts)) {
         for (const ip of comp.imagePrompts) {
           const dims = ip.dimensions ? parseDimensionString(ip.dimensions) : getDimensions(comp.type);
@@ -184,26 +229,25 @@ async function generateImages() {
     }
   }
 
-  totalImages = queue.length;
-  console.log(`\nGenerating ${totalImages} images via Pollinations...\n`);
+  const totalImages = queue.length;
+  console.log(`\nGenerating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
 
-  // Process queue with rate limiting
+  let successImages = 0;
+
   for (let i = 0; i < queue.length; i++) {
     const task = queue[i];
     console.log(`[${i + 1}/${totalImages}] ${task.filename}`);
 
-    const result = await downloadImage(task.prompt, task.dimensions, task.filename);
+    const result = await generateImage(task.prompt, task.dimensions, task.filename);
 
     if (result) {
       successImages++;
       const relativePath = `images/${task.filename}`;
 
-      // Update layout JSON with image path
       if (task.target === '_graphic') {
         if (!task.component._graphic) task.component._graphic = {};
         task.component._graphic.large = relativePath;
       } else if (task.target === '_items' && task.targetKey) {
-        // Find the matching item and update its graphic
         const itemIndex = parseInt(task.targetKey.replace('item-', ''));
         if (task.component._items && task.component._items[itemIndex]) {
           if (!task.component._items[itemIndex]._graphic) {
@@ -226,10 +270,13 @@ async function generateImages() {
   console.log(`\nComplete: ${successImages}/${totalImages} images generated`);
   console.log(`Layout updated: ${LAYOUT_PATH}`);
   console.log(`Images saved to: ${OUTPUT_DIR}`);
+
+  if (successImages < totalImages) {
+    console.log(`\nTo retry failed images, run the script again — it skips existing ones.`);
+  }
 }
 
-// ─── CLI entry point ─────────────────────────────────────────────────
-generateImages().catch(err => {
-  console.error('Error:', err.message);
+main().catch(err => {
+  console.error('Fatal error:', err.message);
   process.exit(1);
 });
