@@ -246,15 +246,59 @@ window.AdaptTranslator = (function () {
   }
 
   // ---- Build components for a slide ----
-  function buildSlideComponents(slide, section, blockId, idManager) {
+  function buildSlideComponents(slide, section, blockId, idManager, sectionImageTracker) {
     var components = [];
     var presentation = slide.presentation || 'narrative';
-    var hasImage = slide.content && (slide.content.images.length > 0);
-    var hasVideo = slide.content && (slide.content.videos.length > 0);
+
+    // Filter images: use content/hero images freely, allow ONE background per section
+    var allImages = (slide.content && slide.content.images) || [];
+    var contentImages = allImages.filter(function (img) {
+      var role = getImageRole(img);
+      // Skip very small images (icons/decorative under 80px)
+      var w = img.width || img.originalWidth || 0;
+      var h = img.height || img.originalHeight || 0;
+      if (w > 0 && h > 0 && w < 80 && h < 80) return false;
+      // Skip logo images
+      if (role === 'logo') return false;
+      // Content and hero images: always include
+      if (role === 'content' || role === 'hero') return true;
+      // Background images: allow the first unique one per section as a banner
+      if (role === 'background') {
+        var src = getImageSrc(img);
+        var filename = src ? src.split('/').pop() : '';
+        if (filename && !sectionImageTracker['bg_' + filename]) {
+          sectionImageTracker['bg_' + filename] = true;
+          return true;
+        }
+        return false; // Skip duplicate backgrounds
+      }
+      return true;
+    });
+
+    // Deduplicate: skip if this exact image was already used in this section
+    contentImages = contentImages.filter(function (img) {
+      var src = getImageSrc(img);
+      if (!src) return false;
+      var filename = src.split('/').pop();
+      if (sectionImageTracker[filename]) return false;
+      sectionImageTracker[filename] = true;
+      return true;
+    });
+
+    var hasImage = contentImages.length > 0;
+    var hasVideo = slide.content && (slide.content.videos || []).length > 0;
     var headings = ((slide.content && slide.content.headings) || []).map(textVal);
     var bodyTexts = ((slide.content && slide.content.bodyTexts) || []).map(textVal);
     var callouts = ((slide.content && slide.content.callouts) || []).map(textVal);
     var allTexts = bodyTexts.concat(callouts);
+
+    // Fix ALL CAPS headings — title-case them
+    headings = headings.map(function (h) {
+      if (h && h === h.toUpperCase() && h.length > 4) {
+        return h.charAt(0) + h.slice(1).toLowerCase();
+      }
+      return h;
+    });
 
     // Determine component type based on presentation and content
     if (presentation === 'hero' || section.type === 'hero') {
@@ -446,10 +490,7 @@ window.AdaptTranslator = (function () {
       });
     } else if (hasImage && allTexts.length > 0) {
       // Text + image → split layout (text left, graphic right)
-      // Find the first content image (skip backgrounds/decorative)
-      var contentImg = slide.content.images.find(function (img) {
-        return getImageRole(img) === 'content' || getImageRole(img) === 'hero';
-      }) || slide.content.images[0];
+      var contentImg = contentImages[0];
       var imgSrc = getImageSrc(contentImg);
       var imgAlt = getImageAlt(contentImg);
 
@@ -495,7 +536,7 @@ window.AdaptTranslator = (function () {
 
       // If there's an image but no text, use graphic component
       if (hasImage && allTexts.length === 0) {
-        var imgData = slide.content.images[0];
+        var imgData = contentImages[0];
         var imgSrc = getImageSrc(imgData);
         var compId = idManager.nextComponent(blockId);
         components.push({
@@ -588,6 +629,7 @@ window.AdaptTranslator = (function () {
       // Process slides within section
       var slides = section.slides || [];
       var sectionHasContent = false;
+      var sectionImageTracker = {}; // Track images used in this section to deduplicate
 
       slides.forEach(function (slide, slideIndex) {
         // Create block for this slide
@@ -595,7 +637,7 @@ window.AdaptTranslator = (function () {
         var trackingId = idManager.nextTrackingId();
 
         // Build components first, then only add block if there are components
-        var comps = buildSlideComponents(slide, section, blockId, idManager);
+        var comps = buildSlideComponents(slide, section, blockId, idManager, sectionImageTracker);
 
         if (comps.length > 0) {
           sectionHasContent = true;
