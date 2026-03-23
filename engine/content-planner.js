@@ -1120,9 +1120,11 @@ window.ContentPlanner = (function () {
       return 'interactive';
     }
 
-    // Video or large image focal point
+    // Video focal point
     if (hasVideo) return 'media-feature';
-    if (hasHeroImage && textLength < 200) return 'media-feature';
+
+    // Large image with minimal text → image feature (will map to graphic-text or graphic)
+    if (hasHeroImage && textLength < 50) return 'standard';
 
     // Text-heavy → narrative flow
     if (textLength > 100) return 'narrative';

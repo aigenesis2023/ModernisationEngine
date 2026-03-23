@@ -332,8 +332,8 @@ window.AdaptTranslator = (function () {
         instruction: '',
         _graphic: heroGraphic
       });
-    } else if (presentation === 'media-feature' || hasVideo) {
-      // Video: media component
+    } else if (hasVideo) {
+      // Video: media component (only when actual video exists)
       var videoSrc = slide.content.videos[0];
       var compId = idManager.nextComponent(blockId);
       components.push({
