@@ -1,290 +1,271 @@
-# CLAUDE.md — Modernisation Engine
+# CLAUDE.md — Modernisation Engine V2
 
-## What This Project Is
-An AI-powered tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, premium deep-scroll web experiences. The SCORM file is treated as a **knowledge base** (not a blueprint) — content is extracted, then an AI layout engine redesigns the course from scratch using a premium component library with AI-generated branded images.
+## What This Is
+An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern, branded, premium deep-scroll web experiences. The SCORM file is a **knowledge base** — content is extracted, then an AI layout engine redesigns the course from scratch using a premium React component library and AI-generated branded images.
 
-**Live at:** https://aigenesis2023.github.io/ModernisationEngine/
+**Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
+(Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
 ---
 
-## Architecture: V2 (AI-Powered Redesign)
+## Architecture
+
+```
+SCORM File ──→ Simplified Parser ──→ Content Bucket (JSON)
+Brand URL  ──→ Brand Scraper     ──→ Brand Profile (JSON)
+                                          │
+                    ┌─────────────────────┘
+                    ▼
+         Content Bucket + Brand Profile
+                    │
+                    ▼
+         AI Layout Engine (prompt in v2/prompts/layout-engine.md)
+                    │
+                    ▼
+         Course Layout JSON (validated against schema)
+                    │
+              ┌─────┴─────┐
+              ▼            ▼
+    AI Image Generator   React Renderer
+    (Pollinations)       (blade-runner-engine)
+              │            │
+              ▼            ▼
+         images/      Static HTML course
+```
 
 ### Core Principle
-The SCORM file is a **knowledge base**, not a blueprint. We extract all text, quiz data, and media inventory — then an AI "Senior Instructional Designer" creates a brand-new course layout using premium React components and AI-generated branded images. This gives full creative control over the output without being constrained by Storyline's internal structure.
+The SCORM file's internal structure (layers, triggers, states, coordinates) is **ignored**. We extract raw text, quiz data, and media inventory — then the AI designs the presentation from scratch. This eliminates all the V1 heuristic complexity and gives full creative control.
 
-### Pipeline Overview
-```
-1. EXTRACTION:  SCORM file → Simplified Parser → Content Bucket (JSON)
-2. BRANDING:    Brand URL → Brand Scraper → Brand Profile (colors, fonts, logo, style)
-3. DESIGN:      Content Bucket + Brand Profile → LLM Layout Engine → Course Layout (JSON)
-4. IMAGES:      Course Layout → AI Image Generator (Pollinations) → Branded images
-5. RENDER:      Course Layout + Images → React Component Renderer → Beautiful course
-6. EDIT:        Course JSON → AI Editor UI → User customization (future)
-```
-
-### Why V2 (not the old V1 rule-based approach)
-The V1 approach tried to reverse-engineer Storyline's internal structure (layers, triggers, states, coordinates) and mechanically transform it into web components using if/else heuristics. After extensive development, this approach hit a hard ceiling:
-- 95% of images were discarded by the role classifier
-- Rule-based heuristics can't make intelligent design decisions (sees "4 layers" → always picks accordion, regardless of content meaning)
-- Output was visually monotonous (same glass card treatment for everything)
-- Every fix created new edge cases because Storyline's structure was never designed for external consumption
-
-V2 solves this by treating the SCORM as raw content and letting AI intelligence handle all design decisions.
+### Everything is codified — nothing ad-hoc
+All prompts, schemas, and scripts live in `v2/`. The only difference between testing (Claude Code) and production (API call) is who executes the layout engine prompt. Everything else is automated code.
 
 ---
 
-## Development Workflow (Current — Proof of Concept)
+## File Structure
 
-### Key Principle: Everything in the codebase, nothing ad-hoc
-All prompts, schemas, and scripts live in the repo under `v2/`. The only difference between testing and production is WHO runs the layout engine prompt — Claude Code (testing) vs API call (production). Everything else is automated code that works identically in both modes.
-
-### Directory structure:
 ```
-v2/
+CLAUDE.md                              ← This file — project reference
+WEBSITE BRANDING REF.rtf               ← Brand URL for testing
+
+engine/
+  scorm-parser.js                      ← SCORM extraction (being simplified for V2)
+  brand-scraper.js                     ← Brand URL → colors/fonts/style (reused as-is)
+
+blade-runner-engine/                   ← React + Vite renderer (the visual output)
+  src/
+    App.jsx                            ← Entry: loads courseData + brandData
+    main.jsx                           ← React root mount
+    index.css                          ← CSS design system (all via custom properties)
+    components/
+      ComponentRegistry.js             ← Maps type strings → React components
+      CourseRenderer.jsx               ← Recursive JSON → React tree
+      HeroSplash.jsx                   ← Full-viewport hero with animation
+      TextBlock.jsx                    ← Text with heading
+      GraphicBlock.jsx                 ← Full-width image
+      GraphicText.jsx                  ← Side-by-side text + image split
+      SilkyAccordion.jsx               ← Expandable panels
+      MCQPro.jsx                       ← Quiz with feedback + retry
+      NarrativeSlider.jsx              ← Carousel with prev/next
+      BentoGrid.jsx                    ← Multi-card grid
+      DataTable.jsx                    ← Parsed table
+      MediaBlock.jsx                   ← Video player
+      TextInputBlock.jsx               ← Form fields
+      BranchingCards.jsx               ← Selectable option cards
+    store/courseStore.js                ← Zustand state
+    theme/ThemeEngine.js               ← Brand → CSS variables
+  package.json                         ← React/Vite/Tailwind/Framer deps
+
+blade-runner-template.html             ← Pre-built single-file renderer (~405KB)
+
+v2/                                    ← ALL V2 WORK GOES HERE
   schemas/
-    content-bucket.schema.json    ← Validated extraction output format
-    course-layout.schema.json     ← Validated layout engine output format
-    component-library.json        ← All components: type, props, when to use, examples
+    content-bucket.schema.json         ← Extraction output format
+    course-layout.schema.json          ← Layout engine output format
+    component-library.json             ← All components: type, props, usage, examples
   prompts/
-    layout-engine.md              ← Full system prompt for AI layout engine
-    image-generator.md            ← Prompt templates for image generation per component
+    layout-engine.md                   ← System prompt for AI layout engine
+    image-generator.md                 ← Prompt templates for image generation
   scripts/
-    extract.js                    ← Simplified SCORM parser → content-bucket.json
-    scrape-brand.js               ← Brand URL → brand-profile.json
-    generate-images.js            ← Layout JSON → Pollinations API → images
-    build-course.js               ← Layout + images + brand → final static HTML
+    extract.js                         ← Simplified SCORM parser → content-bucket.json
+    scrape-brand.js                    ← Brand URL → brand-profile.json
+    generate-images.js                 ← Layout JSON → Pollinations → images/
+    build-course.js                    ← Layout + images + brand → static HTML
   output/
-    content-bucket.json           ← Extracted from test SCORM
-    brand-profile.json            ← Scraped from brand URL
-    course-layout.json            ← Layout engine output
-    images/                       ← Generated images
+    content-bucket.json                ← Extracted from test SCORM
+    brand-profile.json                 ← Scraped from brand URL
+    course-layout.json                 ← Layout engine output
+    images/                            ← Generated images
+
+v1-archive/                            ← Old V1 code (reference only, not used)
+  content-planner.js                   ← 1317 lines of heuristics (replaced by LLM)
+  adapt-translator.js                  ← 853 lines of rule mapping (replaced by LLM)
+  app.js                               ← V1 pipeline orchestrator
+  index-upload-ui.html                 ← V1 upload UI
+
+EV/                                    ← Test SCORM (gitignored, in Codespace)
+TEST SCORM/                            ← Small test SCORM (committed)
 ```
 
-### Workflow (same for testing AND production):
-1. `node v2/scripts/extract.js EV/` → `v2/output/content-bucket.json`
-2. `node v2/scripts/scrape-brand.js "https://www.backgrounds.supply"` → `v2/output/brand-profile.json`
-3. **Layout engine**: feed content + brand + prompt → `v2/output/course-layout.json`
-   - **Testing**: Claude Code reads the prompt file and content, writes the layout JSON
-   - **Production**: API call sends the same prompt + content, receives the same JSON
-4. `node v2/scripts/generate-images.js` → images in `v2/output/images/`
-5. `node v2/scripts/build-course.js` → final HTML at GitHub Pages URL
-
-### Testing setup:
-- Test SCORM: `EV/` directory (gitignored, uploaded to Codespace)
-- Brand URL: `https://www.backgrounds.supply/?ref=onepagelove` (in `WEBSITE BRANDING REF.rtf`)
-- GitHub Pages URL serves the finished course directly — no upload UI
-- User previews, gives feedback, engines are iterated and improved
-
-**Once concept is proven**, we add:
-- Upload UI for SCORM file + brand URL + API key
-- Claude API integration (swaps in for the manual layout engine step)
-- AI editor for end-user customization
-
 ---
 
-## Phase 1: Content Extraction (Simplified Parser)
+## The 5 Phases
 
-The parser's job is now "structured dumb" — extract all meaningful content without trying to interpret Storyline's layout or interaction model.
+### Phase 1 — Extraction (`v2/scripts/extract.js`)
+**Input:** SCORM folder (e.g., `EV/`)
+**Output:** `v2/output/content-bucket.json`
 
-### What to extract:
-- **Course title** from imsmanifest.xml
-- **Scene boundaries** (Storyline's intentional topic groupings — use as section markers)
-- **All text content** per slide (headings, body text, callouts — cleaned of junk)
-- **Quiz data** (question text, choices with correct answers, feedback) — structured, not raw text
-- **Form fields** (labels, field types)
-- **Media inventory** (list of all image/video files with filenames)
-- **Video references** (which slides reference which video files)
+Simplified "structured dumb" extraction. No layout inference, no interaction analysis.
 
-### What to NOT extract (removed from V1):
-- Layer hierarchy, trigger patterns, state analysis
-- Image role classification (background/hero/content/icon/decorative)
-- Interaction model analysis (click-reveal, auto-reveal, conditional)
-- Presentation heuristics (classifyPresentation)
-- Coordinate/depth/size data for layout inference
+**Extracts:**
+- Course title from imsmanifest.xml
+- Scene boundaries (Storyline's intentional topic groupings)
+- All text per slide: headings, body paragraphs, callouts (cleaned of junk)
+- Quiz data: question, choices with correct answers, feedback (structured)
+- Form fields: labels, types
+- Media inventory: list of all real image/video filenames (shapes and text-as-image excluded)
 
-### Content Bucket schema:
-```json
-{
-  "title": "EV Awareness & Safety",
-  "sections": [
-    {
-      "sceneId": "scene1",
-      "sceneTitle": "Recognising an EV",
-      "slides": [
-        {
-          "slideId": "5WKv4q3uVlq",
-          "texts": ["heading text", "body paragraph 1", "body paragraph 2"],
-          "images": ["5d4Z2zggdHJ.jpg"],
-          "videos": [],
-          "quiz": null,
-          "formFields": []
-        }
-      ]
-    }
-  ],
-  "media": {
-    "images": ["5d4Z2zggdHJ.jpg", "6FsIKpGsVCv.jpg", ...],
-    "videos": ["video_5g5siribedP.mp4"]
-  },
-  "noiseStats": { "textsDropped": 264, "shapesDropped": 55 }
-}
-```
+**Noise filtering (kept from V1):**
+- Shape filenames: `Shape*.png`, `txt__default_*.png`
+- Auto-generated labels: "Rectangle 1", "Oval 3", "Slide 2.1"
+- Icon alt-text: "arrow icon 1", "check icon 1"
+- Storyline UI text: player instructions, variable placeholders
+- Very short strings (< 3 chars)
 
-### Noise filtering (still needed):
-- Auto-generated labels ("Rectangle 1", "Shape 3")
-- Icon alt-text ("arrow icon 1")
-- Shape filenames (Shape*.png, txt__default_*.png)
-- Storyline UI text ("Click to reveal", player instructions)
-- Very short text (< 3 chars)
+### Phase 2 — Brand Scraping (`v2/scripts/scrape-brand.js`)
+**Input:** Brand URL (e.g., `https://www.backgrounds.supply`)
+**Output:** `v2/output/brand-profile.json`
 
----
+Reuses `engine/brand-scraper.js` logic. Fetches URL via CORS proxy, extracts:
+- Colors: primary, secondary, accent, background, surface, text, gradient
+- Typography: heading font, body font, sizes, weights, line-height, Google Fonts URL
+- Style: border-radius, button style (pill/rounded/solid), card style, mood
+- Logo: URL, dimensions, alt text
 
-## Phase 2: Brand Scraping (Keep from V1)
+CORS proxy: `https://cors-proxy.leoduncan-elearning.workers.dev`
 
-Brand scraper (`brand-scraper.js`) works well and is kept as-is:
-- Fetches URL via CORS proxy (`https://cors-proxy.leoduncan-elearning.workers.dev`)
-- Extracts: colors (primary, secondary, accent, background, text), typography (fonts, sizes, weights), style (border-radius, button style, mood), logo
-- Falls back to SCORM project colors if scraping fails, then to generic defaults
+### Phase 3 — AI Layout Engine (`v2/prompts/layout-engine.md`)
+**Input:** `content-bucket.json` + `brand-profile.json` + system prompt
+**Output:** `v2/output/course-layout.json`
 
----
+The AI reads the extracted content and brand profile, then designs the course layout:
+- Decides how many sections and what each contains
+- Chooses the best component type for each content block
+- Writes display titles, rewrites/tightens body text
+- Specifies image prompts for each section (what to generate)
+- Ensures visual variety (no consecutive identical component types)
+- Follows brand aesthetic (dark/light, colors, typography mood)
 
-## Phase 3: AI Layout Engine
+**Testing:** Claude Code reads the prompt file and content, writes the layout JSON
+**Production:** API call sends the same prompt + content, receives the same JSON
 
-### For proof-of-concept (current):
-Claude Code (this tool) acts as the layout engine. It reads the Content Bucket + Brand Profile and manually designs the course layout JSON.
+### Phase 4 — Image Generation (`v2/scripts/generate-images.js`)
+**Input:** `course-layout.json` (contains image prompts per component)
+**Output:** Images in `v2/output/images/`
 
-### For production (future):
-An LLM API call (Claude Sonnet or Haiku) replaces this manual step. The system prompt describes a Senior Instructional Designer persona with a component reference sheet.
-
-### Component Library (target: 25-30 premium components)
-
-**Existing (from V1 — keep and polish):**
-| Component | Purpose |
-|---|---|
-| `hero` / HeroSplash | Full-viewport opening with animated title, background image, scroll indicator |
-| `text` / TextBlock | Clean text with heading, body, instruction |
-| `graphic` / GraphicBlock | Full-width image with hover zoom |
-| `graphic-text` / GraphicText | Side-by-side text + image split (alternating left/right) |
-| `accordion` / SilkyAccordion | Expandable panels with completion tracking |
-| `mcq` / MCQPro | Quiz with selection, submit, feedback, retry |
-| `narrative` / NarrativeSlider | Prev/next carousel with dots |
-| `bento` / BentoGrid | Multi-card grid with image backgrounds |
-| `data-table` / DataTable | Auto-parsed table from structured data |
-| `media` / MediaBlock | Video player with custom play overlay |
-| `textinput` / TextInputBlock | Multi-field form with labels + submit |
-| `branching` / BranchingCards | Selectable option cards with letter badges |
-
-**New components to build:**
-| Component | Purpose |
-|---|---|
-| `timeline` / TimelineStepper | Numbered sequential steps with connecting line |
-| `comparison` / ComparisonTable | Side-by-side columns with checkmarks/crosses |
-| `stat-callout` / StatCallout | Large numbers with context labels |
-| `pullquote` / PullQuote | Emphasized text with accent bar (key takeaways, warnings) |
-| `key-term` / KeyTerm | Highlighted vocabulary with inline definition |
-| `checklist` / Checklist | Checkable items with completion tracking |
-| `tabs` / TabPanel | Horizontal tabbed content panels |
-| `flashcard` / Flashcard | Flip interaction for term/definition pairs |
-| `labeled-image` / LabeledImage | Image with numbered hotspot markers |
-| `process-flow` / ProcessFlow | Connected nodes showing a workflow |
-| `image-gallery` / ImageGallery | Grid/masonry of multiple images |
-| `full-bleed` / FullBleedImage | Edge-to-edge image with overlay text (section breaks) |
-| `video-transcript` / VideoTranscript | Video player with expandable transcript |
-
----
-
-## Phase 4: AI Image Generation
-
-**Strategy: Generate ALL images with AI for MVP.**
-
-The SCORM file's original images are mostly Storyline artifacts (shapes, text-as-image, low-res screenshots). Instead of trying to salvage them, generate fresh branded images for every section.
-
-### Image generation approach:
-- Use **Pollinations** free API for MVP (`https://image.pollinations.ai/prompt/...`)
-- Prompt includes: section topic, brand colors from URL (#0099ff, #ff3c71), style directive
-- Dimensions specified per component type (16:9 for hero/full-bleed, 1:1 for cards, 4:3 for graphic-text)
+Uses Pollinations free API: `https://image.pollinations.ai/prompt/...`
+- Each component that needs an image has an `imagePrompt` field in the layout JSON
+- Prompts include: topic context, brand colors, style directive, dimensions
+- Dimensions per component type: 16:9 (hero, full-bleed), 4:3 (graphic-text), 1:1 (cards)
 - Style: modern, clean, tech-professional, matching brand aesthetic
-- **User can replace any image** via the AI editor (future)
 
-### Moving to better image generation later:
-- DALL-E 3, Flux, or Stable Diffusion for higher quality
-- Brand style consistency via image-to-image with brand colors
-- Potentially keep original SCORM photos where they're high-quality (editor option)
+Future upgrade: DALL-E 3, Flux, or Stable Diffusion for higher quality.
+User can replace any image via the AI editor.
+
+### Phase 5 — Build (`v2/scripts/build-course.js`)
+**Input:** `course-layout.json` + `images/` + `brand-profile.json`
+**Output:** Static HTML at GitHub Pages URL
+
+- Converts course-layout.json into the `window.courseData` format the React renderer expects
+- Embeds images as base64 data URLs
+- Injects brand data as `window.brandData`
+- Injects into `blade-runner-template.html`
+- Outputs final single-file HTML
 
 ---
 
-## Phase 5: React Renderer (Keep and Polish from V1)
+## Component Library
 
-### Tech Stack (unchanged):
-- React 19.2 + Vite 8.0
-- Tailwind CSS 4.2
-- Framer Motion 12.38
-- Zustand 5.0
-- vite-plugin-singlefile 2.3
+### Existing (12 — keep and polish)
+| Type | Component | Purpose |
+|---|---|---|
+| `hero` | HeroSplash | Full-viewport opening, animated title, background image |
+| `text` | TextBlock | Clean text with heading and body |
+| `graphic` | GraphicBlock | Full-width image with hover zoom |
+| `graphic-text` | GraphicText | Side-by-side text + image (alternates left/right) |
+| `accordion` | SilkyAccordion | Expandable panels with completion tracking |
+| `mcq` | MCQPro | Quiz: select, submit, feedback, retry |
+| `narrative` | NarrativeSlider | Carousel with prev/next and dots |
+| `bento` | BentoGrid | Multi-card grid with image backgrounds |
+| `data-table` | DataTable | Auto-parsed table from structured data |
+| `media` | MediaBlock | Video player with custom overlay |
+| `textinput` | TextInputBlock | Multi-field form with submit |
+| `branching` | BranchingCards | Selectable option cards |
 
-### Building the Template:
-```bash
-cd blade-runner-engine
-npm install
-npx vite build
-cp dist/index.html ../blade-runner-template.html
+### New (13 — to build)
+| Type | Component | Purpose |
+|---|---|---|
+| `timeline` | TimelineStepper | Numbered steps with connecting line |
+| `comparison` | ComparisonTable | Side-by-side columns with checks/crosses |
+| `stat-callout` | StatCallout | Large numbers with context labels |
+| `pullquote` | PullQuote | Emphasized text with accent bar |
+| `key-term` | KeyTerm | Highlighted vocabulary with definition |
+| `checklist` | Checklist | Checkable items with completion |
+| `tabs` | TabPanel | Horizontal tabbed content |
+| `flashcard` | Flashcard | Flip interaction for term/definition |
+| `labeled-image` | LabeledImage | Image with numbered hotspot markers |
+| `process-flow` | ProcessFlow | Connected workflow nodes |
+| `image-gallery` | ImageGallery | Grid/masonry of images |
+| `full-bleed` | FullBleedImage | Edge-to-edge image with overlay text |
+| `video-transcript` | VideoTranscript | Video with expandable transcript |
+
+All components documented in `v2/schemas/component-library.json` with: type string, required props, optional props, ideal use cases, example JSON.
+
+---
+
+## Design System
+
+### CSS Custom Properties (set by ThemeEngine from brand profile)
+```
+Colors:     --brand-primary, --brand-secondary, --brand-accent, --brand-heading
+            --brand-bg, --brand-surface, --brand-text, --brand-text-muted
+            --brand-success, --brand-error, --brand-gradient, --brand-glow
+Glass:      --ui-glass, --ui-glass-border, --ui-glass-hover
+Radius:     --ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
+Fonts:      --font-heading, --font-body
+Typography: --font-base-size, --font-h1, --font-h2, --font-h3
+            --font-heading-weight, --font-body-weight, --font-line-height
 ```
 
-### Key files:
-- `blade-runner-engine/src/App.jsx` — loads window.courseData + window.brandData
-- `blade-runner-engine/src/components/CourseRenderer.jsx` — recursive JSON → React tree
-- `blade-runner-engine/src/components/ComponentRegistry.js` — maps type strings → components
-- `blade-runner-engine/src/theme/ThemeEngine.js` — brand → CSS variables
-- `blade-runner-engine/src/store/courseStore.js` — Zustand state management
-- `blade-runner-engine/src/index.css` — CSS design system variables
+### Theme detection
+ThemeEngine computes actual background luminance from hex color (ignores theme strings). Dark bg (luminance < 0.55) gets dark-mode glass. Light bg gets light-mode glass. All components use CSS variables — never hardcoded colors.
 
-### Design System:
-- All colors/fonts/radii are CSS custom properties set by ThemeEngine at runtime
-- Dark mode default, light mode when brand background luminance > 0.55
-- Glass card styling adapts to background brightness
-- All components use `var(--ui-glass)`, `var(--brand-primary)`, etc. — never hardcoded colors
+### Building the renderer
+```bash
+cd blade-runner-engine && npm install && npx vite build && cp dist/index.html ../blade-runner-template.html
+```
+**Must rebuild after any component/CSS change.**
 
 ---
 
-## Phase 6: AI Editor (Future)
-
-Since the course is a JSON tree of components, building an editor is straightforward:
-- User clicks a block → sidebar opens
-- Options: "Change to Accordion", "Swap Image", "Regenerate Image", "Edit Text", "Delete Section"
-- "Regenerate" sends the section content back to the LLM for a redesign
-- Image replacement via upload or AI regeneration with new prompt
-- Export: download as SCORM package, HTML, or JSON
+## Test Data
+- **SCORM:** `EV/` — 108-slide EV Awareness & Safety course (gitignored, in Codespace)
+- **Brand URL:** `https://www.backgrounds.supply/?ref=onepagelove` (in `WEBSITE BRANDING REF.rtf`)
+- Brand profile: dark theme (#383838 bg), blue (#0099ff) + pink (#ff3c71), Satoshi/Inter fonts
 
 ---
 
-## Test Files
-- `EV/` — Full 108-slide EV Awareness & Safety course (gitignored, uploaded to Codespace)
-- `WEBSITE BRANDING REF.rtf` — Contains brand URL: `https://www.backgrounds.supply/?ref=onepagelove`
-- `TEST SCORM/` — Small test SCORM (committed to repo)
-
-## CORS Proxy
-`https://cors-proxy.leoduncan-elearning.workers.dev`
-
----
-
-## ⛔ ABSOLUTE RULE — UNIVERSAL ENGINE, NOT SPECIFIC FIXES
-
-**Every engine change must work for ANY Storyline SCORM file.**
-
-The test SCORM files are diagnostic tools. Fixing specific output for specific files is counterproductive.
-
-**Branding source of truth:**
-- Brand URL website → ONLY source for visual identity
-- SCORM file → ONLY source for content and structure
-- Original SCORM styling is IRRELEVANT
+## Future Roadmap
+1. **Production UI:** Upload SCORM + brand URL + API key input
+2. **Claude API integration:** Replace manual Claude Code step with API call
+3. **AI Editor:** Click block → sidebar → change component, swap/regenerate image, edit text
+4. **SCORM packaging:** JSZip export with imsmanifest.xml
+5. **LMS tracking:** Lightweight SCORM shim for progress/completion reporting
 
 ---
 
-## V1 Architecture (Legacy — kept in codebase for reference)
+## ⛔ ABSOLUTE RULE — UNIVERSAL ENGINE
 
-The old rule-based pipeline is still in the codebase but will be superseded by V2:
-- `engine/scorm-parser.js` — full Storyline structure extraction (to be simplified)
-- `engine/content-planner.js` — heuristic presentation classification (to be replaced by LLM)
-- `engine/adapt-translator.js` — rule-based component mapping (to be replaced by LLM)
-- `engine/brand-scraper.js` — brand extraction (kept as-is)
-- `engine/app.js` — pipeline orchestrator (to be rewritten for V2)
+Every change must work for ANY Storyline SCORM file. Test files are diagnostic tools, not the product.
+
+**Branding:** Brand URL = only source for visual identity. SCORM styling is irrelevant.
+**Content:** SCORM = only source for educational content. AI redesigns the presentation.
