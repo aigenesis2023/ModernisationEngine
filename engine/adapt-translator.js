@@ -265,13 +265,17 @@ window.AdaptTranslator = (function () {
       return true;
     });
 
-    // Deduplicate: skip if this exact image filename already used in this section
+    // Deduplicate within THIS SLIDE only (not across section).
+    // Different slides may legitimately use the same image file —
+    // e.g., a photo shown on a content slide and again on a quiz slide.
+    // Cross-section dedup happens later via seenContentHashes.
+    var slideImageSeen = {};
     contentImages = contentImages.filter(function (img) {
       var src = getImageSrc(img);
       if (!src) return false;
       var filename = src.split('/').pop();
-      if (sectionImageTracker[filename]) return false;
-      sectionImageTracker[filename] = true;
+      if (slideImageSeen[filename]) return false;
+      slideImageSeen[filename] = true;
       return true;
     });
 
