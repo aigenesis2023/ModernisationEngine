@@ -56,11 +56,11 @@ export default function TabPanel({ data = {} }) {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
         }}
       >
-        {/* Tab buttons */}
+        {/* Tab buttons — pill style with clear separation */}
         <div
-          className="flex overflow-x-auto gap-0 scrollbar-hide"
+          className="flex overflow-x-auto gap-2 p-3"
           style={{
-            borderBottom: '2px solid var(--ui-glass-border)',
+            borderBottom: '1px solid var(--ui-glass-border)',
             msOverflowStyle: 'none',
             scrollbarWidth: 'none',
           }}
@@ -71,17 +71,18 @@ export default function TabPanel({ data = {} }) {
               <button
                 key={i}
                 onClick={() => setActiveTab(i)}
-                className="relative px-5 py-4 text-xs sm:text-sm font-semibold whitespace-nowrap cursor-pointer flex-shrink-0"
+                className="px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0 rounded-full"
                 style={{
                   color: isActive
-                    ? 'var(--brand-heading, #ffffff)'
-                    : 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))',
-                  background: 'transparent',
-                  transition: 'color 0.2s ease',
-                  marginBottom: '-2px',
-                  borderBottom: isActive
-                    ? '2px solid var(--brand-primary, #8b5cf6)'
-                    : '2px solid transparent',
+                    ? '#ffffff'
+                    : 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))',
+                  background: isActive
+                    ? 'var(--brand-primary, #6366f1)'
+                    : 'rgba(255, 255, 255, 0.06)',
+                  border: isActive
+                    ? 'none'
+                    : '1px solid var(--ui-glass-border, rgba(255, 255, 255, 0.1))',
+                  transition: 'all 0.2s ease',
                 }}
               >
                 {item.title || `Tab ${i + 1}`}

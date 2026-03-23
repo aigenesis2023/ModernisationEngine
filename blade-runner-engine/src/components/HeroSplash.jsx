@@ -40,8 +40,12 @@ export default function HeroSplash({ data = {} }) {
   const title = data.displayTitle || '';
   const body = data.body || '';
   const graphic = data._graphic || null;
-  const letters = title.split('');
   const showBgImage = graphic?.large && !imgError;
+
+  // Split title into words, then each word into letters for animation
+  // This preserves word boundaries so the browser can wrap between words
+  const words = title.split(' ');
+  let charIndex = 0;
 
   return (
     <section
@@ -74,22 +78,31 @@ export default function HeroSplash({ data = {} }) {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
         }}
       >
-        {/* Animated title */}
+        {/* Animated title — grouped by words so browser can wrap between words */}
         <h1 className="text-2xl sm:text-4xl md:text-6xl font-bold tracking-tight leading-tight mb-6"
             style={{ color: 'var(--brand-heading, #ffffff)' }}>
-          {letters.map((char, i) => (
-            <motion.span
-              key={`${i}-${char}`}
-              custom={i}
-              initial="hidden"
-              animate={isInView ? 'visible' : 'hidden'}
-              variants={letterVariants}
-              className="inline-block"
-              style={{ whiteSpace: char === ' ' ? 'pre' : undefined }}
-            >
-              {char === ' ' ? '\u00A0' : char}
-            </motion.span>
-          ))}
+          {words.map((word, wi) => {
+            const wordChars = word.split('');
+            const startIdx = charIndex;
+            charIndex += word.length + 1; // +1 for space
+            return (
+              <span key={wi} style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+                {wordChars.map((char, ci) => (
+                  <motion.span
+                    key={`${startIdx + ci}-${char}`}
+                    custom={startIdx + ci}
+                    initial="hidden"
+                    animate={isInView ? 'visible' : 'hidden'}
+                    variants={letterVariants}
+                    className="inline-block"
+                  >
+                    {char}
+                  </motion.span>
+                ))}
+                {wi < words.length - 1 && <span>&nbsp;</span>}
+              </span>
+            );
+          })}
         </h1>
 
         {/* Body / subtitle */}
