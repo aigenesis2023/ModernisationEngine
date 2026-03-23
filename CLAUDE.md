@@ -1,217 +1,236 @@
 # CLAUDE.md — Modernisation Engine
 
 ## What This Project Is
-A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. User uploads a SCORM folder, enters a brand URL, and gets a modernised SCORM package back.
+An AI-powered tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, premium deep-scroll web experiences. The SCORM file is treated as a **knowledge base** (not a blueprint) — content is extracted, then an AI layout engine redesigns the course from scratch using a premium component library with AI-generated branded images.
 
 **Live at:** https://aigenesis2023.github.io/ModernisationEngine/
 
 ---
 
-## File Structure
+## Architecture: V2 (AI-Powered Redesign)
 
+### Core Principle
+The SCORM file is a **knowledge base**, not a blueprint. We extract all text, quiz data, and media inventory — then an AI "Senior Instructional Designer" creates a brand-new course layout using premium React components and AI-generated branded images. This gives full creative control over the output without being constrained by Storyline's internal structure.
+
+### Pipeline Overview
 ```
-index.html                           ← Upload UI served on GitHub Pages
-engine/
-  scorm-parser.js        (1093 loc)  ← Phase 1: SCORM → CourseIR
-  content-planner.js     (1317 loc)  ← Phase 2: CourseIR → CoursePlan
-  brand-scraper.js        (470 loc)  ← Phase 3: URL → BrandProfile
-  adapt-translator.js     (853 loc)  ← Phase 4: CoursePlan → Adapt JSON
-  app.js                  (579 loc)  ← Pipeline orchestrator + SCORM packager
-
-blade-runner-engine/                 ← React + Vite project (pre-built into single HTML)
-  src/
-    App.jsx                          ← Entry: loads window.courseData + window.brandData
-    main.jsx                         ← React root mount
-    index.css                        ← Design system: CSS variables, focus states, scrollbar
-    components/
-      ComponentRegistry.js           ← Maps type strings → React components
-      CourseRenderer.jsx   (268 loc) ← Recursive JSON → React tree, scroll progress, sections
-      HeroSplash.jsx       (138 loc) ← Full-viewport hero with letter animation + bg image
-      TextBlock.jsx         (48 loc) ← Simple text with heading
-      GraphicBlock.jsx      (80 loc) ← Full-width image with hover zoom
-      GraphicText.jsx      (121 loc) ← Side-by-side text + image split layout
-      SilkyAccordion.jsx   (213 loc) ← Expandable panels with completion tracking
-      MCQPro.jsx           (310 loc) ← Quiz with selection, submit, feedback, retry
-      NarrativeSlider.jsx  (201 loc) ← Prev/next carousel with dots + counter
-      BentoGrid.jsx        (167 loc) ← Multi-card grid with image backgrounds
-      DataTable.jsx        (185 loc) ← Auto-parsed table from HTML body content
-      MediaBlock.jsx       (181 loc) ← Video player with custom play overlay
-      TextInputBlock.jsx   (157 loc) ← Multi-field form with labels + submit
-      BranchingCards.jsx   (197 loc) ← Selectable option cards with letter badges
-    store/courseStore.js              ← Zustand: course data, UI state, brand
-    theme/ThemeEngine.js             ← Applies BrandProfile → CSS custom properties
-
-blade-runner-template.html  (405KB)  ← Pre-built single-file HTML (React+CSS+JS inlined)
+1. EXTRACTION:  SCORM file → Simplified Parser → Content Bucket (JSON)
+2. BRANDING:    Brand URL → Brand Scraper → Brand Profile (colors, fonts, logo, style)
+3. DESIGN:      Content Bucket + Brand Profile → LLM Layout Engine → Course Layout (JSON)
+4. IMAGES:      Course Layout → AI Image Generator (Pollinations) → Branded images
+5. RENDER:      Course Layout + Images → React Component Renderer → Beautiful course
+6. EDIT:        Course JSON → AI Editor UI → User customization (future)
 ```
+
+### Why V2 (not the old V1 rule-based approach)
+The V1 approach tried to reverse-engineer Storyline's internal structure (layers, triggers, states, coordinates) and mechanically transform it into web components using if/else heuristics. After extensive development, this approach hit a hard ceiling:
+- 95% of images were discarded by the role classifier
+- Rule-based heuristics can't make intelligent design decisions (sees "4 layers" → always picks accordion, regardless of content meaning)
+- Output was visually monotonous (same glass card treatment for everything)
+- Every fix created new edge cases because Storyline's structure was never designed for external consumption
+
+V2 solves this by treating the SCORM as raw content and letting AI intelligence handle all design decisions.
 
 ---
 
-## Pipeline: How It Works End-to-End
+## Development Workflow (Current — Proof of Concept)
 
-All 6 phases run **in the browser** when the user clicks "Generate". No server.
+For testing, we bypass the API and upload UI entirely:
+1. Test SCORM files are in the repo (`EV/` directory — gitignored, uploaded to Codespace)
+2. Brand URL: `https://www.backgrounds.supply/?ref=onepagelove` (also in `WEBSITE BRANDING REF.rtf`)
+3. Claude Code acts as the LLM layout engine — extracts content, designs layout, generates images
+4. The GitHub Pages URL (`https://aigenesis2023.github.io/ModernisationEngine/`) serves the finished course directly — no upload UI, no runtime processing
+5. User previews, gives feedback, Claude Code iterates
 
-### Phase 1 — SCORM Parsing (`scorm-parser.js`)
-- Reads uploaded `fileMap` (Map<relativePath, File>) built from folder upload
-- Parses `imsmanifest.xml` for course title, ID, mastery score, SCORM version
-- Finds Storyline data JS files in `html5/data/js/` — each is one slide
-- Parses each via `window.globalProvideData('slide', 'JSON')` pattern using Function constructor
-- Extracts from each slide: objects (text, images, buttons, shapes), layers, triggers, states
-- Classifies images by role: `background`, `hero`, `content`, `icon`, `decorative` (based on size/coverage/depth)
-- Detects quiz data (pick-one, pick-many, true/false) from Storyline accType patterns
-- Detects form fields, video/audio, sliders, scroll panels, 360-images
-- **Output:** `CourseIR` — { meta, slides[], questionBanks[], navigation, variables, assets }
-
-### Phase 2 — Content Planning (`content-planner.js`)
-- **Noise filtering:** Removes 273+ categories of Storyline junk — auto-generated labels ("Rectangle 1"), icon alt-text ("arrow icon 1"), shape names, object hashes, ALL CAPS internal names, quiz type labels
-- **Section grouping:** Groups slides into sections based on Storyline scene boundaries
-- **Presentation classification:** Each slide gets a `presentation` type: `hero`, `narrative`, `interactive`, `media-feature`, `quiz`, `form`, `branching`
-- **Image filtering:** Skips decorative/icon images, allows one background per section, deduplicates
-- **Title derivation:** If manifest title is too short (< 5 chars, like "EV"), derives from first section title or heading
-- **Output:** `CoursePlan` — { meta, sections[], quizBanks[], verification }
-
-### Phase 3 — Brand Scraping (`brand-scraper.js`)
-- Fetches brand URL via CORS proxy: `https://cors-proxy.leoduncan-elearning.workers.dev?url=...`
-- 10-second timeout on main fetch, 5-second timeout per external stylesheet
-- Parses HTML with DOMParser, collects all CSS (inline `<style>`, external `<link>`, `[style]` attrs)
-- **Color extraction:** Finds hex/rgb colors, maps to roles (primary, secondary, accent) by saturation + context (background, border, theme-color meta)
-- **Dark/light detection:** Counts dark vs light background occurrences, checks body/html background
-- **Typography:** Extracts font-family declarations, finds Google Fonts imports, detects heading weight
-- **Style:** Detects border-radius, glassmorphism (backdrop-filter + transparent bg), button style (pill/rounded/solid), card style (glass/elevated/outlined/flat), mood (creative/corporate/elegant)
-- **Logo:** Tries header selectors, `.logo img`, og:image fallback
-- **Fallback:** If fetch fails, returns generic purple/dark profile
-- **Output:** `BrandProfile` — { colors, typography, style, logo }
-
-### Phase 4 — Adapt Translation (`adapt-translator.js`)
-- **ID Manager:** Central authority for all IDs — guarantees every component→block→article→page chain is valid. One broken reference = broken course.
-- Creates single-page deep-scroll structure: 1 page, N articles (sections), N blocks (slides), N components
-- **Article displayTitle** is set from section title (except hero sections) — this is what renders as section headers
-- **Component type mapping** (this is critical — determines which React component renders):
-
-| Slide Content | Component Type | React Component |
-|---|---|---|
-| `presentation: 'hero'` or `section.type: 'hero'` | `hero` | HeroSplash (full-viewport, animated title, bg image) |
-| Has video | `media` | MediaBlock (video player with play overlay) |
-| `interactive` layers + mostly images | `narrative` | NarrativeSlider (prev/next carousel) |
-| `interactive` layers, text-heavy | `accordion` | SilkyAccordion (expandable panels) |
-| `form` with formFields | `textinput` | TextInputBlock (all fields grouped, one submit) |
-| `quiz` with quizData | `mcq` | MCQPro (selection + submit + feedback + retry) |
-| `branching` with interactions | `branching` | BranchingCards (selectable option cards) |
-| Has image + text | `graphic-text` | GraphicText (side-by-side split) |
-| 4+ short texts (< 120 chars each), no images | `bento` | BentoGrid (multi-card grid) |
-| 3+ texts with separators (` - `, `:`, `\|`) | `data-table` | DataTable (auto-parsed table) |
-| Has image only | `graphic` | GraphicBlock (full-width with hover zoom) |
-| `presentation: 'results'` | `text` (results-display class) | TextBlock (styled for results) |
-| Default (text only) | `text` | TextBlock |
-
-- **Image paths:** `adaptImagePath()` strips directory, prepends `course/en/images/filename`
-- **Output:** Adapt JSON — { course, contentObjects[], articles[], blocks[], components[] }
-
-### Phase 5 — Template Injection + Image Embedding (`app.js`)
-- Fetches `blade-runner-template.html` (tries 3 paths)
-- Verifies it's actually the React app (checks for 'courseData' or 'react' in HTML)
-- **Image embedding:**
-  - Stringifies ALL adapt JSON, scans for image filenames
-  - Iterates fileMap for `.jpg|.jpeg|.png|.gif|.svg|.webp` files
-  - Matches by filename (not directory) — catches `mobile/` files referenced as `story_content/`
-  - Reads matching files as ArrayBuffer → base64 data URLs
-  - Caps: **6MB total**, **800KB per image** — skips larger ones
-  - Replaces `course/en/images/filename` paths with `data:image/...;base64,...` in ALL JSON
-  - Debug logging when 0 images match (shows JSON refs vs SCORM files)
-- Injects `<script>window.courseData = {...}; window.brandData = {...};</script>` before `</head>`
-
-### Phase 6 — SCORM Packaging (`app.js` + JSZip)
-- Creates ZIP with: `index.html` (the injected template), `imsmanifest.xml`
-- Copies original images from `story_content/` and `mobile/` into `course/en/images/`
-- Copies video files from `story_content/` into `course/en/video/`
-- Compresses with DEFLATE level 6
-- User downloads as `modernised-course.zip`
+**Once concept is proven**, we add back:
+- Upload UI for SCORM file + brand URL
+- API key input field (Claude API for the LLM layout engine)
+- AI editor for end-user customization
 
 ---
 
-## Blade Runner Engine (React Renderer)
+## Phase 1: Content Extraction (Simplified Parser)
 
-### Tech Stack
+The parser's job is now "structured dumb" — extract all meaningful content without trying to interpret Storyline's layout or interaction model.
+
+### What to extract:
+- **Course title** from imsmanifest.xml
+- **Scene boundaries** (Storyline's intentional topic groupings — use as section markers)
+- **All text content** per slide (headings, body text, callouts — cleaned of junk)
+- **Quiz data** (question text, choices with correct answers, feedback) — structured, not raw text
+- **Form fields** (labels, field types)
+- **Media inventory** (list of all image/video files with filenames)
+- **Video references** (which slides reference which video files)
+
+### What to NOT extract (removed from V1):
+- Layer hierarchy, trigger patterns, state analysis
+- Image role classification (background/hero/content/icon/decorative)
+- Interaction model analysis (click-reveal, auto-reveal, conditional)
+- Presentation heuristics (classifyPresentation)
+- Coordinate/depth/size data for layout inference
+
+### Content Bucket schema:
+```json
+{
+  "title": "EV Awareness & Safety",
+  "sections": [
+    {
+      "sceneId": "scene1",
+      "sceneTitle": "Recognising an EV",
+      "slides": [
+        {
+          "slideId": "5WKv4q3uVlq",
+          "texts": ["heading text", "body paragraph 1", "body paragraph 2"],
+          "images": ["5d4Z2zggdHJ.jpg"],
+          "videos": [],
+          "quiz": null,
+          "formFields": []
+        }
+      ]
+    }
+  ],
+  "media": {
+    "images": ["5d4Z2zggdHJ.jpg", "6FsIKpGsVCv.jpg", ...],
+    "videos": ["video_5g5siribedP.mp4"]
+  },
+  "noiseStats": { "textsDropped": 264, "shapesDropped": 55 }
+}
+```
+
+### Noise filtering (still needed):
+- Auto-generated labels ("Rectangle 1", "Shape 3")
+- Icon alt-text ("arrow icon 1")
+- Shape filenames (Shape*.png, txt__default_*.png)
+- Storyline UI text ("Click to reveal", player instructions)
+- Very short text (< 3 chars)
+
+---
+
+## Phase 2: Brand Scraping (Keep from V1)
+
+Brand scraper (`brand-scraper.js`) works well and is kept as-is:
+- Fetches URL via CORS proxy (`https://cors-proxy.leoduncan-elearning.workers.dev`)
+- Extracts: colors (primary, secondary, accent, background, text), typography (fonts, sizes, weights), style (border-radius, button style, mood), logo
+- Falls back to SCORM project colors if scraping fails, then to generic defaults
+
+---
+
+## Phase 3: AI Layout Engine
+
+### For proof-of-concept (current):
+Claude Code (this tool) acts as the layout engine. It reads the Content Bucket + Brand Profile and manually designs the course layout JSON.
+
+### For production (future):
+An LLM API call (Claude Sonnet or Haiku) replaces this manual step. The system prompt describes a Senior Instructional Designer persona with a component reference sheet.
+
+### Component Library (target: 25-30 premium components)
+
+**Existing (from V1 — keep and polish):**
+| Component | Purpose |
+|---|---|
+| `hero` / HeroSplash | Full-viewport opening with animated title, background image, scroll indicator |
+| `text` / TextBlock | Clean text with heading, body, instruction |
+| `graphic` / GraphicBlock | Full-width image with hover zoom |
+| `graphic-text` / GraphicText | Side-by-side text + image split (alternating left/right) |
+| `accordion` / SilkyAccordion | Expandable panels with completion tracking |
+| `mcq` / MCQPro | Quiz with selection, submit, feedback, retry |
+| `narrative` / NarrativeSlider | Prev/next carousel with dots |
+| `bento` / BentoGrid | Multi-card grid with image backgrounds |
+| `data-table` / DataTable | Auto-parsed table from structured data |
+| `media` / MediaBlock | Video player with custom play overlay |
+| `textinput` / TextInputBlock | Multi-field form with labels + submit |
+| `branching` / BranchingCards | Selectable option cards with letter badges |
+
+**New components to build:**
+| Component | Purpose |
+|---|---|
+| `timeline` / TimelineStepper | Numbered sequential steps with connecting line |
+| `comparison` / ComparisonTable | Side-by-side columns with checkmarks/crosses |
+| `stat-callout` / StatCallout | Large numbers with context labels |
+| `pullquote` / PullQuote | Emphasized text with accent bar (key takeaways, warnings) |
+| `key-term` / KeyTerm | Highlighted vocabulary with inline definition |
+| `checklist` / Checklist | Checkable items with completion tracking |
+| `tabs` / TabPanel | Horizontal tabbed content panels |
+| `flashcard` / Flashcard | Flip interaction for term/definition pairs |
+| `labeled-image` / LabeledImage | Image with numbered hotspot markers |
+| `process-flow` / ProcessFlow | Connected nodes showing a workflow |
+| `image-gallery` / ImageGallery | Grid/masonry of multiple images |
+| `full-bleed` / FullBleedImage | Edge-to-edge image with overlay text (section breaks) |
+| `video-transcript` / VideoTranscript | Video player with expandable transcript |
+
+---
+
+## Phase 4: AI Image Generation
+
+**Strategy: Generate ALL images with AI for MVP.**
+
+The SCORM file's original images are mostly Storyline artifacts (shapes, text-as-image, low-res screenshots). Instead of trying to salvage them, generate fresh branded images for every section.
+
+### Image generation approach:
+- Use **Pollinations** free API for MVP (`https://image.pollinations.ai/prompt/...`)
+- Prompt includes: section topic, brand colors from URL (#0099ff, #ff3c71), style directive
+- Dimensions specified per component type (16:9 for hero/full-bleed, 1:1 for cards, 4:3 for graphic-text)
+- Style: modern, clean, tech-professional, matching brand aesthetic
+- **User can replace any image** via the AI editor (future)
+
+### Moving to better image generation later:
+- DALL-E 3, Flux, or Stable Diffusion for higher quality
+- Brand style consistency via image-to-image with brand colors
+- Potentially keep original SCORM photos where they're high-quality (editor option)
+
+---
+
+## Phase 5: React Renderer (Keep and Polish from V1)
+
+### Tech Stack (unchanged):
 - React 19.2 + Vite 8.0
-- Tailwind CSS 4.2 (via @tailwindcss/vite)
-- Framer Motion 12.38 (scroll-reveal animations)
-- Zustand 5.0 (state management)
-- vite-plugin-singlefile 2.3 (inlines all JS/CSS into one HTML)
+- Tailwind CSS 4.2
+- Framer Motion 12.38
+- Zustand 5.0
+- vite-plugin-singlefile 2.3
 
-### Building the Template
+### Building the Template:
 ```bash
 cd blade-runner-engine
 npm install
 npx vite build
 cp dist/index.html ../blade-runner-template.html
 ```
-**IMPORTANT:** After any component/CSS change, you MUST rebuild and commit `blade-runner-template.html`. The pipeline fetches this file at runtime — it doesn't build React on the fly.
 
-### How the Renderer Works
-1. `App.jsx` reads `window.courseData` and `window.brandData` (injected by pipeline)
-2. `courseStore.js` (Zustand) stores all course data + UI state (scroll progress, accordion state, quiz answers)
-3. `ThemeEngine.js` applies brand colors/fonts/radius as CSS custom properties on `:root`
-   - Handles dark mode (white glass overlays) and light mode (white fills, dark borders)
-   - Sets `--ui-button-radius` from brand `buttonStyle` (pill/rounded/default)
-4. `CourseRenderer.jsx` renders the tree:
-   - Progress bar (fixed top, gradient)
-   - Course header (hidden when HeroSplash exists)
-   - For each article → `ArticleSection` with alternating backgrounds, section title + accent bar
-   - Hero sections render full-width (no max-width container)
-   - For each block → `BlockRow` with glass card wrapper (backdrop-blur)
-   - For each component → resolved via `ComponentRegistry.js` → rendered
-5. All components use Framer Motion `useInView` for scroll-triggered entrance animations
+### Key files:
+- `blade-runner-engine/src/App.jsx` — loads window.courseData + window.brandData
+- `blade-runner-engine/src/components/CourseRenderer.jsx` — recursive JSON → React tree
+- `blade-runner-engine/src/components/ComponentRegistry.js` — maps type strings → components
+- `blade-runner-engine/src/theme/ThemeEngine.js` — brand → CSS variables
+- `blade-runner-engine/src/store/courseStore.js` — Zustand state management
+- `blade-runner-engine/src/index.css` — CSS design system variables
 
-### CSS Design System (`index.css`)
-All colors/fonts/radii are CSS custom properties overridden by ThemeEngine at runtime:
-```
-Colors:     --brand-primary, --brand-secondary, --brand-accent, --brand-heading
-            --brand-bg, --brand-surface, --brand-text, --brand-text-muted
-            --brand-success, --brand-error, --brand-gradient, --brand-glow
-Glass:      --ui-glass, --ui-glass-border, --ui-glass-hover
-Radius:     --ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
-Fonts:      --font-heading, --font-body
-Typography: --font-base-size, --font-h1, --font-h2, --font-h3
-            --font-heading-weight, --font-body-weight, --font-line-height
-```
-Also includes: focus-visible states, link styling in body content, image loading backgrounds, custom scrollbar, `prefers-reduced-motion` support.
-
-### Brand Logo
-- Logo is scraped from the brand URL (header selectors, `.logo img`, og:image fallback)
-- Displayed in course header (above title) and footer
-- Hidden via `onError` if the logo URL fails to load
-
-### Zustand Store (`courseStore.js`)
-```
-course, contentObjects, articles, blocks, components  ← Course data
-brand                                                  ← Brand profile
-scrollProgress                                         ← 0-100
-activeAccordions                                       ← { componentId_itemIndex: true }
-quizAnswers                                            ← { componentId: answerIndex }
-completedSections                                      ← { articleId: true }
-```
-Actions: `loadCourse`, `loadBrand`, `toggleAccordion`, `submitAnswer`, `completeSection`, `updateComponent`.
-Exposed as `window.courseData` for potential future AI editing bridge.
+### Design System:
+- All colors/fonts/radii are CSS custom properties set by ThemeEngine at runtime
+- Dark mode default, light mode when brand background luminance > 0.55
+- Glass card styling adapts to background brightness
+- All components use `var(--ui-glass)`, `var(--brand-primary)`, etc. — never hardcoded colors
 
 ---
 
-## CORS Proxy
-Brand scraping requires a CORS proxy (Cloudflare Worker):
-`https://cors-proxy.leoduncan-elearning.workers.dev`
-Used as: `proxy?url=<encoded-brand-url>`. Timeout: 10s main, 5s per stylesheet.
+## Phase 6: AI Editor (Future)
+
+Since the course is a JSON tree of components, building an editor is straightforward:
+- User clicks a block → sidebar opens
+- Options: "Change to Accordion", "Swap Image", "Regenerate Image", "Edit Text", "Delete Section"
+- "Regenerate" sends the section content back to the LLM for a redesign
+- Image replacement via upload or AI regeneration with new prompt
+- Export: download as SCORM package, HTML, or JSON
+
+---
 
 ## Test Files
+- `EV/` — Full 108-slide EV Awareness & Safety course (gitignored, uploaded to Codespace)
+- `WEBSITE BRANDING REF.rtf` — Contains brand URL: `https://www.backgrounds.supply/?ref=onepagelove`
 - `TEST SCORM/` — Small test SCORM (committed to repo)
-- `EV/` — Full 108-slide EV course (gitignored, too large for git, uploaded to Codespace)
 
----
-
-## Pipeline Diagnostics
-Each pipeline phase logs timing and content breakdowns in the progress log:
-- **Phase 1:** `(Xms): N slides, M objects`
-- **Phase 2:** `(Xms): N sections, title="..."`
-- **Phase 3:** `(Xms): primary=#..., font=..., theme=..., bg=#...`
-- **Phase 4:** `(Xms): N sections, M blocks, P components [hero:1, graphic-text:5, accordion:3, ...]`
-- **Phase 5:** `Found N referenced images (out of M total)` + DEBUG lines when 0 match
+## CORS Proxy
+`https://cors-proxy.leoduncan-elearning.workers.dev`
 
 ---
 
@@ -219,71 +238,20 @@ Each pipeline phase logs timing and content breakdowns in the progress log:
 
 **Every engine change must work for ANY Storyline SCORM file.**
 
-The test SCORM files are diagnostic tools that REVEAL categories of problems.
-They are NOT the product. Fixing specific output for specific test files is
-COUNTERPRODUCTIVE — it gives a false sense of progress.
-
-**Before writing ANY code, ask:** "If someone uploaded a Storyline course about
-cooking safety, marine biology, or HR compliance, would this change help THAT course?"
-
-**The process:**
-1. Name the CATEGORY, not the symptom
-2. Research how Storyline produces this category UNIVERSALLY
-3. Design the rule based on STRUCTURAL PATTERNS
-4. Implement — test output should improve as a BYPRODUCT
+The test SCORM files are diagnostic tools. Fixing specific output for specific files is counterproductive.
 
 **Branding source of truth:**
-- Brand URL website → ONLY source for visual identity (colors, fonts, logo, style)
+- Brand URL website → ONLY source for visual identity
 - SCORM file → ONLY source for content and structure
 - Original SCORM styling is IRRELEVANT
 
 ---
 
-## Component Development Guidelines
+## V1 Architecture (Legacy — kept in codebase for reference)
 
-Reference these tools for interaction design patterns:
-- **Articulate Rise 360** — gold standard for scrolling e-learning interactions
-- **Adapt Framework** — component library documentation and JSON schemas
-- **H5P** — interactive content types and patterns
-
-Every component must:
-1. Accept Adapt-standard JSON props (`data` object with `_id`, `_component`, etc.)
-2. Use CSS custom properties for ALL brand-specific colors (never hardcode colors)
-3. Include Framer Motion scroll-reveal animations via `useInView`
-4. Be responsive (mobile-first)
-5. Have `data-component-id` attribute on wrapper div (for future AI editing)
-6. Handle missing/empty data gracefully (return null, don't render empty cards)
-7. Handle image load errors with `onError` fallback (hide broken images)
-
----
-
-## Known Issues & Next Steps
-
-### Critical
-- **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion in an LMS.
-- **Image embedding:** Only ~5 of 36 content images typically embed. Large Storyline images (>1.5MB) are skipped. Images referenced in Storyline data as `story_content/` often only exist in `mobile/` — filename matching handles this but needs verification.
-
-### Content Quality
-- **43% content retention** — Noise filtering drops 264+ junk elements but may be too aggressive for some courses
-- **Drag-and-drop** content presented as plain text (needs matching exercise interaction component)
-- **360-image** content extracted but no interactive viewer component
-- **Results slides** use basic text component (no dynamic score display yet)
-
-### Data Flow Gaps
-- `coursePlan.quizBanks` — quiz pool structure not used (could enhance quiz randomisation)
-- `coursePlan.navigation` — course navigation map ignored (could enable menu/progression)
-- `coursePlan.variables` — Storyline variables ignored (could drive conditional content)
-- `slide.triggers` / `slide.states` — interaction triggers not translated to web events
-- `brand.style.cardStyle` — glass/elevated/outlined inference not applied per-component
-
-### Polish
-- Mobile responsive pass needed across all components
-
-### Recently Fixed (2026-03-23)
-- **Branching cards empty:** Translator read `slide.interactions` but planner stored in `slide.buttons` — now reads correct path
-- **Glass/theme mismatch:** ThemeEngine trusted theme string ("light") even when bg was dark (#383838) — now uses luminance
-- **Section fragmentation:** "(Part 2)" sections now merged with parent when same title + type
-- **Content duplication:** Identical components across branching paths now deduplicated
-- **Empty components:** Title-only text components (no body) filtered out
-- **All components now use CSS variables** for glass/border values — no more hardcoded rgba
-- **Brand typography fully applied:** baseSize, h1/h2/h3 sizes, weights, line-height from scraper
+The old rule-based pipeline is still in the codebase but will be superseded by V2:
+- `engine/scorm-parser.js` — full Storyline structure extraction (to be simplified)
+- `engine/content-planner.js` — heuristic presentation classification (to be replaced by LLM)
+- `engine/adapt-translator.js` — rule-based component mapping (to be replaced by LLM)
+- `engine/brand-scraper.js` — brand extraction (kept as-is)
+- `engine/app.js` — pipeline orchestrator (to be rewritten for V2)
