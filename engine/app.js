@@ -206,17 +206,30 @@
       // Phase 5: Build single-file HTML (Blade Runner Engine)
       log('Phase 5: Building course output...', 'info');
       var templateHtml = null;
-      try {
-        var templateResp = await fetch('blade-runner-engine/dist/index.html');
-        if (templateResp.ok) templateHtml = await templateResp.text();
-      } catch (e) {}
-
-      if (!templateHtml) {
-        // Fallback: try alternate path
+      // Try multiple paths to find the Blade Runner Engine template
+      var templatePaths = [
+        'blade-runner-template.html',
+        'blade-runner-engine/dist/index.html',
+        './blade-runner-template.html'
+      ];
+      for (var tp = 0; tp < templatePaths.length; tp++) {
+        if (templateHtml) break;
         try {
-          var templateResp2 = await fetch('blade-runner-template.html');
-          if (templateResp2.ok) templateHtml = await templateResp2.text();
-        } catch (e) {}
+          log('  Trying template: ' + templatePaths[tp], 'info');
+          var templateResp = await fetch(templatePaths[tp]);
+          if (templateResp.ok) {
+            templateHtml = await templateResp.text();
+            // Verify it's actually the React app (not a 404 page)
+            if (templateHtml.indexOf('courseData') === -1 && templateHtml.indexOf('react') === -1 && templateHtml.indexOf('React') === -1) {
+              log('  Template loaded but not React app, skipping', 'info');
+              templateHtml = null;
+            } else {
+              log('  Template loaded: ' + (templateHtml.length / 1024).toFixed(0) + ' KB', 'success');
+            }
+          }
+        } catch (e) {
+          log('  Template fetch failed: ' + e.message, 'info');
+        }
       }
 
       if (templateHtml) {
