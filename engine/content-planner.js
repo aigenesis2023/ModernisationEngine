@@ -835,7 +835,8 @@ window.ContentPlanner = (function () {
     if (!text || text.length < 80) return text;
 
     // Strategy 1: Split on sentence boundaries (periods, !, ?) and deduplicate
-    var sentences = text.split(/(?<=[.!?])\s+/).filter(function (s) { return s.trim().length > 10; });
+    // Split on sentence boundaries — avoid lookbehind for Safari compatibility
+    var sentences = (text.match(/[^.!?]+[.!?]+/g) || [text]).filter(function (s) { return s.trim().length > 10; });
     if (sentences.length >= 4) {
       var seen = {};
       var unique = sentences.filter(function (s) {

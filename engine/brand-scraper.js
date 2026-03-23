@@ -11,7 +11,7 @@ window.BrandScraper = (function () {
     let html;
     try {
       const proxyUrl = corsProxyUrl + '?url=' + encodeURIComponent(url);
-      const resp = await fetch(proxyUrl);
+      const resp = await fetch(proxyUrl, { signal: AbortSignal.timeout(10000) });
       if (!resp.ok) throw new Error('HTTP ' + resp.status);
       html = await resp.text();
     } catch (err) {
@@ -55,7 +55,7 @@ window.BrandScraper = (function () {
       if (href) {
         const cssUrl = resolveUrl(href, pageUrl);
         linkPromises.push(
-          fetch(corsProxyUrl + '?url=' + encodeURIComponent(cssUrl))
+          fetch(corsProxyUrl + '?url=' + encodeURIComponent(cssUrl), { signal: AbortSignal.timeout(5000) })
             .then(r => r.ok ? r.text() : '')
             .catch(() => '')
         );

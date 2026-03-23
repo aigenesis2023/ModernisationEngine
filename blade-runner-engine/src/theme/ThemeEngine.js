@@ -66,8 +66,11 @@ export function applyBrand(brand) {
   }
 
   // Glass intensity based on mood
+  // Check theme (dark/light) separately from mood (creative/corporate/etc.)
+  // The brand scraper detects theme from CSS body background color
+  const theme = s.theme || (s.mood === 'dark' ? 'dark' : '');
   const mood = s.mood || 'default';
-  if (mood === 'dark' || mood === 'bold') {
+  if (theme === 'dark' || mood === 'bold') {
     root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.06)');
     root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.12)');
     root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.10)');
