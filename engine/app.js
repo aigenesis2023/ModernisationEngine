@@ -42,6 +42,29 @@
   var fileMap = new Map(); // relativePath -> File
   var generatedHtml = null;
   var generatedBlob = null;
+  var swReady = false;
+  var swRegistration = null;
+
+  // Register Service Worker for preview
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('preview-sw.js', { scope: '/' })
+      .then(function (reg) {
+        swRegistration = reg;
+        // Wait for the SW to be active
+        var sw = reg.active || reg.waiting || reg.installing;
+        if (sw && sw.state === 'activated') {
+          swReady = true;
+        } else if (sw) {
+          sw.addEventListener('statechange', function () {
+            if (sw.state === 'activated') swReady = true;
+          });
+        }
+        console.log('Preview SW registered');
+      })
+      .catch(function (err) {
+        console.log('Preview SW registration failed:', err.message);
+      });
+  }
 
   // ---- File Upload ----
 
@@ -251,16 +274,93 @@
 
   // ---- Preview Toggle ----
 
-  btnPreview.addEventListener('click', function () {
+  btnPreview.addEventListener('click', async function () {
     if (!generatedHtml) return;
-    // Generate a lightweight preview HTML from the Adapt JSON data
+
     var data = JSON.parse(generatedHtml);
+
+    // If Service Worker is available, use it for identical Adapt preview
+    if (swReady && navigator.serviceWorker.controller) {
+      log('Loading preview...', 'info');
+
+      // Build the file map for the SW
+      var previewFiles = {};
+
+      // Adapt runtime files
+      try {
+        var manifest = await (await fetch('adapt-template/manifest.json')).json();
+        for (var i = 0; i < manifest.length; i++) {
+          try {
+            var resp = await fetch('adapt-template/' + manifest[i]);
+            if (resp.ok) {
+              if (/\.(woff2?|ttf|eot|png|jpg|gif)$/i.test(manifest[i])) {
+                previewFiles[manifest[i]] = await resp.arrayBuffer();
+              } else {
+                previewFiles[manifest[i]] = await resp.text();
+              }
+            }
+          } catch (e) {}
+        }
+      } catch (e) {
+        log('Warning: Could not load template files for preview', 'info');
+      }
+
+      // Adapt index.html
+      previewFiles['index.html'] =
+        '<!doctype html><html id="adapt" class="html no-js" lang="en" dir="ltr"><head>' +
+        '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' +
+        '<title>' + (data.title || 'Preview') + '</title>' +
+        '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+        '<link href="adapt.css" type="text/css" rel="stylesheet">' +
+        '<link href="brand-override.css" type="text/css" rel="stylesheet">' +
+        '<script>window.ADAPT_BUILD_TYPE="production";window.ISCOOKIELMS=false;<\/script>' +
+        '<script src="libraries/modernizr.js"><\/script>' +
+        '<script src="adapt/js/scriptLoader.js"><\/script>' +
+        '</head><body><div id="app"><div id="wrapper"></div></div></body></html>';
+
+      // Brand CSS
+      previewFiles['brand-override.css'] = data.brandCSS || '';
+
+      // Course JSON files
+      previewFiles['course/en/course.json'] = data.course;
+      previewFiles['course/en/contentObjects.json'] = data.contentObjects;
+      previewFiles['course/en/articles.json'] = data.articles;
+      previewFiles['course/en/blocks.json'] = data.blocks;
+      previewFiles['course/en/components.json'] = data.components;
+      previewFiles['course/en/language_data_manifest.js'] =
+        ['course.json', 'contentObjects.json', 'articles.json', 'blocks.json', 'components.json'];
+
+      // Copy original SCORM images for preview
+      for (var entry of fileMap) {
+        var fPath = entry[0], fObj = entry[1];
+        if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(fPath)) {
+          try {
+            previewFiles['course/en/images/' + fPath.split('/').pop()] = await fObj.arrayBuffer();
+          } catch (e) {}
+        }
+      }
+
+      // Send files to Service Worker
+      var mc = new MessageChannel();
+      mc.port1.onmessage = function (ev) {
+        if (ev.data.status === 'ready') {
+          window.open('/preview/', '_blank');
+        }
+      };
+      navigator.serviceWorker.controller.postMessage(
+        { type: 'SET_PREVIEW_FILES', files: previewFiles },
+        [mc.port2]
+      );
+      return;
+    }
+
+    // Fallback: lightweight HTML preview (no SW available)
     var previewHtml = buildPreviewHtml(data);
     var previewUrl = URL.createObjectURL(new Blob([previewHtml], { type: 'text/html' }));
     window.open(previewUrl, '_blank');
   });
 
-  // Build a standalone preview HTML from Adapt JSON (no RequireJS needed)
+  // Fallback preview: lightweight HTML from Adapt JSON
   function buildPreviewHtml(data) {
     var css = data.brandCSS || '';
     var title = data.title || 'Course Preview';
