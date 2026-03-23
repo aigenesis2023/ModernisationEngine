@@ -100,6 +100,7 @@ All 6 phases run **in the browser** when the user clicks "Generate". No server.
 | 4+ short texts (< 120 chars each), no images | `bento` | BentoGrid (multi-card grid) |
 | 3+ texts with separators (` - `, `:`, `\|`) | `data-table` | DataTable (auto-parsed table) |
 | Has image only | `graphic` | GraphicBlock (full-width with hover zoom) |
+| `presentation: 'results'` | `text` (results-display class) | TextBlock (styled for results) |
 | Default (text only) | `text` | TextBlock |
 
 - **Image paths:** `adaptImagePath()` strips directory, prepends `course/en/images/filename`
@@ -163,14 +164,21 @@ cp dist/index.html ../blade-runner-template.html
 ### CSS Design System (`index.css`)
 All colors/fonts/radii are CSS custom properties overridden by ThemeEngine at runtime:
 ```
---brand-primary, --brand-secondary, --brand-accent, --brand-heading
---brand-bg, --brand-surface, --brand-text, --brand-text-muted
---brand-success, --brand-error, --brand-gradient, --brand-glow
---ui-glass, --ui-glass-border, --ui-glass-hover
---ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
---font-heading, --font-body
+Colors:     --brand-primary, --brand-secondary, --brand-accent, --brand-heading
+            --brand-bg, --brand-surface, --brand-text, --brand-text-muted
+            --brand-success, --brand-error, --brand-gradient, --brand-glow
+Glass:      --ui-glass, --ui-glass-border, --ui-glass-hover
+Radius:     --ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
+Fonts:      --font-heading, --font-body
+Typography: --font-base-size, --font-h1, --font-h2, --font-h3
+            --font-heading-weight, --font-body-weight, --font-line-height
 ```
 Also includes: focus-visible states, link styling in body content, image loading backgrounds, custom scrollbar, `prefers-reduced-motion` support.
+
+### Brand Logo
+- Logo is scraped from the brand URL (header selectors, `.logo img`, og:image fallback)
+- Displayed in course header (above title) and footer
+- Hidden via `onError` if the logo URL fails to load
 
 ### Zustand Store (`courseStore.js`)
 ```
@@ -253,13 +261,22 @@ Every component must:
 
 ### Critical
 - **Image display unverified:** Storyline data references `story_content/` paths but files often live in `mobile/`. Embedding code matches by filename so it SHOULD work — needs end-to-end testing. Debug logging added.
-- **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion.
+- **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion in an LMS.
+
+### Data Flow Gaps (partially addressed)
+The pipeline audit found multiple cases where data was extracted but not fully used:
+- `coursePlan.quizBanks` — quiz pool structure passed through but translator doesn't use it (could enhance quiz randomisation)
+- `coursePlan.navigation` — course navigation map ignored (could enable menu/progression)
+- `coursePlan.variables` — Storyline variables ignored (could drive conditional content)
+- `slide.triggers` / `slide.states` — interaction triggers extracted but not translated to web events
+- `brand.style.cardStyle` — glass/elevated/outlined inference scraped but not applied per-component
+- `brand.style.imageStyle` — circular/rounded/sharp inference scraped but not applied
 
 ### Content Gaps
 - Drag-and-drop content presented as plain text (needs matching exercise interaction)
 - 360-image content extracted but no interactive viewer
-- Results routing untested with actual quiz completion flow
+- Results slides use basic text component (no score display logic yet)
 
 ### Polish
 - Mobile responsive pass needed across all components
-- Brand scraper fails on some sites (CORS/timeout) — uses generic fallback
+- Brand scraper CORS fallback now uses SCORM projectColors/projectFonts before generic defaults
