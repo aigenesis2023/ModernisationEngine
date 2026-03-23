@@ -132,8 +132,9 @@ export default function TextInputBlock({ data = {} }) {
               initial={{ opacity: 0, y: 12 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
               transition={{ delay: 0.3 + items.length * 0.1, duration: 0.4 }}
-              className="self-start mt-2 px-6 py-3 rounded-lg text-sm font-medium tracking-wide cursor-pointer"
+              className="self-start mt-2 px-6 py-3 text-sm font-medium tracking-wide cursor-pointer"
               style={{
+                borderRadius: 'var(--ui-button-radius, 9999px)',
                 background: 'var(--brand-primary, #8b5cf6)',
                 color: '#ffffff',
                 border: 'none',

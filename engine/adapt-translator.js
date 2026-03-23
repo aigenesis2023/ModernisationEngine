@@ -302,19 +302,25 @@ window.AdaptTranslator = (function () {
 
     // Determine component type based on presentation and content
     if (presentation === 'hero' || section.type === 'hero') {
-      // Hero: text component with title
+      // Hero: full-viewport splash with animated title and optional background image
       var compId = idManager.nextComponent(blockId);
+      var heroGraphic = contentImages.length > 0 ? {
+        alt: getImageAlt(contentImages[0]) || '',
+        large: adaptImagePath(contentImages[0]),
+        small: adaptImagePath(contentImages[0])
+      } : null;
       components.push({
         _id: compId,
         _parentId: blockId,
         _type: 'component',
-        _component: 'text',
-        _classes: 'hero-text',
+        _component: 'hero',
+        _classes: '',
         _layout: 'full',
         title: slide.originalTitle || section.title || '',
         displayTitle: headings[0] || slide.originalTitle || section.title || '',
         body: textsToBody(allTexts),
-        instruction: ''
+        instruction: '',
+        _graphic: heroGraphic
       });
     } else if (presentation === 'media-feature' || hasVideo) {
       // Video: media component
@@ -344,73 +350,113 @@ window.AdaptTranslator = (function () {
         _preventForwardScrubbing: false
       });
     } else if (presentation === 'interactive' && slide.layers && slide.layers.length > 0) {
-      // Layers → accordion component
-      var items = slide.layers.map(function (layer) {
+      // Layers → accordion OR narrative component depending on content
+      var layerItems = slide.layers.map(function (layer) {
         var layerTexts = (layer.texts || []).map(textVal);
         var layerTitle = layer.name || layerTexts[0] || 'Details';
         var layerBody = layerTexts.length > 1 ? textsToBody(layerTexts.slice(1)) :
           (layerTexts.length === 1 ? textsToBody(layerTexts) : '');
+        var layerGraphic = null;
 
-        // Include layer images if any
+        // Include layer images
         if (layer.images && layer.images.length > 0) {
-          layerBody += '<p><img src="' + adaptImagePath(layer.images[0].src || layer.images[0]) +
-            '" alt="' + escHtml(layer.images[0].alt || '') + '" style="max-width:100%"></p>';
+          var layerImg = layer.images[0];
+          var layerImgSrc = typeof layerImg === 'string' ? layerImg : (layerImg.src || layerImg.originalPath || '');
+          layerGraphic = {
+            src: adaptImagePath(layerImgSrc),
+            large: adaptImagePath(layerImgSrc),
+            alt: (typeof layerImg === 'object' ? layerImg.alt : '') || ''
+          };
+          // Also embed in body for accordion fallback
+          if (!layerGraphic.src) layerGraphic = null;
+          else {
+            layerBody += '<p><img src="' + adaptImagePath(layerImgSrc) +
+              '" alt="' + escHtml(layerGraphic.alt) + '" style="max-width:100%"></p>';
+          }
         }
 
         return {
           title: layerTitle,
-          body: layerBody || '<p>' + escHtml(layerTitle) + '</p>'
+          body: layerBody || '<p>' + escHtml(layerTitle) + '</p>',
+          _graphic: layerGraphic
         };
       });
 
       // Filter out empty/duplicate items
-      items = items.filter(function (item) {
+      layerItems = layerItems.filter(function (item) {
         return item.body && item.body.length > 10;
       });
 
-      if (items.length > 0) {
+      if (layerItems.length > 0) {
+        // Decide: if most layers have images → use narrative (carousel), else accordion
+        var layersWithImages = layerItems.filter(function(item) { return item._graphic; }).length;
+        var useNarrative = layersWithImages > layerItems.length / 2 && layerItems.length >= 2;
+
         var compId = idManager.nextComponent(blockId);
-        components.push({
-          _id: compId,
-          _parentId: blockId,
-          _type: 'component',
-          _component: 'accordion',
-          _classes: '',
-          _layout: 'full',
-          title: headings[0] || slide.originalTitle || '',
-          displayTitle: headings[0] || '',
-          body: textsToBody(allTexts.slice(0, 1)),
-          instruction: items.length > 1 ? 'Select each heading to learn more.' : '',
-          _setCompletionOn: 'allItems',
-          _shouldCollapseItems: true,
-          _shouldExpandFirstItem: false,
-          _items: items
-        });
+        if (useNarrative) {
+          components.push({
+            _id: compId,
+            _parentId: blockId,
+            _type: 'component',
+            _component: 'narrative',
+            _classes: '',
+            _layout: 'full',
+            title: headings[0] || slide.originalTitle || '',
+            displayTitle: headings[0] || '',
+            body: textsToBody(allTexts.slice(0, 1)),
+            instruction: 'Use the arrows to explore each item.',
+            _setCompletionOn: 'allItems',
+            _items: layerItems
+          });
+        } else {
+          components.push({
+            _id: compId,
+            _parentId: blockId,
+            _type: 'component',
+            _component: 'accordion',
+            _classes: '',
+            _layout: 'full',
+            title: headings[0] || slide.originalTitle || '',
+            displayTitle: headings[0] || '',
+            body: textsToBody(allTexts.slice(0, 1)),
+            instruction: layerItems.length > 1 ? 'Select each heading to learn more.' : '',
+            _setCompletionOn: 'allItems',
+            _shouldCollapseItems: true,
+            _shouldExpandFirstItem: false,
+            _items: layerItems
+          });
+        }
       }
     } else if (presentation === 'form' && slide.formFields && slide.formFields.length > 0) {
-      // Form fields → textInput components
-      slide.formFields.forEach(function (field) {
-        var compId = idManager.nextComponent(blockId);
-        components.push({
-          _id: compId,
-          _parentId: blockId,
-          _type: 'component',
-          _component: 'textinput',
-          _classes: '',
-          _layout: 'full',
-          title: field.label || 'Input',
-          displayTitle: '',
-          body: '<p>' + escHtml(field.label || 'Please enter your response') + '</p>',
-          instruction: '',
-          ariaQuestion: field.label || '',
-          _items: [{ prefix: '', _answers: [''], placeholder: field.label || '' }],
-          _attempts: 1,
-          _canShowFeedback: false,
-          _canShowMarking: false,
-          _canShowModelAnswer: false,
-          _shouldDisplayAttempts: false,
-          _recordInteraction: false
-        });
+      // Form fields → single textInput component with all fields as items
+      var formItems = slide.formFields.map(function (field) {
+        return {
+          prefix: field.label || '',
+          _answers: [''],
+          placeholder: field.label || 'Enter your response'
+        };
+      });
+      var formTitle = headings[0] || slide.originalTitle || '';
+      var formBody = allTexts.length > 0 ? textsToBody(allTexts) : '';
+      var compId = idManager.nextComponent(blockId);
+      components.push({
+        _id: compId,
+        _parentId: blockId,
+        _type: 'component',
+        _component: 'textinput',
+        _classes: '',
+        _layout: 'full',
+        title: formTitle,
+        displayTitle: formTitle,
+        body: formBody || '<p>Please complete the fields below.</p>',
+        instruction: '',
+        _items: formItems,
+        _attempts: 1,
+        _canShowFeedback: false,
+        _canShowMarking: false,
+        _canShowModelAnswer: false,
+        _shouldDisplayAttempts: false,
+        _recordInteraction: false
       });
     } else if (presentation === 'quiz' && slide.quizData) {
       // Quiz question → MCQ component
@@ -459,16 +505,18 @@ window.AdaptTranslator = (function () {
         }
       });
     } else if (presentation === 'branching' && slide.interactions) {
-      // Branching options → text component with styled buttons
-      // Adapt doesn't have a native branching component, so we use
-      // a narrative or text component to present the options
+      // Branching options → BranchingCards component with interactive selection
       var optionTexts = slide.interactions.filter(function (i) {
         return i.type === 'button' || i.type === 'option';
       }).map(function (i) { return textVal(i.label || i.text || ''); }).filter(Boolean);
 
-      var bodyHtml = textsToBody(allTexts);
+      // Build body with options as list items for BranchingCards to parse
+      var bodyHtml = '';
+      if (allTexts.length > 0) {
+        bodyHtml += textsToBody(allTexts);
+      }
       if (optionTexts.length > 0) {
-        bodyHtml += '<ul class="branching-options">';
+        bodyHtml += '<ul>';
         optionTexts.forEach(function (opt) {
           bodyHtml += '<li>' + escHtml(opt) + '</li>';
         });
@@ -480,8 +528,8 @@ window.AdaptTranslator = (function () {
         _id: compId,
         _parentId: blockId,
         _type: 'component',
-        _component: 'text',
-        _classes: 'branching-component',
+        _component: 'branching',
+        _classes: '',
         _layout: 'full',
         title: headings[0] || slide.originalTitle || '',
         displayTitle: headings[0] || '',
@@ -489,45 +537,28 @@ window.AdaptTranslator = (function () {
         instruction: ''
       });
     } else if (hasImage && allTexts.length > 0) {
-      // Text + image → split layout (text left, graphic right)
+      // Text + image → GraphicText split component (single component, not two)
       var contentImg = contentImages[0];
       var imgSrc = getImageSrc(contentImg);
       var imgAlt = getImageAlt(contentImg);
 
-      var textCompId = idManager.nextComponent(blockId);
+      var compId = idManager.nextComponent(blockId);
       components.push({
-        _id: textCompId,
+        _id: compId,
         _parentId: blockId,
         _type: 'component',
-        _component: 'text',
+        _component: 'graphic-text',
         _classes: '',
-        _layout: 'left',
+        _layout: 'full',
         title: headings[0] || '',
         displayTitle: headings[0] || '',
         body: textsToBody(allTexts),
-        instruction: ''
-      });
-
-      var graphicCompId = idManager.nextComponent(blockId);
-      components.push({
-        _id: graphicCompId,
-        _parentId: blockId,
-        _type: 'component',
-        _component: 'graphic',
-        _classes: '',
-        _layout: 'right',
-        title: '',
-        displayTitle: '',
-        body: '',
         instruction: '',
         _graphic: {
           alt: imgAlt,
-          longdescription: '',
           large: adaptImagePath(imgSrc),
-          small: adaptImagePath(imgSrc),
-          attribution: ''
-        },
-        _isOptional: true
+          small: adaptImagePath(imgSrc)
+        }
       });
     } else {
       // Default: text component
@@ -615,13 +646,16 @@ window.AdaptTranslator = (function () {
       var articleId = idManager.nextArticle(pageId);
       var articleTitle = section.title || 'Section ' + (sectionIndex + 1);
 
+      // Hero sections don't need a section header (the HeroSplash handles it)
+      var showSectionTitle = section.type !== 'hero';
+
       articlesJson.push({
         _id: articleId,
         _parentId: pageId,
         _type: 'article',
         _classes: sectionClasses(section.type),
         title: articleTitle,
-        displayTitle: '',
+        displayTitle: showSectionTitle ? articleTitle : '',
         body: '',
         instruction: ''
       });

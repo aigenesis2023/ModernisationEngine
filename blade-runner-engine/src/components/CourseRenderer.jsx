@@ -37,6 +37,36 @@ function ArticleSection({ article, blocks, components, index }) {
   const isEven = index % 2 === 0;
   const sectionBg = isEven ? 'transparent' : 'var(--brand-surface, #12121e)';
 
+  // Hero sections are full-width (no max-width container)
+  const isHero = (article._classes || '').includes('section-hero');
+  // Check if this section has a hero component (for full-bleed rendering)
+  const hasHeroComponent = blocks.some((b) =>
+    components.some((c) => c._parentId === b._id && c._component === 'hero')
+  );
+
+  if (hasHeroComponent || isHero) {
+    // Hero sections render full-width with no padding
+    return (
+      <motion.section
+        ref={ref}
+        data-article-id={article._id}
+        className="relative"
+        initial={{ opacity: 0 }}
+        animate={isInView ? { opacity: 1 } : {}}
+        transition={{ duration: 0.6 }}
+      >
+        {blocks.map((block, bi) => (
+          <BlockRow
+            key={block._id}
+            block={block}
+            components={components.filter((c) => c._parentId === block._id)}
+            blockIndex={bi}
+          />
+        ))}
+      </motion.section>
+    );
+  }
+
   return (
     <motion.section
       ref={ref}
@@ -44,8 +74,8 @@ function ArticleSection({ article, blocks, components, index }) {
       className={`relative ${article._classes || ''}`}
       style={{
         background: sectionBg,
-        paddingTop: index === 0 ? '48px' : '64px',
-        paddingBottom: '64px',
+        paddingTop: index === 0 ? '48px' : '80px',
+        paddingBottom: '80px',
       }}
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
@@ -55,7 +85,7 @@ function ArticleSection({ article, blocks, components, index }) {
         {/* Section title with accent bar */}
         {article.displayTitle && (
           <motion.div
-            className="mb-10"
+            className="mb-12"
             initial={{ opacity: 0, x: -20 }}
             animate={isInView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.5, delay: 0.15 }}
@@ -65,7 +95,7 @@ function ArticleSection({ article, blocks, components, index }) {
               style={{ background: 'var(--brand-gradient)' }}
             />
             <h2
-              className="text-2xl md:text-3xl font-bold tracking-tight"
+              className="text-2xl md:text-4xl font-bold tracking-tight"
               style={{
                 fontFamily: 'var(--font-heading)',
                 color: 'var(--brand-primary)',
@@ -78,7 +108,7 @@ function ArticleSection({ article, blocks, components, index }) {
         )}
 
         {/* Blocks within this article */}
-        <div className="space-y-8">
+        <div className="space-y-10">
           {blocks.map((block, bi) => (
             <BlockRow
               key={block._id}
@@ -118,8 +148,9 @@ function BlockRow({ block, components, blockIndex }) {
       style={isSingleGraphic ? {} : {
         background: 'var(--ui-glass)',
         border: '1px solid var(--ui-glass-border)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
+        backdropFilter: 'blur(12px)',
+        WebkitBackdropFilter: 'blur(12px)',
+        boxShadow: '0 4px 16px rgba(0, 0, 0, 0.08)',
       }}
       initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
@@ -180,28 +211,30 @@ export default function CourseRenderer() {
     <div className="min-h-screen" style={{ background: 'var(--brand-bg)' }}>
       <ProgressBar />
 
-      {/* Course title header */}
-      <header
-        className="pt-16 pb-8 px-6 md:px-10 text-center"
-        style={{ background: 'var(--brand-surface)' }}
-      >
-        <div className="max-w-[860px] mx-auto">
-          <h1
-            className="text-4xl md:text-5xl font-bold tracking-tight mb-3"
-            style={{
-              fontFamily: 'var(--font-heading)',
-              color: 'var(--brand-text)',
-              lineHeight: 1.1,
-            }}
-          >
-            {course.displayTitle || course.title}
-          </h1>
-          <div
-            className="w-20 h-1 rounded-full mx-auto mt-6"
-            style={{ background: 'var(--brand-gradient)' }}
-          />
-        </div>
-      </header>
+      {/* Course title header — hide if there's a hero component (it handles its own title) */}
+      {!components.some((c) => c._component === 'hero') && (
+        <header
+          className="pt-20 pb-12 px-6 md:px-10 text-center"
+          style={{ background: 'var(--brand-surface)' }}
+        >
+          <div className="max-w-[860px] mx-auto">
+            <h1
+              className="text-4xl md:text-6xl font-bold tracking-tight mb-3"
+              style={{
+                fontFamily: 'var(--font-heading)',
+                color: 'var(--brand-text)',
+                lineHeight: 1.1,
+              }}
+            >
+              {course.displayTitle || course.title}
+            </h1>
+            <div
+              className="w-20 h-1 rounded-full mx-auto mt-8"
+              style={{ background: 'var(--brand-gradient)' }}
+            />
+          </div>
+        </header>
+      )}
 
       {/* Course content */}
       <main>

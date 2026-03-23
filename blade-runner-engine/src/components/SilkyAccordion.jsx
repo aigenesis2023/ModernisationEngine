@@ -110,12 +110,12 @@ export default function SilkyAccordion({ data = {} }) {
               variants={itemVariants}
               className="rounded-xl border overflow-hidden"
               style={{
-                background: 'rgba(255, 255, 255, 0.04)',
+                background: 'var(--ui-glass, rgba(255, 255, 255, 0.08))',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 borderColor: open
                   ? 'var(--brand-accent, rgba(139, 92, 246, 0.5))'
-                  : 'rgba(255, 255, 255, 0.08)',
+                  : 'var(--ui-glass-border, rgba(255, 255, 255, 0.15))',
                 boxShadow: open
                   ? '0 0 20px rgba(139, 92, 246, 0.08)'
                   : '0 2px 8px rgba(0, 0, 0, 0.2)',

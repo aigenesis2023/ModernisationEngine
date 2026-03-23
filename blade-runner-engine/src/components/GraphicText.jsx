@@ -1,5 +1,5 @@
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 const textVariants = {
   hidden: { opacity: 0, x: -32 },
@@ -23,12 +23,14 @@ const imageVariants = {
 export default function GraphicText({ data = {} }) {
   var ref = useRef(null);
   var isInView = useInView(ref, { once: true, amount: 0.2 });
+  var [imgError, setImgError] = useState(false);
 
   var title = data.displayTitle || '';
   var body = data.body || '';
   var graphic = data._graphic || null;
   var imgSrc = graphic ? (graphic.large || graphic.src || '') : '';
   var imgAlt = graphic ? (graphic.alt || title || '') : '';
+  var showImage = imgSrc && !imgError;
 
   return (
     <motion.section
@@ -38,17 +40,19 @@ export default function GraphicText({ data = {} }) {
       <div
         className="max-w-5xl mx-auto rounded-xl border overflow-hidden"
         style={{
-          background: 'rgba(255, 255, 255, 0.03)',
+          background: 'var(--ui-glass, rgba(255, 255, 255, 0.03))',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
+          borderColor: 'var(--ui-glass-border, rgba(255, 255, 255, 0.06))',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
         <div
-          className="grid gap-0"
+          className="graphic-text-grid"
           style={{
-            gridTemplateColumns: imgSrc ? '1fr 1fr' : '1fr',
+            display: 'grid',
+            gap: 0,
+            gridTemplateColumns: showImage ? '1fr 1fr' : '1fr',
           }}
         >
           {/* Text column */}
@@ -56,7 +60,8 @@ export default function GraphicText({ data = {} }) {
             initial="hidden"
             animate={isInView ? 'visible' : 'hidden'}
             variants={textVariants}
-            className="flex flex-col justify-center p-8 sm:p-12 order-2 sm:order-1"
+            className="flex flex-col justify-center p-8 sm:p-12"
+            style={{ order: showImage ? 1 : 0 }}
           >
             {title && (
               <h2
@@ -77,20 +82,19 @@ export default function GraphicText({ data = {} }) {
           </motion.div>
 
           {/* Image column */}
-          {imgSrc && (
+          {showImage && (
             <motion.div
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={imageVariants}
-              className="relative order-1 sm:order-2 min-h-[240px] sm:min-h-[360px]"
+              className="relative min-h-[240px] sm:min-h-[360px]"
+              style={{ order: 2 }}
             >
               <img
                 src={imgSrc}
                 alt={imgAlt}
                 className="absolute inset-0 w-full h-full object-cover"
-                style={{
-                  borderRadius: '0',
-                }}
+                onError={() => setImgError(true)}
               />
               {/* Subtle inner shadow for depth */}
               <div
@@ -104,12 +108,14 @@ export default function GraphicText({ data = {} }) {
         </div>
       </div>
 
-      {/* Responsive stacking: image above text on mobile */}
-      <style>{'\
-        @media (max-width: 639px) {\
-          .grid { grid-template-columns: 1fr !important; }\
-        }\
-      '}</style>
+      {/* Scoped responsive stacking for this component only */}
+      <style>{`
+        @media (max-width: 639px) {
+          .graphic-text-grid { grid-template-columns: 1fr !important; }
+          .graphic-text-grid > *:first-child { order: 2 !important; }
+          .graphic-text-grid > *:last-child { order: 1 !important; }
+        }
+      `}</style>
     </motion.section>
   );
 }

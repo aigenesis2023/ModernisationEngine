@@ -68,6 +68,11 @@ export default function MCQPro({ data = {} }) {
     setSubmitted(true);
   };
 
+  const handleRetry = () => {
+    setSelected(new Set());
+    setSubmitted(false);
+  };
+
   const isCorrect = submitted && items.every((item, i) =>
     item._shouldBeSelected ? selected.has(i) : !selected.has(i)
   );
@@ -201,18 +206,20 @@ export default function MCQPro({ data = {} }) {
         })}
       </div>
 
-      {/* Submit button */}
-      {!submitted && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
-          transition={{ duration: 0.4, delay: 0.4 }}
-        >
+      {/* Submit / Retry buttons */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 10 }}
+        transition={{ duration: 0.4, delay: 0.4 }}
+        className="flex gap-3"
+      >
+        {!submitted && (
           <button
             onClick={handleSubmit}
             disabled={selected.size === 0}
-            className="px-8 py-3 rounded-full font-semibold text-sm tracking-wide text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+            className="px-8 py-3 font-semibold text-sm tracking-wide text-white disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
             style={{
+              borderRadius: 'var(--ui-button-radius, 9999px)',
               background: selected.size > 0
                 ? 'var(--brand-gradient, linear-gradient(135deg, var(--brand-accent, #8b5cf6), var(--brand-primary, #6d28d9)))'
                 : 'rgba(255, 255, 255, 0.1)',
@@ -222,8 +229,23 @@ export default function MCQPro({ data = {} }) {
           >
             Submit
           </button>
-        </motion.div>
-      )}
+        )}
+        {submitted && !isCorrect && (
+          <button
+            onClick={handleRetry}
+            className="px-8 py-3 font-semibold text-sm tracking-wide cursor-pointer border"
+            style={{
+              borderRadius: 'var(--ui-button-radius, 9999px)',
+              background: 'transparent',
+              borderColor: 'var(--brand-primary, #8b5cf6)',
+              color: 'var(--brand-primary, #8b5cf6)',
+              transition: 'all 0.3s ease',
+            }}
+          >
+            Try Again
+          </button>
+        )}
+      </motion.div>
 
       {/* Feedback */}
       <AnimatePresence>

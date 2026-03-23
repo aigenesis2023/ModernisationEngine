@@ -99,6 +99,7 @@ export default function NarrativeSlider({ data = {} }) {
                     alt={graphic.alt || currentItem.title || ''}
                     className="w-full h-48 sm:h-full object-cover"
                     style={{ minHeight: '200px' }}
+                    onError={(e) => { e.target.style.display = 'none'; }}
                   />
                 </div>
               )}

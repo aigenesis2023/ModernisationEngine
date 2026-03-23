@@ -1,5 +1,5 @@
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 const letterVariants = {
   hidden: { opacity: 0, y: 40 },
@@ -35,11 +35,13 @@ const bounce = {
 export default function HeroSplash({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const [imgError, setImgError] = useState(false);
 
   const title = data.displayTitle || '';
   const body = data.body || '';
   const graphic = data._graphic || null;
   const letters = title.split('');
+  const showBgImage = graphic?.large && !imgError;
 
   return (
     <section
@@ -48,13 +50,14 @@ export default function HeroSplash({ data = {} }) {
       style={{ background: 'var(--brand-gradient, linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 50%, #0a0a1a 100%))' }}
     >
       {/* Background image */}
-      {graphic?.large && (
+      {showBgImage && (
         <>
           <img
             src={graphic.large}
             alt={graphic.alt || ''}
             className="absolute inset-0 w-full h-full object-cover"
             aria-hidden="true"
+            onError={() => setImgError(true)}
           />
           <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
         </>

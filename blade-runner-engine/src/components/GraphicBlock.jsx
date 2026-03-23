@@ -1,5 +1,5 @@
 import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 
 const scaleUp = {
   hidden: { opacity: 0, scale: 0.92 },
@@ -22,6 +22,7 @@ const captionFade = {
 export default function GraphicBlock({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const [imgError, setImgError] = useState(false);
 
   const title = data.displayTitle || '';
   const body = data.body || '';
@@ -29,7 +30,7 @@ export default function GraphicBlock({ data = {} }) {
   const imgSrc = graphic.large || graphic.small || '';
   const altText = graphic.alt || title || '';
 
-  if (!imgSrc) return null;
+  if (!imgSrc || imgError) return null;
 
   return (
     <motion.figure
@@ -61,6 +62,7 @@ export default function GraphicBlock({ data = {} }) {
           style={{ borderRadius: 'var(--ui-radius, 12px)' }}
           whileHover={{ scale: 1.03 }}
           transition={{ duration: 0.4, ease: 'easeOut' }}
+          onError={() => setImgError(true)}
         />
       </div>
 

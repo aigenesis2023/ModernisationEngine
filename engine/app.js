@@ -175,33 +175,46 @@
     setProgress(0);
 
     try {
+      var phaseStart = Date.now();
+
       // Phase 1: Parse SCORM
-      log('Phase 1: Parsing SCORM package...', 'info');
+      log('Phase 1: Parsing SCORM package (' + fileMap.size + ' files)...', 'info');
       setProgress(10);
       var course = await SCORMParser.extractCourse(fileMap, function (msg) { log('  ' + msg); });
+      log('Phase 1 done (' + (Date.now() - phaseStart) + 'ms): ' +
+        course.slides.length + ' slides, ' +
+        (course.slides.reduce(function(s,sl) { return s + (sl.objects||[]).length; }, 0)) + ' objects', 'success');
       setProgress(30);
-      log('SCORM parsing complete.', 'success');
 
       // Phase 2: Content Intelligence
+      phaseStart = Date.now();
       log('Phase 2: Analysing course structure...', 'info');
       var coursePlan = ContentPlanner.planCourse(course, function (msg) { log('  ' + msg); });
+      log('Phase 2 done (' + (Date.now() - phaseStart) + 'ms): ' +
+        coursePlan.sections.length + ' sections, title="' + coursePlan.meta.title + '"', 'success');
       setProgress(40);
-      log('Content planning complete.', 'success');
 
       // Phase 3: Scrape brand
+      phaseStart = Date.now();
       log('Phase 3: Scraping brand from URL...', 'info');
       var brandUrl = brandUrlInput.value.trim();
       var corsProxy = corsProxyInput.value.trim();
+      log('  Brand URL: ' + brandUrl, 'info');
+      log('  CORS proxy: ' + corsProxy, 'info');
       var brand = null;
       try {
         brand = await BrandScraper.scrapeBrand(brandUrl, corsProxy, function (msg) { log('  ' + msg); });
         if (brand && brand.colors && brand.colors.primary) {
-          log('Brand scraped: primary=' + brand.colors.primary + ', font=' + (brand.typography?.headingFont || 'default'), 'success');
+          log('Phase 3 done (' + (Date.now() - phaseStart) + 'ms): primary=' + brand.colors.primary +
+            ', secondary=' + brand.colors.secondary +
+            ', font=' + (brand.typography?.headingFont || 'default') +
+            ', theme=' + (brand.style?.theme || 'auto') +
+            ', bg=' + brand.colors.background, 'success');
         } else {
-          log('Brand scraper returned defaults — CORS proxy may be failing', 'info');
+          log('Phase 3: Brand scraper returned empty result after ' + (Date.now() - phaseStart) + 'ms', 'info');
         }
       } catch (brandErr) {
-        log('Brand scraping failed: ' + brandErr.message, 'info');
+        log('Phase 3 FAILED (' + (Date.now() - phaseStart) + 'ms): ' + brandErr.message, 'error');
         brand = null;
       }
       // Ensure brand has minimum required structure
@@ -219,11 +232,22 @@
       log('Brand extraction complete.', 'success');
 
       // Phase 4: Translate to Adapt JSON
+      phaseStart = Date.now();
       log('Phase 4: Translating course content...', 'info');
       var adaptJson = AdaptTranslator.translate(coursePlan, brand, function (msg) { log('  ' + msg); });
       adaptJson.course._trickle = { _isEnabled: false };
       setProgress(65);
-      log('Course mapped: ' + adaptJson.components.length + ' components', 'success');
+
+      // Log component breakdown
+      var compTypes = {};
+      adaptJson.components.forEach(function(c) {
+        compTypes[c._component] = (compTypes[c._component] || 0) + 1;
+      });
+      var typeBreakdown = Object.keys(compTypes).map(function(k) { return k + ':' + compTypes[k]; }).join(', ');
+      log('Phase 4 done (' + (Date.now() - phaseStart) + 'ms): ' +
+        adaptJson.articles.length + ' sections, ' +
+        adaptJson.blocks.length + ' blocks, ' +
+        adaptJson.components.length + ' components [' + typeBreakdown + ']', 'success');
 
       // Phase 5: Build single-file HTML (Blade Runner Engine)
       log('Phase 5: Building course output...', 'info');
@@ -261,29 +285,44 @@
         var imageMap = {}; // filename → data URL
         var embedCount = 0;
         var totalEmbedSize = 0;
-        var MAX_TOTAL_EMBED = 4 * 1024 * 1024; // 4MB total cap for all images
-        var MAX_SINGLE_IMAGE = 500 * 1024; // 500KB per image
+        var MAX_TOTAL_EMBED = 6 * 1024 * 1024; // 6MB total cap for all images
+        var MAX_SINGLE_IMAGE = 800 * 1024; // 800KB per image (educational images can be larger)
 
-        // First: find which image filenames are actually referenced in components
-        var componentsStr = JSON.stringify(adaptJson.components);
+        // Stringify ALL course data to find image references everywhere
+        // (components have _graphic fields, accordion body HTML has <img> tags, etc.)
+        var fullJsonStr = JSON.stringify(adaptJson);
         var referencedImages = new Set();
         for (var fileEntry of fileMap) {
           var filePath = fileEntry[0];
           if (/\.(jpg|jpeg|png|gif|svg|webp)$/i.test(filePath)) {
             var fileName = filePath.split('/').pop();
             var adaptPath = 'course/en/images/' + fileName;
-            if (componentsStr.indexOf(adaptPath) !== -1) {
+            if (fullJsonStr.indexOf(adaptPath) !== -1 || fullJsonStr.indexOf(fileName) !== -1) {
               referencedImages.add(filePath);
             }
           }
         }
-        log('  Found ' + referencedImages.size + ' referenced images (out of ' +
-            Array.from(fileMap.keys()).filter(function(k) { return /\.(jpg|jpeg|png)$/i.test(k); }).length + ' total)', 'info');
+        var totalImageFiles = Array.from(fileMap.keys()).filter(function(k) { return /\.(jpg|jpeg|png|gif|svg|webp)$/i.test(k); }).length;
+        log('  Found ' + referencedImages.size + ' referenced images (out of ' + totalImageFiles + ' total in SCORM)', 'info');
+        if (referencedImages.size === 0 && totalImageFiles > 0) {
+          // Debug: show what image files exist vs what the JSON references
+          var jsonImageRefs = [];
+          var imgRefPattern = /course\/en\/images\/[^"\\]+/g;
+          var match;
+          while ((match = imgRefPattern.exec(fullJsonStr)) !== null) {
+            if (jsonImageRefs.indexOf(match[0]) === -1) jsonImageRefs.push(match[0]);
+          }
+          log('  DEBUG: JSON references ' + jsonImageRefs.length + ' image paths:', 'info');
+          jsonImageRefs.slice(0, 5).forEach(function(p) { log('    → ' + p, 'info'); });
+          var sampleFiles = Array.from(fileMap.keys()).filter(function(k) { return /\.(jpg|jpeg|png)$/i.test(k); }).slice(0, 5);
+          log('  DEBUG: Sample SCORM files:', 'info');
+          sampleFiles.forEach(function(f) { log('    → ' + f, 'info'); });
+        }
 
         // Second: embed only referenced images, respecting size caps
         for (var refImg of referencedImages) {
           if (totalEmbedSize >= MAX_TOTAL_EMBED) {
-            log('  Hit 4MB embed cap, skipping remaining images', 'info');
+            log('  Hit 6MB embed cap, skipping remaining images', 'info');
             break;
           }
           var imgFile = fileMap.get(refImg);
@@ -301,7 +340,8 @@
             var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
                        ext === 'png' ? 'image/png' :
                        ext === 'gif' ? 'image/gif' :
-                       ext === 'svg' ? 'image/svg+xml' : 'image/' + ext;
+                       ext === 'svg' ? 'image/svg+xml' :
+                       ext === 'webp' ? 'image/webp' : 'image/' + ext;
             var dataUrl = 'data:' + mime + ';base64,' + btoa(binary);
             imageMap['course/en/images/' + refImg.split('/').pop()] = dataUrl;
             totalEmbedSize += imgBytes.length;
@@ -312,11 +352,15 @@
         }
         log('  Embedded ' + embedCount + ' images (' + (totalEmbedSize/1024).toFixed(0) + 'KB)', 'info');
 
-        // Replace image paths in components with data URLs
+        // Replace image paths in ALL course JSON with data URLs
         for (var imgKey in imageMap) {
-          componentsStr = componentsStr.split(imgKey).join(imageMap[imgKey]);
+          fullJsonStr = fullJsonStr.split(imgKey).join(imageMap[imgKey]);
         }
-        adaptJson.components = JSON.parse(componentsStr);
+        var updatedJson = JSON.parse(fullJsonStr);
+        adaptJson.components = updatedJson.components;
+        adaptJson.articles = updatedJson.articles;
+        adaptJson.blocks = updatedJson.blocks;
+        adaptJson.contentObjects = updatedJson.contentObjects;
 
         // Inject course data + brand data into the template
         var injectScript = '<script>\n';

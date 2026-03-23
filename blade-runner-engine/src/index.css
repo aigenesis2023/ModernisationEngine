@@ -1,8 +1,7 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 /* === BLADE RUNNER ENGINE — Design System === */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
 :root {
   --brand-primary: #0ea5e9;
@@ -21,9 +20,10 @@
   --ui-radius: 16px;
   --ui-radius-sm: 8px;
   --ui-radius-lg: 24px;
-  --ui-glass: rgba(255, 255, 255, 0.06);
-  --ui-glass-border: rgba(255, 255, 255, 0.12);
-  --ui-glass-hover: rgba(255, 255, 255, 0.10);
+  --ui-glass: rgba(255, 255, 255, 0.08);
+  --ui-glass-border: rgba(255, 255, 255, 0.15);
+  --ui-glass-hover: rgba(255, 255, 255, 0.12);
+  --ui-button-radius: 9999px;
   --font-heading: 'Satoshi', 'Inter', system-ui, sans-serif;
   --font-body: 'Inter', system-ui, sans-serif;
 }
@@ -44,16 +44,72 @@ body {
   min-height: 100vh;
   overflow-x: hidden;
   font-size: 16px;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root { min-height: 100vh; }
 
+/* --- Focus states (accessibility) --- */
+:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--brand-primary);
+  outline-offset: 2px;
+}
+
+/* --- Selection --- */
 ::selection {
   background: var(--brand-primary);
   color: white;
 }
 
+/* --- Links within body content --- */
+[dangerouslySetInnerHTML] a,
+.text-base a,
+.leading-relaxed a {
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+[dangerouslySetInnerHTML] a:hover,
+.text-base a:hover,
+.leading-relaxed a:hover {
+  color: var(--brand-accent, var(--brand-primary));
+  text-decoration-color: var(--brand-accent, var(--brand-primary));
+}
+
+/* --- Lists within body content --- */
+div[class*="leading-relaxed"] ul { list-style: disc; padding-left: 1.25em; margin-bottom: 0.75em; }
+div[class*="leading-relaxed"] ol { list-style: decimal; padding-left: 1.25em; margin-bottom: 0.75em; }
+div[class*="leading-relaxed"] li { margin-bottom: 0.25em; }
+
+/* --- Image loading placeholder --- */
+img {
+  background: var(--ui-glass);
+  color: transparent;
+}
+img[src=""], img:not([src]) {
+  visibility: hidden;
+}
+
+/* --- Scrollbar --- */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--brand-text-muted); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
+
+/* --- Reduced motion: disable all animations for users who prefer it --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

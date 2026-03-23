@@ -1263,8 +1263,47 @@ window.ContentPlanner = (function () {
       log('  Dropped ' + verification.planned.textsDropped + ' junk/decorative text elements');
     }
 
+    // Derive a better course title if the manifest title is unhelpful
+    // Storyline manifest titles are often internal names like "Test intro scene"
+    var meta = Object.assign({}, courseIR.meta);
+    var manifestTitle = (meta.title || '').trim();
+    if (!manifestTitle || manifestTitle.length < 5 || /^(test|untitled|my project|course|new|scene)/i.test(manifestTitle)) {
+      // Try to find a better title from headings, section titles, or body text
+      var bestTitle = null;
+
+      // Strategy 1: First content section's first heading
+      for (var si = 0; si < sections.length && !bestTitle; si++) {
+        var s = sections[si];
+        // Also check the section title itself
+        if (s.title && s.title.length > 5 && s.title.length < 80) {
+          bestTitle = s.title;
+          break;
+        }
+        for (var sli = 0; sli < s.slides.length && !bestTitle; sli++) {
+          var sl = s.slides[sli];
+          if (sl.content && sl.content.headings && sl.content.headings.length > 0) {
+            var h = sl.content.headings[0];
+            var hText = typeof h === 'string' ? h : h.text || '';
+            if (hText.length > 5 && hText.length < 80) {
+              bestTitle = hText;
+            }
+          }
+        }
+      }
+
+      // Strategy 2: Use manifest title + first section title as combined title
+      if (!bestTitle && manifestTitle && sections.length > 0 && sections[0].title) {
+        bestTitle = manifestTitle + ' — ' + sections[0].title;
+      }
+
+      if (bestTitle) {
+        meta.title = bestTitle;
+        log('Derived course title from content: "' + bestTitle + '"');
+      }
+    }
+
     return {
-      meta: courseIR.meta,
+      meta: meta,
       sections: sections,
       quizBanks: courseIR.questionBanks,
       navigation: courseIR.navigation,

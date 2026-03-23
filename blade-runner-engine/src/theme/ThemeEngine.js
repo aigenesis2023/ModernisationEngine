@@ -65,12 +65,22 @@ export function applyBrand(brand) {
     root.style.setProperty('--ui-radius-lg', Math.min(32, r * 1.5) + 'px');
   }
 
-  // Glass intensity based on mood
-  // Check theme (dark/light) separately from mood (creative/corporate/etc.)
+  // Glass intensity based on theme (dark/light) and mood
   // The brand scraper detects theme from CSS body background color
   const theme = s.theme || (s.mood === 'dark' ? 'dark' : '');
   const mood = s.mood || 'default';
-  if (theme === 'dark' || mood === 'bold') {
+  const isLight = theme === 'light';
+
+  if (isLight) {
+    // Light mode: glass uses dark overlays (visible on white/light backgrounds)
+    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.7)');
+    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.08)');
+    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.85)');
+    root.style.setProperty('--brand-glow', `0 4px 24px rgba(0, 0, 0, 0.06)`);
+    // Ensure selection color has contrast
+    root.style.setProperty('--ui-selection-bg', c.primary || '#2563eb');
+    root.style.setProperty('--ui-selection-text', '#ffffff');
+  } else if (theme === 'dark' || mood === 'bold') {
     root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.06)');
     root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.12)');
     root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.10)');
@@ -83,6 +93,15 @@ export function applyBrand(brand) {
     root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.05)');
     root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.10)');
     root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.08)');
+  }
+
+  // Button style from brand
+  if (s.buttonStyle === 'pill') {
+    root.style.setProperty('--ui-button-radius', '9999px');
+  } else if (s.buttonStyle === 'rounded') {
+    root.style.setProperty('--ui-button-radius', 'var(--ui-radius, 12px)');
+  } else {
+    root.style.setProperty('--ui-button-radius', 'var(--ui-radius-sm, 8px)');
   }
 }
 
