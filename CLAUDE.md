@@ -35,16 +35,49 @@ V2 solves this by treating the SCORM as raw content and letting AI intelligence 
 
 ## Development Workflow (Current — Proof of Concept)
 
-For testing, we bypass the API and upload UI entirely:
-1. Test SCORM files are in the repo (`EV/` directory — gitignored, uploaded to Codespace)
-2. Brand URL: `https://www.backgrounds.supply/?ref=onepagelove` (also in `WEBSITE BRANDING REF.rtf`)
-3. Claude Code acts as the LLM layout engine — extracts content, designs layout, generates images
-4. The GitHub Pages URL (`https://aigenesis2023.github.io/ModernisationEngine/`) serves the finished course directly — no upload UI, no runtime processing
-5. User previews, gives feedback, Claude Code iterates
+### Key Principle: Everything in the codebase, nothing ad-hoc
+All prompts, schemas, and scripts live in the repo under `v2/`. The only difference between testing and production is WHO runs the layout engine prompt — Claude Code (testing) vs API call (production). Everything else is automated code that works identically in both modes.
 
-**Once concept is proven**, we add back:
-- Upload UI for SCORM file + brand URL
-- API key input field (Claude API for the LLM layout engine)
+### Directory structure:
+```
+v2/
+  schemas/
+    content-bucket.schema.json    ← Validated extraction output format
+    course-layout.schema.json     ← Validated layout engine output format
+    component-library.json        ← All components: type, props, when to use, examples
+  prompts/
+    layout-engine.md              ← Full system prompt for AI layout engine
+    image-generator.md            ← Prompt templates for image generation per component
+  scripts/
+    extract.js                    ← Simplified SCORM parser → content-bucket.json
+    scrape-brand.js               ← Brand URL → brand-profile.json
+    generate-images.js            ← Layout JSON → Pollinations API → images
+    build-course.js               ← Layout + images + brand → final static HTML
+  output/
+    content-bucket.json           ← Extracted from test SCORM
+    brand-profile.json            ← Scraped from brand URL
+    course-layout.json            ← Layout engine output
+    images/                       ← Generated images
+```
+
+### Workflow (same for testing AND production):
+1. `node v2/scripts/extract.js EV/` → `v2/output/content-bucket.json`
+2. `node v2/scripts/scrape-brand.js "https://www.backgrounds.supply"` → `v2/output/brand-profile.json`
+3. **Layout engine**: feed content + brand + prompt → `v2/output/course-layout.json`
+   - **Testing**: Claude Code reads the prompt file and content, writes the layout JSON
+   - **Production**: API call sends the same prompt + content, receives the same JSON
+4. `node v2/scripts/generate-images.js` → images in `v2/output/images/`
+5. `node v2/scripts/build-course.js` → final HTML at GitHub Pages URL
+
+### Testing setup:
+- Test SCORM: `EV/` directory (gitignored, uploaded to Codespace)
+- Brand URL: `https://www.backgrounds.supply/?ref=onepagelove` (in `WEBSITE BRANDING REF.rtf`)
+- GitHub Pages URL serves the finished course directly — no upload UI
+- User previews, gives feedback, engines are iterated and improved
+
+**Once concept is proven**, we add:
+- Upload UI for SCORM file + brand URL + API key
+- Claude API integration (swaps in for the manual layout engine step)
 - AI editor for end-user customization
 
 ---
