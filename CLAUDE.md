@@ -260,23 +260,30 @@ Every component must:
 ## Known Issues & Next Steps
 
 ### Critical
-- **Image display unverified:** Storyline data references `story_content/` paths but files often live in `mobile/`. Embedding code matches by filename so it SHOULD work — needs end-to-end testing. Debug logging added.
 - **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion in an LMS.
+- **Image embedding:** Only ~5 of 36 content images typically embed. Large Storyline images (>1.5MB) are skipped. Images referenced in Storyline data as `story_content/` often only exist in `mobile/` — filename matching handles this but needs verification.
 
-### Data Flow Gaps (partially addressed)
-The pipeline audit found multiple cases where data was extracted but not fully used:
-- `coursePlan.quizBanks` — quiz pool structure passed through but translator doesn't use it (could enhance quiz randomisation)
+### Content Quality
+- **43% content retention** — Noise filtering drops 264+ junk elements but may be too aggressive for some courses
+- **Drag-and-drop** content presented as plain text (needs matching exercise interaction component)
+- **360-image** content extracted but no interactive viewer component
+- **Results slides** use basic text component (no dynamic score display yet)
+
+### Data Flow Gaps
+- `coursePlan.quizBanks` — quiz pool structure not used (could enhance quiz randomisation)
 - `coursePlan.navigation` — course navigation map ignored (could enable menu/progression)
 - `coursePlan.variables` — Storyline variables ignored (could drive conditional content)
-- `slide.triggers` / `slide.states` — interaction triggers extracted but not translated to web events
-- `brand.style.cardStyle` — glass/elevated/outlined inference scraped but not applied per-component
-- `brand.style.imageStyle` — circular/rounded/sharp inference scraped but not applied
-
-### Content Gaps
-- Drag-and-drop content presented as plain text (needs matching exercise interaction)
-- 360-image content extracted but no interactive viewer
-- Results slides use basic text component (no score display logic yet)
+- `slide.triggers` / `slide.states` — interaction triggers not translated to web events
+- `brand.style.cardStyle` — glass/elevated/outlined inference not applied per-component
 
 ### Polish
 - Mobile responsive pass needed across all components
-- Brand scraper CORS fallback now uses SCORM projectColors/projectFonts before generic defaults
+
+### Recently Fixed (2026-03-23)
+- **Branching cards empty:** Translator read `slide.interactions` but planner stored in `slide.buttons` — now reads correct path
+- **Glass/theme mismatch:** ThemeEngine trusted theme string ("light") even when bg was dark (#383838) — now uses luminance
+- **Section fragmentation:** "(Part 2)" sections now merged with parent when same title + type
+- **Content duplication:** Identical components across branching paths now deduplicated
+- **Empty components:** Title-only text components (no body) filtered out
+- **All components now use CSS variables** for glass/border values — no more hardcoded rgba
+- **Brand typography fully applied:** baseSize, h1/h2/h3 sizes, weights, line-height from scraper
