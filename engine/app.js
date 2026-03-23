@@ -5,6 +5,25 @@
 (function () {
   'use strict';
 
+  // Simple SCORM manifest generator
+  function generateSimpleManifest(title, courseId) {
+    var t = (title || 'Modernised Course').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    var id = courseId || 'modernised-' + Date.now();
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' +
+      '<manifest identifier="' + id + '" version="1.0"\n' +
+      '  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"\n' +
+      '  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"\n' +
+      '  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">\n' +
+      '  <metadata><schema>ADL SCORM</schema><schemaversion>1.2</schemaversion></metadata>\n' +
+      '  <organizations default="org1"><organization identifier="org1">\n' +
+      '    <title>' + t + '</title>\n' +
+      '    <item identifier="item1" identifierref="res1"><title>' + t + '</title></item>\n' +
+      '  </organization></organizations>\n' +
+      '  <resources><resource identifier="res1" type="webcontent" adlcp:scormtype="sco" href="index.html">\n' +
+      '    <file href="index.html"/></resource></resources>\n' +
+      '</manifest>';
+  }
+
   // DOM refs
   var uploadZone = document.getElementById('uploadZone');
   var fileInput = document.getElementById('fileInput');
@@ -181,21 +200,45 @@
       var adaptJson = AdaptTranslator.translate(coursePlan, brand, function (msg) { log('  ' + msg); });
       // Disable trickle for free-scroll experience
       adaptJson.course._trickle = { _isEnabled: false };
-      setProgress(70);
+      setProgress(65);
       log('Adapt JSON generated: ' + adaptJson.components.length + ' components', 'success');
 
-      // Phase 5: Generate brand CSS
-      log('Phase 5: Applying brand styling...', 'info');
+      // Phase 5: Generate brand CSS + bundle single HTML
+      log('Phase 5: Building course...', 'info');
       var brandCSS = AdaptTranslator.generateBrandCSS(brand);
-      generatedHtml = null; // Not used in Adapt mode
-      setProgress(80);
-      log('Brand CSS generated (' + (brandCSS.length / 1024).toFixed(1) + ' KB)', 'success');
+      generatedHtml = await AdaptBundler.bundle(adaptJson, brandCSS, coursePlan, function (msg) { log('  ' + msg); });
+      setProgress(90);
+      log('Course built (' + (generatedHtml.length / 1024).toFixed(0) + ' KB)', 'success');
 
-      // Phase 6: Package SCORM
+      // Phase 6: Package SCORM zip (HTML + images)
       log('Phase 6: Creating SCORM package...', 'info');
-      generatedBlob = await AdaptPackager.packageCourse(adaptJson, brandCSS, fileMap, coursePlan, function (msg) { log('  ' + msg); });
+      var zip = new JSZip();
+      // Add the single HTML file
+      zip.file('index.html', generatedHtml);
+      // Add SCORM manifest
+      zip.file('imsmanifest.xml', generateSimpleManifest(coursePlan.meta.title, coursePlan.meta.courseId));
+      // Copy images from original SCORM
+      var imgCount = 0;
+      for (var entry of fileMap) {
+        var fPath = entry[0], fObj = entry[1];
+        if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(fPath)) {
+          try {
+            var buf = await fObj.arrayBuffer();
+            zip.file('course/en/images/' + fPath.split('/').pop(), buf);
+            imgCount++;
+          } catch (e) {}
+        }
+        if (/^story_content\/.*\.(mp4|webm)$/i.test(fPath)) {
+          try {
+            var buf = await fObj.arrayBuffer();
+            zip.file('course/en/video/' + fPath.split('/').pop(), buf);
+            imgCount++;
+          } catch (e) {}
+        }
+      }
+      generatedBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       setProgress(100);
-      log('Done! Your modernised course is ready.', 'success');
+      log('Done! ' + imgCount + ' assets, ' + (generatedBlob.size / 1024 / 1024).toFixed(1) + ' MB package', 'success');
 
       // Show results
       resultSection.classList.add('active');
@@ -222,15 +265,10 @@
   // ---- Preview Toggle ----
 
   btnPreview.addEventListener('click', function () {
-    if (!generatedBlob) return;
-    // For Adapt output, preview requires serving from a directory.
-    // For now, trigger download — future: serve via backend
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(generatedBlob);
-    a.download = 'modernised-course.zip';
-    a.click();
-    URL.revokeObjectURL(a.href);
-    log('Download started. Unzip and open index.html to preview, or upload to your LMS.', 'info');
+    if (!generatedHtml) return;
+    // Preview the single-file HTML in a new tab
+    var previewUrl = URL.createObjectURL(new Blob([generatedHtml], { type: 'text/html' }));
+    window.open(previewUrl, '_blank');
   });
 
 })();
