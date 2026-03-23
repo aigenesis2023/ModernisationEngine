@@ -65,7 +65,7 @@ export default function ProcessFlow({ data = {} }) {
 
   return (
     <section ref={ref} className="w-full py-6 sm:py-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {title && (
           <motion.h2
             initial={{ opacity: 0, y: 16 }}
@@ -103,7 +103,7 @@ export default function ProcessFlow({ data = {} }) {
                   initial="hidden"
                   animate={isInView ? 'visible' : 'hidden'}
                   variants={nodeVariants}
-                  className="w-full max-w-md rounded-xl border p-5 flex gap-4 items-start"
+                  className="w-full max-w-2xl rounded-xl border p-5 sm:p-6 flex gap-4 items-start"
                   style={{
                     background: 'var(--ui-glass, rgba(255, 255, 255, 0.06))',
                     backdropFilter: 'blur(16px)',

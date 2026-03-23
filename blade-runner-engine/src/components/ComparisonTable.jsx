@@ -12,18 +12,18 @@ const fadeInUp = {
 
 function CheckIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="10" fill="var(--brand-success, #10b981)" fillOpacity="0.15" />
-      <path d="M6 10l3 3 5-5" stroke="var(--brand-success, #10b981)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <circle cx="13" cy="13" r="13" fill="var(--brand-success, #10b981)" fillOpacity="0.2" />
+      <path d="M8 13l3.5 3.5 6.5-6.5" stroke="var(--brand-success, #10b981)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
 
 function CrossIcon() {
   return (
-    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-      <circle cx="10" cy="10" r="10" fill="var(--brand-error, #ef4444)" fillOpacity="0.15" />
-      <path d="M7 7l6 6M13 7l-6 6" stroke="var(--brand-error, #ef4444)" strokeWidth="2" strokeLinecap="round" />
+    <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+      <circle cx="13" cy="13" r="13" fill="var(--brand-error, #ef4444)" fillOpacity="0.2" />
+      <path d="M9 9l8 8M17 9l-8 8" stroke="var(--brand-error, #ef4444)" strokeWidth="2.5" strokeLinecap="round" />
     </svg>
   );
 }
@@ -95,7 +95,7 @@ export default function ComparisonTable({ data = {} }) {
                       borderLeft: '1px solid var(--ui-glass-border)',
                     }}
                   >
-                    <div className="text-base font-semibold">{col.title}</div>
+                    <div className="text-base sm:text-lg font-bold">{col.title}</div>
                     {col.subtitle && (
                       <div
                         className="text-xs mt-1 font-normal"

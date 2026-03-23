@@ -84,7 +84,7 @@ export default function MCQPro({ data = {} }) {
     : '';
 
   return (
-    <div ref={ref} className="w-full max-w-3xl mx-auto px-4 py-8">
+    <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
       {/* Question heading */}
       {title && (
         <motion.h2

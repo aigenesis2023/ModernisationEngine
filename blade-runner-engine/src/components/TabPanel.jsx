@@ -19,7 +19,7 @@ export default function TabPanel({ data = {} }) {
   const currentItem = items[activeTab] || {};
 
   return (
-    <div ref={ref} className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
       {title && (
         <motion.h2
           initial={{ opacity: 0, y: 16 }}
@@ -71,7 +71,7 @@ export default function TabPanel({ data = {} }) {
               <button
                 key={i}
                 onClick={() => setActiveTab(i)}
-                className="px-4 py-2 text-xs sm:text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0 rounded-full"
+                className="px-5 py-2.5 text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0 rounded-full"
                 style={{
                   color: isActive
                     ? '#ffffff'
@@ -92,7 +92,7 @@ export default function TabPanel({ data = {} }) {
         </div>
 
         {/* Tab content */}
-        <div className="relative" style={{ minHeight: '120px' }}>
+        <div className="relative" style={{ minHeight: '160px' }}>
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}

@@ -52,7 +52,7 @@ export default function TextInputBlock({ data = {} }) {
       <div
         className="w-full rounded-xl border p-8 sm:p-12"
         style={{
-          maxWidth: '680px',
+          maxWidth: '780px',
           background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',

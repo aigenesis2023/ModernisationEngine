@@ -32,7 +32,7 @@ export default function Checklist({ data = {} }) {
   };
 
   return (
-    <div ref={ref} className="w-full max-w-3xl mx-auto px-4 py-8">
+    <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
       {title && (
         <motion.h2
           initial={{ opacity: 0, y: 16 }}

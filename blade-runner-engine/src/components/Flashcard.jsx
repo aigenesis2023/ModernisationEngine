@@ -150,7 +150,13 @@ export default function Flashcard({ data = {} }) {
 
         <div
           className="grid gap-4 sm:gap-6"
-          style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))' }}
+          style={{
+            gridTemplateColumns: items.length <= 2
+              ? `repeat(${items.length}, 1fr)`
+              : items.length === 4
+                ? 'repeat(2, 1fr)'
+                : 'repeat(auto-fill, minmax(280px, 1fr))',
+          }}
         >
           {items.map((item, i) => (
             <FlipCard key={i} item={item} index={i} isInView={isInView} />

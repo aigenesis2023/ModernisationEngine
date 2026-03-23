@@ -39,7 +39,7 @@ export default function NarrativeSlider({ data = {} }) {
   const graphic = currentItem._graphic || {};
 
   return (
-    <div ref={ref} className="w-full max-w-4xl mx-auto px-4 py-8">
+    <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
       {/* Section heading */}
       {title && (
         <motion.h2
@@ -80,7 +80,7 @@ export default function NarrativeSlider({ data = {} }) {
         }}
       >
         {/* Slide content */}
-        <div className="relative overflow-hidden" style={{ minHeight: '120px' }}>
+        <div className="relative overflow-hidden" style={{ minHeight: '200px' }}>
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
               key={currentIndex}
