@@ -1,252 +1,210 @@
-# CLAUDE.md — Modernisation Engine
+# CLAUDE.md — Modernisation Engine (Blade Runner Architecture)
 
 ## What This Project Is
-A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. The user uploads a SCORM zip/folder, enters a brand URL, and gets a modernised SCORM package back.
+A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. User uploads a SCORM zip/folder, enters a brand URL, and gets a modernised SCORM package back.
 
-## Architecture
+## Architecture (Current: Blade Runner Engine)
 
-**Single-page app. No build step. No npm. Pure browser JavaScript using IIFE modules.**
+**Two-layer system:**
+1. **Extraction Pipeline** — Browser-based IIFE modules that parse SCORM, plan content, scrape brand
+2. **Blade Runner Engine** — Pre-built React + Vite + Tailwind + Framer Motion renderer (single HTML file)
 
 ```
-index.html                  ← UI: upload zone, brand URL input, preview, download
+index.html                           ← Upload UI (GitHub Pages)
 engine/
-  app.js                    ← Orchestrator: wires the 6-phase pipeline
-  scorm-parser.js           ← Phase 1: Extracts CourseIR from Storyline data files
-  content-planner.js        ← Phase 2: Intelligence layer — cleans, structures, plans presentation
-  brand-scraper.js          ← Phase 3: Scrapes brand colors/fonts/logo from URL
-  image-generator.js        ← Phase 4: Generates context-aware AI images via Pollinations API
-  generator-data.js         ← Phase 5a: Converts CoursePlan → section/quiz JSON
-  generator-css.js          ← Phase 5b: Generates brand-aware deep-scroll CSS
-  generator-app.js          ← Phase 5c: Generates deep-scroll React app + SCORM adapter
-  packager.js               ← Phase 6: Creates SCORM 1.2 zip with JSZip
-```
+  scorm-parser.js                    ← Phase 1: SCORM → CourseIR
+  content-planner.js                 ← Phase 2: CourseIR → CoursePlan
+  brand-scraper.js                   ← Phase 3: URL → BrandProfile
+  adapt-translator.js                ← Phase 4: CoursePlan → Adapt JSON
+  app.js                             ← Pipeline orchestrator
 
-### Module Loading Order (in index.html)
-JSZip CDN → scorm-parser → content-planner → brand-scraper → image-generator → generator-css → generator-data → generator-app → packager → app.js
+blade-runner-engine/                 ← React + Vite project (pre-built)
+  src/
+    components/                      ← 11 premium React components
+      ComponentRegistry.js           ← Dynamic component resolution
+      CourseRenderer.jsx             ← Recursive JSON → React tree
+      HeroSplash.jsx                 ← Full-viewport hero
+      TextBlock.jsx                  ← Clean text with glass card
+      GraphicBlock.jsx               ← Full-width image
+      GraphicText.jsx                ← Split layout (text + image)
+      SilkyAccordion.jsx             ← Framer Motion accordion
+      MCQPro.jsx                     ← Quiz with feedback
+      NarrativeSlider.jsx            ← Carousel for sequential content
+      BentoGrid.jsx                  ← Multi-item grid layout
+      DataTable.jsx                  ← Technical data display
+      MediaBlock.jsx                 ← Video/audio player
+      TextInputBlock.jsx             ← Form inputs
+      BranchingCards.jsx             ← Decision cards
+    store/courseStore.js              ← Zustand state management
+    theme/ThemeEngine.js             ← Brand → CSS variables
+    services/RepresentationAgent.js  ← AI content → component mapping
+
+blade-runner-template.html           ← Pre-built single-file output (399KB)
+```
 
 ### Data Flow
 ```
 SCORM Upload → SCORMParser.extractCourse()     → CourseIR
-CourseIR     → ContentPlanner.planCourse()      → CoursePlan (sections, verification)
-Brand URL    → BrandScraper.scrapeBrand()       → BrandProfile
-CourseIR     → ImageGenerator.generateImages()  → ImageManifest
-(CoursePlan, BrandProfile, ImageManifest) → GeneratorApp.generateHtml() → HTML string
-  internally calls: GeneratorData.buildSectionsData() → section JSON
-                    GeneratorData.buildQuizData()      → quiz JSON
-                    GeneratorCSS.generateCss()         → CSS string
-HTML string → Packager.packageCourse() → SCORM zip blob → download
+CourseIR      → ContentPlanner.planCourse()     → CoursePlan
+Brand URL     → BrandScraper.scrapeBrand()      → BrandProfile
+CoursePlan    → AdaptTranslator.translate()     → Adapt JSON (course/articles/blocks/components)
+BrandProfile  → ThemeEngine.applyBrand()        → CSS Variables
+
+Adapt JSON + BrandProfile → injected into blade-runner-template.html
+                          → single self-contained HTML file
+                          → opens in browser, works from file://
 ```
 
 ## Key Data Structures
 
-### CourseIR (output of scorm-parser.js)
+### Adapt JSON Schema (output of adapt-translator.js)
+The engine uses Adapt's JSON hierarchy as its data standard:
 ```
-{ meta: { title, courseId, scormVersion, masteryScore },
-  slides: [{ id, title, type, slideNumber, elements, layers, timeline, triggers, transitions }],
-  questionBanks: [{ id, title, group, drawCount, questions }],
-  assets: { images, videos, audio, fonts },
-  navigation, variables, extractionReport }
-```
-
-### CoursePlan (output of content-planner.js)
-```
-{ meta, sections: [{ id, type, title, slides: [PlannedSlide] }],
-  quizBanks, navigation, variables, assets,
-  verification: { extracted, planned, contentRetention } }
+course.json           → { _id: "course", title, _spoor, _trickle, ... }
+contentObjects.json   → [{ _id: "co-100", _parentId: "course", _type: "page" }]
+articles.json         → [{ _id: "a-100", _parentId: "co-100", _type: "article" }]
+blocks.json           → [{ _id: "b-100", _parentId: "a-100", _type: "block" }]
+components.json       → [{ _id: "c-100", _parentId: "b-100", _component: "accordion", ... }]
 ```
 
-### PlannedSlide
-```
-{ id, originalTitle, type, presentation,
-  content: { headings, bodyTexts, callouts, images, videos, audio },
-  layers: [{ id, name, texts, images, videos, audio, interactions, triggers }],
-  interactions, triggers, states, formFields, quizData }
-```
+### ID Manager
+Central authority for all IDs. Guarantees unique IDs and valid parent refs.
+Every component points to a block, every block to an article, every article to a page.
+One broken reference = broken course. The ID Manager prevents this.
 
-### Presentation Types (set by content-planner.js)
-- `hero` — full-viewport title with gradient/image background
-- `narrative` — flowing text with optional images
-- `media-feature` — large video/image focal point
-- `interactive` — layers as accordion/modal/bento
-- `form` — input fields
-- `quiz` — inline quiz trigger
-- `branching` — path selection
-- `results` — score display
+### Component Types (from ComponentRegistry.js)
+| Type | React Component | When Used |
+|------|----------------|-----------|
+| `hero` | HeroSplash | Opening/title slides |
+| `text` | TextBlock | Standard text content |
+| `graphic` | GraphicBlock | Full-width images |
+| `graphic-text` | GraphicText | Text + image split layout |
+| `accordion` | SilkyAccordion | Multi-layer expandable content |
+| `mcq` | MCQPro | Quiz questions |
+| `narrative` | NarrativeSlider | Sequential carousel content |
+| `bento` | BentoGrid | Multi-item grid layout |
+| `data-table` | DataTable | Technical/structured data |
+| `media` | MediaBlock | Video/audio |
+| `textinput` | TextInputBlock | Form fields |
+| `branching` | BranchingCards | Decision/path selection |
 
-### Section Types
-- `hero` — opening/title section
-- `content` — main learning content
-- `assessment` — quiz section
-- `form` — data collection
-- `branching` — path selection
-- `results` — completion/results
+### RepresentationAgent (services/RepresentationAgent.js)
+Analyzes content characteristics and assigns the best component type:
+- 4+ short text items → BentoGrid
+- Layers with substantial text → Accordion
+- Sequential layers with images → NarrativeSlider
+- Quiz data → MCQPro
+- Image + text → GraphicText split layout
+- Structured items with separators → DataTable
 
-### Slide Types
-`title | objectives | form | branching | quiz | results | content`
+## The Pipeline
 
-### BrandProfile (output of brand-scraper.js)
-```
-{ sourceUrl, colors: { primary, secondary, accent, background, surface, text, textMuted, success, error, warning, gradient },
-  typography: { headingFont, bodyFont, headingWeight, baseSize, lineHeight, headingSizes, fontImportUrl },
-  style: { borderRadius, buttonStyle, cardStyle, spacing, mood },
-  logo: { url, alt } }
-```
+| Phase | Module | What It Does |
+|-------|--------|-------------|
+| 1 | scorm-parser.js | Parse Storyline SCORM data into CourseIR |
+| 2 | content-planner.js | Clean noise, group into sections, classify presentation |
+| 3 | brand-scraper.js | Scrape brand website for design tokens via CORS proxy |
+| 4 | adapt-translator.js | Convert CoursePlan → Adapt JSON with ID Manager |
+| 5 | app.js | Inject JSON + brand into pre-built Blade Runner template |
+| 6 | app.js (JSZip) | Package as SCORM zip (HTML + images) |
 
-### Layer Interaction Types
-- `accordion` — text-heavy layers → expandable panels
-- `modal` — layers with images → clickable tiles that open overlay
-- `bento` — 3+ short layers → CSS Grid tile layout
+## Blade Runner Engine (React Renderer)
 
-## The 6-Phase Pipeline
+### Tech Stack
+- React 19 + Vite 8
+- Tailwind CSS v4 (via @tailwindcss/vite)
+- Framer Motion (animations)
+- Zustand (state management)
+- vite-plugin-singlefile (single HTML output)
 
-| Phase | What It Does |
-|-------|-------------|
-| 1. Deep SCORM Extraction | Parse Storyline data into comprehensive CourseIR |
-| 2. Content Intelligence | Clean noise, group into sections, classify presentation |
-| 3. Brand Intelligence | Scrape brand website for design tokens |
-| 4. AI Image Generation | Generate context-aware branded images via Pollinations |
-| 5. HTML Generation | Build deep-scroll React app with brand CSS |
-| 6. SCORM Packaging | Create valid SCORM 1.2 zip with manifest and assets |
-
-## Output Experience
-- **Deep scroll layout** — continuous scrolling experience, no slide-by-slide navigation
-- **Section-based structure** — course grouped into logical sections (hero, content, quiz, results)
-- **Scroll-triggered animations** — IntersectionObserver reveals content as user scrolls
-- **Fixed progress bar** — shows scroll progress through the course
-- **Inline quiz** — quiz appears as a full-screen overlay when triggered
-- **Alternating section backgrounds** — visual rhythm between sections
-- **Mobile-first responsive** — works on all devices
-
-## What Works Well
-- All 8 modules wire together correctly
-- Deep scroll layout with section-based structure
-- Content Intelligence layer filters noise and groups slides logically
-- Quiz logic is complete: pick-one, pick-many, true/false, text-entry
-- SCORM pass/fail reporting works (SCORM.complete → LMS API)
-- Brand scraper falls back to purple/elegant theme if scraping fails
-- Image generation includes brand colors and content context in prompts
-- Layer audio now preserved through to output
-- Content verification report tracks what was kept vs dropped
-
-## Development Notes
-
-### How to test locally
-Open `index.html` in a browser. Upload a SCORM zip or folder. Enter a brand URL. Click "Generate". Preview result and download SCORM package.
-
-### CORS proxy
-Brand scraping requires a CORS proxy. Set in the UI input field.
-
-### No npm/node required
-Everything runs in the browser. External deps loaded via CDN:
-- React 18 + ReactDOM 18 (in generated output)
-- JSZip (in index.html for packaging)
-
-### Generated output structure
-```
-imsmanifest.xml       ← SCORM 1.2 manifest
-index.html            ← Self-contained deep-scroll React app with embedded CSS + JS
-assets/images/*       ← Original + AI-generated images
-assets/media/*        ← Video/audio files
+### Building the Template
+```bash
+cd blade-runner-engine
+npm install
+npx vite build
+cp dist/index.html ../blade-runner-template.html
 ```
 
-## Code Conventions
-- IIFE module pattern: `window.ModuleName = (function() { ... })();`
-- No ES6 modules, no import/export — script tag loading order matters
-- ES5-compatible generated code (runs in LMS webviews)
-- All generated React uses `React.createElement` (no JSX, no build step)
-- `escJs()` and `escHtml()` for safe string embedding
+### How It Works
+1. The template is pre-built ONCE during development (399KB single HTML)
+2. At runtime, app.js fetches the template and injects `window.courseData` + `window.brandData`
+3. React reads from Zustand store, which loads from `window.courseData`
+4. ThemeEngine applies brand CSS variables from `window.brandData`
+5. CourseRenderer recursively maps JSON → React components
+6. Preview opens as blob URL in new tab (works from file://)
 
-## ⛔ ABSOLUTE RULE — READ THIS BEFORE EVERY SINGLE CODE CHANGE
+### Design System
+- **Aesthetic:** "Linear.app meets Blade Runner 2049"
+- **Theme:** Dark mode default, light mode via brand detection
+- **Typography:** Satoshi/Inter, CSS variable-driven
+- **Cards:** Glassmorphism (backdrop-blur, semi-transparent borders)
+- **Animations:** Framer Motion scroll-reveal, staggered entrances
+- **Colors:** All via CSS custom properties (--brand-primary, etc.)
 
-**Fixing the test course output is WORTHLESS and HARMFUL.** Any change that improves
-the output for the test SCORM file but wouldn't help a completely different Storyline
-course is a WASTE OF TIME and creates a FALSE SENSE OF PROGRESS. It makes the preview
-look good while hiding real engine weaknesses.
+### State Management (Zustand)
+```
+useCourseStore:
+  course, contentObjects, articles, blocks, components  ← Course data
+  brand                                                  ← Brand profile
+  scrollProgress                                         ← 0-100
+  activeAccordions                                       ← { componentId_itemIndex: true }
+  quizAnswers                                            ← { componentId: answerIndex }
+  completedSections                                      ← { articleId: true }
+```
+
+Exposed as `window.courseData` for future AI editing bridge.
+
+## CORS Proxy
+Brand scraping requires a CORS proxy (Cloudflare Worker):
+`https://cors-proxy.leoduncan-elearning.workers.dev`
+
+## Test Files
+- `TEST SCORM/` — Small test SCORM (committed to repo)
+- `EV/` — Full 108-slide EV course (gitignored, uploaded to Codespace)
+- `test/screenshots/` — Visual audit screenshots (overwritten each run)
+
+## ⛔ ABSOLUTE RULE — UNIVERSAL ENGINE, NOT SPECIFIC FIXES
+
+**Every engine change must work for ANY Storyline SCORM file.**
+
+The test SCORM files are diagnostic tools that REVEAL categories of problems.
+They are NOT the product. Fixing specific output for specific test files is
+COUNTERPRODUCTIVE — it gives a false sense of progress.
 
 **Before writing ANY code, ask:** "If someone uploaded a Storyline course about
 cooking safety, marine biology, or HR compliance, would this change help THAT course?"
-If the answer is no or maybe, DO NOT MAKE THE CHANGE.
 
-**Specific things that are ALWAYS WRONG:**
-- Adding specific text strings from the test course to any filter/regex
-- Tuning thresholds/regex patterns until the test output "looks right"
-- Adding word lists derived from the test course content
-- Any fix where you're looking at the test output and thinking "how do I make THIS look better"
-
-**What IS allowed:**
-- Rules based on Storyline's EXPORT FORMAT (data structures, object types, naming patterns)
-- Classification based on STRUCTURAL PROPERTIES (font size, position, depth, element type)
-- Patterns that exist in ALL Storyline exports (textLib, imagelib, slideLayers, actionGroups)
+**The process:**
+1. Name the CATEGORY, not the symptom
+2. Research how Storyline produces this category UNIVERSALLY
+3. Design the rule based on STRUCTURAL PATTERNS
+4. Implement — test output should improve as a BYPRODUCT
 
 **Branding source of truth:**
-The brand URL website is the ONLY source of truth for visual branding (colors,
-fonts, gradients, button styles, mood). The original SCORM course's colors and
-styling are IRRELEVANT — the engine is RE-BRANDING the course. Never extract
-or use the original course's accent colors, font choices, or visual styles.
-The SCORM file provides CONTENT and STRUCTURE. The brand URL provides VISUAL IDENTITY.
+The brand URL website is the ONLY source of truth for visual branding.
+The original SCORM course's colors and styling are IRRELEVANT.
+The SCORM file provides CONTENT and STRUCTURE.
+The brand URL provides VISUAL IDENTITY.
 
-## CRITICAL: Engine Development Process
+## Component Development Guidelines
 
-### The Golden Rule
-**The test SCORM file and brand URL are diagnostic tools, not the product.** They exist to REVEAL categories of problems that the engine must solve for ALL Storyline SCORM exports. Every engine change must be designed by studying how Storyline works universally, not by looking at what went wrong with one specific course.
+When building or improving components, reference these e-learning authoring tools
+for interaction design patterns:
+- **Articulate Rise 360** — gold standard for scrolling e-learning interactions
+- **Adapt Framework** — component library documentation and JSON schemas
+- **H5P** — interactive content types and patterns
 
-### Mandatory Process — Follow This BEFORE Writing Any Code
+Every component must:
+1. Accept Adapt-standard JSON props (`data` object with `_id`, `_component`, etc.)
+2. Use CSS custom properties for ALL brand-specific colors
+3. Include Framer Motion scroll-reveal animations
+4. Be responsive (mobile-first)
+5. Have a `data-component-id` attribute for future AI editing
+6. Handle missing/empty data gracefully (don't render empty cards)
 
-When you see an issue in the test output, you MUST follow this sequence. Do NOT skip steps.
-
-**Step 1: Name the category, not the symptom.**
-- BAD: "The text 'Layer 1' is showing as a heading" → leads to fixing one string
-- GOOD: "Auto-generated layer names are being rendered as content headings" → leads to a universal classifier
-
-**Step 2: Research how Storyline produces this category universally.**
-- How does Storyline name layers? (Always "Layer N" by default, authors can rename them)
-- What other auto-generated patterns exist? (Shape names, variable names, slide titles)
-- What does this look like in a DIFFERENT course? (Would a cooking course have the same issue?)
-
-**Step 3: Design the rule based on structural patterns, not specific content.**
-- The rule should reference Storyline's export FORMAT (object kinds, naming patterns, data structures)
-- It should use content CHARACTERISTICS (length, position, semantic structure) not specific values
-- Test the rule mentally: "If I ran a completely different Storyline course through this rule, would it still make correct decisions?"
-
-**Step 4: Implement and verify.**
-- The test SCORM output should improve as a BYPRODUCT
-- If you find yourself checking "does this fix the specific issue I saw?" you've gone wrong — check "does this handle the CATEGORY correctly?"
-
-### What "Specific Fix" Looks Like (DO NOT DO THIS)
-- Changing a threshold because it looks better for this course's text (`60 → 80 chars`)
-- Adding a regex that matches text from the test course
-- Hardcoding any slide ID, variable name, or quiz bank ID from the test data
-- Checking if output "looks right" for the test course without asking "would this work for a 50-slide compliance training course?"
-
-### What "Universal Improvement" Looks Like (DO THIS)
-- Studying Storyline's `textLib` structure to understand how text roles are encoded
-- Building classification based on `fontSize`, `depth`, `fontWeight` — properties ALL Storyline exports have
-- Using the navigation graph (`slideMap.slideRefs[].linksTo[]`) to understand branching — this structure is identical in every export
-- Detecting auto-generated names by pattern (`generic_noun + optional_number`) since Storyline ALWAYS generates names this way
-
-### Testing Requirements
-- Run the COMPLETE pipeline (brand scraping + AI image generation) — don't skip phases
-- Do NOT take Playwright screenshots unless the user explicitly asks for them — it's slow. The user previews via the GitHub Pages URL instead.
-- Only take screenshots and save to `test/screenshots/` when the user says "take screenshots" or "update screenshots"
-- When screenshots ARE taken, overwrite the existing files (don't accumulate old ones)
-- For each issue found, write down the CATEGORY before touching code
-- After implementing, re-run and verify the category is handled — not just the specific instance
-
-### Universal Problem Categories
-The engine must handle these categories for ANY Storyline SCORM export:
-1. **Authoring artefacts** — auto-generated names, player instructions, variable placeholders, structural labels
-2. **Content role classification** — inferring heading vs body vs callout vs feedback from text characteristics
-3. **Course structure reconstruction** — grouping slides into logical sections based on scene boundaries and slide type
-4. **Layer interaction mapping** — presenting Storyline layers as web-native components (accordion/modal/bento)
-5. **Branching & navigation** — preserving the author's intended course flow and decision points
-6. **Form field reconstruction** — building proper web forms from Storyline textinput objects
-7. **Quiz & assessment preservation** — maintaining all question types, scoring, and feedback
-8. **Asset path resolution** — correctly referencing images, video, and audio with fallbacks
-
-## Common Pitfalls
-- **Script order in index.html matters** — content-planner after scorm-parser, generators after content-planner
-- **brand.colors is an OBJECT** with named keys, not an array of hex strings
-- **Generated code is ES5** — the React app string must not use arrow functions, let/const, template literals
-- **CoursePlan vs CourseIR** — generators now consume CoursePlan (from ContentPlanner), not raw CourseIR
-- **Deep scroll layout** — no slide navigation; content flows as continuous scroll with sections
-- **openPanels is now keyed by slideId** — format: `slideId_layerIndex` to support multiple accordion sections
+## Known Issues & Next Steps
+- Images don't load from blob URLs (need base64 embedding)
+- Brand scraper fails on some sites (CORS/timeout)
+- Tailwind classes need verification in build output
+- Components need more glassmorphism/spacing polish
+- No SCORM tracking in the React output yet (need lightweight shim)
