@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* === BLADE RUNNER ENGINE — Design System === */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --brand-primary: #0ea5e9;
+  --brand-secondary: #6366f1;
+  --brand-accent: #22d3ee;
+  --brand-bg: #0a0a12;
+  --brand-surface: #12121e;
+  --brand-surface-hover: #1a1a2e;
+  --brand-text: #e8e8f0;
+  --brand-text-muted: #6b6b80;
+  --brand-success: #10b981;
+  --brand-error: #ef4444;
+  --brand-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  --brand-glow: 0 0 30px rgba(14, 165, 233, 0.12);
+  --ui-radius: 16px;
+  --ui-radius-sm: 8px;
+  --ui-radius-lg: 24px;
+  --ui-glass: rgba(255, 255, 255, 0.03);
+  --ui-glass-border: rgba(255, 255, 255, 0.06);
+  --ui-glass-hover: rgba(255, 255, 255, 0.07);
+  --font-heading: 'Satoshi', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--brand-bg);
+  color: var(--brand-text);
+  line-height: 1.7;
+  min-height: 100vh;
+  overflow-x: hidden;
+  font-size: 16px;
+}
+
+#root { min-height: 100vh; }
+
+::selection {
+  background: var(--brand-primary);
+  color: white;
+}
+
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--brand-text-muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--brand-primary); }
