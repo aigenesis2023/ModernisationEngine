@@ -350,7 +350,10 @@ window.AdaptTranslator = (function () {
         _preventForwardScrubbing: false
       });
     } else if (presentation === 'interactive' && slide.layers && slide.layers.length > 0) {
-      // Layers → accordion OR narrative component depending on content
+      // Use the content planner's interactionType decision (it already analysed triggers,
+      // layer content, text lengths, modal flags, etc.) instead of re-analysing here.
+      var interactionType = slide.interactionType || 'accordion';
+
       var layerItems = slide.layers.map(function (layer) {
         var layerTexts = (layer.texts || []).map(textVal);
         var layerTitle = layer.name || layerTexts[0] || 'Details';
@@ -367,7 +370,6 @@ window.AdaptTranslator = (function () {
             large: adaptImagePath(layerImgSrc),
             alt: (typeof layerImg === 'object' ? layerImg.alt : '') || ''
           };
-          // Also embed in body for accordion fallback
           if (!layerGraphic.src) layerGraphic = null;
           else {
             layerBody += '<p><img src="' + adaptImagePath(layerImgSrc) +
@@ -388,12 +390,25 @@ window.AdaptTranslator = (function () {
       });
 
       if (layerItems.length > 0) {
-        // Decide: if most layers have images → use narrative (carousel), else accordion
-        var layersWithImages = layerItems.filter(function(item) { return item._graphic; }).length;
-        var useNarrative = layersWithImages > layerItems.length / 2 && layerItems.length >= 2;
-
         var compId = idManager.nextComponent(blockId);
-        if (useNarrative) {
+
+        if (interactionType === 'bento') {
+          // Short items in a grid
+          components.push({
+            _id: compId,
+            _parentId: blockId,
+            _type: 'component',
+            _component: 'bento',
+            _classes: '',
+            _layout: 'full',
+            title: headings[0] || slide.originalTitle || '',
+            displayTitle: headings[0] || '',
+            body: textsToBody(allTexts.slice(0, 1)),
+            instruction: '',
+            _items: layerItems
+          });
+        } else if (interactionType === 'modal' || interactionType === 'tabs') {
+          // Image-heavy layers or tabbed → narrative carousel
           components.push({
             _id: compId,
             _parentId: blockId,
@@ -409,6 +424,7 @@ window.AdaptTranslator = (function () {
             _items: layerItems
           });
         } else {
+          // Default: accordion (most common for click-reveal layers)
           components.push({
             _id: compId,
             _parentId: blockId,
@@ -680,6 +696,20 @@ window.AdaptTranslator = (function () {
     var idManager = createIdManager();
 
     log('Generating Adapt JSON...');
+
+    // Log content analysis from the planner — this is the "intelligence" step
+    log('Content analysis by section:');
+    (coursePlan.sections || []).forEach(function(s) {
+      var slideDetails = s.slides.map(function(sl) {
+        var p = sl.presentation || '?';
+        var it = sl.interactionType || '';
+        var imgs = (sl.content && sl.content.images) ? sl.content.images.length : 0;
+        var layers = (sl.layers || []).length;
+        var texts = ((sl.content && sl.content.bodyTexts) || []).length;
+        return p + (it ? '/' + it : '') + (imgs ? ' img:' + imgs : '') + (layers ? ' layers:' + layers : '');
+      }).join(', ');
+      log('  ' + s.type.toUpperCase() + ' "' + s.title + '": ' + slideDetails);
+    });
 
     // 1. course.json
     var courseJson = generateCourse(coursePlan, brandProfile);
