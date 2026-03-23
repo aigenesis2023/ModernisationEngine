@@ -472,7 +472,9 @@ window.AdaptTranslator = (function () {
           placeholder: field.label || 'Enter your response'
         };
       });
-      var formTitle = headings[0] || slide.originalTitle || '';
+      // Prefer section title or slide title for forms — headings[0] often contains
+      // the course title which is wrong context for a form
+      var formTitle = section.title || slide.originalTitle || headings[0] || '';
       var formBody = allTexts.length > 0 ? textsToBody(allTexts) : '';
       var compId = idManager.nextComponent(blockId);
       components.push({
@@ -540,11 +542,27 @@ window.AdaptTranslator = (function () {
           }
         }
       });
-    } else if (presentation === 'branching' && slide.interactions) {
+    } else if (presentation === 'branching') {
       // Branching options → BranchingCards component with interactive selection
-      var optionTexts = slide.interactions.filter(function (i) {
-        return i.type === 'button' || i.type === 'option';
-      }).map(function (i) { return textVal(i.label || i.text || ''); }).filter(Boolean);
+      // The planner stores button data in slide.buttons (not slide.interactions)
+      var buttons = slide.buttons || [];
+      var interactions = slide.interactions || [];
+      var optionTexts = buttons.map(function (b) {
+        return textVal(b.label || b.text || '');
+      }).filter(Boolean);
+      // Fallback: also check interactions array
+      if (optionTexts.length === 0) {
+        optionTexts = interactions.filter(function (i) {
+          return i.type === 'button' || i.type === 'option';
+        }).map(function (i) { return textVal(i.label || i.text || ''); }).filter(Boolean);
+      }
+      // Last resort: use layer names as options (Storyline often puts branching options as layers)
+      if (optionTexts.length === 0 && slide.layers && slide.layers.length > 0) {
+        optionTexts = slide.layers.map(function(l) {
+          var layerTexts = (l.texts || []).map(textVal);
+          return l.name || layerTexts[0] || '';
+        }).filter(function(t) { return t && t.length > 2; });
+      }
 
       // Build body with options as list items for BranchingCards to parse
       var bodyHtml = '';
@@ -559,13 +577,16 @@ window.AdaptTranslator = (function () {
         bodyHtml += '</ul>';
       }
 
+      // If no options found at all, fall back to text component instead of empty cards
+      var branchComponentType = optionTexts.length > 0 ? 'branching' : 'text';
+
       var compId = idManager.nextComponent(blockId);
       components.push({
         _id: compId,
         _parentId: blockId,
         _type: 'component',
-        _component: 'branching',
-        _classes: '',
+        _component: branchComponentType,
+        _classes: branchComponentType === 'text' ? 'branching-fallback' : '',
         _layout: 'full',
         title: headings[0] || slide.originalTitle || '',
         displayTitle: headings[0] || '',
@@ -596,8 +617,11 @@ window.AdaptTranslator = (function () {
           small: adaptImagePath(imgSrc)
         }
       });
-    } else if (allTexts.length >= 4 && allTexts.every(function(t) { return t.length < 120; })) {
+    } else if (allTexts.length >= 4 && allTexts.every(function(t) { return t.length < 120; })
+      && section.type !== 'assessment' && section.type !== 'results'
+      && !allTexts.some(function(t) { return /\?$/.test(t.trim()); })) {
       // 4+ short text items → BentoGrid (with optional images)
+      // Exclude assessment sections and texts that end with ? (likely quiz questions)
       var bentoItems = allTexts.map(function (t, idx) {
         var itemGraphic = (contentImages[idx]) ? {
           src: adaptImagePath(contentImages[idx]),

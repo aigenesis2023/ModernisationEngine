@@ -133,19 +133,19 @@ function BlockRow({ block, components, blockIndex }) {
   const hasRight = components.some((c) => c._layout === 'right');
   const isSplit = hasLeft && hasRight;
 
-  // Don't wrap single full-width graphics in a card (let them breathe)
-  const isSingleGraphic = components.length === 1 &&
-    (components[0]._component === 'graphic' || components[0]._component === 'hero');
+  // Don't wrap components that handle their own styling (have their own glass cards/containers)
+  const selfStyledTypes = ['graphic', 'hero', 'graphic-text', 'bento', 'media', 'branching', 'narrative', 'data-table', 'textinput', 'mcq'];
+  const isSelfStyled = components.length === 1 && selfStyledTypes.includes(components[0]._component);
 
   return (
     <motion.div
       ref={ref}
       data-block-id={block._id}
       className={`
-        ${isSingleGraphic ? '' : 'rounded-2xl p-6 md:p-8'}
+        ${isSelfStyled ? '' : 'rounded-2xl p-6 md:p-8'}
         ${isSplit ? 'grid grid-cols-1 md:grid-cols-2 gap-8 items-start' : ''}
       `}
-      style={isSingleGraphic ? {} : {
+      style={isSelfStyled ? {} : {
         background: 'var(--ui-glass)',
         border: '1px solid var(--ui-glass-border)',
         backdropFilter: 'blur(12px)',
