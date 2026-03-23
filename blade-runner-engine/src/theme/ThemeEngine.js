@@ -173,8 +173,10 @@ export function applyBrand(brand) {
  * Apply Stitch Design DNA — complete design system overlay
  *
  * Applies Stitch's full design system on top of the brand profile.
- * This includes: 50+ colors, 10 surface levels, glass effects,
- * shadows, gradients, and border radius.
+ * Three layers:
+ * 1. Color tokens (50+ colors, 10 surface levels)
+ * 2. Visual treatments (glass, shadows, gradients, radii)
+ * 3. Structural rules (typography, surface usage, border style, color cycle)
  *
  * Call AFTER applyBrand() so DNA values override the basic brand defaults.
  */
@@ -188,7 +190,6 @@ export function applyDesignDNA(dna) {
     for (const [key, value] of Object.entries(sh)) {
       root.style.setProperty(`--${key}`, value);
     }
-    // Override brand defaults with Stitch surfaces
     if (sh.surface) root.style.setProperty('--brand-surface', sh.surface);
     if (sh.background) root.style.setProperty('--brand-bg', sh.background);
     if (sh['surface-dim']) root.style.setProperty('--brand-bg', sh['surface-dim']);
@@ -198,7 +199,6 @@ export function applyDesignDNA(dna) {
   // ─── Full color system from Stitch ─────────────────────────────────
   if (dna.colors) {
     const dc = dna.colors;
-    // Map Stitch's Material 3 colors to our CSS variables
     if (dc.primary) root.style.setProperty('--brand-primary', dc.primary);
     if (dc['primary-container']) root.style.setProperty('--brand-primary-container', dc['primary-container']);
     if (dc.secondary) root.style.setProperty('--brand-secondary', dc.secondary);
@@ -213,7 +213,6 @@ export function applyDesignDNA(dna) {
     if (dc['on-background']) root.style.setProperty('--brand-heading', dc.primary || dc['on-background']);
     if (dc['surface-tint']) root.style.setProperty('--brand-surface-tint', dc['surface-tint']);
     if (dc['inverse-primary']) root.style.setProperty('--brand-inverse-primary', dc['inverse-primary']);
-    // Store all Stitch colors as CSS variables for component use
     for (const [key, value] of Object.entries(dc)) {
       root.style.setProperty(`--stitch-${key}`, value);
     }
@@ -226,13 +225,11 @@ export function applyDesignDNA(dna) {
     if (gc.backdropFilter) root.style.setProperty('--ui-glass-blur', gc.backdropFilter);
   }
 
-  // Glow / neon border
   if (dna.glass?.glow) {
     root.style.setProperty('--brand-glow', dna.glass.glow);
     root.style.setProperty('--ui-glass-border', dna.glass.glow.replace(/box-shadow:\s*/, ''));
   }
 
-  // Shadows
   if (dna.glass?.shadows?.length) {
     root.style.setProperty('--ui-card-shadow', dna.glass.shadows[0]);
     if (dna.glass.shadows.length > 1) {
@@ -250,6 +247,61 @@ export function applyDesignDNA(dna) {
     if (dna.borderRadius.xl) root.style.setProperty('--ui-radius', dna.borderRadius.xl);
     if (dna.borderRadius.lg) root.style.setProperty('--ui-radius-sm', dna.borderRadius.lg);
     if (dna.borderRadius.full) root.style.setProperty('--ui-radius-lg', dna.borderRadius.full);
+  }
+
+  // ─── LAYER 3: Structural rules from designMd ──────────────────────
+  const rules = dna.designRules;
+  if (rules) {
+    // Typography rules — components use these for labels, headings, body
+    const typo = rules.typography;
+    if (typo?.label) {
+      root.style.setProperty('--label-transform', typo.label.transform || 'uppercase');
+      root.style.setProperty('--label-tracking', typo.label.tracking || '0.1em');
+      root.style.setProperty('--label-size', typo.label.size || '0.6875rem');
+      root.style.setProperty('--label-weight', typo.label.weight || 700);
+    }
+    if (typo?.heading) {
+      root.style.setProperty('--heading-tracking', typo.heading.tracking || '-0.02em');
+      root.style.setProperty('--heading-weight', typo.heading.weight || 700);
+    }
+    if (typo?.body) {
+      root.style.setProperty('--body-line-height', typo.body.lineHeight || 1.6);
+    }
+
+    // Surface rules — resolved to hex values for direct use
+    const sr = rules.surfaceRules;
+    if (sr && dna.surfaceHierarchy) {
+      const sh = dna.surfaceHierarchy;
+      if (sr.base && sh[sr.base]) root.style.setProperty('--surface-base', sh[sr.base]);
+      if (sr.section && sh[sr.section]) root.style.setProperty('--surface-section', sh[sr.section]);
+      if (sr.card && sh[sr.card]) root.style.setProperty('--surface-card', sh[sr.card]);
+      if (sr.floating && sh[sr.floating]) root.style.setProperty('--surface-floating', sh[sr.floating]);
+      if (sr.input && sh[sr.input]) root.style.setProperty('--surface-input', sh[sr.input]);
+      if (sr.hover && sh[sr.hover]) root.style.setProperty('--surface-hover', sh[sr.hover]);
+    }
+
+    // Border style
+    const bs = rules.borderStyle;
+    if (bs) {
+      root.style.setProperty('--border-style-type', bs.type || 'solid');
+      if (bs.type === 'luminous' && dna.colors?.primary) {
+        const pRgb = hexToRgb(dna.colors.primary);
+        const opacity = bs.glowOpacity || 0.1;
+        root.style.setProperty('--border-luminous', `inset 0 1px 0 0 rgba(${pRgb.r}, ${pRgb.g}, ${pRgb.b}, ${opacity})`);
+      }
+      if (dna.colors?.['outline-variant']) {
+        const oRgb = hexToRgb(dna.colors['outline-variant']);
+        const opacity = bs.outlineOpacity || 0.15;
+        root.style.setProperty('--border-ghost', `rgba(${oRgb.r}, ${oRgb.g}, ${oRgb.b}, ${opacity})`);
+      }
+    }
+
+    // Color cycle — resolved to hex for components to index into
+    const cycle = rules.colorCycle || ['primary', 'secondary', 'tertiary', 'error'];
+    cycle.forEach((name, i) => {
+      const hex = dna.colors?.[name];
+      if (hex) root.style.setProperty(`--color-cycle-${i}`, hex);
+    });
   }
 }
 
@@ -329,6 +381,7 @@ export function generateBrandCSS(brand) {
  * (used alongside generateBrandCSS for static HTML export)
  *
  * Mirrors applyDesignDNA() but outputs a CSS string instead of runtime injection.
+ * Includes all three layers: tokens, visual treatments, and structural rules.
  */
 export function generateDesignDNACSS(dna) {
   if (!dna) return '';
@@ -362,7 +415,6 @@ export function generateDesignDNACSS(dna) {
     if (dc['on-surface-variant']) css += `  --brand-text-muted: ${dc['on-surface-variant']};\n`;
     if (dc['on-background']) css += `  --brand-heading: ${dc.primary || dc['on-background']};\n`;
     if (dc['surface-tint']) css += `  --brand-surface-tint: ${dc['surface-tint']};\n`;
-    // All Stitch colors as custom properties
     for (const [key, value] of Object.entries(dc)) {
       css += `  --stitch-${key}: ${value};\n`;
     }
@@ -387,6 +439,57 @@ export function generateDesignDNACSS(dna) {
     if (dna.borderRadius.xl) css += `  --ui-radius: ${dna.borderRadius.xl};\n`;
     if (dna.borderRadius.lg) css += `  --ui-radius-sm: ${dna.borderRadius.lg};\n`;
     if (dna.borderRadius.full) css += `  --ui-radius-lg: ${dna.borderRadius.full};\n`;
+  }
+
+  // ─── Structural rules from designMd ──────────────────────────────
+  const rules = dna.designRules;
+  if (rules) {
+    const typo = rules.typography;
+    if (typo?.label) {
+      css += `  --label-transform: ${typo.label.transform || 'uppercase'};\n`;
+      css += `  --label-tracking: ${typo.label.tracking || '0.1em'};\n`;
+      css += `  --label-size: ${typo.label.size || '0.6875rem'};\n`;
+      css += `  --label-weight: ${typo.label.weight || 700};\n`;
+    }
+    if (typo?.heading) {
+      css += `  --heading-tracking: ${typo.heading.tracking || '-0.02em'};\n`;
+      css += `  --heading-weight: ${typo.heading.weight || 700};\n`;
+    }
+    if (typo?.body) {
+      css += `  --body-line-height: ${typo.body.lineHeight || 1.6};\n`;
+    }
+
+    // Surface rules resolved to hex
+    const sr = rules.surfaceRules;
+    if (sr && dna.surfaceHierarchy) {
+      const sh = dna.surfaceHierarchy;
+      if (sr.base && sh[sr.base]) css += `  --surface-base: ${sh[sr.base]};\n`;
+      if (sr.section && sh[sr.section]) css += `  --surface-section: ${sh[sr.section]};\n`;
+      if (sr.card && sh[sr.card]) css += `  --surface-card: ${sh[sr.card]};\n`;
+      if (sr.floating && sh[sr.floating]) css += `  --surface-floating: ${sh[sr.floating]};\n`;
+      if (sr.input && sh[sr.input]) css += `  --surface-input: ${sh[sr.input]};\n`;
+      if (sr.hover && sh[sr.hover]) css += `  --surface-hover: ${sh[sr.hover]};\n`;
+    }
+
+    // Border luminous glow
+    const bs = rules.borderStyle;
+    if (bs?.type === 'luminous' && dna.colors?.primary) {
+      const pRgb = hexToRgb(dna.colors.primary);
+      const opacity = bs.glowOpacity || 0.1;
+      css += `  --border-luminous: inset 0 1px 0 0 rgba(${pRgb.r}, ${pRgb.g}, ${pRgb.b}, ${opacity});\n`;
+    }
+    if (dna.colors?.['outline-variant']) {
+      const oRgb = hexToRgb(dna.colors['outline-variant']);
+      const opacity = bs?.outlineOpacity || 0.15;
+      css += `  --border-ghost: rgba(${oRgb.r}, ${oRgb.g}, ${oRgb.b}, ${opacity});\n`;
+    }
+
+    // Color cycle resolved to hex
+    const cycle = rules.colorCycle || ['primary', 'secondary', 'tertiary', 'error'];
+    cycle.forEach((name, i) => {
+      const hex = dna.colors?.[name];
+      if (hex) css += `  --color-cycle-${i}: ${hex};\n`;
+    });
   }
 
   css += '}\n';

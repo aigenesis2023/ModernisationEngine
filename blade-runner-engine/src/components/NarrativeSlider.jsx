@@ -1,5 +1,6 @@
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const slideVariants = {
   enter: (direction) => ({
@@ -21,6 +22,7 @@ const slideVariants = {
 export default function NarrativeSlider({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const { style, rules, resolveSurface, hasDNA } = useComponentStyle('narrative');
 
   const title = data.displayTitle || '';
   const body = data.body || '';
@@ -37,6 +39,39 @@ export default function NarrativeSlider({ data = {} }) {
 
   const currentItem = items[currentIndex] || {};
   const graphic = currentItem._graphic || {};
+
+  // DNA-driven values
+  const containerBg = hasDNA && style?.container?.primaryBg
+    ? resolveSurface(style.container.primaryBg)
+    : null;
+  const containerRounded = hasDNA && style?.container?.rounded
+    ? style.container.rounded
+    : 'rounded-2xl';
+  const badge = hasDNA && style?.badge?.found ? style.badge : null;
+  const labelTypo = hasDNA && rules?.typography?.label ? rules.typography.label : null;
+  const activeDotColor = hasDNA ? 'var(--brand-primary, #8b5cf6)' : 'var(--brand-accent, #8b5cf6)';
+  const borderStyle = hasDNA ? rules?.borderStyle : null;
+
+  // Ghost border style from rules
+  const ghostBorder = borderStyle?.type === 'luminous'
+    ? `1px solid rgba(255,255,255,${borderStyle.outlineOpacity || 0.08})`
+    : undefined;
+
+  // Container card style
+  const cardStyle = containerBg
+    ? {
+        background: containerBg,
+        borderColor: ghostBorder ? undefined : 'var(--ui-glass-border)',
+        border: ghostBorder || undefined,
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+      }
+    : {
+        background: 'var(--ui-glass)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        borderColor: 'var(--ui-glass-border)',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+      };
 
   return (
     <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
@@ -70,14 +105,8 @@ export default function NarrativeSlider({ data = {} }) {
         initial={{ opacity: 0, y: 24 }}
         animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
         transition={{ duration: 0.5, delay: 0.2, ease: 'easeOut' }}
-        className="rounded-2xl border overflow-hidden"
-        style={{
-          background: 'var(--ui-glass)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'var(--ui-glass-border)',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-        }}
+        className={`${containerRounded} ${containerBg ? '' : 'border'} overflow-hidden`}
+        style={cardStyle}
       >
         {/* Slide content */}
         <div className="relative overflow-hidden" style={{ minHeight: '200px' }}>
@@ -93,7 +122,7 @@ export default function NarrativeSlider({ data = {} }) {
             >
               {/* Image (left on desktop, top on mobile) */}
               {(graphic.large || graphic.src) && (
-                <div className="sm:w-1/2 flex-shrink-0">
+                <div className="sm:w-1/2 flex-shrink-0 relative">
                   <img
                     src={graphic.large || graphic.src}
                     alt={graphic.alt || currentItem.title || ''}
@@ -101,6 +130,17 @@ export default function NarrativeSlider({ data = {} }) {
                     style={{ minHeight: '200px' }}
                     onError={(e) => { e.target.style.display = 'none'; }}
                   />
+                  {/* DNA: primary color overlay on image */}
+                  {hasDNA && (
+                    <div
+                      className="absolute inset-0 pointer-events-none"
+                      style={{
+                        background: 'var(--brand-primary, transparent)',
+                        mixBlendMode: 'overlay',
+                        opacity: 0.15,
+                      }}
+                    />
+                  )}
                 </div>
               )}
 
@@ -109,6 +149,33 @@ export default function NarrativeSlider({ data = {} }) {
                 className="flex-1 flex flex-col justify-center p-6 sm:p-8"
                 style={{ minWidth: 0 }}
               >
+                {/* DNA: Badge label above slide title */}
+                {badge && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      style={{
+                        width: '3px',
+                        height: '16px',
+                        background: 'var(--brand-primary, #8b5cf6)',
+                        borderRadius: '2px',
+                        display: 'inline-block',
+                        flexShrink: 0,
+                      }}
+                    />
+                    <span
+                      style={{
+                        color: 'var(--brand-primary, #8b5cf6)',
+                        fontSize: labelTypo?.size || '0.7rem',
+                        fontWeight: labelTypo?.weight || 700,
+                        textTransform: labelTypo?.transform || 'uppercase',
+                        letterSpacing: labelTypo?.tracking || '0.1em',
+                      }}
+                    >
+                      {badge.text}
+                    </span>
+                  </div>
+                )}
+
                 {currentItem.title && (
                   <h3
                     className="text-lg sm:text-xl font-semibold mb-3"
@@ -163,7 +230,7 @@ export default function NarrativeSlider({ data = {} }) {
                     width: i === currentIndex ? '20px' : '8px',
                     height: '8px',
                     background: i === currentIndex
-                      ? 'var(--brand-accent, #8b5cf6)'
+                      ? activeDotColor
                       : 'rgba(255, 255, 255, 0.2)',
                   }}
                 />

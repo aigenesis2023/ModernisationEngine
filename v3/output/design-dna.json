@@ -1,87 +1,82 @@
 {
   "meta": {
     "source": "Google Stitch",
-    "generatedAt": "2026-03-23T17:57:09.411Z"
+    "generatedAt": "2026-03-23T19:08:28.412Z",
+    "systemName": "Voltage High-Stakes"
   },
   "colors": {
-    "tertiary": "#699cff",
-    "on-tertiary-container": "#000311",
-    "error-dim": "#d73357",
-    "inverse-surface": "#f9f9f9",
-    "secondary-container": "#6f00be",
-    "inverse-primary": "#494bd7",
-    "on-primary": "#0f00a4",
-    "on-error-container": "#ffb2b9",
-    "primary": "#a3a6ff",
-    "primary-container": "#9396ff",
-    "on-error": "#490013",
-    "on-surface-variant": "#ababab",
-    "on-primary-container": "#0a0081",
-    "primary-dim": "#6063ee",
-    "outline": "#757575",
-    "error": "#ff6e84",
-    "inverse-on-surface": "#555555",
-    "background": "#0e0e0e",
-    "on-background": "#ffffff",
-    "tertiary-container": "#4388fd",
-    "on-surface": "#ffffff",
-    "tertiary-dim": "#699cff",
-    "on-tertiary": "#001e4a",
     "secondary": "#c180ff",
-    "secondary-dim": "#9c48ea",
-    "outline-variant": "#484848",
+    "on-error-container": "#ffb2b9",
+    "on-background": "#ffffff",
     "on-secondary-container": "#e9cdff",
+    "error": "#ff6e84",
+    "error-container": "#a70138",
+    "on-primary-container": "#0a0081",
+    "on-primary": "#0f00a4",
+    "outline": "#757575",
+    "outline-variant": "#484848",
+    "primary-dim": "#6063ee",
+    "tertiary-container": "#4388fd",
+    "error-dim": "#d73357",
+    "tertiary-dim": "#699cff",
+    "on-tertiary-container": "#000311",
+    "on-error": "#490013",
     "on-secondary": "#33005b",
-    "error-container": "#a70138"
+    "primary-container": "#9396ff",
+    "secondary-container": "#6f00be",
+    "on-surface-variant": "#ababab",
+    "inverse-on-surface": "#555555",
+    "primary": "#a3a6ff",
+    "on-surface": "#ffffff",
+    "inverse-surface": "#f9f9f9",
+    "background": "#0e0e0e",
+    "tertiary": "#699cff",
+    "secondary-dim": "#9c48ea",
+    "inverse-primary": "#494bd7",
+    "on-tertiary": "#001e4a"
   },
   "surfaceHierarchy": {
-    "surface-bright": "#2c2c2c",
     "surface-container": "#191919",
-    "surface-container-low": "#131313",
-    "surface-dim": "#0e0e0e",
-    "surface-container-lowest": "#000000",
-    "surface-container-high": "#1f1f1f",
-    "surface-variant": "#262626",
     "surface-container-highest": "#262626",
+    "surface-tint": "#a3a6ff",
     "surface": "#0e0e0e",
-    "surface-tint": "#a3a6ff"
+    "surface-bright": "#2c2c2c",
+    "surface-container-lowest": "#000000",
+    "surface-container-low": "#131313",
+    "surface-container-high": "#1f1f1f",
+    "surface-dim": "#0e0e0e",
+    "surface-variant": "#262626"
   },
   "fixedColors": {
-    "on-secondary-fixed": "#4f0089",
+    "primary-fixed": "#9396ff",
     "secondary-fixed-dim": "#dbb4ff",
     "tertiary-fixed-dim": "#73a2ff",
-    "on-secondary-fixed-variant": "#7511c3",
-    "primary-fixed-dim": "#8387ff",
-    "on-tertiary-fixed": "#00163b",
-    "on-primary-fixed-variant": "#0e009d",
     "on-primary-fixed": "#000000",
-    "primary-fixed": "#9396ff",
+    "tertiary-fixed": "#8ab0ff",
+    "on-secondary-fixed-variant": "#7511c3",
     "secondary-fixed": "#e5c6ff",
+    "on-primary-fixed-variant": "#0e009d",
+    "on-tertiary-fixed": "#00163b",
     "on-tertiary-fixed-variant": "#00377b",
-    "tertiary-fixed": "#8ab0ff"
+    "on-secondary-fixed": "#4f0089",
+    "primary-fixed-dim": "#8387ff"
   },
   "glass": {
-    "card": {
-      "background": "rgba(19, 19, 19, 0.6)",
-      "backdropFilter": "blur(20px)"
-    },
-    "glow": "inset 0 1px 0 0 rgba(163, 166, 255, 0.1)",
     "shadows": [
-      "inset 0 1px 0 0 rgba(99,102,241,0.1)",
-      "0 0 20px rgba(163,166,255,0.4)",
-      "0 0 20px rgba(163,166,255,0.3)",
-      "0 0 40px rgba(99,102,241,0.05)",
+      "0 0 20px rgba(99,102,241,0.1)",
+      "0 0 30px rgba(163,166,255,0.3)",
       "0 0 10px #a3a6ff",
-      "0 0 10px #c180ff",
-      "0 0 10px #699cff"
+      "0 0 20px rgba(163,166,255,0.4)",
+      "0 0 30px rgba(163,166,255,0.4)",
+      "0 0 30px rgba(193,128,255,0.4)",
+      "0 0 30px rgba(59,130,246,0.4)",
+      "0 0 30px rgba(163,166,255,0.15)"
     ]
   },
   "gradients": {
     "patterns": [
-      "from-transparent via-surface-dim/40 to-surface-dim",
-      "from-surface-dim via-transparent to-transparent\"></div>",
-      "from-surface-dim via-surface-dim/20 to-transparent\"></div>",
-      "from-primary via-secondary to-transparent"
+      "from-black/20 via-black/60 to-black",
+      "from-transparent via-white/20 to-transparent"
     ],
     "signature": "linear-gradient(135deg, #a3a6ff, #c180ff)"
   },
@@ -102,7 +97,499 @@
       "Inter"
     ]
   },
-  "customClasses": {
-    "raw": ".material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }\n        .glass { background: rgba(19, 19, 19, 0.6); backdrop-filter: blur(20px); }\n        .neon-border { box-shadow: inset 0 1px 0 0 rgba(163, 166, 255, 0.1); }\n        .no-scrollbar::-webkit-scrollbar { display: none; }"
+  "designRules": {
+    "systemName": "Voltage High-Stakes",
+    "colorMode": "DARK",
+    "spacingScale": 3,
+    "roundness": "ROUND_FOUR",
+    "typography": {
+      "label": {
+        "transform": "uppercase",
+        "tracking": "0.1em",
+        "size": "0.6875rem",
+        "weight": 700
+      },
+      "heading": {
+        "tracking": "-0.02em",
+        "weight": 700
+      },
+      "body": {
+        "lineHeight": 1.6,
+        "size": "1rem"
+      }
+    },
+    "surfaceRules": {
+      "base": "surface-dim",
+      "section": "surface-container-low",
+      "card": "surface-container-high",
+      "floating": "surface-container-highest",
+      "input": "surface-container-lowest",
+      "hover": "surface-variant"
+    },
+    "borderStyle": {
+      "type": "luminous",
+      "glowOpacity": 0.1,
+      "outlineOpacity": 0.6,
+      "noLineRule": true
+    },
+    "colorCycle": [
+      "primary",
+      "secondary",
+      "tertiary",
+      "error"
+    ]
+  },
+  "componentStyles": {
+    "hero": {
+      "container": {
+        "backgrounds": [],
+        "borders": []
+      },
+      "icons": [
+        "keyboard_double_arrow_down"
+      ],
+      "typography": {
+        "titleSize": "text-6xl md:text-8xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {},
+      "badge": null,
+      "treatments": {
+        "overlayGradientDirection": "b"
+      }
+    },
+    "text": {
+      "container": {
+        "backgrounds": [],
+        "borders": []
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-4xl",
+        "titleWeight": "font-bold",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 12
+      },
+      "badge": null,
+      "treatments": {}
+    },
+    "accordion": {
+      "container": {
+        "backgrounds": [
+          "surface-container-high",
+          "secondary"
+        ],
+        "primaryBg": "surface-container-high",
+        "borders": [
+          "border-l",
+          "border-secondary",
+          "border-t",
+          "border-white/5"
+        ],
+        "rounded": "rounded-xl"
+      },
+      "icons": [
+        "architecture",
+        "check_circle",
+        "lock",
+        "expand_less",
+        "dangerous",
+        "radio_button_unchecked"
+      ],
+      "typography": {},
+      "layout": {},
+      "badge": null,
+      "treatments": {
+        "borderLeftAccent": 4,
+        "hoverBg": "surface-container-high",
+        "colorCycle": true
+      }
+    },
+    "textinput": {
+      "container": {
+        "backgrounds": [
+          "primary/10",
+          "surface-container-highest",
+          "primary"
+        ],
+        "primaryBg": "surface-container-highest",
+        "borders": [
+          "border-none"
+        ],
+        "rounded": "rounded-xl"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-2xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 2
+      },
+      "badge": {
+        "text": "Hazard Type",
+        "found": true
+      },
+      "treatments": {
+        "glowDots": true
+      }
+    },
+    "graphic-text": {
+      "container": {
+        "backgrounds": [
+          "secondary/20"
+        ],
+        "borders": [],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [
+        "arrow_forward"
+      ],
+      "typography": {
+        "titleSize": "text-4xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 2
+      },
+      "badge": {
+        "text": "Technical Insight",
+        "found": true
+      },
+      "treatments": {}
+    },
+    "checklist": {
+      "container": {
+        "backgrounds": [
+          "surface-container-highest",
+          "primary"
+        ],
+        "primaryBg": "surface-container-highest",
+        "borders": [],
+        "rounded": "rounded-xl"
+      },
+      "icons": [
+        "check_box",
+        "check_box_outline_blank"
+      ],
+      "typography": {
+        "titleSize": "text-2xl",
+        "titleWeight": "font-bold"
+      },
+      "layout": {},
+      "badge": null,
+      "treatments": {
+        "glowDots": true
+      }
+    },
+    "pullquote": {
+      "container": {
+        "backgrounds": [],
+        "borders": []
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-9xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {},
+      "badge": {
+        "text": "Chief Safety Officer",
+        "found": true
+      },
+      "treatments": {}
+    },
+    "stat-callout": {
+      "container": {
+        "backgrounds": [],
+        "borders": [],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-6xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 3
+      },
+      "badge": {
+        "text": "Typical System Voltage",
+        "found": true
+      },
+      "treatments": {}
+    },
+    "bento": {
+      "container": {
+        "backgrounds": [
+          "secondary/10",
+          "tertiary/10"
+        ],
+        "borders": [
+          "border-tertiary/20"
+        ],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [
+        "memory",
+        "ac_unit"
+      ],
+      "typography": {
+        "titleSize": "text-3xl",
+        "titleWeight": "font-black"
+      },
+      "layout": {
+        "gridCols": 12,
+        "direction": "column"
+      },
+      "badge": null,
+      "treatments": {}
+    },
+    "comparison": {
+      "container": {
+        "backgrounds": [
+          "surface-container-high"
+        ],
+        "primaryBg": "surface-container-high",
+        "borders": [],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-4xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {},
+      "badge": null,
+      "treatments": {
+        "hoverBg": "white",
+        "divideY": true
+      }
+    },
+    "mcq": {
+      "container": {
+        "backgrounds": [
+          "primary/20",
+          "primary/10",
+          "primary"
+        ],
+        "borders": [
+          "border-t",
+          "border-primary",
+          "border",
+          "border-white/5",
+          "border-zinc"
+        ],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-2xl",
+        "titleWeight": "font-bold",
+        "hasLabels": true
+      },
+      "layout": {
+        "circularNodes": true
+      },
+      "badge": null,
+      "treatments": {
+        "hoverBg": "white",
+        "glowDots": true
+      }
+    },
+    "full-bleed": {
+      "container": {
+        "backgrounds": [],
+        "borders": []
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-5xl md:text-7xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {},
+      "badge": null,
+      "treatments": {}
+    },
+    "key-term": {
+      "container": {
+        "backgrounds": [],
+        "borders": [],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [
+        "settings_input_component",
+        "monitoring",
+        "energy_savings_leaf"
+      ],
+      "typography": {
+        "titleSize": "text-2xl",
+        "titleWeight": "font-black"
+      },
+      "layout": {
+        "gridCols": 3
+      },
+      "badge": null,
+      "treatments": {
+        "colorCycle": true
+      }
+    },
+    "timeline": {
+      "container": {
+        "backgrounds": [
+          "surface-container-lowest"
+        ],
+        "primaryBg": "surface-container-lowest",
+        "borders": [
+          "border-l",
+          "border-white/10",
+          "border",
+          "border-primary",
+          "border-secondary"
+        ],
+        "rounded": "rounded-full"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-4xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "circularNodes": true
+      },
+      "badge": null,
+      "treatments": {
+        "borderLeftAccent": 2,
+        "colorCycle": true
+      }
+    },
+    "narrative": {
+      "container": {
+        "backgrounds": [
+          "primary"
+        ],
+        "borders": [
+          "border",
+          "border-white/10"
+        ],
+        "rounded": "rounded-3xl"
+      },
+      "icons": [
+        "chevron_left",
+        "chevron_right"
+      ],
+      "typography": {
+        "titleSize": "text-4xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "direction": "column",
+        "circularNodes": true
+      },
+      "badge": null,
+      "treatments": {
+        "hoverBg": "white"
+      }
+    },
+    "process-flow": {
+      "container": {
+        "backgrounds": [],
+        "borders": [
+          "border",
+          "border-secondary/30",
+          "border-tertiary/30"
+        ],
+        "rounded": "rounded-full"
+      },
+      "icons": [
+        "visibility",
+        "phonelink_off",
+        "bolt"
+      ],
+      "typography": {
+        "titleSize": "text-3xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "direction": "column"
+      },
+      "badge": {
+        "text": "System De-Energization Flow",
+        "found": true
+      },
+      "treatments": {
+        "glowDots": true,
+        "colorCycle": true,
+        "overlayGradientDirection": "r"
+      }
+    },
+    "tabs": {
+      "container": {
+        "backgrounds": [
+          "primary"
+        ],
+        "borders": [],
+        "rounded": "rounded-full"
+      },
+      "icons": [
+        "check_circle"
+      ],
+      "typography": {
+        "titleSize": "text-3xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 2
+      },
+      "badge": {
+        "text": "Safety Gear",
+        "found": true
+      },
+      "treatments": {
+        "pillTabs": true
+      }
+    },
+    "flashcard": {
+      "container": {
+        "backgrounds": [
+          "primary"
+        ],
+        "borders": [
+          "border-primary/50"
+        ],
+        "rounded": "rounded-2xl"
+      },
+      "icons": [],
+      "typography": {
+        "titleSize": "text-3xl",
+        "titleWeight": "font-black",
+        "hasLabels": true
+      },
+      "layout": {
+        "gridCols": 3,
+        "direction": "column"
+      },
+      "badge": {
+        "text": "Question",
+        "found": true
+      },
+      "treatments": {
+        "glowDots": true,
+        "has3D": true
+      }
+    }
   }
 }

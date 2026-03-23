@@ -1,6 +1,7 @@
 import { motion, AnimatePresence, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
 import useCourseStore from '../store/courseStore';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const itemVariants = {
   hidden: { opacity: 0, y: 24 },
@@ -37,6 +38,7 @@ export default function SilkyAccordion({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const store = useCourseStore();
+  const { style, rules, resolveSurface, hasDNA } = useComponentStyle('accordion');
 
   const title = data.displayTitle || '';
   const body = data.body || '';
@@ -53,6 +55,99 @@ export default function SilkyAccordion({ data = {} }) {
     if (!everOpened[index]) {
       setEverOpened((prev) => ({ ...prev, [index]: true }));
     }
+  };
+
+  // ─── DNA-driven config ──────────────────────────────────────
+  const useDNA = hasDNA && style;
+  const containerBg = useDNA && style.container?.primaryBg
+    ? resolveSurface(style.container.primaryBg)
+    : null;
+  const containerRounding = useDNA && style.container?.rounded
+    ? style.container.rounded
+    : 'rounded-xl';
+  const isLuminousBorder = useDNA && rules?.borderStyle?.type === 'luminous';
+  const useDivideY = useDNA && style.treatments?.divideY;
+
+  // Icons from DNA: last icon is chevron, rest are item icons
+  const dnaIcons = useDNA && style.icons?.length > 0 ? style.icons : null;
+  const chevronIcon = dnaIcons && dnaIcons.length > 0 ? dnaIcons[dnaIcons.length - 1] : null;
+  const itemIcons = dnaIcons && dnaIcons.length > 1 ? dnaIcons.slice(0, -1) : null;
+
+  // Helper to get cycling item icon
+  const getItemIcon = (index) => {
+    if (!itemIcons || itemIcons.length === 0) return null;
+    return itemIcons[index % itemIcons.length];
+  };
+
+  // ─── Chevron element (DNA material icon or fallback SVG) ────
+  const renderChevron = (open) => {
+    if (useDNA && chevronIcon) {
+      return (
+        <motion.span
+          initial={false}
+          animate={open ? 'expanded' : 'collapsed'}
+          variants={chevronVariants}
+          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+          className="material-symbols-outlined flex-shrink-0 ml-3"
+          style={{
+            color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))',
+            fontSize: '20px',
+            display: 'inline-block',
+          }}
+        >
+          {chevronIcon}
+        </motion.span>
+      );
+    }
+    return (
+      <motion.svg
+        initial={false}
+        animate={open ? 'expanded' : 'collapsed'}
+        variants={chevronVariants}
+        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+        width="20"
+        height="20"
+        viewBox="0 0 20 20"
+        fill="none"
+        className="flex-shrink-0 ml-3"
+        style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))' }}
+      >
+        <path
+          d="M5 7.5L10 12.5L15 7.5"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </motion.svg>
+    );
+  };
+
+  // ─── Container style ────────────────────────────────────────
+  const outerContainerStyle = useDNA && containerBg
+    ? { background: containerBg, borderRadius: '16px', padding: '8px' }
+    : {};
+
+  // ─── Item border style (DNA vs default) ─────────────────────
+  const getItemBorderStyle = (open) => {
+    if (useDNA && isLuminousBorder) {
+      return {
+        borderColor: open
+          ? 'var(--brand-accent, rgba(139, 92, 246, 0.5))'
+          : 'var(--border-ghost, rgba(255, 255, 255, 0.06))',
+        boxShadow: open
+          ? '0 0 20px rgba(139, 92, 246, 0.08)'
+          : 'none',
+      };
+    }
+    return {
+      borderColor: open
+        ? 'var(--brand-accent, rgba(139, 92, 246, 0.5))'
+        : 'var(--ui-glass-border, rgba(255, 255, 255, 0.15))',
+      boxShadow: open
+        ? '0 0 20px rgba(139, 92, 246, 0.08)'
+        : '0 2px 8px rgba(0, 0, 0, 0.2)',
+    };
   };
 
   return (
@@ -96,10 +191,16 @@ export default function SilkyAccordion({ data = {} }) {
       )}
 
       {/* Accordion items */}
-      <div className="flex flex-col gap-3">
+      <div
+        className={`flex flex-col ${useDivideY ? '' : 'gap-3'}`}
+        style={outerContainerStyle}
+      >
         {items.map((item, index) => {
           const open = isOpen(index);
           const visited = everOpened[index] || open;
+          const iconName = getItemIcon(index);
+          const borderStyle = getItemBorderStyle(open);
+          const isLast = index === items.length - 1;
 
           return (
             <motion.div
@@ -108,18 +209,19 @@ export default function SilkyAccordion({ data = {} }) {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={itemVariants}
-              className="rounded-xl border overflow-hidden"
+              className={`${useDivideY ? '' : `${containerRounding} border`} overflow-hidden`}
               style={{
-                background: 'var(--ui-glass, rgba(255, 255, 255, 0.08))',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
-                borderColor: open
-                  ? 'var(--brand-accent, rgba(139, 92, 246, 0.5))'
-                  : 'var(--ui-glass-border, rgba(255, 255, 255, 0.15))',
-                boxShadow: open
-                  ? '0 0 20px rgba(139, 92, 246, 0.08)'
-                  : '0 2px 8px rgba(0, 0, 0, 0.2)',
-                transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+                background: useDivideY ? 'transparent' : 'var(--ui-glass, rgba(255, 255, 255, 0.08))',
+                backdropFilter: useDivideY ? 'none' : 'blur(16px)',
+                WebkitBackdropFilter: useDivideY ? 'none' : 'blur(16px)',
+                ...(useDivideY
+                  ? {
+                      borderBottom: isLast ? 'none' : `1px solid ${isLuminousBorder ? 'var(--border-ghost, rgba(255, 255, 255, 0.06))' : 'var(--ui-glass-border, rgba(255, 255, 255, 0.15))'}`,
+                    }
+                  : {
+                      ...borderStyle,
+                      transition: 'border-color 0.3s ease, box-shadow 0.3s ease',
+                    }),
               }}
             >
               {/* Header */}
@@ -130,6 +232,18 @@ export default function SilkyAccordion({ data = {} }) {
                 aria-expanded={open}
               >
                 <span className="flex items-center gap-3 flex-1 min-w-0">
+                  {/* DNA item icon */}
+                  {useDNA && iconName && (
+                    <span
+                      className="material-symbols-outlined flex-shrink-0"
+                      style={{
+                        color: 'var(--brand-accent, var(--brand-primary, #8b5cf6))',
+                        fontSize: '20px',
+                      }}
+                    >
+                      {iconName}
+                    </span>
+                  )}
                   {/* Completion indicator */}
                   {visited && (
                     <span
@@ -159,26 +273,7 @@ export default function SilkyAccordion({ data = {} }) {
                 </span>
 
                 {/* Chevron */}
-                <motion.svg
-                  initial={false}
-                  animate={open ? 'expanded' : 'collapsed'}
-                  variants={chevronVariants}
-                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                  width="20"
-                  height="20"
-                  viewBox="0 0 20 20"
-                  fill="none"
-                  className="flex-shrink-0 ml-3"
-                  style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))' }}
-                >
-                  <path
-                    d="M5 7.5L10 12.5L15 7.5"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </motion.svg>
+                {renderChevron(open)}
               </button>
 
               {/* Collapsible content */}
@@ -196,7 +291,9 @@ export default function SilkyAccordion({ data = {} }) {
                       className="px-5 pb-5 text-sm leading-relaxed"
                       style={{
                         color: 'var(--brand-text, rgba(255, 255, 255, 0.8))',
-                        borderTop: '1px solid var(--ui-glass-border)',
+                        borderTop: useDivideY
+                          ? 'none'
+                          : '1px solid var(--ui-glass-border)',
                         paddingTop: '1rem',
                       }}
                       dangerouslySetInnerHTML={{ __html: item.body || '' }}

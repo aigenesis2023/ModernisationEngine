@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 32, scale: 0.95 },
@@ -53,10 +54,72 @@ function AnimatedNumber({ value, isInView }) {
 export default function StatCallout({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.3 });
+  const { style, rules, resolveSurface, getCycleColor, hasDNA } = useComponentStyle('stat-callout');
+  const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const title = data.displayTitle || '';
   const body = data.body || '';
   const items = data._items || [];
+
+  // DNA-driven values
+  const gridCols = hasDNA && style?.layout?.gridCols ? style.layout.gridCols : Math.min(items.length, 4);
+  const cardBg = hasDNA && style?.container?.primaryBg ? resolveSurface(style.container.primaryBg) : null;
+  const hoverBg = hasDNA && style?.treatments?.hoverBg ? resolveSurface(style.treatments.hoverBg) : null;
+  const useColorCycle = hasDNA && style?.treatments?.colorCycle;
+  const labelTypo = hasDNA && rules?.typography?.label ? rules.typography.label : null;
+
+  const getCardBackground = (index) => {
+    if (!hasDNA) {
+      return {
+        background: 'var(--ui-glass, rgba(255, 255, 255, 0.06))',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+      };
+    }
+    const isHovered = hoveredIndex === index;
+    const bg = isHovered && hoverBg ? hoverBg : (cardBg || 'var(--ui-glass, rgba(255, 255, 255, 0.06))');
+    return {
+      background: bg,
+      backdropFilter: cardBg ? undefined : 'blur(16px)',
+      WebkitBackdropFilter: cardBg ? undefined : 'blur(16px)',
+      transition: 'background 0.25s ease',
+    };
+  };
+
+  const getValueStyle = (index) => {
+    if (useColorCycle) {
+      const color = getCycleColor(index);
+      return color ? { color } : {
+        background: 'var(--brand-gradient, linear-gradient(135deg, var(--brand-primary), var(--brand-accent)))',
+        WebkitBackgroundClip: 'text',
+        WebkitTextFillColor: 'transparent',
+        backgroundClip: 'text',
+      };
+    }
+    return {
+      background: 'var(--brand-gradient, linear-gradient(135deg, var(--brand-primary), var(--brand-accent)))',
+      WebkitBackgroundClip: 'text',
+      WebkitTextFillColor: 'transparent',
+      backgroundClip: 'text',
+    };
+  };
+
+  const getLabelStyle = () => {
+    if (labelTypo) {
+      return {
+        color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))',
+        textTransform: labelTypo.transform || 'uppercase',
+        letterSpacing: labelTypo.tracking || '0.05em',
+        fontSize: labelTypo.size || '0.75rem',
+        fontWeight: labelTypo.weight || '700',
+      };
+    }
+    return { color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))' };
+  };
+
+  const labelClasses = labelTypo
+    ? 'leading-snug mt-1 block'
+    : 'text-sm sm:text-base leading-snug mt-1';
 
   return (
     <section ref={ref} className="w-full py-6 sm:py-8">
@@ -87,7 +150,7 @@ export default function StatCallout({ data = {} }) {
         <div
           className="grid gap-6"
           style={{
-            gridTemplateColumns: `repeat(${Math.min(items.length, 4)}, 1fr)`,
+            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
           }}
         >
           {items.map((item, i) => (
@@ -97,23 +160,18 @@ export default function StatCallout({ data = {} }) {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={cardVariants}
-              className="rounded-xl border p-8 sm:p-10 text-center"
+              className={`${hasDNA && style?.container?.rounded ? style.container.rounded : 'rounded-xl'} border p-8 sm:p-10 text-center`}
               style={{
-                background: 'var(--ui-glass, rgba(255, 255, 255, 0.06))',
-                backdropFilter: 'blur(16px)',
-                WebkitBackdropFilter: 'blur(16px)',
+                ...getCardBackground(i),
                 borderColor: 'var(--ui-glass-border, rgba(255, 255, 255, 0.12))',
                 boxShadow: '0 4px 24px rgba(0, 0, 0, 0.15)',
               }}
+              onMouseEnter={() => hoverBg && setHoveredIndex(i)}
+              onMouseLeave={() => hoverBg && setHoveredIndex(null)}
             >
               <div
                 className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-3"
-                style={{
-                  background: 'var(--brand-gradient, linear-gradient(135deg, var(--brand-primary), var(--brand-accent)))',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                }}
+                style={getValueStyle(i)}
               >
                 {item.prefix || ''}
                 <AnimatedNumber value={item.value || '0'} isInView={isInView} />
@@ -121,8 +179,8 @@ export default function StatCallout({ data = {} }) {
               </div>
               {item.label && (
                 <div
-                  className="text-sm sm:text-base leading-snug mt-1"
-                  style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.6))' }}
+                  className={labelClasses}
+                  style={getLabelStyle()}
                 >
                   {item.label}
                 </div>

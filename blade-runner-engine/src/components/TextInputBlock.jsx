@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 32 },
@@ -26,6 +27,7 @@ const inputVariants = {
 export default function TextInputBlock({ data = {} }) {
   var ref = useRef(null);
   var isInView = useInView(ref, { once: true, amount: 0.2 });
+  const { style, rules, resolveSurface, hasDNA } = useComponentStyle('textinput');
 
   var title = data.displayTitle || '';
   var body = data.body || '';
@@ -41,6 +43,14 @@ export default function TextInputBlock({ data = {} }) {
     });
   }
 
+  // DNA-driven values
+  const labelTypo = hasDNA && rules?.typography?.label ? rules.typography.label : null;
+  const inputBg = hasDNA ? resolveSurface('surface-container-lowest') : null;
+  const borderStyle = hasDNA && rules?.borderStyle ? rules.borderStyle : null;
+  const ghostBorder = borderStyle
+    ? `1px solid rgba(255, 255, 255, ${borderStyle.outlineOpacity || 0.06})`
+    : null;
+
   return (
     <motion.section
       ref={ref}
@@ -50,13 +60,13 @@ export default function TextInputBlock({ data = {} }) {
       className="w-full flex justify-center py-6 sm:py-8"
     >
       <div
-        className="w-full rounded-xl border p-8 sm:p-12"
+        className="w-full rounded-xl p-8 sm:p-12"
         style={{
           maxWidth: '780px',
           background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'var(--ui-glass-border)',
+          border: hasDNA && ghostBorder ? ghostBorder : '1px solid var(--ui-glass-border)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
@@ -94,8 +104,19 @@ export default function TextInputBlock({ data = {} }) {
                 {/* Label */}
                 {item.prefix && (
                   <label
-                    className="block text-sm font-medium mb-2 tracking-wide"
-                    style={{ color: 'var(--brand-text, rgba(255, 255, 255, 0.85))' }}
+                    className="block mb-2"
+                    style={hasDNA && labelTypo ? {
+                      color: 'var(--brand-primary, #8b5cf6)',
+                      fontSize: labelTypo.size || '0.75rem',
+                      fontWeight: labelTypo.weight || 700,
+                      textTransform: labelTypo.transform || 'uppercase',
+                      letterSpacing: labelTypo.tracking || '0.05em',
+                    } : {
+                      color: 'var(--brand-text, rgba(255, 255, 255, 0.85))',
+                      fontSize: '0.875rem',
+                      fontWeight: 500,
+                      letterSpacing: '0.025em',
+                    }}
                   >
                     {item.prefix}
                   </label>
@@ -111,10 +132,10 @@ export default function TextInputBlock({ data = {} }) {
                   onBlur={function () { setFocusedIndex(-1); }}
                   className="w-full rounded-lg px-4 py-3 text-base outline-none"
                   style={{
-                    background: 'var(--ui-glass)',
-                    border: '1px solid ' + (isFocused
-                      ? 'var(--brand-primary, #8b5cf6)'
-                      : 'rgba(255, 255, 255, 0.08)'),
+                    background: hasDNA && inputBg ? inputBg : 'var(--ui-glass)',
+                    border: isFocused
+                      ? '1px solid var(--brand-primary, #8b5cf6)'
+                      : (hasDNA && ghostBorder ? ghostBorder : '1px solid rgba(255, 255, 255, 0.08)'),
                     color: 'var(--brand-text, rgba(255, 255, 255, 0.9))',
                     boxShadow: isFocused
                       ? '0 0 0 3px rgba(139, 92, 246, 0.15), 0 0 20px rgba(139, 92, 246, 0.1)'
@@ -132,7 +153,9 @@ export default function TextInputBlock({ data = {} }) {
               initial={{ opacity: 0, y: 12 }}
               animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 12 }}
               transition={{ delay: 0.3 + items.length * 0.1, duration: 0.4 }}
-              className="self-start mt-2 px-6 py-3 text-sm font-medium tracking-wide cursor-pointer"
+              className={hasDNA
+                ? 'w-full mt-2 px-6 py-3 font-black tracking-widest uppercase cursor-pointer'
+                : 'self-start mt-2 px-6 py-3 text-sm font-medium tracking-wide cursor-pointer'}
               style={{
                 borderRadius: 'var(--ui-button-radius, 9999px)',
                 background: 'var(--brand-primary, #8b5cf6)',
@@ -140,6 +163,7 @@ export default function TextInputBlock({ data = {} }) {
                 border: 'none',
                 boxShadow: '0 2px 12px rgba(139, 92, 246, 0.3)',
                 transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+                ...(hasDNA ? { fontSize: '0.875rem' } : {}),
               }}
               whileHover={{
                 scale: 1.03,

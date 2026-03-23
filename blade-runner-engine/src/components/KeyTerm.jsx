@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const termVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -17,10 +18,83 @@ const termVariants = {
 export default function KeyTerm({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
+  const { style, rules, resolveSurface, getCycleColor, hasDNA } = useComponentStyle('key-term');
 
   const title = data.displayTitle || '';
   const items = data._items || [];
 
+  // ─── DNA-driven layout ───────────────────────────────────────
+  if (hasDNA && style) {
+    const gridCols = style.layout?.gridCols || 3;
+    const cardBg = resolveSurface(style.container?.primaryBg) || 'var(--ui-glass, rgba(255, 255, 255, 0.06))';
+    const labelTypo = rules?.typography?.label || {};
+    const headingTypo = rules?.typography?.heading || {};
+
+    return (
+      <div ref={ref} className="w-full max-w-5xl mx-auto py-6 sm:py-8">
+        {title && (
+          <motion.h2
+            initial={{ opacity: 0, y: 16 }}
+            animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 16 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="text-xl sm:text-2xl font-bold mb-5 tracking-tight"
+            style={{
+              color: 'var(--brand-heading, #ffffff)',
+              letterSpacing: headingTypo.tracking || undefined,
+              fontWeight: headingTypo.weight || undefined,
+            }}
+          >
+            {title}
+          </motion.h2>
+        )}
+
+        <div
+          className="grid gap-4"
+          style={{
+            gridTemplateColumns: `repeat(${gridCols}, 1fr)`,
+          }}
+        >
+          {items.map((item, i) => {
+            const cycleColor = getCycleColor(i);
+
+            return (
+              <motion.div
+                key={i}
+                custom={i}
+                initial="hidden"
+                animate={isInView ? 'visible' : 'hidden'}
+                variants={termVariants}
+                className="rounded-xl p-5 flex flex-col gap-2"
+                style={{
+                  background: cardBg,
+                  border: '1px solid var(--border-ghost, rgba(255, 255, 255, 0.08))',
+                }}
+              >
+                {/* Term name as visual anchor — no bookmark icon */}
+                <h3
+                  className="text-lg mb-1"
+                  style={{
+                    color: cycleColor || 'var(--brand-heading, var(--brand-primary, #ffffff))',
+                    fontWeight: 900,
+                  }}
+                >
+                  {item.term}
+                </h3>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: 'var(--brand-text, rgba(255, 255, 255, 0.8))' }}
+                >
+                  {item.definition}
+                </p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  // ─── Default (no DNA) — original behavior ───────────────────
   return (
     <div ref={ref} className="w-full max-w-4xl mx-auto py-6 sm:py-8">
       {title && (

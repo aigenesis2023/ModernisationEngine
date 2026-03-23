@@ -3,567 +3,584 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EV Awareness &amp; Safety | Component Style Guide</title>
+<title>EV Awareness &amp; Safety | Command Center</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
-      tailwind.config = {
-        darkMode: "class",
-        theme: {
-          extend: {
-            colors: {
-              "tertiary": "#699cff",
-              "surface-bright": "#2c2c2c",
-              "on-tertiary-container": "#000311",
-              "error-dim": "#d73357",
-              "inverse-surface": "#f9f9f9",
-              "secondary-container": "#6f00be",
-              "on-secondary-fixed": "#4f0089",
-              "inverse-primary": "#494bd7",
-              "surface-container": "#191919",
-              "on-primary": "#0f00a4",
-              "on-error-container": "#ffb2b9",
-              "primary": "#a3a6ff",
-              "primary-container": "#9396ff",
-              "secondary-fixed-dim": "#dbb4ff",
-              "on-error": "#490013",
-              "surface-container-low": "#131313",
-              "tertiary-fixed-dim": "#73a2ff",
-              "surface-dim": "#0e0e0e",
-              "on-surface-variant": "#ababab",
-              "on-primary-container": "#0a0081",
-              "primary-dim": "#6063ee",
-              "outline": "#757575",
-              "surface-container-lowest": "#000000",
-              "error": "#ff6e84",
-              "surface-container-high": "#1f1f1f",
-              "inverse-on-surface": "#555555",
-              "surface-variant": "#262626",
-              "background": "#0e0e0e",
-              "on-secondary-fixed-variant": "#7511c3",
-              "on-background": "#ffffff",
-              "primary-fixed-dim": "#8387ff",
-              "on-tertiary-fixed": "#00163b",
-              "tertiary-container": "#4388fd",
-              "surface-container-highest": "#262626",
-              "surface": "#0e0e0e",
-              "on-surface": "#ffffff",
-              "tertiary-dim": "#699cff",
-              "on-tertiary": "#001e4a",
-              "secondary": "#c180ff",
-              "on-primary-fixed-variant": "#0e009d",
-              "secondary-dim": "#9c48ea",
-              "outline-variant": "#484848",
-              "on-secondary-container": "#e9cdff",
-              "on-secondary": "#33005b",
-              "on-primary-fixed": "#000000",
-              "primary-fixed": "#9396ff",
-              "secondary-fixed": "#e5c6ff",
-              "on-tertiary-fixed-variant": "#00377b",
-              "surface-tint": "#a3a6ff",
-              "tertiary-fixed": "#8ab0ff",
-              "error-container": "#a70138"
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary-fixed": "#9396ff",
+                        "secondary": "#c180ff",
+                        "surface-container": "#191919",
+                        "secondary-fixed-dim": "#dbb4ff",
+                        "surface-container-highest": "#262626",
+                        "surface-tint": "#a3a6ff",
+                        "on-error-container": "#ffb2b9",
+                        "on-background": "#ffffff",
+                        "on-secondary-container": "#e9cdff",
+                        "error": "#ff6e84",
+                        "tertiary-fixed-dim": "#73a2ff",
+                        "error-container": "#a70138",
+                        "on-primary-container": "#0a0081",
+                        "on-primary": "#0f00a4",
+                        "outline": "#757575",
+                        "outline-variant": "#484848",
+                        "primary-dim": "#6063ee",
+                        "on-primary-fixed": "#000000",
+                        "tertiary-container": "#4388fd",
+                        "error-dim": "#d73357",
+                        "surface": "#0e0e0e",
+                        "surface-bright": "#2c2c2c",
+                        "tertiary-dim": "#699cff",
+                        "tertiary-fixed": "#8ab0ff",
+                        "on-tertiary-container": "#000311",
+                        "on-error": "#490013",
+                        "on-secondary": "#33005b",
+                        "on-secondary-fixed-variant": "#7511c3",
+                        "primary-container": "#9396ff",
+                        "secondary-fixed": "#e5c6ff",
+                        "on-primary-fixed-variant": "#0e009d",
+                        "secondary-container": "#6f00be",
+                        "surface-container-lowest": "#000000",
+                        "on-surface-variant": "#ababab",
+                        "inverse-on-surface": "#555555",
+                        "primary": "#a3a6ff",
+                        "on-tertiary-fixed": "#00163b",
+                        "on-surface": "#ffffff",
+                        "on-tertiary-fixed-variant": "#00377b",
+                        "surface-container-low": "#131313",
+                        "inverse-surface": "#f9f9f9",
+                        "background": "#0e0e0e",
+                        "tertiary": "#699cff",
+                        "secondary-dim": "#9c48ea",
+                        "inverse-primary": "#494bd7",
+                        "on-secondary-fixed": "#4f0089",
+                        "surface-container-high": "#1f1f1f",
+                        "surface-dim": "#0e0e0e",
+                        "on-tertiary": "#001e4a",
+                        "primary-fixed-dim": "#8387ff",
+                        "surface-variant": "#262626"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
             },
-            fontFamily: {
-              "headline": ["Inter"],
-              "body": ["Inter"],
-              "label": ["Inter"]
-            },
-            borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
-          },
-        },
-      }
+        }
     </script>
 <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass { background: rgba(19, 19, 19, 0.6); backdrop-filter: blur(20px); }
-        .neon-border { box-shadow: inset 0 1px 0 0 rgba(163, 166, 255, 0.1); }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .glass-panel {
+            background: rgba(31, 31, 31, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 10px rgba(96, 99, 238, 0.1);
+        }
+        .voltage-gradient {
+            background: linear-gradient(90deg, #a3a6ff, #c180ff);
+        }
+        .text-glow {
+            text-shadow: 0 0 20px rgba(163, 166, 255, 0.4);
+        }
+        .inner-glow-card {
+            box-shadow: inset 0 0 15px rgba(163, 166, 255, 0.05);
+        }
     </style>
 </head>
-<body class="bg-surface-dim text-on-surface font-body selection:bg-primary/30">
-<!-- 1. TOP APP BAR (Shared Component) -->
-<nav class="bg-[#131313]/60 backdrop-blur-xl text-indigo-500 font-['Inter'] font-bold tracking-tight docked full-width top-0 sticky z-50 tonal-shift shadow-[inset_0_1px_0_0_rgba(99,102,241,0.1)] shadow-2xl shadow-indigo-500/5 transition-all duration-300">
-<div class="flex justify-between items-center px-8 h-20 max-w-[1440px] mx-auto">
-<div class="text-lg font-black uppercase tracking-widest text-indigo-400">EV Awareness &amp; Safety</div>
+<body class="bg-surface-container-lowest text-on-surface font-body selection:bg-primary selection:text-on-primary">
+<!-- 1. NAVIGATION (Shared Component) -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-8 h-16 bg-black/60 backdrop-blur-xl border-b border-white/10 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+<div class="text-lg font-black tracking-tighter text-white uppercase">EV SAFETY COMMAND</div>
 <div class="hidden md:flex gap-8 items-center">
-<a class="text-indigo-400 border-b-2 border-indigo-500 pb-1" href="#">Modules</a>
-<a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">Protocols</a>
-<a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">Resources</a>
-<a class="text-zinc-400 hover:text-zinc-100 transition-colors" href="#">Support</a>
-<button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-md transition-all duration-300 active:scale-95 font-bold">Emergency Stop</button>
-<span class="material-symbols-outlined text-zinc-400 cursor-pointer hover:text-zinc-100">account_circle</span>
+<a class="font-inter tracking-tight font-bold uppercase text-[0.6875rem] text-indigo-300 border-b-2 border-indigo-400 pb-1" href="#">Modules</a>
+<a class="font-inter tracking-tight font-bold uppercase text-[0.6875rem] text-zinc-400 hover:text-white transition-colors" href="#">Protocols</a>
+<a class="font-inter tracking-tight font-bold uppercase text-[0.6875rem] text-zinc-400 hover:text-white transition-colors" href="#">Glossary</a>
+<a class="font-inter tracking-tight font-bold uppercase text-[0.6875rem] text-zinc-400 hover:text-white transition-colors" href="#">Certification</a>
 </div>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-zinc-400 cursor-pointer hover:text-white transition-colors">offline_bolt</span>
+<span class="material-symbols-outlined text-zinc-400 cursor-pointer hover:text-white transition-colors">account_circle</span>
+<button class="bg-primary-container text-on-primary-container font-inter tracking-tight font-bold uppercase text-[0.6875rem] px-4 py-2 rounded-xl scale-95 active:scale-90 transition-transform">Exit Course</button>
 </div>
 </nav>
-<main>
 <!-- 1. HERO SECTION -->
 <section class="relative h-screen flex items-center justify-center overflow-hidden">
 <div class="absolute inset-0 z-0">
-<div class="absolute inset-0 bg-gradient-to-b from-transparent via-surface-dim/40 to-surface-dim z-10"></div>
-<img alt="EV Battery Array" class="w-full h-full object-cover" data-alt="High-tech electric vehicle battery array architecture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCk3x700mQfjsVmKt_JGwHPwfCYugbxi1rM5M4Z_pvoiacgRPoBIp25qyez2oGgZk_3bPx4DhLllCdMEVQfk588AgOjyrTpVDl--Kb4pS2jDfPdhns38JizutrZIGzMtxSaZPpGm5_On7fVgJJ73aketRHhJjBlsL9n6XeEu0596MqngleLpReeNlDR16c-4QKLZJhuxqFIw4VBvhrR17VKGnfy7aYSp3uUbto1kYCdYB_AKHRtEcufhMKtHZgeWjkmo_ChnZ6ff2k"/>
+<div class="absolute inset-0 bg-gradient-to-b from-black/20 via-black/60 to-black z-10"></div>
+<img class="w-full h-full object-cover" data-alt="dramatic wide angle shot of an electric vehicle chassis showing glowing high voltage cables in a futuristic dark laboratory lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCrsAm8gzkrTNDI3hVz51kf4LdfGnRsBwQ6isomQMnB_3REawMcp53UPhF32qNYU0tQPD7nuW_14quIXLHA5L1S10QMCPcmfwsMjUux2zFy1qRjcbYascdIpVD9OlNl2nZO2fGyFIT4V8b3GbhPeTWaLQIBbmYCUc323gnfdJosvVZtj27zgttwpRTrAjf_EHufby39qMXX8iz6SvHRLJcRGU5nnBRjMNEW4s1jlGCfe4OHJ-hLRQZWuVwi0rYiYYF-nqKK8wLiWWg"/>
 </div>
-<div class="relative z-20 text-center px-6 max-w-4xl">
-<span class="label-sm uppercase tracking-[0.2em] text-primary mb-4 block font-bold">Training Module 01</span>
-<h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-8 leading-none">EV AWARENESS <br/>&amp; SAFETY</h1>
-<p class="text-xl text-on-surface-variant mb-10 max-w-2xl mx-auto leading-relaxed">The definitive technical guide for high-voltage systems handling, thermal management, and emergency response protocols.</p>
-<div class="flex justify-center gap-6">
-<button class="bg-primary-container text-on-primary-container px-8 py-4 rounded-lg font-bold flex items-center gap-2 hover:shadow-[0_0_20px_rgba(163,166,255,0.4)] transition-all">
-                        Begin Certification
-                        <span class="material-symbols-outlined">arrow_forward</span>
-</button>
+<div class="relative z-20 text-center px-6 max-w-5xl">
+<h1 class="text-6xl md:text-8xl font-black tracking-tighter text-white uppercase mb-4 text-glow">EV Awareness &amp; Safety</h1>
+<p class="text-xl md:text-2xl text-on-surface-variant font-light tracking-wide max-w-3xl mx-auto">Mastering High-Voltage Systems and Critical Compliance Protocols.</p>
 </div>
-</div>
-<div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce flex flex-col items-center gap-2">
-<span class="text-[10px] uppercase tracking-widest text-zinc-500">Scroll to explore</span>
-<span class="material-symbols-outlined text-zinc-600">expand_more</span>
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce z-20">
+<span class="material-symbols-outlined text-4xl text-primary">keyboard_double_arrow_down</span>
 </div>
 </section>
-<div class="max-w-7xl mx-auto px-6 lg:px-12">
+<main class="max-w-7xl mx-auto px-8 py-24 space-y-48">
 <!-- 2. TEXT BLOCK -->
-<section class="py-28 max-w-3xl mx-auto">
-<h2 class="text-primary text-sm font-bold uppercase tracking-widest mb-6">Introduction</h2>
-<h3 class="text-4xl font-bold mb-8">Safety Compliance Overview</h3>
-<div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
-<p>Operating within high-voltage environments requires more than just technical knowledge; it demands an uncompromising adherence to safety protocols. This guide establishes the mandatory baseline for technicians, first responders, and engineering personnel working with Lithium-Ion architectures exceeding 400V DC.</p>
-<p>Failure to follow the established Lock-Out Tag-Out (LOTO) procedures or improper use of Insulated Tools (ASTM F1505) can lead to catastrophic electrical discharge, arc flash incidents, or permanent equipment failure.</p>
+<section class="grid grid-cols-1 md:grid-cols-12 gap-12 items-start">
+<div class="md:col-span-4">
+<h2 class="text-4xl font-bold tracking-tighter text-primary uppercase">The High-Voltage Era</h2>
+</div>
+<div class="md:col-span-8 space-y-8 text-on-surface-variant leading-relaxed text-lg">
+<p>As the global automotive landscape pivots toward electrification, the complexity of vehicle safety has increased exponentially. We are no longer dealing with simple 12V lead-acid systems; modern BEVs utilize architectures ranging from 400V to 800V+, where a single error in handling can result in catastrophic outcomes.</p>
+<p>This course is designed to transition seasoned technicians and safety officers into the high-voltage domain by emphasizing non-negotiable isolation protocols, specialized equipment calibration, and real-time thermal monitoring standards that define the modern EV safety culture.</p>
 </div>
 </section>
 <!-- 3. ACCORDION -->
-<section class="py-20">
-<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
-<h3 class="text-2xl font-bold mb-8">High Voltage Safety Protocols</h3>
-<div class="divide-y divide-outline-variant/20">
-<details class="group py-6" open="">
-<summary class="flex justify-between items-center cursor-pointer list-none">
-<span class="text-xl font-medium flex items-center gap-4">
-<span class="material-symbols-outlined text-primary" data-weight="fill">verified_user</span>
-                                    Standard Operating Procedures (SOP)
-                                </span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
-</summary>
-<div class="mt-4 pl-10 text-on-surface-variant">
-                                All personnel must undergo a pre-work briefing. No lone work is permitted on energized systems. The 10-foot isolation perimeter must be strictly enforced with high-visibility physical barriers.
-                            </div>
-</details>
-<details class="group py-6">
-<summary class="flex justify-between items-center cursor-pointer list-none">
-<span class="text-xl font-medium flex items-center gap-4">
-<span class="material-symbols-outlined text-primary" data-weight="fill">bolt</span>
-                                    Voltage Testing and Verification
-                                </span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
-</summary>
-<div class="mt-4 pl-10 text-on-surface-variant">
-                                Always assume the system is live. Use CAT III or CAT IV rated multimeters. Follow the Live-Dead-Live testing sequence before any contact with high-voltage rails.
-                            </div>
-</details>
+<section class="max-w-4xl mx-auto space-y-4">
+<div class="glass-panel p-6 rounded-xl flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-all">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-primary text-3xl">architecture</span>
+<div>
+<h3 class="text-xl font-bold">Module 1: HV Architecture</h3>
+<p class="text-sm text-on-surface-variant">Components, Busbars, and Power Distribution.</p>
 </div>
+</div>
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="glass-panel p-6 rounded-xl border-l-4 border-secondary">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-secondary text-3xl">lock</span>
+<div>
+<h3 class="text-xl font-bold">Module 2: Isolation Procedures</h3>
+<p class="text-sm text-on-surface-variant">Step-by-step lockout-tagout (LOTO) protocols.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-zinc-500">expand_less</span>
+</div>
+<div class="pl-14 space-y-3 text-on-surface-variant text-sm border-t border-white/5 pt-4">
+<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Verification of zero potential voltage</div>
+<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Application of secondary physical barriers</div>
+<div class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-secondary"></span> Visual inspection of service disconnect plugs</div>
+</div>
+</div>
+<div class="glass-panel p-6 rounded-xl flex items-center justify-between group cursor-pointer hover:bg-surface-container-high transition-all">
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-tertiary text-3xl">dangerous</span>
+<div>
+<h3 class="text-xl font-bold">Module 3: Emergency Shutoff</h3>
+<p class="text-sm text-on-surface-variant">Critical response for collision and thermal events.</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-zinc-600">radio_button_unchecked</span>
 </div>
 </section>
 <!-- 4. TEXT INPUT FORM -->
-<section class="py-20 flex justify-center">
-<div class="glass p-12 rounded-2xl w-full max-w-xl border border-outline-variant/20 shadow-2xl">
-<h3 class="text-2xl font-bold mb-2">Certification Verification</h3>
-<p class="text-on-surface-variant text-sm mb-8">Enter your Operator ID to verify training compliance status.</p>
-<div class="space-y-6">
-<div class="relative">
-<label class="text-[10px] uppercase tracking-widest text-primary font-bold mb-2 block">Operator Identity code</label>
-<input class="w-full bg-surface-container-lowest border-outline-variant/20 rounded-lg p-4 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-zinc-700" placeholder="EV-XXXX-XXXX" type="text"/>
+<section class="max-w-3xl mx-auto">
+<div class="glass-panel p-10 rounded-xl relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-3xl rounded-full -mr-16 -mt-16"></div>
+<h2 class="text-2xl font-black uppercase tracking-tight mb-8">Report a Safety Hazard</h2>
+<form class="space-y-6">
+<div class="grid grid-cols-2 gap-6">
+<div class="space-y-2">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Hazard Type</label>
+<input class="w-full bg-surface-container-highest border-none rounded-xl focus:ring-1 focus:ring-tertiary/40 py-3 px-4 text-on-surface placeholder:text-zinc-600" placeholder="e.g. Exposed High-Voltage Cable" type="text"/>
 </div>
-<button class="w-full bg-primary py-4 rounded-lg text-on-primary font-black uppercase tracking-widest hover:shadow-[0_0_20px_rgba(163,166,255,0.3)] transition-all active:scale-[0.98]">
-                            Verify Status
-                        </button>
+<div class="space-y-2">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Location</label>
+<input class="w-full bg-surface-container-highest border-none rounded-xl focus:ring-1 focus:ring-tertiary/40 py-3 px-4 text-on-surface placeholder:text-zinc-600" placeholder="Bay Number or Station ID" type="text"/>
 </div>
+</div>
+<div class="space-y-2">
+<label class="block text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Description</label>
+<textarea class="w-full bg-surface-container-highest border-none rounded-xl focus:ring-1 focus:ring-tertiary/40 py-3 px-4 text-on-surface placeholder:text-zinc-600" placeholder="Detail the observed non-compliance or equipment failure..." rows="4"></textarea>
+</div>
+<button class="w-full py-4 bg-primary text-on-primary font-bold uppercase tracking-tighter rounded-xl hover:shadow-[0_0_30px_rgba(163,166,255,0.3)] transition-all">Submit Critical Report</button>
+</form>
 </div>
 </section>
 <!-- 5. GRAPHIC + TEXT -->
-<section class="py-28 flex flex-col md:flex-row gap-16 items-center">
-<div class="w-full md:w-1/2 rounded-2xl overflow-hidden border border-outline-variant/10 shadow-xl group">
-<img alt="Internal Battery Anatomy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="Close up of a lithium ion battery cell structure" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDi28kEe_cEKHhhUX_81Gho9CFQ2YyQzYXtl01L7nHOF0GOtW9X_EDRxUNhEPzJs64MmrHpsSD7o39p_kmmQVeoRq_j8MBqnBL5J8epKrN-dW8Zh7t6KhhkOZVVERjv_Dl3prA6r7xc1oFzW_nj8o8qitWrZhND6WtrVNjoEC0yD7olJINEMm-51PhO0FySqFQHp54N5BG54wHi7Mp0xeveeHfy6J-bZ_KhBBJk5OjWjGgB48-adIGtmb59w1SP49d72YXvHhmg5o4"/>
+<section class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+<div class="glass-panel p-4 rounded-2xl">
+<img class="w-full aspect-video object-cover rounded-xl grayscale hover:grayscale-0 transition-all duration-700" data-alt="technical 3d cross-section of a lithium-ion battery pack showing cooling channels and individual cell arrangements in blue glow" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCgj5j8oG6dO7m9rP-01gbLqM7qUaXWLvkfJiR8N_tYHQiz7CHZPU5t5nqHFh1NDvoxt5EeRkiwU4GdcG9KeWiNKslmIlGEN6IpnxTT-LF9bpMpZLjn4vPEid2V9cbT8H-BrsNvPM7zaoCrj4YASkAj3aMOr0Y6SFbnzd7J58cba-HsF1rB419tqQOvd5anLNtgufUKMZhYyDTKpahfM-tI_89ye6J7u5gR6ktOjP5oUhnT1RlCsbYwhkuQom3azksU0DfvgB-emWA"/>
 </div>
-<div class="w-full md:w-1/2">
-<h3 class="text-4xl font-bold mb-6">Internal Battery Components</h3>
-<p class="text-on-surface-variant mb-8 leading-relaxed">Understanding the modular architecture of the Traction Battery is critical for diagnostics. Each module consists of individual cells, a Battery Monitoring System (BMS) interface, and integrated thermal cooling channels.</p>
+<div class="space-y-6">
+<div class="inline-block px-3 py-1 bg-secondary/20 text-secondary text-[0.6875rem] font-bold uppercase tracking-widest rounded-full">Technical Insight</div>
+<h2 class="text-4xl font-black tracking-tighter uppercase">Thermal Runaway Mitigation</h2>
+<p class="text-on-surface-variant leading-relaxed">Modern EV battery enclosures are engineered with "sacrifice zones." In the event of a cell failure, the system redirects venting gases through dedicated exhaust ports, preventing a single-cell thermal event from cascading across the entire pack. Understanding the gas flow path is critical for emergency responder positioning.</p>
+<a class="inline-flex items-center gap-2 text-tertiary font-bold group" href="#">
+                    View Mitigation Schematics 
+                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</a>
+</div>
+</section>
+<!-- 6. CHECKLIST -->
+<section class="max-w-2xl mx-auto">
+<div class="glass-panel p-8 rounded-xl space-y-8">
+<div class="flex justify-between items-end">
+<div>
+<h3 class="text-2xl font-bold">Pre-Inspection Protocol</h3>
+<p class="text-on-surface-variant text-sm">Critical safety checks before handling active circuits.</p>
+</div>
+<div class="text-right">
+<span class="text-3xl font-black text-primary">60%</span>
+</div>
+</div>
+<div class="h-2 w-full bg-surface-container-highest flex gap-1">
+<div class="h-full w-1/5 bg-primary shadow-[0_0_10px_#a3a6ff]"></div>
+<div class="h-full w-1/5 bg-primary shadow-[0_0_10px_#a3a6ff]"></div>
+<div class="h-full w-1/5 bg-primary shadow-[0_0_10px_#a3a6ff]"></div>
+<div class="h-full w-1/5 bg-surface-container-highest"></div>
+<div class="h-full w-1/5 bg-surface-container-highest"></div>
+</div>
 <ul class="space-y-4">
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-<div>
-<span class="font-bold block">Cell Matrix</span>
-<span class="text-sm text-on-surface-variant">Prismatic or cylindrical configurations depending on energy density requirements.</span>
-</div>
+<li class="flex items-center gap-4 text-zinc-300">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span>Insulated gloves (Class 0, 1000V) checked for punctures</span>
 </li>
-<li class="flex items-start gap-3">
-<span class="material-symbols-outlined text-primary text-sm mt-1">check_circle</span>
-<div>
-<span class="font-bold block">Cooling Manifold</span>
-<span class="text-sm text-on-surface-variant">Liquid glycol or refrigerant-based thermal exchange systems.</span>
-</div>
+<li class="flex items-center gap-4 text-zinc-300">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span>Voltage tester calibrated and verified on known source</span>
+</li>
+<li class="flex items-center gap-4 text-zinc-300">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_box</span>
+<span>Personal Protective Equipment (PPE) ARC rating confirmed</span>
+</li>
+<li class="flex items-center gap-4 text-zinc-500">
+<span class="material-symbols-outlined">check_box_outline_blank</span>
+<span>Secondary observer briefed on emergency shut-off location</span>
+</li>
+<li class="flex items-center gap-4 text-zinc-500">
+<span class="material-symbols-outlined">check_box_outline_blank</span>
+<span>Physical barrier/pylons established at 1.5m perimeter</span>
 </li>
 </ul>
 </div>
 </section>
-<!-- 6. CHECKLIST -->
-<section class="py-20">
-<div class="bg-surface-container-high p-10 rounded-2xl">
-<div class="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-10">
-<div>
-<h3 class="text-3xl font-bold mb-2">PPE Readiness</h3>
-<p class="text-on-surface-variant">Mandatory equipment for high-voltage intervention.</p>
-</div>
-<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/20 flex flex-col items-end">
-<span class="text-xs uppercase text-zinc-500 mb-2">Compliance Level</span>
-<div class="h-2 w-48 bg-zinc-900 rounded-full overflow-hidden">
-<div class="h-full bg-primary w-2/3"></div>
-</div>
-<span class="text-primary font-bold mt-2">66% Ready</span>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="p-6 bg-surface-container-low border-l-4 border-primary rounded-r-xl">
-<span class="material-symbols-outlined text-primary mb-4">dry_cleaning</span>
-<h4 class="font-bold mb-2">Class 0 Gloves</h4>
-<p class="text-xs text-on-surface-variant">Rated for 1,000V AC. Check for air-leaks before use.</p>
-</div>
-<div class="p-6 bg-surface-container-low border-l-4 border-primary rounded-r-xl">
-<span class="material-symbols-outlined text-primary mb-4">engineering</span>
-<h4 class="font-bold mb-2">Arc Flash Shield</h4>
-<p class="text-xs text-on-surface-variant">Face protection rated for minimum 12 cal/cm².</p>
-</div>
-<div class="p-6 bg-surface-container-low border-l-4 border-zinc-700 rounded-r-xl opacity-60">
-<span class="material-symbols-outlined text-zinc-500 mb-4">accessibility_new</span>
-<h4 class="font-bold mb-2">Dielectric Boots</h4>
-<p class="text-xs text-on-surface-variant">Non-conductive footwear required for site entry.</p>
-</div>
-</div>
-</div>
-</section>
 <!-- 7. PULL QUOTE -->
-<section class="py-28 flex justify-center">
-<div class="max-w-4xl text-center border-l-[6px] border-primary pl-12">
-<blockquote class="text-4xl md:text-5xl font-light italic leading-tight mb-8">
-                        "Safety is not a checklist; it is the non-negotiable foundation of kinetic innovation. We do not compromise on the integrity of the operator."
-                    </blockquote>
-<cite class="flex items-center justify-center gap-4 not-italic">
-<div class="h-12 w-12 rounded-full bg-zinc-800 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary">person</span>
-</div>
-<div class="text-left">
-<span class="block font-bold">Marcus Thorne</span>
-<span class="text-xs uppercase tracking-widest text-zinc-500">Lead Safety Engineer, Kinetic Observatory</span>
-</div>
-</cite>
+<section class="relative py-20 overflow-hidden text-center">
+<div class="absolute left-1/2 -translate-x-1/2 top-0 text-9xl font-black opacity-5 text-zinc-300">"</div>
+<div class="relative z-10 max-w-4xl mx-auto px-6">
+<blockquote class="text-3xl md:text-5xl font-light italic leading-tight text-white mb-8">
+                    "Safety is not just a protocol; it's a culture of awareness that begins before you even approach the vehicle."
+                </blockquote>
+<cite class="not-italic text-sm font-bold uppercase tracking-[0.2em] text-primary">Chief Safety Officer</cite>
 </div>
 </section>
 <!-- 8. STAT CALLOUT -->
-<section class="py-20 grid grid-cols-1 md:grid-cols-4 gap-8">
-<div class="bg-surface-container-low p-8 rounded-xl text-center group hover:bg-surface-container-high transition-colors">
-<div class="text-5xl font-black text-primary mb-2 tracking-tighter">800V</div>
-<div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Max System Voltage</div>
+<section class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="glass-panel p-10 rounded-2xl text-center inner-glow-card">
+<div class="text-6xl font-black text-white mb-2 tracking-tighter">800V</div>
+<div class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Typical System Voltage</div>
 </div>
-<div class="bg-surface-container-low p-8 rounded-xl text-center group hover:bg-surface-container-high transition-colors">
-<div class="text-5xl font-black text-secondary mb-2 tracking-tighter">10ms</div>
-<div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Discharge Speed</div>
+<div class="glass-panel p-10 rounded-2xl text-center inner-glow-card">
+<div class="text-6xl font-black text-secondary mb-2 tracking-tighter">15ms</div>
+<div class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Response Time</div>
 </div>
-<div class="bg-surface-container-low p-8 rounded-xl text-center group hover:bg-surface-container-high transition-colors">
-<div class="text-5xl font-black text-tertiary mb-2 tracking-tighter">100%</div>
-<div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">LOTO Compliance</div>
-</div>
-<div class="bg-surface-container-low p-8 rounded-xl text-center group hover:bg-surface-container-high transition-colors">
-<div class="text-5xl font-black text-error mb-2 tracking-tighter">24/7</div>
-<div class="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Thermal Monitoring</div>
+<div class="glass-panel p-10 rounded-2xl text-center inner-glow-card">
+<div class="text-6xl font-black text-tertiary mb-2 tracking-tighter">0.01%</div>
+<div class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">Critical Tolerance</div>
 </div>
 </section>
 <!-- 9. BENTO GRID -->
-<section class="py-28">
-<h3 class="text-4xl font-bold mb-12">Module Overview</h3>
-<div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-[800px] md:h-[600px]">
-<div class="md:col-span-2 md:row-span-2 rounded-2xl relative overflow-hidden group border border-outline-variant/10">
-<img alt="Architecture" class="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-1000" data-alt="Electric motor and battery internals" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-Wllb6UpXkio--uGIhNLK_cxY3CLV14TVon8_ZLz5SX43P06T7pdgyhrI6K7GLRS6x1o23dnOLizz2hljZ73aQMjlcxsBnwq1S2U8WDuaMMCaYgET03Ke4s8iOZ8u6V2B3XAz6IKcNn2j9AsEq_uH5VnOaGHGRSOgd3SxYlvl8_2UaB9oArpL9P2R_SPwMONCSVU6bShYsEmcc-b3UwBamlEO8KnkYsZARM738rfv8cddrwK_c3jI5jAn3UfW27haA93JFDDnfLw"/>
-<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-transparent to-transparent"></div>
-<div class="absolute bottom-8 left-8">
-<h4 class="text-2xl font-bold mb-2">System Architecture</h4>
-<p class="text-sm text-on-surface-variant max-w-xs">Detailed walkthrough of modular energy storage layouts.</p>
-</div>
-</div>
-<div class="md:col-span-2 bg-surface-container-high rounded-2xl p-8 border border-outline-variant/10 relative overflow-hidden flex items-end">
-<div class="absolute top-8 right-8 text-primary opacity-20"><span class="material-symbols-outlined !text-8xl">local_fire_department</span></div>
+<section class="grid grid-cols-12 gap-4 h-[600px]">
+<div class="col-span-8 row-span-1 glass-panel rounded-2xl p-8 flex flex-col justify-end relative overflow-hidden group">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:opacity-50 transition-opacity" data-alt="close up of an electric vehicle charging port at night with neon blue light rings" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBCapcUomEE2yZw_Mtix9u6h9EXgLOJ_-OPqq4kZH-uvIoW9pIyIe9vyebAB5rh5GxptcxzM6S1nc3K5i062FuW3yupHZu9jz2qFdTONPrNtAci53U859hwq73AIMsF05jd8RlsceCQZTSaIyaOR2kvWfEemSlewBxm8owCLPtFnpkGJO485FKkFjTVZMw7aE2IvNwSiySyN4WYJJVO0GpyNr72stmtlpvlseTzaaR8OMf8YNBDcWK4Fkah86RzvKypH35F1nOyD7Q"/>
 <div class="relative z-10">
-<h4 class="text-xl font-bold mb-2">Thermal Management</h4>
-<p class="text-sm text-on-surface-variant">Cooling loops, phase change materials, and vent paths.</p>
+<h3 class="text-3xl font-black uppercase">Charging Standards</h3>
+<p class="text-on-surface-variant max-w-md">Comprehensive guide to CCS, CHAdeMO, and Tesla NACS interoperability.</p>
 </div>
 </div>
-<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-variant transition-colors">
-<span class="material-symbols-outlined text-tertiary">bolt</span>
-<h4 class="font-bold">Fast Charging Safety</h4>
+<div class="col-span-4 row-span-1 glass-panel rounded-2xl p-8 flex flex-col items-center justify-center text-center bg-secondary/10">
+<span class="material-symbols-outlined text-5xl text-secondary mb-4">memory</span>
+<h3 class="text-xl font-bold uppercase">Solid State Tech</h3>
+<p class="text-sm text-on-surface-variant">The future of non-volatile energy storage.</p>
 </div>
-<div class="bg-surface-container-low rounded-2xl p-8 border border-outline-variant/10 flex flex-col justify-between hover:bg-surface-variant transition-colors">
-<span class="material-symbols-outlined text-secondary">verified</span>
-<h4 class="font-bold">Certification Prep</h4>
+<div class="col-span-4 row-span-1 glass-panel rounded-2xl p-8 bg-tertiary/10 border-tertiary/20">
+<h3 class="text-xl font-bold uppercase mb-2">Battery Chemistry</h3>
+<p class="text-sm text-on-surface-variant">Comparing LFP, NMC, and NCA fire-risk profiles.</p>
+</div>
+<div class="col-span-8 row-span-1 glass-panel rounded-2xl p-8 flex gap-8 items-center">
+<div class="w-1/3 bg-zinc-900 aspect-square rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined text-6xl text-primary/50">ac_unit</span>
+</div>
+<div class="flex-1">
+<h3 class="text-3xl font-black uppercase">Cooling Systems</h3>
+<p class="text-on-surface-variant">Active vs Passive thermal management in high-load scenarios.</p>
 </div>
 </div>
 </section>
 <!-- 10. COMPARISON TABLE -->
-<section class="py-20">
-<h3 class="text-3xl font-bold mb-10 text-center">AC vs DC Charging Safety</h3>
-<div class="overflow-x-auto">
+<section>
+<div class="mb-12 text-center">
+<h2 class="text-4xl font-black uppercase tracking-tighter">Safety Requirements Comparison</h2>
+<p class="text-on-surface-variant mt-2">Differentiating protocols across powertrain architectures.</p>
+</div>
+<div class="glass-panel rounded-2xl overflow-hidden">
 <table class="w-full text-left border-collapse">
 <thead>
-<tr class="border-b border-outline-variant/30">
-<th class="py-6 px-4 text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Safety Parameter</th>
-<th class="py-6 px-4 text-center font-bold text-primary">AC (Level 2)</th>
-<th class="py-6 px-4 text-center font-bold text-secondary">DC Fast Charge</th>
+<tr class="bg-surface-container-high text-[0.6875rem] font-bold uppercase tracking-widest text-on-surface-variant">
+<th class="p-6">Safety Metric</th>
+<th class="p-6">Hybrid (HEV)</th>
+<th class="p-6">Plug-in (PHEV)</th>
+<th class="p-6 text-primary">Battery (BEV)</th>
 </tr>
 </thead>
-<tbody class="divide-y divide-outline-variant/10">
-<tr>
-<td class="py-6 px-4 font-medium">Voltage Onboard Conversion</td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-tertiary">check</span></td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-zinc-700">close</span></td>
+<tbody class="divide-y divide-white/5">
+<tr class="hover:bg-white/5 transition-colors">
+<td class="p-6 font-bold">Max System Voltage</td>
+<td class="p-6">~200V</td>
+<td class="p-6">~400V</td>
+<td class="p-6 text-primary font-black">800V+</td>
 </tr>
-<tr>
-<td class="py-6 px-4 font-medium">External Isolation Monitoring</td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-tertiary">check</span></td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-tertiary" data-weight="fill">check_circle</span></td>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="p-6 font-bold">LOTO Requirement</td>
+<td class="p-6">Standard</td>
+<td class="p-6">Critical</td>
+<td class="p-6 text-primary font-black">Mandatory</td>
 </tr>
-<tr>
-<td class="py-6 px-4 font-medium">Liquid-Cooled Cable Requirement</td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-zinc-700">close</span></td>
-<td class="py-6 px-4 text-center"><span class="material-symbols-outlined text-tertiary">check</span></td>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="p-6 font-bold">Thermal Monitoring</td>
+<td class="p-6">Moderate</td>
+<td class="p-6">High</td>
+<td class="p-6 text-primary font-black">Continuous</td>
+</tr>
+<tr class="hover:bg-white/5 transition-colors">
+<td class="p-6 font-bold">Isolation Monitoring</td>
+<td class="p-6">Basic</td>
+<td class="p-6">Automated</td>
+<td class="p-6 text-primary font-black">Active Pulse</td>
 </tr>
 </tbody>
 </table>
 </div>
 </section>
 <!-- 11. QUIZ COMPONENT -->
-<section class="py-20 max-w-4xl mx-auto">
-<div class="bg-surface-container p-12 rounded-2xl border border-primary/20 shadow-[0_0_40px_rgba(99,102,241,0.05)]">
-<span class="bg-primary/10 text-primary px-3 py-1 rounded-full text-[10px] font-bold tracking-widest mb-6 inline-block">KNOWLEDGE CHECK</span>
-<h3 class="text-3xl font-bold mb-8">What is the first step when a 'High Voltage Isolation Fault' is detected?</h3>
+<section class="max-w-3xl mx-auto">
+<div class="glass-panel p-10 rounded-2xl border-t-2 border-primary">
+<div class="flex items-center gap-4 mb-8">
+<span class="bg-primary/20 text-primary px-3 py-1 rounded-md font-bold text-sm tracking-widest">QUESTION 14/20</span>
+</div>
+<h3 class="text-2xl font-bold mb-8">Which tool is required for testing high-voltage isolation?</h3>
 <div class="space-y-4">
-<button class="w-full text-left p-6 rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-all group flex justify-between items-center">
-<span>Immediate manual disconnect of the service plug.</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100">radio_button_unchecked</span>
-</button>
-<button class="w-full text-left p-6 rounded-xl border border-primary/40 bg-primary/5 transition-all group flex justify-between items-center">
-<span class="text-primary font-bold">Evacuate perimeter and initiate remote diagnostic triage.</span>
-<span class="material-symbols-outlined text-primary" data-weight="fill">check_circle</span>
-</button>
-<button class="w-full text-left p-6 rounded-xl border border-outline-variant/20 hover:border-primary/50 transition-all group flex justify-between items-center">
-<span>Measure resistance at the auxiliary battery terminals.</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100">radio_button_unchecked</span>
-</button>
+<label class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+<div class="w-6 h-6 rounded-full border-2 border-zinc-600 flex items-center justify-center"></div>
+<span class="text-lg">Standard Multimeter</span>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-xl border-2 border-primary bg-primary/10 cursor-pointer">
+<div class="w-6 h-6 rounded-full border-2 border-primary flex items-center justify-center">
+<div class="w-3 h-3 rounded-full bg-primary"></div>
+</div>
+<span class="text-lg font-bold text-white">Insulated Megohmmeter</span>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-xl border border-white/5 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors">
+<div class="w-6 h-6 rounded-full border-2 border-zinc-600 flex items-center justify-center"></div>
+<span class="text-lg">Phase Rotation Tester</span>
+</label>
+</div>
+<div class="mt-8 flex justify-end">
+<button class="bg-primary text-on-primary font-black uppercase tracking-tight py-3 px-8 rounded-xl shadow-[0_0_20px_rgba(163,166,255,0.4)]">Next Module</button>
 </div>
 </div>
 </section>
-</div>
 <!-- 12. FULL-BLEED IMAGE -->
-<section class="relative h-[600px] my-28 overflow-hidden group">
-<img alt="Thermal Simulation" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2000ms]" data-alt="High speed photo of a spark discharge experiment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSoJ6RXe7yvmGGnL_JPqw1pysoCaBkA7mi0QdelgdWmCU2GSRwMmQZZPCrlDTWoyhdGI3s19u8A7B12K51ZW8GijZqTw7d7FLBHgERHFQZ9VzWnFVryWWTrnoUiWoHfDqq8CqDCSJNueEdJXIrKirc65YMUO1tEapdWeN5pzu4v6PydXFDj-1rdDIIhBK--yR8CUq705v30oJEYPlT3sTM6jb36GZ67NzpVzmUL7j6zG0JzL4BWIu9zUsE70H6pQwGemn-Hx_zj_M"/>
-<div class="absolute inset-0 bg-gradient-to-r from-surface-dim via-surface-dim/20 to-transparent"></div>
-<div class="absolute inset-y-0 left-0 w-full flex items-center px-12 md:px-32">
-<div class="max-w-xl">
-<h3 class="text-5xl font-black mb-6">Thermal Runaway Simulation</h3>
-<p class="text-lg text-on-surface-variant leading-relaxed">Modeling the exothermic reaction propagation within cell-to-cell structures. Understanding these visual cues is the difference between containment and catastrophe.</p>
-</div>
+<section class="relative h-[500px] -mx-8 flex items-center justify-center">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="extreme macro close up of orange high voltage cabling in an electric vehicle with visible connector textures and metallic sheathing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbrHwDJJHjfdPfMIE07O2oiNb-lShxva7kjhLWI6wWzuH9iGbjpqjrSJmzOMvul9PhHuYhty-CCtzPQxU-js0C-SaaJ2cn8q8VqPtRVWkANGMTXZtDHr5zUm5SJYQ7lrixA5RHVc1bs8ZUICdn6grfoXgdSFgCfZQ8wQ_8LeCz2ch1Tk0_qp-F5dfB_LQQ4pbyc_7mLGANavgXCoaNw9jbJRlTwJe5Rpy0SzGkxhDDwMVj4LEX-kAnOD3oXP_FgR-vpfI9xypc1M8"/>
+<div class="absolute inset-0 bg-black/70 backdrop-blur-sm"></div>
+<div class="relative z-10 text-center">
+<h2 class="text-5xl md:text-7xl font-black uppercase tracking-tighter text-white">Uncompromising<br/>Safety Standards</h2>
 </div>
 </section>
-<div class="max-w-7xl mx-auto px-6 lg:px-12">
 <!-- 13. KEY TERMS -->
-<section class="py-20">
-<h3 class="text-3xl font-bold mb-10">Glossary of Terms</h3>
+<section>
 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
-<div class="text-primary mb-4 font-black">ARC FLASH</div>
-<p class="text-sm text-on-surface-variant">A light and heat produced as part of an arc fault, which is a type of electrical explosion.</p>
+<div class="glass-panel p-8 rounded-2xl hover:scale-105 transition-transform duration-500">
+<span class="material-symbols-outlined text-primary mb-4 text-4xl">settings_input_component</span>
+<h3 class="text-2xl font-black uppercase mb-3">Inverter</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Converts high-voltage DC from the battery into three-phase AC to drive the traction motor, while also controlling regenerative braking.</p>
 </div>
-<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
-<div class="text-secondary mb-4 font-black">LI-ION</div>
-<p class="text-sm text-on-surface-variant">Lithium-ion battery technology, the standard energy storage medium for modern electric drivetrains.</p>
+<div class="glass-panel p-8 rounded-2xl hover:scale-105 transition-transform duration-500">
+<span class="material-symbols-outlined text-secondary mb-4 text-4xl">monitoring</span>
+<h3 class="text-2xl font-black uppercase mb-3">BMS</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">Battery Management System: The digital "brain" that monitors voltage, temperature, and SOC to ensure cells operate within the Safe Operating Area.</p>
 </div>
-<div class="bg-surface-container-low p-8 rounded-xl border border-outline-variant/10">
-<div class="text-tertiary mb-4 font-black">BMS</div>
-<p class="text-sm text-on-surface-variant">Battery Management System. The 'brain' that manages state-of-charge, health, and thermal safety.</p>
+<div class="glass-panel p-8 rounded-2xl hover:scale-105 transition-transform duration-500">
+<span class="material-symbols-outlined text-tertiary mb-4 text-4xl">energy_savings_leaf</span>
+<h3 class="text-2xl font-black uppercase mb-3">Regenerative Braking</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">The process of capturing kinetic energy during deceleration, turning the traction motor into a generator to charge the battery.</p>
 </div>
 </div>
 </section>
 <!-- 14. TIMELINE -->
-<section class="py-20 relative">
-<h3 class="text-3xl font-bold mb-16 text-center">Incident Response Protocol</h3>
-<div class="absolute left-1/2 top-40 bottom-20 w-px bg-gradient-to-b from-primary via-secondary to-transparent hidden md:block"></div>
-<div class="space-y-24 relative">
-<div class="flex flex-col md:flex-row items-center gap-12">
-<div class="md:w-1/2 md:text-right">
-<h4 class="text-xl font-bold text-primary mb-2">01. Detection</h4>
-<p class="text-on-surface-variant">Sensor network identifies isolation fault or temperature spike exceeding 60°C.</p>
+<section class="max-w-4xl mx-auto">
+<h2 class="text-4xl font-black uppercase text-center mb-16 tracking-tighter">Evolution of EV Safety</h2>
+<div class="relative pl-12 border-l-2 border-white/10 space-y-16">
+<div class="relative">
+<div class="absolute -left-[57px] top-0 w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-primary flex items-center justify-center z-10">
+<span class="text-[0.6875rem] font-black">01</span>
 </div>
-<div class="w-4 h-4 rounded-full bg-primary relative z-10 hidden md:block shadow-[0_0_10px_#a3a6ff]"></div>
-<div class="md:w-1/2"></div>
-</div>
-<div class="flex flex-col md:flex-row items-center gap-12">
-<div class="md:w-1/2"></div>
-<div class="w-4 h-4 rounded-full bg-secondary relative z-10 hidden md:block shadow-[0_0_10px_#c180ff]"></div>
-<div class="md:w-1/2 text-left">
-<h4 class="text-xl font-bold text-secondary mb-2">02. Mitigation</h4>
-<p class="text-on-surface-variant">Automated contactors open. High-voltage path is physically severed within 10ms.</p>
+<div>
+<span class="text-primary font-black text-2xl tracking-tighter">2010</span>
+<h4 class="text-xl font-bold mt-1">Foundation Standards</h4>
+<p class="text-on-surface-variant mt-2">Introduction of ISO 26262 functional safety for road vehicles, laying the groundwork for electrified drivetrains.</p>
 </div>
 </div>
-<div class="flex flex-col md:flex-row items-center gap-12">
-<div class="md:w-1/2 md:text-right">
-<h4 class="text-xl font-bold text-tertiary mb-2">03. Response</h4>
-<p class="text-on-surface-variant">External suppression systems activated. Emergency protocols broadcast to all site personnel.</p>
+<div class="relative">
+<div class="absolute -left-[57px] top-0 w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-secondary flex items-center justify-center z-10">
+<span class="text-[0.6875rem] font-black">02</span>
 </div>
-<div class="w-4 h-4 rounded-full bg-tertiary relative z-10 hidden md:block shadow-[0_0_10px_#699cff]"></div>
-<div class="md:w-1/2"></div>
+<div>
+<span class="text-secondary font-black text-2xl tracking-tighter">2015</span>
+<h4 class="text-xl font-bold mt-1">High-Speed Isolation</h4>
+<p class="text-on-surface-variant mt-2">Widespread adoption of pyro-fuses and millisecond-range contactor disconnects during collision events.</p>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -left-[57px] top-0 w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-tertiary flex items-center justify-center z-10">
+<span class="text-[0.6875rem] font-black">03</span>
+</div>
+<div>
+<span class="text-tertiary font-black text-2xl tracking-tighter">2020</span>
+<h4 class="text-xl font-bold mt-1">Active Thermal Management</h4>
+<p class="text-on-surface-variant mt-2">Immersion cooling and cell-to-pack architectures become standard for high-performance safety.</p>
+</div>
+</div>
+<div class="relative">
+<div class="absolute -left-[57px] top-0 w-10 h-10 rounded-full bg-surface-container-lowest border-2 border-white flex items-center justify-center z-10">
+<span class="text-[0.6875rem] font-black">04</span>
+</div>
+<div>
+<span class="text-white font-black text-2xl tracking-tighter">2024</span>
+<h4 class="text-xl font-bold mt-1">Predictive AI Diagnostics</h4>
+<p class="text-on-surface-variant mt-2">Machine learning models predicting dendrite growth and potential failures weeks before they occur.</p>
+</div>
 </div>
 </div>
 </section>
 <!-- 15. NARRATIVE SLIDER -->
-<section class="py-28">
-<div class="bg-surface-container-low rounded-3xl overflow-hidden flex flex-col md:flex-row">
-<div class="md:w-2/5 relative h-80 md:h-auto">
-<img alt="Case Study" class="w-full h-full object-cover" data-alt="Technical workspace with multiple glowing monitors" src="https://lh3.googleusercontent.com/aida-public/AB6AXuATJaALX15W20lgze-62jpEQ9a61PJ4hq7zAMh6UQlVUodtBFRZdqSW6dxEJcag6A_YGjm-hWhFX5ldy25uP8zzDfK0FqEzN51Td_L20E43es_5aCrmz1a8OevKiiTrAT4djBZUNCJDgcAIVURBJcBwvEFEjtxe7_iAaKb3MI6vbYm_1b1Ed9zhGICoqmMJ2_4PhzhkKjPLvkyjrdGkZNwygbAGYsjqm4NbbCK1uZ9AarjaUI8Amk257qcR_vbdIpmXT-JyRElX7Tk"/>
-<div class="absolute inset-0 bg-primary/20 mix-blend-overlay"></div>
+<section class="max-w-5xl mx-auto">
+<div class="glass-panel p-2 rounded-3xl overflow-hidden relative">
+<div class="flex h-[400px]">
+<div class="w-1/2 overflow-hidden">
+<img class="w-full h-full object-cover" data-alt="firefighters and first responders training on a vehicle with glowing orange components in a simulation environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpW3zuM6yUEbD_qq_ifrEoUojn9IYOrfMiW_e27YHI_cSnt9JJGwuti_1ntj33v7gWsOmVxNQh_wTLEeI0nhuqW_BPnTJxd4Y_dMy6qU17Isnv0EIY2ulEF0SwalzW-JnvkiEheuOLa0MX153soLdKBYswKOWzuAviOm1rghsK_cUj312TtJ-_VQE98ZigPmZslB0vV1YYqKCPKJ2uOs0HWxhamqjAx4mQnAbvOOog-_SnAAbjLB1nHe-wmC1a5fV-aKPUEiCtum4"/>
 </div>
-<div class="md:w-3/5 p-12 flex flex-col justify-center">
-<div class="flex items-center gap-2 mb-6">
-<div class="h-1 w-12 bg-primary rounded-full"></div>
-<span class="text-xs uppercase tracking-widest text-primary font-bold">Case Study 04</span>
+<div class="w-1/2 p-12 flex flex-col justify-center">
+<div class="flex gap-2 mb-6">
+<span class="w-8 h-1 bg-primary rounded-full"></span>
+<span class="w-8 h-1 bg-white/20 rounded-full"></span>
+<span class="w-8 h-1 bg-white/20 rounded-full"></span>
 </div>
-<h4 class="text-3xl font-bold mb-6">Submerged Vehicle Recovery</h4>
-<p class="text-on-surface-variant leading-relaxed mb-8">Examining the safety implications of salt-water immersion on a 400V pack. Learn why traditional fire suppression fails in electrolytic environments.</p>
-<div class="flex gap-2">
-<div class="w-3 h-3 rounded-full bg-primary"></div>
-<div class="w-3 h-3 rounded-full bg-zinc-800"></div>
-<div class="w-3 h-3 rounded-full bg-zinc-800"></div>
+<h3 class="text-4xl font-black uppercase mb-4 tracking-tighter leading-none">First Responder Protocols</h3>
+<p class="text-on-surface-variant text-lg">Approach procedures: Identify the EV badge, stabilize the vehicle, and locate the Manual Service Disconnect (MSD) immediately.</p>
+<div class="mt-8 flex gap-4">
+<button class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5"><span class="material-symbols-outlined">chevron_left</span></button>
+<button class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:bg-white/5"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
 </div>
 </div>
 </div>
 </section>
 <!-- 16. PROCESS FLOW -->
-<section class="py-20 text-center">
-<h3 class="text-3xl font-bold mb-16">Battery Recycling Workflow</h3>
-<div class="flex flex-wrap justify-center items-center gap-8">
-<div class="bg-surface-container-high p-8 rounded-full border border-outline-variant/30 w-44 h-44 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-primary mb-2">auto_delete</span>
-<span class="text-xs font-bold uppercase">Decommission</span>
+<section class="max-w-5xl mx-auto">
+<h2 class="text-center text-3xl font-black uppercase mb-16 tracking-widest text-primary/80">System De-Energization Flow</h2>
+<div class="flex justify-between items-center relative">
+<div class="absolute left-0 top-1/2 w-full h-px bg-gradient-to-r from-transparent via-white/20 to-transparent -z-10"></div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-24 h-24 glass-panel rounded-full flex items-center justify-center group-hover:shadow-[0_0_30px_rgba(163,166,255,0.4)] transition-all">
+<span class="material-symbols-outlined text-4xl text-primary">visibility</span>
 </div>
-<span class="material-symbols-outlined text-zinc-700 hidden lg:block">arrow_forward</span>
-<div class="bg-surface-container-high p-8 rounded-full border border-outline-variant/30 w-44 h-44 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-primary mb-2">handyman</span>
-<span class="text-xs font-bold uppercase">Disassembly</span>
+<span class="font-bold uppercase tracking-widest text-xs">Identify Voltage</span>
 </div>
-<span class="material-symbols-outlined text-zinc-700 hidden lg:block">arrow_forward</span>
-<div class="bg-surface-container-high p-8 rounded-full border border-outline-variant/30 w-44 h-44 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-primary mb-2">science</span>
-<span class="text-xs font-bold uppercase">Hydrometallurgy</span>
+<div class="material-symbols-outlined text-white/20">arrow_forward_ios</div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-24 h-24 glass-panel rounded-full flex items-center justify-center group-hover:shadow-[0_0_30px_rgba(193,128,255,0.4)] transition-all border border-secondary/30">
+<span class="material-symbols-outlined text-4xl text-secondary">phonelink_off</span>
 </div>
-<span class="material-symbols-outlined text-zinc-700 hidden lg:block">arrow_forward</span>
-<div class="bg-surface-container-high p-8 rounded-full border border-outline-variant/30 w-44 h-44 flex flex-col items-center justify-center">
-<span class="material-symbols-outlined text-primary mb-2">eco</span>
-<span class="text-xs font-bold uppercase">Resource Recovery</span>
+<span class="font-bold uppercase tracking-widest text-xs">Isolate System</span>
+</div>
+<div class="material-symbols-outlined text-white/20">arrow_forward_ios</div>
+<div class="flex flex-col items-center gap-4 group">
+<div class="w-24 h-24 glass-panel rounded-full flex items-center justify-center group-hover:shadow-[0_0_30px_rgba(59,130,246,0.4)] transition-all border border-tertiary/30">
+<span class="material-symbols-outlined text-4xl text-tertiary">bolt</span>
+</div>
+<span class="font-bold uppercase tracking-widest text-xs">Verify Zero Voltage</span>
 </div>
 </div>
 </section>
 <!-- 17. TAB PANEL -->
-<section class="py-20 max-w-4xl mx-auto">
-<div class="flex justify-center gap-2 mb-10 bg-surface-container-lowest p-2 rounded-full w-fit mx-auto border border-outline-variant/10">
-<button class="bg-primary text-on-primary px-8 py-2 rounded-full font-bold text-sm">Daily</button>
-<button class="text-zinc-500 px-8 py-2 rounded-full font-bold text-sm hover:text-on-surface">Weekly</button>
-<button class="text-zinc-500 px-8 py-2 rounded-full font-bold text-sm hover:text-on-surface">Quarterly</button>
+<section class="max-w-4xl mx-auto">
+<div class="flex justify-center gap-4 mb-12">
+<button class="px-8 py-3 bg-primary text-on-primary rounded-full font-bold uppercase tracking-widest text-sm">Safety Gear</button>
+<button class="px-8 py-3 glass-panel text-on-surface-variant rounded-full font-bold uppercase tracking-widest text-sm hover:text-white transition-colors">Tools</button>
+<button class="px-8 py-3 glass-panel text-on-surface-variant rounded-full font-bold uppercase tracking-widest text-sm hover:text-white transition-colors">Environment</button>
 </div>
-<div class="bg-surface-container-low p-10 rounded-2xl border border-outline-variant/10">
-<h4 class="text-2xl font-bold mb-6">Daily Maintenance Tasks</h4>
-<div class="space-y-4">
-<div class="flex items-center gap-6 p-4 hover:bg-surface-variant rounded-xl transition-colors">
-<span class="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-primary">01</span>
-<span class="flex-1 font-medium">Visual inspection of coolant reservoir levels.</span>
-<span class="material-symbols-outlined text-zinc-600">more_horiz</span>
+<div class="glass-panel p-10 rounded-2xl grid grid-cols-2 gap-12">
+<div class="space-y-6">
+<h3 class="text-3xl font-black uppercase tracking-tight">Essential Gear</h3>
+<p class="text-on-surface-variant">Technicians must be equipped with full ARC-flash rated protection whenever working within 1.5 meters of an active HV component.</p>
+<ul class="space-y-3">
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> Class 0 Rubber Gloves</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> ASTM Face Shield</li>
+<li class="flex items-center gap-2"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> Insulated Hand Tools</li>
+</ul>
 </div>
-<div class="flex items-center gap-6 p-4 hover:bg-surface-variant rounded-xl transition-colors">
-<span class="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-primary">02</span>
-<span class="flex-1 font-medium">Verify charging port debris-free status.</span>
-<span class="material-symbols-outlined text-zinc-600">more_horiz</span>
-</div>
-<div class="flex items-center gap-6 p-4 hover:bg-surface-variant rounded-xl transition-colors">
-<span class="w-12 h-12 rounded-lg bg-zinc-800 flex items-center justify-center font-bold text-primary">03</span>
-<span class="flex-1 font-medium">Check telemetry dashboard for system errors.</span>
-<span class="material-symbols-outlined text-zinc-600">more_horiz</span>
-</div>
+<div class="rounded-xl overflow-hidden grayscale">
+<img class="w-full h-full object-cover" data-alt="industrial safety gear laid out on a dark surface including insulated gloves, safety goggles and a high-vis vest" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtkBEj9IPE65rWOz9RtBJtk_N0a5yDq-kF35yRv3dSViydW43FyiBiJc8Sn54ZO5VwDsuRNQwxhvl2yaRSUFiA4SjOW8ggC95BLngzqhOy3ULo-G4zC2j0IHdwxD1yX4o9IzJk-r2ej9OOgqvWWu5sGbKLrwqqn4rvPDg0hnq7COjNPdjWB-B0pXCw7xekq8QnBv8UeO6KDb9UPeNCN284DjURQiPEkcrZBx6-wv8_sckYWepJM2SekzsISG5n1hfWkaxddfr8s5Y"/>
 </div>
 </div>
 </section>
 <!-- 18. FLASHCARDS -->
-<section class="py-28">
-<h3 class="text-3xl font-bold mb-10">Safety Signs Identification</h3>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+<section>
+<h2 class="text-center text-3xl font-black uppercase mb-16 tracking-tighter">Knowledge Check</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Flipping Card -->
 <div class="group h-64 [perspective:1000px]">
-<div class="relative h-full w-full rounded-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-<div class="absolute inset-0 bg-surface-container-high flex flex-col items-center justify-center p-6 backface-hidden rounded-xl border border-outline-variant/20">
-<span class="material-symbols-outlined !text-6xl text-error mb-4">warning</span>
-<span class="text-xs uppercase font-bold tracking-widest text-zinc-500">Sign A</span>
+<div class="relative h-full w-full rounded-2xl transition-all duration-500 [transform-style:preserve-3d] [transform:rotateY(180deg)] shadow-[0_0_30px_rgba(163,166,255,0.15)]">
+<div class="absolute inset-0 h-full w-full rounded-2xl glass-panel p-8 [backface-visibility:hidden] flex flex-col items-center justify-center text-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">What does BMS stand for?</p>
 </div>
-<div class="absolute inset-0 h-full w-full rounded-xl bg-error p-6 text-on-error [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col items-center justify-center text-center">
-<h5 class="font-black mb-2">HIGH VOLTAGE</h5>
-<p class="text-xs">DANGER: Risk of electrical shock or arc flash.</p>
-</div>
-</div>
-</div>
-<div class="group h-64 [perspective:1000px]">
-<div class="relative h-full w-full rounded-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-<div class="absolute inset-0 bg-surface-container-high flex flex-col items-center justify-center p-6 backface-hidden rounded-xl border border-outline-variant/20">
-<span class="material-symbols-outlined !text-6xl text-tertiary mb-4">smoke_free</span>
-<span class="text-xs uppercase font-bold tracking-widest text-zinc-500">Sign B</span>
-</div>
-<div class="absolute inset-0 h-full w-full rounded-xl bg-tertiary p-6 text-on-tertiary [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col items-center justify-center text-center">
-<h5 class="font-black mb-2">NO OPEN FLAMES</h5>
-<p class="text-xs">Presence of flammable gases or electrolyte vapors.</p>
+<div class="absolute inset-0 h-full w-full rounded-2xl bg-primary p-8 [backface-visibility:hidden] [transform:rotateY(180deg)] flex flex-col items-center justify-center text-center">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-on-primary mb-4">Answer</span>
+<p class="text-2xl font-black text-on-primary">Battery Management System</p>
 </div>
 </div>
 </div>
-<div class="group h-64 [perspective:1000px]">
-<div class="relative h-full w-full rounded-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-<div class="absolute inset-0 bg-surface-container-high flex flex-col items-center justify-center p-6 backface-hidden rounded-xl border border-outline-variant/20">
-<span class="material-symbols-outlined !text-6xl text-secondary mb-4">masks</span>
-<span class="text-xs uppercase font-bold tracking-widest text-zinc-500">Sign C</span>
+<!-- Normal Front -->
+<div class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">Difference between AC and DC charging?</p>
 </div>
-<div class="absolute inset-0 h-full w-full rounded-xl bg-secondary p-6 text-on-secondary [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col items-center justify-center text-center">
-<h5 class="font-black mb-2">PPE REQUIRED</h5>
-<p class="text-xs">Respirator and face shield mandatory in this zone.</p>
+<div class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">Standard glove air-leak test method?</p>
 </div>
+<div class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">What is the purpose of an Interlock circuit?</p>
 </div>
+<div class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">How is Li-ion fire suppression unique?</p>
 </div>
-<div class="group h-64 [perspective:1000px]">
-<div class="relative h-full w-full rounded-xl transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
-<div class="absolute inset-0 bg-surface-container-high flex flex-col items-center justify-center p-6 backface-hidden rounded-xl border border-outline-variant/20">
-<span class="material-symbols-outlined !text-6xl text-primary mb-4">medical_services</span>
-<span class="text-xs uppercase font-bold tracking-widest text-zinc-500">Sign D</span>
-</div>
-<div class="absolute inset-0 h-full w-full rounded-xl bg-primary p-6 text-on-primary [transform:rotateY(180deg)] [backface-visibility:hidden] flex flex-col items-center justify-center text-center">
-<h5 class="font-black mb-2">FIRST AID</h5>
-<p class="text-xs">Electrical injury kit and AED location.</p>
-</div>
-</div>
+<div class="glass-panel p-8 rounded-2xl flex flex-col items-center justify-center text-center cursor-pointer hover:border-primary/50 transition-colors">
+<span class="text-[0.6875rem] font-bold uppercase tracking-widest text-primary mb-4">Question</span>
+<p class="text-xl font-bold">Definition of "Safe State" in ISO 26262?</p>
 </div>
 </div>
 </section>
-</div>
 </main>
 <!-- FOOTER (Shared Component) -->
-<footer class="bg-[#0e0e0e] w-full py-12 border-t border-zinc-800/10 transition-opacity duration-300">
-<div class="flex flex-col items-center gap-6 max-w-7xl mx-auto px-6">
-<div class="text-indigo-500 font-bold text-lg">EV AWARENESS &amp; SAFETY</div>
+<footer class="w-full py-12 px-8 border-t border-white/5 tonal-shift bg-zinc-950 mt-48">
+<div class="flex flex-col md:flex-row justify-between items-center gap-6 w-full">
+<div class="text-zinc-100 font-bold uppercase tracking-tighter">EV SAFETY COMMAND</div>
 <div class="flex flex-wrap justify-center gap-8">
-<a class="text-zinc-600 font-['Inter'] text-[10px] uppercase tracking-widest hover:text-indigo-300" href="#">Compliance Standards</a>
-<a class="text-zinc-600 font-['Inter'] text-[10px] uppercase tracking-widest hover:text-indigo-300" href="#">Privacy Policy</a>
-<a class="text-zinc-600 font-['Inter'] text-[10px] uppercase tracking-widest hover:text-indigo-300" href="#">Voltage Safety Guide</a>
-<a class="text-zinc-600 font-['Inter'] text-[10px] uppercase tracking-widest hover:text-indigo-300" href="#">Certification</a>
+<a class="font-inter text-[0.6875rem] tracking-[0.1em] font-bold uppercase text-zinc-500 hover:text-zinc-200 transition-opacity hover:opacity-80 hover:underline decoration-indigo-500/50" href="#">Privacy Protocol</a>
+<a class="font-inter text-[0.6875rem] tracking-[0.1em] font-bold uppercase text-zinc-500 hover:text-zinc-200 transition-opacity hover:opacity-80 hover:underline decoration-indigo-500/50" href="#">Safety Standards</a>
+<a class="font-inter text-[0.6875rem] tracking-[0.1em] font-bold uppercase text-zinc-500 hover:text-zinc-200 transition-opacity hover:opacity-80 hover:underline decoration-indigo-500/50" href="#">Emergency Contact</a>
+<a class="font-inter text-[0.6875rem] tracking-[0.1em] font-bold uppercase text-zinc-500 hover:text-zinc-200 transition-opacity hover:opacity-80 hover:underline decoration-indigo-500/50" href="#">Technical Support</a>
 </div>
-<div class="text-zinc-600 font-['Inter'] text-[10px] uppercase tracking-widest text-center">
-                © 2024 Kinetic Observatory. High-Voltage Compliance Mandatory.
-            </div>
+<div class="font-inter text-[0.6875rem] tracking-[0.1em] font-bold uppercase text-zinc-500">© 2024 HIGH-VOLTAGE SAFETY SYSTEMS. ALL RIGHTS RESERVED.</div>
 </div>
 </footer>
 </body></html>

@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 32 },
@@ -31,6 +32,7 @@ function CrossIcon() {
 export default function ComparisonTable({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const { style, rules, resolveSurface, getCycleColor, hasDNA } = useComponentStyle('comparison');
 
   const title = data.displayTitle || '';
   const body = data.body || '';
@@ -38,6 +40,19 @@ export default function ComparisonTable({ data = {} }) {
   const rows = data.rows || [];
 
   if (columns.length === 0 || rows.length === 0) return null;
+
+  // DNA-driven values
+  const icons = hasDNA && style?.icons ? style.icons : [];
+  const checkIcon = icons.find(i => i === 'check_circle') || icons.find(i => i === 'check') || 'check_circle';
+  const crossIcon = icons.find(i => i === 'close') || icons.find(i => i === 'cancel') || 'close';
+  const labelTypo = hasDNA && rules?.typography?.label ? rules.typography.label : null;
+  const borderStyle = hasDNA && rules?.borderStyle ? rules.borderStyle : null;
+  const ghostBorder = borderStyle
+    ? `1px solid rgba(255, 255, 255, ${borderStyle.outlineOpacity || 0.06})`
+    : null;
+  const rowDivider = borderStyle
+    ? `1px solid rgba(255, 255, 255, ${(borderStyle.outlineOpacity || 0.06) * 0.5})`
+    : null;
 
   return (
     <motion.section
@@ -48,13 +63,13 @@ export default function ComparisonTable({ data = {} }) {
       className="w-full flex justify-center py-6 sm:py-8"
     >
       <div
-        className="w-full rounded-xl border overflow-hidden"
+        className="w-full rounded-xl overflow-hidden"
         style={{
           maxWidth: '900px',
           background: 'var(--ui-glass)',
           backdropFilter: 'blur(16px)',
           WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'var(--ui-glass-border)',
+          border: hasDNA && ghostBorder ? ghostBorder : '1px solid var(--ui-glass-border)',
           boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
         }}
       >
@@ -62,7 +77,9 @@ export default function ComparisonTable({ data = {} }) {
         {title && (
           <div
             className="px-6 sm:px-8 py-5 border-b"
-            style={{ borderColor: 'var(--ui-glass-border)' }}
+            style={{ borderColor: hasDNA && ghostBorder ? 'transparent' : 'var(--ui-glass-border)',
+              ...(hasDNA && ghostBorder ? { borderBottom: ghostBorder } : {}),
+            }}
           >
             <h2
               className="text-xl sm:text-2xl font-semibold tracking-tight"
@@ -86,26 +103,43 @@ export default function ComparisonTable({ data = {} }) {
             <thead>
               <tr>
                 <th className="px-6 py-4 text-left" style={{ width: '40%' }} />
-                {columns.map((col, ci) => (
-                  <th
-                    key={ci}
-                    className="px-6 py-4 text-center"
-                    style={{
-                      color: 'var(--brand-heading, #ffffff)',
-                      borderLeft: '1px solid var(--ui-glass-border)',
-                    }}
-                  >
-                    <div className="text-base sm:text-lg font-bold">{col.title}</div>
-                    {col.subtitle && (
+                {columns.map((col, ci) => {
+                  const cycleColor = hasDNA ? getCycleColor(ci) : null;
+                  return (
+                    <th
+                      key={ci}
+                      className="px-6 py-4 text-center"
+                      style={{
+                        borderLeft: hasDNA && ghostBorder
+                          ? ghostBorder
+                          : '1px solid var(--ui-glass-border)',
+                      }}
+                    >
                       <div
-                        className="text-xs mt-1 font-normal"
-                        style={{ color: 'var(--brand-text-muted)' }}
+                        style={hasDNA && labelTypo ? {
+                          color: cycleColor || 'var(--brand-heading, #ffffff)',
+                          fontSize: labelTypo.size || '0.75rem',
+                          fontWeight: labelTypo.weight || 700,
+                          textTransform: labelTypo.transform || 'uppercase',
+                          letterSpacing: labelTypo.tracking || '0.05em',
+                        } : {
+                          color: 'var(--brand-heading, #ffffff)',
+                        }}
+                        className={hasDNA && labelTypo ? '' : 'text-base sm:text-lg font-bold'}
                       >
-                        {col.subtitle}
+                        {col.title}
                       </div>
-                    )}
-                  </th>
-                ))}
+                      {col.subtitle && (
+                        <div
+                          className="text-xs mt-1 font-normal"
+                          style={{ color: 'var(--brand-text-muted)' }}
+                        >
+                          {col.subtitle}
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
               </tr>
             </thead>
 
@@ -116,7 +150,9 @@ export default function ComparisonTable({ data = {} }) {
                   key={ri}
                   style={{
                     background: ri % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent',
-                    borderTop: '1px solid var(--ui-glass-border)',
+                    borderTop: hasDNA && rowDivider
+                      ? rowDivider
+                      : '1px solid var(--ui-glass-border)',
                   }}
                 >
                   <td
@@ -129,12 +165,44 @@ export default function ComparisonTable({ data = {} }) {
                     <td
                       key={vi}
                       className="px-6 py-4 text-center"
-                      style={{ borderLeft: '1px solid var(--ui-glass-border)' }}
+                      style={{
+                        borderLeft: hasDNA && ghostBorder
+                          ? ghostBorder
+                          : '1px solid var(--ui-glass-border)',
+                      }}
                     >
                       {val === true ? (
-                        <span className="inline-flex justify-center"><CheckIcon /></span>
+                        hasDNA ? (
+                          <span className="inline-flex justify-center">
+                            <span
+                              className="material-symbols-outlined"
+                              style={{
+                                fontSize: '26px',
+                                color: 'var(--brand-success, #10b981)',
+                              }}
+                            >
+                              {checkIcon}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex justify-center"><CheckIcon /></span>
+                        )
                       ) : val === false ? (
-                        <span className="inline-flex justify-center"><CrossIcon /></span>
+                        hasDNA ? (
+                          <span className="inline-flex justify-center">
+                            <span
+                              className="material-symbols-outlined"
+                              style={{
+                                fontSize: '26px',
+                                color: 'var(--brand-error, #ef4444)',
+                              }}
+                            >
+                              {crossIcon}
+                            </span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex justify-center"><CrossIcon /></span>
+                        )
                       ) : (
                         <span
                           className="text-sm"

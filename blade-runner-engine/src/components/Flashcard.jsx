@@ -1,5 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 32, scale: 0.95 },
@@ -15,6 +16,121 @@ const cardVariants = {
   }),
 };
 
+/* ─── DNA-aware FlipCard ─────────────────────────────────────── */
+function FlipCardDNA({ item, index, isInView, style, rules, resolveSurface, getCycleColor }) {
+  const [flipped, setFlipped] = useState(false);
+
+  const frontBg = resolveSurface(style.container?.primaryBg) || 'var(--ui-glass, rgba(255, 255, 255, 0.06))';
+  const backBg = getCycleColor(index) || 'var(--brand-primary, #8b5cf6)';
+  const icons = style.icons || [];
+  const iconName = icons.length > 0 ? icons[index % icons.length] : null;
+  const badge = style.badge || {};
+  const labelTypo = rules?.typography?.label || {};
+
+  return (
+    <motion.div
+      custom={index}
+      initial="hidden"
+      animate={isInView ? 'visible' : 'hidden'}
+      variants={cardVariants}
+      className="cursor-pointer"
+      style={{ perspective: '1000px' }}
+      onClick={() => setFlipped(!flipped)}
+    >
+      <div
+        className="relative w-full"
+        style={{
+          minHeight: '200px',
+          transformStyle: 'preserve-3d',
+          transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+          transition: 'transform 0.5s ease',
+        }}
+      >
+        {/* Front */}
+        <div
+          className="absolute inset-0 rounded-xl p-6 flex flex-col items-center justify-center text-center"
+          style={{
+            backfaceVisibility: 'hidden',
+            background: frontBg,
+            border: '1px solid var(--border-ghost, rgba(255, 255, 255, 0.08))',
+            boxShadow: '0 4px 24px rgba(0, 0, 0, 0.15)',
+          }}
+        >
+          {/* Material icon */}
+          {iconName && (
+            <span
+              className="material-symbols-outlined mb-3"
+              style={{
+                fontSize: '32px',
+                color: getCycleColor(index) || 'var(--brand-primary)',
+                opacity: 0.7,
+              }}
+            >
+              {iconName}
+            </span>
+          )}
+
+          <p
+            className="text-base sm:text-lg leading-relaxed font-medium"
+            style={{ color: 'var(--brand-text, rgba(255, 255, 255, 0.9))' }}
+          >
+            {item.front}
+          </p>
+
+          {/* Badge label below icon */}
+          {badge.found && badge.text && (
+            <span
+              className="mt-2"
+              style={{
+                textTransform: labelTypo.transform || 'uppercase',
+                letterSpacing: labelTypo.tracking || '0.05em',
+                fontSize: labelTypo.size || '0.6rem',
+                fontWeight: labelTypo.weight || 700,
+                color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.4))',
+              }}
+            >
+              {badge.text}
+            </span>
+          )}
+
+          <span
+            className="text-xs mt-4 uppercase tracking-widest"
+            style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.3))' }}
+          >
+            Click to reveal
+          </span>
+        </div>
+
+        {/* Back */}
+        <div
+          className="absolute inset-0 rounded-xl p-6 flex flex-col items-center justify-center text-center"
+          style={{
+            backfaceVisibility: 'hidden',
+            transform: 'rotateY(180deg)',
+            background: backBg,
+            border: '1px solid transparent',
+            boxShadow: '0 0 24px rgba(0, 0, 0, 0.2)',
+          }}
+        >
+          <span
+            className="material-symbols-outlined mb-3"
+            style={{ fontSize: '24px', color: '#ffffff' }}
+          >
+            check_circle
+          </span>
+          <p
+            className="text-sm sm:text-base leading-relaxed"
+            style={{ color: '#ffffff' }}
+          >
+            {item.back}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+/* ─── Default FlipCard (no DNA) ──────────────────────────────── */
 function FlipCard({ item, index, isInView }) {
   const [flipped, setFlipped] = useState(false);
 
@@ -116,10 +232,14 @@ function FlipCard({ item, index, isInView }) {
 export default function Flashcard({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
+  const { style, rules, resolveSurface, getCycleColor, hasDNA } = useComponentStyle('flashcard');
 
   const title = data.displayTitle || '';
   const instruction = data.instruction || '';
   const items = data._items || [];
+
+  const useDNA = hasDNA && style;
+  const gridCols = useDNA ? (style.layout?.gridCols || 4) : null;
 
   return (
     <section ref={ref} className="w-full py-6 sm:py-8">
@@ -151,16 +271,31 @@ export default function Flashcard({ data = {} }) {
         <div
           className="grid gap-4 sm:gap-6"
           style={{
-            gridTemplateColumns: items.length <= 2
-              ? `repeat(${items.length}, 1fr)`
-              : items.length === 4
-                ? 'repeat(2, 1fr)'
-                : 'repeat(auto-fill, minmax(280px, 1fr))',
+            gridTemplateColumns: useDNA
+              ? `repeat(${gridCols}, 1fr)`
+              : items.length <= 2
+                ? `repeat(${items.length}, 1fr)`
+                : items.length === 4
+                  ? 'repeat(2, 1fr)'
+                  : 'repeat(auto-fill, minmax(280px, 1fr))',
           }}
         >
-          {items.map((item, i) => (
-            <FlipCard key={i} item={item} index={i} isInView={isInView} />
-          ))}
+          {items.map((item, i) =>
+            useDNA ? (
+              <FlipCardDNA
+                key={i}
+                item={item}
+                index={i}
+                isInView={isInView}
+                style={style}
+                rules={rules}
+                resolveSurface={resolveSurface}
+                getCycleColor={getCycleColor}
+              />
+            ) : (
+              <FlipCard key={i} item={item} index={i} isInView={isInView} />
+            )
+          )}
         </div>
       </div>
     </section>

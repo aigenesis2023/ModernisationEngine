@@ -3,15 +3,22 @@
  *
  * Loads course data from window.courseData (injected at build time)
  * and renders through the CourseRenderer.
+ *
+ * The ComponentStyleProvider bridges Stitch's per-component design
+ * patterns to React components. Every component reads its visual
+ * config from the provider — icons, backgrounds, badges, layouts
+ * are all Stitch-designed and course-specific.
  */
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import useCourseStore from './store/courseStore';
 import { applyBrand, applyDesignDNA } from './theme/ThemeEngine';
+import { ComponentStyleProvider } from './theme/ComponentStyleProvider';
 import CourseRenderer from './components/CourseRenderer';
 
 function App() {
   const loadCourse = useCourseStore((s) => s.loadCourse);
   const loadBrand = useCourseStore((s) => s.loadBrand);
+  const [designDNA, setDesignDNA] = useState(null);
 
   useEffect(() => {
     // Load course data from global (injected by the engine pipeline)
@@ -27,6 +34,7 @@ function App() {
       // Apply Stitch Design DNA if available (enhanced tokens overlay)
       if (window.designDNA) {
         applyDesignDNA(window.designDNA);
+        setDesignDNA(window.designDNA);
       }
     }
 
@@ -45,7 +53,11 @@ function App() {
     });
   }, [loadCourse, loadBrand]);
 
-  return <CourseRenderer />;
+  return (
+    <ComponentStyleProvider designDNA={designDNA}>
+      <CourseRenderer />
+    </ComponentStyleProvider>
+  );
 }
 
 export default App;

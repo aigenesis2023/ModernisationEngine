@@ -1,10 +1,12 @@
 import { motion, useInView, useScroll, useTransform } from 'framer-motion';
 import { useRef, useState } from 'react';
+import { useComponentStyle } from '../theme/ComponentStyleProvider';
 
 export default function FullBleedImage({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.15 });
   const [imgError, setImgError] = useState(false);
+  const { style, hasDNA } = useComponentStyle('full-bleed');
 
   const title = data.displayTitle || '';
   const body = data.body || '';
@@ -21,11 +23,46 @@ export default function FullBleedImage({ data = {} }) {
 
   if (!imgSrc || imgError) return null;
 
+  // DNA-driven gradient direction
+  const gradientDir = hasDNA && style?.treatments?.overlayGradientDirection
+    ? style.treatments.overlayGradientDirection
+    : null;
+
+  // Map direction codes to CSS gradient direction
+  const gradientMap = {
+    r: 'to right',
+    l: 'to left',
+    b: 'to bottom',
+    t: 'to top',
+    br: 'to bottom right',
+    bl: 'to bottom left',
+  };
+  const cssGradientDir = gradientDir ? (gradientMap[gradientDir] || 'to bottom') : 'to bottom';
+
+  // DNA: When gradient is left-to-right ('r'), anchor text to left
+  const isFromLeft = gradientDir === 'r';
+  const dnaOverlayPosition = hasDNA && isFromLeft ? 'left' : overlayPosition;
+
+  // DNA-driven title weight
+  const titleWeight = hasDNA && style?.typography?.titleWeight
+    ? style.typography.titleWeight
+    : 'font-bold';
+
+  // DNA: larger title size
+  const titleSizeClass = hasDNA
+    ? 'text-4xl sm:text-5xl md:text-6xl'
+    : 'text-3xl sm:text-4xl md:text-5xl';
+
   const alignmentClasses = {
     center: 'items-center justify-center text-center',
     left: 'items-start justify-center text-left pl-8 sm:pl-16',
     right: 'items-end justify-center text-right pr-8 sm:pr-16',
   };
+
+  // Build gradient overlay
+  const overlayGradient = hasDNA && gradientDir
+    ? `linear-gradient(${cssGradientDir}, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0.4) 40%, rgba(0,0,0,0.1) 100%)`
+    : 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.6) 100%)';
 
   return (
     <motion.section
@@ -53,15 +90,13 @@ export default function FullBleedImage({ data = {} }) {
       {/* Dark overlay with gradient for text readability */}
       <div
         className="absolute inset-0"
-        style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 50%, rgba(0,0,0,0.6) 100%)',
-        }}
+        style={{ background: overlayGradient }}
       />
 
       {/* Content overlay */}
       {(title || body) && (
         <div
-          className={`relative z-10 flex flex-col h-full min-h-[400px] max-h-[600px] px-6 py-16 ${alignmentClasses[overlayPosition] || alignmentClasses.center}`}
+          className={`relative z-10 flex flex-col h-full min-h-[400px] max-h-[600px] px-6 py-16 ${alignmentClasses[dnaOverlayPosition] || alignmentClasses.center}`}
         >
           <div className="max-w-2xl">
             {title && (
@@ -69,7 +104,7 @@ export default function FullBleedImage({ data = {} }) {
                 initial={{ opacity: 0, y: 24 }}
                 animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 24 }}
                 transition={{ duration: 0.6, delay: 0.3 }}
-                className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight mb-4 leading-tight"
+                className={`${titleSizeClass} ${titleWeight} tracking-tight mb-4 leading-tight`}
                 style={{ color: '#ffffff' }}
               >
                 {title}
