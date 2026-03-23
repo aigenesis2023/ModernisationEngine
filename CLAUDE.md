@@ -39,7 +39,7 @@ blade-runner-engine/                 ← React + Vite project (pre-built)
     theme/ThemeEngine.js             ← Brand → CSS variables
     services/RepresentationAgent.js  ← AI content → component mapping
 
-blade-runner-template.html           ← Pre-built single-file output (399KB)
+blade-runner-template.html           ← Pre-built single-file output (~405KB)
 ```
 
 ### Data Flow
@@ -88,14 +88,22 @@ One broken reference = broken course. The ID Manager prevents this.
 | `textinput` | TextInputBlock | Form fields |
 | `branching` | BranchingCards | Decision/path selection |
 
-### RepresentationAgent (services/RepresentationAgent.js)
-Analyzes content characteristics and assigns the best component type:
-- 4+ short text items → BentoGrid
-- Layers with substantial text → Accordion
-- Sequential layers with images → NarrativeSlider
-- Quiz data → MCQPro
-- Image + text → GraphicText split layout
-- Structured items with separators → DataTable
+### Component Mapping (adapt-translator.js buildSlideComponents)
+The translator maps slide content to component types:
+- `presentation: 'hero'` or `section.type: 'hero'` → `hero` (HeroSplash with bg image)
+- `presentation: 'media-feature'` or has video → `media` (MediaBlock)
+- `presentation: 'interactive'` with layers + mostly images → `narrative` (NarrativeSlider)
+- `presentation: 'interactive'` with layers, text-heavy → `accordion` (SilkyAccordion)
+- `presentation: 'form'` with formFields → `textinput` (single TextInputBlock, all fields grouped)
+- `presentation: 'quiz'` with quizData → `mcq` (MCQPro)
+- `presentation: 'branching'` with interactions → `branching` (BranchingCards)
+- Has image + text → `graphic-text` (GraphicText split layout)
+- Has image only → `graphic` (GraphicBlock)
+- Default → `text` (TextBlock)
+
+**NOT YET MAPPED** (components exist but translator never emits these types):
+- `bento` → BentoGrid (needs RepresentationAgent logic for 4+ short items)
+- `data-table` → DataTable (needs structured data detection)
 
 ## The Pipeline
 
@@ -126,12 +134,14 @@ cp dist/index.html ../blade-runner-template.html
 ```
 
 ### How It Works
-1. The template is pre-built ONCE during development (399KB single HTML)
+1. The template is pre-built ONCE during development (~405KB single HTML)
 2. At runtime, app.js fetches the template and injects `window.courseData` + `window.brandData`
-3. React reads from Zustand store, which loads from `window.courseData`
-4. ThemeEngine applies brand CSS variables from `window.brandData`
-5. CourseRenderer recursively maps JSON → React components
-6. Preview opens as blob URL in new tab (works from file://)
+3. Images referenced in JSON are base64-embedded (6MB total cap, 800KB per image)
+4. React reads from Zustand store, which loads from `window.courseData`
+5. ThemeEngine applies brand CSS variables from `window.brandData`
+6. CourseRenderer recursively maps JSON → React components
+7. Hero sections render full-width; other sections alternate backgrounds
+8. Preview opens as blob URL in new tab (works from file://)
 
 ### Design System
 - **Aesthetic:** "Linear.app meets Blade Runner 2049"
@@ -203,8 +213,30 @@ Every component must:
 6. Handle missing/empty data gracefully (don't render empty cards)
 
 ## Known Issues & Next Steps
-- Images don't load from blob URLs (need base64 embedding)
-- Brand scraper fails on some sites (CORS/timeout)
-- Tailwind classes need verification in build output
-- Components need more glassmorphism/spacing polish
-- No SCORM tracking in the React output yet (need lightweight shim)
+
+### Image Path Mismatch (Critical)
+Storyline slide data references `story_content/filename.jpg` but actual image files
+are often in the `mobile/` directory instead. The image embedding code searches by
+filename (not directory), so it SHOULD find them — but this needs verification.
+Debug logging added to Phase 5 to diagnose when 0 images match.
+
+### Not Yet Mapped to Premium Components
+- `bento` (BentoGrid) — needs detection logic for 4+ short text items
+- `data-table` (DataTable) — needs structured data / separator detection
+- RepresentationAgent.js exists but is not wired into the pipeline
+
+### Other Known Issues
+- Brand scraper fails on some sites (CORS/timeout) — falls back to generic profile
+- Drag-and-drop content presented as text — needs matching exercise interaction
+- 360-image content extracted but no interactive viewer component
+- Results routing needs real-world testing with quiz completion
+- No SCORM tracking shim in React output yet (LMS won't record progress)
+- Mobile polish pass needed
+
+### Pipeline Diagnostics
+Each phase now logs timing in ms and content breakdowns. The progress log shows:
+- Phase 1: slide/object counts
+- Phase 2: section count + derived title
+- Phase 3: brand colors, fonts, theme, timing
+- Phase 4: component type breakdown (e.g. `hero:1, graphic-text:5, accordion:3`)
+- Phase 5: image embed counts + debug output when 0 match
