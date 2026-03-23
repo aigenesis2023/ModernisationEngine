@@ -1,129 +1,143 @@
-# CLAUDE.md — Modernisation Engine (Blade Runner Architecture)
+# CLAUDE.md — Modernisation Engine
 
 ## What This Project Is
-A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. User uploads a SCORM zip/folder, enters a brand URL, and gets a modernised SCORM package back.
+A browser-based tool that converts legacy SCORM 1.2 e-learning courses (Articulate Storyline exports) into modern, branded, mobile-responsive deep-scroll web experiences. User uploads a SCORM folder, enters a brand URL, and gets a modernised SCORM package back.
 
-## Architecture (Current: Blade Runner Engine)
+**Live at:** https://aigenesis2023.github.io/ModernisationEngine/
 
-**Two-layer system:**
-1. **Extraction Pipeline** — Browser-based IIFE modules that parse SCORM, plan content, scrape brand
-2. **Blade Runner Engine** — Pre-built React + Vite + Tailwind + Framer Motion renderer (single HTML file)
+---
+
+## File Structure
 
 ```
-index.html                           ← Upload UI (GitHub Pages)
+index.html                           ← Upload UI served on GitHub Pages
 engine/
-  scorm-parser.js                    ← Phase 1: SCORM → CourseIR
-  content-planner.js                 ← Phase 2: CourseIR → CoursePlan
-  brand-scraper.js                   ← Phase 3: URL → BrandProfile
-  adapt-translator.js                ← Phase 4: CoursePlan → Adapt JSON
-  app.js                             ← Pipeline orchestrator
+  scorm-parser.js        (1093 loc)  ← Phase 1: SCORM → CourseIR
+  content-planner.js     (1317 loc)  ← Phase 2: CourseIR → CoursePlan
+  brand-scraper.js        (470 loc)  ← Phase 3: URL → BrandProfile
+  adapt-translator.js     (853 loc)  ← Phase 4: CoursePlan → Adapt JSON
+  app.js                  (579 loc)  ← Pipeline orchestrator + SCORM packager
 
-blade-runner-engine/                 ← React + Vite project (pre-built)
+blade-runner-engine/                 ← React + Vite project (pre-built into single HTML)
   src/
-    components/                      ← 11 premium React components
-      ComponentRegistry.js           ← Dynamic component resolution
-      CourseRenderer.jsx             ← Recursive JSON → React tree
-      HeroSplash.jsx                 ← Full-viewport hero
-      TextBlock.jsx                  ← Clean text with glass card
-      GraphicBlock.jsx               ← Full-width image
-      GraphicText.jsx                ← Split layout (text + image)
-      SilkyAccordion.jsx             ← Framer Motion accordion
-      MCQPro.jsx                     ← Quiz with feedback
-      NarrativeSlider.jsx            ← Carousel for sequential content
-      BentoGrid.jsx                  ← Multi-item grid layout
-      DataTable.jsx                  ← Technical data display
-      MediaBlock.jsx                 ← Video/audio player
-      TextInputBlock.jsx             ← Form inputs
-      BranchingCards.jsx             ← Decision cards
-    store/courseStore.js              ← Zustand state management
-    theme/ThemeEngine.js             ← Brand → CSS variables
-    services/RepresentationAgent.js  ← AI content → component mapping
+    App.jsx                          ← Entry: loads window.courseData + window.brandData
+    main.jsx                         ← React root mount
+    index.css                        ← Design system: CSS variables, focus states, scrollbar
+    components/
+      ComponentRegistry.js           ← Maps type strings → React components
+      CourseRenderer.jsx   (268 loc) ← Recursive JSON → React tree, scroll progress, sections
+      HeroSplash.jsx       (138 loc) ← Full-viewport hero with letter animation + bg image
+      TextBlock.jsx         (48 loc) ← Simple text with heading
+      GraphicBlock.jsx      (80 loc) ← Full-width image with hover zoom
+      GraphicText.jsx      (121 loc) ← Side-by-side text + image split layout
+      SilkyAccordion.jsx   (213 loc) ← Expandable panels with completion tracking
+      MCQPro.jsx           (310 loc) ← Quiz with selection, submit, feedback, retry
+      NarrativeSlider.jsx  (201 loc) ← Prev/next carousel with dots + counter
+      BentoGrid.jsx        (167 loc) ← Multi-card grid with image backgrounds
+      DataTable.jsx        (185 loc) ← Auto-parsed table from HTML body content
+      MediaBlock.jsx       (181 loc) ← Video player with custom play overlay
+      TextInputBlock.jsx   (157 loc) ← Multi-field form with labels + submit
+      BranchingCards.jsx   (197 loc) ← Selectable option cards with letter badges
+    store/courseStore.js              ← Zustand: course data, UI state, brand
+    theme/ThemeEngine.js             ← Applies BrandProfile → CSS custom properties
+    services/RepresentationAgent.js  ← NOT WIRED IN — intended for AI component mapping
 
-blade-runner-template.html           ← Pre-built single-file output (~405KB)
+blade-runner-template.html  (405KB)  ← Pre-built single-file HTML (React+CSS+JS inlined)
 ```
 
-### Data Flow
-```
-SCORM Upload → SCORMParser.extractCourse()     → CourseIR
-CourseIR      → ContentPlanner.planCourse()     → CoursePlan
-Brand URL     → BrandScraper.scrapeBrand()      → BrandProfile
-CoursePlan    → AdaptTranslator.translate()     → Adapt JSON (course/articles/blocks/components)
-BrandProfile  → ThemeEngine.applyBrand()        → CSS Variables
+---
 
-Adapt JSON + BrandProfile → injected into blade-runner-template.html
-                          → single self-contained HTML file
-                          → opens in browser, works from file://
-```
+## Pipeline: How It Works End-to-End
 
-## Key Data Structures
+All 6 phases run **in the browser** when the user clicks "Generate". No server.
 
-### Adapt JSON Schema (output of adapt-translator.js)
-The engine uses Adapt's JSON hierarchy as its data standard:
-```
-course.json           → { _id: "course", title, _spoor, _trickle, ... }
-contentObjects.json   → [{ _id: "co-100", _parentId: "course", _type: "page" }]
-articles.json         → [{ _id: "a-100", _parentId: "co-100", _type: "article" }]
-blocks.json           → [{ _id: "b-100", _parentId: "a-100", _type: "block" }]
-components.json       → [{ _id: "c-100", _parentId: "b-100", _component: "accordion", ... }]
-```
+### Phase 1 — SCORM Parsing (`scorm-parser.js`)
+- Reads uploaded `fileMap` (Map<relativePath, File>) built from folder upload
+- Parses `imsmanifest.xml` for course title, ID, mastery score, SCORM version
+- Finds Storyline data JS files in `html5/data/js/` — each is one slide
+- Parses each via `window.globalProvideData('slide', 'JSON')` pattern using Function constructor
+- Extracts from each slide: objects (text, images, buttons, shapes), layers, triggers, states
+- Classifies images by role: `background`, `hero`, `content`, `icon`, `decorative` (based on size/coverage/depth)
+- Detects quiz data (pick-one, pick-many, true/false) from Storyline accType patterns
+- Detects form fields, video/audio, sliders, scroll panels, 360-images
+- **Output:** `CourseIR` — { meta, slides[], questionBanks[], navigation, variables, assets }
 
-### ID Manager
-Central authority for all IDs. Guarantees unique IDs and valid parent refs.
-Every component points to a block, every block to an article, every article to a page.
-One broken reference = broken course. The ID Manager prevents this.
+### Phase 2 — Content Planning (`content-planner.js`)
+- **Noise filtering:** Removes 273+ categories of Storyline junk — auto-generated labels ("Rectangle 1"), icon alt-text ("arrow icon 1"), shape names, object hashes, ALL CAPS internal names, quiz type labels
+- **Section grouping:** Groups slides into sections based on Storyline scene boundaries
+- **Presentation classification:** Each slide gets a `presentation` type: `hero`, `narrative`, `interactive`, `media-feature`, `quiz`, `form`, `branching`
+- **Image filtering:** Skips decorative/icon images, allows one background per section, deduplicates
+- **Title derivation:** If manifest title is too short (< 5 chars, like "EV"), derives from first section title or heading
+- **Output:** `CoursePlan` — { meta, sections[], quizBanks[], verification }
 
-### Component Types (from ComponentRegistry.js)
-| Type | React Component | When Used |
-|------|----------------|-----------|
-| `hero` | HeroSplash | Opening/title slides |
-| `text` | TextBlock | Standard text content |
-| `graphic` | GraphicBlock | Full-width images |
-| `graphic-text` | GraphicText | Text + image split layout |
-| `accordion` | SilkyAccordion | Multi-layer expandable content |
-| `mcq` | MCQPro | Quiz questions |
-| `narrative` | NarrativeSlider | Sequential carousel content |
-| `bento` | BentoGrid | Multi-item grid layout |
-| `data-table` | DataTable | Technical/structured data |
-| `media` | MediaBlock | Video/audio |
-| `textinput` | TextInputBlock | Form fields |
-| `branching` | BranchingCards | Decision/path selection |
+### Phase 3 — Brand Scraping (`brand-scraper.js`)
+- Fetches brand URL via CORS proxy: `https://cors-proxy.leoduncan-elearning.workers.dev?url=...`
+- 10-second timeout on main fetch, 5-second timeout per external stylesheet
+- Parses HTML with DOMParser, collects all CSS (inline `<style>`, external `<link>`, `[style]` attrs)
+- **Color extraction:** Finds hex/rgb colors, maps to roles (primary, secondary, accent) by saturation + context (background, border, theme-color meta)
+- **Dark/light detection:** Counts dark vs light background occurrences, checks body/html background
+- **Typography:** Extracts font-family declarations, finds Google Fonts imports, detects heading weight
+- **Style:** Detects border-radius, glassmorphism (backdrop-filter + transparent bg), button style (pill/rounded/solid), card style (glass/elevated/outlined/flat), mood (creative/corporate/elegant)
+- **Logo:** Tries header selectors, `.logo img`, og:image fallback
+- **Fallback:** If fetch fails, returns generic purple/dark profile
+- **Output:** `BrandProfile` — { colors, typography, style, logo }
 
-### Component Mapping (adapt-translator.js buildSlideComponents)
-The translator maps slide content to component types:
-- `presentation: 'hero'` or `section.type: 'hero'` → `hero` (HeroSplash with bg image)
-- `presentation: 'media-feature'` or has video → `media` (MediaBlock)
-- `presentation: 'interactive'` with layers + mostly images → `narrative` (NarrativeSlider)
-- `presentation: 'interactive'` with layers, text-heavy → `accordion` (SilkyAccordion)
-- `presentation: 'form'` with formFields → `textinput` (single TextInputBlock, all fields grouped)
-- `presentation: 'quiz'` with quizData → `mcq` (MCQPro)
-- `presentation: 'branching'` with interactions → `branching` (BranchingCards)
-- Has image + text → `graphic-text` (GraphicText split layout)
-- Has image only → `graphic` (GraphicBlock)
-- Default → `text` (TextBlock)
+### Phase 4 — Adapt Translation (`adapt-translator.js`)
+- **ID Manager:** Central authority for all IDs — guarantees every component→block→article→page chain is valid. One broken reference = broken course.
+- Creates single-page deep-scroll structure: 1 page, N articles (sections), N blocks (slides), N components
+- **Article displayTitle** is set from section title (except hero sections) — this is what renders as section headers
+- **Component type mapping** (this is critical — determines which React component renders):
 
-**NOT YET MAPPED** (components exist but translator never emits these types):
-- `bento` → BentoGrid (needs RepresentationAgent logic for 4+ short items)
-- `data-table` → DataTable (needs structured data detection)
+| Slide Content | Component Type | React Component |
+|---|---|---|
+| `presentation: 'hero'` or `section.type: 'hero'` | `hero` | HeroSplash (full-viewport, animated title, bg image) |
+| Has video | `media` | MediaBlock (video player with play overlay) |
+| `interactive` layers + mostly images | `narrative` | NarrativeSlider (prev/next carousel) |
+| `interactive` layers, text-heavy | `accordion` | SilkyAccordion (expandable panels) |
+| `form` with formFields | `textinput` | TextInputBlock (all fields grouped, one submit) |
+| `quiz` with quizData | `mcq` | MCQPro (selection + submit + feedback + retry) |
+| `branching` with interactions | `branching` | BranchingCards (selectable option cards) |
+| Has image + text | `graphic-text` | GraphicText (side-by-side split) |
+| Has image only | `graphic` | GraphicBlock (full-width with hover zoom) |
+| Default (text only) | `text` | TextBlock |
 
-## The Pipeline
+**NOT YET MAPPED** (React components exist but translator never emits these):
+- `bento` → BentoGrid — needs detection for 4+ short text items
+- `data-table` → DataTable — needs structured data / separator detection
 
-| Phase | Module | What It Does |
-|-------|--------|-------------|
-| 1 | scorm-parser.js | Parse Storyline SCORM data into CourseIR |
-| 2 | content-planner.js | Clean noise, group into sections, classify presentation |
-| 3 | brand-scraper.js | Scrape brand website for design tokens via CORS proxy |
-| 4 | adapt-translator.js | Convert CoursePlan → Adapt JSON with ID Manager |
-| 5 | app.js | Inject JSON + brand into pre-built Blade Runner template |
-| 6 | app.js (JSZip) | Package as SCORM zip (HTML + images) |
+- **Image paths:** `adaptImagePath()` strips directory, prepends `course/en/images/filename`
+- **Output:** Adapt JSON — { course, contentObjects[], articles[], blocks[], components[] }
+
+### Phase 5 — Template Injection + Image Embedding (`app.js`)
+- Fetches `blade-runner-template.html` (tries 3 paths)
+- Verifies it's actually the React app (checks for 'courseData' or 'react' in HTML)
+- **Image embedding:**
+  - Stringifies ALL adapt JSON, scans for image filenames
+  - Iterates fileMap for `.jpg|.jpeg|.png|.gif|.svg|.webp` files
+  - Matches by filename (not directory) — catches `mobile/` files referenced as `story_content/`
+  - Reads matching files as ArrayBuffer → base64 data URLs
+  - Caps: **6MB total**, **800KB per image** — skips larger ones
+  - Replaces `course/en/images/filename` paths with `data:image/...;base64,...` in ALL JSON
+  - Debug logging when 0 images match (shows JSON refs vs SCORM files)
+- Injects `<script>window.courseData = {...}; window.brandData = {...};</script>` before `</head>`
+
+### Phase 6 — SCORM Packaging (`app.js` + JSZip)
+- Creates ZIP with: `index.html` (the injected template), `imsmanifest.xml`
+- Copies original images from `story_content/` and `mobile/` into `course/en/images/`
+- Copies video files from `story_content/` into `course/en/video/`
+- Compresses with DEFLATE level 6
+- User downloads as `modernised-course.zip`
+
+---
 
 ## Blade Runner Engine (React Renderer)
 
 ### Tech Stack
-- React 19 + Vite 8
-- Tailwind CSS v4 (via @tailwindcss/vite)
-- Framer Motion (animations)
-- Zustand (state management)
-- vite-plugin-singlefile (single HTML output)
+- React 19.2 + Vite 8.0
+- Tailwind CSS 4.2 (via @tailwindcss/vite)
+- Framer Motion 12.38 (scroll-reveal animations)
+- Zustand 5.0 (state management)
+- vite-plugin-singlefile 2.3 (inlines all JS/CSS into one HTML)
 
 ### Building the Template
 ```bash
@@ -132,46 +146,69 @@ npm install
 npx vite build
 cp dist/index.html ../blade-runner-template.html
 ```
+**IMPORTANT:** After any component/CSS change, you MUST rebuild and commit `blade-runner-template.html`. The pipeline fetches this file at runtime — it doesn't build React on the fly.
 
-### How It Works
-1. The template is pre-built ONCE during development (~405KB single HTML)
-2. At runtime, app.js fetches the template and injects `window.courseData` + `window.brandData`
-3. Images referenced in JSON are base64-embedded (6MB total cap, 800KB per image)
-4. React reads from Zustand store, which loads from `window.courseData`
-5. ThemeEngine applies brand CSS variables from `window.brandData`
-6. CourseRenderer recursively maps JSON → React components
-7. Hero sections render full-width; other sections alternate backgrounds
-8. Preview opens as blob URL in new tab (works from file://)
+### How the Renderer Works
+1. `App.jsx` reads `window.courseData` and `window.brandData` (injected by pipeline)
+2. `courseStore.js` (Zustand) stores all course data + UI state (scroll progress, accordion state, quiz answers)
+3. `ThemeEngine.js` applies brand colors/fonts/radius as CSS custom properties on `:root`
+   - Handles dark mode (white glass overlays) and light mode (white fills, dark borders)
+   - Sets `--ui-button-radius` from brand `buttonStyle` (pill/rounded/default)
+4. `CourseRenderer.jsx` renders the tree:
+   - Progress bar (fixed top, gradient)
+   - Course header (hidden when HeroSplash exists)
+   - For each article → `ArticleSection` with alternating backgrounds, section title + accent bar
+   - Hero sections render full-width (no max-width container)
+   - For each block → `BlockRow` with glass card wrapper (backdrop-blur)
+   - For each component → resolved via `ComponentRegistry.js` → rendered
+5. All components use Framer Motion `useInView` for scroll-triggered entrance animations
 
-### Design System
-- **Aesthetic:** "Linear.app meets Blade Runner 2049"
-- **Theme:** Dark mode default, light mode via brand detection
-- **Typography:** Satoshi/Inter, CSS variable-driven
-- **Cards:** Glassmorphism (backdrop-blur, semi-transparent borders)
-- **Animations:** Framer Motion scroll-reveal, staggered entrances
-- **Colors:** All via CSS custom properties (--brand-primary, etc.)
-
-### State Management (Zustand)
+### CSS Design System (`index.css`)
+All colors/fonts/radii are CSS custom properties overridden by ThemeEngine at runtime:
 ```
-useCourseStore:
-  course, contentObjects, articles, blocks, components  ← Course data
-  brand                                                  ← Brand profile
-  scrollProgress                                         ← 0-100
-  activeAccordions                                       ← { componentId_itemIndex: true }
-  quizAnswers                                            ← { componentId: answerIndex }
-  completedSections                                      ← { articleId: true }
+--brand-primary, --brand-secondary, --brand-accent, --brand-heading
+--brand-bg, --brand-surface, --brand-text, --brand-text-muted
+--brand-success, --brand-error, --brand-gradient, --brand-glow
+--ui-glass, --ui-glass-border, --ui-glass-hover
+--ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
+--font-heading, --font-body
 ```
+Also includes: focus-visible states, link styling in body content, image loading backgrounds, custom scrollbar, `prefers-reduced-motion` support.
 
-Exposed as `window.courseData` for future AI editing bridge.
+### Zustand Store (`courseStore.js`)
+```
+course, contentObjects, articles, blocks, components  ← Course data
+brand                                                  ← Brand profile
+scrollProgress                                         ← 0-100
+activeAccordions                                       ← { componentId_itemIndex: true }
+quizAnswers                                            ← { componentId: answerIndex }
+completedSections                                      ← { articleId: true }
+```
+Actions: `loadCourse`, `loadBrand`, `toggleAccordion`, `submitAnswer`, `completeSection`, `updateComponent`.
+Exposed as `window.courseData` for potential future AI editing bridge.
+
+---
 
 ## CORS Proxy
 Brand scraping requires a CORS proxy (Cloudflare Worker):
 `https://cors-proxy.leoduncan-elearning.workers.dev`
+Used as: `proxy?url=<encoded-brand-url>`. Timeout: 10s main, 5s per stylesheet.
 
 ## Test Files
 - `TEST SCORM/` — Small test SCORM (committed to repo)
-- `EV/` — Full 108-slide EV course (gitignored, uploaded to Codespace)
-- `test/screenshots/` — Visual audit screenshots (overwritten each run)
+- `EV/` — Full 108-slide EV course (gitignored, too large for git, uploaded to Codespace)
+
+---
+
+## Pipeline Diagnostics
+Each pipeline phase logs timing and content breakdowns in the progress log:
+- **Phase 1:** `(Xms): N slides, M objects`
+- **Phase 2:** `(Xms): N sections, title="..."`
+- **Phase 3:** `(Xms): primary=#..., font=..., theme=..., bg=#...`
+- **Phase 4:** `(Xms): N sections, M blocks, P components [hero:1, graphic-text:5, accordion:3, ...]`
+- **Phase 5:** `Found N referenced images (out of M total)` + DEBUG lines when 0 match
+
+---
 
 ## ⛔ ABSOLUTE RULE — UNIVERSAL ENGINE, NOT SPECIFIC FIXES
 
@@ -191,52 +228,46 @@ cooking safety, marine biology, or HR compliance, would this change help THAT co
 4. Implement — test output should improve as a BYPRODUCT
 
 **Branding source of truth:**
-The brand URL website is the ONLY source of truth for visual branding.
-The original SCORM course's colors and styling are IRRELEVANT.
-The SCORM file provides CONTENT and STRUCTURE.
-The brand URL provides VISUAL IDENTITY.
+- Brand URL website → ONLY source for visual identity (colors, fonts, logo, style)
+- SCORM file → ONLY source for content and structure
+- Original SCORM styling is IRRELEVANT
+
+---
 
 ## Component Development Guidelines
 
-When building or improving components, reference these e-learning authoring tools
-for interaction design patterns:
+Reference these tools for interaction design patterns:
 - **Articulate Rise 360** — gold standard for scrolling e-learning interactions
 - **Adapt Framework** — component library documentation and JSON schemas
 - **H5P** — interactive content types and patterns
 
 Every component must:
 1. Accept Adapt-standard JSON props (`data` object with `_id`, `_component`, etc.)
-2. Use CSS custom properties for ALL brand-specific colors
-3. Include Framer Motion scroll-reveal animations
+2. Use CSS custom properties for ALL brand-specific colors (never hardcode colors)
+3. Include Framer Motion scroll-reveal animations via `useInView`
 4. Be responsive (mobile-first)
-5. Have a `data-component-id` attribute for future AI editing
-6. Handle missing/empty data gracefully (don't render empty cards)
+5. Have `data-component-id` attribute on wrapper div (for future AI editing)
+6. Handle missing/empty data gracefully (return null, don't render empty cards)
+7. Handle image load errors with `onError` fallback (hide broken images)
+
+---
 
 ## Known Issues & Next Steps
 
-### Image Path Mismatch (Critical)
-Storyline slide data references `story_content/filename.jpg` but actual image files
-are often in the `mobile/` directory instead. The image embedding code searches by
-filename (not directory), so it SHOULD find them — but this needs verification.
-Debug logging added to Phase 5 to diagnose when 0 images match.
+### Critical
+- **Image display unverified:** Storyline data references `story_content/` paths but files often live in `mobile/`. Embedding code matches by filename so it SHOULD work — needs end-to-end testing. Debug logging added.
+- **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion.
 
-### Not Yet Mapped to Premium Components
-- `bento` (BentoGrid) — needs detection logic for 4+ short text items
-- `data-table` (DataTable) — needs structured data / separator detection
-- RepresentationAgent.js exists but is not wired into the pipeline
+### Components Not Yet Wired
+- `bento` (BentoGrid) — component exists, translator never emits it. Needs detection for slides with 4+ short text items.
+- `data-table` (DataTable) — component exists, translator never emits it. Needs structured data detection.
+- `RepresentationAgent.js` — exists in services/ but not called anywhere. Was intended as AI-powered content→component mapper.
 
-### Other Known Issues
-- Brand scraper fails on some sites (CORS/timeout) — falls back to generic profile
-- Drag-and-drop content presented as text — needs matching exercise interaction
-- 360-image content extracted but no interactive viewer component
-- Results routing needs real-world testing with quiz completion
-- No SCORM tracking shim in React output yet (LMS won't record progress)
-- Mobile polish pass needed
+### Content Gaps
+- Drag-and-drop content presented as plain text (needs matching exercise interaction)
+- 360-image content extracted but no interactive viewer
+- Results routing untested with actual quiz completion flow
 
-### Pipeline Diagnostics
-Each phase now logs timing in ms and content breakdowns. The progress log shows:
-- Phase 1: slide/object counts
-- Phase 2: section count + derived title
-- Phase 3: brand colors, fonts, theme, timing
-- Phase 4: component type breakdown (e.g. `hero:1, graphic-text:5, accordion:3`)
-- Phase 5: image embed counts + debug output when 0 match
+### Polish
+- Mobile responsive pass needed across all components
+- Brand scraper fails on some sites (CORS/timeout) — uses generic fallback
