@@ -1,0 +1,44 @@
+{
+  "sourceUrl": "https://aidataguardians.com/",
+  "colors": {
+    "primary": "#6366f1",
+    "secondary": "#a855f7",
+    "accent": "#3b82f6",
+    "background": "#000000",
+    "surface": "#121212",
+    "text": "#f0f0f0",
+    "textMuted": "#c8c8c8",
+    "success": "#10b981",
+    "error": "#ef4444",
+    "warning": "#f59e0b",
+    "gradient": "linear-gradient(135deg, #6366f1, #a855f7)"
+  },
+  "typography": {
+    "headingFont": "Inter",
+    "bodyFont": "Inter",
+    "fontImportUrl": "https://fonts.googleapis.com",
+    "baseSize": 16,
+    "headingSizes": {
+      "h1": 40,
+      "h2": 32,
+      "h3": 24
+    },
+    "lineHeight": 1.6,
+    "headingWeight": 800,
+    "bodyWeight": 500
+  },
+  "style": {
+    "borderRadius": "20px",
+    "cardStyle": "glass",
+    "buttonStyle": "gradient",
+    "imageStyle": "rounded",
+    "mood": "creative",
+    "theme": "light",
+    "spacing": {
+      "unit": 8,
+      "section": 64,
+      "element": 16
+    }
+  },
+  "scrapedAt": "2026-03-23T13:19:57.664Z"
+}
