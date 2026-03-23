@@ -178,7 +178,7 @@
 
       // Phase 4: AI Image Generation
       log('Phase 4: Generating AI images...', 'info');
-      var images = await ImageGenerator.generateImages(course, brand, function (msg) { log('  ' + msg); });
+      var images = await ImageGenerator.generateImages(course, brand, function (msg) { log('  ' + msg); }, fileMap);
       setProgress(70);
       log('Image generation complete.', 'success');
 

@@ -175,7 +175,7 @@ async function run() {
     images = { entries: [] };
   } else {
     console.log('\n--- Phase 4: AI Image Generation ---');
-    images = await window.ImageGenerator.generateImages(course, brand, log);
+    images = await window.ImageGenerator.generateImages(course, brand, log, fileMap);
   }
 
   // Phase 5: Generate HTML

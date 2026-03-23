@@ -99,13 +99,47 @@ window.ImageGenerator = (function () {
   }
 
   /**
+   * Convert an original SCORM image file to a data URL for embedding.
+   * This ensures images work in both preview AND packaged output.
+   */
+  async function fileToDataUrl(file) {
+    if (!file) return null;
+    try {
+      // In browser: File objects have arrayBuffer()
+      if (typeof file.arrayBuffer === 'function') {
+        var buffer = await file.arrayBuffer();
+        var bytes = new Uint8Array(buffer);
+        var binary = '';
+        for (var i = 0; i < bytes.length; i++) binary += String.fromCharCode(bytes[i]);
+        var ext = (file.name || '').split('.').pop().toLowerCase();
+        var mime = ext === 'png' ? 'image/png' : ext === 'svg' ? 'image/svg+xml' : ext === 'gif' ? 'image/gif' : 'image/jpeg';
+        return 'data:' + mime + ';base64,' + btoa(binary);
+      }
+      // In Node.js test harness: file has text() but we need binary
+      if (typeof file.text === 'function') {
+        var text = await file.text();
+        // If it looks like binary data, it might be a buffer
+        if (typeof Buffer !== 'undefined' && Buffer.from) {
+          var ext = (file.name || '').split('.').pop().toLowerCase();
+          var mime = ext === 'png' ? 'image/png' : ext === 'svg' ? 'image/svg+xml' : ext === 'gif' ? 'image/gif' : 'image/jpeg';
+          return 'data:' + mime + ';base64,' + Buffer.from(text, 'binary').toString('base64');
+        }
+      }
+    } catch (e) {
+      // Silently fail — we'll fall back to the file path
+    }
+    return null;
+  }
+
+  /**
    * Generate images for all slides that have hero/content/background images.
    * @param {object} course - The CourseIR object
    * @param {object} brand - The brand profile
    * @param {Function} log - Logging callback
+   * @param {Map} fileMap - Original uploaded files (for fallback embedding)
    * @returns {Promise<object>} - The images object with entries array
    */
-  async function generateImages(course, brand, log) {
+  async function generateImages(course, brand, log, fileMap) {
     var entries = [];
 
     // Collect all image elements that need generation
@@ -181,10 +215,16 @@ window.ImageGenerator = (function () {
       if (!apiAvailable) {
         if (task.originalPath) {
           log('    Using original (API unavailable): ' + task.originalPath);
+          // Try to embed as data URL so images work in preview (not just zip)
+          var embeddedUrl = null;
+          if (fileMap) {
+            var originalFile = fileMap.get(task.originalPath);
+            if (originalFile) embeddedUrl = await fileToDataUrl(originalFile);
+          }
           entries.push({
             originalAssetId: task.assetId,
             status: 'original',
-            generatedPath: 'assets/images/' + task.originalPath.split('/').pop(),
+            generatedPath: embeddedUrl || ('assets/images/' + task.originalPath.split('/').pop()),
             originalPath: task.originalPath,
             role: task.role,
             prompt: prompt,
@@ -216,10 +256,15 @@ window.ImageGenerator = (function () {
         log('    AI generation failed (' + err.message + ') — using originals for remaining images.');
 
         if (task.originalPath) {
+          var embeddedUrl = null;
+          if (fileMap) {
+            var originalFile = fileMap.get(task.originalPath);
+            if (originalFile) embeddedUrl = await fileToDataUrl(originalFile);
+          }
           entries.push({
             originalAssetId: task.assetId,
             status: 'original',
-            generatedPath: 'assets/images/' + task.originalPath.split('/').pop(),
+            generatedPath: embeddedUrl || ('assets/images/' + task.originalPath.split('/').pop()),
             originalPath: task.originalPath,
             role: task.role,
             prompt: prompt,
