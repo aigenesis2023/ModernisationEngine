@@ -219,36 +219,80 @@
       log('Brand extraction complete.', 'success');
 
       // Phase 4: Translate to Adapt JSON
-      log('Phase 4: Translating to Adapt format...', 'info');
+      log('Phase 4: Translating course content...', 'info');
       var adaptJson = AdaptTranslator.translate(coursePlan, brand, function (msg) { log('  ' + msg); });
-      // Disable trickle for free-scroll experience
       adaptJson.course._trickle = { _isEnabled: false };
       setProgress(65);
-      log('Adapt JSON generated: ' + adaptJson.components.length + ' components', 'success');
+      log('Course mapped: ' + adaptJson.components.length + ' components', 'success');
 
-      // Phase 5: Generate brand CSS
-      log('Phase 5: Applying brand styling...', 'info');
-      var brandCSS = AdaptTranslator.generateBrandCSS(brand);
-      setProgress(75);
-      log('Brand CSS generated.', 'success');
+      // Phase 5: Build single-file HTML (Blade Runner Engine)
+      log('Phase 5: Building course output...', 'info');
+      var templateHtml = null;
+      try {
+        var templateResp = await fetch('blade-runner-engine/dist/index.html');
+        if (templateResp.ok) templateHtml = await templateResp.text();
+      } catch (e) {}
 
-      // Phase 6: Package SCORM (Adapt multi-file output)
-      log('Phase 6: Creating SCORM package...', 'info');
-      generatedBlob = await AdaptPackager.packageCourse(adaptJson, brandCSS, fileMap, coursePlan, function (msg) { log('  ' + msg); });
+      if (!templateHtml) {
+        // Fallback: try alternate path
+        try {
+          var templateResp2 = await fetch('blade-runner-template.html');
+          if (templateResp2.ok) templateHtml = await templateResp2.text();
+        } catch (e) {}
+      }
 
-      // Also store the JSON + CSS for preview
-      generatedHtml = JSON.stringify({
-        course: adaptJson.course,
-        contentObjects: adaptJson.contentObjects,
-        articles: adaptJson.articles,
-        blocks: adaptJson.blocks,
-        components: adaptJson.components,
-        brandCSS: brandCSS,
-        title: coursePlan.meta.title
-      });
+      if (templateHtml) {
+        // Inject course data + brand data into the template
+        var injectScript = '<script>\n';
+        injectScript += 'window.courseData = ' + JSON.stringify(adaptJson) + ';\n';
+        injectScript += 'window.brandData = ' + JSON.stringify(brand) + ';\n';
+        injectScript += '<\/script>\n';
+        generatedHtml = templateHtml.replace('</head>', injectScript + '</head>');
+        log('Blade Runner Engine output: ' + (generatedHtml.length / 1024).toFixed(0) + ' KB', 'success');
+      } else {
+        log('Warning: Template not found, using inline preview', 'info');
+        // Store data for the fallback preview
+        generatedHtml = JSON.stringify({
+          course: adaptJson.course,
+          contentObjects: adaptJson.contentObjects,
+          articles: adaptJson.articles,
+          blocks: adaptJson.blocks,
+          components: adaptJson.components,
+          brand: brand,
+          title: coursePlan.meta.title
+        });
+      }
 
+      setProgress(85);
+
+      // Phase 6: Package SCORM zip
+      log('Phase 6: Packaging SCORM...', 'info');
+      var zip = new JSZip();
+      zip.file('index.html', generatedHtml);
+      zip.file('imsmanifest.xml', generateSimpleManifest(coursePlan.meta.title, coursePlan.meta.courseId));
+
+      // Copy original SCORM images
+      var assetCount = 0;
+      for (var entry of fileMap) {
+        var fPath = entry[0], fObj = entry[1];
+        if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(fPath)) {
+          try {
+            var buf = await fObj.arrayBuffer();
+            zip.file('course/en/images/' + fPath.split('/').pop(), buf);
+            assetCount++;
+          } catch (e) {}
+        }
+        if (/^story_content\/.*\.(mp4|webm)$/i.test(fPath)) {
+          try {
+            var buf = await fObj.arrayBuffer();
+            zip.file('course/en/video/' + fPath.split('/').pop(), buf);
+            assetCount++;
+          } catch (e) {}
+        }
+      }
+      generatedBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       setProgress(100);
-      log('Done! Your modernised course is ready.', 'success');
+      log('Done! ' + assetCount + ' assets, ' + (generatedBlob.size / 1024 / 1024).toFixed(1) + ' MB', 'success');
 
       // Show results
       resultSection.classList.add('active');
@@ -274,13 +318,30 @@
 
   // ---- Preview Toggle ----
 
-  btnPreview.addEventListener('click', async function () {
+  btnPreview.addEventListener('click', function () {
     if (!generatedHtml) return;
 
-    var data = JSON.parse(generatedHtml);
+    // Check if generatedHtml is a full HTML document (starts with <!doctype or <html)
+    var isFullHtml = generatedHtml.trim().substring(0, 20).toLowerCase().indexOf('<!doctype') >= 0 ||
+                     generatedHtml.trim().substring(0, 20).toLowerCase().indexOf('<html') >= 0;
 
-    // If Service Worker is available, use it for identical Adapt preview
-    if (swReady && navigator.serviceWorker.controller) {
+    if (isFullHtml) {
+      // Open the single-file HTML directly — this is the Blade Runner Engine output
+      var previewUrl = URL.createObjectURL(new Blob([generatedHtml], { type: 'text/html' }));
+      window.open(previewUrl, '_blank');
+      return;
+    }
+
+    // Fallback: lightweight preview from JSON data
+    var data;
+    try { data = JSON.parse(generatedHtml); } catch (e) { return; }
+    var previewHtml = buildPreviewHtml(data);
+    var previewUrl = URL.createObjectURL(new Blob([previewHtml], { type: 'text/html' }));
+    window.open(previewUrl, '_blank');
+    return;
+
+    // Dead code below — kept for reference
+    if (false) {
       log('Loading preview...', 'info');
 
       // Build the file map for the SW
