@@ -1,0 +1,1190 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EV Awareness &amp; Safety</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "tertiary": "#adc6ff",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "on-tertiary-fixed": "#001a42",
+                        "on-error": "#690005",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-tint": "#c0c1ff",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-on-surface": "#303030",
+                        "background": "#131313",
+                        "surface-bright": "#393939",
+                        "inverse-surface": "#e2e2e2",
+                        "on-primary": "#1000a9",
+                        "surface-container": "#1f1f1f",
+                        "tertiary-fixed": "#d8e2ff",
+                        "on-secondary-container": "#d6a9ff",
+                        "secondary-fixed": "#f0dbff",
+                        "on-primary-fixed-variant": "#2f2ebe",
+                        "on-primary-fixed": "#07006c",
+                        "secondary-fixed-dim": "#ddb7ff",
+                        "secondary": "#ddb7ff",
+                        "on-tertiary-container": "#00285d",
+                        "on-surface-variant": "#c7c4d7",
+                        "primary-container": "#8083ff",
+                        "surface-dim": "#131313",
+                        "surface": "#131313",
+                        "primary-fixed-dim": "#c0c1ff",
+                        "on-tertiary": "#002e6a",
+                        "on-secondary-fixed-variant": "#6900b3",
+                        "surface-container-highest": "#353535",
+                        "on-secondary": "#490080",
+                        "inverse-primary": "#494bd6",
+                        "outline": "#908fa0",
+                        "on-error-container": "#ffdad6",
+                        "on-secondary-fixed": "#2c0051",
+                        "tertiary-fixed-dim": "#adc6ff",
+                        "surface-container-low": "#1b1b1b",
+                        "outline-variant": "#464554",
+                        "on-surface": "#e2e2e2",
+                        "tertiary-container": "#4d8eff",
+                        "on-tertiary-fixed-variant": "#004395",
+                        "primary": "#c0c1ff",
+                        "on-background": "#e2e2e2",
+                        "surface-variant": "#353535",
+                        "secondary-container": "#6f00be",
+                        "on-primary-container": "#0d0096",
+                        "primary-fixed": "#e1e0ff"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        details > summary::-webkit-details-marker { display: none; }
+        .glass-panel {
+            background: rgba(53, 53, 53, 0.4);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(144, 143, 160, 0.15);
+        }
+    </style>
+
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
+
+<nav class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-[#ffffff]/10 shadow-[0_0_40px_rgba(99,102,241,0.15)] flex justify-between items-center px-8 py-4">
+  <div class="text-xl font-black tracking-[0.2em] text-[#c0c1ff] font-headline">EV_AWARENESS_&AMP;_SAFETY</div>
+  <div class="hidden md:flex gap-8 items-center">
+    <a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#section-01">Course Overview</a>
+    <a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#section-02">Recognising an Electric Vehicle</a>
+    <a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#section-03">Types of Electric Vehicles</a>
+    <a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#section-05">Hazards &amp; Legislation</a>
+    <a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#section-06">Electric Shock &amp; Emergency Response</a>
+  </div>
+  <button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-sm font-bold tracking-widest text-xs transition-transform scale-95 active:scale-90" onclick="window.scrollTo({top:0,behavior:'smooth'})">TOP</button>
+</nav>
+
+<main class="min-h-screen bg-black overflow-x-hidden pt-16">
+<section class="relative h-screen flex items-center px-8 md:px-24 overflow-hidden">
+  <div class="absolute inset-0 z-0">
+    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent z-10"></div>
+    <img alt="Electric vehicle in a modern workshop with dramatic blue lighting" class="w-full h-full object-cover" src="images/comp-000.jpg"/>
+  </div>
+  <div class="relative z-20 max-w-4xl">
+    <div class="inline-block px-3 py-1 bg-primary-container/20 text-primary border border-primary/30 text-[10px] font-bold tracking-[0.3em] mb-6 uppercase">Module 01: Core Systems</div>
+    <h1 class="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 font-headline">EV Awareness &amp; Safety</h1>
+    <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed mb-12 border-l-2 border-primary-container pl-8">Your essential guide to identifying electric vehicles, understanding high-voltage hazards, and working safely in the modern automotive workplace.</p>
+    <button class="bg-primary-container text-on-primary-container px-10 py-4 font-black tracking-widest text-sm uppercase transition-all hover:brightness-110 active:scale-95" onclick="window.scrollBy({top:window.innerHeight,behavior:'smooth'})">BEGIN COURSE</button>
+  </div>
+</section>
+
+<section id="section-01" class="py-40 px-8 md:px-24 bg-surface-container-low max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Course Overview</h2>
+  <div class="space-y-16">
+    <div class="max-w-3xl">
+    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">About This Course</h3>
+    <div class="text-on-surface-variant text-lg leading-loose"><p>This course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle.</p><p><strong>Important:</strong> This first-level course does not qualify you to work directly on high-voltage systems. You should inform your colleagues of your current trained level and request further assistance from a suitably trained person when necessary.</p></div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">Learning Objectives</h3>
+  <div class="space-y-4">
+    <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Know About EV Types</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>Identify electric and hybrid vehicles currently available. Recognise alternative fuel source vehicles and understand the differences between BEV, HEV, and PHEV.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Understand High-Voltage Hazards</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>State the hazards associated with high-energy electricity. Understand the risks that may be present when connecting and charging electric/hybrid vehicles.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Work Safely Around EVs</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>State safety precautions to take before approaching and working around electric/hybrid vehicles. Identify high-energy cabling and associated components.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Safe Charging Procedures</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>Understand how vehicles may be safely charged using an external source. Know the correct procedures and terminology for EV charging.</p></div>
+  </details>
+  </div>
+</div>
+  </div>
+</section>
+
+<section class="py-40 bg-surface-container-low px-8 md:px-24">
+  <div class="max-w-4xl mx-auto glass-panel p-12 md:p-20">
+    <div class="mb-12">
+      <h3 class="text-2xl font-black text-white tracking-tight uppercase mb-2">Learner Registration</h3>
+      <p class="text-xs tracking-widest text-on-surface-variant uppercase">Please enter your details before continuing.</p>
+    </div>
+    <form class="grid md:grid-cols-2 gap-8">
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Name</label>
+        <input class="w-full bg-surface-container-highest border-0 border-b border-outline/30 focus:border-primary-container focus:ring-0 text-white p-4 transition-colors" placeholder="Enter your full name" type="text"/>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Organisation</label>
+        <input class="w-full bg-surface-container-highest border-0 border-b border-outline/30 focus:border-primary-container focus:ring-0 text-white p-4 transition-colors" placeholder="Enter your organisation" type="text"/>
+      </div>
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">Email</label>
+        <input class="w-full bg-surface-container-highest border-0 border-b border-outline/30 focus:border-primary-container focus:ring-0 text-white p-4 transition-colors" placeholder="Enter your email address" type="text"/>
+      </div>
+      <div class="md:col-span-2 pt-8">
+        <button class="w-full bg-primary-container text-on-primary-container py-5 font-black tracking-[0.3em] uppercase text-xs" type="button">SUBMIT</button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<section id="section-02" class="py-40 px-8 md:px-24 bg-surface-container-lowest max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Recognising an Electric Vehicle</h2>
+  <div class="space-y-16">
+    <div class="max-w-3xl">
+    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">Why Identification Matters</h3>
+    <div class="text-on-surface-variant text-lg leading-loose"><p>It is critical that you can recognise an electric vehicle when it enters your workplace. Identifying features will differ between manufacturers, so you may need to exercise your skill and experience to determine the vehicle type — getting it wrong could be dangerous.</p></div>
+  </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <h3 class="text-2xl font-bold text-white mb-6">Exterior Identification</h3>
+      <div class="text-on-surface-variant text-sm leading-relaxed"><p>Look for these key exterior features:</p><ul><li><strong>Number plate:</strong> Full EVs may have a green border (not mandatory)</li><li><strong>Badging:</strong> Many EVs display a badge indicating electric power</li><li><strong>Charge port:</strong> BEVs and PHEVs have a battery charge connector port on the vehicle exterior</li></ul></div>
+    </div>
+    <div class="relative group">
+      <img alt="Electric vehicle exterior showing green number plate and charging port" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700" src="images/comp-011.jpg"/>
+    </div>
+  </div>
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div class="relative group">
+      <img alt="EV engine bay with orange high-voltage cables and warning labels" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700" src="images/comp-012.jpg"/>
+    </div>
+    <div>
+      <h3 class="text-2xl font-bold text-white mb-6">Under the Bonnet</h3>
+      <div class="text-on-surface-variant text-sm leading-relaxed"><p>When inspecting the engine bay, look for these indicators:</p><ul><li><strong>Orange high-voltage cables</strong> — the universal indicator of an EV electrical system</li><li><strong>Power controller / inverter</strong> — converts battery DC to motor AC</li><li><strong>Warning labels</strong> — high-voltage warnings on components and covers</li></ul></div>
+    </div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">EV Identification Checklist</h3>
+  <ul class="space-y-6" data-checklist>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Badging on exterior bodywork</p>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Look for EV, Electric, e-tron, or similar manufacturer badges.</p>
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">External mains charging connection port</p>
+        
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Instrument cluster warnings and messages</p>
+        
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Power flow / energy use screen on dashboard</p>
+        
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Bright-coloured (orange) high-voltage cables</p>
+        
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Green band on number plate</p>
+        <p class="text-xs text-on-surface-variant leading-relaxed">Not mandatory — do not rely on this alone.</p>
+      </div>
+    </li>
+    <li class="flex items-start gap-4 group">
+      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
+      <div>
+        <p class="text-white font-bold tracking-tight mb-1">Warning labels on HV components</p>
+        
+      </div>
+    </li>
+  </ul>
+</div>
+    <blockquote class="border-l-4 border-primary p-8 bg-primary/5">
+  <p class="text-2xl italic text-white leading-relaxed mb-4">Not all types of EV will have the same identifying features. A Hybrid Electric Vehicle (HEV) may not have a charging port, but it still contains high-voltage components that present serious risks.</p>
+  <cite class="text-sm text-on-surface-variant not-italic">&mdash; EV Safety Guidelines</cite>
+</blockquote>
+  </div>
+</section>
+
+<section id="section-03" class="py-40 px-8 md:px-24 bg-black max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Types of Electric Vehicles</h2>
+  <div class="space-y-16">
+    <div>
+  <h3 class="text-2xl font-black text-white mb-10 tracking-tight">The EV Landscape</h3>
+  <div class="flex flex-wrap justify-center gap-16">
+    <div class="text-center">
+      <div class="text-5xl font-black text-white mb-2">3</div>
+      <div class="text-[10px] font-bold text-primary tracking-widest uppercase">Main types of electric vehicle</div>
+    </div>
+    <div class="text-center">
+      <div class="text-5xl font-black text-white mb-2">650V</div>
+      <div class="text-[10px] font-bold text-primary tracking-widest uppercase">Maximum voltage in modern EVs</div>
+    </div>
+    <div class="text-center">
+      <div class="text-5xl font-black text-white mb-2">12V</div>
+      <div class="text-[10px] font-bold text-primary tracking-widest uppercase">Standard ICE vehicle voltage</div>
+    </div>
+  </div>
+</div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-4 tracking-tight">Vehicle Categories</h3>
+  <div class="text-on-surface-variant text-sm mb-10"><p>Understanding the differences between vehicle types is essential for assessing risk and applying the correct procedures.</p></div>
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="md:col-span-2 glass-panel p-10 flex flex-col justify-end relative overflow-hidden group min-h-[300px]">
+      <img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" src="images/comp-021-item-0.jpg"/>
+      <div class="relative z-10">
+        <span class="text-[10px] font-bold tracking-widest text-primary mb-2 block">FEATURED</span>
+        <h4 class="text-3xl font-black text-white mb-4">BEV — Battery Electric Vehicle</h4>
+        <p class="text-on-surface-variant text-sm max-w-md mb-6">Fully electric, powered entirely by a rechargeable battery pack. No internal combustion engine. Charged exclusively via external mains connection.</p>
+      </div>
+    </div>
+    <div class="glass-panel p-10 flex flex-col justify-between min-h-[250px]">
+      <span class="material-symbols-outlined text-4xl text-primary">speed</span>
+      <div>
+        <span class="text-[10px] font-bold tracking-widest text-primary mb-2 block">CATEGORY</span>
+        <h4 class="text-2xl font-black text-white mb-4">HEV — Hybrid Electric Vehicle</h4>
+        <p class="text-on-surface-variant text-sm">Combines a conventional engine with an electric motor. The battery charges through regenerative braking — there is no external charging port.</p>
+      </div>
+    </div>
+    <div class="glass-panel p-10 flex flex-col justify-between min-h-[250px]">
+      <span class="material-symbols-outlined text-4xl text-primary">shield</span>
+      <div>
+        <span class="text-[10px] font-bold tracking-widest text-primary mb-2 block">CATEGORY</span>
+        <h4 class="text-2xl font-black text-white mb-4">PHEV — Plug-in Hybrid Electric Vehicle</h4>
+        <p class="text-on-surface-variant text-sm">Has both a combustion engine and an electric motor with a larger battery than HEV. Can be charged via external mains connection for extended electric-only range.</p>
+      </div>
+    </div>
+    
+  </div>
+</div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">EV Identification Features by Type</h3>
+  <div class="glass-panel overflow-x-auto p-10">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="text-[10px] font-bold tracking-[0.2em] text-white/40 border-b border-white/10">
+          <th class="pb-4 uppercase">Feature</th>
+          <th class="pb-4 uppercase">BEV</th>
+          <th class="pb-4 uppercase">HEV</th>
+          <th class="pb-4 uppercase">PHEV</th>
+        </tr>
+      </thead>
+      <tbody class="text-xs font-bold text-white divide-y divide-white/5">
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Badging</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">External charging port</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-error text-sm">close</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Instrument cluster warnings</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Power flow screen</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Orange HV cables</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Green number plate band</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-error text-sm">close</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+        <tr>
+          <td class="py-4 font-normal text-on-surface-variant">Warning labels</td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+          <td class="py-4"><span class="material-symbols-outlined text-primary text-sm">check</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+  </div>
+</section>
+
+<section class="py-40 bg-black flex justify-center px-8">
+  <div class="max-w-2xl w-full glass-panel p-12 text-center" data-quiz data-correct="0" data-feedback-correct="Correct! The Government Vehicle Enquiry Service at vehicleenquiry.service.gov.uk allows you to check a vehicle's fuel type using its registration number." data-feedback-incorrect="Not quite. The correct website is vehicleenquiry.service.gov.uk — bookmark it for quick vehicle identification.">
+    <h3 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-8">Knowledge Check</h3>
+    <p class="text-2xl font-black text-white mb-10 tracking-tight">You can use the UK Government Vehicle Enquiry website to check a vehicle's fuel type using its registration number. Which of the following is the correct URL?</p>
+    <div class="grid gap-4">
+      <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="0">vehicleenquiry.service.gov.uk</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="1">dvla.gov.uk/vehicle-check</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="2">mot-check.service.gov.uk</button>
+    </div>
+    <div class="mt-8 hidden" data-quiz-feedback></div>
+  </div>
+</section>
+
+<section class="relative min-h-screen bg-fixed bg-center bg-cover flex flex-col items-center justify-center px-8 md:px-24" style="background-image: url('images/comp-030.jpg');">
+  <div class="absolute inset-0 bg-black/90 z-0"></div>
+  <div class="relative z-10 max-w-5xl w-full text-center">
+    <h2 class="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-6">Understanding the Hazards</h2>
+    <div class="h-1 w-24 bg-primary mx-auto mb-12"></div>
+    <div class="text-on-surface-variant text-xl leading-relaxed"><p>High-voltage systems in EVs present unique risks that require specific knowledge and precautions.</p></div>
+  </div>
+</section>
+
+<section id="section-05" class="py-40 px-8 md:px-24 bg-surface-container-low max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Hazards &amp; Legislation</h2>
+  <div class="space-y-16">
+    <div class="max-w-3xl">
+    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">High-Voltage Hazards in the Workplace</h3>
+    <div class="text-on-surface-variant text-lg leading-loose"><p>Electric and hybrid vehicles introduce hazards into the workplace in addition to those normally associated with vehicle repair and maintenance. Understanding these risks is the first step to working safely.</p></div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">Key Risks of Working with EVs</h3>
+  <div class="space-y-4">
+    <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Fatal Electric Shock</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>The presence of high-voltage components and cabling capable of delivering a fatal electric shock. Voltages in EVs can reach up to 650V DC — significantly higher than the 12/24V found in conventional vehicles. Components may retain dangerous voltage even when the vehicle is switched off.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Fire &amp; Explosion Risk</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>The storage of electrical energy with the potential to cause explosion or fire. Stored electrical energy can be released suddenly if batteries are damaged or incorrectly modified, releasing explosive gases and harmful chemicals.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Silent Operation</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>Electric motors operate silently, meaning people may be unaware of vehicles moving. Most EVs are fitted with a pedestrian sound emitter, but this may not always be active in workshop environments.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Unexpected Movement</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>Electric motors can generate magnetic forces that cause unexpected movement. Remote operation keys that only need to be near the vehicle can accidentally power it up.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Medical Device Interference</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>High-voltage electrical systems may affect medical devices such as pacemakers. Staff with such devices should be made aware of this risk.</p></div>
+  </details>
+  <details class="group glass-panel rounded-none">
+    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
+      <span class="text-sm font-bold tracking-widest uppercase text-white">Battery Handling</span>
+      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
+    </summary>
+    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4"><p>Manual handling risks associated with battery replacement. Batteries are extremely heavy. Hybrid vehicles also retain a conventional fuel tank, adding further complexity.</p></div>
+  </details>
+  </div>
+</div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-8 tracking-tight">Legislation &amp; Standards</h3>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">bolt</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">HSE Guidelines</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">The UK Health and Safety Executive provides specific guidance for working with electric and hybrid vehicles in the motor vehicle repair industry. Source: hse.gov.uk/mvr/topics/electric-hybrid.htm</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">speed</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">ECE R100 Certification</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">A UN regulation that defines 'High Voltage' as &gt;60V to ≤1500V DC (or &gt;30V to ≤1000V AC). This is the standard used when referring to electric vehicle high-voltage systems.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">power</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">HSE Work Categories</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">The UK HSE identifies 4 categories of EV work: valeting/sales (low risk), incident response, routine maintenance, and high-voltage system work (specialist only).</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">Low-Risk Activity Precautions</h3>
+  <div class="text-on-surface-variant text-sm mb-8"><p>Even for valeting, sales, and other lower-risk activities around EVs, these precautions must be followed:</p></div>
+  <div class="relative border-l border-white/10 pl-8 space-y-12">
+    <div class="relative">
+      <div class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-primary ring-4 ring-primary/20"></div>
+      <p class="text-[10px] font-black text-primary tracking-widest uppercase mb-1">Step 01</p>
+      <p class="text-white font-bold text-sm mb-2">Secure the Key Fob</p>
+      <p class="text-xs text-on-surface-variant">Keep remote operation keys away from the vehicle to prevent accidental power-up. Use a signal-blocking pouch if available.</p>
+    </div>
+    <div class="relative">
+      <div class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-white/20 ring-4 ring-primary/20"></div>
+      <p class="text-[10px] font-black text-white/40 tracking-widest uppercase mb-1">Step 02</p>
+      <p class="text-white font-bold text-sm mb-2">Be Aware of Silent Movement</p>
+      <p class="text-xs text-on-surface-variant">People moving EVs around the workplace should be aware that others may not hear them approaching. Sound your horn when necessary.</p>
+    </div>
+    <div class="relative">
+      <div class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-white/20 ring-4 ring-primary/20"></div>
+      <p class="text-[10px] font-black text-white/40 tracking-widest uppercase mb-1">Step 03</p>
+      <p class="text-white font-bold text-sm mb-2">Avoid Pressure Washing HV Components</p>
+      <p class="text-xs text-on-surface-variant">High-pressure water can damage high-voltage electrical components and cables. Orange cables indicate HV systems — refer to manufacturer guidance before valeting in these areas.</p>
+    </div>
+    <div class="relative">
+      <div class="absolute -left-[37px] top-1 w-4 h-4 rounded-full bg-white/20 ring-4 ring-primary/20"></div>
+      <p class="text-[10px] font-black text-white/40 tracking-widest uppercase mb-1">Step 04</p>
+      <p class="text-white font-bold text-sm mb-2">Never Touch Orange Cables</p>
+      <p class="text-xs text-on-surface-variant">Orange cables carry high voltage. Never handle, move, or lean tools against them. Report any visible damage immediately.</p>
+    </div>
+  </div>
+</div>
+  </div>
+</section>
+
+<section id="section-06" class="py-40 px-8 md:px-24 bg-surface-container-lowest max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Electric Shock &amp; Emergency Response</h2>
+  <div class="space-y-16">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <h3 class="text-2xl font-bold text-white mb-6">What Is an Electric Shock?</h3>
+      <div class="text-on-surface-variant text-sm leading-relaxed"><p>A voltage as low as <strong>50 volts</strong> applied between two parts of the human body causes a current to flow that can block the electrical signals between the brain and the muscles.</p><p>This may cause:</p><ul><li>Stopping the heart beating properly</li><li>Preventing the person from breathing</li><li>Causing muscle spasms</li><li>Secondary injuries such as burns and fall injuries</li></ul></div>
+    </div>
+    <div class="relative group">
+      <img alt="Diagram illustrating the effects of electric shock on the human body" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700" src="images/comp-040.jpg"/>
+    </div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">Shock Severity Factors</h3>
+  <div class="text-on-surface-variant text-sm mb-6"><p>The severity of an electric shock depends on a combination of factors:</p></div>
+  <div class="glass-panel p-8" data-carousel>
+    <div data-slide-container>
+      <div data-slide>
+        <h5 class="text-xs font-black tracking-widest text-primary uppercase mb-2">01 / 04</h5>
+        <p class="text-white font-bold text-lg mb-4">Voltage Level</p>
+        <div class="text-sm text-on-surface-variant leading-relaxed"><p>EV systems operate at up to 650V DC — far exceeding the 50V threshold for danger. Higher voltage drives more current through the body.</p></div>
+      </div>
+      <div data-slide style="display:none">
+        <h5 class="text-xs font-black tracking-widest text-primary uppercase mb-2">02 / 04</h5>
+        <p class="text-white font-bold text-lg mb-4">Current Path Through Body</p>
+        <div class="text-sm text-on-surface-variant leading-relaxed"><p>The path the current takes matters greatly. Hand-to-hand across the chest is the most dangerous. Finger-to-finger on the same hand is less severe but still harmful.</p></div>
+      </div>
+      <div data-slide style="display:none">
+        <h5 class="text-xs font-black tracking-widest text-primary uppercase mb-2">03 / 04</h5>
+        <p class="text-white font-bold text-lg mb-4">Duration of Contact</p>
+        <div class="text-sm text-on-surface-variant leading-relaxed"><p>Even fractions of a second of contact with high voltage can be fatal. Muscle spasms may prevent the person from releasing their grip, prolonging exposure.</p></div>
+      </div>
+      <div data-slide style="display:none">
+        <h5 class="text-xs font-black tracking-widest text-primary uppercase mb-2">04 / 04</h5>
+        <p class="text-white font-bold text-lg mb-4">Skin Conductivity</p>
+        <div class="text-sm text-on-surface-variant leading-relaxed"><p>Wet or sweaty skin dramatically reduces resistance, allowing more current to flow. Always ensure dry conditions when near HV components.</p></div>
+      </div>
+    </div>
+    <div class="flex gap-4 mt-8">
+      <button class="material-symbols-outlined text-white/40 hover:text-white" data-prev>chevron_left</button>
+      <span class="text-xs text-white/40 font-bold tracking-widest self-center" data-slide-counter>1 / 4</span>
+      <button class="material-symbols-outlined text-white/40 hover:text-white" data-next>chevron_right</button>
+    </div>
+  </div>
+</div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-6 tracking-tight">Emergency Response Procedure</h3>
+  <div class="text-on-surface-variant text-sm mb-8"><p>If you encounter someone receiving an electric shock, follow these steps in order:</p></div>
+  <ol class="space-y-6">
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">01</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Assess the Situation</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Do NOT touch the casualty if they are still in contact with the electrical source. You are at risk of electrocution.</p>
+      </div>
+    </li>
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">02</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Isolate the Power Source</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">For mains chargers, turn off power at the isolation switch. For vehicle HV systems, turn off the vehicle using the normal key. Consider that the vehicle may not be safe even when switched off.</p>
+      </div>
+    </li>
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">03</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Separate Casualty from Source</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">If safe to do so, use a purpose-designed insulated rescue hook to separate the casualty from the power supply. Never use bare hands or conductive materials.</p>
+      </div>
+    </li>
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">04</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Call 999</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Call emergency services immediately. Provide details about the high-voltage nature of the incident.</p>
+      </div>
+    </li>
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">05</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Provide First Aid</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Once contact is broken, perform a primary survey and treat injuries. Seek assistance from trained first aiders on site.</p>
+      </div>
+    </li>
+    <li class="flex gap-4">
+      <span class="text-xl font-black text-primary/40">06</span>
+      <div>
+        <p class="text-white font-bold text-sm mb-1">Secure the Scene</p>
+        <p class="text-sm text-on-surface-variant leading-relaxed">Cordon off the vehicle using a non-conductive safety barrier chain. Ensure no one else attempts to work on it until it has been made safe by a specialist.</p>
+      </div>
+    </li>
+  </ol>
+</div>
+  </div>
+</section>
+
+<section id="section-07" class="py-40 px-8 md:px-24 bg-black max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Safety Equipment</h2>
+  <div class="space-y-16">
+    <div class="max-w-3xl">
+    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">Essential EV Safety Equipment</h3>
+    <div class="text-on-surface-variant text-lg leading-loose"><p>When electric vehicles enter your workplace, specific safety equipment must be available and correctly used. The following items should be present in any workshop or facility that handles EVs.</p></div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-8 tracking-tight">Equipment Guide</h3>
+  <div data-tabs>
+    <div class="flex flex-wrap justify-center gap-2 mb-12" data-tab-triggers>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white border-b-2 border-primary" data-tab-trigger="0">Vehicle ID Sign</button>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white/40 hover:text-white" data-tab-trigger="1">Barrier Chain</button>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white/40 hover:text-white" data-tab-trigger="2">Key Signal Blocker</button>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white/40 hover:text-white" data-tab-trigger="3">Rescue Hook</button>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white/40 hover:text-white" data-tab-trigger="4">Insulated Gloves</button>
+      <button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase text-white/40 hover:text-white" data-tab-trigger="5">Warning Signs</button>
+    </div>
+    <div class="glass-panel p-12 min-h-[400px]">
+      <div data-tab-panel="0">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Vehicle ID Sign</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>Should be present on every electric vehicle entering a workshop for repair so that all staff are aware it is an EV. This is the primary visual indicator that special precautions apply.</p></div>
+      </div>
+      <div data-tab-panel="1" style="display:none">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Barrier Chain</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>A non-conductive safety barrier chain or cordon that alerts others and prevents unauthorised access to the EV work area. Must be non-conductive to prevent creating an additional electrical path.</p></div>
+      </div>
+      <div data-tab-panel="2" style="display:none">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Key Signal Blocker</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>A pouch or case that prevents accidental power-up on keyless-start vehicles by blocking the key from receiving and sending signals to the vehicle. Essential for preventing unexpected movement.</p></div>
+      </div>
+      <div data-tab-panel="3" style="display:none">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Rescue Hook</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>An insulated hook to be used by suitably trained staff in an emergency to remove a casualty from the source of an electric shock. Must be rated for the voltages present and regularly inspected.</p></div>
+      </div>
+      <div data-tab-panel="4" style="display:none">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Insulated Gloves</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>Class 0 insulated gloves rated to 1500V DC. Should be worn by suitably trained persons when working on the high-voltage system. Must be inspected before each use for tears or damage.</p></div>
+      </div>
+      <div data-tab-panel="5" style="display:none">
+        <h4 class="text-xl font-black text-white mb-4 tracking-tight">Warning Signs</h4>
+        <div class="text-on-surface-variant text-sm leading-relaxed"><p>Signs that alert others to the risks present in the EV work area. Includes 'Do Not Start / Work in Progress' signs to prevent unauthorised starting during repair.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</section>
+
+<section class="py-40 bg-black flex justify-center px-8">
+  <div class="max-w-2xl w-full glass-panel p-12 text-center" data-quiz data-correct="1" data-feedback-correct="Correct! The signal blocker prevents the vehicle from detecting the key and accidentally powering up, which could cause unexpected movement." data-feedback-incorrect="Not quite. The primary purpose is to block the key's signals, preventing the vehicle from accidentally powering up when someone is working near it.">
+    <h3 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-8">Equipment Knowledge Check</h3>
+    <p class="text-2xl font-black text-white mb-10 tracking-tight">What is the primary purpose of a key signal blocker pouch?</p>
+    <div class="grid gap-4">
+      <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="0">Prevents the key from being stolen</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="1">Prevents accidental power-up on keyless-start vehicles by blocking key signals</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="2">Stops the key from being lost</button>
+    </div>
+    <div class="mt-8 hidden" data-quiz-feedback></div>
+  </div>
+</section>
+
+<section class="py-40 bg-black flex justify-center px-8">
+  <div class="max-w-2xl w-full glass-panel p-12 text-center" data-quiz data-correct="0" data-feedback-correct="Correct! The rescue hook is specifically designed to safely separate a person from an electrical source without the rescuer making direct contact." data-feedback-incorrect="The rescue hook's primary purpose is to safely remove a casualty from contact with an electrical source during an emergency.">
+    <h3 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-8">Rescue Equipment Check</h3>
+    <p class="text-2xl font-black text-white mb-10 tracking-tight">What is the purpose of an insulated rescue hook?</p>
+    <div class="grid gap-4">
+      <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="0">To be used by suitably trained staff in an emergency to remove a casualty from an electric shock source</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="1">To move high-voltage cables away from the car if they become short-circuited</button>
+        <button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="2">To pull damaged battery packs out of the vehicle</button>
+    </div>
+    <div class="mt-8 hidden" data-quiz-feedback></div>
+  </div>
+</section>
+
+<section id="section-08" class="py-40 px-8 md:px-24 bg-surface max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Charging Terminology</h2>
+  <div class="space-y-16">
+    <div class="grid lg:grid-cols-2 gap-12 items-center">
+    <div>
+      <h3 class="text-2xl font-bold text-white mb-6">Understanding Charging</h3>
+      <div class="text-on-surface-variant text-sm leading-relaxed"><p>To work safely around EV charging systems, you need to understand the basic electrical terminology. These concepts determine charging speed, cable ratings, and safety thresholds.</p></div>
+    </div>
+    <div class="relative group">
+      <img alt="Modern EV charging station with illuminated connector" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700" src="images/comp-060.jpg"/>
+    </div>
+  </div>
+    <div>
+  <h3 class="text-2xl font-black text-white mb-8 tracking-tight">Key Electrical Terms</h3>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="group h-80 perspective" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180 cursor-pointer">
+        <div class="absolute inset-0 backface-hidden glass-panel flex flex-col items-center justify-center p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">bolt</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">What are Watts?</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary-container p-8 flex items-center justify-center text-center">
+          <p class="text-on-primary-container font-bold text-sm leading-relaxed">Watts measure energy consumption — the rate at which electrical energy is used or generated. We're familiar with this from household items like lightbulbs. EV chargers are rated in kilowatts (kW).</p>
+        </div>
+      </div>
+    </div>
+    <div class="group h-80 perspective" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180 cursor-pointer">
+        <div class="absolute inset-0 backface-hidden glass-panel flex flex-col items-center justify-center p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">speed</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">What are Amps?</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary-container p-8 flex items-center justify-center text-center">
+          <p class="text-on-primary-container font-bold text-sm leading-relaxed">Amps (amperes) measure electrical current — the flow of electricity through a circuit. There is a relationship between voltage, amps, and resistance. A higher amp reading means more current is flowing.</p>
+        </div>
+      </div>
+    </div>
+    <div class="group h-80 perspective" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180 cursor-pointer">
+        <div class="absolute inset-0 backface-hidden glass-panel flex flex-col items-center justify-center p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">power</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">What is Voltage?</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary-container p-8 flex items-center justify-center text-center">
+          <p class="text-on-primary-container font-bold text-sm leading-relaxed">Voltage is electrical pressure — the force that pushes current through a circuit. ICE vehicles use 12V, trucks use 24V, but EVs operate at 400-650V DC. This is why EV electrical systems are so dangerous.</p>
+        </div>
+      </div>
+    </div>
+    <div class="group h-80 perspective" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180 cursor-pointer">
+        <div class="absolute inset-0 backface-hidden glass-panel flex flex-col items-center justify-center p-8 text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">memory</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">What does kWh mean?</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary-container p-8 flex items-center justify-center text-center">
+          <p class="text-on-primary-container font-bold text-sm leading-relaxed">Kilowatt-hours measure battery capacity — how much energy the battery can store. A larger kWh rating means greater range. Typical EV batteries range from 40kWh to 100kWh.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  </div>
+</section>
+
+<section id="section-09" class="py-40 px-8 md:px-24 bg-surface-container-low max-w-7xl mx-auto">
+  <h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">Glossary &amp; Summary</h2>
+  <div class="space-y-16">
+    <div>
+  <h3 class="text-2xl font-black text-white mb-8 tracking-tight">Key Terms Reference</h3>
+  <div class="grid md:grid-cols-3 gap-8">
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">bolt</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">Arc Flash</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">A sudden release of electrical energy through the air when a high-voltage gap is breached. Can cause serious burns, injuries, or equipment damage.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">speed</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">BEV</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">Battery Electric Vehicle — powered entirely by a rechargeable battery pack with no internal combustion engine.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">power</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">HEV</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">Hybrid Electric Vehicle — combines a conventional engine with an electric motor. Battery charges through regenerative braking only.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">memory</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">PHEV</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">Plug-in Hybrid Electric Vehicle — has both a combustion engine and electric motor with external charging capability.</p>
+        </div>
+      </div>
+    </div>
+    <div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
+      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
+        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
+          <span class="material-symbols-outlined text-4xl text-primary mb-4">hub</span>
+          <h5 class="text-lg font-black text-white uppercase tracking-widest">ECE R100</h5>
+        </div>
+        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
+          <p class="text-on-surface-variant text-sm leading-relaxed">The UN regulation defining high voltage as &gt;60V to ≤1500V DC for electric vehicles. Specifies all required safety tests for EV approval.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    <div class="max-w-3xl">
+    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">Course Complete</h3>
+    <div class="text-on-surface-variant text-lg leading-loose"><p>You have completed the EV Awareness & Safety course. Remember: always identify the vehicle type before beginning any work, never touch orange cables, and follow your organisation's specific EV safety procedures.</p><p>If you have any questions about working with electric vehicles, consult your workshop manager or a suitably trained EV specialist.</p></div>
+  </div>
+  </div>
+</section>
+
+<!-- Course Completion -->
+<section class="py-40 bg-surface-container-highest px-8 md:px-24">
+  <div class="max-w-4xl mx-auto text-center">
+    <span class="material-symbols-outlined text-6xl text-primary mb-8">verified_user</span>
+    <h2 class="text-4xl font-black text-white mb-8 tracking-tight uppercase">Course Complete</h2>
+    <p class="text-on-surface-variant text-xl leading-relaxed mb-12">
+      You have completed EV Awareness &amp; Safety. Review any sections as needed.
+    </p>
+    <button class="bg-primary-container text-on-primary-container px-12 py-5 font-black tracking-[0.3em] uppercase text-xs" onclick="window.scrollTo({top:0,behavior:'smooth'})">RETURN TO TOP</button>
+  </div>
+</section>
+
+<footer class="w-full py-20 border-t border-[#ffffff]/5 bg-[#000000]">
+  <div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8 font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-[#ffffff]/40">
+    <div class="opacity-80">&copy; 2026 EV AWARENESS &AMP; SAFETY. ALL RIGHTS RESERVED.</div>
+    <div class="flex gap-12">
+      <a class="hover:text-[#ffffff] transition-opacity" href="#">PRIVACY</a>
+      <a class="hover:text-[#ffffff] transition-opacity" href="#">TERMS</a>
+    </div>
+  </div>
+</footer>
+</main>
+
+<style>
+
+        .perspective { perspective: 1000px; }
+        .preserve-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+    
+</style>
+
+<script>
+/**
+ * Hydration Script — Vanilla JS interactivity for Stitch-designed HTML pages
+ * Injected into static HTML to bring interactive patterns to life.
+ */
+(function () {
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // ── Inject CSS ──────────────────────────────────────────────────────
+    var style = document.createElement('style');
+    style.textContent =
+      '@keyframes slideDown { from { opacity: 0; max-height: 0; } to { opacity: 1; max-height: 500px; } }' +
+      'details[open] summary ~ * { animation: slideDown 0.3s ease forwards; }' +
+      'details summary { list-style: none; cursor: pointer; }' +
+      'details summary::-webkit-details-marker { display: none; }' +
+      'html { scroll-behavior: smooth; }' +
+      '#hydrate-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-primary, #0099ff); z-index: 9999; transition: width 0.15s linear; pointer-events: none; }';
+    document.head.appendChild(style);
+
+    // ── 1. QUIZ ─────────────────────────────────────────────────────────
+    var quizzes = document.querySelectorAll('[data-quiz]');
+    quizzes.forEach(function (quiz) {
+      var choices = quiz.querySelectorAll('[data-choice]');
+      var correctBtn = quiz.querySelector('[data-correct]');
+      var selected = null;
+      var submitBtn = null;
+      var feedbackEl = null;
+
+      function resetQuiz() {
+        selected = null;
+        choices.forEach(function (c) {
+          c.classList.remove('border-primary-container', 'border-[#22c55e]', 'border-error');
+          c.style.opacity = '';
+        });
+        if (submitBtn) submitBtn.remove();
+        submitBtn = null;
+        if (feedbackEl) feedbackEl.remove();
+        feedbackEl = null;
+      }
+
+      choices.forEach(function (choice) {
+        choice.style.cursor = 'pointer';
+        choice.addEventListener('click', function () {
+          if (feedbackEl) return; // already submitted
+          choices.forEach(function (c) {
+            c.classList.remove('border-primary-container');
+            c.style.opacity = '0.5';
+          });
+          choice.classList.add('border-primary-container');
+          choice.style.opacity = '1';
+          selected = choice;
+
+          if (!submitBtn) {
+            submitBtn = document.createElement('button');
+            submitBtn.textContent = 'Submit';
+            submitBtn.className = 'mt-4 px-6 py-2 rounded-lg bg-primary text-white font-semibold cursor-pointer hover:opacity-90 transition-opacity';
+            quiz.appendChild(submitBtn);
+
+            submitBtn.addEventListener('click', function () {
+              if (!selected) return;
+              feedbackEl = document.createElement('div');
+              feedbackEl.className = 'mt-3 text-sm font-semibold';
+
+              if (selected === correctBtn) {
+                selected.classList.remove('border-primary-container');
+                selected.classList.add('border-[#22c55e]');
+                feedbackEl.textContent = 'Correct!';
+                feedbackEl.style.color = '#22c55e';
+              } else {
+                selected.classList.remove('border-primary-container');
+                selected.classList.add('border-error');
+                if (correctBtn) {
+                  correctBtn.classList.add('border-[#22c55e]');
+                  correctBtn.style.opacity = '1';
+                }
+                feedbackEl.textContent = 'Incorrect — see the correct answer highlighted in green.';
+                feedbackEl.style.color = '#ef4444';
+
+                var tryAgain = document.createElement('button');
+                tryAgain.textContent = 'Try Again';
+                tryAgain.className = 'ml-3 px-4 py-1 rounded-lg border border-white/20 text-white/60 text-sm cursor-pointer hover:text-white transition-colors';
+                tryAgain.addEventListener('click', resetQuiz);
+                feedbackEl.appendChild(tryAgain);
+              }
+              quiz.appendChild(feedbackEl);
+              submitBtn.remove();
+              submitBtn = null;
+            });
+          }
+        });
+      });
+    });
+
+    // ── 2. TABS ─────────────────────────────────────────────────────────
+    var tabContainers = document.querySelectorAll('[data-tabs]');
+    tabContainers.forEach(function (container) {
+      var triggers = container.querySelectorAll('[data-tab-trigger]');
+      var panels = container.querySelectorAll('[data-tab-panel]');
+
+      function activateTab(index) {
+        triggers.forEach(function (t, i) {
+          if (i === index) {
+            t.classList.add('border-b-2', 'border-primary', 'text-white');
+            t.classList.remove('text-white/40');
+          } else {
+            t.classList.remove('border-b-2', 'border-primary', 'text-white');
+            t.classList.add('text-white/40');
+          }
+        });
+        panels.forEach(function (p, i) {
+          p.style.display = i === index ? '' : 'none';
+        });
+      }
+
+      triggers.forEach(function (trigger, i) {
+        trigger.style.cursor = 'pointer';
+        trigger.addEventListener('click', function () { activateTab(i); });
+      });
+
+      if (triggers.length > 0) activateTab(0);
+    });
+
+    // ── 3. FLASHCARDS ───────────────────────────────────────────────────
+    var flashcards = document.querySelectorAll('[data-flashcard]');
+    flashcards.forEach(function (card) {
+      card.style.cursor = 'pointer';
+      var inner = card.querySelector('[class*="preserve-3d"]') ||
+                  card.querySelector('.preserve-3d') ||
+                  card.firstElementChild;
+      if (!inner) return;
+
+      function toggle(e) {
+        e.preventDefault();
+        inner.classList.toggle('rotate-y-180');
+      }
+      card.addEventListener('click', toggle);
+      card.addEventListener('touchend', function (e) {
+        // Prevent double-fire on touch devices
+        e.preventDefault();
+        inner.classList.toggle('rotate-y-180');
+      });
+    });
+
+    // ── 4. CAROUSEL / NARRATIVE ─────────────────────────────────────────
+    var carousels = document.querySelectorAll('[data-carousel]');
+    carousels.forEach(function (container) {
+      var slides = container.querySelectorAll('[data-slide]');
+      var prevBtn = container.querySelector('[data-prev]');
+      var nextBtn = container.querySelector('[data-next]');
+      if (slides.length === 0) return;
+      var current = 0;
+
+      // Create dot indicators
+      var dotsWrap = null;
+      if (slides.length > 1) {
+        dotsWrap = document.createElement('div');
+        dotsWrap.className = 'flex justify-center gap-2 mt-4';
+        for (var d = 0; d < slides.length; d++) {
+          var dot = document.createElement('button');
+          dot.className = 'w-2 h-2 rounded-full bg-white/20 transition-colors';
+          dot.setAttribute('data-dot', d);
+          dot.style.cursor = 'pointer';
+          dotsWrap.appendChild(dot);
+        }
+        // Insert dots after the slides area or at end of container
+        var navArea = prevBtn ? prevBtn.parentElement : null;
+        if (navArea && navArea.parentElement === container) {
+          container.insertBefore(dotsWrap, navArea.nextSibling);
+        } else {
+          container.appendChild(dotsWrap);
+        }
+
+        dotsWrap.addEventListener('click', function (e) {
+          var dotIndex = e.target.getAttribute('data-dot');
+          if (dotIndex !== null) {
+            current = parseInt(dotIndex, 10);
+            showSlide();
+          }
+        });
+      }
+
+      function showSlide() {
+        slides.forEach(function (s, i) {
+          s.style.display = i === current ? '' : 'none';
+        });
+        if (prevBtn) prevBtn.disabled = current === 0;
+        if (nextBtn) nextBtn.disabled = current === slides.length - 1;
+        if (prevBtn) prevBtn.style.opacity = current === 0 ? '0.3' : '1';
+        if (nextBtn) nextBtn.style.opacity = current === slides.length - 1 ? '0.3' : '1';
+        if (dotsWrap) {
+          var dots = dotsWrap.querySelectorAll('[data-dot]');
+          dots.forEach(function (dot, i) {
+            dot.className = 'w-2 h-2 rounded-full transition-colors cursor-pointer ' +
+              (i === current ? 'bg-primary' : 'bg-white/20');
+          });
+        }
+      }
+
+      if (prevBtn) {
+        prevBtn.style.cursor = 'pointer';
+        prevBtn.addEventListener('click', function () {
+          if (current > 0) { current--; showSlide(); }
+        });
+      }
+      if (nextBtn) {
+        nextBtn.style.cursor = 'pointer';
+        nextBtn.addEventListener('click', function () {
+          if (current < slides.length - 1) { current++; showSlide(); }
+        });
+      }
+      showSlide();
+    });
+
+    // ── 5. CHECKLIST ────────────────────────────────────────────────────
+    var checklists = document.querySelectorAll('[data-checklist]');
+    checklists.forEach(function (container) {
+      // Handle native checkboxes
+      var checkboxes = container.querySelectorAll('input[type="checkbox"]');
+
+      // Handle icon-based checklist items (Material Symbols / icon spans)
+      var iconItems = container.querySelectorAll('li, [data-check-item]');
+      var totalItems = checkboxes.length;
+      var checked = 0;
+
+      // Find or create progress counter
+      var counter = container.querySelector('[data-checklist-progress]');
+      if (!counter && (totalItems > 1 || iconItems.length > 1)) {
+        counter = document.createElement('div');
+        counter.className = 'text-xs text-white/40 mt-3';
+        container.appendChild(counter);
+      }
+
+      function updateProgress() {
+        checked = 0;
+        checkboxes.forEach(function (cb) { if (cb.checked) checked++; });
+        // Count icon-toggled items
+        iconItems.forEach(function (item) {
+          if (item.getAttribute('data-checked') === 'true') checked++;
+        });
+        var total = checkboxes.length + iconItems.length;
+        if (counter && total > 0) {
+          counter.textContent = checked + ' / ' + total + ' complete';
+        }
+      }
+
+      checkboxes.forEach(function (cb) {
+        cb.addEventListener('change', updateProgress);
+      });
+
+      iconItems.forEach(function (item) {
+        // Look for check_circle icon span inside
+        var icon = item.querySelector('.material-symbols-rounded, .material-icons, [class*="icon"]');
+        if (!icon) return;
+        totalItems++;
+        item.setAttribute('data-checked', 'false');
+        item.style.cursor = 'pointer';
+
+        item.addEventListener('click', function (e) {
+          if (e.target.tagName === 'INPUT') return; // let native checkboxes handle themselves
+          var isChecked = item.getAttribute('data-checked') === 'true';
+          if (isChecked) {
+            item.setAttribute('data-checked', 'false');
+            icon.textContent = 'check_circle_outline';
+            icon.classList.remove('text-primary');
+            icon.classList.add('text-white/20');
+          } else {
+            item.setAttribute('data-checked', 'true');
+            icon.textContent = 'check_circle';
+            icon.classList.remove('text-white/20');
+            icon.classList.add('text-primary');
+          }
+          updateProgress();
+        });
+      });
+
+      updateProgress();
+    });
+
+    // ── 6. ACCORDION (details/summary) — CSS handles animation ────────
+    // Already handled via injected CSS above. Nothing extra needed.
+
+    // ── 7. SCROLL PROGRESS BAR ──────────────────────────────────────────
+    var progressBar = document.createElement('div');
+    progressBar.id = 'hydrate-progress';
+    progressBar.style.width = '0%';
+    document.body.appendChild(progressBar);
+
+    window.addEventListener('scroll', function () {
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      progressBar.style.width = pct + '%';
+    }, { passive: true });
+
+    // ── 8. SMOOTH SCROLL for anchor links ───────────────────────────────
+    document.addEventListener('click', function (e) {
+      var anchor = e.target.closest('a[href^="#"]');
+      if (!anchor) return;
+      var id = anchor.getAttribute('href');
+      if (!id || id === '#') return;
+      var target = document.querySelector(id);
+      if (target) {
+        e.preventDefault();
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+
+    // ── Summary log ─────────────────────────────────────────────────────
+    console.log(
+      'Hydration complete: ' +
+      quizzes.length + ' quizzes, ' +
+      tabContainers.length + ' tabs, ' +
+      flashcards.length + ' flashcards, ' +
+      carousels.length + ' carousels'
+    );
+
+  });
+})();
+
+</script>
+</body>
+</html>

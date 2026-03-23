@@ -1,0 +1,263 @@
+{
+  "outputComponents": [
+    {
+      "designSystem": {
+        "designSystem": {
+          "displayName": "Aegis Prime",
+          "theme": {
+            "bodyFont": "INTER",
+            "colorMode": "DARK",
+            "colorVariant": "FIDELITY",
+            "customColor": "#6366f1",
+            "designMd": "```markdown\n# Design System Specification\n\n## 1. Overview & Creative North Star: \"The Technical Monolith\"\n\nThis design system is engineered for high-stakes environments where precision is not an option—it is a requirement. Moving away from the \"friendly SaaS\" aesthetic, we are building **The Technical Monolith**. \n\nThe creative direction focuses on **Architectural Authority**. We achieve a $50k+ bespoke feel by leaning into extreme high-contrast, cinematic whitespace, and \"glass instrumentation.\" Instead of a traditional grid that feels like a website, we treat the screen as a high-end command center. Every interaction should feel intentional, heavy, and technically superior.\n\n**Key Deviations from Standard UI:**\n*   **Deep Scrolled Narrative:** Content is not crammed. We use `20` (7rem) to `24` (8.5rem) spacing units to let technical concepts breathe.\n*   **Asymmetric Sophistication:** We avoid centered, \"balanced\" templates. High-impact headings should be left-aligned with significant negative space to their right, creating a sense of forward momentum.\n*   **The \"Instrument\" Feel:** Using `Inter` in its most aggressive tracking and weight variations to mimic aerospace or high-end engineering interfaces.\n\n---\n\n## 2. Colors & Surface Architecture\n\nThe palette is anchored in the abyss. By using `#000000` as our canvas and the provided indigo/purple tokens as our \"light sources,\" we create a high-contrast environment that demands focus.\n\n### The \"No-Line\" Rule\n**Explicit Instruction:** You are prohibited from using 1px solid borders to define sections. Traditional boxes make a platform look like a template. \n*   **Boundary Definition:** Use the `surface` token hierarchy. A section might transition from `surface_dim` (#131313) to `surface_container_lowest` (#0e0e0e) to create a subtle, sophisticated edge.\n*   **The Tonal Shift:** To separate a sidebar or a card, use a background color shift of exactly one tier (e.g., placing a `surface_container` card on a `surface` background).\n\n### Surface Hierarchy & Nesting\nTreat the UI as a series of layered glass plates. \n1.  **Level 0 (Base):** `surface` (#131313) for the main page body.\n2.  **Level 1 (Sections):** `surface_container_low` (#1b1b1b) for deep-scroll content blocks.\n3.  **Level 2 (Interaction):** `surface_container_high` (#2a2a2a) for hover states and active components.\n\n### The \"Glass & Gradient\" Rule\nTo achieve a premium, technical feel:\n*   **Glassmorphism:** For floating menus or \"Heads-Up Display\" (HUD) elements, use `surface_variant` at 40% opacity with a `backdrop-filter: blur(20px)`.\n*   **Signature Gradients:** Main CTAs should not be flat. Use a linear gradient from `primary` (#c0c1ff) to `primary_container` (#8083ff) at a 135-degree angle to give the UI a \"lit\" appearance.\n\n---\n\n## 3. Typography: Authoritative Editorial\n\nWe use **Inter** exclusively. The power of this system comes from dramatic scale shifts and extreme letter-spacing.\n\n*   **The Hero Statement:** Use `display-lg` (3.5rem) but scaled up for Hero sections to the equivalent of 6xl-8xl. These should be `font-weight: 800` with `letter-spacing: -0.05em` to feel like a heavy, technical slab.\n*   **The Label Identity:** All technical labels (e.g., \"MODULE 01\", \"CRITICAL ERROR\") must use `label-sm` or `label-md`, set to **UPPERCASE** with `letter-spacing: 0.2em`. This conveys a \"serialized\" or \"industrial\" vibe.\n*   **Body Narrative:** Use `body-lg` (1rem) for readability. Ensure line-height is generous (1.6) to contrast against the tight, heavy headlines.\n\n---\n\n## 4. Elevation & Depth: Tonal Layering\n\nTraditional drop shadows are forbidden unless the element is \"floating\" (e.g., a modal). Depth is achieved through light, not shadow.\n\n*   **The Layering Principle:** Instead of a shadow, place a `surface_container_highest` element inside a `surface_container_low` section. The delta in luminance creates the \"lift.\"\n*   **Ambient Glow:** For high-priority alerts, use an \"Ambient Shadow.\" Instead of a black shadow, use a 15% opacity version of the `primary` or `secondary` token with a 40px blur. This makes the component look like it’s emitting light onto the black surface.\n*   **The \"Ghost Border\" Fallback:** If a container absolutely requires a boundary for accessibility, use the `outline_variant` token at **15% opacity**. It should be felt, not seen.\n\n---\n\n## 5. Components\n\n### Buttons: High-Stakes Interaction\n*   **Primary:** Solid `primary_container` (#8083ff) with `on_primary` text. Use `rounded-sm` (0.125rem) for a sharp, technical look. No large rounded corners—keep it architectural.\n*   **Tertiary/Ghost:** Use `label-md` uppercase text with a 2px bottom-bar in `primary` that expands on hover.\n\n### Input Fields: Minimalist Telemetry\n*   No four-sided boxes. Use a `surface_container_highest` background with a 1px solid bottom-border of `outline`. \n*   Active state: The bottom border glows using the `accent` (Blue #3b82f6) token.\n\n### Cards & Lists: The Separation Principle\n*   **Strict Rule:** No divider lines between list items. Use `spacing-6` (2rem) between items or alternating background tones of `surface_container_lowest` and `surface_container_low`.\n*   **Progress Indicators:** Use the `secondary` (Purple #a855f7) token for technical progress bars. They should be thin (4px) to look like precision instruments.\n\n### Technical HUD (Bespoke Component)\nCreate a \"Safety Telemetry\" card using Glassmorphism. `surface_variant` at 20% opacity, `backdrop-filter: blur(12px)`, and a \"Ghost Border\" of 10% opacity `on_surface`.\n\n---\n\n## 6. Do’s and Don'ts\n\n### Do:\n*   **Embrace the Dark:** Keep 90% of the UI in the `surface` to `surface_container_lowest` range.\n*   **Use Generous Padding:** If you think a section has enough padding, add `spacing-10` (3.5rem) more. Space equals luxury.\n*   **Technical Precision:** Ensure all icons are thin-stroke (1px or 1.5px) to match the `Inter` light weights.\n\n### Don’t:\n*   **Never use Grey:** Use the \"tinted neutrals\" provided (e.g., `surface_variant`). Pure grey kills the premium technical feel.\n*   **No \"Friendly\" Language:** The UI should feel like a flight manual. Use \"INITIALIZE\" instead of \"Get Started.\"\n*   **Avoid standard 4px borders:** Use the `sm` (0.125rem) or `none` (0px) roundedness for a more serious, custom-engineered appearance. \n\n---\n**Director's Note:** This platform is about high-stakes safety. If it feels too \"soft\" or \"web-like,\" you have failed the brief. It should feel like the interface of a multi-million dollar piece of hardware. When in doubt, increase the contrast and the whitespace.```",
+            "font": "INTER",
+            "headlineFont": "INTER",
+            "labelFont": "INTER",
+            "namedColors": {
+              "background": "#131313",
+              "error": "#ffb4ab",
+              "error_container": "#93000a",
+              "inverse_on_surface": "#303030",
+              "inverse_primary": "#494bd6",
+              "inverse_surface": "#e2e2e2",
+              "on_background": "#e2e2e2",
+              "on_error": "#690005",
+              "on_error_container": "#ffdad6",
+              "on_primary": "#1000a9",
+              "on_primary_container": "#0d0096",
+              "on_primary_fixed": "#07006c",
+              "on_primary_fixed_variant": "#2f2ebe",
+              "on_secondary": "#490080",
+              "on_secondary_container": "#d6a9ff",
+              "on_secondary_fixed": "#2c0051",
+              "on_secondary_fixed_variant": "#6900b3",
+              "on_surface": "#e2e2e2",
+              "on_surface_variant": "#c7c4d7",
+              "on_tertiary": "#002e6a",
+              "on_tertiary_container": "#00285d",
+              "on_tertiary_fixed": "#001a42",
+              "on_tertiary_fixed_variant": "#004395",
+              "outline": "#908fa0",
+              "outline_variant": "#464554",
+              "primary": "#c0c1ff",
+              "primary_container": "#8083ff",
+              "primary_fixed": "#e1e0ff",
+              "primary_fixed_dim": "#c0c1ff",
+              "secondary": "#ddb7ff",
+              "secondary_container": "#6f00be",
+              "secondary_fixed": "#f0dbff",
+              "secondary_fixed_dim": "#ddb7ff",
+              "surface": "#131313",
+              "surface_bright": "#393939",
+              "surface_container": "#1f1f1f",
+              "surface_container_high": "#2a2a2a",
+              "surface_container_highest": "#353535",
+              "surface_container_low": "#1b1b1b",
+              "surface_container_lowest": "#0e0e0e",
+              "surface_dim": "#131313",
+              "surface_tint": "#c0c1ff",
+              "surface_variant": "#353535",
+              "tertiary": "#adc6ff",
+              "tertiary_container": "#4d8eff",
+              "tertiary_fixed": "#d8e2ff",
+              "tertiary_fixed_dim": "#adc6ff"
+            },
+            "overrideNeutralColor": "#000000",
+            "overridePrimaryColor": "#6366f1",
+            "overrideSecondaryColor": "#a855f7",
+            "overrideTertiaryColor": "#3b82f6",
+            "roundness": "ROUND_FOUR",
+            "spacingScale": 3
+          }
+        },
+        "name": "assets/fc9712e438d44aedb8d510f9f0c41fa9",
+        "version": "1"
+      }
+    },
+    {
+      "design": {
+        "screens": [
+          {
+            "designSystem": {
+              "designSystem": {
+                "displayName": "Aegis Prime",
+                "theme": {
+                  "bodyFont": "INTER",
+                  "colorMode": "DARK",
+                  "colorVariant": "FIDELITY",
+                  "customColor": "#6366f1",
+                  "designMd": "```markdown\n# Design System Specification\n\n## 1. Overview & Creative North Star: \"The Technical Monolith\"\n\nThis design system is engineered for high-stakes environments where precision is not an option—it is a requirement. Moving away from the \"friendly SaaS\" aesthetic, we are building **The Technical Monolith**. \n\nThe creative direction focuses on **Architectural Authority**. We achieve a $50k+ bespoke feel by leaning into extreme high-contrast, cinematic whitespace, and \"glass instrumentation.\" Instead of a traditional grid that feels like a website, we treat the screen as a high-end command center. Every interaction should feel intentional, heavy, and technically superior.\n\n**Key Deviations from Standard UI:**\n*   **Deep Scrolled Narrative:** Content is not crammed. We use `20` (7rem) to `24` (8.5rem) spacing units to let technical concepts breathe.\n*   **Asymmetric Sophistication:** We avoid centered, \"balanced\" templates. High-impact headings should be left-aligned with significant negative space to their right, creating a sense of forward momentum.\n*   **The \"Instrument\" Feel:** Using `Inter` in its most aggressive tracking and weight variations to mimic aerospace or high-end engineering interfaces.\n\n---\n\n## 2. Colors & Surface Architecture\n\nThe palette is anchored in the abyss. By using `#000000` as our canvas and the provided indigo/purple tokens as our \"light sources,\" we create a high-contrast environment that demands focus.\n\n### The \"No-Line\" Rule\n**Explicit Instruction:** You are prohibited from using 1px solid borders to define sections. Traditional boxes make a platform look like a template. \n*   **Boundary Definition:** Use the `surface` token hierarchy. A section might transition from `surface_dim` (#131313) to `surface_container_lowest` (#0e0e0e) to create a subtle, sophisticated edge.\n*   **The Tonal Shift:** To separate a sidebar or a card, use a background color shift of exactly one tier (e.g., placing a `surface_container` card on a `surface` background).\n\n### Surface Hierarchy & Nesting\nTreat the UI as a series of layered glass plates. \n1.  **Level 0 (Base):** `surface` (#131313) for the main page body.\n2.  **Level 1 (Sections):** `surface_container_low` (#1b1b1b) for deep-scroll content blocks.\n3.  **Level 2 (Interaction):** `surface_container_high` (#2a2a2a) for hover states and active components.\n\n### The \"Glass & Gradient\" Rule\nTo achieve a premium, technical feel:\n*   **Glassmorphism:** For floating menus or \"Heads-Up Display\" (HUD) elements, use `surface_variant` at 40% opacity with a `backdrop-filter: blur(20px)`.\n*   **Signature Gradients:** Main CTAs should not be flat. Use a linear gradient from `primary` (#c0c1ff) to `primary_container` (#8083ff) at a 135-degree angle to give the UI a \"lit\" appearance.\n\n---\n\n## 3. Typography: Authoritative Editorial\n\nWe use **Inter** exclusively. The power of this system comes from dramatic scale shifts and extreme letter-spacing.\n\n*   **The Hero Statement:** Use `display-lg` (3.5rem) but scaled up for Hero sections to the equivalent of 6xl-8xl. These should be `font-weight: 800` with `letter-spacing: -0.05em` to feel like a heavy, technical slab.\n*   **The Label Identity:** All technical labels (e.g., \"MODULE 01\", \"CRITICAL ERROR\") must use `label-sm` or `label-md`, set to **UPPERCASE** with `letter-spacing: 0.2em`. This conveys a \"serialized\" or \"industrial\" vibe.\n*   **Body Narrative:** Use `body-lg` (1rem) for readability. Ensure line-height is generous (1.6) to contrast against the tight, heavy headlines.\n\n---\n\n## 4. Elevation & Depth: Tonal Layering\n\nTraditional drop shadows are forbidden unless the element is \"floating\" (e.g., a modal). Depth is achieved through light, not shadow.\n\n*   **The Layering Principle:** Instead of a shadow, place a `surface_container_highest` element inside a `surface_container_low` section. The delta in luminance creates the \"lift.\"\n*   **Ambient Glow:** For high-priority alerts, use an \"Ambient Shadow.\" Instead of a black shadow, use a 15% opacity version of the `primary` or `secondary` token with a 40px blur. This makes the component look like it’s emitting light onto the black surface.\n*   **The \"Ghost Border\" Fallback:** If a container absolutely requires a boundary for accessibility, use the `outline_variant` token at **15% opacity**. It should be felt, not seen.\n\n---\n\n## 5. Components\n\n### Buttons: High-Stakes Interaction\n*   **Primary:** Solid `primary_container` (#8083ff) with `on_primary` text. Use `rounded-sm` (0.125rem) for a sharp, technical look. No large rounded corners—keep it architectural.\n*   **Tertiary/Ghost:** Use `label-md` uppercase text with a 2px bottom-bar in `primary` that expands on hover.\n\n### Input Fields: Minimalist Telemetry\n*   No four-sided boxes. Use a `surface_container_highest` background with a 1px solid bottom-border of `outline`. \n*   Active state: The bottom border glows using the `accent` (Blue #3b82f6) token.\n\n### Cards & Lists: The Separation Principle\n*   **Strict Rule:** No divider lines between list items. Use `spacing-6` (2rem) between items or alternating background tones of `surface_container_lowest` and `surface_container_low`.\n*   **Progress Indicators:** Use the `secondary` (Purple #a855f7) token for technical progress bars. They should be thin (4px) to look like precision instruments.\n\n### Technical HUD (Bespoke Component)\nCreate a \"Safety Telemetry\" card using Glassmorphism. `surface_variant` at 20% opacity, `backdrop-filter: blur(12px)`, and a \"Ghost Border\" of 10% opacity `on_surface`.\n\n---\n\n## 6. Do’s and Don'ts\n\n### Do:\n*   **Embrace the Dark:** Keep 90% of the UI in the `surface` to `surface_container_lowest` range.\n*   **Use Generous Padding:** If you think a section has enough padding, add `spacing-10` (3.5rem) more. Space equals luxury.\n*   **Technical Precision:** Ensure all icons are thin-stroke (1px or 1.5px) to match the `Inter` light weights.\n\n### Don’t:\n*   **Never use Grey:** Use the \"tinted neutrals\" provided (e.g., `surface_variant`). Pure grey kills the premium technical feel.\n*   **No \"Friendly\" Language:** The UI should feel like a flight manual. Use \"INITIALIZE\" instead of \"Get Started.\"\n*   **Avoid standard 4px borders:** Use the `sm` (0.125rem) or `none` (0px) roundedness for a more serious, custom-engineered appearance. \n\n---\n**Director's Note:** This platform is about high-stakes safety. If it feels too \"soft\" or \"web-like,\" you have failed the brief. It should feel like the interface of a multi-million dollar piece of hardware. When in doubt, increase the contrast and the whitespace.```",
+                  "font": "INTER",
+                  "headlineFont": "INTER",
+                  "labelFont": "INTER",
+                  "namedColors": {
+                    "background": "#131313",
+                    "error": "#ffb4ab",
+                    "error_container": "#93000a",
+                    "inverse_on_surface": "#303030",
+                    "inverse_primary": "#494bd6",
+                    "inverse_surface": "#e2e2e2",
+                    "on_background": "#e2e2e2",
+                    "on_error": "#690005",
+                    "on_error_container": "#ffdad6",
+                    "on_primary": "#1000a9",
+                    "on_primary_container": "#0d0096",
+                    "on_primary_fixed": "#07006c",
+                    "on_primary_fixed_variant": "#2f2ebe",
+                    "on_secondary": "#490080",
+                    "on_secondary_container": "#d6a9ff",
+                    "on_secondary_fixed": "#2c0051",
+                    "on_secondary_fixed_variant": "#6900b3",
+                    "on_surface": "#e2e2e2",
+                    "on_surface_variant": "#c7c4d7",
+                    "on_tertiary": "#002e6a",
+                    "on_tertiary_container": "#00285d",
+                    "on_tertiary_fixed": "#001a42",
+                    "on_tertiary_fixed_variant": "#004395",
+                    "outline": "#908fa0",
+                    "outline_variant": "#464554",
+                    "primary": "#c0c1ff",
+                    "primary_container": "#8083ff",
+                    "primary_fixed": "#e1e0ff",
+                    "primary_fixed_dim": "#c0c1ff",
+                    "secondary": "#ddb7ff",
+                    "secondary_container": "#6f00be",
+                    "secondary_fixed": "#f0dbff",
+                    "secondary_fixed_dim": "#ddb7ff",
+                    "surface": "#131313",
+                    "surface_bright": "#393939",
+                    "surface_container": "#1f1f1f",
+                    "surface_container_high": "#2a2a2a",
+                    "surface_container_highest": "#353535",
+                    "surface_container_low": "#1b1b1b",
+                    "surface_container_lowest": "#0e0e0e",
+                    "surface_dim": "#131313",
+                    "surface_tint": "#c0c1ff",
+                    "surface_variant": "#353535",
+                    "tertiary": "#adc6ff",
+                    "tertiary_container": "#4d8eff",
+                    "tertiary_fixed": "#d8e2ff",
+                    "tertiary_fixed_dim": "#adc6ff"
+                  },
+                  "overrideNeutralColor": "#000000",
+                  "overridePrimaryColor": "#6366f1",
+                  "overrideSecondaryColor": "#a855f7",
+                  "overrideTertiaryColor": "#3b82f6",
+                  "roundness": "ROUND_FOUR",
+                  "spacingScale": 3
+                }
+              },
+              "name": "assets/fc9712e438d44aedb8d510f9f0c41fa9",
+              "version": "1"
+            },
+            "deviceType": "DESKTOP",
+            "generatedBy": "figaro_agent",
+            "height": "20352",
+            "htmlCode": {
+              "downloadUrl": "https://contribution.usercontent.google.com/download?c=CgthaWRhX2NvZGVmeBJ7Eh1hcHBfY29tcGFuaW9uX2dlbmVyYXRlZF9maWxlcxpaCiVodG1sXzZmNGFlODczYTUzZTQ1ODk4M2NlZDczNTA3OWU5ZGQ3EgsSBxDG6pzCsBEYAZIBIwoKcHJvamVjdF9pZBIVQhM3ODUxNzM3MTcyMjIyNzgwNzcz&filename=&opi=96797242",
+              "mimeType": "text/html",
+              "name": "projects/7851737172222780773/files/5cb2e28720ea4e909901cee0d242605c"
+            },
+            "id": "162ed73f6ff245ccb732fffbac94f087",
+            "name": "projects/7851737172222780773/screens/162ed73f6ff245ccb732fffbac94f087",
+            "prompt": "A complete, premium deep-scroll e-learning course page for \"EV Awareness & Safety.\" \n- Single-page experience with dramatic gradients and deep blacks (#000000). \n- Hero Section: Full viewport, Title \"EV Awareness & Safety,\" subtitle, dramatic imagery, primary CTA.\n- Course Overview: Text blocks, interactive <details> accordions for Learning Objectives. \n- Learner Registration: Form with native inputs. \n- Identification: Graphic-text side-by-side (exterior and under-bonnet features), interactive checklist with data-checklist, pullquote. \n- Categories: Stat callouts, bento-style cards for BEV/HEV/PHEV, comparison table. \n- Knowledge Check: Interactive data-quiz with data-correct=\"0\" for MCQ. \n- Hazards & Legislation: Parallax full-bleed section \"Understanding the Hazards,\" <details> accordions for Key Risks, timeline for Low-Risk Precautions. \n- Emergency Response: Graphic-text for \"What is Electric Shock?\", data-carousel narrative for \"Shock Severity Factors,\" process flow for \"Emergency Response Procedure.\" \n- Safety Equipment: data-tabs for \"Equipment Guide\" (Vehicle ID, Barrier, Key Blocker, Rescue Hook, Gloves, Signs), 2 MCQ quizzes with data-quiz. \n- Charging: data-flashcards for terminology. \n- Glossary/Summary: Key terms and course completion message. \n- INTERACTIVE ATTRIBUTES: Ensure all data-quiz, data-correct, data-choice, data-flashcard, data-checklist, data-tabs, data-tab-trigger, data-tab-panel, data-carousel, data-slide, data-prev, data-next attributes are correctly applied for custom interactivity. \n- Aesthetics: Technical, high-stakes, professional, custom-built feel. Generous whitespace (10rem padding). \n- Use Google Material Symbols for all icons.",
+            "screenMetadata": {
+              "agentType": "HATTER_AGENT",
+              "status": "COMPLETE"
+            },
+            "screenType": "DESIGN",
+            "screenshot": {
+              "downloadUrl": "https://lh3.googleusercontent.com/aida/ADBb0uiBZKWlQEJoJEQQtFCrq7ZczFoO3ESblDhvr3qp0-XyEBNS068-V-m_llmbbpknjXDpa4DK0ijmRGrqG7qAdxP5RY4qVwB9yUNyPkDvAZbtmx7Zv93divC2LMvv2Z4FUu0jW5-PJbsY_6cAzXGnJxKWnbijL9pq-KDnhSZuH1XNH7sh3pmv58JfBvxk9Yp45LqWhYHz4ThheOBUAbT58pu72sWzK1q21ZZ6TlobtO3FeSDsVRu5iaz5Fi4",
+              "name": "projects/7851737172222780773/files/e6db23f8921a461da5e884a63f92e78a"
+            },
+            "theme": {
+              "bodyFont": "INTER",
+              "colorMode": "DARK",
+              "colorVariant": "FIDELITY",
+              "customColor": "#6366f1",
+              "designMd": "```markdown\n# Design System Specification\n\n## 1. Overview & Creative North Star: \"The Technical Monolith\"\n\nThis design system is engineered for high-stakes environments where precision is not an option—it is a requirement. Moving away from the \"friendly SaaS\" aesthetic, we are building **The Technical Monolith**. \n\nThe creative direction focuses on **Architectural Authority**. We achieve a $50k+ bespoke feel by leaning into extreme high-contrast, cinematic whitespace, and \"glass instrumentation.\" Instead of a traditional grid that feels like a website, we treat the screen as a high-end command center. Every interaction should feel intentional, heavy, and technically superior.\n\n**Key Deviations from Standard UI:**\n*   **Deep Scrolled Narrative:** Content is not crammed. We use `20` (7rem) to `24` (8.5rem) spacing units to let technical concepts breathe.\n*   **Asymmetric Sophistication:** We avoid centered, \"balanced\" templates. High-impact headings should be left-aligned with significant negative space to their right, creating a sense of forward momentum.\n*   **The \"Instrument\" Feel:** Using `Inter` in its most aggressive tracking and weight variations to mimic aerospace or high-end engineering interfaces.\n\n---\n\n## 2. Colors & Surface Architecture\n\nThe palette is anchored in the abyss. By using `#000000` as our canvas and the provided indigo/purple tokens as our \"light sources,\" we create a high-contrast environment that demands focus.\n\n### The \"No-Line\" Rule\n**Explicit Instruction:** You are prohibited from using 1px solid borders to define sections. Traditional boxes make a platform look like a template. \n*   **Boundary Definition:** Use the `surface` token hierarchy. A section might transition from `surface_dim` (#131313) to `surface_container_lowest` (#0e0e0e) to create a subtle, sophisticated edge.\n*   **The Tonal Shift:** To separate a sidebar or a card, use a background color shift of exactly one tier (e.g., placing a `surface_container` card on a `surface` background).\n\n### Surface Hierarchy & Nesting\nTreat the UI as a series of layered glass plates. \n1.  **Level 0 (Base):** `surface` (#131313) for the main page body.\n2.  **Level 1 (Sections):** `surface_container_low` (#1b1b1b) for deep-scroll content blocks.\n3.  **Level 2 (Interaction):** `surface_container_high` (#2a2a2a) for hover states and active components.\n\n### The \"Glass & Gradient\" Rule\nTo achieve a premium, technical feel:\n*   **Glassmorphism:** For floating menus or \"Heads-Up Display\" (HUD) elements, use `surface_variant` at 40% opacity with a `backdrop-filter: blur(20px)`.\n*   **Signature Gradients:** Main CTAs should not be flat. Use a linear gradient from `primary` (#c0c1ff) to `primary_container` (#8083ff) at a 135-degree angle to give the UI a \"lit\" appearance.\n\n---\n\n## 3. Typography: Authoritative Editorial\n\nWe use **Inter** exclusively. The power of this system comes from dramatic scale shifts and extreme letter-spacing.\n\n*   **The Hero Statement:** Use `display-lg` (3.5rem) but scaled up for Hero sections to the equivalent of 6xl-8xl. These should be `font-weight: 800` with `letter-spacing: -0.05em` to feel like a heavy, technical slab.\n*   **The Label Identity:** All technical labels (e.g., \"MODULE 01\", \"CRITICAL ERROR\") must use `label-sm` or `label-md`, set to **UPPERCASE** with `letter-spacing: 0.2em`. This conveys a \"serialized\" or \"industrial\" vibe.\n*   **Body Narrative:** Use `body-lg` (1rem) for readability. Ensure line-height is generous (1.6) to contrast against the tight, heavy headlines.\n\n---\n\n## 4. Elevation & Depth: Tonal Layering\n\nTraditional drop shadows are forbidden unless the element is \"floating\" (e.g., a modal). Depth is achieved through light, not shadow.\n\n*   **The Layering Principle:** Instead of a shadow, place a `surface_container_highest` element inside a `surface_container_low` section. The delta in luminance creates the \"lift.\"\n*   **Ambient Glow:** For high-priority alerts, use an \"Ambient Shadow.\" Instead of a black shadow, use a 15% opacity version of the `primary` or `secondary` token with a 40px blur. This makes the component look like it’s emitting light onto the black surface.\n*   **The \"Ghost Border\" Fallback:** If a container absolutely requires a boundary for accessibility, use the `outline_variant` token at **15% opacity**. It should be felt, not seen.\n\n---\n\n## 5. Components\n\n### Buttons: High-Stakes Interaction\n*   **Primary:** Solid `primary_container` (#8083ff) with `on_primary` text. Use `rounded-sm` (0.125rem) for a sharp, technical look. No large rounded corners—keep it architectural.\n*   **Tertiary/Ghost:** Use `label-md` uppercase text with a 2px bottom-bar in `primary` that expands on hover.\n\n### Input Fields: Minimalist Telemetry\n*   No four-sided boxes. Use a `surface_container_highest` background with a 1px solid bottom-border of `outline`. \n*   Active state: The bottom border glows using the `accent` (Blue #3b82f6) token.\n\n### Cards & Lists: The Separation Principle\n*   **Strict Rule:** No divider lines between list items. Use `spacing-6` (2rem) between items or alternating background tones of `surface_container_lowest` and `surface_container_low`.\n*   **Progress Indicators:** Use the `secondary` (Purple #a855f7) token for technical progress bars. They should be thin (4px) to look like precision instruments.\n\n### Technical HUD (Bespoke Component)\nCreate a \"Safety Telemetry\" card using Glassmorphism. `surface_variant` at 20% opacity, `backdrop-filter: blur(12px)`, and a \"Ghost Border\" of 10% opacity `on_surface`.\n\n---\n\n## 6. Do’s and Don'ts\n\n### Do:\n*   **Embrace the Dark:** Keep 90% of the UI in the `surface` to `surface_container_lowest` range.\n*   **Use Generous Padding:** If you think a section has enough padding, add `spacing-10` (3.5rem) more. Space equals luxury.\n*   **Technical Precision:** Ensure all icons are thin-stroke (1px or 1.5px) to match the `Inter` light weights.\n\n### Don’t:\n*   **Never use Grey:** Use the \"tinted neutrals\" provided (e.g., `surface_variant`). Pure grey kills the premium technical feel.\n*   **No \"Friendly\" Language:** The UI should feel like a flight manual. Use \"INITIALIZE\" instead of \"Get Started.\"\n*   **Avoid standard 4px borders:** Use the `sm` (0.125rem) or `none` (0px) roundedness for a more serious, custom-engineered appearance. \n\n---\n**Director's Note:** This platform is about high-stakes safety. If it feels too \"soft\" or \"web-like,\" you have failed the brief. It should feel like the interface of a multi-million dollar piece of hardware. When in doubt, increase the contrast and the whitespace.```",
+              "font": "INTER",
+              "headlineFont": "INTER",
+              "labelFont": "INTER",
+              "namedColors": {
+                "background": "#131313",
+                "error": "#ffb4ab",
+                "error_container": "#93000a",
+                "inverse_on_surface": "#303030",
+                "inverse_primary": "#494bd6",
+                "inverse_surface": "#e2e2e2",
+                "on_background": "#e2e2e2",
+                "on_error": "#690005",
+                "on_error_container": "#ffdad6",
+                "on_primary": "#1000a9",
+                "on_primary_container": "#0d0096",
+                "on_primary_fixed": "#07006c",
+                "on_primary_fixed_variant": "#2f2ebe",
+                "on_secondary": "#490080",
+                "on_secondary_container": "#d6a9ff",
+                "on_secondary_fixed": "#2c0051",
+                "on_secondary_fixed_variant": "#6900b3",
+                "on_surface": "#e2e2e2",
+                "on_surface_variant": "#c7c4d7",
+                "on_tertiary": "#002e6a",
+                "on_tertiary_container": "#00285d",
+                "on_tertiary_fixed": "#001a42",
+                "on_tertiary_fixed_variant": "#004395",
+                "outline": "#908fa0",
+                "outline_variant": "#464554",
+                "primary": "#c0c1ff",
+                "primary_container": "#8083ff",
+                "primary_fixed": "#e1e0ff",
+                "primary_fixed_dim": "#c0c1ff",
+                "secondary": "#ddb7ff",
+                "secondary_container": "#6f00be",
+                "secondary_fixed": "#f0dbff",
+                "secondary_fixed_dim": "#ddb7ff",
+                "surface": "#131313",
+                "surface_bright": "#393939",
+                "surface_container": "#1f1f1f",
+                "surface_container_high": "#2a2a2a",
+                "surface_container_highest": "#353535",
+                "surface_container_low": "#1b1b1b",
+                "surface_container_lowest": "#0e0e0e",
+                "surface_dim": "#131313",
+                "surface_tint": "#c0c1ff",
+                "surface_variant": "#353535",
+                "tertiary": "#adc6ff",
+                "tertiary_container": "#4d8eff",
+                "tertiary_fixed": "#d8e2ff",
+                "tertiary_fixed_dim": "#adc6ff"
+              },
+              "overrideNeutralColor": "#000000",
+              "overridePrimaryColor": "#6366f1",
+              "overrideSecondaryColor": "#a855f7",
+              "overrideTertiaryColor": "#3b82f6",
+              "roundness": "ROUND_FOUR",
+              "spacingScale": 3
+            },
+            "title": "EV Awareness & Safety Course",
+            "width": "2560"
+          }
+        ],
+        "theme": {}
+      }
+    },
+    {
+      "text": "I've completed the premium, deep-scroll e-learning course for \"EV Awareness & Safety.\" \n\nThe design features a high-stakes, technical aesthetic with:\n- **A Full-Viewport Hero Section:** Creating an authoritative first impression.\n- **Interactive Multi-Section Flow:** Including accordions for learning objectives, a learner registration form, and graphic-text layouts for vehicle identification.\n- **Specialized Learning Components:** Such as a bento-style grid for vehicle categories, interactive checklists, and a \"Shock Severity\" carousel.\n- **Knowledge Reinforcement:** Multiple interactive quizzes, a tabbed equipment guide, and flashcards for charging terminology.\n- **Technical Visual Language:** Utilizing a dark theme (#000000) with dramatic typography (Inter), glassmorphism, and generous whitespace for a bespoke, premium feel.\n\nAll elements are enhanced with the requested `data-*` attributes to support custom JavaScript interactivity for the accordions, quizzes, carousels, and tabs."
+    },
+    {
+      "suggestion": "Add a certificate generation screen at the end"
+    },
+    {
+      "suggestion": "Change the primary color to a high-visibility orange"
+    },
+    {
+      "suggestion": "Design a mobile version of this course page"
+    },
+    {
+      "suggestion": "Add more interactive diagrams for battery components"
+    }
+  ],
+  "projectId": "7851737172222780773",
+  "sessionId": "11378780906857609537"
+}

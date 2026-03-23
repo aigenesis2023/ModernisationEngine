@@ -1,0 +1,245 @@
+Design a complete, premium deep-scroll e-learning course page.
+
+COURSE: "EV Awareness & Safety"
+DOMAIN: safety and compliance training
+DESIGN FEEL: authoritative, high-stakes, technical
+BRAND: Primary #6366f1, Secondary #a855f7, Accent #3b82f6, Background #000000
+FONT: Inter
+
+This is a single-page deep-scroll course. It should look like a $50,000 custom-built learning platform — NOT a template. Use dramatic typography, generous whitespace, surface hierarchy for depth, and glass effects where appropriate. Dark theme based on the background color.
+
+CRITICAL — INTERACTIVE ELEMENTS:
+For elements that need JavaScript interactivity, add these data attributes:
+- Accordions: Use native <details><summary> HTML elements
+- Quiz questions: Add data-quiz on the container, data-correct="N" (zero-indexed correct answer index) on the container, and data-choice on each option button
+- Flashcards: Add data-flashcard on the card container
+- Checklists: Add data-checklist on the container, use native <input type="checkbox"> elements
+- Tab panels: Add data-tabs on the container, data-tab-trigger on each tab button, data-tab-panel on each content panel
+- Carousels/Narrative: Add data-carousel on the container, data-slide on each slide, data-prev and data-next on navigation buttons
+- Text inputs: Use native <form> elements with <input> fields
+
+Use Google Material Symbols icons throughout: <span class="material-symbols-outlined">icon_name</span>
+
+HERE IS THE EXACT CONTENT — use it all, do not skip or summarise anything:
+
+
+### SECTION: Introduction
+
+[HERO] EV Awareness & Safety
+Title: EV Awareness & Safety
+Subtitle: <p>Your essential guide to identifying electric vehicles, understanding high-voltage hazards, and working safely in the modern automotive workplace.</p>
+(Full-viewport hero with background image, dramatic gradient overlay, CTA button)
+
+### SECTION: Course Overview
+
+[TEXT] About This Course
+<p>This course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle.</p><p><strong>Important:</strong> This first-level course does not qualify you to work directly on high-voltage systems. You should inform your colleagues of your current trained level and request further assistance from a suitably trained person when necessary.</p>
+
+[ACCORDION] Learning Objectives
+Instruction: Explore each objective to understand what you'll learn.
+INTERACTIVE: Use native <details><summary> elements.
+  • Know About EV Types: <p>Identify electric and hybrid vehicles currently available. Recognise alternative fuel source vehicles and understand the differences between BEV, HEV, and PHEV.</p>
+  • Understand High-Voltage Hazards: <p>State the hazards associated with high-energy electricity. Understand the risks that may be present when connecting and charging electric/hybrid vehicles.</p>
+  • Work Safely Around EVs: <p>State safety precautions to take before approaching and working around electric/hybrid vehicles. Identify high-energy cabling and associated components.</p>
+  • Safe Charging Procedures: <p>Understand how vehicles may be safely charged using an external source. Know the correct procedures and terminology for EV charging.</p>
+
+[TEXTINPUT] Learner Registration
+INTERACTIVE: Use native <form> with <input> elements.
+<p>Please enter your details before continuing.</p>
+  Field: Name (placeholder: "Enter your full name")
+  Field: Organisation (placeholder: "Enter your organisation")
+  Field: Email (placeholder: "Enter your email address")
+
+### SECTION: Recognising an Electric Vehicle
+
+[TEXT] Why Identification Matters
+<p>It is critical that you can recognise an electric vehicle when it enters your workplace. Identifying features will differ between manufacturers, so you may need to exercise your skill and experience to determine the vehicle type — getting it wrong could be dangerous.</p>
+
+[GRAPHIC-TEXT] Exterior Identification
+<p>Look for these key exterior features:</p><ul><li><strong>Number plate:</strong> Full EVs may have a green border (not mandatory)</li><li><strong>Badging:</strong> Many EVs display a badge indicating electric power</li><li><strong>Charge port:</strong> BEVs and PHEVs have a battery charge connector port on the vehicle exterior</li></ul>
+(Side-by-side text + image layout. Include a relevant image.)
+
+[GRAPHIC-TEXT] Under the Bonnet
+<p>When inspecting the engine bay, look for these indicators:</p><ul><li><strong>Orange high-voltage cables</strong> — the universal indicator of an EV electrical system</li><li><strong>Power controller / inverter</strong> — converts battery DC to motor AC</li><li><strong>Warning labels</strong> — high-voltage warnings on components and covers</li></ul>
+(Side-by-side text + image layout. Include a relevant image.)
+
+[CHECKLIST] EV Identification Checklist
+INTERACTIVE: Add data-checklist, use native <input type="checkbox"> per item.
+
+Instruction: Review each indicator you would check when identifying an EV.
+  ☐ Badging on exterior bodywork — Look for EV, Electric, e-tron, or similar manufacturer badges.
+  ☐ External mains charging connection port
+  ☐ Instrument cluster warnings and messages
+  ☐ Power flow / energy use screen on dashboard
+  ☐ Bright-coloured (orange) high-voltage cables
+  ☐ Green band on number plate — Not mandatory — do not rely on this alone.
+  ☐ Warning labels on HV components
+
+[PULLQUOTE] 
+Quote: Not all types of EV will have the same identifying features. A Hybrid Electric Vehicle (HEV) may not have a charging port, but it still contains high-voltage components that present serious risks.
+Attribution: EV Safety Guidelines
+
+### SECTION: Types of Electric Vehicles
+
+[STAT-CALLOUT] The EV Landscape
+
+  3 — Main types of electric vehicle
+  650V — Maximum voltage in modern EVs
+  12V — Standard ICE vehicle voltage
+
+[BENTO] Vehicle Categories
+<p>Understanding the differences between vehicle types is essential for assessing risk and applying the correct procedures.</p>
+(Multi-card grid layout with images where available)
+  Card: BEV — Battery Electric Vehicle — <p>Fully electric, powered entirely by a rechargeable battery pack. No internal combustion engine. Charged exclusively via external mains connection.</p>
+  Card: HEV — Hybrid Electric Vehicle — <p>Combines a conventional engine with an electric motor. The battery charges through regenerative braking — there is no external charging port.</p>
+  Card: PHEV — Plug-in Hybrid Electric Vehicle — <p>Has both a combustion engine and an electric motor with a larger battery than HEV. Can be charged via external mains connection for extended electric-only range.</p>
+
+[COMPARISON] EV Identification Features by Type
+<p>Different vehicle types can be identified by different features. Use this table as a quick reference.</p>
+Columns: BEV | HEV | PHEV
+  Badging: ✓ | ✓ | ✓
+  External charging port: ✓ | ✗ | ✓
+  Instrument cluster warnings: ✓ | ✓ | ✓
+  Power flow screen: ✓ | ✓ | ✓
+  Orange HV cables: ✓ | ✓ | ✓
+  Green number plate band: ✓ | ✗ | ✓
+  Warning labels: ✓ | ✓ | ✓
+
+[MCQ] Knowledge Check
+INTERACTIVE: Add data-quiz and data-correct="0" attributes.
+Question: <p>You can use the UK Government Vehicle Enquiry website to check a vehicle's fuel type using its registration number. Which of the following is the correct URL?</p>
+Instruction: Choose the best answer.
+  vehicleenquiry.service.gov.uk [CORRECT]
+  dvla.gov.uk/vehicle-check
+  mot-check.service.gov.uk
+Correct feedback: <p>Correct! The Government Vehicle Enquiry Service at vehicleenquiry.service.gov.uk allows you to check a vehicle's fuel type using its registration number.</p>
+Incorrect feedback: <p>Not quite. The correct website is vehicleenquiry.service.gov.uk — bookmark it for quick vehicle identification.</p>
+
+### SECTION: Introduction
+
+[FULL-BLEED] Understanding the Hazards
+(Full-width parallax image with text overlay)
+<p>High-voltage systems in EVs present unique risks that require specific knowledge and precautions.</p>
+
+### SECTION: Hazards & Legislation
+
+[TEXT] High-Voltage Hazards in the Workplace
+<p>Electric and hybrid vehicles introduce hazards into the workplace in addition to those normally associated with vehicle repair and maintenance. Understanding these risks is the first step to working safely.</p>
+
+[ACCORDION] Key Risks of Working with EVs
+Instruction: Select each risk category to learn more.
+INTERACTIVE: Use native <details><summary> elements.
+  • Fatal Electric Shock: <p>The presence of high-voltage components and cabling capable of delivering a fatal electric shock. Voltages in EVs can reach up to 650V DC — significantly higher than the 12/24V found in conventional vehicles. Components may retain dangerous voltage even when the vehicle is switched off.</p>
+  • Fire & Explosion Risk: <p>The storage of electrical energy with the potential to cause explosion or fire. Stored electrical energy can be released suddenly if batteries are damaged or incorrectly modified, releasing explosive gases and harmful chemicals.</p>
+  • Silent Operation: <p>Electric motors operate silently, meaning people may be unaware of vehicles moving. Most EVs are fitted with a pedestrian sound emitter, but this may not always be active in workshop environments.</p>
+  • Unexpected Movement: <p>Electric motors can generate magnetic forces that cause unexpected movement. Remote operation keys that only need to be near the vehicle can accidentally power it up.</p>
+  • Medical Device Interference: <p>High-voltage electrical systems may affect medical devices such as pacemakers. Staff with such devices should be made aware of this risk.</p>
+  • Battery Handling: <p>Manual handling risks associated with battery replacement. Batteries are extremely heavy. Hybrid vehicles also retain a conventional fuel tank, adding further complexity.</p>
+
+[KEY-TERM] Legislation & Standards
+  HSE Guidelines: The UK Health and Safety Executive provides specific guidance for working with electric and hybrid vehicles in the motor vehicle repair industry. Source: hse.gov.uk/mvr/topics/electric-hybrid.htm
+  ECE R100 Certification: A UN regulation that defines 'High Voltage' as >60V to ≤1500V DC (or >30V to ≤1000V AC). This is the standard used when referring to electric vehicle high-voltage systems.
+  HSE Work Categories: The UK HSE identifies 4 categories of EV work: valeting/sales (low risk), incident response, routine maintenance, and high-voltage system work (specialist only).
+
+[TIMELINE] Low-Risk Activity Precautions
+<p>Even for valeting, sales, and other lower-risk activities around EVs, these precautions must be followed:</p>
+  Step 01: Secure the Key Fob — <p>Keep remote operation keys away from the vehicle to prevent accidental power-up. Use a signal-blocking pouch if available.</p>
+  Step 02: Be Aware of Silent Movement — <p>People moving EVs around the workplace should be aware that others may not hear them approaching. Sound your horn when necessary.</p>
+  Step 03: Avoid Pressure Washing HV Components — <p>High-pressure water can damage high-voltage electrical components and cables. Orange cables indicate HV systems — refer to manufacturer guidance before valeting in these areas.</p>
+  Step 04: Never Touch Orange Cables — <p>Orange cables carry high voltage. Never handle, move, or lean tools against them. Report any visible damage immediately.</p>
+
+### SECTION: Electric Shock & Emergency Response
+
+[GRAPHIC-TEXT] What Is an Electric Shock?
+<p>A voltage as low as <strong>50 volts</strong> applied between two parts of the human body causes a current to flow that can block the electrical signals between the brain and the muscles.</p><p>This may cause:</p><ul><li>Stopping the heart beating properly</li><li>Preventing the person from breathing</li><li>Causing muscle spasms</li><li>Secondary injuries such as burns and fall injuries</li></ul>
+(Side-by-side text + image layout. Include a relevant image.)
+
+[NARRATIVE] Shock Severity Factors
+INTERACTIVE: Add data-carousel, data-slide, data-prev, data-next.
+<p>The severity of an electric shock depends on a combination of factors:</p>
+  Slide: Voltage Level — <p>EV systems operate at up to 650V DC — far exceeding the 50V threshold for danger. Higher voltage drives more current through the body.</p>
+  Slide: Current Path Through Body — <p>The path the current takes matters greatly. Hand-to-hand across the chest is the most dangerous. Finger-to-finger on the same hand is less severe but still harmful.</p>
+  Slide: Duration of Contact — <p>Even fractions of a second of contact with high voltage can be fatal. Muscle spasms may prevent the person from releasing their grip, prolonging exposure.</p>
+  Slide: Skin Conductivity — <p>Wet or sweaty skin dramatically reduces resistance, allowing more current to flow. Always ensure dry conditions when near HV components.</p>
+
+[PROCESS-FLOW] Emergency Response Procedure
+<p>If you encounter someone receiving an electric shock, follow these steps in order:</p>
+  → Assess the Situation: Do NOT touch the casualty if they are still in contact with the electrical source. You are at risk of electrocution.
+  → Isolate the Power Source: For mains chargers, turn off power at the isolation switch. For vehicle HV systems, turn off the vehicle using the normal key. Consider that the vehicle may not be safe even when switched off.
+  → Separate Casualty from Source: If safe to do so, use a purpose-designed insulated rescue hook to separate the casualty from the power supply. Never use bare hands or conductive materials.
+  → Call 999: Call emergency services immediately. Provide details about the high-voltage nature of the incident.
+  → Provide First Aid: Once contact is broken, perform a primary survey and treat injuries. Seek assistance from trained first aiders on site.
+  → Secure the Scene: Cordon off the vehicle using a non-conductive safety barrier chain. Ensure no one else attempts to work on it until it has been made safe by a specialist.
+
+### SECTION: Safety Equipment
+
+[TEXT] Essential EV Safety Equipment
+<p>When electric vehicles enter your workplace, specific safety equipment must be available and correctly used. The following items should be present in any workshop or facility that handles EVs.</p>
+
+[TABS] Equipment Guide
+INTERACTIVE: Add data-tabs on container, data-tab-trigger on buttons, data-tab-panel on panels.
+
+  Tab "Vehicle ID Sign": <p>Should be present on every electric vehicle entering a workshop for repair so that all staff are aware it is an EV. This is the primary visual indicator that special precautions apply.</p>
+  Tab "Barrier Chain": <p>A non-conductive safety barrier chain or cordon that alerts others and prevents unauthorised access to the EV work area. Must be non-conductive to prevent creating an additional electrical path.</p>
+  Tab "Key Signal Blocker": <p>A pouch or case that prevents accidental power-up on keyless-start vehicles by blocking the key from receiving and sending signals to the vehicle. Essential for preventing unexpected movement.</p>
+  Tab "Rescue Hook": <p>An insulated hook to be used by suitably trained staff in an emergency to remove a casualty from the source of an electric shock. Must be rated for the voltages present and regularly inspected.</p>
+  Tab "Insulated Gloves": <p>Class 0 insulated gloves rated to 1500V DC. Should be worn by suitably trained persons when working on the high-voltage system. Must be inspected before each use for tears or damage.</p>
+  Tab "Warning Signs": <p>Signs that alert others to the risks present in the EV work area. Includes 'Do Not Start / Work in Progress' signs to prevent unauthorised starting during repair.</p>
+
+[MCQ] Equipment Knowledge Check
+INTERACTIVE: Add data-quiz and data-correct="1" attributes.
+Question: <p>What is the primary purpose of a key signal blocker pouch?</p>
+Instruction: Choose the best answer.
+  Prevents the key from being stolen
+  Prevents accidental power-up on keyless-start vehicles by blocking key signals [CORRECT]
+  Stops the key from being lost
+Correct feedback: <p>Correct! The signal blocker prevents the vehicle from detecting the key and accidentally powering up, which could cause unexpected movement.</p>
+Incorrect feedback: <p>Not quite. The primary purpose is to block the key's signals, preventing the vehicle from accidentally powering up when someone is working near it.</p>
+
+[MCQ] Rescue Equipment Check
+INTERACTIVE: Add data-quiz and data-correct="0" attributes.
+Question: <p>What is the purpose of an insulated rescue hook?</p>
+Instruction: Choose the best answer.
+  To be used by suitably trained staff in an emergency to remove a casualty from an electric shock source [CORRECT]
+  To move high-voltage cables away from the car if they become short-circuited
+  To pull damaged battery packs out of the vehicle
+Correct feedback: <p>Correct! The rescue hook is specifically designed to safely separate a person from an electrical source without the rescuer making direct contact.</p>
+Incorrect feedback: <p>The rescue hook's primary purpose is to safely remove a casualty from contact with an electrical source during an emergency.</p>
+
+### SECTION: Charging Terminology
+
+[GRAPHIC-TEXT] Understanding Charging
+<p>To work safely around EV charging systems, you need to understand the basic electrical terminology. These concepts determine charging speed, cable ratings, and safety thresholds.</p>
+(Side-by-side text + image layout. Include a relevant image.)
+
+[FLASHCARD] Key Electrical Terms
+INTERACTIVE: Add data-flashcard on each card (click to flip).
+Click each card to reveal the definition.
+  Front: What are Watts? → Back: Watts measure energy consumption — the rate at which electrical energy is used or generated. We're familiar with this from household items like lightbulbs. EV chargers are rated in kilowatts (kW).
+  Front: What are Amps? → Back: Amps (amperes) measure electrical current — the flow of electricity through a circuit. There is a relationship between voltage, amps, and resistance. A higher amp reading means more current is flowing.
+  Front: What is Voltage? → Back: Voltage is electrical pressure — the force that pushes current through a circuit. ICE vehicles use 12V, trucks use 24V, but EVs operate at 400-650V DC. This is why EV electrical systems are so dangerous.
+  Front: What does kWh mean? → Back: Kilowatt-hours measure battery capacity — how much energy the battery can store. A larger kWh rating means greater range. Typical EV batteries range from 40kWh to 100kWh.
+
+### SECTION: Glossary & Summary
+
+[KEY-TERM] Key Terms Reference
+  Arc Flash: A sudden release of electrical energy through the air when a high-voltage gap is breached. Can cause serious burns, injuries, or equipment damage.
+  BEV: Battery Electric Vehicle — powered entirely by a rechargeable battery pack with no internal combustion engine.
+  HEV: Hybrid Electric Vehicle — combines a conventional engine with an electric motor. Battery charges through regenerative braking only.
+  PHEV: Plug-in Hybrid Electric Vehicle — has both a combustion engine and electric motor with external charging capability.
+  ECE R100: The UN regulation defining high voltage as >60V to ≤1500V DC for electric vehicles. Specifies all required safety tests for EV approval.
+
+[TEXT] Course Complete
+<p>You have completed the EV Awareness & Safety course. Remember: always identify the vehicle type before beginning any work, never touch orange cables, and follow your organisation's specific EV safety procedures.</p><p>If you have any questions about working with electric vehicles, consult your workshop manager or a suitably trained EV specialist.</p>
+
+
+DESIGN REQUIREMENTS:
+- Deep scroll single page, every section flows into the next
+- Hero section should be full-viewport with dramatic imagery
+- Generate relevant imagery using placeholder URLs or Stitch's image generation
+- Generous section padding (7-10rem between major sections)
+- Typography scale: hero titles 6-8xl, section titles 3-4xl, body text lg
+- Uppercase tracking-widest labels for categories and badges
+- Surface hierarchy: use layered backgrounds for depth, not borders
+- All content must be included — this IS the course, not a preview
+- Make it responsive (mobile-friendly)
