@@ -233,38 +233,65 @@
       }
 
       if (templateHtml) {
-        // Embed images as base64 data URLs so they work from blob:// preview
-        log('  Embedding images...', 'info');
+        // Embed ONLY images that are referenced in the course JSON
+        // This prevents bloat from unused SCORM assets
+        log('  Embedding referenced images...', 'info');
         var imageMap = {}; // filename → data URL
         var embedCount = 0;
-        for (var imgEntry of fileMap) {
-          var imgPath = imgEntry[0], imgFile = imgEntry[1];
-          if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(imgPath)) {
-            try {
-              var imgBuf = await imgFile.arrayBuffer();
-              var imgBytes = new Uint8Array(imgBuf);
-              // Only embed images under 500KB to keep HTML size reasonable
-              if (imgBytes.length < 2097152) {
-                var binary = '';
-                for (var bi = 0; bi < imgBytes.length; bi++) binary += String.fromCharCode(imgBytes[bi]);
-                var ext = imgPath.split('.').pop().toLowerCase();
-                var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
-                           ext === 'png' ? 'image/png' :
-                           ext === 'gif' ? 'image/gif' :
-                           ext === 'svg' ? 'image/svg+xml' : 'image/' + ext;
-                var dataUrl = 'data:' + mime + ';base64,' + btoa(binary);
-                imageMap['course/en/images/' + imgPath.split('/').pop()] = dataUrl;
-                embedCount++;
-              }
-            } catch (e) {}
+        var totalEmbedSize = 0;
+        var MAX_TOTAL_EMBED = 4 * 1024 * 1024; // 4MB total cap for all images
+        var MAX_SINGLE_IMAGE = 500 * 1024; // 500KB per image
+
+        // First: find which image filenames are actually referenced in components
+        var componentsStr = JSON.stringify(adaptJson.components);
+        var referencedImages = new Set();
+        for (var fileEntry of fileMap) {
+          var filePath = fileEntry[0];
+          if (/\.(jpg|jpeg|png|gif|svg|webp)$/i.test(filePath)) {
+            var fileName = filePath.split('/').pop();
+            var adaptPath = 'course/en/images/' + fileName;
+            if (componentsStr.indexOf(adaptPath) !== -1) {
+              referencedImages.add(filePath);
+            }
           }
         }
-        log('  Embedded ' + embedCount + ' images', 'info');
+        log('  Found ' + referencedImages.size + ' referenced images (out of ' +
+            Array.from(fileMap.keys()).filter(function(k) { return /\.(jpg|jpeg|png)$/i.test(k); }).length + ' total)', 'info');
+
+        // Second: embed only referenced images, respecting size caps
+        for (var refImg of referencedImages) {
+          if (totalEmbedSize >= MAX_TOTAL_EMBED) {
+            log('  Hit 4MB embed cap, skipping remaining images', 'info');
+            break;
+          }
+          var imgFile = fileMap.get(refImg);
+          if (!imgFile) continue;
+          try {
+            var imgBuf = await imgFile.arrayBuffer();
+            var imgBytes = new Uint8Array(imgBuf);
+            if (imgBytes.length > MAX_SINGLE_IMAGE) {
+              log('  Skipping large image: ' + refImg.split('/').pop() + ' (' + (imgBytes.length/1024).toFixed(0) + 'KB)', 'info');
+              continue;
+            }
+            var binary = '';
+            for (var bi = 0; bi < imgBytes.length; bi++) binary += String.fromCharCode(imgBytes[bi]);
+            var ext = refImg.split('.').pop().toLowerCase();
+            var mime = ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' :
+                       ext === 'png' ? 'image/png' :
+                       ext === 'gif' ? 'image/gif' :
+                       ext === 'svg' ? 'image/svg+xml' : 'image/' + ext;
+            var dataUrl = 'data:' + mime + ';base64,' + btoa(binary);
+            imageMap['course/en/images/' + refImg.split('/').pop()] = dataUrl;
+            totalEmbedSize += imgBytes.length;
+            embedCount++;
+          } catch (e) {
+            log('  Image embed error: ' + e.message, 'info');
+          }
+        }
+        log('  Embedded ' + embedCount + ' images (' + (totalEmbedSize/1024).toFixed(0) + 'KB)', 'info');
 
         // Replace image paths in components with data URLs
-        var componentsStr = JSON.stringify(adaptJson.components);
         for (var imgKey in imageMap) {
-          // Replace all occurrences of the path with the data URL
           componentsStr = componentsStr.split(imgKey).join(imageMap[imgKey]);
         }
         adaptJson.components = JSON.parse(componentsStr);
