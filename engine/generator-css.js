@@ -617,12 +617,95 @@ window.GeneratorCSS = (function () {
       '.bento-tile:hover::before { opacity: 1; }\n' +
       '.bento-tile:hover { transform: translateY(-3px); ' + shadow + ' }\n' +
       '.bento-tile h3 { color: var(--primary); font-size: 1rem; margin-bottom: 0.75rem; }\n' +
+
+      // Tabs component — universal interaction for 3+ click-revealed layers
+      '.tabs-container {\n' +
+      '  width: 100%; max-width: var(--content-width);\n' +
+      '}\n' +
+      '.tab-buttons {\n' +
+      '  display: flex; gap: 0; overflow-x: auto;\n' +
+      '  border-bottom: 2px solid ' + border + ';\n' +
+      '  margin-bottom: 1.5rem;\n' +
+      '  -webkit-overflow-scrolling: touch;\n' +
+      '}\n' +
+      '.tab-btn {\n' +
+      '  background: none; border: none; cursor: pointer;\n' +
+      '  padding: 0.875rem 1.25rem; font-size: 0.875rem;\n' +
+      '  font-family: inherit; color: var(--text-muted);\n' +
+      '  white-space: nowrap; position: relative;\n' +
+      '  transition: color var(--transition);\n' +
+      '  font-weight: 500;\n' +
+      '}\n' +
+      '.tab-btn:hover { color: var(--primary); }\n' +
+      '.tab-btn.active {\n' +
+      '  color: var(--primary); font-weight: 600;\n' +
+      '}\n' +
+      '.tab-btn.active::after {\n' +
+      '  content: ""; position: absolute; bottom: -2px; left: 0; right: 0;\n' +
+      '  height: 2px; background: var(--primary);\n' +
+      '}\n' +
+      '.tab-content { min-height: 100px; }\n' +
+      '.tab-panel {\n' +
+      '  animation: revealUp 0.3s ease-out;\n' +
+      '}\n' +
+      '.tab-panel p {\n' +
+      '  line-height: 1.7; font-size: 1rem;\n' +
+      '}\n' +
+      '.tab-media { margin-bottom: 1rem; }\n' +
+      '.tab-image, .tab-video {\n' +
+      '  width: 100%; max-width: 600px;\n' +
+      '  border-radius: var(--radius);\n' +
+      '}\n' +
+
+      // Inline layers — auto-revealed content shown without interaction
+      '.inline-layers { width: 100%; max-width: var(--content-width); }\n' +
+      '.inline-layer-block {\n' +
+      '  padding: 1rem 0;\n' +
+      '  border-bottom: 1px solid ' + border + ';\n' +
+      '}\n' +
+      '.inline-layer-block:last-child { border-bottom: none; }\n' +
+      '.inline-layer-block p { line-height: 1.7; }\n' +
       '.bento-tile p { font-size: 0.95rem; }\n' +
       '.bento-image {\n' +
       '  width: 100%; border-radius: calc(var(--radius) * 0.6);\n' +
       '  overflow: hidden; margin-bottom: 1rem;\n' +
       '}\n' +
       '.bento-image img { width: 100%; height: auto; display: block; }\n\n' +
+
+      // Drag-and-drop sorting exercise
+      '.drag-drop-block { padding: 2rem; }\n' +
+      '.dd-instruction {\n' +
+      '  font-size: 1.05rem; margin-bottom: 1.5rem;\n' +
+      '  color: var(--text-muted); font-style: italic;\n' +
+      '}\n' +
+      '.dd-items {\n' +
+      '  display: grid; grid-template-columns: 1fr;\n' +
+      '  gap: 0.75rem; margin-bottom: 1.5rem;\n' +
+      '}\n' +
+      '.dd-item {\n' +
+      '  display: flex; align-items: center; justify-content: space-between;\n' +
+      '  padding: 1rem 1.25rem; border-radius: var(--radius);\n' +
+      '  border: 2px solid ' + border + ';\n' +
+      '  background: var(--surface); cursor: pointer;\n' +
+      '  font-family: inherit; font-size: 0.95rem;\n' +
+      '  text-align: left; transition: all var(--transition);\n' +
+      '  color: var(--text);\n' +
+      '}\n' +
+      '.dd-item:hover { border-color: var(--primary); transform: translateY(-2px); }\n' +
+      '.dd-item.yes {\n' +
+      '  border-color: var(--success); background: ' + (dark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)') + ';\n' +
+      '}\n' +
+      '.dd-item.no {\n' +
+      '  border-color: var(--error); background: ' + (dark ? 'rgba(239, 68, 68, 0.1)' : 'rgba(239, 68, 68, 0.05)') + ';\n' +
+      '}\n' +
+      '.dd-label { flex: 1; }\n' +
+      '.dd-status { font-size: 1.2rem; margin-left: 1rem; }\n' +
+      '.dd-feedback {\n' +
+      '  padding: 1rem; border-radius: var(--radius);\n' +
+      '  background: ' + (dark ? 'rgba(16, 185, 129, 0.1)' : 'rgba(16, 185, 129, 0.05)') + ';\n' +
+      '  border: 1px solid var(--success); margin-bottom: 1rem;\n' +
+      '}\n' +
+      '.dd-feedback p { color: var(--success); font-weight: 500; }\n' +
 
       // ============ TABLE ============
       '.table-container {\n' +

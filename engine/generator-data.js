@@ -548,6 +548,16 @@ window.GeneratorData = (function () {
       };
     }
 
+    // Drag and drop exercise
+    if (slide.isDragDrop && slide.dragDropData) {
+      data.isDragDrop = true;
+      data.dragDropData = {
+        instruction: slide.dragDropData.instruction,
+        items: slide.dragDropData.items,
+        feedback: slide.dragDropData.feedback
+      };
+    }
+
     // Results
     if (slide.type === 'results') {
       data.title = slide.originalTitle || 'Your Results';

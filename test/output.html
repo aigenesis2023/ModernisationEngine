@@ -528,6 +528,50 @@ p:last-child { margin-bottom: 0; }
 .bento-tile:hover::before { opacity: 1; }
 .bento-tile:hover { transform: translateY(-3px); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06); }
 .bento-tile h3 { color: var(--primary); font-size: 1rem; margin-bottom: 0.75rem; }
+.tabs-container {
+  width: 100%; max-width: var(--content-width);
+}
+.tab-buttons {
+  display: flex; gap: 0; overflow-x: auto;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+  -webkit-overflow-scrolling: touch;
+}
+.tab-btn {
+  background: none; border: none; cursor: pointer;
+  padding: 0.875rem 1.25rem; font-size: 0.875rem;
+  font-family: inherit; color: var(--text-muted);
+  white-space: nowrap; position: relative;
+  transition: color var(--transition);
+  font-weight: 500;
+}
+.tab-btn:hover { color: var(--primary); }
+.tab-btn.active {
+  color: var(--primary); font-weight: 600;
+}
+.tab-btn.active::after {
+  content: ""; position: absolute; bottom: -2px; left: 0; right: 0;
+  height: 2px; background: var(--primary);
+}
+.tab-content { min-height: 100px; }
+.tab-panel {
+  animation: revealUp 0.3s ease-out;
+}
+.tab-panel p {
+  line-height: 1.7; font-size: 1rem;
+}
+.tab-media { margin-bottom: 1rem; }
+.tab-image, .tab-video {
+  width: 100%; max-width: 600px;
+  border-radius: var(--radius);
+}
+.inline-layers { width: 100%; max-width: var(--content-width); }
+.inline-layer-block {
+  padding: 1rem 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+.inline-layer-block:last-child { border-bottom: none; }
+.inline-layer-block p { line-height: 1.7; }
 .bento-tile p { font-size: 0.95rem; }
 .bento-image {
   width: 100%; border-radius: calc(var(--radius) * 0.6);
@@ -535,6 +579,39 @@ p:last-child { margin-bottom: 0; }
 }
 .bento-image img { width: 100%; height: auto; display: block; }
 
+.drag-drop-block { padding: 2rem; }
+.dd-instruction {
+  font-size: 1.05rem; margin-bottom: 1.5rem;
+  color: var(--text-muted); font-style: italic;
+}
+.dd-items {
+  display: grid; grid-template-columns: 1fr;
+  gap: 0.75rem; margin-bottom: 1.5rem;
+}
+.dd-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.25rem; border-radius: var(--radius);
+  border: 2px solid rgba(0,0,0,0.08);
+  background: var(--surface); cursor: pointer;
+  font-family: inherit; font-size: 0.95rem;
+  text-align: left; transition: all var(--transition);
+  color: var(--text);
+}
+.dd-item:hover { border-color: var(--primary); transform: translateY(-2px); }
+.dd-item.yes {
+  border-color: var(--success); background: rgba(16, 185, 129, 0.05);
+}
+.dd-item.no {
+  border-color: var(--error); background: rgba(239, 68, 68, 0.05);
+}
+.dd-label { flex: 1; }
+.dd-status { font-size: 1.2rem; margin-left: 1rem; }
+.dd-feedback {
+  padding: 1rem; border-radius: var(--radius);
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid var(--success); margin-bottom: 1rem;
+}
+.dd-feedback p { color: var(--success); font-weight: 500; }
 .table-container {
   width: 100%; overflow-x: auto; margin: 1.5rem 0;
   border-radius: var(--radius); backdrop-filter: blur(12px); background: rgba(255,255,255,0.85); box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 24px rgba(0,0,0,0.06);
@@ -937,7 +1014,7 @@ window.addEventListener("beforeunload", function() { SCORM.finish(); });
 </script>
   <script>"use strict";
 var e = React.createElement;
-var SECTIONS = [{"id":"section_0","type":"hero","title":"Opening","slides":[{"id":"6PHP67HzAfO","type":"title","presentation":"hero","title":"EV Awareness & Safety","headings":["EV Awareness & Safety"],"images":[{"src":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","alt":"electric cars photo 1.jpg","role":"hero"},{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","image":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","videos":[{"src":"assets/media/video_5g5siribedP_5_56_960x540.mp4","poster":"assets/images/poster_6WQxVv1uraT_video_5g5siribedP_5_56_960x540.jpg","durationMs":0}],"video":{"src":"assets/media/video_5g5siribedP_5_56_960x540.mp4","poster":"assets/images/poster_6WQxVv1uraT_video_5g5siribedP_5_56_960x540.jpg","durationMs":0}}]},{"id":"section_1","type":"content","title":"Learning Objectives","slides":[{"id":"5oBKAOaplIi","type":"objectives","presentation":"interactive","title":"Learning Objectives","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5i81TpygqmO","name":"You should inform your colleagues of your current trained level & request...","texts":["You should inform your colleagues of your current trained level & request further assistance from a suitably trained person when necessary."]},{"id":"6BFhlMXDL7G","name":"This first level online course does not in any way qualify you to work directly...","texts":["This first level online course does not in any way qualify you to work directly upon the High Voltage systems on the vehicle."]},{"id":"5ninacGEWh9","name":"This training course is designed to improve your knowledge of Electric Vehicles...","texts":["This training course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle."]}],"interactionType":"accordion"}]},{"id":"section_2","type":"form","title":"Your Details","slides":[{"id":"5l79ARwxLmt","type":"form","presentation":"form","title":"Your Details","headings":["EV Awareness & Safety"],"images":[{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","image":"assets/images/6hpHeVfdBg9.png","fields":[{"label":"Name","placeholder":"Name","fieldType":"text","variableName":"TextEntry9"},{"label":"Organisation","placeholder":"Organisation","fieldType":"text","variableName":"TextEntry10"},{"label":"Email","placeholder":"Email","fieldType":"text","variableName":"TextEntry3"}],"instruction":"Please fill in your details"}]},{"id":"section_3","type":"branching","title":"Role Selector","slides":[{"id":"5qTAlMk2jlu","type":"branching","presentation":"branching","title":"Role Selector","images":[{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","image":"assets/images/6hpHeVfdBg9.png","options":[{"label":"Non-technical","value":"Non-technical","quizBank":"QuestionDraw51","description":"Site logistics, car parking and movements, valeting."},{"label":"Semi-technical","value":"Semi-technical","quizBank":"QuestionDraw71","description":"Service advisor, customer liaison."},{"label":"Technical","value":"Technical","quizBank":"QuestionDraw71","description":"Bodyshop & workshop technicians, Workshop manager."}],"quizBankIds":["QuestionDraw51","QuestionDraw71"]}]},{"id":"section_4","type":"branching","title":"Pre-knowledge check","slides":[{"id":"6X0JgCQ9g4V","type":"branching","presentation":"branching","title":"Pre-knowledge check","images":[{"src":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","alt":"electric cars photo 1.jpg","role":"background"}],"backgroundImage":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","layers":[{"id":"5XPL1uwcAwg","name":"OK. Let’s jump straight into the EV Safety and Awareness e-learning course.","texts":["OK. Let’s jump straight into the EV Safety and Awareness e-learning course."]},{"id":"62wTkvP8Rz2","name":"OK. Let’s test your existing knowledge of EV Safety and Awareness via the full...","texts":["OK. Let’s test your existing knowledge of EV Safety and Awareness via the full length knowledge check."]},{"id":"6mlHRY0gr6K","name":"OK. Let’s test your existing knowledge of EV Safety and Awareness via the short...","texts":["OK. Let’s test your existing knowledge of EV Safety and Awareness via the short knowledge check."]},{"id":"63dIcpemDry","name":"This course will begin with a short quiz designed to help you recognise your...","texts":["This course will begin with a short quiz designed to help you recognise your existing knowledge and those areas on which you will need to focus during the training course. You can skip the knowledge check if you’d prefer to jump straight into the course, however if you selected ‘Non Technical’ or ‘Semi Technical’ it might be a good idea to find out what you know, and what you don’t know. Based on your experience, our recommendation is highlighted below:"]}],"interactionType":"bento","options":[{"label":"Take a short version of the EV Knowledge Test","value":"Take a short version of the EV Knowledge Test","quizBank":"QuestionDraw51"},{"label":"Take the Full version of the EV Knowledge Test","value":"Take the Full version of the EV Knowledge Test","quizBank":"QuestionDraw71"},{"label":"SKIP the EV Knowledge Test","value":"SKIP the EV Knowledge Test"}],"quizBankIds":["QuestionDraw51","QuestionDraw71"],"texts":["This course will begin with a short quiz designed to help you recognise your existing knowledge and those areas on which you will need to focus during the training course. You can skip the knowledge check if you’d prefer to jump straight into the course, however if you selected ‘Non Technical’ or ‘Semi Technical’ it might be a good idea to find out what you know, and what you don’t know. Based on your experience, our recommendation is highlighted below:"]}]},{"id":"section_5","type":"results","title":"Your Results","slides":[{"id":"6gVJ6ioVtxh","type":"results","presentation":"results","title":"Results Slide (Non-tech group)","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5wavdtZS5sH","name":"It looks like you might need some help understanding electric vehicles. Don’t...","texts":["It looks like you might need some help understanding electric vehicles. Don’t worry - this course will help you achieve exactly that!"]},{"id":"5yOErPlnlss","name":"Well done! It looks like you’re already pretty knowledgeable on EVs. This...","texts":["Well done! It looks like you’re already pretty knowledgeable on EVs. This course will help fill any gaps in your knowledge."]}],"interactionType":"accordion"},{"id":"6ikVHG8x6rz","type":"results","presentation":"results","title":"Results Slide (Technical group)","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5VSCzzIPOLM","name":"It looks like you might need some help understanding electric vehicles. Don’t...","texts":["It looks like you might need some help understanding electric vehicles. Don’t worry - this course will help you achieve exactly that!"]},{"id":"6htOZ0TTDKP","name":"Well done! It looks like you’re already pretty knowledgeable on EVs. This...","texts":["Well done! It looks like you’re already pretty knowledgeable on EVs. This course will help fill any gaps in your knowledge."]}],"interactionType":"accordion"}]}];
+var SECTIONS = [{"id":"section_0","type":"hero","title":"Opening","slides":[{"id":"6PHP67HzAfO","type":"title","presentation":"hero","title":"EV Awareness & Safety","headings":["EV Awareness & Safety"],"images":[{"src":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","alt":"electric cars photo 1.jpg","role":"hero"},{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","image":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","videos":[{"src":"assets/media/video_5g5siribedP_5_56_960x540.mp4","poster":"assets/images/poster_6WQxVv1uraT_video_5g5siribedP_5_56_960x540.jpg","durationMs":0}],"video":{"src":"assets/media/video_5g5siribedP_5_56_960x540.mp4","poster":"assets/images/poster_6WQxVv1uraT_video_5g5siribedP_5_56_960x540.jpg","durationMs":0}}]},{"id":"section_1","type":"content","title":"Learning Objectives","slides":[{"id":"5oBKAOaplIi","type":"objectives","presentation":"interactive","title":"Learning Objectives","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5i81TpygqmO","name":"You should inform your colleagues of your current trained level & request...","texts":["You should inform your colleagues of your current trained level & request further assistance from a suitably trained person when necessary."]},{"id":"6BFhlMXDL7G","name":"This first level online course does not in any way qualify you to work directly...","texts":["This first level online course does not in any way qualify you to work directly upon the High Voltage systems on the vehicle."]},{"id":"5ninacGEWh9","name":"This training course is designed to improve your knowledge of Electric Vehicles...","texts":["This training course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle."]}],"interactionType":"tabs"}]},{"id":"section_2","type":"form","title":"Your Details","slides":[{"id":"5l79ARwxLmt","type":"form","presentation":"form","title":"Your Details","headings":["EV Awareness & Safety"],"images":[{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","image":"assets/images/6hpHeVfdBg9.png","fields":[{"label":"Name","placeholder":"Name","fieldType":"text","variableName":"TextEntry9"},{"label":"Organisation","placeholder":"Organisation","fieldType":"text","variableName":"TextEntry10"},{"label":"Email","placeholder":"Email","fieldType":"text","variableName":"TextEntry3"}],"instruction":"Please fill in your details"}]},{"id":"section_3","type":"branching","title":"Role Selector","slides":[{"id":"5qTAlMk2jlu","type":"branching","presentation":"branching","title":"Role Selector","images":[{"src":"assets/images/6hpHeVfdBg9.png","alt":"updated-logo.png","role":"logo"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","image":"assets/images/6hpHeVfdBg9.png","options":[{"label":"Non-technical","value":"Non-technical","quizBank":"QuestionDraw51","description":"Site logistics, car parking and movements, valeting."},{"label":"Semi-technical","value":"Semi-technical","quizBank":"QuestionDraw71","description":"Service advisor, customer liaison."},{"label":"Technical","value":"Technical","quizBank":"QuestionDraw71","description":"Bodyshop & workshop technicians, Workshop manager."}],"quizBankIds":["QuestionDraw51","QuestionDraw71"]}]},{"id":"section_4","type":"branching","title":"Pre-knowledge check","slides":[{"id":"6X0JgCQ9g4V","type":"branching","presentation":"branching","title":"Pre-knowledge check","images":[{"src":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","alt":"electric cars photo 1.jpg","role":"background"}],"backgroundImage":"assets/images/6FsIKpGsVCv_P_0_313_1922_1060.jpg","layers":[{"id":"5XPL1uwcAwg","name":"OK. Let’s jump straight into the EV Safety and Awareness e-learning course.","texts":["OK. Let’s jump straight into the EV Safety and Awareness e-learning course."]},{"id":"62wTkvP8Rz2","name":"OK. Let’s test your existing knowledge of EV Safety and Awareness via the full...","texts":["OK. Let’s test your existing knowledge of EV Safety and Awareness via the full length knowledge check."]},{"id":"6mlHRY0gr6K","name":"OK. Let’s test your existing knowledge of EV Safety and Awareness via the short...","texts":["OK. Let’s test your existing knowledge of EV Safety and Awareness via the short knowledge check."]},{"id":"63dIcpemDry","name":"This course will begin with a short quiz designed to help you recognise your...","texts":["This course will begin with a short quiz designed to help you recognise your existing knowledge and those areas on which you will need to focus during the training course. You can skip the knowledge check if you’d prefer to jump straight into the course, however if you selected ‘Non Technical’ or ‘Semi Technical’ it might be a good idea to find out what you know, and what you don’t know. Based on your experience, our recommendation is highlighted below:"]}],"interactionType":"bento","options":[{"label":"Take a short version of the EV Knowledge Test","value":"Take a short version of the EV Knowledge Test","quizBank":"QuestionDraw51"},{"label":"Take the Full version of the EV Knowledge Test","value":"Take the Full version of the EV Knowledge Test","quizBank":"QuestionDraw71"},{"label":"SKIP the EV Knowledge Test","value":"SKIP the EV Knowledge Test"}],"quizBankIds":["QuestionDraw51","QuestionDraw71"],"texts":["This course will begin with a short quiz designed to help you recognise your existing knowledge and those areas on which you will need to focus during the training course. You can skip the knowledge check if you’d prefer to jump straight into the course, however if you selected ‘Non Technical’ or ‘Semi Technical’ it might be a good idea to find out what you know, and what you don’t know. Based on your experience, our recommendation is highlighted below:"]}]},{"id":"section_5","type":"results","title":"Your Results","slides":[{"id":"6gVJ6ioVtxh","type":"results","presentation":"results","title":"Results Slide (Non-tech group)","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5wavdtZS5sH","name":"It looks like you might need some help understanding electric vehicles. Don’t...","texts":["It looks like you might need some help understanding electric vehicles. Don’t worry - this course will help you achieve exactly that!"]},{"id":"5yOErPlnlss","name":"Well done! It looks like you’re already pretty knowledgeable on EVs. This...","texts":["Well done! It looks like you’re already pretty knowledgeable on EVs. This course will help fill any gaps in your knowledge."]}],"interactionType":"accordion"},{"id":"6ikVHG8x6rz","type":"results","presentation":"results","title":"Results Slide (Technical group)","images":[{"src":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","alt":"electric vehicle photo 4.jpg","role":"background"}],"backgroundImage":"assets/images/6JpJu1LzRVa_P_0_119_2048_1151.jpg","layers":[{"id":"5VSCzzIPOLM","name":"It looks like you might need some help understanding electric vehicles. Don’t...","texts":["It looks like you might need some help understanding electric vehicles. Don’t worry - this course will help you achieve exactly that!"]},{"id":"6htOZ0TTDKP","name":"Well done! It looks like you’re already pretty knowledgeable on EVs. This...","texts":["Well done! It looks like you’re already pretty knowledgeable on EVs. This course will help fill any gaps in your knowledge."]}],"interactionType":"accordion"}]}];
 var QUIZ_BANKS = [{"id":"QuestionDraw51","title":"QuestionDraw51","group":"6gVJ6ioVtxh","drawCount":10,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]},{"id":"QuestionDraw71","title":"QuestionDraw71","group":"6ikVHG8x6rz","drawCount":20,"questions":[{"questionText":"A voltage of 60 volts is classed as high voltage when talking about vehicle electric systems.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"BEV stands for Battery Electric Vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A BEV is an electric vehicle which is powered solely by electricity from a battery.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"HEV stands for Hybrid Electric Vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle has an electric motor and an internal combustion engine.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A PHEV can be charged by plugging into the electric grid – eg a charging station or wall socket.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Every type of electric vehicle can be charged from a mains charger.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A hybrid electric vehicle can be recognized by a green band on the number plate.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A pure electric vehicle does not have an internal combustion engine.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The UK government MOT check website can be used to check if a vehicle runs on electricity or not.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"Depending on vehicle type and manufacturer, electric vehicle High Voltage operating systems can range between 1500-2000v.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"High voltage electric vehicle cables are usually orange in colour.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The AVAS system alerts pedestrians to the presence of a moving electric vehicle.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A voltage of just 50 volts can cause damage to the human body.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A rescue hook is used to disconnect vehicle high voltage cables in an emergency.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The on-board charger allows the vehicle battery to be charged from the mains supply.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"A parallel hybrid  can use a combination of the engine and the electric motor to drive the wheels.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The engine in a series hybrid is used to drive the wheels.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":false},{"text":"That’s not true","isCorrect":true},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"The High Voltage battery capacity is measured in Kwh.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"},{"questionText":"In addition to the high voltage battery, electric vehicles usually have a smaller 12-volt battery as well.","questionType":"pick-one","choices":[{"text":"Yes, that’s true","isCorrect":true},{"text":"That’s not true","isCorrect":false},{"text":"I’m not sure","isCorrect":false}],"correctFeedback":"Correct","incorrectFeedback":"Incorrect"}]}];
 var MASTERY = 80;
 var PASS_STATUS = "pass";
@@ -1225,6 +1302,8 @@ function App() {
   function renderSlide(slide, si, idx, section) {
     var key = "sl_" + si + "_" + idx;
     var delay = idx * 100;
+    // Drag-and-drop slides render as sorting exercises regardless of presentation type
+    if (slide.isDragDrop && slide.dragDropData) return renderDragDropExercise(slide, key, section, delay);
     switch (slide.presentation) {
       case "hero": return renderHeroSlide(slide, key);
       case "results": return renderResultsSlide(slide, key);
@@ -1236,6 +1315,51 @@ function App() {
       case "narrative": return renderNarrativeSlide(slide, key, section, delay);
       default: return renderNarrativeSlide(slide, key, section, delay);
     }
+  }
+
+  function renderDragDropExercise(slide, key, section, delay) {
+    var dd = slide.dragDropData;
+    if (!dd || !dd.items || dd.items.length === 0) return renderNarrativeSlide(slide, key, section, delay);
+    var _ddState = React.useState({}), ddAnswers = _ddState[0], setDdAnswers = _ddState[1];
+    var _ddChecked = React.useState(false), ddChecked = _ddChecked[0], setDdChecked = _ddChecked[1];
+    var instruction = dd.instruction || "Sort the items into the correct categories";
+    // Clean instruction text (remove "drag" references)
+    instruction = instruction.replace(/drag\s+(and\s+drop\s+)?/gi, "Sort ").replace(/drop\s*zone/gi, "category");
+    return e(RevealBlock, { className: "content-block drag-drop-block", key: key, style: { animationDelay: delay + "ms" } },
+      slide.title ? e("h3", { className: "slide-heading" }, slide.title) : null,
+      e("p", { className: "dd-instruction" }, instruction),
+      e("div", { className: "dd-items" },
+        dd.items.map(function(item, i) {
+          var currentChoice = ddAnswers[i] || "unassigned";
+          var statusClass = ddChecked ? " checked" : "";
+          return e("button", {
+            key: "dd" + i,
+            className: "dd-item " + currentChoice + statusClass,
+            onClick: function() {
+              if (ddChecked) return;
+              var newAnswers = Object.assign({}, ddAnswers);
+              newAnswers[i] = currentChoice === "unassigned" ? "yes" : currentChoice === "yes" ? "no" : "unassigned";
+              setDdAnswers(newAnswers);
+            }
+          },
+            e("span", { className: "dd-label" }, item),
+            e("span", { className: "dd-status" }, currentChoice === "yes" ? "\u2705" : currentChoice === "no" ? "\u274C" : "\u2753")
+          );
+        })
+      ),
+      !ddChecked ? e("button", {
+        className: "btn btn-primary",
+        onClick: function() { setDdChecked(true); }
+      }, "Check Answers") : e("div", { className: "dd-feedback" },
+        dd.feedback && dd.feedback.length > 0 ?
+          e("p", null, dd.feedback[0]) :
+          e("p", null, "Review your answers above.")
+      ),
+      ddChecked ? e("button", {
+        className: "btn btn-outline",
+        onClick: function() { setDdAnswers({}); setDdChecked(false); }
+      }, "Try Again") : null
+    );
   }
 
   function renderHeroSlide(slide, key) {
@@ -1349,10 +1473,65 @@ function App() {
   function renderLayers(slide) {
     if (!slide.layers || slide.layers.length === 0) return null;
     var type = slide.interactionType || "accordion";
+    if (type === "inline") return renderInlineLayers(slide);
+    if (type === "tabs") return renderTabs(slide);
     if (shouldUseFlipCards(slide)) return renderFlipCards(slide);
     if (type === "bento") return renderBentoGrid(slide);
     if (type === "modal") return renderModalTriggers(slide);
     return renderAccordion(slide);
+  }
+
+  function renderInlineLayers(slide) {
+    return e("div", { className: "inline-layers" },
+      slide.layers.map(function(layer, i) {
+        var text = typeof layer === "string" ? layer : (layer.texts ? layer.texts.join(" ") : "");
+        if (!text.trim()) return null;
+        return e("div", { className: "inline-layer-block", key: "il" + i },
+          e("p", null, text)
+        );
+      })
+    );
+  }
+
+  var _tabState = React.useState(0), activeTab = _tabState[0], setActiveTab = _tabState[1];
+  function renderTabs(slide) {
+    var layers = slide.layers || [];
+    if (layers.length === 0) return null;
+    return e("div", { className: "tabs-container" },
+      e("div", { className: "tab-buttons" },
+        layers.map(function(layer, i) {
+          var label = (typeof layer === "string") ? "Tab " + (i+1) :
+            (layer.name && layer.name !== "Layer " + (i+1) ? layer.name :
+             layer.texts && layer.texts[0] ? layer.texts[0].substring(0, 30) : "Tab " + (i+1));
+          return e("button", {
+            key: "tab" + i,
+            className: "tab-btn" + (activeTab === i ? " active" : ""),
+            onClick: function() { setActiveTab(i); }
+          }, label);
+        })
+      ),
+      e("div", { className: "tab-content" },
+        layers.map(function(layer, i) {
+          if (activeTab !== i) return null;
+          var text = typeof layer === "string" ? layer : (layer.texts ? layer.texts.join(" ") : "");
+          var images = (typeof layer === "object" && layer.images) ? layer.images : [];
+          var videos = (typeof layer === "object" && layer.videos) ? layer.videos : [];
+          return e("div", { className: "tab-panel active", key: "tp" + i },
+            images.length > 0 ? e("div", { className: "tab-media" },
+              images.map(function(img, j) {
+                return e("img", { key: "ti" + j, src: img.src || img, alt: img.alt || "", className: "tab-image" });
+              })
+            ) : null,
+            videos.length > 0 ? e("div", { className: "tab-media" },
+              videos.map(function(vid, j) {
+                return e("video", { key: "tv" + j, src: vid.src || vid, controls: true, className: "tab-video" });
+              })
+            ) : null,
+            text ? e("p", null, text) : null
+          );
+        })
+      )
+    );
   }
 
   function renderInteractions(slide) {

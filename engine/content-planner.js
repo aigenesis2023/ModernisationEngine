@@ -746,6 +746,47 @@ window.ContentPlanner = (function () {
       });
     }
 
+    // Capture interaction model from trigger analysis (universal)
+    if (slide.interactionModel) {
+      plan.interactionModel = slide.interactionModel;
+
+      // Detect drag-and-drop exercises from ondragstart events.
+      // Universal: ALL Storyline drag-and-drop interactions have ondragstart
+      // events on the draggable objects. We detect this and extract the
+      // drag items + drop targets from the slide content for rendering
+      // as a web-native sorting/matching exercise.
+      var hasDragEvents = slide.interactionModel.variableSets.some(function (v) {
+        return v.event === 'ondragstart';
+      });
+      if (hasDragEvents) {
+        plan.isDragDrop = true;
+        // Extract drag items and drop targets from text elements.
+        // Universal pattern: drag items are short labels, drop targets are
+        // category labels (YES/NO, or descriptive categories).
+        // The question text contains "drag" instruction which we filter.
+        var allTexts = plan.content.headings.concat(plan.content.bodyTexts);
+        var instruction = allTexts.find(function (t) {
+          return /drag/i.test(t) && t.length > 20;
+        }) || '';
+        plan.dragDropData = {
+          instruction: instruction,
+          // The actual items and targets need to be inferred from the
+          // text elements — short ALL CAPS or short labels are typically
+          // drop targets, while medium-length texts are drag items.
+          items: plan.content.bodyTexts.filter(function (t) {
+            return t.length > 5 && t.length < 200 && !/drag|submit|arrow|icon|line \d/i.test(t) && t !== instruction;
+          }),
+          feedback: plan.layers.filter(function (l) {
+            return l.texts.some(function (t) {
+              return /correct|incorrect|right|wrong/i.test(t.content);
+            });
+          }).map(function (l) {
+            return l.texts.map(function (t) { return t.content; }).join(' ');
+          })
+        };
+      }
+    }
+
     // Deduplicate content: same text appearing in multiple layers/states
     // This is universal — Storyline courses often have the same text in
     // different states (normal, hover, visited) or repeated across layers
@@ -1009,59 +1050,42 @@ window.ContentPlanner = (function () {
 
     // Lots of layers → interactive section
     if (hasLayers && plan.layers.length >= 2) {
-      // STEP 1: Check triggers to understand HOW layers are revealed.
-      // This is universal — Storyline stores layer show/hide triggers in
-      // the actionGroups and events of each slide's objects.
-      //
-      // Patterns:
-      //   - show_slidelayer on onrelease/onclick = click-to-reveal (accordion/tabs)
-      //   - show_slidelayer on ontransitionin/onslidestart = auto-show (inline)
-      //   - No show_slidelayer actions = layers shown via player nav arrows (accordion)
-      var allTriggers = (plan.triggers || []).concat([]);
-      plan.layers.forEach(function (l) {
-        (l.triggers || []).forEach(function (t) { allTriggers.push(t); });
-      });
+      // Use the interaction model from trigger analysis if available.
+      // This is universal — the scorm-parser analyses ALL Storyline exports'
+      // actionGroups and events to classify the interaction type.
+      var imType = plan.interactionModel ? plan.interactionModel.type : null;
 
-      var showLayerActions = allTriggers.filter(function (t) {
-        return t.actions && t.actions.some(function (a) {
-          return a.kind === 'show_slidelayer' || a.kind === 'show';
-        });
-      });
-
-      var hasClickTriggers = showLayerActions.some(function (t) {
-        return t.event === 'onclick' || t.event === 'onrelease' || t.event === 'onpress';
-      });
-
-      var hasAutoTriggers = showLayerActions.some(function (t) {
-        return t.event === 'ontransitionin' || t.event === 'onslidestart' || t.event === 'onbeforeslidein';
-      });
-
-      // If ALL layers are auto-shown (no click interaction), render inline
-      if (hasAutoTriggers && !hasClickTriggers && showLayerActions.length > 0) {
-        // Layers are revealed automatically — no user interaction needed.
-        // Render all layer content inline rather than behind accordions.
+      // Auto-revealed layers (ontransitionin/onslidestart) = no user interaction needed.
+      // Render all layer content inline rather than behind accordions.
+      if (imType === 'auto-reveal') {
         plan.interactionType = 'inline';
         return 'narrative';
       }
 
-      // STEP 2: Fall back to content-based classification
+      // Conditional layers (shown based on variable values) = results/branching.
+      // These are already handled by results/branching section types.
+      if (imType === 'conditional') {
+        plan.interactionType = 'conditional';
+        return 'interactive';
+      }
+
+      // Content-based classification for click-to-reveal layers.
+      // The trigger analysis tells us it's click-based; now decide the COMPONENT.
       var layerHasImages = plan.layers.some(function (l) { return l.images.length > 0; });
       var avgTextLen = plan.layers.reduce(function (sum, l) {
         return sum + l.texts.reduce(function (s, t) { return s + t.content.length; }, 0);
       }, 0) / plan.layers.length;
-
-      // Content-based classification for click-to-reveal layers:
-      //
-      // BENTO GRID: 3-6 layers with SHORT text (key facts, bullet points).
-      // MODAL: Layers with images — each layer is a visual topic.
-      // ACCORDION: All other cases — text-heavy expandable content.
       var maxTextLen = plan.layers.reduce(function (max, l) {
         return Math.max(max, l.texts.reduce(function (s, t) { return s + t.content.length; }, 0));
       }, 0);
 
       var hasModalLayers = plan.layers.some(function (l) { return l.isModal; });
 
-      if (hasModalLayers) {
+      // Tabbed interaction (3+ unique target layers via click) → tabs or accordion
+      if (imType === 'tabbed' && plan.layers.length >= 3 && plan.layers.length <= 8) {
+        // Tabs work best for 3-8 panels with moderate content
+        plan.interactionType = 'tabs';
+      } else if (hasModalLayers) {
         plan.interactionType = 'modal';
       } else if (plan.layers.length >= 3 && plan.layers.length <= 6 && avgTextLen < 100 && maxTextLen < 150) {
         plan.interactionType = 'bento';

@@ -427,6 +427,8 @@ window.GeneratorApp = (function () {
       '  function renderSlide(slide, si, idx, section) {\n' +
       '    var key = "sl_" + si + "_" + idx;\n' +
       '    var delay = idx * 100;\n' +
+      '    // Drag-and-drop slides render as sorting exercises regardless of presentation type\n' +
+      '    if (slide.isDragDrop && slide.dragDropData) return renderDragDropExercise(slide, key, section, delay);\n' +
       '    switch (slide.presentation) {\n' +
       '      case "hero": return renderHeroSlide(slide, key);\n' +
       '      case "results": return renderResultsSlide(slide, key);\n' +
@@ -438,6 +440,55 @@ window.GeneratorApp = (function () {
       '      case "narrative": return renderNarrativeSlide(slide, key, section, delay);\n' +
       '      default: return renderNarrativeSlide(slide, key, section, delay);\n' +
       '    }\n  }\n\n' +
+
+      // --- Drag-and-drop exercise (universal) ---
+      // Storyline drag-and-drop interactions are rendered as click-to-sort
+      // exercises in the web output. The user clicks items to cycle them
+      // through categories, then checks their answers.
+      '  function renderDragDropExercise(slide, key, section, delay) {\n' +
+      '    var dd = slide.dragDropData;\n' +
+      '    if (!dd || !dd.items || dd.items.length === 0) return renderNarrativeSlide(slide, key, section, delay);\n' +
+      '    var _ddState = React.useState({}), ddAnswers = _ddState[0], setDdAnswers = _ddState[1];\n' +
+      '    var _ddChecked = React.useState(false), ddChecked = _ddChecked[0], setDdChecked = _ddChecked[1];\n' +
+      '    var instruction = dd.instruction || "Sort the items into the correct categories";\n' +
+      '    // Clean instruction text (remove "drag" references)\n' +
+      '    instruction = instruction.replace(/drag\\s+(and\\s+drop\\s+)?/gi, "Sort ").replace(/drop\\s*zone/gi, "category");\n' +
+      '    return e(RevealBlock, { className: "content-block drag-drop-block", key: key, style: { animationDelay: delay + "ms" } },\n' +
+      '      slide.title ? e("h3", { className: "slide-heading" }, slide.title) : null,\n' +
+      '      e("p", { className: "dd-instruction" }, instruction),\n' +
+      '      e("div", { className: "dd-items" },\n' +
+      '        dd.items.map(function(item, i) {\n' +
+      '          var currentChoice = ddAnswers[i] || "unassigned";\n' +
+      '          var statusClass = ddChecked ? " checked" : "";\n' +
+      '          return e("button", {\n' +
+      '            key: "dd" + i,\n' +
+      '            className: "dd-item " + currentChoice + statusClass,\n' +
+      '            onClick: function() {\n' +
+      '              if (ddChecked) return;\n' +
+      '              var newAnswers = Object.assign({}, ddAnswers);\n' +
+      '              newAnswers[i] = currentChoice === "unassigned" ? "yes" : currentChoice === "yes" ? "no" : "unassigned";\n' +
+      '              setDdAnswers(newAnswers);\n' +
+      '            }\n' +
+      '          },\n' +
+      '            e("span", { className: "dd-label" }, item),\n' +
+      '            e("span", { className: "dd-status" }, currentChoice === "yes" ? "\\u2705" : currentChoice === "no" ? "\\u274C" : "\\u2753")\n' +
+      '          );\n' +
+      '        })\n' +
+      '      ),\n' +
+      '      !ddChecked ? e("button", {\n' +
+      '        className: "btn btn-primary",\n' +
+      '        onClick: function() { setDdChecked(true); }\n' +
+      '      }, "Check Answers") : e("div", { className: "dd-feedback" },\n' +
+      '        dd.feedback && dd.feedback.length > 0 ?\n' +
+      '          e("p", null, dd.feedback[0]) :\n' +
+      '          e("p", null, "Review your answers above.")\n' +
+      '      ),\n' +
+      '      ddChecked ? e("button", {\n' +
+      '        className: "btn btn-outline",\n' +
+      '        onClick: function() { setDdAnswers({}); setDdChecked(false); }\n' +
+      '      }, "Try Again") : null\n' +
+      '    );\n' +
+      '  }\n\n' +
 
       // --- Hero slide ---
       '  function renderHeroSlide(slide, key) {\n' +
@@ -554,10 +605,67 @@ window.GeneratorApp = (function () {
       '  function renderLayers(slide) {\n' +
       '    if (!slide.layers || slide.layers.length === 0) return null;\n' +
       '    var type = slide.interactionType || "accordion";\n' +
+      '    if (type === "inline") return renderInlineLayers(slide);\n' +
+      '    if (type === "tabs") return renderTabs(slide);\n' +
       '    if (shouldUseFlipCards(slide)) return renderFlipCards(slide);\n' +
       '    if (type === "bento") return renderBentoGrid(slide);\n' +
       '    if (type === "modal") return renderModalTriggers(slide);\n' +
       '    return renderAccordion(slide);\n' +
+      '  }\n\n' +
+
+      // Inline layers: auto-revealed content shown without any interaction
+      '  function renderInlineLayers(slide) {\n' +
+      '    return e("div", { className: "inline-layers" },\n' +
+      '      slide.layers.map(function(layer, i) {\n' +
+      '        var text = typeof layer === "string" ? layer : (layer.texts ? layer.texts.join(" ") : "");\n' +
+      '        if (!text.trim()) return null;\n' +
+      '        return e("div", { className: "inline-layer-block", key: "il" + i },\n' +
+      '          e("p", null, text)\n' +
+      '        );\n' +
+      '      })\n' +
+      '    );\n' +
+      '  }\n\n' +
+
+      // Tabs: tabbed interface for 3+ click-revealed layers
+      '  var _tabState = React.useState(0), activeTab = _tabState[0], setActiveTab = _tabState[1];\n' +
+      '  function renderTabs(slide) {\n' +
+      '    var layers = slide.layers || [];\n' +
+      '    if (layers.length === 0) return null;\n' +
+      '    return e("div", { className: "tabs-container" },\n' +
+      '      e("div", { className: "tab-buttons" },\n' +
+      '        layers.map(function(layer, i) {\n' +
+      '          var label = (typeof layer === "string") ? "Tab " + (i+1) :\n' +
+      '            (layer.name && layer.name !== "Layer " + (i+1) ? layer.name :\n' +
+      '             layer.texts && layer.texts[0] ? layer.texts[0].substring(0, 30) : "Tab " + (i+1));\n' +
+      '          return e("button", {\n' +
+      '            key: "tab" + i,\n' +
+      '            className: "tab-btn" + (activeTab === i ? " active" : ""),\n' +
+      '            onClick: function() { setActiveTab(i); }\n' +
+      '          }, label);\n' +
+      '        })\n' +
+      '      ),\n' +
+      '      e("div", { className: "tab-content" },\n' +
+      '        layers.map(function(layer, i) {\n' +
+      '          if (activeTab !== i) return null;\n' +
+      '          var text = typeof layer === "string" ? layer : (layer.texts ? layer.texts.join(" ") : "");\n' +
+      '          var images = (typeof layer === "object" && layer.images) ? layer.images : [];\n' +
+      '          var videos = (typeof layer === "object" && layer.videos) ? layer.videos : [];\n' +
+      '          return e("div", { className: "tab-panel active", key: "tp" + i },\n' +
+      '            images.length > 0 ? e("div", { className: "tab-media" },\n' +
+      '              images.map(function(img, j) {\n' +
+      '                return e("img", { key: "ti" + j, src: img.src || img, alt: img.alt || "", className: "tab-image" });\n' +
+      '              })\n' +
+      '            ) : null,\n' +
+      '            videos.length > 0 ? e("div", { className: "tab-media" },\n' +
+      '              videos.map(function(vid, j) {\n' +
+      '                return e("video", { key: "tv" + j, src: vid.src || vid, controls: true, className: "tab-video" });\n' +
+      '              })\n' +
+      '            ) : null,\n' +
+      '            text ? e("p", null, text) : null\n' +
+      '          );\n' +
+      '        })\n' +
+      '      )\n' +
+      '    );\n' +
       '  }\n\n' +
 
       // --- Interaction rendering (sliders, hotspots, etc.) ---

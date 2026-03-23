@@ -659,6 +659,11 @@ window.SCORMParser = (function () {
 
     const triggers = parseTriggers(timelineData, objects);
 
+    // Build interaction model by analysing show_slidelayer triggers across
+    // ALL layers and objects. This is universal — Storyline always uses
+    // actionGroups and events to control layer visibility.
+    const interactionModel = analyseInteractions(slideData);
+
     const layers = (slideData.slideLayers || []).slice(1).map((layer, i) => ({
       id: layer.id || 'layer_' + (i + 1), name: layer.name || 'Layer ' + (i + 1),
       elements: parseElements(layer.objects || [], slideWidth, slideHeight),
@@ -682,9 +687,165 @@ window.SCORMParser = (function () {
     return { id: slideId, title: slideData.title, type: slideType, slideNumber,
       elements, layers, timeline, transitions: transition,
       audioNarrationId: slideData.globalAudioId || undefined, triggers,
+      interactionModel,
       locked: slideData.slideLock || false,
       hasNavRestriction: hasNavRestriction || false,
       resume: slideData.resume || false };
+  }
+
+  // ---- Interaction model analysis ----
+  //
+  // Analyses the trigger/action system to understand HOW the author intended
+  // layers and objects to be interacted with. This is universal across ALL
+  // Storyline exports because the action system uses the same vocabulary.
+  //
+  // Output: { type, layerTriggers[], variableSets[], conditions[], gotos[] }
+  //   type: 'click-reveal' | 'auto-reveal' | 'conditional' | 'sequential' | 'static'
+  //   layerTriggers: which objects show which layers, and how
+  //   variableSets: which interactions set which variables
+  //   conditions: what conditions gate content visibility
+  //   gotos: what navigation happens and when
+
+  function analyseInteractions(slideData) {
+    const layerShows = [];
+    const layerHides = [];
+    const variableSets = [];
+    const conditions = [];
+    const gotos = [];
+
+    function scanActions(actions, sourceObjId, sourceLayerIdx, eventName) {
+      for (const a of (actions || [])) {
+        if (a.kind === 'show_slidelayer' || (a.kind === 'show' && a.layerRef)) {
+          layerShows.push({
+            sourceObjectId: sourceObjId,
+            sourceLayerIndex: sourceLayerIdx,
+            event: eventName,
+            targetLayerId: a.layerRef?.value || a.objRef?.value || ''
+          });
+        }
+        if (a.kind === 'hide_slidelayer' || (a.kind === 'hide' && a.layerRef)) {
+          layerHides.push({
+            sourceLayerIndex: sourceLayerIdx,
+            targetLayerId: a.layerRef?.value || ''
+          });
+        }
+        if (a.kind === 'adjustvar') {
+          const varName = (a.variable || '').replace('_player.', '');
+          // Skip system variables (hover, disabled, internal state management)
+          if (varName && !/^_/.test(varName)) {
+            variableSets.push({
+              sourceLayerIndex: sourceLayerIdx,
+              event: eventName,
+              variable: varName,
+              operator: a.operator || 'set',
+              value: a.value?.value !== undefined ? a.value.value : undefined
+            });
+          }
+        }
+        if (a.kind === 'gotoplay' || a.kind === 'playnextdrawslide') {
+          gotos.push({
+            sourceLayerIndex: sourceLayerIdx,
+            event: eventName,
+            target: a.slideRef?.value || a.kind
+          });
+        }
+        if (a.kind === 'if_action' && a.condition?.statement) {
+          const stmt = a.condition.statement;
+          const varRef = (stmt.valuea || '').replace('_player.', '');
+          // Skip system conditions (window context, prev history)
+          if (varRef && !varRef.includes('$WindowId') && !varRef.includes('#hasPrevHistory')) {
+            conditions.push({
+              variable: varRef,
+              operator: stmt.operator || 'eq',
+              value: stmt.valueb,
+              event: eventName
+            });
+          }
+          scanActions(a.thenActions, sourceObjId, sourceLayerIdx, eventName + '/then');
+          scanActions(a.elseActions, sourceObjId, sourceLayerIdx, eventName + '/else');
+        }
+      }
+    }
+
+    // Scan slide-level events
+    for (const evt of (slideData.events || [])) {
+      scanActions(evt.actions, 'slide', -1, evt.kind);
+    }
+    // Scan slide-level actionGroups
+    if (slideData.actionGroups && typeof slideData.actionGroups === 'object') {
+      for (const [agName, ag] of Object.entries(slideData.actionGroups)) {
+        if (/^ActGrp(Set|Clear)(Hover|Disabled|Down|Checked)/i.test(agName)) continue;
+        scanActions(ag.actions, 'slide-ag', -1, agName);
+      }
+    }
+    // Scan each layer's objects and events
+    for (let li = 0; li < (slideData.slideLayers || []).length; li++) {
+      const layer = slideData.slideLayers[li];
+      for (const evt of (layer.events || [])) {
+        scanActions(evt.actions, 'layer', li, evt.kind);
+      }
+      if (layer.actionGroups && typeof layer.actionGroups === 'object') {
+        for (const [agName, ag] of Object.entries(layer.actionGroups)) {
+          if (/^ActGrp(Set|Clear)(Hover|Disabled|Down|Checked)/i.test(agName)) continue;
+          scanActions(ag.actions, 'layer-ag', li, agName);
+        }
+      }
+      function scanObjs(objs) {
+        for (const o of (objs || [])) {
+          if (o.actionGroups && typeof o.actionGroups === 'object') {
+            for (const [agName, ag] of Object.entries(o.actionGroups)) {
+              if (/^ActGrp(Set|Clear)(Hover|Disabled|Down|Checked|Unchecked|State)/i.test(agName)) continue;
+              scanActions(ag.actions, o.id || o.referenceName || 'obj', li, agName);
+            }
+          }
+          if (o.events) {
+            for (const evt of o.events) {
+              scanActions(evt.actions, o.id || o.referenceName || 'obj', li, evt.kind);
+            }
+          }
+          if (o.objects) scanObjs(o.objects);
+        }
+      }
+      scanObjs(layer.objects);
+    }
+
+    // Classify the overall interaction type
+    const hasClickShows = layerShows.some(s =>
+      /release|press|click/i.test(s.event) && !/then|else/i.test(s.event));
+    const hasAutoShows = layerShows.some(s =>
+      /transition|slidestart|timeline/i.test(s.event));
+    const hasConditionalShows = layerShows.some(s =>
+      /then|else/i.test(s.event));
+    const uniqueTargetLayers = new Set(layerShows.map(s => s.targetLayerId));
+
+    let type = 'static';
+    if (hasClickShows && uniqueTargetLayers.size >= 3) type = 'tabbed';
+    else if (hasClickShows) type = 'click-reveal';
+    else if (hasConditionalShows) type = 'conditional';
+    else if (hasAutoShows) type = 'auto-reveal';
+    else if (layerShows.length > 0) type = 'sequential';
+
+    return {
+      type,
+      layerShowCount: layerShows.length,
+      layerHideCount: layerHides.length,
+      variableSetCount: variableSets.length,
+      conditionCount: conditions.length,
+      gotoCount: gotos.length,
+      // Detailed data for complex rendering decisions
+      layerTriggers: layerShows,
+      variableSets: variableSets.filter(v =>
+        // Only keep meaningful variable sets (not system/quiz internal)
+        !/CurrentQuiz_|ReviewMode_|RetryMode_|_RetryMode/i.test(v.variable)
+      ),
+      conditions: conditions.filter(c =>
+        // Only keep meaningful conditions
+        !/\$OnStage|\$Id|#_checked/i.test(c.variable) ||
+        // Keep checkbox/radio checked conditions — these inform branching
+        /checked/i.test(c.variable)
+      ),
+      gotos
+    };
   }
 
   // ---- Asset manifest builder ----
