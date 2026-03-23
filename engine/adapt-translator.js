@@ -89,11 +89,30 @@ window.AdaptTranslator = (function () {
     }).join('');
   }
 
+  // ---- Helper: extract image path from image data (may be string or object) ----
+  function getImageSrc(imgData) {
+    if (!imgData) return '';
+    if (typeof imgData === 'string') return imgData;
+    return imgData.originalPath || imgData.src || imgData.path || '';
+  }
+
+  function getImageAlt(imgData) {
+    if (!imgData) return '';
+    if (typeof imgData === 'string') return '';
+    return imgData.altText || imgData.alt || '';
+  }
+
+  function getImageRole(imgData) {
+    if (!imgData || typeof imgData === 'string') return 'content';
+    return imgData.role || 'content';
+  }
+
   // ---- Helper: build image path for Adapt ----
-  function adaptImagePath(originalPath) {
-    if (!originalPath) return '';
+  function adaptImagePath(imgDataOrPath) {
+    var rawPath = typeof imgDataOrPath === 'string' ? imgDataOrPath : getImageSrc(imgDataOrPath);
+    if (!rawPath) return '';
     // Adapt expects images in course/en/images/
-    var filename = originalPath.split('/').pop();
+    var filename = rawPath.split('/').pop();
     return 'course/en/images/' + filename;
   }
 
@@ -427,9 +446,12 @@ window.AdaptTranslator = (function () {
       });
     } else if (hasImage && allTexts.length > 0) {
       // Text + image → split layout (text left, graphic right)
-      var imgData = slide.content.images[0];
-      var imgSrc = typeof imgData === 'string' ? imgData : (imgData.src || imgData.path || '');
-      var imgAlt = typeof imgData === 'string' ? '' : (imgData.alt || '');
+      // Find the first content image (skip backgrounds/decorative)
+      var contentImg = slide.content.images.find(function (img) {
+        return getImageRole(img) === 'content' || getImageRole(img) === 'hero';
+      }) || slide.content.images[0];
+      var imgSrc = getImageSrc(contentImg);
+      var imgAlt = getImageAlt(contentImg);
 
       var textCompId = idManager.nextComponent(blockId);
       components.push({
@@ -474,7 +496,7 @@ window.AdaptTranslator = (function () {
       // If there's an image but no text, use graphic component
       if (hasImage && allTexts.length === 0) {
         var imgData = slide.content.images[0];
-        var imgSrc = typeof imgData === 'string' ? imgData : (imgData.src || imgData.path || '');
+        var imgSrc = getImageSrc(imgData);
         var compId = idManager.nextComponent(blockId);
         components.push({
           _id: compId,
@@ -510,7 +532,15 @@ window.AdaptTranslator = (function () {
       }
     }
 
-    return components;
+    // Filter out empty components (no content = no value to the learner)
+    return components.filter(function (comp) {
+      var hasBody = comp.body && comp.body.replace(/<[^>]*>/g, '').trim().length > 0;
+      var hasTitle = comp.displayTitle && comp.displayTitle.trim().length > 0;
+      var hasItems = comp._items && comp._items.length > 0;
+      var hasGraphic = comp._graphic && (comp._graphic.large || comp._graphic.src);
+      var hasMedia = comp._media && (comp._media.mp4 || comp._media.source);
+      return hasBody || hasTitle || hasItems || hasGraphic || hasMedia;
+    });
   }
 
   // ---- Main translation function ----
@@ -557,40 +587,42 @@ window.AdaptTranslator = (function () {
 
       // Process slides within section
       var slides = section.slides || [];
+      var sectionHasContent = false;
 
       slides.forEach(function (slide, slideIndex) {
         // Create block for this slide
         var blockId = idManager.nextBlock(articleId);
         var trackingId = idManager.nextTrackingId();
 
-        blocksJson.push({
-          _id: blockId,
-          _parentId: articleId,
-          _type: 'block',
-          _classes: '',
-          title: slide.originalTitle || '',
-          displayTitle: '',
-          body: '',
-          instruction: '',
-          _trackingId: trackingId,
-          _onScreen: {
-            _isEnabled: true,
-            _classes: 'fade-in-bottom',
-            _percentInviewVertical: 50
-          }
-        });
-
-        // Build components for this slide
+        // Build components first, then only add block if there are components
         var comps = buildSlideComponents(slide, section, blockId, idManager);
-        componentsJson = componentsJson.concat(comps);
 
-        // If slide has layers AND wasn't handled as accordion above,
-        // create additional blocks for layer content
-        if (slide.layers && slide.layers.length > 0 &&
-          slide.presentation !== 'interactive') {
-          // Layers rendered as separate blocks if presentation isn't interactive
+        if (comps.length > 0) {
+          sectionHasContent = true;
+          blocksJson.push({
+            _id: blockId,
+            _parentId: articleId,
+            _type: 'block',
+            _classes: '',
+            title: textVal(slide.originalTitle) || '',
+            displayTitle: '',
+            body: '',
+            instruction: '',
+            _trackingId: trackingId,
+            _onScreen: {
+              _isEnabled: true,
+              _classes: 'fade-in-bottom',
+              _percentInviewVertical: 50
+            }
+          });
+          componentsJson = componentsJson.concat(comps);
         }
       });
+
+      // Remove article if no blocks were generated (empty section)
+      if (!sectionHasContent) {
+        articlesJson.pop();
+      }
     });
 
     // Update the latest tracking ID in course.json
