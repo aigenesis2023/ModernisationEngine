@@ -2,7 +2,7 @@ import { StitchToolClient } from "@google/stitch-sdk";
 
 // Use the low-level client for full control and visibility
 const client = new StitchToolClient({
-  apiKey: "AQ.Ab8RN6JLEHW95LGAv8yvK7EooqkpRhG90f9ISCliKYxd5ljhuA",
+  apiKey: process.env.STITCH_API_KEY,
   timeout: 300000
 });
 
