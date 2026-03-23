@@ -75,8 +75,8 @@ export default function HeroSplash({ data = {} }) {
         }}
       >
         {/* Animated title */}
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6"
-            style={{ color: 'var(--brand-heading, #ffffff)' }}>
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold tracking-tight leading-tight mb-6"
+            style={{ color: 'var(--brand-heading, #ffffff)', wordBreak: 'keep-all', overflowWrap: 'normal' }}>
           {letters.map((char, i) => (
             <motion.span
               key={`${i}-${char}`}

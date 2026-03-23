@@ -58,7 +58,7 @@ export default function TabPanel({ data = {} }) {
       >
         {/* Tab buttons */}
         <div
-          className="flex overflow-x-auto"
+          className="flex overflow-x-auto gap-1 px-2 pt-2"
           style={{ borderBottom: '1px solid var(--ui-glass-border)' }}
         >
           {items.map((item, i) => {
@@ -67,25 +67,18 @@ export default function TabPanel({ data = {} }) {
               <button
                 key={i}
                 onClick={() => setActiveTab(i)}
-                className="relative px-5 py-4 text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0"
+                className="relative px-4 py-3 text-sm font-medium whitespace-nowrap cursor-pointer flex-shrink-0 rounded-t-lg"
                 style={{
                   color: isActive
                     ? 'var(--brand-heading, #ffffff)'
                     : 'var(--brand-text-muted, rgba(255, 255, 255, 0.5))',
-                  background: isActive ? 'rgba(255, 255, 255, 0.04)' : 'transparent',
-                  transition: 'color 0.2s ease, background 0.2s ease',
+                  background: isActive ? 'rgba(255, 255, 255, 0.08)' : 'transparent',
+                  borderBottom: isActive ? '2px solid var(--brand-primary, #8b5cf6)' : '2px solid transparent',
+                  transition: 'color 0.2s ease, background 0.2s ease, border-color 0.2s ease',
+                  marginBottom: '-1px',
                 }}
               >
                 {item.title || `Tab ${i + 1}`}
-                {isActive && (
-                  <motion.div
-                    layoutId="tab-indicator"
-                    className="absolute bottom-0 left-0 right-0 h-0.5"
-                    style={{
-                      background: 'var(--brand-gradient, var(--brand-primary, #8b5cf6))',
-                    }}
-                  />
-                )}
               </button>
             );
           })}

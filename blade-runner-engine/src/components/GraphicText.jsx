@@ -88,7 +88,7 @@ export default function GraphicText({ data = {} }) {
               initial="hidden"
               animate={isInView ? 'visible' : 'hidden'}
               variants={imageVariants}
-              className="relative min-h-[240px] sm:min-h-[360px]"
+              className="relative min-h-[200px] sm:min-h-[320px]"
               style={{ order: imageOnLeft ? 1 : 2 }}
             >
               <img
@@ -115,6 +115,7 @@ export default function GraphicText({ data = {} }) {
           .graphic-text-grid { grid-template-columns: 1fr !important; }
           .graphic-text-grid > *:first-child { order: 2 !important; }
           .graphic-text-grid > *:last-child { order: 1 !important; }
+          .graphic-text-grid > * + * { margin-top: 0; }
         }
       `}</style>
     </motion.section>

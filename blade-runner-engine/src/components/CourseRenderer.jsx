@@ -79,8 +79,8 @@ function ArticleSection({ article, blocks, components, index }) {
       className={`relative ${article._classes || ''}`}
       style={{
         background: sectionBg,
-        paddingTop: index === 0 ? '48px' : '80px',
-        paddingBottom: '80px',
+        paddingTop: index === 0 ? '48px' : '56px',
+        paddingBottom: '56px',
       }}
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
