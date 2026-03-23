@@ -203,42 +203,29 @@
       setProgress(65);
       log('Adapt JSON generated: ' + adaptJson.components.length + ' components', 'success');
 
-      // Phase 5: Generate brand CSS + bundle single HTML
-      log('Phase 5: Building course...', 'info');
+      // Phase 5: Generate brand CSS
+      log('Phase 5: Applying brand styling...', 'info');
       var brandCSS = AdaptTranslator.generateBrandCSS(brand);
-      generatedHtml = await AdaptBundler.bundle(adaptJson, brandCSS, coursePlan, function (msg) { log('  ' + msg); });
-      setProgress(90);
-      log('Course built (' + (generatedHtml.length / 1024).toFixed(0) + ' KB)', 'success');
+      setProgress(75);
+      log('Brand CSS generated.', 'success');
 
-      // Phase 6: Package SCORM zip (HTML + images)
+      // Phase 6: Package SCORM (Adapt multi-file output)
       log('Phase 6: Creating SCORM package...', 'info');
-      var zip = new JSZip();
-      // Add the single HTML file
-      zip.file('index.html', generatedHtml);
-      // Add SCORM manifest
-      zip.file('imsmanifest.xml', generateSimpleManifest(coursePlan.meta.title, coursePlan.meta.courseId));
-      // Copy images from original SCORM
-      var imgCount = 0;
-      for (var entry of fileMap) {
-        var fPath = entry[0], fObj = entry[1];
-        if (/^(story_content|mobile)\/.*\.(jpg|jpeg|png|gif|svg|webp)$/i.test(fPath)) {
-          try {
-            var buf = await fObj.arrayBuffer();
-            zip.file('course/en/images/' + fPath.split('/').pop(), buf);
-            imgCount++;
-          } catch (e) {}
-        }
-        if (/^story_content\/.*\.(mp4|webm)$/i.test(fPath)) {
-          try {
-            var buf = await fObj.arrayBuffer();
-            zip.file('course/en/video/' + fPath.split('/').pop(), buf);
-            imgCount++;
-          } catch (e) {}
-        }
-      }
-      generatedBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
+      generatedBlob = await AdaptPackager.packageCourse(adaptJson, brandCSS, fileMap, coursePlan, function (msg) { log('  ' + msg); });
+
+      // Also store the JSON + CSS for preview
+      generatedHtml = JSON.stringify({
+        course: adaptJson.course,
+        contentObjects: adaptJson.contentObjects,
+        articles: adaptJson.articles,
+        blocks: adaptJson.blocks,
+        components: adaptJson.components,
+        brandCSS: brandCSS,
+        title: coursePlan.meta.title
+      });
+
       setProgress(100);
-      log('Done! ' + imgCount + ' assets, ' + (generatedBlob.size / 1024 / 1024).toFixed(1) + ' MB package', 'success');
+      log('Done! Your modernised course is ready.', 'success');
 
       // Show results
       resultSection.classList.add('active');
@@ -266,9 +253,127 @@
 
   btnPreview.addEventListener('click', function () {
     if (!generatedHtml) return;
-    // Preview the single-file HTML in a new tab
-    var previewUrl = URL.createObjectURL(new Blob([generatedHtml], { type: 'text/html' }));
+    // Generate a lightweight preview HTML from the Adapt JSON data
+    var data = JSON.parse(generatedHtml);
+    var previewHtml = buildPreviewHtml(data);
+    var previewUrl = URL.createObjectURL(new Blob([previewHtml], { type: 'text/html' }));
     window.open(previewUrl, '_blank');
   });
+
+  // Build a standalone preview HTML from Adapt JSON (no RequireJS needed)
+  function buildPreviewHtml(data) {
+    var css = data.brandCSS || '';
+    var title = data.title || 'Course Preview';
+    var html = '<!doctype html><html lang="en"><head>';
+    html += '<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
+    html += '<title>' + title + '</title>';
+    html += '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">';
+    html += '<style>';
+    html += '*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }';
+    html += 'body { font-family: Inter, system-ui, sans-serif; line-height: 1.6; max-width: 900px; margin: 0 auto; padding: 20px; }';
+    html += 'h1 { font-size: 2.5rem; margin: 2rem 0 1rem; }';
+    html += 'h2 { font-size: 1.8rem; margin: 2rem 0 0.5rem; color: #117F93; }';
+    html += 'h3 { font-size: 1.3rem; margin: 1rem 0 0.3rem; }';
+    html += 'p { margin: 0.5rem 0; }';
+    html += '.article { margin: 3rem 0; padding: 2rem 0; border-top: 3px solid #117F93; }';
+    html += '.block { margin: 1.5rem 0; }';
+    html += '.component { margin: 1rem 0; padding: 1.5rem; background: #f8f9fa; border-radius: 12px; }';
+    html += '.accordion-item { border: 1px solid #ddd; border-radius: 8px; margin: 0.5rem 0; overflow: hidden; }';
+    html += '.accordion-btn { width: 100%; padding: 1rem 1.5rem; background: #117F93; color: #fff; border: none; text-align: left; font-size: 1rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }';
+    html += '.accordion-btn:hover { background: #0e6b7a; }';
+    html += '.accordion-body { padding: 1rem 1.5rem; display: none; }';
+    html += '.accordion-item.open .accordion-body { display: block; }';
+    html += '.mcq-item { padding: 0.8rem 1.2rem; margin: 0.5rem 0; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; }';
+    html += '.mcq-item:hover { border-color: #117F93; }';
+    html += '.mcq-item.selected { border-color: #117F93; background: #e8f7fa; }';
+    html += 'img { max-width: 100%; height: auto; border-radius: 8px; margin: 1rem 0; }';
+    html += '.split { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; align-items: center; }';
+    html += '@media (max-width: 768px) { .split { grid-template-columns: 1fr; } }';
+    html += '.preview-badge { position: fixed; top: 10px; right: 10px; background: #117F93; color: #fff; padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; z-index: 999; }';
+    html += css;
+    html += '</style></head><body>';
+    html += '<div class="preview-badge">Preview — Download SCORM zip for full Adapt experience</div>';
+    html += '<h1>' + esc(title) + '</h1>';
+
+    // Render articles (sections)
+    (data.articles || []).forEach(function (article) {
+      html += '<div class="article">';
+      if (article.displayTitle) html += '<h2>' + esc(article.displayTitle) + '</h2>';
+
+      // Find blocks for this article
+      var blocks = (data.blocks || []).filter(function (b) { return b._parentId === article._id; });
+      blocks.forEach(function (block) {
+        html += '<div class="block">';
+
+        // Find components for this block
+        var comps = (data.components || []).filter(function (c) { return c._parentId === block._id; });
+
+        // Check if split layout (left + right components)
+        var hasLeft = comps.some(function (c) { return c._layout === 'left'; });
+        var hasRight = comps.some(function (c) { return c._layout === 'right'; });
+        if (hasLeft && hasRight) html += '<div class="split">';
+
+        comps.forEach(function (comp) {
+          html += '<div class="component">';
+
+          if (comp._component === 'text') {
+            if (comp.displayTitle) html += '<h3>' + comp.displayTitle + '</h3>';
+            if (comp.body) html += comp.body;
+          } else if (comp._component === 'graphic') {
+            if (comp.displayTitle) html += '<h3>' + comp.displayTitle + '</h3>';
+            if (comp._graphic && comp._graphic.large) {
+              html += '<img src="' + esc(comp._graphic.large) + '" alt="' + esc(comp._graphic.alt || '') + '">';
+            }
+          } else if (comp._component === 'accordion') {
+            if (comp.displayTitle) html += '<h3>' + comp.displayTitle + '</h3>';
+            if (comp.body) html += comp.body;
+            if (comp.instruction) html += '<p><em>' + esc(comp.instruction) + '</em></p>';
+            (comp._items || []).forEach(function (item, idx) {
+              html += '<div class="accordion-item" onclick="this.classList.toggle(\'open\')">';
+              html += '<button class="accordion-btn">' + esc(item.title) + '<span>+</span></button>';
+              html += '<div class="accordion-body">' + (item.body || '') + '</div>';
+              html += '</div>';
+            });
+          } else if (comp._component === 'mcq') {
+            if (comp.body) html += comp.body;
+            if (comp.instruction) html += '<p><em>' + esc(comp.instruction) + '</em></p>';
+            (comp._items || []).forEach(function (item) {
+              html += '<div class="mcq-item" onclick="this.classList.toggle(\'selected\')">';
+              html += esc(item.text);
+              html += '</div>';
+            });
+          } else if (comp._component === 'media') {
+            if (comp.displayTitle) html += '<h3>' + comp.displayTitle + '</h3>';
+            if (comp.body) html += comp.body;
+            if (comp._media && comp._media.mp4) {
+              html += '<video controls style="width:100%;border-radius:8px"><source src="' + esc(comp._media.mp4) + '" type="video/mp4"></video>';
+            }
+          } else if (comp._component === 'textinput') {
+            if (comp.body) html += comp.body;
+            html += '<input type="text" style="width:100%;padding:10px;border:2px solid #ddd;border-radius:8px;font-size:1rem" placeholder="Type your answer...">';
+          } else {
+            // Generic fallback
+            if (comp.displayTitle) html += '<h3>' + comp.displayTitle + '</h3>';
+            if (comp.body) html += comp.body;
+          }
+
+          html += '</div>';
+        });
+
+        if (hasLeft && hasRight) html += '</div>';
+        html += '</div>';
+      });
+
+      html += '</div>';
+    });
+
+    html += '</body></html>';
+    return html;
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
 
 })();
