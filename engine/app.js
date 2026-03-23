@@ -192,7 +192,29 @@
       log('Phase 3: Scraping brand from URL...', 'info');
       var brandUrl = brandUrlInput.value.trim();
       var corsProxy = corsProxyInput.value.trim();
-      var brand = await BrandScraper.scrapeBrand(brandUrl, corsProxy, function (msg) { log('  ' + msg); });
+      var brand = null;
+      try {
+        brand = await BrandScraper.scrapeBrand(brandUrl, corsProxy, function (msg) { log('  ' + msg); });
+        if (brand && brand.colors && brand.colors.primary) {
+          log('Brand scraped: primary=' + brand.colors.primary + ', font=' + (brand.typography?.headingFont || 'default'), 'success');
+        } else {
+          log('Brand scraper returned defaults — CORS proxy may be failing', 'info');
+        }
+      } catch (brandErr) {
+        log('Brand scraping failed: ' + brandErr.message, 'info');
+        brand = null;
+      }
+      // Ensure brand has minimum required structure
+      if (!brand || !brand.colors) {
+        log('Using fallback brand profile', 'info');
+        brand = {
+          colors: { primary: '#0ea5e9', secondary: '#6366f1', accent: '#22d3ee',
+            background: '#0a0a12', surface: '#12121e', text: '#e8e8f0',
+            textMuted: '#6b6b80', gradient: 'linear-gradient(135deg, #0ea5e9, #6366f1)' },
+          typography: { headingFont: 'Inter', bodyFont: 'Inter' },
+          style: { borderRadius: '16px', mood: 'dark' }
+        };
+      }
       setProgress(55);
       log('Brand extraction complete.', 'success');
 

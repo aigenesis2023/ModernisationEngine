@@ -68,13 +68,18 @@ export function applyBrand(brand) {
   // Glass intensity based on mood
   const mood = s.mood || 'default';
   if (mood === 'dark' || mood === 'bold') {
-    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.03)');
-    root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.06)');
-    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.08)');
+    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.06)');
+    root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.12)');
+    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.10)');
   } else if (mood === 'minimal' || mood === 'clean') {
-    root.style.setProperty('--ui-glass', 'rgba(0, 0, 0, 0.02)');
-    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.06)');
-    root.style.setProperty('--ui-glass-hover', 'rgba(0, 0, 0, 0.04)');
+    root.style.setProperty('--ui-glass', 'rgba(0, 0, 0, 0.03)');
+    root.style.setProperty('--ui-glass-border', 'rgba(0, 0, 0, 0.08)');
+    root.style.setProperty('--ui-glass-hover', 'rgba(0, 0, 0, 0.06)');
+  } else {
+    // Creative/default — slightly more visible glass
+    root.style.setProperty('--ui-glass', 'rgba(255, 255, 255, 0.05)');
+    root.style.setProperty('--ui-glass-border', 'rgba(255, 255, 255, 0.10)');
+    root.style.setProperty('--ui-glass-hover', 'rgba(255, 255, 255, 0.08)');
   }
 }
 
