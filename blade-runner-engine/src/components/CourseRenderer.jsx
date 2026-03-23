@@ -141,7 +141,12 @@ function BlockRow({ block, components, blockIndex }) {
   const isSplit = hasLeft && hasRight;
 
   // Don't wrap components that handle their own styling (have their own glass cards/containers)
-  const selfStyledTypes = ['graphic', 'hero', 'graphic-text', 'bento', 'media', 'branching', 'narrative', 'data-table', 'textinput', 'mcq'];
+  const selfStyledTypes = [
+    'graphic', 'hero', 'graphic-text', 'bento', 'media', 'branching', 'narrative',
+    'data-table', 'textinput', 'mcq', 'comparison', 'stat-callout', 'full-bleed',
+    'labeled-image', 'image-gallery', 'process-flow', 'flashcard', 'video-transcript',
+    'tabs',
+  ];
   const isSelfStyled = components.length === 1 && selfStyledTypes.includes(components[0]._component);
 
   return (

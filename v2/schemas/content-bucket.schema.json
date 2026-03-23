@@ -1,0 +1,284 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "content-bucket.schema.json",
+  "title": "Content Bucket",
+  "description": "Simplified extraction output from a SCORM/Storyline course. Contains raw educational content — no layout, no coordinates, no interaction logic. The AI layout engine uses this as its knowledge base.",
+
+  "type": "object",
+  "required": ["courseTitle", "courseId", "scenes", "mediaInventory"],
+  "additionalProperties": false,
+
+  "properties": {
+    "courseTitle": {
+      "type": "string",
+      "description": "Course title extracted from imsmanifest.xml"
+    },
+    "courseId": {
+      "type": "string",
+      "description": "Manifest identifier"
+    },
+    "scormVersion": {
+      "type": "string",
+      "enum": ["1.2", "2004"],
+      "description": "SCORM specification version"
+    },
+    "totalSlides": {
+      "type": "integer",
+      "description": "Total number of slides found in the SCORM package"
+    },
+    "scenes": {
+      "type": "array",
+      "description": "Top-level topic groupings (Storyline scenes). Each scene is a logical section of the course.",
+      "items": { "$ref": "#/$defs/scene" },
+      "minItems": 1
+    },
+    "mediaInventory": {
+      "type": "object",
+      "description": "All real media files found in the package (shapes and text-as-image excluded)",
+      "required": ["images", "videos", "audio"],
+      "additionalProperties": false,
+      "properties": {
+        "images": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mediaFile" },
+          "description": "Real photographs and illustrations (not shapes or generated text images)"
+        },
+        "videos": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mediaFile" },
+          "description": "Video files (.mp4, .webm, etc.)"
+        },
+        "audio": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/mediaFile" },
+          "description": "Audio files (.mp3, .wav, etc.)"
+        }
+      }
+    },
+    "extractedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO timestamp of when extraction was performed"
+    }
+  },
+
+  "$defs": {
+    "scene": {
+      "type": "object",
+      "required": ["sceneId", "title", "slides"],
+      "additionalProperties": false,
+      "properties": {
+        "sceneId": {
+          "type": "string",
+          "description": "Unique scene identifier from Storyline"
+        },
+        "title": {
+          "type": "string",
+          "description": "Scene title (topic name). May be auto-generated like 'Scene 1' if Storyline has no explicit title."
+        },
+        "slides": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/slide" },
+          "description": "Ordered slides within this scene"
+        }
+      }
+    },
+
+    "slide": {
+      "type": "object",
+      "required": ["slideId", "slideIndex", "contentBlocks"],
+      "additionalProperties": false,
+      "properties": {
+        "slideId": {
+          "type": "string",
+          "description": "Unique slide identifier"
+        },
+        "slideIndex": {
+          "type": "integer",
+          "description": "Position in the overall course (1-based)"
+        },
+        "title": {
+          "type": "string",
+          "description": "Slide title if present (cleaned of junk labels)"
+        },
+        "contentBlocks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/contentBlock" },
+          "description": "All content extracted from this slide, in reading order"
+        }
+      }
+    },
+
+    "contentBlock": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["heading", "body", "callout", "list", "quiz", "form-field", "table", "media-ref"],
+          "description": "The kind of content extracted"
+        },
+        "text": {
+          "type": "string",
+          "description": "Plain or lightly-formatted text content (HTML cleaned). Used by heading, body, callout types."
+        },
+        "items": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List items (for type=list)"
+        },
+        "listStyle": {
+          "type": "string",
+          "enum": ["bullet", "numbered"],
+          "description": "List formatting hint"
+        },
+        "quiz": {
+          "$ref": "#/$defs/quizData",
+          "description": "Structured quiz data (for type=quiz)"
+        },
+        "formField": {
+          "$ref": "#/$defs/formFieldData",
+          "description": "Form field data (for type=form-field)"
+        },
+        "table": {
+          "$ref": "#/$defs/tableData",
+          "description": "Tabular data (for type=table)"
+        },
+        "mediaRef": {
+          "$ref": "#/$defs/mediaRef",
+          "description": "Reference to a media file (for type=media-ref)"
+        }
+      }
+    },
+
+    "quizData": {
+      "type": "object",
+      "required": ["question", "choices"],
+      "additionalProperties": false,
+      "properties": {
+        "question": {
+          "type": "string",
+          "description": "The question text"
+        },
+        "questionType": {
+          "type": "string",
+          "enum": ["multiple-choice", "multiple-select", "true-false", "free-text"],
+          "description": "Type of quiz question"
+        },
+        "choices": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["text", "correct"],
+            "additionalProperties": false,
+            "properties": {
+              "text": { "type": "string" },
+              "correct": { "type": "boolean" }
+            }
+          },
+          "description": "Answer choices with correct flag"
+        },
+        "feedback": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "correct": { "type": "string", "description": "Feedback shown when correct" },
+            "incorrect": { "type": "string", "description": "Feedback shown when incorrect" }
+          }
+        }
+      }
+    },
+
+    "formFieldData": {
+      "type": "object",
+      "required": ["label"],
+      "additionalProperties": false,
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "Field label text"
+        },
+        "fieldType": {
+          "type": "string",
+          "enum": ["text", "textarea", "number", "email"],
+          "description": "Input type hint"
+        },
+        "placeholder": {
+          "type": "string"
+        }
+      }
+    },
+
+    "tableData": {
+      "type": "object",
+      "required": ["rows"],
+      "additionalProperties": false,
+      "properties": {
+        "headers": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Column headers if identifiable"
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "description": "Row data as arrays of cell strings"
+        }
+      }
+    },
+
+    "mediaRef": {
+      "type": "object",
+      "required": ["filename", "mediaType"],
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Filename within the SCORM package"
+        },
+        "mediaType": {
+          "type": "string",
+          "enum": ["image", "video", "audio"]
+        },
+        "altText": {
+          "type": "string",
+          "description": "Alt text if available"
+        },
+        "context": {
+          "type": "string",
+          "description": "Where on the slide this media appeared (e.g. 'background', 'inline')"
+        }
+      }
+    },
+
+    "mediaFile": {
+      "type": "object",
+      "required": ["filename"],
+      "additionalProperties": false,
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Filename relative to SCORM package root"
+        },
+        "originalPath": {
+          "type": "string",
+          "description": "Full path within the SCORM package"
+        },
+        "altText": {
+          "type": "string"
+        },
+        "dimensions": {
+          "type": "object",
+          "properties": {
+            "width": { "type": "integer" },
+            "height": { "type": "integer" }
+          }
+        }
+      }
+    }
+  }
+}
