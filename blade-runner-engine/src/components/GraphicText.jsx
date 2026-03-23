@@ -31,6 +31,7 @@ export default function GraphicText({ data = {} }) {
   var imgSrc = graphic ? (graphic.large || graphic.src || '') : '';
   var imgAlt = graphic ? (graphic.alt || title || '') : '';
   var showImage = imgSrc && !imgError;
+  var imageOnLeft = data._imageAlign === 'left';
 
   return (
     <motion.section
@@ -61,7 +62,7 @@ export default function GraphicText({ data = {} }) {
             animate={isInView ? 'visible' : 'hidden'}
             variants={textVariants}
             className="flex flex-col justify-center p-8 sm:p-12"
-            style={{ order: showImage ? 1 : 0 }}
+            style={{ order: imageOnLeft ? 2 : 1 }}
           >
             {title && (
               <h2
@@ -88,7 +89,7 @@ export default function GraphicText({ data = {} }) {
               animate={isInView ? 'visible' : 'hidden'}
               variants={imageVariants}
               className="relative min-h-[240px] sm:min-h-[360px]"
-              style={{ order: 2 }}
+              style={{ order: imageOnLeft ? 1 : 2 }}
             >
               <img
                 src={imgSrc}

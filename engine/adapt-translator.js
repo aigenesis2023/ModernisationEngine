@@ -246,36 +246,26 @@ window.AdaptTranslator = (function () {
   }
 
   // ---- Build components for a slide ----
+  // Counter for alternating image alignment in graphic-text components
+  var graphicTextCounter = 0;
+
   function buildSlideComponents(slide, section, blockId, idManager, sectionImageTracker) {
     var components = [];
     var presentation = slide.presentation || 'narrative';
 
-    // Filter images: use content/hero images freely, allow ONE background per section
+    // Filter images: keep all content/hero images, skip only logos and tiny icons
     var allImages = (slide.content && slide.content.images) || [];
     var contentImages = allImages.filter(function (img) {
       var role = getImageRole(img);
-      // Skip very small images (icons/decorative under 80px)
+      if (role === 'logo') return false;
+      // Skip truly tiny images (both dimensions under 60px)
       var w = img.width || img.originalWidth || 0;
       var h = img.height || img.originalHeight || 0;
-      if (w > 0 && h > 0 && w < 80 && h < 80) return false;
-      // Skip logo images
-      if (role === 'logo') return false;
-      // Content and hero images: always include
-      if (role === 'content' || role === 'hero') return true;
-      // Background images: allow the first unique one per section as a banner
-      if (role === 'background') {
-        var src = getImageSrc(img);
-        var filename = src ? src.split('/').pop() : '';
-        if (filename && !sectionImageTracker['bg_' + filename]) {
-          sectionImageTracker['bg_' + filename] = true;
-          return true;
-        }
-        return false; // Skip duplicate backgrounds
-      }
+      if (w > 0 && h > 0 && w < 60 && h < 60) return false;
       return true;
     });
 
-    // Deduplicate: skip if this exact image was already used in this section
+    // Deduplicate: skip if this exact image filename already used in this section
     contentImages = contentImages.filter(function (img) {
       var src = getImageSrc(img);
       if (!src) return false;
@@ -599,6 +589,7 @@ window.AdaptTranslator = (function () {
       var imgSrc = getImageSrc(contentImg);
       var imgAlt = getImageAlt(contentImg);
 
+      graphicTextCounter++;
       var compId = idManager.nextComponent(blockId);
       components.push({
         _id: compId,
@@ -607,6 +598,7 @@ window.AdaptTranslator = (function () {
         _component: 'graphic-text',
         _classes: '',
         _layout: 'full',
+        _imageAlign: graphicTextCounter % 2 === 0 ? 'left' : 'right',
         title: headings[0] || '',
         displayTitle: headings[0] || '',
         body: textsToBody(allTexts),
@@ -666,6 +658,7 @@ window.AdaptTranslator = (function () {
 
       // Image + any text → graphic-text split (catches slides that fell through earlier checks)
       if (hasImage && (body || displayTitle)) {
+        graphicTextCounter++;
         var fallbackImg = contentImages[0];
         var compId = idManager.nextComponent(blockId);
         components.push({
@@ -675,6 +668,7 @@ window.AdaptTranslator = (function () {
           _component: 'graphic-text',
           _classes: '',
           _layout: 'full',
+          _imageAlign: graphicTextCounter % 2 === 0 ? 'left' : 'right',
           title: displayTitle,
           displayTitle: displayTitle,
           body: body,

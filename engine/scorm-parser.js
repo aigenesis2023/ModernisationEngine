@@ -196,26 +196,33 @@ window.SCORMParser = (function () {
     slideHeight = slideHeight || 540;
     const lower = (altText || '').toLowerCase();
     const url = (imgUrl || '').toLowerCase();
+    const filename = url.split('/').pop() || '';
 
     // Shape-based decorative images (universal Storyline pattern: "Shape" + hash)
-    if (/\/shape[a-z0-9]+\./i.test(url)) return 'decorative';
+    if (/^shape[a-z0-9]+\./i.test(filename)) return 'decorative';
+
+    // Text-rendered-as-image (Storyline pattern: "txt__default_" + hash)
+    if (/^txt__default_/i.test(filename)) return 'decorative';
 
     // Logo detection
     if (lower.includes('logo')) return 'logo';
 
-    // Icon: very small images
-    if (objWidth < 80 || objHeight < 80) return 'icon';
+    // Tiny images — both dimensions must be small (a 400x60 banner is NOT an icon)
+    if (objWidth > 0 && objHeight > 0 && objWidth < 60 && objHeight < 60) return 'icon';
 
-    // Calculate coverage: what % of the slide does this image fill?
+    // Calculate coverage
     var slideArea = slideWidth * slideHeight;
     var imgArea = objWidth * objHeight;
     var coverage = imgArea / slideArea;
 
-    // Background: covers >85% of slide, positioned near origin, low depth
-    if (coverage > 0.85 && depth <= 3) return 'background';
+    // Full-slide images are educational content in Storyline, not throwaway backgrounds.
+    // Storyline authors use full-slide photos as the MAIN visual for a topic.
+    // Only classify as pure "background" if it's a gradient/pattern (Shape file) —
+    // but we already caught those above. Real photos should be treated as content.
+    if (coverage > 0.85) return 'hero';
 
-    // Hero: covers >40% of slide — large feature image
-    if (coverage > 0.4) return 'hero';
+    // Large image covering significant portion of slide
+    if (coverage > 0.3) return 'hero';
 
     // Content: everything else that's reasonably sized
     return 'content';
