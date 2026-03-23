@@ -56,7 +56,7 @@ export default function SilkyAccordion({ data = {} }) {
   };
 
   return (
-    <div ref={ref} className="w-full max-w-3xl mx-auto px-4 py-8">
+    <div ref={ref} className="w-full">
       {/* Section heading */}
       {title && (
         <motion.h2

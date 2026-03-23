@@ -1,11 +1,11 @@
 /**
  * CourseRenderer — Recursive JSON → React component tree
  *
- * Takes the Adapt JSON hierarchy and renders it as a scrollable
- * deep-scroll experience using the Component Registry.
- *
- * Hierarchy: Course → Page → Article → Block → Component
- * For deep-scroll: single page, articles = sections, blocks = rows
+ * Deep-scroll single-page experience with visual rhythm:
+ * - Alternating section backgrounds for visual separation
+ * - Generous padding between sections
+ * - Glass card containers for content blocks
+ * - Scroll-triggered reveal animations
  */
 import { motion, useInView } from 'framer-motion';
 import { useRef, useEffect } from 'react';
@@ -18,64 +18,82 @@ function ProgressBar() {
   return (
     <div
       style={{
-        position: 'fixed', top: 0, left: 0, height: '3px',
+        position: 'fixed', top: 0, left: 0, height: '4px',
         width: `${progress}%`, zIndex: 9999,
         background: 'var(--brand-gradient)',
         transition: 'width 0.15s ease',
+        boxShadow: '0 0 12px var(--brand-primary)',
       }}
     />
   );
 }
 
-// Article = Section wrapper
+// Article = Section wrapper with alternating backgrounds
 function ArticleSection({ article, blocks, components, index }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: '-10%' });
+  const isInView = useInView(ref, { once: true, margin: '-5%' });
+
+  // Alternate between transparent and surface color for visual rhythm
+  const isEven = index % 2 === 0;
+  const sectionBg = isEven ? 'transparent' : 'var(--brand-surface, #12121e)';
 
   return (
     <motion.section
       ref={ref}
       data-article-id={article._id}
-      className={`relative py-16 md:py-24 ${article._classes || ''}`}
+      className={`relative ${article._classes || ''}`}
+      style={{
+        background: sectionBg,
+        paddingTop: index === 0 ? '48px' : '64px',
+        paddingBottom: '64px',
+      }}
       initial={{ opacity: 0 }}
       animate={isInView ? { opacity: 1 } : {}}
-      transition={{ duration: 0.6, delay: 0.1 }}
+      transition={{ duration: 0.6 }}
     >
-      <div className="max-w-[900px] mx-auto px-5 md:px-8">
-        {/* Section title */}
+      <div className="max-w-[860px] mx-auto px-6 md:px-10">
+        {/* Section title with accent bar */}
         {article.displayTitle && (
-          <motion.h2
-            className="text-3xl md:text-4xl font-bold mb-8"
-            style={{ fontFamily: 'var(--font-heading)', color: 'var(--brand-primary)' }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={isInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.5, delay: 0.2 }}
+          <motion.div
+            className="mb-10"
+            initial={{ opacity: 0, x: -20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.15 }}
           >
-            {article.displayTitle}
-          </motion.h2>
+            <div
+              className="w-12 h-1 rounded-full mb-4"
+              style={{ background: 'var(--brand-gradient)' }}
+            />
+            <h2
+              className="text-2xl md:text-3xl font-bold tracking-tight"
+              style={{
+                fontFamily: 'var(--font-heading)',
+                color: 'var(--brand-primary)',
+                lineHeight: 1.2,
+              }}
+            >
+              {article.displayTitle}
+            </h2>
+          </motion.div>
         )}
 
         {/* Blocks within this article */}
-        {blocks.map((block, bi) => (
-          <BlockRow
-            key={block._id}
-            block={block}
-            components={components.filter((c) => c._parentId === block._id)}
-            blockIndex={bi}
-          />
-        ))}
+        <div className="space-y-8">
+          {blocks.map((block, bi) => (
+            <BlockRow
+              key={block._id}
+              block={block}
+              components={components.filter((c) => c._parentId === block._id)}
+              blockIndex={bi}
+            />
+          ))}
+        </div>
       </div>
-
-      {/* Section divider */}
-      <div
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px"
-        style={{ background: 'var(--ui-glass-border)' }}
-      />
     </motion.section>
   );
 }
 
-// Block = Row of components
+// Block = Row of components, wrapped in a glass card
 function BlockRow({ block, components, blockIndex }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-5%' });
@@ -85,14 +103,27 @@ function BlockRow({ block, components, blockIndex }) {
   const hasRight = components.some((c) => c._layout === 'right');
   const isSplit = hasLeft && hasRight;
 
+  // Don't wrap single full-width graphics in a card (let them breathe)
+  const isSingleGraphic = components.length === 1 &&
+    (components[0]._component === 'graphic' || components[0]._component === 'hero');
+
   return (
     <motion.div
       ref={ref}
       data-block-id={block._id}
-      className={`mb-8 ${isSplit ? 'grid grid-cols-1 md:grid-cols-2 gap-8 items-center' : ''}`}
-      initial={{ opacity: 0, y: 30 }}
+      className={`
+        ${isSingleGraphic ? '' : 'rounded-2xl p-6 md:p-8'}
+        ${isSplit ? 'grid grid-cols-1 md:grid-cols-2 gap-8 items-start' : ''}
+      `}
+      style={isSingleGraphic ? {} : {
+        background: 'var(--ui-glass)',
+        border: '1px solid var(--ui-glass-border)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+      }}
+      initial={{ opacity: 0, y: 24 }}
       animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: blockIndex * 0.08 }}
+      transition={{ duration: 0.5, delay: blockIndex * 0.06 }}
     >
       {components.map((comp) => {
         const Component = getComponent(comp._component);
@@ -141,13 +172,36 @@ export default function CourseRenderer() {
     );
   }
 
-  // For deep-scroll: we render all articles from the first page
+  // Deep-scroll: render all articles from the first page
   const page = contentObjects[0];
   const pageArticles = articles.filter((a) => a._parentId === page?._id);
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--brand-bg)' }}>
       <ProgressBar />
+
+      {/* Course title header */}
+      <header
+        className="pt-16 pb-8 px-6 md:px-10 text-center"
+        style={{ background: 'var(--brand-surface)' }}
+      >
+        <div className="max-w-[860px] mx-auto">
+          <h1
+            className="text-4xl md:text-5xl font-bold tracking-tight mb-3"
+            style={{
+              fontFamily: 'var(--font-heading)',
+              color: 'var(--brand-text)',
+              lineHeight: 1.1,
+            }}
+          >
+            {course.displayTitle || course.title}
+          </h1>
+          <div
+            className="w-20 h-1 rounded-full mx-auto mt-6"
+            style={{ background: 'var(--brand-gradient)' }}
+          />
+        </div>
+      </header>
 
       {/* Course content */}
       <main>
@@ -167,8 +221,12 @@ export default function CourseRenderer() {
 
       {/* Footer */}
       <footer
-        className="py-12 text-center text-sm"
-        style={{ color: 'var(--brand-text-muted)', borderTop: '1px solid var(--ui-glass-border)' }}
+        className="py-16 text-center text-sm"
+        style={{
+          color: 'var(--brand-text-muted)',
+          background: 'var(--brand-surface)',
+          borderTop: '1px solid var(--ui-glass-border)',
+        }}
       >
         <p>Modernised with the Blade Runner Engine</p>
       </footer>

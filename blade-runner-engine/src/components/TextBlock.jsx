@@ -1,15 +1,6 @@
 import { motion, useInView } from 'framer-motion';
 import { useRef } from 'react';
 
-const fadeInUp = {
-  hidden: { opacity: 0, y: 32 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
-
 export default function TextBlock({ data = {} }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, amount: 0.2 });
@@ -18,54 +9,40 @@ export default function TextBlock({ data = {} }) {
   const body = data.body || '';
   const instruction = data.instruction || '';
 
+  if (!title && !body && !instruction) return null;
+
   return (
-    <motion.section
+    <motion.div
       ref={ref}
-      initial="hidden"
-      animate={isInView ? 'visible' : 'hidden'}
-      variants={fadeInUp}
-      className="w-full flex justify-center px-4 sm:px-6 py-12 sm:py-20"
+      initial={{ opacity: 0, y: 16 }}
+      animate={isInView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div
-        className="w-full rounded-xl border p-8 sm:p-12"
-        style={{
-          maxWidth: '680px',
-          background: 'rgba(255, 255, 255, 0.03)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
-          borderColor: 'rgba(255, 255, 255, 0.06)',
-          boxShadow: '0 4px 24px rgba(0, 0, 0, 0.2)',
-        }}
-      >
-        {/* Heading */}
-        {title && (
-          <h2
-            className="text-2xl sm:text-3xl font-semibold tracking-tight mb-6 leading-snug"
-            style={{ color: 'var(--brand-heading, #ffffff)' }}
-          >
-            {title}
-          </h2>
-        )}
+      {title && (
+        <h3
+          className="text-xl md:text-2xl font-semibold tracking-tight mb-4"
+          style={{ color: 'var(--brand-heading, var(--brand-primary))', fontFamily: 'var(--font-heading)' }}
+        >
+          {title}
+        </h3>
+      )}
 
-        {/* Instruction */}
-        {instruction && (
-          <p
-            className="text-sm mb-4 leading-relaxed"
-            style={{ color: 'var(--brand-text-muted, rgba(255, 255, 255, 0.45))' }}
-          >
-            {instruction}
-          </p>
-        )}
+      {instruction && (
+        <p
+          className="text-sm mb-3 italic"
+          style={{ color: 'var(--brand-text-muted)' }}
+        >
+          {instruction}
+        </p>
+      )}
 
-        {/* Body */}
-        {body && (
-          <div
-            className="text-base sm:text-lg leading-relaxed [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-4 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-4 [&>h3]:text-xl [&>h3]:font-semibold [&>h3]:mt-6 [&>h3]:mb-3"
-            style={{ color: 'var(--brand-text, rgba(255, 255, 255, 0.8))' }}
-            dangerouslySetInnerHTML={{ __html: body }}
-          />
-        )}
-      </div>
-    </motion.section>
+      {body && (
+        <div
+          className="text-base leading-relaxed [&>p]:mb-3 [&>ul]:list-disc [&>ul]:pl-5 [&>ul]:mb-3 [&>ol]:list-decimal [&>ol]:pl-5 [&>ol]:mb-3 [&>h3]:text-lg [&>h3]:font-semibold [&>h3]:mt-4 [&>h3]:mb-2"
+          style={{ color: 'var(--brand-text)' }}
+          dangerouslySetInnerHTML={{ __html: body }}
+        />
+      )}
+    </motion.div>
   );
 }
