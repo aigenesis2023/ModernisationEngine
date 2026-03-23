@@ -250,8 +250,11 @@
         adaptJson.components.length + ' components [' + typeBreakdown + ']', 'success');
 
       // Phase 5: Build single-file HTML (Blade Runner Engine)
+      phaseStart = Date.now();
       log('Phase 5: Building course output...', 'info');
       var templateHtml = null;
+      var embedCount = 0;
+      var totalEmbedSize = 0;
       // Try multiple paths to find the Blade Runner Engine template
       var templatePaths = [
         'blade-runner-template.html',
@@ -283,8 +286,6 @@
         // This prevents bloat from unused SCORM assets
         log('  Embedding referenced images...', 'info');
         var imageMap = {}; // filename → data URL
-        var embedCount = 0;
-        var totalEmbedSize = 0;
         var MAX_TOTAL_EMBED = 6 * 1024 * 1024; // 6MB total cap for all images
         var MAX_SINGLE_IMAGE = 800 * 1024; // 800KB per image (educational images can be larger)
 
@@ -368,7 +369,7 @@
         injectScript += 'window.brandData = ' + JSON.stringify(brand) + ';\n';
         injectScript += '<\/script>\n';
         generatedHtml = templateHtml.replace('</head>', injectScript + '</head>');
-        log('Blade Runner Engine output: ' + (generatedHtml.length / 1024).toFixed(0) + ' KB', 'success');
+        log('Phase 5 done (' + (Date.now() - phaseStart) + 'ms): ' + embedCount + ' images embedded, ' + (generatedHtml.length / 1024).toFixed(0) + 'KB output', 'success');
       } else {
         log('Warning: Template not found, using inline preview', 'info');
         // Store data for the fallback preview
@@ -413,6 +414,25 @@
       generatedBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } });
       setProgress(100);
       log('Done! ' + assetCount + ' assets, ' + (generatedBlob.size / 1024 / 1024).toFixed(1) + ' MB', 'success');
+
+      // Pipeline summary
+      log('', 'info');
+      log('═══ PIPELINE SUMMARY ═══', 'success');
+      log('Course: "' + coursePlan.meta.title + '" (' + course.slides.length + ' slides → ' + adaptJson.components.length + ' components)', 'success');
+      log('Brand: ' + (brand.sourceUrl ? brand.sourceUrl : 'fallback') + ' → primary=' + brand.colors.primary + ', theme=' + (brand.style?.theme || brand.style?.mood || 'dark'), 'success');
+      log('Components: ' + typeBreakdown, 'success');
+      log('Images: ' + embedCount + ' embedded (' + (totalEmbedSize/1024).toFixed(0) + 'KB)', embedCount > 0 ? 'success' : 'error');
+      log('Output: ' + (generatedHtml.length / 1024).toFixed(0) + 'KB HTML + ' + (generatedBlob.size / 1024 / 1024).toFixed(1) + 'MB ZIP', 'success');
+      if (embedCount === 0) {
+        log('⚠ NO IMAGES EMBEDDED — check that SCORM folder contains image files in story_content/ or mobile/', 'error');
+      }
+      if (!brand.sourceUrl) {
+        log('⚠ BRAND SCRAPING FAILED — using generic fallback colors. Check CORS proxy + brand URL.', 'error');
+      }
+      if (adaptJson.components.length < 3) {
+        log('⚠ VERY FEW COMPONENTS — SCORM parsing may have failed or course is very small.', 'error');
+      }
+      log('═══════════════════════', 'success');
 
       // Show results
       resultSection.classList.add('active');
