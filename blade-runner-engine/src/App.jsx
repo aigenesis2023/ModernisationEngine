@@ -6,7 +6,7 @@
  */
 import { useEffect } from 'react';
 import useCourseStore from './store/courseStore';
-import { applyBrand } from './theme/ThemeEngine';
+import { applyBrand, applyDesignDNA } from './theme/ThemeEngine';
 import CourseRenderer from './components/CourseRenderer';
 
 function App() {
@@ -22,6 +22,11 @@ function App() {
       if (window.brandData) {
         loadBrand(window.brandData);
         applyBrand(window.brandData);
+      }
+
+      // Apply Stitch Design DNA if available (enhanced tokens overlay)
+      if (window.designDNA) {
+        applyDesignDNA(window.designDNA);
       }
     }
 

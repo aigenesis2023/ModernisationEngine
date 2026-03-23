@@ -6,11 +6,11 @@
  * and updates the layout JSON with actual image paths.
  *
  * Usage:
- *   HF_TOKEN=hf_... node v2/scripts/generate-images.js
- *   node v2/scripts/generate-images.js                    # reads from env
+ *   HF_TOKEN=hf_... node v3/scripts/generate-images.js
+ *   node v3/scripts/generate-images.js                    # reads from env
  *
- * Input:  v2/output/course-layout.json
- * Output: v2/output/images/*.jpg + updated course-layout.json
+ * Input:  v3/output/course-layout.json
+ * Output: v3/output/images/*.jpg + updated course-layout.json
  */
 
 const fs = require('fs');
@@ -21,9 +21,9 @@ const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const HF_TOKEN = process.env.HF_TOKEN || '';
 
-const OUTPUT_DIR = path.resolve('v2/output/images');
-const LAYOUT_PATH = path.resolve('v2/output/course-layout.json');
-const BRAND_PATH = path.resolve('v2/output/brand-profile.json');
+const OUTPUT_DIR = path.resolve('v3/output/images');
+const LAYOUT_PATH = path.resolve('v3/output/course-layout.json');
+const BRAND_PATH = path.resolve('v3/output/brand-profile.json');
 
 // Rate limiting: 3s between requests (HF free tier)
 const DELAY_MS = 3000;
@@ -175,7 +175,7 @@ async function main() {
   // Check for token
   if (!HF_TOKEN) {
     console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: HF_TOKEN=hf_... node v2/scripts/generate-images.js');
+    console.error('Usage: HF_TOKEN=hf_... node v3/scripts/generate-images.js');
     process.exit(1);
   }
 

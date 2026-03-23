@@ -170,6 +170,90 @@ export function applyBrand(brand) {
 }
 
 /**
+ * Apply Stitch Design DNA — complete design system overlay
+ *
+ * Applies Stitch's full design system on top of the brand profile.
+ * This includes: 50+ colors, 10 surface levels, glass effects,
+ * shadows, gradients, and border radius.
+ *
+ * Call AFTER applyBrand() so DNA values override the basic brand defaults.
+ */
+export function applyDesignDNA(dna) {
+  if (!dna) return;
+  const root = document.documentElement;
+
+  // ─── Surface hierarchy (10 tonal levels for layered depth) ─────────
+  if (dna.surfaceHierarchy) {
+    const sh = dna.surfaceHierarchy;
+    for (const [key, value] of Object.entries(sh)) {
+      root.style.setProperty(`--${key}`, value);
+    }
+    // Override brand defaults with Stitch surfaces
+    if (sh.surface) root.style.setProperty('--brand-surface', sh.surface);
+    if (sh.background) root.style.setProperty('--brand-bg', sh.background);
+    if (sh['surface-dim']) root.style.setProperty('--brand-bg', sh['surface-dim']);
+    if (sh['surface-container-low']) root.style.setProperty('--section-alt-bg', sh['surface-container-low']);
+  }
+
+  // ─── Full color system from Stitch ─────────────────────────────────
+  if (dna.colors) {
+    const dc = dna.colors;
+    // Map Stitch's Material 3 colors to our CSS variables
+    if (dc.primary) root.style.setProperty('--brand-primary', dc.primary);
+    if (dc['primary-container']) root.style.setProperty('--brand-primary-container', dc['primary-container']);
+    if (dc.secondary) root.style.setProperty('--brand-secondary', dc.secondary);
+    if (dc['secondary-container']) root.style.setProperty('--brand-secondary-container', dc['secondary-container']);
+    if (dc.tertiary) root.style.setProperty('--brand-accent', dc.tertiary);
+    if (dc['tertiary-container']) root.style.setProperty('--brand-tertiary-container', dc['tertiary-container']);
+    if (dc.error) root.style.setProperty('--brand-error', dc.error);
+    if (dc.outline) root.style.setProperty('--brand-outline', dc.outline);
+    if (dc['outline-variant']) root.style.setProperty('--brand-outline-variant', dc['outline-variant']);
+    if (dc['on-surface']) root.style.setProperty('--brand-text', dc['on-surface']);
+    if (dc['on-surface-variant']) root.style.setProperty('--brand-text-muted', dc['on-surface-variant']);
+    if (dc['on-background']) root.style.setProperty('--brand-heading', dc.primary || dc['on-background']);
+    if (dc['surface-tint']) root.style.setProperty('--brand-surface-tint', dc['surface-tint']);
+    if (dc['inverse-primary']) root.style.setProperty('--brand-inverse-primary', dc['inverse-primary']);
+    // Store all Stitch colors as CSS variables for component use
+    for (const [key, value] of Object.entries(dc)) {
+      root.style.setProperty(`--stitch-${key}`, value);
+    }
+  }
+
+  // ─── Glass card (Stitch-designed glass-morphism) ───────────────────
+  if (dna.glass?.card) {
+    const gc = dna.glass.card;
+    if (gc.background) root.style.setProperty('--ui-glass', gc.background);
+    if (gc.backdropFilter) root.style.setProperty('--ui-glass-blur', gc.backdropFilter);
+  }
+
+  // Glow / neon border
+  if (dna.glass?.glow) {
+    root.style.setProperty('--brand-glow', dna.glass.glow);
+    root.style.setProperty('--ui-glass-border', dna.glass.glow.replace(/box-shadow:\s*/, ''));
+  }
+
+  // Shadows
+  if (dna.glass?.shadows?.length) {
+    root.style.setProperty('--ui-card-shadow', dna.glass.shadows[0]);
+    if (dna.glass.shadows.length > 1) {
+      root.style.setProperty('--ui-card-shadow-hover', dna.glass.shadows[1]);
+    }
+  }
+
+  // ─── Gradients ─────────────────────────────────────────────────────
+  if (dna.gradients?.signature) {
+    root.style.setProperty('--brand-gradient', dna.gradients.signature);
+  }
+
+  // ─── Border radius ─────────────────────────────────────────────────
+  if (dna.borderRadius) {
+    if (dna.borderRadius.xl) root.style.setProperty('--ui-radius', dna.borderRadius.xl);
+    if (dna.borderRadius.lg) root.style.setProperty('--ui-radius-sm', dna.borderRadius.lg);
+    if (dna.borderRadius.full) root.style.setProperty('--ui-radius-lg', dna.borderRadius.full);
+  }
+}
+
+/**
  * Generate a CSS string with all brand overrides
  * (used for the exported single-file HTML)
  */
@@ -237,5 +321,74 @@ export function generateBrandCSS(brand) {
   // Add theme class to html for CSS selectors
   css += themeVars.isLight ? 'html { color-scheme: light; }\n' : 'html { color-scheme: dark; }\n';
 
+  return css;
+}
+
+/**
+ * Generate CSS string for Stitch Design DNA tokens
+ * (used alongside generateBrandCSS for static HTML export)
+ *
+ * Mirrors applyDesignDNA() but outputs a CSS string instead of runtime injection.
+ */
+export function generateDesignDNACSS(dna) {
+  if (!dna) return '';
+
+  let css = ':root {\n';
+
+  // Surface hierarchy
+  if (dna.surfaceHierarchy) {
+    for (const [key, value] of Object.entries(dna.surfaceHierarchy)) {
+      css += `  --${key}: ${value};\n`;
+    }
+    if (dna.surfaceHierarchy.surface) css += `  --brand-surface: ${dna.surfaceHierarchy.surface};\n`;
+    if (dna.surfaceHierarchy.background) css += `  --brand-bg: ${dna.surfaceHierarchy.background};\n`;
+    if (dna.surfaceHierarchy['surface-dim']) css += `  --brand-bg: ${dna.surfaceHierarchy['surface-dim']};\n`;
+    if (dna.surfaceHierarchy['surface-container-low']) css += `  --section-alt-bg: ${dna.surfaceHierarchy['surface-container-low']};\n`;
+  }
+
+  // Full color system
+  if (dna.colors) {
+    const dc = dna.colors;
+    if (dc.primary) css += `  --brand-primary: ${dc.primary};\n`;
+    if (dc['primary-container']) css += `  --brand-primary-container: ${dc['primary-container']};\n`;
+    if (dc.secondary) css += `  --brand-secondary: ${dc.secondary};\n`;
+    if (dc['secondary-container']) css += `  --brand-secondary-container: ${dc['secondary-container']};\n`;
+    if (dc.tertiary) css += `  --brand-accent: ${dc.tertiary};\n`;
+    if (dc['tertiary-container']) css += `  --brand-tertiary-container: ${dc['tertiary-container']};\n`;
+    if (dc.error) css += `  --brand-error: ${dc.error};\n`;
+    if (dc.outline) css += `  --brand-outline: ${dc.outline};\n`;
+    if (dc['outline-variant']) css += `  --brand-outline-variant: ${dc['outline-variant']};\n`;
+    if (dc['on-surface']) css += `  --brand-text: ${dc['on-surface']};\n`;
+    if (dc['on-surface-variant']) css += `  --brand-text-muted: ${dc['on-surface-variant']};\n`;
+    if (dc['on-background']) css += `  --brand-heading: ${dc.primary || dc['on-background']};\n`;
+    if (dc['surface-tint']) css += `  --brand-surface-tint: ${dc['surface-tint']};\n`;
+    // All Stitch colors as custom properties
+    for (const [key, value] of Object.entries(dc)) {
+      css += `  --stitch-${key}: ${value};\n`;
+    }
+  }
+
+  // Glass
+  if (dna.glass?.card) {
+    if (dna.glass.card.background) css += `  --ui-glass: ${dna.glass.card.background};\n`;
+    if (dna.glass.card.backdropFilter) css += `  --ui-glass-blur: ${dna.glass.card.backdropFilter};\n`;
+  }
+  if (dna.glass?.glow) css += `  --brand-glow: ${dna.glass.glow};\n`;
+  if (dna.glass?.shadows?.length) {
+    css += `  --ui-card-shadow: ${dna.glass.shadows[0]};\n`;
+    if (dna.glass.shadows.length > 1) css += `  --ui-card-shadow-hover: ${dna.glass.shadows[1]};\n`;
+  }
+
+  // Gradients
+  if (dna.gradients?.signature) css += `  --brand-gradient: ${dna.gradients.signature};\n`;
+
+  // Border radius
+  if (dna.borderRadius) {
+    if (dna.borderRadius.xl) css += `  --ui-radius: ${dna.borderRadius.xl};\n`;
+    if (dna.borderRadius.lg) css += `  --ui-radius-sm: ${dna.borderRadius.lg};\n`;
+    if (dna.borderRadius.full) css += `  --ui-radius-lg: ${dna.borderRadius.full};\n`;
+  }
+
+  css += '}\n';
   return css;
 }

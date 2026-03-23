@@ -1,24 +1,25 @@
 #!/usr/bin/env node
 /**
- * V2 Course Builder
+ * V3 Course Builder (with Stitch Design DNA support)
  *
  * Converts course-layout.json into the Adapt-style data format expected by
  * the blade-runner-engine React renderer, embeds images as base64 data URLs,
  * injects brand data, and produces a single static HTML file.
  *
- * Usage: node v2/scripts/build-course.js
- * Input:  v2/output/course-layout.json, v2/output/brand-profile.json, v2/output/images/
- * Output: v2/output/course.html (self-contained single-file)
+ * Usage: node v3/scripts/build-course.js
+ * Input:  v3/output/course-layout.json, v3/output/brand-profile.json, v3/output/images/
+ * Output: v3/output/course.html (self-contained single-file)
  */
 
 const fs = require('fs');
 const path = require('path');
 
-const LAYOUT_PATH = path.resolve('v2/output/course-layout.json');
-const BRAND_PATH = path.resolve('v2/output/brand-profile.json');
-const IMAGES_DIR = path.resolve('v2/output/images');
+const LAYOUT_PATH = path.resolve('v3/output/course-layout.json');
+const BRAND_PATH = path.resolve('v3/output/brand-profile.json');
+const IMAGES_DIR = path.resolve('v3/output/images');
+const DNA_PATH = path.resolve('v3/output/design-dna.json');
 const TEMPLATE_PATH = path.resolve('blade-runner-template.html');
-const OUTPUT_PATH = path.resolve('v2/output/course.html');
+const OUTPUT_PATH = path.resolve('v3/output/course.html');
 
 // Also write to docs root for GitHub Pages
 const PAGES_PATH = path.resolve('index.html');
@@ -31,7 +32,7 @@ function embedImage(imagePath) {
   if (imagePath.startsWith('data:') || imagePath.startsWith('http')) return imagePath;
 
   // Resolve relative to output dir
-  const fullPath = path.resolve('v2/output', imagePath);
+  const fullPath = path.resolve('v3/output', imagePath);
   if (!fs.existsSync(fullPath)) {
     console.log(`  Warning: image not found: ${fullPath}`);
     return '';
@@ -187,6 +188,15 @@ function buildCourse() {
     console.log('Warning: brand-profile.json not found. Using defaults.');
   }
 
+  // Load Design DNA (optional — Stitch-generated enhanced tokens)
+  let designDNA = null;
+  if (fs.existsSync(DNA_PATH)) {
+    designDNA = JSON.parse(fs.readFileSync(DNA_PATH, 'utf-8'));
+    console.log(`Design DNA: ${Object.keys(designDNA.colors || {}).length} colors, ${Object.keys(designDNA.surfaceHierarchy || {}).length} surface levels`);
+  } else {
+    console.log('Design DNA: not found (optional — run v3/scripts/generate-design-dna.js)');
+  }
+
   // Load template
   if (!fs.existsSync(TEMPLATE_PATH)) {
     console.error('Error: blade-runner-template.html not found. Build the renderer first:');
@@ -205,14 +215,17 @@ function buildCourse() {
   const brandDataScript = brand
     ? `<script>window.brandData = ${JSON.stringify(brand)};</script>`
     : '';
+  const dnaDataScript = designDNA
+    ? `<script>window.designDNA = ${JSON.stringify(designDNA)};</script>`
+    : '';
 
   // Inject data before the closing </head> or before the first <script>
   // Strategy: inject before </head> tag
   if (template.includes('</head>')) {
-    template = template.replace('</head>', `${courseDataScript}\n${brandDataScript}\n</head>`);
+    template = template.replace('</head>', `${courseDataScript}\n${brandDataScript}\n${dnaDataScript}\n</head>`);
   } else {
     // Fallback: prepend to body
-    template = template.replace('<body>', `<body>\n${courseDataScript}\n${brandDataScript}`);
+    template = template.replace('<body>', `<body>\n${courseDataScript}\n${brandDataScript}\n${dnaDataScript}`);
   }
 
   // Update page title

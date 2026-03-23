@@ -2,5 +2,8 @@
   "devDependencies": {
     "@playwright/mcp": "^0.0.68",
     "jsdom": "^29.0.1"
+  },
+  "dependencies": {
+    "@google/stitch-sdk": "^0.0.3"
   }
 }

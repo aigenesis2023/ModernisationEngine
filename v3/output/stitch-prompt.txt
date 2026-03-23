@@ -1,0 +1,56 @@
+You are designing a premium e-learning experience. Create a COMPLETE component style guide page showing every component type listed below, fully designed and styled.
+
+COURSE CONTEXT:
+- Title: "EV Awareness & Safety"
+- Domain: safety and compliance training
+- Topics covered: Intro, Menu, Section 1, Section 2, Section 3, Section 4, Section 5, Glossary
+- Mood: authoritative, clear, high-stakes
+- This is a 29-component deep-scroll learning experience
+
+BRAND IDENTITY (from client's website — use these EXACT colors):
+- Primary: #6366f1
+- Secondary: #a855f7
+- Accent: #3b82f6
+- Background: #000000 (dark theme)
+- Text: #f0f0f0
+- Heading font: Inter
+- Body font: Inter
+
+DESIGN DIRECTION:
+- Dark, immersive interface with glass-morphism effects, subtle neon glows, and layered translucent surfaces
+- Premium feel — this should look like a $50,000 custom-built learning platform
+- Every component should feel native to the safety and compliance training domain
+- Primary color for headings and CTAs, secondary for accents/highlights, accent for interactive elements
+- Cards must have DEPTH: layered glass effects, inner shadows, border glows
+- Strong typography hierarchy: extra-large bold headings, comfortable body text
+- Generous whitespace between all sections
+- Show hover states and interactive affordances
+
+COMPONENTS TO DESIGN (show ALL of these with realistic "EV Awareness & Safety" content):
+
+• HERO SECTION — Full-viewport opening with course title "EV Awareness & Safety", subtitle, dramatic background, scroll indicator
+• TEXT BLOCK — Clean prose section with heading and body paragraphs
+• ACCORDION — Expandable panels with smooth open/close animation, chevron icons, completion tracking
+• TEXT INPUT FORM — Labeled input fields with styled borders and submit button
+• GRAPHIC + TEXT — Side-by-side layout with image on one side and content on the other
+• CHECKLIST — Checkable items with animated progress bar tracking completion percentage
+• PULL QUOTE — Emphasized key message with thick accent bar and attribution
+• STAT CALLOUT — Large animated numbers with descriptive labels below (key metrics/figures)
+• BENTO GRID — Multi-card grid layout with image backgrounds, hover lift effects
+• COMPARISON TABLE — Feature comparison with check/cross indicators across columns
+• QUIZ COMPONENT — Multiple choice question with selectable answer cards, submit button, feedback state
+• FULL-BLEED IMAGE — Edge-to-edge image with gradient overlay and centered text
+• KEY TERMS — Vocabulary/glossary cards with icon, term heading, and definition
+• TIMELINE — Vertical numbered steps with gradient connecting line between nodes
+• NARRATIVE SLIDER — Carousel with prev/next navigation buttons and progress dots
+• PROCESS FLOW — Connected workflow nodes with directional arrows between stages
+• TAB PANEL — Horizontal pill-style tab buttons switching between content panels
+• FLASHCARDS — 3D flip cards showing question on front, answer on back, arranged in a grid
+
+CRITICAL REQUIREMENTS:
+- Use REAL example content from "EV Awareness & Safety" — NOT placeholder text
+- Each component must be VISUALLY DISTINCT but share the same design language
+- Show the FULL component with all sub-elements (icons, buttons, states)
+- Page scrolls vertically showing all 18 components in sequence
+- Use Material Symbols icons throughout for UI elements
+- This is the DESIGN REFERENCE that developers will implement — make it pixel-perfect

@@ -5,8 +5,8 @@
  * Fetches a brand URL via CORS proxy and extracts design tokens
  * (colors, fonts, style, logo). Node.js version of engine/brand-scraper.js.
  *
- * Usage: node v2/scripts/scrape-brand.js <brand-url>
- * Output: v2/output/brand-profile.json
+ * Usage: node v3/scripts/scrape-brand.js <brand-url>
+ * Output: v3/output/brand-profile.json
  */
 
 const fs = require('fs');
@@ -505,11 +505,11 @@ if (!brandUrl) {
       console.log(`Found brand URL in ref file: ${urlMatch[0]}`);
       run(urlMatch[0]);
     } else {
-      console.error('Usage: node v2/scripts/scrape-brand.js <brand-url>');
+      console.error('Usage: node v3/scripts/scrape-brand.js <brand-url>');
       process.exit(1);
     }
   } else {
-    console.error('Usage: node v2/scripts/scrape-brand.js <brand-url>');
+    console.error('Usage: node v3/scripts/scrape-brand.js <brand-url>');
     process.exit(1);
   }
 } else {
@@ -520,7 +520,7 @@ async function run(url) {
   try {
     const profile = await scrapeBrand(url);
 
-    const outputDir = path.resolve('v2/output');
+    const outputDir = path.resolve('v3/output');
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     const outputPath = path.join(outputDir, 'brand-profile.json');
