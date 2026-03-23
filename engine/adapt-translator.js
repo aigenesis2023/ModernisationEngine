@@ -717,6 +717,57 @@ window.AdaptTranslator = (function () {
       }
     }
 
+    // If the slide has images but none of the generated components use them,
+    // inject the image into the first component as a _graphic field, or add
+    // a standalone graphic component. This prevents image loss.
+    if (hasImage && components.length > 0) {
+      var anyCompHasGraphic = components.some(function(c) {
+        return (c._graphic && (c._graphic.large || c._graphic.src)) ||
+               (c._component === 'hero' && c._graphic);
+      });
+      if (!anyCompHasGraphic) {
+        var slideImg = contentImages[0];
+        var imgPath = adaptImagePath(slideImg);
+        if (imgPath) {
+          // Try to attach image to the first text/accordion component as graphic-text
+          var firstTextComp = components.find(function(c) {
+            return c._component === 'text' && c.body;
+          });
+          if (firstTextComp) {
+            // Upgrade text → graphic-text with the slide's image
+            graphicTextCounter++;
+            firstTextComp._component = 'graphic-text';
+            firstTextComp._imageAlign = graphicTextCounter % 2 === 0 ? 'left' : 'right';
+            firstTextComp._graphic = {
+              alt: getImageAlt(slideImg),
+              large: imgPath,
+              small: imgPath
+            };
+          } else {
+            // No text component to attach to — add a standalone graphic
+            var imgCompId = idManager.nextComponent(blockId);
+            components.push({
+              _id: imgCompId,
+              _parentId: blockId,
+              _type: 'component',
+              _component: 'graphic',
+              _classes: '',
+              _layout: 'full',
+              title: '',
+              displayTitle: '',
+              body: '',
+              instruction: '',
+              _graphic: {
+                alt: getImageAlt(slideImg),
+                large: imgPath,
+                small: imgPath
+              }
+            });
+          }
+        }
+      }
+    }
+
     // Filter out empty components (no content = no value to the learner)
     return components.filter(function (comp) {
       var hasBody = comp.body && comp.body.replace(/<[^>]*>/g, '').trim().length > 0;
