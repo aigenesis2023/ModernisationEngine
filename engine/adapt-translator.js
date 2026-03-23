@@ -730,7 +730,14 @@ window.AdaptTranslator = (function () {
       var hasItems = comp._items && comp._items.length > 0;
       var hasGraphic = comp._graphic && (comp._graphic.large || comp._graphic.src);
       var hasMedia = comp._media && (comp._media.mp4 || comp._media.source);
-      return hasBody || hasTitle || hasItems || hasGraphic || hasMedia;
+
+      // Text-only components with JUST a title (no body, no items, no media) are visual noise
+      // They're usually slide titles that are already captured as section headers
+      if (comp._component === 'text' && hasTitle && !hasBody && !hasItems && !hasGraphic) {
+        return false;
+      }
+
+      return hasBody || hasItems || hasGraphic || hasMedia || (hasTitle && hasBody);
     });
   }
 
@@ -771,6 +778,11 @@ window.AdaptTranslator = (function () {
     var sections = coursePlan.sections || [];
     log('Processing ' + sections.length + ' sections...');
 
+    // Global content hash to deduplicate identical components across sections
+    // (branching courses repeat content across paths — learner only sees one path
+    // but in deep-scroll they'd see all duplicates)
+    var seenContentHashes = new Set();
+
     sections.forEach(function (section, sectionIndex) {
       // Skip message/prompt scenes
       if (section.type === 'system') return;
@@ -779,8 +791,8 @@ window.AdaptTranslator = (function () {
       var articleId = idManager.nextArticle(pageId);
       var articleTitle = section.title || 'Section ' + (sectionIndex + 1);
 
-      // Hero sections don't need a section header (the HeroSplash handles it)
-      var showSectionTitle = section.type !== 'hero';
+      // Hero and results sections don't need a section header
+      var showSectionTitle = section.type !== 'hero' && section.type !== 'results';
 
       articlesJson.push({
         _id: articleId,
@@ -805,6 +817,18 @@ window.AdaptTranslator = (function () {
 
         // Build components first, then only add block if there are components
         var comps = buildSlideComponents(slide, section, blockId, idManager, sectionImageTracker);
+
+        // Deduplicate: skip blocks whose content is identical to an earlier block
+        // This prevents branching path duplicates from appearing multiple times in deep-scroll
+        // (Quiz questions are excluded from dedup — they should always appear)
+        comps = comps.filter(function(comp) {
+          if (comp._component === 'mcq') return true; // Always keep quiz questions
+          var contentKey = (comp.displayTitle || '') + '||' + (comp.body || '').replace(/<[^>]*>/g, '').trim();
+          if (contentKey.length < 5) return true; // Don't dedup very short/empty content
+          if (seenContentHashes.has(contentKey)) return false;
+          seenContentHashes.add(contentKey);
+          return true;
+        });
 
         if (comps.length > 0) {
           sectionHasContent = true;

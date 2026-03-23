@@ -33,9 +33,14 @@ function ArticleSection({ article, blocks, components, index }) {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-5%' });
 
-  // Alternate between transparent and surface color for visual rhythm
+  // Section-type-specific backgrounds for visual hierarchy
+  const classes = article._classes || '';
+  const isAssessment = classes.includes('section-assessment');
+  const isResults = classes.includes('section-results');
   const isEven = index % 2 === 0;
-  const sectionBg = isEven ? 'transparent' : 'var(--brand-surface, #12121e)';
+  const sectionBg = isAssessment || isResults
+    ? 'var(--brand-surface, #12121e)'
+    : isEven ? 'transparent' : 'var(--brand-surface, #12121e)';
 
   // Hero sections are full-width (no max-width container)
   const isHero = (article._classes || '').includes('section-hero');
@@ -95,9 +100,11 @@ function ArticleSection({ article, blocks, components, index }) {
               style={{ background: 'var(--brand-gradient)' }}
             />
             <h2
-              className="text-2xl md:text-4xl font-bold tracking-tight"
+              className="tracking-tight"
               style={{
                 fontFamily: 'var(--font-heading)',
+                fontSize: 'var(--font-h2, 32px)',
+                fontWeight: 'var(--font-heading-weight, 700)',
                 color: 'var(--brand-primary)',
                 lineHeight: 1.2,
               }}
@@ -229,9 +236,11 @@ export default function CourseRenderer() {
               />
             )}
             <h1
-              className="text-4xl md:text-6xl font-bold tracking-tight mb-3"
+              className="tracking-tight mb-3"
               style={{
                 fontFamily: 'var(--font-heading)',
+                fontSize: 'var(--font-h1, 40px)',
+                fontWeight: 'var(--font-heading-weight, 700)',
                 color: 'var(--brand-text)',
                 lineHeight: 1.1,
               }}

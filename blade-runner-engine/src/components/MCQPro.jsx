@@ -130,7 +130,7 @@ export default function MCQPro({ data = {} }) {
           const shouldBeSelected = item._shouldBeSelected;
 
           // After submit: determine visual state
-          let borderColor = 'rgba(255, 255, 255, 0.08)';
+          let borderColor = 'var(--ui-glass-border)';
           let glowShadow = '0 2px 8px rgba(0, 0, 0, 0.2)';
           let indicatorBg = 'transparent';
 

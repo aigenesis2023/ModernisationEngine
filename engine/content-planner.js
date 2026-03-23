@@ -480,7 +480,29 @@ window.ContentPlanner = (function () {
       }
     });
 
-    // Post-process 2: deduplicate section titles
+    // Post-process 2: Merge consecutive sections with the same title and type.
+    // Storyline scene boundaries often split what should be one section into
+    // multiple fragments. If two adjacent sections have the same title and type,
+    // merge the second into the first.
+    var merged = [sections[0]];
+    for (var mi = 1; mi < sections.length; mi++) {
+      var prev = merged[merged.length - 1];
+      var curr = sections[mi];
+      var sameTitleBase = prev.title.toLowerCase() === curr.title.toLowerCase();
+      var compatibleType = prev.type === curr.type ||
+        (prev.type === 'content' && curr.type === 'content') ||
+        (prev.type === 'branching' && curr.type === 'branching');
+
+      if (sameTitleBase && compatibleType) {
+        // Merge: append curr slides into prev
+        prev.slides = prev.slides.concat(curr.slides);
+      } else {
+        merged.push(curr);
+      }
+    }
+    sections = merged;
+
+    // Post-process 3: For any remaining duplicate titles, add (Part N)
     var titleCounts = {};
     sections.forEach(function (s) {
       var key = s.title.toLowerCase();
