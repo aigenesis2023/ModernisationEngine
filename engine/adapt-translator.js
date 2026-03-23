@@ -560,8 +560,42 @@ window.AdaptTranslator = (function () {
           small: adaptImagePath(imgSrc)
         }
       });
+    } else if (!hasImage && allTexts.length >= 4 && allTexts.every(function(t) { return t.length < 120; })) {
+      // 4+ short text items without images → BentoGrid
+      var bentoItems = allTexts.map(function (t) {
+        return { title: t, body: '' };
+      });
+      var compId = idManager.nextComponent(blockId);
+      components.push({
+        _id: compId,
+        _parentId: blockId,
+        _type: 'component',
+        _component: 'bento',
+        _classes: '',
+        _layout: 'full',
+        title: headings[0] || slide.originalTitle || '',
+        displayTitle: headings[0] || '',
+        body: '',
+        instruction: '',
+        _items: bentoItems
+      });
+    } else if (!hasImage && allTexts.length >= 3 && allTexts.some(function(t) { return /\s[-–—:|]\s/.test(t); })) {
+      // 3+ text items with separators (key - value, key: value) → DataTable
+      var compId = idManager.nextComponent(blockId);
+      components.push({
+        _id: compId,
+        _parentId: blockId,
+        _type: 'component',
+        _component: 'data-table',
+        _classes: '',
+        _layout: 'full',
+        title: headings[0] || slide.originalTitle || '',
+        displayTitle: headings[0] || '',
+        body: textsToBody(allTexts),
+        instruction: ''
+      });
     } else {
-      // Default: text component
+      // Default: text or graphic component
       var displayTitle = headings[0] || '';
       var body = textsToBody(headings.length > 1 ? headings.slice(1).concat(allTexts) : allTexts);
 

@@ -40,7 +40,6 @@ blade-runner-engine/                 ← React + Vite project (pre-built into si
       BranchingCards.jsx   (197 loc) ← Selectable option cards with letter badges
     store/courseStore.js              ← Zustand: course data, UI state, brand
     theme/ThemeEngine.js             ← Applies BrandProfile → CSS custom properties
-    services/RepresentationAgent.js  ← NOT WIRED IN — intended for AI component mapping
 
 blade-runner-template.html  (405KB)  ← Pre-built single-file HTML (React+CSS+JS inlined)
 ```
@@ -98,12 +97,10 @@ All 6 phases run **in the browser** when the user clicks "Generate". No server.
 | `quiz` with quizData | `mcq` | MCQPro (selection + submit + feedback + retry) |
 | `branching` with interactions | `branching` | BranchingCards (selectable option cards) |
 | Has image + text | `graphic-text` | GraphicText (side-by-side split) |
+| 4+ short texts (< 120 chars each), no images | `bento` | BentoGrid (multi-card grid) |
+| 3+ texts with separators (` - `, `:`, `\|`) | `data-table` | DataTable (auto-parsed table) |
 | Has image only | `graphic` | GraphicBlock (full-width with hover zoom) |
 | Default (text only) | `text` | TextBlock |
-
-**NOT YET MAPPED** (React components exist but translator never emits these):
-- `bento` → BentoGrid — needs detection for 4+ short text items
-- `data-table` → DataTable — needs structured data / separator detection
 
 - **Image paths:** `adaptImagePath()` strips directory, prepends `course/en/images/filename`
 - **Output:** Adapt JSON — { course, contentObjects[], articles[], blocks[], components[] }
@@ -257,11 +254,6 @@ Every component must:
 ### Critical
 - **Image display unverified:** Storyline data references `story_content/` paths but files often live in `mobile/`. Embedding code matches by filename so it SHOULD work — needs end-to-end testing. Debug logging added.
 - **SCORM tracking:** No LMS tracking shim in React output. Course won't record progress/completion.
-
-### Components Not Yet Wired
-- `bento` (BentoGrid) — component exists, translator never emits it. Needs detection for slides with 4+ short text items.
-- `data-table` (DataTable) — component exists, translator never emits it. Needs structured data detection.
-- `RepresentationAgent.js` — exists in services/ but not called anywhere. Was intended as AI-powered content→component mapper.
 
 ### Content Gaps
 - Drag-and-drop content presented as plain text (needs matching exercise interaction)
