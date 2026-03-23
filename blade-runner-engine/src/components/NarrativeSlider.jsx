@@ -80,7 +80,7 @@ export default function NarrativeSlider({ data = {} }) {
         }}
       >
         {/* Slide content */}
-        <div className="relative overflow-hidden" style={{ minHeight: '280px' }}>
+        <div className="relative overflow-hidden" style={{ minHeight: '120px' }}>
           <AnimatePresence initial={false} custom={direction} mode="wait">
             <motion.div
               key={currentIndex}

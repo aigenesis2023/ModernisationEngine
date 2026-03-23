@@ -249,6 +249,9 @@ window.AdaptTranslator = (function () {
   // Counter for alternating image alignment in graphic-text components
   var graphicTextCounter = 0;
 
+  // Global image usage counter — prevent the same photo appearing 10+ times
+  var globalImageUseCount = {};
+
   function buildSlideComponents(slide, section, blockId, idManager, sectionImageTracker) {
     var components = [];
     var presentation = slide.presentation || 'narrative';
@@ -370,9 +373,23 @@ window.AdaptTranslator = (function () {
 
       var layerItems = slide.layers.map(function (layer) {
         var layerTexts = (layer.texts || []).map(textVal);
-        var layerTitle = layer.name || layerTexts[0] || 'Details';
-        var layerBody = layerTexts.length > 1 ? textsToBody(layerTexts.slice(1)) :
-          (layerTexts.length === 1 ? textsToBody(layerTexts) : '');
+        // Use layer.name as title if available, otherwise first text.
+        // Body gets ALL texts (or texts[1:] if first text was used as title).
+        var layerTitle, layerBody;
+        if (layer.name && layer.name.length > 2) {
+          layerTitle = layer.name;
+          layerBody = textsToBody(layerTexts);
+        } else if (layerTexts.length > 1) {
+          layerTitle = layerTexts[0];
+          layerBody = textsToBody(layerTexts.slice(1));
+        } else if (layerTexts.length === 1) {
+          // Only 1 text — use as body, make title short or empty
+          layerTitle = layerTexts[0].length > 60 ? '' : layerTexts[0];
+          layerBody = layerTexts[0].length > 60 ? textsToBody(layerTexts) : '';
+        } else {
+          layerTitle = 'Details';
+          layerBody = '';
+        }
         var layerGraphic = null;
 
         // Include layer images
@@ -558,6 +575,15 @@ window.AdaptTranslator = (function () {
         }).filter(function(t) { return t && t.length > 2; });
       }
 
+      // Deduplicate options (Storyline layers often repeat across branching paths)
+      var seenOptions = {};
+      optionTexts = optionTexts.filter(function(t) {
+        var key = t.toLowerCase().trim();
+        if (seenOptions[key]) return false;
+        seenOptions[key] = true;
+        return true;
+      });
+
       // Build body with options as list items for BranchingCards to parse
       var bodyHtml = '';
       if (allTexts.length > 0) {
@@ -732,7 +758,11 @@ window.AdaptTranslator = (function () {
       if (!anyCompHasGraphic) {
         var slideImg = contentImages[0];
         var imgPath = adaptImagePath(slideImg);
-        if (imgPath) {
+        // Limit same image to max 3 uses globally (prevents visual repetition)
+        var imgFilename = imgPath ? imgPath.split('/').pop() : '';
+        globalImageUseCount[imgFilename] = (globalImageUseCount[imgFilename] || 0) + 1;
+        var imageOverused = globalImageUseCount[imgFilename] > 3;
+        if (imgPath && !imageOverused) {
           // Try to attach image to the first text/accordion component as graphic-text
           var firstTextComp = components.find(function(c) {
             return c._component === 'text' && c.body;
