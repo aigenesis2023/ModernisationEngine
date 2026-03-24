@@ -11,6 +11,11 @@
  *   2. Fill it with real content (title, body, items, quiz answers, etc.)
  *   3. Handle interactive data attributes for hydrate.js
  *
+ * Layout rules enforced by every fill function:
+ *   1. Containment: max-w-6xl mx-auto px-8 — no content touches screen edges
+ *   2. Grids/flex: explicit gap-* and min column widths — no collapsed layouts
+ *   3. Typography: h2=text-3xl, h3=text-2xl, h4=text-xl — consistent scale
+ *
  * Usage: node v5/scripts/build-course.js
  */
 
@@ -81,9 +86,27 @@ function findAll(html, re) {
   return results;
 }
 
+/** Strip containment classes from a section class string.
+ *  Section handles spacing (py-*) and background (bg-*).
+ *  Containment (max-w, mx-auto, px-*) goes in an inner div. */
+function sectionOnly(cls) {
+  return cls
+    .replace(/max-w-\S+/g, '')
+    .replace(/\bmx-auto\b/g, '')
+    .replace(/\bpx-\d+\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim() || 'py-24';
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // FILL FUNCTIONS — one per component type
 // Each takes the Stitch pattern HTML and real content, returns filled HTML
+//
+// Layout contract:
+//   - Section tag: spacing + background only (via sectionOnly())
+//   - Inner div: max-w-6xl mx-auto px-8 (containment)
+//   - Grids: explicit gap-* + min-w on columns
+//   - Headings: h2=text-3xl, h3=text-2xl, h4=text-xl
 // ═══════════════════════════════════════════════════════════════════════
 
 function fillHero(pattern, comp) {
@@ -96,7 +119,7 @@ function fillHero(pattern, comp) {
   return `<section class="${sectionClass}" data-component-type="hero">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
-<div class="relative z-10 text-center max-w-4xl mx-auto px-8">
+<div class="relative z-10 text-center max-w-6xl mx-auto px-8">
 <h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8">${title}</h1>
 <p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12">${bodyText}</p>
 <div class="flex gap-4 justify-center">
@@ -109,12 +132,15 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
 
 function fillText(pattern, comp) {
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
 
-  return `<section class="${sectionClass}" data-component-type="text">
-<h2 class="font-headline text-4xl font-bold mb-8">${title}</h2>
+  return `<section class="${secClass}" data-component-type="text">
+<div class="max-w-6xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
 ${comp.body || ''}
+</div>
 </div>
 </section>`;
 }
@@ -124,9 +150,9 @@ function fillAccordion(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
 
-  // Extract the details class from pattern
   const detailsClass = pattern.match(/<details[^>]*class="([^"]*)"/)?.[1] || 'group glass-card rounded-2xl p-6 transition-all duration-300';
   const bodyClass = pattern.match(/<div class="(mt-4[^"]*)"/)?.[1] || 'mt-4 text-on-surface-variant leading-relaxed';
 
@@ -142,8 +168,8 @@ ${item.body || ''}
 </details>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="accordion">
-<div class="max-w-4xl mx-auto">
+  return `<section class="${secClass}" data-component-type="accordion">
+<div class="max-w-6xl mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-12 text-center">${title}</h3>
 <div class="space-y-4">
 ${newDetails}
@@ -158,56 +184,44 @@ function fillMCQ(pattern, comp) {
   const correctFeedback = stripTags(feedback.correct || 'Correct!');
   const incorrectFeedback = stripTags((feedback._incorrect && feedback._incorrect.final) || 'Not quite. Try again.');
 
-  // Find correct answer index
   let correctIdx = items.findIndex(i => i.correct || i._shouldBeSelected);
   if (correctIdx < 0) correctIdx = 0;
 
   const questionText = stripTags(comp.instruction || comp.body || '');
   const title = esc(comp.displayTitle || 'Knowledge Check');
 
-  // Extract the first unselected choice as a template (data-choice="a" or "b")
-  // Use the first choice div that has the standard unselected styling
-  const firstChoice = pattern.match(/<div[^>]*data-choice="a"[^>]*>[\s\S]*?<\/span>\s*<\/div>/i);
-  let choiceTemplate = '';
-  if (firstChoice) {
-    choiceTemplate = firstChoice[0];
-  }
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
+  const secClass = sectionOnly(rawClass);
+  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  const labelDiv = pattern.match(/<div class="text-secondary[^"]*">[^<]*<\/div>/)?.[0] || '';
 
-  // Build new choices from the template
+  const firstChoice = pattern.match(/<div[^>]*data-choice="a"[^>]*>[\s\S]*?<\/span>\s*<\/div>/i);
+  let choiceTemplate = firstChoice ? firstChoice[0] : '';
+
   const newChoices = items.map((item, i) => {
     if (choiceTemplate) {
       let c = choiceTemplate;
       c = c.replace(/data-choice="[^"]*"/, `data-choice="${i}"`);
-      // Replace the text span (last <span> that isn't material-symbols)
       c = c.replace(/<span>[\s\S]*?<\/span>$/, `<span>${esc(item.text || '')}</span>`);
       c = c.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(item.text || '')}</span>`);
       return c;
     }
-    // Fallback if no template found — use glass-card for contrast on any background
     return `<div class="group flex items-center p-5 rounded-xl bg-surface-container/80 hover:bg-surface-container cursor-pointer transition-all border border-outline-variant/20 hover:border-secondary/50 backdrop-blur-sm" data-choice="${i}">
 <div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary flex-shrink-0"></div>
 <span class="text-on-surface">${esc(item.text || '')}</span>
 </div>`;
   }).join('\n');
 
-  // Rebuild the entire MCQ section from scratch using the pattern's outer structure
-  // Extract the section tag with its classes
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-3xl mx-auto';
-  // Extract the glass-card wrapper classes
-  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
-  // Extract the label div (e.g., "KNOWLEDGE CHECK")
-  const labelDiv = pattern.match(/<div class="text-secondary[^"]*">[^<]*<\/div>/)?.[0] || '';
-  // Extract h3 classes
-  const h3Class = pattern.match(/<h3[^>]*class="([^"]*)"/)?.[1] || 'font-headline text-2xl font-bold mb-8';
-
-  return `<section class="${sectionClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
+  return `<section class="${secClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
+<div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
 ${labelDiv ? labelDiv.replace(/>.*</, `>${title}<`) : `<div class="text-secondary font-bold text-sm mb-4">${title}</div>`}
-<h3 class="${h3Class}">${questionText}</h3>
+<h3 class="font-headline text-2xl font-bold mb-8">${questionText}</h3>
 <div class="space-y-4">
 ${newChoices}
 </div>
 <div class="mt-8 hidden" data-quiz-feedback></div>
+</div>
 </div>
 </section>`;
 }
@@ -215,32 +229,25 @@ ${newChoices}
 function fillGraphicText(pattern, comp, index) {
   const title = esc(comp.displayTitle || '');
   const bodyText = comp.body || '';
-  // Override pattern's section class — we rebuild the layout entirely with flex,
-  // so the pattern's grid/column classes would conflict. Keep only spacing/bg classes.
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || '';
-  // Strip grid-related classes that would conflict with our flex layout
-  const sectionClass = rawClass
-    .replace(/grid\b/g, '').replace(/md:grid-cols-\d/g, '').replace(/gap-\d+/g, '')
-    .replace(/max-w-\[[^\]]*\]/g, '').replace(/max-w-\w+/g, '')
-    .replace(/\s+/g, ' ').trim()
-    || 'py-24 px-8';
+  const secClass = sectionOnly(rawClass.replace(/grid\b/g, '').replace(/md:grid-cols-\d/g, '').replace(/gap-\d+/g, '')) || 'py-24';
   const align = comp._imageAlign || (index % 2 === 0 ? 'right' : 'left');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
-  const imageDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}">
+  const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}">
 <div class="relative group rounded-2xl overflow-hidden aspect-[4/3]">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container rounded-2xl"></div>'}
 </div>
 </div>`;
 
-  const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center">
-<h2 class="font-headline text-4xl font-black tracking-tighter mb-6 leading-tight">${title}</h2>
+  const textDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center">
+<h2 class="font-headline text-3xl font-bold tracking-tight mb-6 leading-tight">${title}</h2>
 <div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
 
-  return `<section class="${sectionClass}" data-component-type="graphic-text">
-<div class="max-w-7xl mx-auto">
+  return `<section class="${secClass}" data-component-type="graphic-text">
+<div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 ${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
 </div>
@@ -252,57 +259,57 @@ function fillBento(pattern, comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-7xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
+  const secClass = sectionOnly(rawClass);
 
-  // Extract icon classes from pattern
   const icons = ['bolt', 'speed', 'shield', 'memory', 'hub', 'star', 'lightbulb', 'science'];
 
-  // First card is large (col-span-2, row-span-2), rest are smaller
   const newCards = items.map((item, i) => {
     if (i === 0) {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
-      return `<div class="md:col-span-2 md:row-span-2 glass-card rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group">
+      return `<div class="md:col-span-2 md:row-span-2 glass-card rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group min-h-[200px]">
 ${imgSrc ? `<img alt="" class="absolute inset-0 object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[0]}</span>
-<h4 class="font-headline text-2xl font-bold mb-2">${esc(item.title || '')}</h4>
+<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
-    // Alternate between horizontal and vertical card styles
     if (i <= 2 && items.length > 3) {
-      return `<div class="md:col-span-2 glass-card rounded-3xl p-8 flex items-center gap-8">
-<div class="bg-secondary-container p-4 rounded-2xl">
+      return `<div class="md:col-span-2 glass-card rounded-3xl p-8 flex items-center gap-6 min-h-[100px]">
+<div class="bg-secondary-container p-4 rounded-2xl flex-shrink-0">
 <span class="material-symbols-outlined text-secondary text-4xl">${icons[i % icons.length]}</span>
 </div>
-<div>
+<div class="min-w-0">
 <h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
-    return `<div class="glass-card rounded-3xl p-8 flex flex-col justify-center">
+    return `<div class="glass-card rounded-3xl p-8 flex flex-col justify-center min-h-[100px]">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+<h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
 <p class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="bento">
-<h2 class="font-headline text-4xl font-bold mb-16">${title}</h2>
-<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+  return `<section class="${secClass}" data-component-type="bento">
+<div class="max-w-6xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
 ${newCards}
+</div>
 </div>
 </section>`;
 }
 
 function fillDataTable(pattern, comp) {
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-5xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
   const body = comp.body || '';
 
-  // Support both schema formats: columns+rows (layout engine) and _rows (legacy)
   const columns = comp.columns || [];
   const rows = comp.rows || comp._rows || [];
 
@@ -310,7 +317,6 @@ function fillDataTable(pattern, comp) {
   let bodyHtml = '';
 
   if (columns.length > 0) {
-    // columns + rows format from layout engine
     headerHtml = columns.map(c => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(c.title || '')}</th>`).join('');
     bodyHtml = rows.map(row => {
       const label = row.label || '';
@@ -322,10 +328,8 @@ function fillDataTable(pattern, comp) {
       }).join('');
       return `<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
     }).join('\n');
-    // Prepend the label column header
     headerHtml = `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
   } else if (rows.length > 0 && Array.isArray(rows[0])) {
-    // Legacy _rows format (array of arrays, first row = headers)
     const headers = rows[0];
     headerHtml = headers.map(h => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
     bodyHtml = rows.slice(1).map(row =>
@@ -333,11 +337,12 @@ function fillDataTable(pattern, comp) {
     ).join('\n');
   }
 
-  return `<section class="${sectionClass}" data-component-type="data-table">
+  return `<section class="${secClass}" data-component-type="data-table">
+<div class="max-w-6xl mx-auto px-8">
 ${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
 <div class="overflow-hidden rounded-xl border border-white/5 glass">
 <div class="px-8 py-6 border-b border-white/5">
-<h3 class="text-xl font-bold tracking-tight">${title}</h3>
+<h3 class="text-2xl font-bold tracking-tight">${title}</h3>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
@@ -346,14 +351,16 @@ ${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
 </table>
 </div>
 </div>
+</div>
 </section>`;
 }
 
 function fillTextInput(pattern, comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
-  const cardClass = pattern.match(/<div[^>]*class="([^"]*glass-card[^"]*)"/)?.[1] || 'max-w-3xl mx-auto glass-card p-12 rounded-[2rem]';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low';
+  const secClass = sectionOnly(rawClass);
+  const cardClass = pattern.match(/<div[^>]*class="([^"]*glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
   const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
 
   const newInputs = items.map(item =>
@@ -363,12 +370,14 @@ function fillTextInput(pattern, comp) {
 </div>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="textinput">
+  return `<section class="${secClass}" data-component-type="textinput">
+<div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="space-y-8">
 ${newInputs}
 <button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary-container w-full">Submit</button>
+</div>
 </div>
 </div>
 </section>`;
@@ -378,7 +387,8 @@ function fillBranching(pattern, comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-4xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
+  const secClass = sectionOnly(rawClass);
 
   const newButtons = items.map(item =>
     `<button class="p-6 rounded-2xl bg-surface-variant/30 text-left hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">
@@ -387,12 +397,14 @@ function fillBranching(pattern, comp) {
 </button>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="branching">
+  return `<section class="${secClass}" data-component-type="branching">
+<div class="max-w-6xl mx-auto px-8">
 <div class="glass-card p-12 rounded-3xl border-l-8 border-secondary">
 <h3 class="font-headline text-2xl font-bold mb-6">${title}</h3>
 <p class="text-lg text-on-surface-variant mb-10 italic">${bodyText}</p>
-<div class="grid gap-4">
+<div class="grid gap-6">
 ${newButtons}
+</div>
 </div>
 </div>
 </section>`;
@@ -403,9 +415,9 @@ function fillTimeline(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-4xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
+  const secClass = sectionOnly(rawClass);
 
-  // Extract dot classes from pattern
   const activeDotClass = pattern.match(/class="(absolute[^"]*bg-secondary[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-secondary shadow-[0_0_10px_rgba(37,216,252,0.5)]';
   const inactiveDotClass = pattern.match(/class="(absolute[^"]*bg-outline-variant[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant';
 
@@ -420,10 +432,12 @@ function fillTimeline(pattern, comp) {
 </div>`;
   }).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="timeline">
-<h2 class="font-headline text-4xl font-bold mb-20 text-center">${title}</h2>
+  return `<section class="${secClass}" data-component-type="timeline">
+<div class="max-w-6xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-20 text-center">${title}</h2>
 <div class="relative border-l-2 border-outline-variant ml-4 space-y-16">
 ${newSteps}
+</div>
 </div>
 </section>`;
 }
@@ -431,19 +445,17 @@ ${newSteps}
 function fillComparison(pattern, comp) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
 
-  // Support both formats: columns+rows (layout engine) and _columns (legacy)
   const columns = comp.columns || comp._columns || [];
   const rows = comp.rows || [];
 
   if (columns.length === 0) return pattern;
 
-  // Build header — prepend empty cell for the row label column
   const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th>` +
     columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">${esc(c.title || '')}</th>`).join('');
 
-  // Build rows
   const rowsHtml = rows.map(row => {
     const label = row.label || '';
     const vals = (row.values || []).map(v => {
@@ -454,7 +466,8 @@ function fillComparison(pattern, comp) {
     return `<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="comparison">
+  return `<section class="${secClass}" data-component-type="comparison">
+<div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)}</p>` : ''}
 <div class="overflow-x-auto glass rounded-3xl border border-white/5">
@@ -463,6 +476,7 @@ ${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)
 <tbody class="divide-y divide-white/5">${rowsHtml}</tbody>
 </table>
 </div>
+</div>
 </section>`;
 }
 
@@ -470,11 +484,9 @@ function fillStatCallout(pattern, comp) {
   const items = comp._items || [];
   if (items.length === 0) return pattern;
 
-  // Extract section and grid classes from pattern
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
-  const gridClass = pattern.match(/<div[^>]*class="([^"]*grid[^"]*)"/)?.[1] || 'max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-center';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low';
+  const secClass = sectionOnly(rawClass);
 
-  // Extract one stat block as template
   const statMatch = pattern.match(/<div class="space-y-2">[\s\S]*?<\/div>\s*<\/div>/i);
   const numClass = statMatch
     ? (statMatch[0].match(/<div class="(text-5xl[^"]*)"/)?.[1] || 'text-5xl font-headline font-extrabold text-gradient')
@@ -483,16 +495,21 @@ function fillStatCallout(pattern, comp) {
     ? (statMatch[0].match(/<p class="([^"]*)"/)?.[1] || 'text-on-surface-variant text-sm uppercase tracking-widest font-bold')
     : 'text-on-surface-variant text-sm uppercase tracking-widest font-bold';
 
+  const colCount = Math.min(items.length, 4);
+  const gridCols = `grid-cols-2 md:grid-cols-${colCount}`;
+
   const newStats = items.map(item =>
-    `<div class="space-y-2">
+    `<div class="space-y-2 min-w-[120px]">
 <div class="${numClass}">${esc(item.stat || item.value || '')}</div>
 <p class="${labelClass}">${esc(item.label || '')}</p>
 </div>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="stat-callout">
-<div class="${gridClass}">
+  return `<section class="${secClass}" data-component-type="stat-callout">
+<div class="max-w-6xl mx-auto px-8">
+<div class="grid ${gridCols} gap-8 text-center">
 ${newStats}
+</div>
 </div>
 </section>`;
 }
@@ -500,13 +517,16 @@ ${newStats}
 function fillPullquote(pattern, comp) {
   const quote = stripTags(comp.body || '');
   const attribution = esc(comp.attribution || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
 
-  return `<section class="${sectionClass}" data-component-type="pullquote">
+  return `<section class="${secClass}" data-component-type="pullquote">
+<div class="max-w-6xl mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary">
 <span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
 <blockquote class="text-2xl font-headline font-bold leading-relaxed">${quote}</blockquote>
 ${attribution ? `<p class="mt-4 text-on-surface-variant">— ${attribution}</p>` : ''}
+</div>
 </div>
 </section>`;
 }
@@ -514,10 +534,10 @@ ${attribution ? `<p class="mt-4 text-on-surface-variant">— ${attribution}</p>`
 function fillChecklist(pattern, comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-3xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
   const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"[^>]*data-checklist/)?.[1] || 'glass-card p-12 rounded-3xl';
 
-  // Extract checkbox input classes from pattern
   const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent';
 
   const newLabels = items.map(item =>
@@ -527,13 +547,15 @@ function fillChecklist(pattern, comp) {
 </label>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="checklist">
+  return `<section class="${secClass}" data-component-type="checklist">
+<div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}" data-checklist>
-<h2 class="font-headline text-2xl font-bold mb-8">${title}</h2>
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="space-y-2">
 ${newLabels}
 </div>
 <div class="mt-6 text-sm text-on-surface-variant font-bold">0 / ${items.length} complete</div>
+</div>
 </div>
 </section>`;
 }
@@ -543,9 +565,9 @@ function fillTabs(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 bg-surface-container-low';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 bg-surface-container-low';
+  const secClass = sectionOnly(rawClass);
 
-  // Extract button classes from pattern
   const activeBtn = pattern.match(/<button[^>]*class="([^"]*bg-secondary[^"]*)"[^>]*data-tab-trigger/)?.[1]
     || 'px-8 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm uppercase tracking-wider';
   const inactiveBtn = pattern.match(/<button[^>]*class="([^"]*glass-card[^"]*)"[^>]*data-tab-trigger/)?.[1]
@@ -557,14 +579,14 @@ function fillTabs(pattern, comp) {
 
   const panels = items.map((item, i) =>
     `<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
-<h4 class="font-headline text-2xl font-bold mb-4">${esc(item.title || '')}</h4>
+<h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
 <div class="text-on-surface-variant leading-relaxed">${item.body || ''}</div>
 </div>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="tabs">
-<div class="max-w-5xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-16 text-center">${title}</h2>
+  return `<section class="${secClass}" data-component-type="tabs">
+<div class="max-w-6xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
 <div class="flex flex-wrap justify-center gap-4 mb-12" data-tabs>
 ${triggers}
 </div>
@@ -578,7 +600,8 @@ function fillFlashcard(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low overflow-hidden';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low overflow-hidden';
+  const secClass = sectionOnly(rawClass);
   const icons = ['info', 'local_fire_department', 'pan_tool', 'bolt', 'shield', 'warning', 'speed', 'memory'];
 
   const newCards = items.map((item, i) => {
@@ -599,10 +622,10 @@ function fillFlashcard(pattern, comp) {
 </div>`;
   }).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="flashcard">
-<div class="max-w-7xl mx-auto">
+  return `<section class="${secClass}" data-component-type="flashcard">
+<div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-8">
 ${newCards}
 </div>
 </div>
@@ -615,18 +638,20 @@ function fillNarrative(pattern, comp) {
 
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-5xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
+  const secClass = sectionOnly(rawClass);
 
   const newSlides = items.map((item, i) => {
     const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
     return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 <div class="text-secondary font-bold mb-4">${counter}</div>
-<h4 class="font-headline text-2xl font-bold mb-4">${esc(item.title || '')}</h4>
+<h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="narrative" data-carousel>
+  return `<section class="${secClass}" data-component-type="narrative" data-carousel>
+<div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-12 relative">
 ${newSlides}
@@ -639,6 +664,7 @@ ${newSlides}
 </button>
 </div>
 </div>
+</div>
 </section>`;
 }
 
@@ -647,19 +673,23 @@ function fillKeyTerm(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
 
+  const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
   const newCards = items.map(item =>
-    `<div class="glass-card p-8 rounded-2xl">
+    `<div class="glass-card p-8 rounded-2xl overflow-hidden">
 <div class="text-secondary font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant text-sm">${esc(item.definition || item.body || '')}</p>
+<p class="text-on-surface-variant">${esc(item.definition || item.body || '')}</p>
 </div>`
   ).join('\n');
 
-  return `<section class="${sectionClass}" data-component-type="key-term">
+  return `<section class="${secClass}" data-component-type="key-term">
+<div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
-<div class="grid md:grid-cols-3 gap-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 ${cols === 3 ? 'md:grid-cols-3' : ''} gap-10">
 ${newCards}
+</div>
 </div>
 </section>`;
 }
@@ -676,8 +706,8 @@ function fillFullBleed(pattern, comp) {
   return `<section class="${sectionClass}" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/60 to-transparent"></div>
-<div class="relative z-10 max-w-4xl mx-auto px-8 flex flex-col ${alignClass}">
-<h2 class="font-headline text-5xl font-black tracking-tighter mb-4">${title}</h2>
+<div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col ${alignClass}">
+<h2 class="font-headline text-3xl font-bold tracking-tight mb-4">${title}</h2>
 ${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
 </div>
 </section>`;
@@ -686,16 +716,19 @@ ${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
 function fillGraphic(pattern, comp) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
+  const secClass = sectionOnly(rawClass);
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
-  return `<section class="${sectionClass}" data-component-type="graphic">
+  return `<section class="${secClass}" data-component-type="graphic">
+<div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
 <div class="rounded-2xl overflow-hidden">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
 </div>
 ${body ? `<div class="mt-4 text-on-surface-variant">${body}</div>` : ''}
+</div>
 </section>`;
 }
 
@@ -704,11 +737,9 @@ function fillProcessFlow(pattern, comp) {
   if (items.length === 0) return pattern;
 
   const title = esc(comp.displayTitle || '');
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low';
+  const secClass = sectionOnly(rawClass);
 
-  const arrowHtml = '<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>';
-
-  // For many nodes, use vertical layout (more readable). For few nodes, horizontal.
   const useVertical = items.length > 4;
 
   const newNodes = items.map((item, i) => {
@@ -730,10 +761,10 @@ ${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${st
 
   const flexDir = useVertical ? 'flex-col' : 'flex-col md:flex-row';
 
-  return `<section class="${sectionClass}" data-component-type="process-flow">
-<div class="max-w-5xl mx-auto">
+  return `<section class="${secClass}" data-component-type="process-flow">
+<div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="flex ${flexDir} items-stretch gap-4">
+<div class="flex ${flexDir} items-stretch gap-6">
 ${withArrows}
 </div>
 </div>
@@ -741,40 +772,57 @@ ${withArrows}
 }
 
 function fillMedia(pattern, comp) {
-  // Media component is mostly visual — just replace image if available
-  let html = pattern;
+  let inner = pattern;
   if (comp._graphic) {
     const src = embedImage(comp._graphic.large);
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+    inner = inner.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
   }
-  return html;
+  // Pattern uses relative/absolute positioning — wrap in containment, don't inject inside
+  inner = inner.replace(/^<section/, '<div').replace(/<\/section>\s*$/, '</div>');
+  return `<section class="py-24" data-component-type="media">
+<div class="max-w-6xl mx-auto px-8">
+${inner}
+</div>
+</section>`;
 }
 
 function fillVideoTranscript(pattern, comp) {
-  let html = pattern;
-  // Replace summary text
-  html = html.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(comp.displayTitle || 'Transcript')}</span>`);
-  // Replace transcript body
-  html = html.replace(/(<div class="p-8[^"]*">)([\s\S]*?)(<\/div>\s*<\/details>)/i,
+  let inner = pattern;
+  inner = inner.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(comp.displayTitle || 'Transcript')}</span>`);
+  inner = inner.replace(/(<div class="p-8[^"]*">)([\s\S]*?)(<\/div>\s*<\/details>)/i,
     `$1${comp.body || ''}$3`);
-  return html;
+  inner = inner.replace(/^<section/, '<div').replace(/<\/section>\s*$/, '</div>');
+  return `<section class="py-24" data-component-type="video-transcript">
+<div class="max-w-6xl mx-auto px-8">
+${inner}
+</div>
+</section>`;
 }
 
 function fillImageGallery(pattern, comp) {
-  let html = pattern;
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
-  // Image gallery doesn't usually appear in SCORM data, so mostly keep pattern as-is
-  return html;
+  let inner = pattern;
+  inner = replaceFirstTag(inner, 'h2', esc(comp.displayTitle || ''));
+  inner = inner.replace(/^<section/, '<div').replace(/<\/section>\s*$/, '</div>');
+  return `<section class="py-24" data-component-type="image-gallery">
+<div class="max-w-6xl mx-auto px-8">
+${inner}
+</div>
+</section>`;
 }
 
 function fillLabeledImage(pattern, comp) {
-  let html = pattern;
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  let inner = pattern;
+  inner = replaceFirstTag(inner, 'h2', esc(comp.displayTitle || ''));
   if (comp._graphic) {
     const src = embedImage(comp._graphic.large);
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+    inner = inner.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
   }
-  return html;
+  inner = inner.replace(/^<section/, '<div').replace(/<\/section>\s*$/, '</div>');
+  return `<section class="py-24" data-component-type="labeled-image">
+<div class="max-w-6xl mx-auto px-8">
+${inner}
+</div>
+</section>`;
 }
 
 // ─── Component dispatcher ─────────────────────────────────────────────
@@ -821,10 +869,8 @@ function buildNav(shell, layout) {
   const courseTitle = esc(layout.course.title || 'Course');
   const sections = layout.sections.filter(s => s.title).slice(0, 6);
 
-  // Extract nav classes from the pattern
   const navClass = shell.nav.match(/<nav[^>]*class="([^"]*)"/)?.[1] || 'fixed top-0 w-full z-50 bg-surface-container/60 backdrop-blur-xl flex justify-between items-center px-8 h-20';
 
-  // Extract link classes
   const activeLinkClass = shell.nav.match(/<a[^>]*class="([^"]*border-b[^"]*)"/)?.[1] || "text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm uppercase";
   const inactiveLinkClass = shell.nav.match(/<a[^>]*class="([^"]*hover:text-white[^"]*)"/)?.[1] || "text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase";
 
@@ -852,14 +898,13 @@ function buildFooter(shell, layout) {
   const courseTitle = esc(layout.course.title || 'Course');
   const year = new Date().getFullYear();
 
-  // Extract footer classes from pattern
   const footerClass = shell.footer.match(/<footer[^>]*class="([^"]*)"/)?.[1] || 'bg-surface-dim w-full py-12 border-t border-white/5';
 
   return `<footer class="${footerClass}" data-component-type="footer">
-<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="max-w-6xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
 <div class="flex flex-col gap-2 items-center md:items-start">
 <span class="text-lg font-bold text-on-surface">${courseTitle}</span>
-<span class="text-xs text-on-surface-variant">© ${year} ${courseTitle}. All rights reserved.</span>
+<span class="text-xs text-on-surface-variant">&copy; ${year} ${courseTitle}. All rights reserved.</span>
 </div>
 <div class="flex gap-8">
 <a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
@@ -937,11 +982,9 @@ function build() {
     });
 
     if (componentHtmls.length > 0) {
-      // Section title bar (visual divider between topic groups)
-      // Skip for hero section (empty title) — hero stands alone
       const sectionTitle = section.title || '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-7xl mx-auto px-8 pt-24 pb-8" id="${sectionId}">
+        ? `<div class="max-w-6xl mx-auto px-8 pt-24 pb-8" id="${sectionId}">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
 <h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
@@ -950,18 +993,14 @@ function build() {
 </div>`
         : '';
 
-      // Components that already have <section> wrappers (hero, full-bleed, etc.)
-      // get rendered as-is. Other components are grouped into the section flow.
-      // Reduce spacing between consecutive components within the same section.
       const wrapped = componentHtmls.map((h, i) => {
         if (h.trim().startsWith('<section')) {
-          // Self-contained component — add section ID to first one if no title bar
           if (i === 0 && !sectionTitle) {
             return h.replace(/<section/, `<section id="${sectionId}"`);
           }
           return h;
         }
-        return `<div class="py-12 px-8 max-w-7xl mx-auto">\n${h}\n</div>`;
+        return `<div class="py-12 max-w-6xl mx-auto px-8">\n${h}\n</div>`;
       }).join('\n\n');
 
       sectionsHtml.push(titleBar + '\n' + wrapped);
@@ -1011,13 +1050,15 @@ ${navHtml}
 ${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
-<section class="py-32 px-8 text-center max-w-4xl mx-auto">
+<section class="py-32 text-center">
+<div class="max-w-6xl mx-auto px-8">
   <span class="material-symbols-outlined text-6xl text-secondary mb-8">verified_user</span>
-  <h2 class="font-headline text-4xl font-bold mb-8">Course Complete</h2>
+  <h2 class="font-headline text-3xl font-bold mb-8">Course Complete</h2>
   <p class="text-on-surface-variant text-xl leading-relaxed mb-12">
     You have completed ${esc(courseTitle)}. Review any sections as needed.
   </p>
   <button class="btn-primary px-12 py-5 rounded-full font-bold text-lg" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
+</div>
 </section>
 
 ${footerHtml}

@@ -238,6 +238,11 @@ Pattern-fill approach — Stitch provides the design system, we provide the cont
 
 All 25 component types use Approach A (extract classes, rebuild). Zero Stitch example content leaks. Different brand URL → different Stitch kit → different CSS classes → different visual output.
 
+**Layout rules enforced by every fill function (non-negotiable):**
+1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag handles spacing/background only (via `sectionOnly()` helper that strips containment classes from Stitch patterns). An inner `<div>` provides containment.
+2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2×2, not 3+1).
+3. **Typography:** Headings use a consistent scale — `h2 = text-3xl`, `h3 = text-2xl`, `h4 = text-xl` — no random size spikes. Hero `h1` is exempt (uses `text-6xl md:text-8xl`).
+
 ### Hydration (`v5/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
 - **Quizzes**: Select answer → submit → correct/incorrect feedback → retry
@@ -296,7 +301,7 @@ Vanilla JS script injected into the final HTML. Handles:
 ### DESIGN.md Format (what Stitch understands)
 Stitch is trained to interpret DESIGN.md files. Structure:
 1. **Visual Theme & Atmosphere** — evocative adjectives (e.g., "Airy, glass-forward, ethereal")
-2. **Colour Palette & Roles** — semantic names + hex (e.g., "Soft Amethyst (#522c66) — primary actions")
+2. **Colour Palette & Roles** — semantic names in natural language (e.g., "Soft amethyst purple — primary actions")
 3. **Typography Rules** — must use Stitch's 28 supported fonts
 4. **Component Stylings** — natural language (e.g., "Pill-shaped buttons, frosted glass cards")
 5. **Layout Principles** — whitespace strategy, grid patterns
@@ -312,7 +317,7 @@ When describing brands, use Stitch's native terms:
 - `spacingScale`: 0 (minimal), 1 (compact), 2 (normal), 3 (spacious)
 
 ### Future: IMAGE_TO_UI
-The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from CSS scraping. Monitor SDK updates.
+The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from screenshot description. Monitor SDK updates.
 
 ### API Constraints (IMPORTANT)
 - `generate_screen_from_text` only accepts: `projectId`, `prompt`, `deviceType`, `modelId`
@@ -337,7 +342,7 @@ After Stitch returns the full HTML page, `generate-course-html.js` extracts indi
 - Each fragment is stored in `component-patterns/{type}.html`
 - The page shell (nav, footer, head content) is extracted separately to `_page-shell.json`
 - `build-course.js` loads each pattern and fills it with real content via per-type fill functions
-- Confirmed working: 25/25 patterns extracted, 40/40 components filled with 0 fallbacks
+- Confirmed working: 25/25 patterns extracted, 39 components filled with 0 fallbacks (EV test course)
 
 ### What hydrate.js Expects (data attributes)
 hydrate.js looks for these specific data attributes to add interactivity:
@@ -406,6 +411,7 @@ Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
 ```bash
 node v5/scripts/generate-images.js
 ```
+**Note:** HuggingFace Inference API credits are depleted (as of 2026-03-24). For review runs, skip this step and create SVG placeholders instead. The build script handles SVG placeholders fine. Layout review doesn't need real images.
 
 ### Phase 5 — Build
 ```bash
@@ -454,7 +460,7 @@ Outputs to `screenshots/` (gitignored):
 
 **When doing review runs, alternate brand URLs** between `najaf.framer.ai` (dark/green) and `ailyx.framer.website` (light/blue) to ensure fixes are universal. A fix that works for one brand but breaks the other is the wrong fix.
 
-**Image generation must achieve 100% coverage.** `generate-images.js` has retry logic (Pass 1 + Pass 2) and SVG placeholder fallback. Do not proceed to Build if images are missing — the script guarantees 100% asset delivery.
+**Image asset coverage must be 100%.** `generate-images.js` has retry logic (Pass 1 + Pass 2) and SVG placeholder fallback. The script guarantees 100% asset delivery — either real images or SVG placeholders. Both work fine in the build.
 
 ---
 
