@@ -8,6 +8,7 @@ screenshots/
 .env
 
 # Dev screenshots (Playwright viewport/full-page captures)
-*.jpeg
-*.png
-!v4/output/stitch-course-screenshot.png
+# Keep screenshots/ folder tracked, ignore loose images in root
+/*.jpeg
+/*.png
+screenshots/

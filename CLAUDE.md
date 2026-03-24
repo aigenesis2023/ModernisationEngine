@@ -104,28 +104,29 @@ v4/                                    ← ALL ACTIVE CODE
     component-library.json             ← 25 components: type, props, usage, examples
   prompts/
     layout-engine.md                   ← System prompt for AI layout engine
-    image-generator.md                 ← Prompt templates for image generation
-    representative-course.md           ← [NEW] All 25 component types for Stitch to design
+    representative-course.md           ← All 25 component types for Stitch to design
   scripts/
     extract.js                         ← SCORM folder → content-bucket.json
     scrape-brand.js                    ← Brand URL → brand-profile.json + brand-design.md
     design-course.js                   ← AI layout engine (manual + API + load modes)
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
     generate-images.js                 ← Design-informed image generation (runs after Stitch)
-    build-course.js                    ← Component patterns + real content → course.html
+    build-course.js                    ← Pattern fill: Stitch patterns + real content → course.html
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
-    plan-visual-media.js               ← Agent decides per-component: photo vs illustration vs none
   output/
     content-bucket.json                ← Extracted from test SCORM
     brand-profile.json                 ← Scraped from brand URL (raw data)
-    brand-design.md                    ← [NEW] DESIGN.md format brief for Stitch
+    brand-design.md                    ← DESIGN.md format brief for Stitch
     course-layout.json                 ← AI-structured course
     stitch-course-raw.html             ← Stitch's complete designed page
     stitch-course-meta.json            ← Stitch API response metadata
-    design-tokens.json                 ← [NEW] Extracted design system tokens
-    component-patterns/                ← [NEW] Extracted HTML pattern per component type
+    stitch-course-screenshot.png       ← Stitch's design preview
+    design-tokens.json                 ← Extracted design system tokens
+    component-patterns/                ← Extracted HTML pattern per component type (25)
     images/                            ← HF-generated images
     course.html                        ← Final single-file output
+
+screenshots/                           ← Dev screenshots (gitignored, overwritten each run)
 
 EV/                                    ← Test SCORM (64 slides, gitignored in Codespace)
 ```
@@ -149,7 +150,6 @@ Extracts all educational content from the SCORM file:
 ### Phase 2 — Brand Analysis (`v4/scripts/scrape-brand.js`)
 **Input:** Brand URL
 **Output:** `v4/output/brand-profile.json` + `v4/output/brand-design.md`
-**Known bug:** Theme detection currently uses only body/root CSS background-color, which can be wrong (e.g., Fluence has `#1b0c25` in CSS but is visually a light/airy site). Fix: use multiple signals — count of dark vs light backgrounds across all elements, check for gradient overlays, check actual content area backgrounds, not just body.
 
 Scrapes the URL for raw design data, then translates it into Stitch's native language:
 - Extracts: colours, fonts, border-radius, spacing, visual patterns
@@ -203,15 +203,20 @@ Analyses design tokens to determine visual treatment (colour temperature, lighti
 Uses HuggingFace Inference API (FLUX.1-schnell model).
 
 ### Phase 5 — Build (`v4/scripts/build-course.js`)
-**Input:** `component-patterns/` + `design-tokens.json` + `course-layout.json` + `images/`
+**Input:** `component-patterns/` + `design-tokens.json` + `stitch-course-raw.html` + `course-layout.json` + `images/`
 **Output:** `v4/output/course.html` + root `index.html`
 
-For each component in course-layout.json:
-1. Finds the matching component pattern from Stitch's kit
-2. Fills it with real SCORM content (100% fidelity)
-3. Handles special cases: quiz correct answers, image embedding, data attributes
+Pattern-fill approach — the HTML structure IS Stitch's design:
+1. Loads the Stitch `<head>` block (Tailwind config, custom CSS, fonts, Material Design tokens)
+2. Loads the page shell (nav, footer) from `_page-shell.json`
+3. For each component in course-layout.json:
+   - Loads the matching HTML pattern from `component-patterns/`
+   - Fills it with real SCORM content via a per-type fill function
+   - Each fill function does simple content replacement: swap headings, paragraphs, list items, quiz choices
+4. Handles special cases: quiz correct answer indices, image base64 embedding, interactive data attributes
+5. Assembles full page: Stitch head → nav → filled components → footer → hydrate.js
 
-Assembles into full page using the extracted page shell. Embeds images as base64. Inlines hydrate.js for interactivity. All 25 component types work — no fallbacks.
+All 25 component types have fill functions. The visual design is 100% Stitch's — different brand URL produces different HTML patterns and a completely different visual output.
 
 ### Hydration (`v4/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
@@ -305,12 +310,14 @@ The stitch-design skill (https://github.com/google-labs-code/stitch-skills) spec
 - Convert informal language to professional UI/UX terminology (e.g., "nice header" → "sticky navigation bar with glassmorphism")
 - Use evocative atmospheric direction (Minimalist, Vibrant, Brutalist, etc.)
 
-### Component Pattern Extraction (key engineering challenge)
-After Stitch returns the full HTML page, we must extract individual component patterns. Strategy:
-- In the representative course prompt, instruct Stitch to wrap each component in a container with `data-component-type="hero"`, `data-component-type="accordion"`, etc.
-- Parse the returned HTML to extract each component's HTML fragment by its data attribute
-- Store each fragment as a fillable template in `component-patterns/`
-- The build script matches course-layout.json component types to the extracted patterns
+### Component Pattern Extraction (working)
+After Stitch returns the full HTML page, `generate-course-html.js` extracts individual component patterns:
+- The representative course prompt instructs Stitch to wrap each component with `data-component-type="hero"`, `data-component-type="accordion"`, etc.
+- Extraction parses the returned HTML by `data-component-type` attributes (regex, no DOM library needed)
+- Each fragment is stored in `component-patterns/{type}.html`
+- The page shell (nav, footer, head content) is extracted separately to `_page-shell.json`
+- `build-course.js` loads each pattern and fills it with real content via per-type fill functions
+- Confirmed working: 25/25 patterns extracted, 40/40 components filled with 0 fallbacks
 
 ### What hydrate.js Expects (data attributes)
 hydrate.js looks for these specific data attributes to add interactivity:
@@ -368,7 +375,17 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URL:** `https://fluence.framer.website/`
+- **Brand URLs tested:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst)
+
+## Screenshots Workflow
+Dev screenshots go in `screenshots/` (gitignored). Overwrite the same filenames each run:
+- `screenshots/desktop-top.jpeg` — hero + nav viewport
+- `screenshots/desktop-scroll1.jpeg` — first scroll (text, accordion)
+- `screenshots/desktop-scroll2.jpeg` — mid-page (graphic-text, bento)
+- `screenshots/desktop-scroll3.jpeg` — interactive (quiz, flashcard)
+- `screenshots/mobile-top.jpeg` — mobile viewport hero
+
+Use Playwright: `npx http-server -p 8765 -c-1 --silent &` then navigate to `http://localhost:8765/v4/output/course.html`.
 
 ---
 
