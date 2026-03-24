@@ -1,23 +1,22 @@
 #!/usr/bin/env node
 /**
- * V5 Image Generator — Design-Token-Informed
+ * V5 Image Generator — Brand-Description-Informed
  *
- * Reads course-layout.json AND design-tokens.json to generate images
- * that fit the actual designed page. Runs AFTER Stitch, not in parallel.
- *
- * V5 upgrade: Reads from design-tokens.json (extracted by generate-course-html.js)
- * instead of parsing raw Stitch HTML. Falls back to raw HTML if tokens unavailable.
+ * Reads course-layout.json for content subjects and brand-design.md for
+ * photographic treatment. Generates images that match the brand mood.
  *
  * The image prompts from course-layout.json describe WHAT to show (subject).
- * The Stitch design tokens determine HOW it should look (treatment).
+ * The brand description determines HOW it should look (photographic mood).
+ * Image prompts contain ONLY photographic terms — never UI design elements.
  *
  * Usage:
  *   node v5/scripts/generate-images.js
  *
- * Input:  v5/output/course-layout.json  (content subjects)
- *         v5/output/design-tokens.json   (V5 — extracted design tokens)
- *         v5/output/stitch-course-raw.html  (fallback design treatment source)
- *         v5/output/brand-profile.json  (fallback if no Stitch output)
+ * Input:  v5/output/course-layout.json   (content subjects)
+ *         v5/output/brand-design.md       (primary — natural language brand description)
+ *         v5/output/brand-profile.json    (fallback — imageTreatment field)
+ *         v5/output/design-tokens.json    (legacy fallback)
+ *         v5/output/stitch-course-raw.html (legacy fallback)
  * Output: v5/output/images/*.jpg + updated course-layout.json
  */
 
@@ -32,6 +31,7 @@ const HF_TOKEN = process.env.HF_TOKEN || '';
 
 const OUTPUT_DIR = path.resolve('v5/output/images');
 const LAYOUT_PATH = path.resolve('v5/output/course-layout.json');
+const BRAND_DESIGN_PATH = path.resolve('v5/output/brand-design.md');
 const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
 const TOKENS_PATH = path.resolve('v5/output/design-tokens.json');
 const STITCH_PATH = path.resolve('v5/output/stitch-course-raw.html');
@@ -187,6 +187,51 @@ function perceivedLuminance(hex) {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
+// ─── Extract Image Treatment from Brand Description ─────────────────
+// Reads brand-design.md and extracts just the photographic mood for images.
+// NEVER includes UI design elements (glassmorphism, pill buttons, etc.)
+function extractTreatmentFromDescription(description) {
+  // Try to find an "Image Treatment" section
+  const sectionMatch = description.match(/##\s*Image Treatment\s*\n([\s\S]*?)(?=\n##|\n$|$)/i);
+  if (sectionMatch) {
+    const raw = sectionMatch[1].trim();
+    // Clean: take first paragraph, strip markdown formatting
+    const firstPara = raw.split('\n\n')[0].replace(/[*_#]/g, '').trim();
+    if (firstPara.length > 10) return firstPara;
+  }
+
+  // Fallback: derive photographic mood from overall tone words in the description
+  const lower = description.toLowerCase();
+  const parts = [];
+
+  // Lighting
+  if (lower.includes('dark') || lower.includes('moody') || lower.includes('midnight') || lower.includes('deep shadow')) {
+    parts.push('dramatic low-key lighting, deep shadows');
+  } else if (lower.includes('bright') || lower.includes('airy') || lower.includes('light') || lower.includes('luminous')) {
+    parts.push('clean bright natural lighting, soft even illumination');
+  } else {
+    parts.push('balanced professional lighting');
+  }
+
+  // Colour temperature
+  if (lower.includes('warm') || lower.includes('coral') || lower.includes('amber') || lower.includes('golden')) {
+    parts.push('warm colour tones');
+  } else if (lower.includes('cool') || lower.includes('blue') || lower.includes('teal') || lower.includes('cyan') || lower.includes('ice')) {
+    parts.push('cool blue-toned atmosphere');
+  }
+
+  // Style
+  if (lower.includes('elegant') || lower.includes('sophisticated') || lower.includes('premium') || lower.includes('luxury')) {
+    parts.push('refined professional photography');
+  } else if (lower.includes('creative') || lower.includes('bold') || lower.includes('dynamic') || lower.includes('vibrant')) {
+    parts.push('dynamic artistic composition');
+  } else {
+    parts.push('professional photography, clean composition');
+  }
+
+  return parts.join(', ');
+}
+
 // ─── Design-Informed Prompt Enhancement ──────────────────────────────
 // Combines the content subject (from layout) with visual treatment (from Stitch)
 function buildDesignTreatment(design) {
@@ -306,44 +351,51 @@ async function main() {
   }
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
 
-  // Analyse Stitch design for visual treatment
-  // V5: Try design-tokens.json first, then fall back to raw HTML, then brand profile
-  let design;
-  if (fs.existsSync(TOKENS_PATH)) {
-    const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
-    console.log('Using design-tokens.json for image treatment (V5):');
-    design = analyseDesignTokens(tokens);
-    console.log(`  Colour temperature: ${design.colourTemperature}`);
-    console.log(`  Lighting mood: ${design.lightingMood}`);
-    console.log(`  Style register: ${design.styleRegister}`);
-    console.log(`  Theme: ${design.isDark ? 'dark' : 'light'}`);
-  } else if (fs.existsSync(STITCH_PATH)) {
-    const stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
-    design = analyseStitchDesign(stitchHtml);
-    console.log('Using stitch-course-raw.html for image treatment (fallback):');
-    console.log(`  Colour temperature: ${design.colourTemperature}`);
-    console.log(`  Lighting mood: ${design.lightingMood}`);
-    console.log(`  Style register: ${design.styleRegister}`);
-    console.log(`  Theme: ${design.isDark ? 'dark' : 'light'}`);
-  } else {
-    // Fallback to brand profile if no Stitch output
-    console.log('No Stitch output found — using brand profile for image treatment.');
-    let brand = null;
-    if (fs.existsSync(BRAND_PATH)) {
-      brand = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
-    }
-    const isDark = brand?.colors?.isDark || brand?.style?.theme === 'dark';
-    design = {
-      colourTemperature: 'neutral',
-      lightingMood: isDark ? 'moody' : 'bright',
-      styleRegister: 'professional',
-      dominantTones: [brand?.colors?.primary, brand?.colors?.secondary].filter(Boolean),
-      isDark,
-    };
+  // Determine image treatment
+  // Priority: brand-design.md (natural language) → brand-profile.json (imageTreatment field)
+  //         → design-tokens.json (legacy fallback) → stitch-course-raw.html (legacy fallback)
+  let treatment;
+
+  if (fs.existsSync(BRAND_DESIGN_PATH)) {
+    const brandDescription = fs.readFileSync(BRAND_DESIGN_PATH, 'utf-8');
+    console.log('Using brand-design.md for image treatment:');
+    treatment = extractTreatmentFromDescription(brandDescription);
+    console.log(`  Treatment: ${treatment}\n`);
+  } else if (fs.existsSync(BRAND_PATH)) {
+    try {
+      const brandProfile = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
+      if (brandProfile.imageTreatment) {
+        console.log('Using brand-profile.json imageTreatment:');
+        treatment = brandProfile.imageTreatment;
+        console.log(`  Treatment: ${treatment}\n`);
+      }
+    } catch {}
   }
 
-  const treatment = buildDesignTreatment(design);
-  console.log(`  Treatment: ${treatment}\n`);
+  if (!treatment) {
+    // Legacy fallback: design-tokens.json or stitch-course-raw.html
+    let design;
+    if (fs.existsSync(TOKENS_PATH)) {
+      const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+      console.log('Using design-tokens.json for image treatment (legacy fallback):');
+      design = analyseDesignTokens(tokens);
+    } else if (fs.existsSync(STITCH_PATH)) {
+      const stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
+      console.log('Using stitch-course-raw.html for image treatment (legacy fallback):');
+      design = analyseStitchDesign(stitchHtml);
+    } else {
+      console.log('No design source found — using default treatment.');
+      design = {
+        colourTemperature: 'neutral',
+        lightingMood: 'balanced',
+        styleRegister: 'professional',
+        dominantTones: [],
+        isDark: false,
+      };
+    }
+    treatment = buildDesignTreatment(design);
+    console.log(`  Treatment: ${treatment}\n`);
+  }
 
   // Clear existing images — always regenerate
   if (fs.existsSync(OUTPUT_DIR)) {

@@ -107,7 +107,7 @@ v5/                                    ← ALL ACTIVE CODE
     representative-course.md           ← All 25 component types for Stitch to design
   scripts/
     extract.js                         ← SCORM folder → content-bucket.json
-    scrape-brand.js                    ← Brand URL → brand-profile.json + brand-design.md
+    scrape-brand.js                    ← Brand URL → screenshot + natural language description
     design-course.js                   ← AI layout engine (manual + API + load modes)
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
     generate-images.js                 ← Design-informed image generation (runs after Stitch)
@@ -116,7 +116,8 @@ v5/                                    ← ALL ACTIVE CODE
   output/
     content-bucket.json                ← Extracted from test SCORM
     brand-profile.json                 ← Scraped from brand URL (raw data)
-    brand-design.md                    ← DESIGN.md format brief for Stitch
+    brand-screenshot.png               ← Playwright screenshot of brand landing page
+    brand-design.md                    ← Natural language brand description for Stitch
     course-layout.json                 ← AI-structured course
     stitch-course-raw.html             ← Stitch's complete designed page
     stitch-course-meta.json            ← Stitch API response metadata
@@ -207,29 +208,34 @@ We extract:
 This is a **reusable design asset**. The authoring layer can re-render courses with different content or swapped components without re-calling Stitch.
 
 ### Phase 4b — Image Generation (`v5/scripts/generate-images.js`)
-**Input:** `course-layout.json` (content subjects) + `design-tokens.json` (design treatment)
+**Input:** `course-layout.json` (content subjects) + `brand-design.md` (photographic mood)
 **Output:** Images in `v5/output/images/`
-**Runs AFTER Phase 4a** — images are informed by Stitch's design.
+**Runs AFTER Phase 4a** — images are informed by the brand description.
 
-Analyses design tokens to determine visual treatment (colour temperature, lighting mood, style register). Combines content subjects from image prompts with the design treatment. Always regenerates all images.
+Reads the "Image Treatment" section from `brand-design.md` to determine **photographic mood only** — lighting (dramatic/bright/soft), colour temperature (warm/cool), composition style (professional/artistic). This is combined with the content subject from each component's `imagePrompt`.
 
-Uses HuggingFace Inference API (FLUX.1-schnell model).
+**Critical rule:** Image treatment is ONLY photographic terms. Never includes UI design elements (glassmorphism, pill buttons, brand accent colours, etc.). A dark moody brand gets "dramatic low-key lighting, dark atmosphere" — NOT "green-tinted, glass-effect images".
+
+Falls back to: `brand-profile.json` (imageTreatment field) → `design-tokens.json` (legacy) → defaults.
+
+Uses HuggingFace Inference API (FLUX.1-schnell model). Always regenerates all images.
 
 ### Phase 5 — Build (`v5/scripts/build-course.js`)
 **Input:** `component-patterns/` + `design-tokens.json` + `stitch-course-raw.html` + `course-layout.json` + `images/`
 **Output:** `v5/output/course.html` + root `index.html`
 
-Pattern-fill approach — the HTML structure IS Stitch's design:
+Pattern-fill approach — Stitch provides the design system, we provide the content:
 1. Loads the Stitch `<head>` block (Tailwind config, custom CSS, fonts, Material Design tokens)
-2. Loads the page shell (nav, footer) from `_page-shell.json`
+2. Rebuilds nav and footer using CSS classes from Stitch's page shell + real course data
 3. For each component in course-layout.json:
    - Loads the matching HTML pattern from `component-patterns/`
-   - Fills it with real SCORM content via a per-type fill function
-   - Each fill function does simple content replacement: swap headings, paragraphs, list items, quiz choices
+   - **Extracts CSS classes** from the pattern (section wrappers, card styles, button styles, etc.)
+   - **Rebuilds the inner HTML** entirely with real SCORM content using those classes
+   - Never does text replacement on Stitch's example content — always full rebuild (Approach A)
 4. Handles special cases: quiz correct answer indices, image base64 embedding, interactive data attributes
 5. Assembles full page: Stitch head → nav → filled components → footer → hydrate.js
 
-All 25 component types have fill functions. The visual design is 100% Stitch's — different brand URL produces different HTML patterns and a completely different visual output.
+All 25 component types use Approach A (extract classes, rebuild). Zero Stitch example content leaks. Different brand URL → different Stitch kit → different CSS classes → different visual output.
 
 ### Hydration (`v5/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
