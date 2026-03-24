@@ -1,26 +1,35 @@
 /**
- * generate-course-html.js — Stitch-First Course Renderer
+ * generate-course-html.js — V5 Stitch Component Kit Generator
  *
- * Sends the FULL course content to Stitch and gets back a complete,
- * designed HTML page. Stitch is the renderer — not a style guide generator.
+ * Sends Stitch TWO things:
+ *   1. brand-design.md — DESIGN.md format brief (how it should look)
+ *   2. representative-course.md — all 25 component types (what to design)
  *
- * We feed Stitch:
- * - Every section, heading, paragraph, quiz question, accordion item
- * - Brand colors + font (minimal)
- * - Course topic/domain for design direction
- * - Data attribute instructions so we can hydrate interactivity later
+ * Stitch designs a complete, branded page experience — navigation, sections,
+ * every component type, transitions, footer. We then EXTRACT:
+ *   - Page shell (nav, section wrappers, footer)
+ *   - Component patterns (one HTML fragment per type, identified by data-component-type)
+ *   - Design tokens (Tailwind config, colour system, fonts)
  *
- * Stitch returns: a beautiful, fully designed deep-scroll course page.
- * We then inject our hydration script to make interactive elements work.
+ * This is a REUSABLE DESIGN ASSET — the future authoring layer can re-render
+ * courses with different content or swapped components without re-calling Stitch.
  *
- * Input:  v4/output/course-layout.json + v4/output/brand-profile.json
+ * CRITICAL: DesignTheme is OUTPUT-only in the Stitch API. There is no theme
+ * input parameter. The DESIGN.md content goes INSIDE the text prompt parameter.
+ * Stitch understands it there because it's trained on the DESIGN.md format.
+ *
+ * Input:  v4/output/brand-design.md + v4/prompts/representative-course.md
  * Output: v4/output/stitch-course-raw.html
  *         v4/output/stitch-course-meta.json
+ *         v4/output/stitch-course-screenshot.png
+ *         v4/output/component-patterns/*.html
+ *         v4/output/design-tokens.json
  *
  * Requires: STITCH_API_KEY environment variable
+ * Model: GEMINI_3_1_PRO (Deep Think — significantly better for design reasoning)
  */
 
-import { readFileSync, writeFileSync } from 'fs';
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { config } from 'dotenv';
@@ -30,6 +39,7 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 config({ path: join(ROOT, '.env') });
 const OUTPUT_DIR = join(ROOT, 'v4/output');
+const PATTERNS_DIR = join(OUTPUT_DIR, 'component-patterns');
 
 const API_KEY = process.env.STITCH_API_KEY;
 if (!API_KEY) {
@@ -37,276 +47,232 @@ if (!API_KEY) {
   process.exit(1);
 }
 
-// ─── Build the course content prompt ─────────────────────────────────
+// ─── Build the Stitch prompt ────────────────────────────────────────
 
-function buildCoursePrompt(layout, brand) {
-  const course = layout.course;
-  const sections = layout.sections;
+function buildStitchPrompt(designMd, representativeCourse) {
+  return `You are designing a complete, premium e-learning course page.
 
-  // Extract brand identity
-  const colors = brand?.colors || {};
-  const primary = colors.primary || '#6366f1';
-  const secondary = colors.secondary || '#a855f7';
-  const accent = colors.accent || '#3b82f6';
-  const bg = colors.background || '#000000';
-  const headingFont = brand?.typography?.headingFont || 'Inter';
-  const bodyFont = brand?.typography?.bodyFont || headingFont;
-  const theme = brand?.style?.theme || 'dark';
-  const logoUrl = brand?.logo?.url || '';
+=== DESIGN SYSTEM BRIEF ===
 
-  // Detect domain from content
-  const allText = JSON.stringify(layout).toLowerCase();
-  let domain = 'professional training';
-  let mood = 'modern, clean, authoritative';
-  if (allText.match(/safety|hazard|risk|emergency|danger/)) {
-    domain = 'safety and compliance training';
-    mood = 'authoritative, high-stakes, technical';
-  } else if (allText.match(/sales|marketing|customer|revenue/)) {
-    domain = 'business and marketing';
-    mood = 'dynamic, persuasive, energetic';
-  } else if (allText.match(/code|software|api|data|tech/)) {
-    domain = 'technology';
-    mood = 'technical, precise, innovative';
-  } else if (allText.match(/health|medical|patient|clinical/)) {
-    domain = 'healthcare';
-    mood = 'trustworthy, calm, clinical';
-  } else if (allText.match(/lead|manage|team|strategy/)) {
-    domain = 'leadership';
-    mood = 'confident, inspiring, professional';
-  }
+${designMd}
 
-  // Build section content
-  let sectionContent = '';
-  for (const section of sections) {
-    sectionContent += `\n### SECTION: ${section.title || 'Introduction'}\n`;
+=== COURSE CONTENT TO DESIGN ===
 
-    for (const comp of section.components) {
-      sectionContent += buildComponentBlock(comp);
+${representativeCourse}
+
+=== CRITICAL REQUIREMENTS ===
+
+1. Platform: Web Desktop (responsive — must also work on mobile)
+2. Single deep-scroll page with flowing sections, smooth transitions, and visual rhythm
+3. EVERY component MUST be wrapped in a container with data-component-type="typename" attribute
+4. Interactive elements MUST include these exact data attributes for JavaScript hydration:
+   - Quizzes: data-quiz on container, data-correct="N" (zero-indexed), data-choice on each option
+   - Accordions: Native <details><summary> HTML elements
+   - Tabs: data-tabs on container, data-tab-trigger on buttons, data-tab-panel on panels
+   - Flashcards: data-flashcard on card container
+   - Checklists: data-checklist on container, native <input type="checkbox">
+   - Carousels: data-carousel on container, data-slide on slides, data-prev/data-next on nav
+   - Text inputs: Native <form> with <input> elements
+5. Use Google Material Symbols for icons: <span class="material-symbols-outlined">icon_name</span>
+6. Design this to feel like a $50,000 custom-built learning platform — not a template
+7. The design must be unmistakably on-brand using the colour palette and typography above
+8. Include a fixed navigation bar, section transitions, and a footer`;
+}
+
+// ─── Extract component patterns from Stitch HTML ─────────────────────
+
+function extractComponentPatterns(html) {
+  const patterns = {};
+
+  // Match all data-component-type containers
+  // Strategy: find each opening tag with data-component-type, then extract
+  // the complete element including all children
+  const componentTypes = [
+    'hero', 'text', 'graphic', 'graphic-text', 'accordion', 'mcq',
+    'narrative', 'bento', 'data-table', 'media', 'textinput', 'branching',
+    'timeline', 'comparison', 'stat-callout', 'pullquote', 'key-term',
+    'checklist', 'tabs', 'flashcard', 'labeled-image', 'process-flow',
+    'image-gallery', 'full-bleed', 'video-transcript',
+  ];
+
+  for (const type of componentTypes) {
+    // Find the data-component-type attribute in the HTML
+    const marker = `data-component-type="${type}"`;
+    const startIdx = html.indexOf(marker);
+    if (startIdx === -1) continue;
+
+    // Walk back to find the opening tag
+    let tagStart = startIdx;
+    while (tagStart > 0 && html[tagStart] !== '<') tagStart--;
+
+    // Determine the tag name
+    const tagMatch = html.substring(tagStart).match(/^<(\w+)/);
+    if (!tagMatch) continue;
+    const tagName = tagMatch[1];
+
+    // Find the matching closing tag by counting nesting depth
+    let depth = 0;
+    let pos = tagStart;
+    let foundEnd = false;
+
+    while (pos < html.length) {
+      const nextOpen = html.indexOf(`<${tagName}`, pos + 1);
+      const nextClose = html.indexOf(`</${tagName}>`, pos + 1);
+
+      if (nextClose === -1) break; // malformed HTML
+
+      if (nextOpen !== -1 && nextOpen < nextClose) {
+        // Another opening tag of same type before closing
+        depth++;
+        pos = nextOpen;
+      } else {
+        if (depth === 0) {
+          // This is our matching close tag
+          const endIdx = nextClose + `</${tagName}>`.length;
+          patterns[type] = html.substring(tagStart, endIdx);
+          foundEnd = true;
+          break;
+        } else {
+          depth--;
+          pos = nextClose;
+        }
+      }
+    }
+
+    if (!foundEnd) {
+      // Try self-closing or single-line pattern as fallback
+      const selfClose = html.substring(tagStart).match(new RegExp(`^<${tagName}[^>]*\\/>`));
+      if (selfClose) {
+        patterns[type] = selfClose[0];
+      }
     }
   }
 
-  const prompt = `Design a complete, premium deep-scroll e-learning course page.
-
-COURSE: "${course.title}"
-DOMAIN: ${domain}
-DESIGN FEEL: ${mood}
-
-BRAND IDENTITY:
-- Colours: Primary ${primary}, Secondary ${secondary}, Accent ${accent}, Background ${bg}
-- Heading font: ${headingFont}
-- Body font: ${bodyFont}
-- Theme: ${theme}${logoUrl ? `\n- Logo: ${logoUrl}` : ''}
-
-You have full creative freedom over typography scale, spacing, layout techniques, and visual treatments. Design this to feel like a $50,000 custom-built learning platform — not a template. The design should feel unmistakably on-brand.
-
-CRITICAL — INTERACTIVE ELEMENTS:
-For elements that need JavaScript interactivity, add these data attributes:
-- Accordions: Use native <details><summary> HTML elements
-- Quiz questions: Add data-quiz on the container, data-correct="N" (zero-indexed correct answer index) on the container, and data-choice on each option button
-- Flashcards: Add data-flashcard on the card container
-- Checklists: Add data-checklist on the container, use native <input type="checkbox"> elements
-- Tab panels: Add data-tabs on the container, data-tab-trigger on each tab button, data-tab-panel on each content panel
-- Carousels/Narrative: Add data-carousel on the container, data-slide on each slide, data-prev and data-next on navigation buttons
-- Text inputs: Use native <form> elements with <input> fields
-
-Use Google Material Symbols icons throughout: <span class="material-symbols-outlined">icon_name</span>
-
-HERE IS THE EXACT CONTENT — use it all, do not skip or summarise anything:
-
-${sectionContent}
-
-REQUIREMENTS:
-- Deep scroll single page, every section flows into the next
-- Hero section should be full-viewport
-- All content must be included — this IS the course, not a preview
-- Make it responsive (mobile-friendly)`;
-
-  return prompt;
+  return patterns;
 }
 
-function buildComponentBlock(comp) {
-  const type = comp.type;
-  let block = `\n[${type.toUpperCase()}] ${comp.displayTitle || ''}\n`;
+// ─── Extract design tokens from Stitch HTML ──────────────────────────
 
-  // Strip HTML tags for cleaner prompt
-  const cleanHtml = (html) => html || '';
+function extractDesignTokens(html) {
+  const tokens = {
+    colors: {},
+    fonts: {},
+    borderRadius: {},
+    spacing: {},
+    tailwindConfig: null,
+  };
 
-  switch (type) {
-    case 'hero':
-      block += `Title: ${comp.displayTitle}\n`;
-      block += `Subtitle: ${cleanHtml(comp.body)}\n`;
-      block += `(Full-viewport hero with background image, dramatic gradient overlay, CTA button)\n`;
-      break;
+  // Extract Tailwind config — find the script block containing tailwind.config
+  const configScriptMatch = html.match(/<script[^>]*id="tailwind-config"[^>]*>([\s\S]*?)<\/script>/i) ||
+                            html.match(/tailwind\.config\s*=\s*([\s\S]*?)\s*<\/script>/);
+  if (configScriptMatch) {
+    const configText = configScriptMatch[1];
+    tokens.tailwindConfig = configText;
 
-    case 'text':
-      block += `${cleanHtml(comp.body)}\n`;
-      break;
+    // Parse ALL color tokens using a simple regex on key-value pairs
+    // This works regardless of nesting depth
+    for (const cm of configText.matchAll(/"([\w-]+)"\s*:\s*"(#[0-9a-fA-F]{3,8})"/g)) {
+      tokens.colors[cm[1]] = cm[2];
+    }
 
-    case 'accordion':
-      block += `Instruction: ${comp.instruction || 'Select each item to learn more.'}\n`;
-      block += `INTERACTIVE: Use native <details><summary> elements.\n`;
-      for (const item of (comp._items || [])) {
-        block += `  • ${item.title}: ${cleanHtml(item.body)}\n`;
+    // Fonts
+    for (const fm of configText.matchAll(/"(headline|body|label|display|title)"\s*:\s*\["([^"]+)"/g)) {
+      tokens.fonts[fm[1]] = fm[2];
+    }
+
+    // Border radius
+    const radiusMatch = configText.match(/"borderRadius"\s*:\s*\{([^}]+)\}/);
+    if (radiusMatch) {
+      for (const rm of radiusMatch[1].matchAll(/"(\w+)"\s*:\s*"([^"]+)"/g)) {
+        tokens.borderRadius[rm[1]] = rm[2];
       }
-      break;
-
-    case 'mcq':
-      block += `INTERACTIVE: Add data-quiz and data-correct="${(comp._items || []).findIndex(i => i._shouldBeSelected)}" attributes.\n`;
-      block += `Question: ${cleanHtml(comp.body)}\n`;
-      block += `Instruction: ${comp.instruction || 'Choose the best answer.'}\n`;
-      for (const item of (comp._items || [])) {
-        const marker = item._shouldBeSelected ? ' [CORRECT]' : '';
-        block += `  ${item.text}${marker}\n`;
-      }
-      if (comp._feedback) {
-        block += `Correct feedback: ${comp._feedback.correct || 'Correct!'}\n`;
-        block += `Incorrect feedback: ${comp._feedback._incorrect?.final || comp._feedback.incorrect || 'Incorrect. Try again.'}\n`;
-      }
-      break;
-
-    case 'textinput':
-      block += `INTERACTIVE: Use native <form> with <input> elements.\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  Field: ${item.prefix || 'Input'} (placeholder: "${item.placeholder || ''}")\n`;
-      }
-      break;
-
-    case 'graphic-text':
-      block += `${cleanHtml(comp.body)}\n`;
-      block += `(Side-by-side text + image layout. Include a relevant image.)\n`;
-      break;
-
-    case 'checklist':
-      block += `INTERACTIVE: Add data-checklist, use native <input type="checkbox"> per item.\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      block += `Instruction: ${comp.instruction || 'Check each item as you review it.'}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  ☐ ${item.text}${item.detail ? ` — ${item.detail}` : ''}\n`;
-      }
-      break;
-
-    case 'pullquote':
-      block += `Quote: ${cleanHtml(comp.body)}\n`;
-      block += `Attribution: ${comp.attribution || ''}${comp.role ? `, ${comp.role}` : ''}\n`;
-      break;
-
-    case 'stat-callout':
-      block += `${cleanHtml(comp.body)}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  ${item.prefix || ''}${item.value}${item.suffix || ''} — ${item.label}\n`;
-      }
-      break;
-
-    case 'bento':
-      block += `${cleanHtml(comp.body)}\n`;
-      block += `(Multi-card grid layout with images where available)\n`;
-      for (const item of (comp._items || [])) {
-        block += `  Card: ${item.title} — ${cleanHtml(item.body)}\n`;
-      }
-      break;
-
-    case 'comparison':
-      block += `${cleanHtml(comp.body)}\n`;
-      block += `Columns: ${(comp.columns || []).map(c => c.title).join(' | ')}\n`;
-      for (const row of (comp.rows || [])) {
-        const vals = (row.values || []).map(v => v === true ? '✓' : v === false ? '✗' : v).join(' | ');
-        block += `  ${row.label}: ${vals}\n`;
-      }
-      break;
-
-    case 'timeline':
-      block += `${cleanHtml(comp.body)}\n`;
-      for (let i = 0; i < (comp._items || []).length; i++) {
-        const item = comp._items[i];
-        block += `  Step ${String(i + 1).padStart(2, '0')}: ${item.title} — ${cleanHtml(item.body)}\n`;
-      }
-      break;
-
-    case 'process-flow':
-      block += `${cleanHtml(comp.body)}\n`;
-      for (const node of (comp._nodes || [])) {
-        block += `  → ${node.title}: ${node.body}\n`;
-      }
-      break;
-
-    case 'tabs':
-      block += `INTERACTIVE: Add data-tabs on container, data-tab-trigger on buttons, data-tab-panel on panels.\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  Tab "${item.title}": ${cleanHtml(item.body)}\n`;
-      }
-      break;
-
-    case 'flashcard':
-      block += `INTERACTIVE: Add data-flashcard on each card (click to flip).\n`;
-      block += `${comp.instruction || 'Click each card to reveal the answer.'}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  Front: ${item.front} → Back: ${item.back}\n`;
-      }
-      break;
-
-    case 'narrative':
-      block += `INTERACTIVE: Add data-carousel, data-slide, data-prev, data-next.\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      for (const item of (comp._items || [])) {
-        block += `  Slide: ${item.title} — ${cleanHtml(item.body)}\n`;
-      }
-      break;
-
-    case 'key-term':
-      for (const item of (comp._items || [])) {
-        block += `  ${item.term}: ${item.definition}\n`;
-      }
-      break;
-
-    case 'full-bleed':
-      block += `(Full-width parallax image with text overlay)\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      break;
-
-    case 'graphic':
-      block += `(Full-width image)\n`;
-      break;
-
-    case 'media':
-    case 'video-transcript':
-      block += `(Video player placeholder)\n`;
-      block += `${cleanHtml(comp.body)}\n`;
-      break;
-
-    default:
-      block += `${cleanHtml(comp.body)}\n`;
+    }
   }
 
-  return block;
+  // Extract background color for theme detection
+  if (tokens.colors.background) {
+    tokens.isDark = isColorDark(tokens.colors.background);
+  } else {
+    const bgMatch = html.match(/"background"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
+    if (bgMatch) tokens.isDark = isColorDark(bgMatch[1]);
+  }
+
+  return tokens;
+}
+
+function isColorDark(hex) {
+  if (!hex || !hex.startsWith('#') || hex.length < 7) return false;
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 < 0.4;
+}
+
+// ─── Extract page shell ──────────────────────────────────────────────
+
+function extractPageShell(html) {
+  const shell = { head: '', nav: '', footer: '', trailingStyles: '' };
+
+  // Head content
+  const headMatch = html.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  if (headMatch) shell.head = headMatch[1];
+
+  // Nav — look for <nav> or <header> element
+  const navMatch = html.match(/<nav[^>]*>[\s\S]*?<\/nav>/i) ||
+                   html.match(/<header[^>]*>[\s\S]*?<\/header>/i);
+  if (navMatch) shell.nav = navMatch[0];
+
+  // Footer
+  const footerMatch = html.match(/<footer[^>]*>[\s\S]*?<\/footer>/i);
+  if (footerMatch) shell.footer = footerMatch[0];
+
+  // Trailing styles (perspective, backface, etc.)
+  const afterMain = html.split('</main>')[1] || html.split('</body>')[0]?.split('</footer>')[1] || '';
+  const trailingStyles = [];
+  for (const m of afterMain.matchAll(/<style>([\s\S]*?)<\/style>/gi)) {
+    trailingStyles.push(m[1]);
+  }
+  if (trailingStyles.length > 0) {
+    shell.trailingStyles = `<style>\n${trailingStyles.join('\n')}\n</style>`;
+  }
+
+  return shell;
 }
 
 // ─── Main ────────────────────────────────────────────────────────────
 
-const layoutPath = join(ROOT, 'v4/output/course-layout.json');
-const brandPath = join(ROOT, 'v4/output/brand-profile.json');
+// Read inputs
+const designMdPath = join(ROOT, 'v4/output/brand-design.md');
+const repCoursePath = join(ROOT, 'v4/prompts/representative-course.md');
 
-const layout = JSON.parse(readFileSync(layoutPath, 'utf8'));
-const brand = JSON.parse(readFileSync(brandPath, 'utf8'));
+if (!existsSync(designMdPath)) {
+  console.error('ERROR: brand-design.md not found. Run scrape-brand.js first.');
+  process.exit(1);
+}
+if (!existsSync(repCoursePath)) {
+  console.error('ERROR: representative-course.md not found.');
+  process.exit(1);
+}
 
-console.log('=== STITCH-FIRST COURSE GENERATOR (v4) ===\n');
-console.log(`Course: ${layout.course.title}`);
-console.log(`Sections: ${layout.sections.length}`);
-console.log(`Components: ${layout.sections.reduce((s, sec) => s + sec.components.length, 0)}`);
+const designMd = readFileSync(designMdPath, 'utf8');
+const representativeCourse = readFileSync(repCoursePath, 'utf8');
 
-const prompt = buildCoursePrompt(layout, brand);
-console.log(`Prompt: ${prompt.length} chars\n`);
+console.log('=== V5 STITCH COMPONENT KIT GENERATOR ===\n');
+console.log(`Design brief: ${designMd.length} chars`);
+console.log(`Representative course: ${representativeCourse.length} chars`);
+
+const prompt = buildStitchPrompt(designMd, representativeCourse);
+console.log(`Total prompt: ${prompt.length} chars\n`);
 
 // Save prompt for reference
 writeFileSync(join(OUTPUT_DIR, 'stitch-course-prompt.txt'), prompt);
 
-console.log('─── Calling Stitch (may take 2-5 minutes for full course)... ───\n');
+console.log('─── Calling Stitch with GEMINI_3_1_PRO (Deep Think — may take 3-5 minutes)... ───\n');
 
 const client = new StitchToolClient({ apiKey: API_KEY, timeout: 600000 });
 
 const project = await client.callTool('create_project', {
-  title: `${layout.course.title} — Full Course v4`,
+  title: 'Brand Component Kit — V5',
 });
 const projectId = project.name?.replace('projects/', '') || project.projectId;
 console.log(`Project created: ${projectId}`);
@@ -315,14 +281,15 @@ const result = await client.callTool('generate_screen_from_text', {
   projectId,
   prompt,
   deviceType: 'DESKTOP',
-  modelId: 'GEMINI_3_FLASH',
+  modelId: 'GEMINI_3_1_PRO',
 });
 
 // Save raw API response
 writeFileSync(join(OUTPUT_DIR, 'stitch-course-meta.json'), JSON.stringify(result, null, 2));
 console.log('Saved: stitch-course-meta.json');
 
-// Download HTML + screenshot (same structure as v3)
+// Download HTML + screenshot
+let htmlContent = '';
 let htmlSaved = false;
 let screenshotSaved = false;
 
@@ -333,9 +300,9 @@ if (result.outputComponents) {
         if (screen.htmlCode?.downloadUrl && !htmlSaved) {
           console.log('Downloading HTML...');
           const resp = await fetch(screen.htmlCode.downloadUrl);
-          const html = await resp.text();
-          writeFileSync(join(OUTPUT_DIR, 'stitch-course-raw.html'), html);
-          console.log(`Saved: stitch-course-raw.html (${html.length} chars)`);
+          htmlContent = await resp.text();
+          writeFileSync(join(OUTPUT_DIR, 'stitch-course-raw.html'), htmlContent);
+          console.log(`Saved: stitch-course-raw.html (${htmlContent.length} chars)`);
           htmlSaved = true;
         }
         if (screen.screenshot?.downloadUrl && !screenshotSaved) {
@@ -354,6 +321,63 @@ if (result.outputComponents) {
 if (!htmlSaved) {
   console.error('ERROR: No HTML found in Stitch response');
   console.log('Response keys:', Object.keys(result || {}));
+  process.exit(1);
 }
 
-console.log('\n✓ Stitch course generation complete');
+// ─── Extract component patterns ──────────────────────────────────────
+
+console.log('\n─── Extracting component patterns... ───\n');
+
+const patterns = extractComponentPatterns(htmlContent);
+const patternTypes = Object.keys(patterns);
+
+// Save each pattern as individual HTML file
+mkdirSync(PATTERNS_DIR, { recursive: true });
+for (const [type, html] of Object.entries(patterns)) {
+  writeFileSync(join(PATTERNS_DIR, `${type}.html`), html);
+}
+
+console.log(`Extracted ${patternTypes.length}/25 component patterns:`);
+console.log(`  Found: ${patternTypes.join(', ')}`);
+
+const missing = [
+  'hero', 'text', 'graphic', 'graphic-text', 'accordion', 'mcq',
+  'narrative', 'bento', 'data-table', 'media', 'textinput', 'branching',
+  'timeline', 'comparison', 'stat-callout', 'pullquote', 'key-term',
+  'checklist', 'tabs', 'flashcard', 'labeled-image', 'process-flow',
+  'image-gallery', 'full-bleed', 'video-transcript',
+].filter(t => !patternTypes.includes(t));
+
+if (missing.length > 0) {
+  console.log(`  Missing: ${missing.join(', ')}`);
+}
+
+// ─── Extract design tokens ───────────────────────────────────────────
+
+console.log('\n─── Extracting design tokens... ───\n');
+
+const tokens = extractDesignTokens(htmlContent);
+writeFileSync(join(OUTPUT_DIR, 'design-tokens.json'), JSON.stringify(tokens, null, 2));
+console.log(`Saved: design-tokens.json`);
+console.log(`  Colors: ${Object.keys(tokens.colors).length} tokens`);
+console.log(`  Fonts: ${Object.keys(tokens.fonts).length} families`);
+console.log(`  Border radius: ${Object.keys(tokens.borderRadius).length} values`);
+console.log(`  Theme: ${tokens.isDark ? 'dark' : 'light'}`);
+
+// ─── Extract page shell ──────────────────────────────────────────────
+
+console.log('\n─── Extracting page shell... ───\n');
+
+const shell = extractPageShell(htmlContent);
+writeFileSync(join(PATTERNS_DIR, '_page-shell.json'), JSON.stringify(shell, null, 2));
+console.log(`Saved: component-patterns/_page-shell.json`);
+console.log(`  Head: ${shell.head.length} chars`);
+console.log(`  Nav: ${shell.nav.length} chars`);
+console.log(`  Footer: ${shell.footer.length} chars`);
+
+console.log('\n=== Stitch Component Kit generation complete ===');
+console.log(`\nSummary:`);
+console.log(`  Component patterns: ${patternTypes.length}/25`);
+console.log(`  Design tokens: ${Object.keys(tokens.colors).length} colors, ${Object.keys(tokens.fonts).length} fonts`);
+console.log(`  Page shell: nav + footer extracted`);
+console.log(`  Model: GEMINI_3_1_PRO (Deep Think)`);

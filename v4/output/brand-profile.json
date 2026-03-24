@@ -1,39 +1,47 @@
 {
-  "sourceUrl": "https://fluence.framer.website/",
+  "sourceUrl": "https://sprig.framer.website/",
   "colors": {
-    "primary": "#1b0c25",
-    "secondary": "#522c66",
-    "accent": "#0099ff",
-    "background": "#1b0c25",
-    "surface": "#262121",
-    "text": "#edebee",
-    "textMuted": "#c5c3c6",
+    "primary": "#0099ff",
+    "secondary": "#1fd6fa",
+    "accent": "#003242",
+    "background": "#262626",
+    "surface": "#171b1c",
+    "text": "#f0f0f0",
+    "textMuted": "#c8c8c8",
     "success": "#10b981",
     "error": "#ef4444",
     "warning": "#f59e0b",
-    "gradient": "linear-gradient(135deg, #1b0c25, #522c66)"
+    "gradient": "linear-gradient(135deg, #0099ff, #1fd6fa)",
+    "isDark": true,
+    "_themeSignals": {
+      "light": 0,
+      "dark": 2
+    }
   },
   "typography": {
-    "headingFont": "General Sans",
+    "headingFont": "Manrope",
     "bodyFont": "Inter",
-    "fontImportUrl": "https://fonts.googleapis.com/css2?family=General%20Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
-    "baseSize": 18,
+    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+    "baseSize": 16,
     "headingSizes": {
-      "h1": 45,
-      "h2": 36,
-      "h3": 27
+      "h1": 40,
+      "h2": 32,
+      "h3": 24
     },
     "lineHeight": 1.6,
-    "headingWeight": 900,
+    "headingWeight": 700,
     "bodyWeight": 500
   },
   "style": {
-    "borderRadius": "16px",
+    "borderRadius": "12px",
     "cardStyle": "glass",
     "buttonStyle": "rounded",
     "imageStyle": "rounded",
     "mood": "creative",
-    "theme": "light",
+    "medianRadius": 12,
+    "hasBoxShadow": true,
+    "hasBackdropFilter": true,
+    "hasTransparentBg": true,
     "spacing": {
       "unit": 8,
       "section": 64,
@@ -41,10 +49,10 @@
     }
   },
   "logo": {
-    "url": "https://framerusercontent.com/images/mNO89ys2gWfzwt1uvhnoJyIgupY.png?width=636&height=552",
-    "width": 636,
-    "height": 552,
+    "url": "https://framerusercontent.com/images/7uN0qKMaTTsYJr5x6lvz2GyQ1g.jpg?width=1922&height=1204",
+    "width": 1922,
+    "height": 1204,
     "alt": "Logo"
   },
-  "scrapedAt": "2026-03-24T06:59:31.307Z"
+  "scrapedAt": "2026-03-24T09:32:06.630Z"
 }

@@ -1,58 +1,36 @@
 #!/usr/bin/env node
 /**
- * V4 Course Builder — Stitch Design DNA
+ * V5 Course Builder — Stitch Pattern Fill
  *
- * Takes Stitch's exact design patterns (CSS, Tailwind config, class conventions)
- * and fills them with actual SCORM content from course-layout.json.
+ * Uses Stitch's actual component patterns (extracted from the designed page)
+ * and fills them with real SCORM content. The visual design is 100% Stitch's.
+ * The content is 100% from the SCORM.
+ *
+ * For each component in course-layout.json:
+ *   1. Load the matching pattern from component-patterns/
+ *   2. Fill it with real content (title, body, items, quiz answers, etc.)
+ *   3. Handle interactive data attributes for hydrate.js
  *
  * Usage: node v4/scripts/build-course.js
- * Input:  v4/output/stitch-course-raw.html  (design DNA source)
- *         v4/output/course-layout.json       (content source)
- *         v4/output/images/                  (generated images, optional)
- * Output: v4/output/course.html + root index.html
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
+const PATTERNS_DIR = path.resolve(ROOT, 'v4/output/component-patterns');
+const SHELL_PATH = path.resolve(PATTERNS_DIR, '_page-shell.json');
+const TOKENS_PATH = path.resolve(ROOT, 'v4/output/design-tokens.json');
 const STITCH_PATH = path.resolve(ROOT, 'v4/output/stitch-course-raw.html');
 const LAYOUT_PATH = path.resolve(ROOT, 'v4/output/course-layout.json');
-const IMAGES_DIR = path.resolve(ROOT, 'v4/output/images');
 const HYDRATE_PATH = path.resolve(ROOT, 'v4/scripts/hydrate.js');
 const OUTPUT_PATH = path.resolve(ROOT, 'v4/output/course.html');
 const PAGES_PATH = path.resolve(ROOT, 'index.html');
 
-// ─── Image embedding ─────────────────────────────────────────────────
-function embedImage(imagePath) {
-  if (!imagePath) return '';
-  if (imagePath.startsWith('data:') || imagePath.startsWith('http')) return imagePath;
-
-  const fullPath = path.resolve(ROOT, 'v4/output', imagePath);
-  if (!fs.existsSync(fullPath)) {
-    console.log(`  [img] not found locally: ${imagePath}`);
-    return imagePath; // return as-is, might be a relative path for later
-  }
-
-  const buffer = fs.readFileSync(fullPath);
-  const ext = path.extname(fullPath).toLowerCase();
-  const mimeMap = {
-    '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg',
-    '.png': 'image/png', '.gif': 'image/gif',
-    '.webp': 'image/webp', '.svg': 'image/svg+xml',
-  };
-  const mime = mimeMap[ext] || 'image/jpeg';
-  return `data:${mime};base64,${buffer.toString('base64')}`;
-}
-
 // ─── HTML helpers ────────────────────────────────────────────────────
 function esc(s) {
   if (!s) return '';
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 function stripTags(html) {
@@ -60,818 +38,923 @@ function stripTags(html) {
   return html.replace(/<[^>]*>/g, '');
 }
 
-function slugify(s) {
-  return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+function embedImage(imagePath) {
+  if (!imagePath) return '';
+  if (imagePath.startsWith('data:') || imagePath.startsWith('http')) return imagePath;
+  const fullPath = path.resolve(ROOT, 'v4/output', imagePath);
+  if (!fs.existsSync(fullPath)) return imagePath;
+  const buffer = fs.readFileSync(fullPath);
+  const ext = path.extname(fullPath).toLowerCase();
+  const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' };
+  return `data:${mimeMap[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
 }
 
-// ─── Extract design DNA from Stitch HTML ──────────────────────────────
-function extractDesignDNA(stitchHtml) {
-  const headMatch = stitchHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-  const headContent = headMatch ? headMatch[1] : '';
+// ─── Load patterns ───────────────────────────────────────────────────
+function loadPattern(type) {
+  const p = path.resolve(PATTERNS_DIR, `${type}.html`);
+  if (fs.existsSync(p)) return fs.readFileSync(p, 'utf-8');
+  return null;
+}
 
-  // Extract trailing <style> blocks (perspective, backface, etc.)
-  const trailingStyles = [];
-  const styleRegex = /<style>([\s\S]*?)<\/style>/gi;
+function loadPageShell() {
+  if (fs.existsSync(SHELL_PATH)) return JSON.parse(fs.readFileSync(SHELL_PATH, 'utf-8'));
+  return null;
+}
+
+// ─── Simple DOM-like helpers (no library needed) ─────────────────────
+// These do targeted string replacements on the pattern HTML.
+
+/** Replace the text inside the first matching tag */
+function replaceFirstTag(html, tag, newContent) {
+  const re = new RegExp(`(<${tag}[^>]*>)([\\s\\S]*?)(</${tag}>)`, 'i');
+  return html.replace(re, `$1${newContent}$3`);
+}
+
+/** Get all matches of a regex, returning array of { match, index } */
+function findAll(html, re) {
+  const results = [];
   let m;
-  // Get styles AFTER </main> or near end of body
-  const afterMain = stitchHtml.split('</main>')[1] || '';
-  while ((m = styleRegex.exec(afterMain)) !== null) {
-    trailingStyles.push(m[1]);
+  const regex = new RegExp(re.source, re.flags.includes('g') ? re.flags : re.flags + 'g');
+  while ((m = regex.exec(html)) !== null) {
+    results.push({ match: m[0], groups: m, index: m.index });
   }
-
-  return { headContent, trailingStyles };
+  return results;
 }
 
-// ─── Background color cycling for sections ────────────────────────────
-const BG_CLASSES = [
-  'bg-surface',
-  'bg-surface-container-low',
-  'bg-surface-container-lowest',
-  'bg-black',
-];
-
-// ─── Flashcard icon cycling ───────────────────────────────────────────
-const CARD_ICONS = ['bolt', 'speed', 'power', 'memory', 'hub', 'shield', 'star', 'lightbulb', 'science', 'engineering'];
-
 // ═══════════════════════════════════════════════════════════════════════
-// COMPONENT TEMPLATE FUNCTIONS
-// Each returns an HTML string using Stitch's exact Tailwind class patterns
+// FILL FUNCTIONS — one per component type
+// Each takes the Stitch pattern HTML and real content, returns filled HTML
 // ═══════════════════════════════════════════════════════════════════════
 
-function renderHero(comp) {
-  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
-  const imgAlt = comp._graphic ? esc(comp._graphic.alt || '') : '';
+function fillHero(pattern, comp) {
+  let html = pattern;
+  // Replace h1 title
+  html = replaceFirstTag(html, 'h1', esc(comp.displayTitle || ''));
+  // Replace the subtitle paragraph
+  const bodyText = stripTags(comp.body || '');
+  html = replaceFirstTag(html, 'p', bodyText);
+  // Replace image if we have one
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    const alt = esc(comp._graphic.alt || '');
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
+  }
+  return html;
+}
+
+function fillText(pattern, comp) {
+  let html = pattern;
+  // Replace section title (h2)
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  // Replace body content - find the div with paragraphs
+  const bodyDiv = html.match(/(<div class="space-y-6[^"]*">)([\s\S]*?)(<\/div>)/);
+  if (bodyDiv) {
+    html = html.replace(bodyDiv[0], `${bodyDiv[1]}${comp.body || ''}${bodyDiv[3]}`);
+  } else {
+    // Fallback: replace all <p> content
+    const paragraphs = (comp.body || '').split(/<\/?p>/g).filter(s => s.trim());
+    let pIdx = 0;
+    html = html.replace(/<p[^>]*>[\s\S]*?<\/p>/gi, (match) => {
+      if (pIdx === 0 && paragraphs.length > 0) {
+        pIdx++;
+        return paragraphs.map(p => `<p>${p}</p>`).join('\n');
+      }
+      pIdx++;
+      return '';
+    });
+  }
+  return html;
+}
+
+function fillAccordion(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
   const title = esc(comp.displayTitle || '');
-  const body = stripTags(comp.body || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
 
-  return `<section class="relative h-screen flex items-center px-8 md:px-24 overflow-hidden">
-  <div class="absolute inset-0 z-0">
-    <div class="absolute inset-0 bg-gradient-to-r from-black via-black/40 to-transparent z-10"></div>
-    ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSrc}"/>` : '<div class="w-full h-full bg-gradient-to-br from-surface-container-lowest to-black"></div>'}
-  </div>
-  <div class="relative z-20 max-w-4xl">
-    <div class="inline-block px-3 py-1 bg-primary-container/20 text-primary border border-primary/30 text-[10px] font-bold tracking-[0.3em] mb-6 uppercase">Module 01: Core Systems</div>
-    <h1 class="text-6xl md:text-8xl font-black text-white leading-[0.9] tracking-tighter mb-8 font-headline">${title}</h1>
-    <p class="text-xl text-on-surface-variant max-w-2xl leading-relaxed mb-12 border-l-2 border-primary-container pl-8">${body}</p>
-    <button class="bg-primary-container text-on-primary-container px-10 py-4 font-black tracking-widest text-sm uppercase transition-all hover:brightness-110 active:scale-95" onclick="window.scrollBy({top:window.innerHeight,behavior:'smooth'})">BEGIN COURSE</button>
-  </div>
+  // Extract the details class from pattern
+  const detailsClass = pattern.match(/<details[^>]*class="([^"]*)"/)?.[1] || 'group glass-card rounded-2xl p-6 transition-all duration-300';
+  const bodyClass = pattern.match(/<div class="(mt-4[^"]*)"/)?.[1] || 'mt-4 text-on-surface-variant leading-relaxed';
+
+  const newDetails = items.map(item =>
+    `<details class="${detailsClass}">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
+${esc(item.title || '')}
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="${bodyClass}">
+${item.body || ''}
+</div>
+</details>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="accordion">
+<h3 class="font-headline text-2xl font-bold mb-12 text-center">${title}</h3>
+<div class="space-y-4">
+${newDetails}
+</div>
 </section>`;
 }
 
-function renderText(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  return `<div class="max-w-3xl">
-    <h3 class="text-4xl font-black text-white mb-8 tracking-tight">${title}</h3>
-    <div class="text-on-surface-variant text-lg leading-loose">${body}</div>
-  </div>`;
-}
-
-function renderAccordion(comp) {
-  const title = esc(comp.displayTitle || '');
-  const items = comp._items || [];
-  const itemsHtml = items.map(item => `<details class="group glass-panel rounded-none">
-    <summary class="flex justify-between items-center p-6 cursor-pointer list-none">
-      <span class="text-sm font-bold tracking-widest uppercase text-white">${esc(item.title)}</span>
-      <span class="material-symbols-outlined transition-transform group-open:rotate-180 text-primary">expand_more</span>
-    </summary>
-    <div class="px-6 pb-6 text-on-surface-variant text-sm leading-relaxed border-t border-white/5 pt-4">${item.body || ''}</div>
-  </details>`).join('\n  ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  <div class="space-y-4">
-    ${itemsHtml}
-  </div>
-</div>`;
-}
-
-function renderMCQ(comp) {
-  const title = esc(comp.displayTitle || 'Knowledge Check');
-  const question = stripTags(comp.body || '');
+function fillMCQ(pattern, comp) {
   const items = comp._items || [];
   const feedback = comp._feedback || {};
   const correctFeedback = stripTags(feedback.correct || 'Correct!');
   const incorrectFeedback = stripTags((feedback._incorrect && feedback._incorrect.final) || 'Not quite. Try again.');
 
-  // Find correct index
-  let correctIndex = 0;
-  items.forEach((item, i) => { if (item._shouldBeSelected) correctIndex = i; });
+  // Find correct answer index
+  let correctIdx = items.findIndex(i => i.correct || i._shouldBeSelected);
+  if (correctIdx < 0) correctIdx = 0;
 
-  const choicesHtml = items.map((item, i) =>
-    `<button class="w-full py-4 bg-surface-container-high border border-white/5 text-sm font-bold tracking-widest text-white/60 hover:border-primary-container hover:text-white transition-all" data-choice="${i}">${esc(item.text)}</button>`
-  ).join('\n        ');
+  const questionText = stripTags(comp.body || '');
+  const title = esc(comp.displayTitle || 'Knowledge Check');
 
-  return `<section class="py-40 bg-black flex justify-center px-8">
-  <div class="max-w-2xl w-full glass-panel p-12 text-center" data-quiz data-correct="${correctIndex}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
-    <h3 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-8">${title}</h3>
-    <p class="text-2xl font-black text-white mb-10 tracking-tight">${question}</p>
-    <div class="grid gap-4">
-      ${choicesHtml}
-    </div>
-    <div class="mt-8 hidden" data-quiz-feedback></div>
-  </div>
-</section>`;
-}
+  // Extract the first unselected choice as a template (data-choice="a" or "b")
+  // Use the first choice div that has the standard unselected styling
+  const firstChoice = pattern.match(/<div[^>]*data-choice="a"[^>]*>[\s\S]*?<\/span>\s*<\/div>/i);
+  let choiceTemplate = '';
+  if (firstChoice) {
+    choiceTemplate = firstChoice[0];
+  }
 
-function renderTextInput(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = stripTags(comp.body || '');
-  const items = comp._items || [];
-
-  const fieldsHtml = items.map(item => `<div class="space-y-2">
-        <label class="text-[10px] font-bold tracking-[0.2em] text-white/40 uppercase">${esc(item.prefix || item.label || '')}</label>
-        <input class="w-full bg-surface-container-highest border-0 border-b border-outline/30 focus:border-primary-container focus:ring-0 text-white p-4 transition-colors" placeholder="${esc(item.placeholder || '')}" type="text"/>
-      </div>`).join('\n      ');
-
-  return `<section class="py-40 bg-surface-container-low px-8 md:px-24">
-  <div class="max-w-4xl mx-auto glass-panel p-12 md:p-20">
-    <div class="mb-12">
-      <h3 class="text-2xl font-black text-white tracking-tight uppercase mb-2">${title}</h3>
-      <p class="text-xs tracking-widest text-on-surface-variant uppercase">${body}</p>
-    </div>
-    <form class="grid md:grid-cols-2 gap-8">
-      ${fieldsHtml}
-      <div class="md:col-span-2 pt-8">
-        <button class="w-full bg-primary-container text-on-primary-container py-5 font-black tracking-[0.3em] uppercase text-xs" type="button">SUBMIT</button>
-      </div>
-    </form>
-  </div>
-</section>`;
-}
-
-function renderGraphicText(comp, index) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
-  const imgAlt = comp._graphic ? esc(comp._graphic.alt || '') : '';
-  const imageRight = comp._imageAlign === 'right' || (!comp._imageAlign && index % 2 === 0);
-
-  const imageBlock = imgSrc
-    ? `<div class="relative group">
-      <img alt="${imgAlt}" class="w-full grayscale group-hover:grayscale-0 transition-all duration-700" src="${imgSrc}"/>
-    </div>`
-    : `<div class="relative group bg-surface-container-high w-full aspect-video flex items-center justify-center">
-      <span class="material-symbols-outlined text-6xl text-white/10">image</span>
-    </div>`;
-
-  const textBlock = `<div>
-      <h3 class="text-2xl font-bold text-white mb-6">${title}</h3>
-      <div class="text-on-surface-variant text-sm leading-relaxed">${body}</div>
-    </div>`;
-
-  const cols = imageRight ? `${textBlock}\n    ${imageBlock}` : `${imageBlock}\n    ${textBlock}`;
-
-  return `<div class="grid lg:grid-cols-2 gap-12 items-center">
-    ${cols}
-  </div>`;
-}
-
-function renderChecklist(comp) {
-  const title = esc(comp.displayTitle || '');
-  const items = comp._items || [];
-
-  const itemsHtml = items.map(item => `<li class="flex items-start gap-4 group">
-      <span class="material-symbols-outlined text-primary mt-1">check_circle</span>
-      <div>
-        <p class="text-white font-bold tracking-tight mb-1">${esc(item.text || item.title || '')}</p>
-        ${item.detail ? `<p class="text-xs text-on-surface-variant leading-relaxed">${esc(item.detail)}</p>` : ''}
-      </div>
-    </li>`).join('\n    ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  <ul class="space-y-6" data-checklist>
-    ${itemsHtml}
-  </ul>
-</div>`;
-}
-
-function renderPullquote(comp) {
-  const quote = stripTags(comp.body || '');
-  const attribution = esc(comp.attribution || '');
-  const role = esc(comp.role || '');
-  const cite = [attribution, role].filter(Boolean).join(', ');
-
-  return `<blockquote class="border-l-4 border-primary p-8 bg-primary/5">
-  <p class="text-2xl italic text-white leading-relaxed mb-4">${quote}</p>
-  ${cite ? `<cite class="text-sm text-on-surface-variant not-italic">&mdash; ${cite}</cite>` : ''}
-</blockquote>`;
-}
-
-function renderStatCallout(comp) {
-  const title = esc(comp.displayTitle || '');
-  const items = comp._items || [];
-
-  const statsHtml = items.map(item => {
-    const val = esc((item.value || '') + (item.suffix || ''));
-    const label = esc(item.label || '');
-    return `<div class="text-center">
-      <div class="text-5xl font-black text-white mb-2">${val}</div>
-      <div class="text-[10px] font-bold text-primary tracking-widest uppercase">${label}</div>
-    </div>`;
-  }).join('\n    ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-10 tracking-tight">${title}</h3>` : ''}
-  <div class="flex flex-wrap justify-center gap-16">
-    ${statsHtml}
-  </div>
-</div>`;
-}
-
-function renderBento(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  const items = comp._items || [];
-  const defaultIcons = ['bolt', 'speed', 'shield', 'memory', 'hub', 'star'];
-
-  let cardsHtml = '';
-  items.forEach((item, i) => {
-    const itemTitle = esc(item.title || '');
-    const itemBody = stripTags(item.body || '');
-    const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
-    const icon = defaultIcons[i % defaultIcons.length];
-
-    if (i === 0 && imgSrc) {
-      // First item spans 2 cols with background image
-      cardsHtml += `<div class="md:col-span-2 glass-panel p-10 flex flex-col justify-end relative overflow-hidden group min-h-[300px]">
-      <img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" src="${imgSrc}"/>
-      <div class="relative z-10">
-        <span class="text-[10px] font-bold tracking-widest text-primary mb-2 block">FEATURED</span>
-        <h4 class="text-3xl font-black text-white mb-4">${itemTitle}</h4>
-        <p class="text-on-surface-variant text-sm max-w-md mb-6">${itemBody}</p>
-      </div>
-    </div>\n    `;
-    } else {
-      cardsHtml += `<div class="glass-panel p-10 flex flex-col justify-between min-h-[250px]">
-      <span class="material-symbols-outlined text-4xl text-primary">${icon}</span>
-      <div>
-        <span class="text-[10px] font-bold tracking-widest text-primary mb-2 block">CATEGORY</span>
-        <h4 class="text-2xl font-black text-white mb-4">${itemTitle}</h4>
-        <p class="text-on-surface-variant text-sm">${itemBody}</p>
-      </div>
-    </div>\n    `;
+  // Build new choices from the template
+  const newChoices = items.map((item, i) => {
+    if (choiceTemplate) {
+      let c = choiceTemplate;
+      c = c.replace(/data-choice="[^"]*"/, `data-choice="${i}"`);
+      // Replace the text span (last <span> that isn't material-symbols)
+      c = c.replace(/<span>[\s\S]*?<\/span>$/, `<span>${esc(item.text || '')}</span>`);
+      c = c.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(item.text || '')}</span>`);
+      return c;
     }
-  });
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-4 tracking-tight">${title}</h3>` : ''}
-  ${body ? `<div class="text-on-surface-variant text-sm mb-10">${body}</div>` : ''}
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-    ${cardsHtml}
-  </div>
+    // Fallback if no template found
+    return `<div class="group flex items-center p-5 rounded-xl bg-surface-variant/30 hover:bg-surface-variant cursor-pointer transition-all border border-transparent hover:border-secondary/30" data-choice="${i}">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary"></div>
+<span>${esc(item.text || '')}</span>
 </div>`;
+  }).join('\n');
+
+  // Rebuild the entire MCQ section from scratch using the pattern's outer structure
+  // Extract the section tag with its classes
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-3xl mx-auto';
+  // Extract the glass-card wrapper classes
+  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  // Extract the label div (e.g., "KNOWLEDGE CHECK")
+  const labelDiv = pattern.match(/<div class="text-secondary[^"]*">[^<]*<\/div>/)?.[0] || '';
+  // Extract h3 classes
+  const h3Class = pattern.match(/<h3[^>]*class="([^"]*)"/)?.[1] || 'font-headline text-2xl font-bold mb-8';
+
+  return `<section class="${sectionClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
+<div class="${cardClass}">
+${labelDiv ? labelDiv.replace(/>.*</, `>${title}<`) : `<div class="text-secondary font-bold text-sm mb-4">${title}</div>`}
+<h3 class="${h3Class}">${questionText}</h3>
+<div class="space-y-4">
+${newChoices}
+</div>
+<div class="mt-8 hidden" data-quiz-feedback></div>
+</div>
+</section>`;
 }
 
-function renderComparison(comp) {
-  const title = esc(comp.displayTitle || '');
-  const columns = comp.columns || [];
-  const rows = comp.rows || [];
+function fillGraphicText(pattern, comp, index) {
+  let html = pattern;
+  // Replace title
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
 
-  const thHtml = columns.map(col => `<th class="pb-4 uppercase">${esc(col.title || '')}</th>`).join('\n          ');
+  const bodyContent = comp.body || '';
+  const bodyPlain = stripTags(bodyContent);
 
-  const rowsHtml = rows.map(row => {
-    const label = esc(row.label || '');
-    const vals = (row.values || []).map(v => {
-      if (v === true) return '<span class="material-symbols-outlined text-primary text-sm">check</span>';
-      if (v === false) return '<span class="material-symbols-outlined text-error text-sm">close</span>';
-      return esc(String(v));
-    }).map(v => `<td class="py-4">${v}</td>`).join('\n          ');
-    return `<tr>
-          <td class="py-4 font-normal text-on-surface-variant">${label}</td>
-          ${vals}
-        </tr>`;
-  }).join('\n        ');
+  // Replace the main paragraph
+  html = html.replace(/(<p class="text-lg[^"]*">)([\s\S]*?)(<\/p>)/i, `$1${bodyPlain}$3`);
 
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  <div class="glass-panel overflow-x-auto p-10">
-    <table class="w-full text-left">
-      <thead>
-        <tr class="text-[10px] font-bold tracking-[0.2em] text-white/40 border-b border-white/10">
-          <th class="pb-4 uppercase">Feature</th>
-          ${thHtml}
-        </tr>
-      </thead>
-      <tbody class="text-xs font-bold text-white divide-y divide-white/5">
-        ${rowsHtml}
-      </tbody>
-    </table>
-  </div>
-</div>`;
+  // Handle bullet points: replace the entire space-y-4 div with real content or remove it
+  const bulletContainer = html.match(/<div class="space-y-4">([\s\S]*?)<\/div>/i);
+  if (bulletContainer) {
+    if (bodyContent.includes('<li>')) {
+      // Extract list items from body HTML
+      const lis = bodyContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+      const iconSpan = '<span class="material-symbols-outlined text-secondary">verified</span>';
+      const newBullets = lis.map(li => {
+        const text = stripTags(li);
+        return `<div class="flex items-start gap-4">${iconSpan}<p class="text-on-surface">${text}</p></div>`;
+      }).join('\n');
+      html = html.replace(bulletContainer[0], `<div class="space-y-4">\n${newBullets}\n</div>`);
+    } else {
+      // No bullets in content — remove the bullet container entirely
+      html = html.replace(bulletContainer[0], '');
+    }
+  }
+
+  // Replace image
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    const alt = esc(comp._graphic.alt || '');
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
+  }
+  return html;
 }
 
-function renderTimeline(comp) {
+function fillBento(pattern, comp) {
+  const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const items = comp._items || [];
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-7xl mx-auto';
 
-  const stepsHtml = items.map((item, i) => {
-    const dotBg = i === 0 ? 'bg-primary' : 'bg-white/20';
-    const labelColor = i === 0 ? 'text-primary' : 'text-white/40';
-    const stepNum = String(i + 1).padStart(2, '0');
-    return `<div class="relative">
-      <div class="absolute -left-[37px] top-1 w-4 h-4 rounded-full ${dotBg} ring-4 ring-primary/20"></div>
-      <p class="text-[10px] font-black ${labelColor} tracking-widest uppercase mb-1">Step ${stepNum}</p>
-      <p class="text-white font-bold text-sm mb-2">${esc(item.title || '')}</p>
-      <p class="text-xs text-on-surface-variant">${stripTags(item.body || '')}</p>
-    </div>`;
-  }).join('\n    ');
+  // Extract icon classes from pattern
+  const icons = ['bolt', 'speed', 'shield', 'memory', 'hub', 'star', 'lightbulb', 'science'];
 
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  ${body ? `<div class="text-on-surface-variant text-sm mb-8">${body}</div>` : ''}
-  <div class="relative border-l border-white/10 pl-8 space-y-12">
-    ${stepsHtml}
-  </div>
+  // First card is large (col-span-2, row-span-2), rest are smaller
+  const newCards = items.map((item, i) => {
+    if (i === 0) {
+      const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
+      return `<div class="md:col-span-2 md:row-span-2 glass-card rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group">
+${imgSrc ? `<img alt="" class="absolute inset-0 object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" src="${imgSrc}"/>` : ''}
+<div class="relative z-10">
+<span class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[0]}</span>
+<h4 class="font-headline text-2xl font-bold mb-2">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+</div>
 </div>`;
+    }
+    // Alternate between horizontal and vertical card styles
+    if (i <= 2 && items.length > 3) {
+      return `<div class="md:col-span-2 glass-card rounded-3xl p-8 flex items-center gap-8">
+<div class="bg-secondary-container p-4 rounded-2xl">
+<span class="material-symbols-outlined text-secondary text-4xl">${icons[i % icons.length]}</span>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+</div>
+</div>`;
+    }
+    return `<div class="glass-card rounded-3xl p-8 flex flex-col justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
+<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+<p class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</p>
+</div>`;
+  }).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="bento">
+<h2 class="font-headline text-4xl font-bold mb-16">${title}</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+${newCards}
+</div>
+</section>`;
 }
 
-function renderProcessFlow(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  const nodes = comp._nodes || [];
+function fillDataTable(pattern, comp) {
+  let html = pattern;
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
 
-  const nodesHtml = nodes.map((node, i) => {
-    const stepNum = String(i + 1).padStart(2, '0');
-    return `<li class="flex gap-4">
-      <span class="text-xl font-black text-primary/40">${stepNum}</span>
-      <div>
-        <p class="text-white font-bold text-sm mb-1">${esc(node.title || '')}</p>
-        <p class="text-sm text-on-surface-variant leading-relaxed">${esc(node.body || '')}</p>
-      </div>
-    </li>`;
-  }).join('\n    ');
+  const rows = comp._rows || [];
+  if (rows.length === 0) return html;
 
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  ${body ? `<div class="text-on-surface-variant text-sm mb-8">${body}</div>` : ''}
-  <ol class="space-y-6">
-    ${nodesHtml}
-  </ol>
-</div>`;
+  // First row is headers
+  const headers = rows[0];
+  const dataRows = rows.slice(1);
+
+  // Replace thead
+  const theadMatch = html.match(/<thead[\s\S]*?<\/thead>/i);
+  if (theadMatch) {
+    const headerClass = theadMatch[0].match(/class="([^"]*)"/)?.[1] || '';
+    const thClass = 'p-6 font-headline font-bold';
+    const newThead = `<thead class="${headerClass}"><tr>${headers.map(h => `<th class="${thClass}">${esc(h)}</th>`).join('')}</tr></thead>`;
+    html = html.replace(theadMatch[0], newThead);
+  }
+
+  // Replace tbody
+  const tbodyMatch = html.match(/<tbody[\s\S]*?<\/tbody>/i);
+  if (tbodyMatch) {
+    const tbodyClass = tbodyMatch[0].match(/class="([^"]*)"/)?.[1] || '';
+    const newRows = dataRows.map(row =>
+      `<tr>${row.map(cell => `<td class="p-6">${esc(cell)}</td>`).join('')}</tr>`
+    ).join('\n');
+    html = html.replace(tbodyMatch[0], `<tbody class="${tbodyClass}">\n${newRows}\n</tbody>`);
+  }
+
+  return html;
 }
 
-function renderTabs(comp) {
-  const title = esc(comp.displayTitle || '');
+function fillTextInput(pattern, comp) {
   const items = comp._items || [];
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
+  const cardClass = pattern.match(/<div[^>]*class="([^"]*glass-card[^"]*)"/)?.[1] || 'max-w-3xl mx-auto glass-card p-12 rounded-[2rem]';
+  const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
 
-  const triggersHtml = items.map((item, i) => {
-    const active = i === 0
-      ? 'text-white border-b-2 border-primary'
-      : 'text-white/40 hover:text-white';
-    return `<button class="px-8 py-3 bg-surface-container-highest text-[10px] font-bold tracking-widest uppercase ${active}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`;
-  }).join('\n      ');
+  const newInputs = items.map(item =>
+    `<div>
+<label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">${esc(item.prefix || item.label || '')}</label>
+<input class="${inputClass}" placeholder="${esc(item.placeholder || '')}" type="text"/>
+</div>`
+  ).join('\n');
 
-  const panelsHtml = items.map((item, i) => {
-    const display = i === 0 ? '' : ' style="display:none"';
-    return `<div data-tab-panel="${i}"${display}>
-        <h4 class="text-xl font-black text-white mb-4 tracking-tight">${esc(item.title || '')}</h4>
-        <div class="text-on-surface-variant text-sm leading-relaxed">${item.body || ''}</div>
-      </div>`;
-  }).join('\n      ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-8 tracking-tight">${title}</h3>` : ''}
-  <div data-tabs>
-    <div class="flex flex-wrap justify-center gap-2 mb-12" data-tab-triggers>
-      ${triggersHtml}
-    </div>
-    <div class="glass-panel p-12 min-h-[400px]">
-      ${panelsHtml}
-    </div>
-  </div>
-</div>`;
+  return `<section class="${sectionClass}" data-component-type="textinput">
+<div class="${cardClass}">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="space-y-8">
+${newInputs}
+<button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary-container w-full">Submit</button>
+</div>
+</div>
+</section>`;
 }
 
-function renderFlashcard(comp) {
-  const title = esc(comp.displayTitle || '');
+function fillBranching(pattern, comp) {
   const items = comp._items || [];
+  const title = esc(comp.displayTitle || '');
+  const bodyText = stripTags(comp.body || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-4xl mx-auto';
 
-  const cardsHtml = items.map((item, i) => {
-    const icon = CARD_ICONS[i % CARD_ICONS.length];
+  const newButtons = items.map(item =>
+    `<button class="p-6 rounded-2xl bg-surface-variant/30 text-left hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">
+<div class="font-bold mb-1">${esc(item.title || '')}</div>
+<div class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</div>
+</button>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="branching">
+<div class="glass-card p-12 rounded-3xl border-l-8 border-secondary">
+<h3 class="font-headline text-2xl font-bold mb-6">${title}</h3>
+<p class="text-lg text-on-surface-variant mb-10 italic">${bodyText}</p>
+<div class="grid gap-4">
+${newButtons}
+</div>
+</div>
+</section>`;
+}
+
+function fillTimeline(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-4xl mx-auto';
+
+  // Extract dot classes from pattern
+  const activeDotClass = pattern.match(/class="(absolute[^"]*bg-secondary[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-secondary shadow-[0_0_10px_rgba(37,216,252,0.5)]';
+  const inactiveDotClass = pattern.match(/class="(absolute[^"]*bg-outline-variant[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant';
+
+  const newSteps = items.map((item, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    const dotClass = i === 0 ? activeDotClass : inactiveDotClass;
+    const titleClass = i === 0 ? 'font-headline text-xl font-bold text-secondary mb-2' : 'font-headline text-xl font-bold mb-2';
+    return `<div class="relative pl-12">
+<div class="${dotClass}"></div>
+<div class="${titleClass}">${num}. ${esc(item.title || '')}</div>
+<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+</div>`;
+  }).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="timeline">
+<h2 class="font-headline text-4xl font-bold mb-20 text-center">${title}</h2>
+<div class="relative border-l-2 border-outline-variant ml-4 space-y-16">
+${newSteps}
+</div>
+</section>`;
+}
+
+function fillComparison(pattern, comp) {
+  const columns = comp._columns || [];
+  if (columns.length < 2) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  // Extract section classes from pattern
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+
+  // For multi-column comparison data, render as a table (more flexible than 2-col layout)
+  const headers = columns.map(c => c.title || '');
+  const rowCount = Math.max(...columns.map(c => (c.items || []).length));
+
+  const headerHtml = headers.map(h =>
+    `<th class="p-6 font-headline font-bold text-on-surface">${esc(h)}</th>`
+  ).join('');
+
+  const rowsHtml = [];
+  for (let r = 0; r < rowCount; r++) {
+    const cells = columns.map(col => {
+      const val = (col.items || [])[r] || '';
+      return `<td class="p-6 text-on-surface-variant">${esc(val)}</td>`;
+    }).join('');
+    rowsHtml.push(`<tr>${cells}</tr>`);
+  }
+
+  return `<section class="${sectionClass}" data-component-type="comparison">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<div class="overflow-x-auto glass-card rounded-3xl">
+<table class="w-full text-left">
+<thead class="bg-surface-container-high border-b border-outline-variant">
+<tr>${headerHtml}</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+${rowsHtml.join('\n')}
+</tbody>
+</table>
+</div>
+</section>`;
+}
+
+function fillStatCallout(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
+  // Extract section and grid classes from pattern
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
+  const gridClass = pattern.match(/<div[^>]*class="([^"]*grid[^"]*)"/)?.[1] || 'max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-center';
+
+  // Extract one stat block as template
+  const statMatch = pattern.match(/<div class="space-y-2">[\s\S]*?<\/div>\s*<\/div>/i);
+  const numClass = statMatch
+    ? (statMatch[0].match(/<div class="(text-5xl[^"]*)"/)?.[1] || 'text-5xl font-headline font-extrabold text-gradient')
+    : 'text-5xl font-headline font-extrabold text-gradient';
+  const labelClass = statMatch
+    ? (statMatch[0].match(/<p class="([^"]*)"/)?.[1] || 'text-on-surface-variant text-sm uppercase tracking-widest font-bold')
+    : 'text-on-surface-variant text-sm uppercase tracking-widest font-bold';
+
+  const newStats = items.map(item =>
+    `<div class="space-y-2">
+<div class="${numClass}">${esc(item.stat || item.value || '')}</div>
+<p class="${labelClass}">${esc(item.label || '')}</p>
+</div>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="stat-callout">
+<div class="${gridClass}">
+${newStats}
+</div>
+</section>`;
+}
+
+function fillPullquote(pattern, comp) {
+  let html = pattern;
+  const quote = stripTags(comp.body || '');
+  // Replace blockquote text
+  html = html.replace(/(<blockquote[^>]*>)([\s\S]*?)(<\/blockquote>)/i,
+    `$1\n${quote}\n$3`);
+  // Also try if it's just text inside the section
+  if (!html.includes('<blockquote')) {
+    // Some patterns have the quote directly in a styled element
+    const h3Match = html.match(/<h3[^>]*>[\s\S]*?<\/h3>/i);
+    if (!h3Match) {
+      // Replace the main paragraph
+      html = replaceFirstTag(html, 'p', quote);
+    }
+  }
+  return html;
+}
+
+function fillChecklist(pattern, comp) {
+  const items = comp._items || [];
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-3xl mx-auto';
+  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"[^>]*data-checklist/)?.[1] || 'glass-card p-12 rounded-3xl';
+
+  // Extract checkbox input classes from pattern
+  const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent';
+
+  const newLabels = items.map(item =>
+    `<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
+<input class="${inputClass}" type="checkbox"/>
+<span class="text-on-surface-variant">${esc(item.text || '')}</span>
+</label>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="checklist">
+<div class="${cardClass}" data-checklist>
+<h2 class="font-headline text-2xl font-bold mb-8">${title}</h2>
+<div class="space-y-4">
+${newLabels}
+</div>
+</div>
+</section>`;
+}
+
+function fillTabs(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 bg-surface-container-low';
+
+  // Extract button classes from pattern
+  const activeBtn = pattern.match(/<button[^>]*class="([^"]*bg-secondary[^"]*)"[^>]*data-tab-trigger/)?.[1]
+    || 'px-8 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm uppercase tracking-wider';
+  const inactiveBtn = pattern.match(/<button[^>]*class="([^"]*glass-card[^"]*)"[^>]*data-tab-trigger/)?.[1]
+    || 'px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider';
+
+  const triggers = items.map((item, i) =>
+    `<button class="${i === 0 ? activeBtn : inactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
+  ).join('\n');
+
+  const panels = items.map((item, i) =>
+    `<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+<h4 class="font-headline text-2xl font-bold mb-4">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant leading-relaxed">${item.body || ''}</div>
+</div>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="tabs">
+<div class="max-w-5xl mx-auto">
+<h2 class="font-headline text-4xl font-bold mb-16 text-center">${title}</h2>
+<div class="flex flex-wrap justify-center gap-4 mb-12" data-tabs>
+${triggers}
+</div>
+${panels}
+</div>
+</section>`;
+}
+
+function fillFlashcard(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low overflow-hidden';
+  const icons = ['info', 'local_fire_department', 'pan_tool', 'bolt', 'shield', 'warning', 'speed', 'memory'];
+
+  const newCards = items.map((item, i) => {
     const front = esc(item.front || item.title || item.term || '');
     const back = esc(item.back || item.definition || item.body || '');
-    return `<div class="group h-80 perspective" data-flashcard>
-      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180 cursor-pointer">
-        <div class="absolute inset-0 backface-hidden glass-panel flex flex-col items-center justify-center p-8 text-center">
-          <span class="material-symbols-outlined text-4xl text-primary mb-4">${icon}</span>
-          <h5 class="text-lg font-black text-white uppercase tracking-widest">${front}</h5>
-        </div>
-        <div class="absolute inset-0 backface-hidden rotate-y-180 bg-primary-container p-8 flex items-center justify-center text-center">
-          <p class="text-on-primary-container font-bold text-sm leading-relaxed">${back}</p>
-        </div>
-      </div>
-    </div>`;
-  }).join('\n    ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-8 tracking-tight">${title}</h3>` : ''}
-  <div class="grid md:grid-cols-3 gap-8">
-    ${cardsHtml}
-  </div>
+    return `<div class="perspective-1000 h-64 group cursor-pointer" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
+<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
+<div class="text-center">
+<div class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[i % icons.length]}</div>
+<div class="font-headline font-bold text-xl">${front}</div>
+</div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<p class="text-on-secondary-container font-medium">${back}</p>
+</div>
+</div>
 </div>`;
-}
+  }).join('\n');
 
-function renderNarrative(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  const items = comp._items || [];
-
-  const slidesHtml = items.map((item, i) => {
-    const display = i === 0 ? '' : ' style="display:none"';
-    const stepNum = String(i + 1).padStart(2, '0');
-    return `<div data-slide${display}>
-        <h5 class="text-xs font-black tracking-widest text-primary uppercase mb-2">${stepNum} / ${String(items.length).padStart(2, '0')}</h5>
-        <p class="text-white font-bold text-lg mb-4">${esc(item.title || '')}</p>
-        <div class="text-sm text-on-surface-variant leading-relaxed">${item.body || ''}</div>
-      </div>`;
-  }).join('\n      ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-6 tracking-tight">${title}</h3>` : ''}
-  ${body ? `<div class="text-on-surface-variant text-sm mb-6">${body}</div>` : ''}
-  <div class="glass-panel p-8" data-carousel>
-    <div data-slide-container>
-      ${slidesHtml}
-    </div>
-    <div class="flex gap-4 mt-8">
-      <button class="material-symbols-outlined text-white/40 hover:text-white" data-prev>chevron_left</button>
-      <span class="text-xs text-white/40 font-bold tracking-widest self-center" data-slide-counter>1 / ${items.length}</span>
-      <button class="material-symbols-outlined text-white/40 hover:text-white" data-next>chevron_right</button>
-    </div>
-  </div>
-</div>`;
-}
-
-function renderKeyTerm(comp) {
-  const title = esc(comp.displayTitle || '');
-  const items = comp._items || [];
-
-  const termsHtml = items.map((item, i) => {
-    const icon = CARD_ICONS[i % CARD_ICONS.length];
-    const term = esc(item.term || item.title || '');
-    const def = esc(item.definition || item.body || '');
-    return `<div class="glass-panel p-8 cursor-pointer group h-64" data-flashcard>
-      <div class="relative w-full h-full transition-transform duration-700 preserve-3d group-hover:rotate-y-180">
-        <div class="absolute inset-0 backface-hidden flex flex-col items-center justify-center text-center">
-          <span class="material-symbols-outlined text-4xl text-primary mb-4">${icon}</span>
-          <h5 class="text-lg font-black text-white uppercase tracking-widest">${term}</h5>
-        </div>
-        <div class="absolute inset-0 backface-hidden rotate-y-180 flex items-center justify-center text-center p-4">
-          <p class="text-on-surface-variant text-sm leading-relaxed">${def}</p>
-        </div>
-      </div>
-    </div>`;
-  }).join('\n    ');
-
-  return `<div>
-  ${title ? `<h3 class="text-2xl font-black text-white mb-8 tracking-tight">${title}</h3>` : ''}
-  <div class="grid md:grid-cols-3 gap-8">
-    ${termsHtml}
-  </div>
-</div>`;
-}
-
-function renderFullBleed(comp) {
-  const title = esc(comp.displayTitle || '');
-  const body = comp.body || '';
-  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
-  const bgStyle = imgSrc ? `background-image: url('${imgSrc}');` : '';
-
-  return `<section class="relative min-h-screen bg-fixed bg-center bg-cover flex flex-col items-center justify-center px-8 md:px-24" style="${bgStyle}">
-  <div class="absolute inset-0 bg-black/90 z-0"></div>
-  <div class="relative z-10 max-w-5xl w-full text-center">
-    <h2 class="text-6xl md:text-8xl font-black text-white tracking-tighter uppercase mb-6">${title}</h2>
-    <div class="h-1 w-24 bg-primary mx-auto mb-12"></div>
-    <div class="text-on-surface-variant text-xl leading-relaxed">${body}</div>
-  </div>
+  return `<section class="${sectionClass}" data-component-type="flashcard">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+${newCards}
+</div>
+</div>
 </section>`;
 }
 
-function renderGraphic(comp) {
-  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
-  const imgAlt = comp._graphic ? esc(comp._graphic.alt || '') : '';
+function fillNarrative(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
 
-  if (!imgSrc) return '';
-  return `<div class="relative group">
-  <img alt="${imgAlt}" class="w-full object-cover" src="${imgSrc}"/>
+  const title = esc(comp.displayTitle || '');
+  const body = comp.body || '';
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-8 max-w-5xl mx-auto';
+
+  const newSlides = items.map((item, i) => {
+    const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+    return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
+<div class="text-secondary font-bold mb-4">${counter}</div>
+<h4 class="font-headline text-2xl font-bold mb-4">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>`;
+  }).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="narrative" data-carousel>
+<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>
+<div class="glass-card rounded-[2.5rem] p-12 relative">
+${newSlides}
+<div class="flex gap-4 mt-8">
+<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>`;
+}
+
+function fillKeyTerm(pattern, comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+
+  const newCards = items.map(item =>
+    `<div class="glass-card p-8 rounded-2xl">
+<div class="text-secondary font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
+<p class="text-on-surface-variant text-sm">${esc(item.definition || item.body || '')}</p>
+</div>`
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="key-term">
+<h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
+<div class="grid md:grid-cols-3 gap-8">
+${newCards}
+</div>
+</section>`;
+}
+
+function fillFullBleed(pattern, comp) {
+  let html = pattern;
+  // Replace heading
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  // Replace body text
+  const bodyText = stripTags(comp.body || '');
+  html = html.replace(/<p class="text-2xl[^"]*">[^<]*<\/p>/i,
+    `<p class="text-2xl text-secondary font-medium italic">${bodyText}</p>`);
+  // Replace image
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+  }
+  return html;
+}
+
+function fillGraphic(pattern, comp) {
+  let html = pattern;
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    const alt = esc(comp._graphic.alt || '');
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
+  }
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  return html;
+}
+
+function fillProcessFlow(pattern, comp) {
+  const items = comp._items || comp._nodes || [];
+  if (items.length === 0) return pattern;
+
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 bg-surface-container-low';
+
+  const arrowHtml = '<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>';
+
+  const newNodes = items.map((item, i) => {
+    const nodeClass = i === 0
+      ? 'glass-card px-8 py-6 rounded-2xl border-secondary/30 text-center w-full max-w-xs'
+      : 'glass-card px-8 py-6 rounded-2xl text-center w-full max-w-xs';
+    return `<div class="${nodeClass}">
+<div class="font-headline font-bold">${esc(item.title || '')}</div>
+${item.body ? `<div class="text-sm text-on-surface-variant mt-2">${stripTags(item.body)}</div>` : ''}
+</div>`;
+  });
+
+  const withArrows = newNodes.flatMap((n, i) =>
+    i < newNodes.length - 1 ? [n, arrowHtml] : [n]
+  ).join('\n');
+
+  return `<section class="${sectionClass}" data-component-type="process-flow">
+<div class="max-w-6xl mx-auto">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<div class="flex flex-col md:flex-row items-center justify-center gap-8">
+${withArrows}
+</div>
+</div>
+</section>`;
+}
+
+function fillMedia(pattern, comp) {
+  // Media component is mostly visual — just replace image if available
+  let html = pattern;
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+  }
+  return html;
+}
+
+function fillVideoTranscript(pattern, comp) {
+  let html = pattern;
+  // Replace summary text
+  html = html.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(comp.displayTitle || 'Transcript')}</span>`);
+  // Replace transcript body
+  html = html.replace(/(<div class="p-8[^"]*">)([\s\S]*?)(<\/div>\s*<\/details>)/i,
+    `$1${comp.body || ''}$3`);
+  return html;
+}
+
+function fillImageGallery(pattern, comp) {
+  let html = pattern;
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  // Image gallery doesn't usually appear in SCORM data, so mostly keep pattern as-is
+  return html;
+}
+
+function fillLabeledImage(pattern, comp) {
+  let html = pattern;
+  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  if (comp._graphic) {
+    const src = embedImage(comp._graphic.large);
+    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
+  }
+  return html;
 }
 
 // ─── Component dispatcher ─────────────────────────────────────────────
-// Returns { html, selfWrapped } — selfWrapped means the component renders its own <section>
-function renderComponent(comp, index) {
+function fillComponent(pattern, comp, index) {
   const type = (comp.type || 'text').toLowerCase();
   switch (type) {
-    case 'hero':        return { html: renderHero(comp), selfWrapped: true };
-    case 'text':        return { html: renderText(comp), selfWrapped: false };
-    case 'accordion':   return { html: renderAccordion(comp), selfWrapped: false };
-    case 'mcq':         return { html: renderMCQ(comp), selfWrapped: true };
-    case 'textinput':   return { html: renderTextInput(comp), selfWrapped: true };
-    case 'graphic-text': return { html: renderGraphicText(comp, index), selfWrapped: false };
-    case 'checklist':   return { html: renderChecklist(comp), selfWrapped: false };
-    case 'pullquote':   return { html: renderPullquote(comp), selfWrapped: false };
-    case 'stat-callout': return { html: renderStatCallout(comp), selfWrapped: false };
-    case 'bento':       return { html: renderBento(comp), selfWrapped: false };
-    case 'comparison':  return { html: renderComparison(comp), selfWrapped: false };
-    case 'timeline':    return { html: renderTimeline(comp), selfWrapped: false };
-    case 'process-flow': return { html: renderProcessFlow(comp), selfWrapped: false };
-    case 'tabs':        return { html: renderTabs(comp), selfWrapped: false };
-    case 'flashcard':   return { html: renderFlashcard(comp), selfWrapped: false };
-    case 'narrative':   return { html: renderNarrative(comp), selfWrapped: false };
-    case 'key-term':    return { html: renderKeyTerm(comp), selfWrapped: false };
-    case 'full-bleed':  return { html: renderFullBleed(comp), selfWrapped: true };
-    case 'graphic':     return { html: renderGraphic(comp), selfWrapped: false };
+    case 'hero':            return fillHero(pattern, comp);
+    case 'text':            return fillText(pattern, comp);
+    case 'accordion':       return fillAccordion(pattern, comp);
+    case 'mcq':             return fillMCQ(pattern, comp);
+    case 'graphic-text':    return fillGraphicText(pattern, comp, index);
+    case 'bento':           return fillBento(pattern, comp);
+    case 'data-table':      return fillDataTable(pattern, comp);
+    case 'textinput':       return fillTextInput(pattern, comp);
+    case 'branching':       return fillBranching(pattern, comp);
+    case 'timeline':        return fillTimeline(pattern, comp);
+    case 'comparison':      return fillComparison(pattern, comp);
+    case 'stat-callout':    return fillStatCallout(pattern, comp);
+    case 'pullquote':       return fillPullquote(pattern, comp);
+    case 'checklist':       return fillChecklist(pattern, comp);
+    case 'tabs':            return fillTabs(pattern, comp);
+    case 'flashcard':       return fillFlashcard(pattern, comp);
+    case 'narrative':       return fillNarrative(pattern, comp);
+    case 'key-term':        return fillKeyTerm(pattern, comp);
+    case 'full-bleed':      return fillFullBleed(pattern, comp);
+    case 'graphic':         return fillGraphic(pattern, comp);
+    case 'process-flow':    return fillProcessFlow(pattern, comp);
+    case 'media':           return fillMedia(pattern, comp);
+    case 'video-transcript':return fillVideoTranscript(pattern, comp);
+    case 'image-gallery':   return fillImageGallery(pattern, comp);
+    case 'labeled-image':   return fillLabeledImage(pattern, comp);
     default:
-      console.log(`  [warn] Unknown component type: ${type}, falling back to text`);
-      return { html: renderText(comp), selfWrapped: false };
+      console.log(`  [warn] Unknown component type: ${type}`);
+      return null;
   }
 }
 
-// ─── Render a full section ────────────────────────────────────────────
-function renderSection(section, sectionIndex) {
-  const components = section.components || [];
-  if (components.length === 0) return '';
+// ═══════════════════════════════════════════════════════════════════════
+// PAGE ASSEMBLY
+// ═══════════════════════════════════════════════════════════════════════
 
-  const sectionTitle = section.title || '';
-  const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
-  const bgClass = BG_CLASSES[sectionIndex % BG_CLASSES.length];
-
-  // Separate self-wrapped components from inline ones
-  const output = [];
-  let inlineBuffer = [];
-
-  function flushInline() {
-    if (inlineBuffer.length === 0) return;
-
-    const sectionLabel = sectionTitle
-      ? `<h2 class="text-[10px] font-bold tracking-[0.4em] text-primary uppercase mb-4">${esc(sectionTitle)}</h2>`
-      : '';
-
-    // Only show section label before the first inline group
-    const showLabel = output.length === 0 && sectionLabel;
-
-    output.push(`<section id="${sectionId}" class="py-40 px-8 md:px-24 ${bgClass} max-w-7xl mx-auto">
-  ${showLabel ? sectionLabel : ''}
-  <div class="space-y-16">
-    ${inlineBuffer.join('\n    ')}
-  </div>
-</section>`);
-    inlineBuffer = [];
-  }
-
-  let graphicTextIndex = 0;
-  components.forEach((comp) => {
-    const idx = comp.type === 'graphic-text' ? graphicTextIndex++ : 0;
-    const { html, selfWrapped } = renderComponent(comp, idx);
-    if (!html) return;
-
-    if (selfWrapped) {
-      flushInline();
-      output.push(html);
-    } else {
-      inlineBuffer.push(html);
-    }
-  });
-
-  flushInline();
-  return output.join('\n\n');
-}
-
-// ─── Build nav bar ────────────────────────────────────────────────────
-function buildNav(layout) {
+function buildNav(shell, layout) {
+  if (!shell || !shell.nav) return '';
+  let nav = shell.nav;
   const courseTitle = esc(layout.course.title || 'Course');
-  const sections = layout.sections.filter(s => s.title);
-  const navLinks = sections.slice(0, 5).map(s =>
-    `<a class="font-['Inter'] font-extrabold tracking-tighter uppercase text-[#ffffff]/60 hover:text-white transition-colors" href="#${s.sectionId}">${esc(s.title)}</a>`
-  ).join('\n    ');
 
-  return `<nav class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl border-b border-[#ffffff]/10 shadow-[0_0_40px_rgba(99,102,241,0.15)] flex justify-between items-center px-8 py-4">
-  <div class="text-xl font-black tracking-[0.2em] text-[#c0c1ff] font-headline">${courseTitle.toUpperCase().replace(/\s+/g, '_')}</div>
-  <div class="hidden md:flex gap-8 items-center">
-    ${navLinks}
-  </div>
-  <button class="bg-primary-container text-on-primary-container px-6 py-2 rounded-sm font-bold tracking-widest text-xs transition-transform scale-95 active:scale-90" onclick="window.scrollTo({top:0,behavior:'smooth'})">TOP</button>
-</nav>`;
-}
+  // Replace the site name
+  nav = nav.replace(/>Workplace Safety Fundamentals</, `>${courseTitle}<`);
 
-// ─── Build footer ─────────────────────────────────────────────────────
-function buildFooter(layout) {
-  const courseTitle = esc(layout.course.title || 'Course');
-  return `<footer class="w-full py-20 border-t border-[#ffffff]/5 bg-[#000000]">
-  <div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-8 font-['Inter'] text-[10px] tracking-[0.1em] uppercase text-[#ffffff]/40">
-    <div class="opacity-80">&copy; ${new Date().getFullYear()} ${courseTitle.toUpperCase()}. ALL RIGHTS RESERVED.</div>
-    <div class="flex gap-12">
-      <a class="hover:text-[#ffffff] transition-opacity" href="#">PRIVACY</a>
-      <a class="hover:text-[#ffffff] transition-opacity" href="#">TERMS</a>
-    </div>
-  </div>
-</footer>`;
-}
+  // Replace nav links with real section links
+  const sections = layout.sections.filter(s => s.title).slice(0, 4);
+  const linkRe = /<a[^>]*href="#[^"]*"[^>]*>[^<]*<\/a>/gi;
+  const allLinks = findAll(nav, linkRe);
 
-// ─── Get hydration script ─────────────────────────────────────────────
-function getHydrationScript() {
-  if (fs.existsSync(HYDRATE_PATH)) {
-    return fs.readFileSync(HYDRATE_PATH, 'utf-8');
+  if (allLinks.length > 0 && sections.length > 0) {
+    const activeTemplate = allLinks[0].match;
+    const inactiveTemplate = allLinks.length > 1 ? allLinks[1].match : activeTemplate;
+
+    const newLinks = sections.map((s, i) => {
+      let link = i === 0 ? activeTemplate : inactiveTemplate;
+      link = link.replace(/href="#[^"]*"/, `href="#${s.sectionId || `section-${i}`}"`);
+      link = link.replace(/>([^<]*)<\/a>/, `>${esc(s.title)}</a>`);
+      return link;
+    }).join('\n');
+
+    // Replace all existing links
+    let result = nav;
+    allLinks.forEach(l => { result = result.replace(l.match, ''); });
+    result = result.replace(/(hidden md:flex[^>]*>)\s*/i, `$1\n${newLinks}\n`);
+    nav = result;
   }
-  // Inline fallback hydration for tabs, carousels, quizzes, flashcards
-  return `
-(function(){
-  // ─── Tabs ───
-  document.querySelectorAll('[data-tabs]').forEach(function(tabRoot){
-    var triggers = tabRoot.querySelectorAll('[data-tab-trigger]');
-    var panels = tabRoot.querySelectorAll('[data-tab-panel]');
-    triggers.forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var idx = btn.getAttribute('data-tab-trigger');
-        triggers.forEach(function(t){
-          t.classList.remove('border-b-2','border-primary','text-white');
-          t.classList.add('text-white/40');
-        });
-        btn.classList.add('border-b-2','border-primary','text-white');
-        btn.classList.remove('text-white/40');
-        panels.forEach(function(p){
-          p.style.display = p.getAttribute('data-tab-panel') === idx ? '' : 'none';
-        });
-      });
-    });
-  });
 
-  // ─── Carousels ───
-  document.querySelectorAll('[data-carousel]').forEach(function(carousel){
-    var slides = carousel.querySelectorAll('[data-slide]');
-    var counter = carousel.querySelector('[data-slide-counter]');
-    var current = 0;
-    function show(i){
-      slides.forEach(function(s,j){ s.style.display = j === i ? '' : 'none'; });
-      if(counter) counter.textContent = (i+1) + ' / ' + slides.length;
-    }
-    var prev = carousel.querySelector('[data-prev]');
-    var next = carousel.querySelector('[data-next]');
-    if(prev) prev.addEventListener('click', function(){ current = (current - 1 + slides.length) % slides.length; show(current); });
-    if(next) next.addEventListener('click', function(){ current = (current + 1) % slides.length; show(current); });
-  });
+  return nav;
+}
 
-  // ─── Quizzes ───
-  document.querySelectorAll('[data-quiz]').forEach(function(quiz){
-    var correct = parseInt(quiz.getAttribute('data-correct'), 10);
-    var feedbackCorrect = quiz.getAttribute('data-feedback-correct') || 'Correct!';
-    var feedbackIncorrect = quiz.getAttribute('data-feedback-incorrect') || 'Not quite. Try again.';
-    var feedbackEl = quiz.querySelector('[data-quiz-feedback]');
-    var buttons = quiz.querySelectorAll('[data-choice]');
-    buttons.forEach(function(btn){
-      btn.addEventListener('click', function(){
-        var chosen = parseInt(btn.getAttribute('data-choice'), 10);
-        var isCorrect = chosen === correct;
-        // Reset all buttons
-        buttons.forEach(function(b){
-          b.classList.remove('border-primary','border-error','bg-primary/10','bg-error/10');
-          b.classList.add('border-white/5');
-        });
-        if(isCorrect){
-          btn.classList.remove('border-white/5');
-          btn.classList.add('border-primary','bg-primary/10');
-          if(feedbackEl){
-            feedbackEl.className = 'mt-8 p-6 bg-primary/10 border border-primary/30 text-primary text-sm font-bold';
-            feedbackEl.textContent = feedbackCorrect;
-          }
-        } else {
-          btn.classList.remove('border-white/5');
-          btn.classList.add('border-error','bg-error/10');
-          if(feedbackEl){
-            feedbackEl.className = 'mt-8 p-6 bg-error/10 border border-error/30 text-error text-sm font-bold';
-            feedbackEl.textContent = feedbackIncorrect;
-          }
-        }
-      });
-    });
-  });
+function buildFooter(shell, layout) {
+  if (!shell || !shell.footer) return '';
+  let footer = shell.footer;
+  const courseTitle = esc(layout.course.title || 'Course');
 
-  // ─── Flashcard click toggle ───
-  document.querySelectorAll('[data-flashcard]').forEach(function(card){
-    card.addEventListener('click', function(){
-      var inner = card.querySelector('.preserve-3d');
-      if(inner){
-        inner.classList.toggle('rotate-y-180');
-      }
-    });
-  });
+  // Replace generic names
+  footer = footer.replace(/The Ethereal Archive\./g, courseTitle);
+  footer = footer.replace(/Workplace Safety Fundamentals/g, courseTitle);
+  footer = footer.replace(/© \d{4}/g, `© ${new Date().getFullYear()}`);
 
-  // ─── Smooth scroll for nav links ───
-  document.querySelectorAll('nav a[href^="#"]').forEach(function(link){
-    link.addEventListener('click', function(e){
-      e.preventDefault();
-      var target = document.querySelector(link.getAttribute('href'));
-      if(target) target.scrollIntoView({behavior:'smooth'});
-    });
-  });
-})();
-`;
+  return footer;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN BUILD
 // ═══════════════════════════════════════════════════════════════════════
 function build() {
-  console.log('V4 Build Course — Stitch Design DNA');
-  console.log('====================================\n');
+  console.log('V5 Course Builder — Stitch Pattern Fill');
+  console.log('=========================================\n');
 
   // Read inputs
   if (!fs.existsSync(LAYOUT_PATH)) {
-    console.error(`ERROR: course-layout.json not found at ${LAYOUT_PATH}`);
+    console.error('ERROR: course-layout.json not found');
     process.exit(1);
   }
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
   console.log(`[ok] Loaded course-layout.json (${layout.sections.length} sections)`);
 
+  // Load page shell
+  const shell = loadPageShell();
+  if (shell) {
+    console.log(`[ok] Loaded page shell (nav: ${(shell.nav || '').length} chars, footer: ${(shell.footer || '').length} chars)`);
+  }
+
+  // Load Stitch raw HTML for <head> content
   let stitchHtml = '';
   if (fs.existsSync(STITCH_PATH)) {
     stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
     console.log(`[ok] Loaded stitch-course-raw.html (${stitchHtml.length} chars)`);
-  } else {
-    console.log('[warn] No stitch-course-raw.html found — using default design DNA');
   }
 
-  // Extract design DNA
-  const dna = extractDesignDNA(stitchHtml);
+  // Extract <head> from Stitch HTML
+  const headMatch = stitchHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
+  const headContent = headMatch ? headMatch[1] : '';
+
+  // Count patterns available
+  const patternFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.html'));
+  console.log(`[ok] ${patternFiles.length} component patterns available`);
 
   // Build all sections
-  const sectionsHtml = layout.sections.map((s, i) => renderSection(s, i)).filter(Boolean).join('\n\n');
-  console.log(`[ok] Rendered ${layout.sections.length} sections`);
+  let filledCount = 0;
+  let fallbackCount = 0;
+  const sectionsHtml = [];
 
-  // Build nav and footer
-  const navHtml = buildNav(layout);
-  const footerHtml = buildFooter(layout);
+  layout.sections.forEach((section, sectionIndex) => {
+    const components = section.components || [];
+    if (components.length === 0) return;
+
+    const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
+
+    const componentHtmls = [];
+    components.forEach((comp, compIndex) => {
+      const type = (comp.type || 'text').toLowerCase();
+      const pattern = loadPattern(type);
+
+      if (pattern) {
+        const filled = fillComponent(pattern, comp, compIndex);
+        if (filled) {
+          componentHtmls.push(filled);
+          filledCount++;
+        } else {
+          console.log(`  [warn] Fill returned null for ${type}`);
+          fallbackCount++;
+        }
+      } else {
+        console.log(`  [warn] No pattern for: ${type}, skipping`);
+        fallbackCount++;
+      }
+    });
+
+    if (componentHtmls.length > 0) {
+      // Wrap non-section components in a section container
+      const wrapped = componentHtmls.map(h => {
+        // If it already has a <section> wrapper, use as-is
+        if (h.trim().startsWith('<section')) return h;
+        // Otherwise wrap it
+        return `<section class="py-24 px-8 max-w-7xl mx-auto" id="${sectionId}">\n${h}\n</section>`;
+      }).join('\n\n');
+
+      sectionsHtml.push(wrapped);
+    }
+  });
+
+  console.log(`[ok] Filled ${filledCount} components (${fallbackCount} fallbacks)\n`);
+
+  // Build nav and footer from Stitch's shell
+  const navHtml = buildNav(shell, layout);
+  const footerHtml = buildFooter(shell, layout);
 
   // Get hydration script
-  const hydrateScript = getHydrationScript();
+  let hydrateScript = '';
+  if (fs.existsSync(HYDRATE_PATH)) {
+    hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
+  }
 
-  // Assemble final HTML
+  // Determine theme
+  let isDark = true;
+  if (fs.existsSync(TOKENS_PATH)) {
+    const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+    isDark = tokens.isDark !== false;
+  }
+
+  // Course title
   const courseTitle = layout.course.title || 'Course';
-  const trailingStyleBlock = dna.trailingStyles.length > 0
-    ? `<style>\n${dna.trailingStyles.join('\n')}\n</style>`
-    : `<style>
-  .perspective { perspective: 1000px; }
-  .preserve-3d { transform-style: preserve-3d; }
-  .backface-hidden { backface-visibility: hidden; }
-  .rotate-y-180 { transform: rotateY(180deg); }
-</style>`;
 
-  // Use Stitch's head if available, otherwise construct one
-  const headContent = dna.headContent || `
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"><\/script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;300;400;700;800;900&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-  tailwind.config = {
-    darkMode: "class",
-    theme: {
-      extend: {
-        colors: {
-          "primary": "#c0c1ff", "primary-container": "#8083ff",
-          "on-primary-container": "#0d0096", "on-primary": "#1000a9",
-          "secondary": "#ddb7ff", "secondary-container": "#6f00be",
-          "tertiary": "#adc6ff", "tertiary-container": "#4d8eff",
-          "error": "#ffb4ab", "error-container": "#93000a",
-          "surface": "#131313", "surface-container": "#1f1f1f",
-          "surface-container-low": "#1b1b1b", "surface-container-high": "#2a2a2a",
-          "surface-container-highest": "#353535", "surface-container-lowest": "#0e0e0e",
-          "on-surface": "#e2e2e2", "on-surface-variant": "#c7c4d7",
-          "background": "#131313", "on-background": "#e2e2e2",
-          "outline": "#908fa0", "outline-variant": "#464554",
-        },
-        fontFamily: { "headline": ["Inter"], "body": ["Inter"], "label": ["Inter"] },
-        borderRadius: { "DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem" },
-      },
-    },
+  // Replace title in head
+  let finalHead = headContent;
+  if (finalHead.includes('<title>')) {
+    finalHead = finalHead.replace(/<title>[^<]*<\/title>/i, `<title>${esc(courseTitle)}</title>`);
+  } else {
+    finalHead = `<title>${esc(courseTitle)}</title>\n${finalHead}`;
   }
-<\/script>
-<style>
-  .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24; }
-  details > summary::-webkit-details-marker { display: none; }
-  .glass-panel {
-    background: rgba(53, 53, 53, 0.4);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(144, 143, 160, 0.15);
-  }
-</style>`;
-
-  // Replace <title> in head content
-  const headWithTitle = headContent.replace(
-    /<title>[^<]*<\/title>/i,
-    `<title>${esc(courseTitle)}</title>`
-  );
-  // If no <title> was replaced, we need to check
-  const finalHead = headWithTitle.includes('<title>')
-    ? headWithTitle
-    : `<title>${esc(courseTitle)}</title>\n${headWithTitle}`;
 
   const finalHtml = `<!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="${isDark ? 'dark' : ''}" lang="en">
 <head>
 ${finalHead}
 </head>
@@ -879,25 +962,21 @@ ${finalHead}
 
 ${navHtml}
 
-<main class="min-h-screen bg-black overflow-x-hidden pt-16">
-${sectionsHtml}
+<main class="min-h-screen bg-background overflow-x-hidden pt-20">
+${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
-<section class="py-40 bg-surface-container-highest px-8 md:px-24">
-  <div class="max-w-4xl mx-auto text-center">
-    <span class="material-symbols-outlined text-6xl text-primary mb-8">verified_user</span>
-    <h2 class="text-4xl font-black text-white mb-8 tracking-tight uppercase">Course Complete</h2>
-    <p class="text-on-surface-variant text-xl leading-relaxed mb-12">
-      You have completed ${esc(courseTitle)}. Review any sections as needed.
-    </p>
-    <button class="bg-primary-container text-on-primary-container px-12 py-5 font-black tracking-[0.3em] uppercase text-xs" onclick="window.scrollTo({top:0,behavior:'smooth'})">RETURN TO TOP</button>
-  </div>
+<section class="py-32 px-8 text-center max-w-4xl mx-auto">
+  <span class="material-symbols-outlined text-6xl text-secondary mb-8">verified_user</span>
+  <h2 class="font-headline text-4xl font-bold mb-8">Course Complete</h2>
+  <p class="text-on-surface-variant text-xl leading-relaxed mb-12">
+    You have completed ${esc(courseTitle)}. Review any sections as needed.
+  </p>
+  <button class="btn-primary px-12 py-5 rounded-full font-bold text-lg" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
 </section>
 
 ${footerHtml}
 </main>
-
-${trailingStyleBlock}
 
 <script>
 ${hydrateScript}
@@ -908,7 +987,7 @@ ${hydrateScript}
   // Write outputs
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, finalHtml, 'utf-8');
-  console.log(`\n[ok] Written: ${OUTPUT_PATH} (${(finalHtml.length / 1024).toFixed(0)} KB)`);
+  console.log(`[ok] Written: ${OUTPUT_PATH} (${(finalHtml.length / 1024).toFixed(0)} KB)`);
 
   fs.writeFileSync(PAGES_PATH, finalHtml, 'utf-8');
   console.log(`[ok] Written: ${PAGES_PATH}`);

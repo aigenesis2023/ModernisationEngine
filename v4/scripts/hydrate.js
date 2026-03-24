@@ -52,7 +52,7 @@
           if (!submitBtn) {
             submitBtn = document.createElement('button');
             submitBtn.textContent = 'Submit';
-            submitBtn.className = 'mt-4 px-6 py-2 rounded-lg bg-primary text-white font-semibold cursor-pointer hover:opacity-90 transition-opacity';
+            submitBtn.className = 'mt-4 px-6 py-2 rounded-lg bg-primary text-on-primary font-semibold cursor-pointer hover:opacity-90 transition-opacity';
             quiz.appendChild(submitBtn);
 
             submitBtn.addEventListener('click', function () {
@@ -77,7 +77,7 @@
 
                 var tryAgain = document.createElement('button');
                 tryAgain.textContent = 'Try Again';
-                tryAgain.className = 'ml-3 px-4 py-1 rounded-lg border border-white/20 text-white/60 text-sm cursor-pointer hover:text-white transition-colors';
+                tryAgain.className = 'ml-3 px-4 py-1 rounded-lg border border-outline-variant/30 text-on-surface-variant text-sm cursor-pointer hover:text-on-surface transition-colors';
                 tryAgain.addEventListener('click', resetQuiz);
                 feedbackEl.appendChild(tryAgain);
               }
@@ -99,11 +99,11 @@
       function activateTab(index) {
         triggers.forEach(function (t, i) {
           if (i === index) {
-            t.classList.add('border-b-2', 'border-primary', 'text-white');
-            t.classList.remove('text-white/40');
+            t.classList.add('border-b-2', 'border-primary', 'text-on-surface');
+            t.classList.remove('text-outline');
           } else {
-            t.classList.remove('border-b-2', 'border-primary', 'text-white');
-            t.classList.add('text-white/40');
+            t.classList.remove('border-b-2', 'border-primary', 'text-on-surface');
+            t.classList.add('text-outline');
           }
         });
         panels.forEach(function (p, i) {
@@ -156,7 +156,7 @@
         dotsWrap.className = 'flex justify-center gap-2 mt-4';
         for (var d = 0; d < slides.length; d++) {
           var dot = document.createElement('button');
-          dot.className = 'w-2 h-2 rounded-full bg-white/20 transition-colors';
+          dot.className = 'w-2 h-2 rounded-full bg-outline-variant/30 transition-colors';
           dot.setAttribute('data-dot', d);
           dot.style.cursor = 'pointer';
           dotsWrap.appendChild(dot);
@@ -190,7 +190,7 @@
           var dots = dotsWrap.querySelectorAll('[data-dot]');
           dots.forEach(function (dot, i) {
             dot.className = 'w-2 h-2 rounded-full transition-colors cursor-pointer ' +
-              (i === current ? 'bg-primary' : 'bg-white/20');
+              (i === current ? 'bg-primary' : 'bg-outline-variant/30');
           });
         }
       }
@@ -225,7 +225,7 @@
       var counter = container.querySelector('[data-checklist-progress]');
       if (!counter && (totalItems > 1 || iconItems.length > 1)) {
         counter = document.createElement('div');
-        counter.className = 'text-xs text-white/40 mt-3';
+        counter.className = 'text-xs text-outline mt-3';
         container.appendChild(counter);
       }
 
@@ -261,11 +261,11 @@
             item.setAttribute('data-checked', 'false');
             icon.textContent = 'check_circle_outline';
             icon.classList.remove('text-primary');
-            icon.classList.add('text-white/20');
+            icon.classList.add('text-outline-variant');
           } else {
             item.setAttribute('data-checked', 'true');
             icon.textContent = 'check_circle';
-            icon.classList.remove('text-white/20');
+            icon.classList.remove('text-outline-variant');
             icon.classList.add('text-primary');
           }
           updateProgress();

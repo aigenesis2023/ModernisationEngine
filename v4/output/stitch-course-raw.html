@@ -3,9 +3,9 @@
 <html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>EV Awareness &amp; Safety | EV_SENTINEL_ALPHA</title>
+<title>Workplace Safety Fundamentals | The Ethereal Archive</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;900&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Manrope:wght@700;800&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -14,606 +14,664 @@
             theme: {
                 extend: {
                     colors: {
-                        "tertiary-fixed": "#efdbff",
-                        "on-tertiary-container": "#3c2058",
-                        "on-tertiary-fixed": "#280b45",
-                        "surface-container": "#291933",
-                        "on-tertiary-fixed-variant": "#563a73",
-                        "error-container": "#93000a",
-                        "on-surface": "#f3dafd",
-                        "secondary-fixed": "#f2daff",
-                        "on-secondary-container": "#d7a3ff",
-                        "secondary-container": "#6f05b1",
+                        "outline": "#6e7779",
+                        "on-secondary": "#004755",
+                        "surface": "#0b0f10",
+                        "on-secondary-fixed-variant": "#006577",
+                        "on-surface-variant": "#a4adaf",
+                        "background": "#0b0f10",
+                        "tertiary-fixed-dim": "#acd5e9",
+                        "outline-variant": "#41494b",
+                        "surface-container-high": "#1a2122",
+                        "on-primary-fixed": "#000000",
+                        "on-primary-container": "#001429",
+                        "surface-container-lowest": "#000000",
+                        "surface-dim": "#0b0f10",
+                        "on-secondary-container": "#0ad1f5",
+                        "inverse-primary": "#0062a6",
+                        "on-background": "#dee7e9",
+                        "secondary-fixed-dim": "#78e3ff",
+                        "on-error": "#490006",
+                        "inverse-surface": "#f7fafb",
+                        "on-primary-fixed-variant": "#00203c",
+                        "secondary-dim": "#00caed",
+                        "tertiary-dim": "#acd5e9",
+                        "surface-container-low": "#0f1416",
+                        "surface-bright": "#252d30",
+                        "tertiary-fixed": "#bae3f8",
+                        "inverse-on-surface": "#525657",
+                        "on-error-container": "#ff9993",
+                        "on-tertiary-fixed": "#154051",
+                        "error-container": "#871f21",
+                        "on-secondary-fixed": "#004653",
                         "primary": "#9fcaff",
-                        "surface-variant": "#3f2e49",
+                        "on-tertiary-fixed-variant": "#355d6e",
+                        "primary-container": "#0097fc",
+                        "surface-container": "#141b1c",
+                        "on-primary": "#004273",
+                        "on-surface": "#dee7e9",
+                        "error-dim": "#c54d4a",
+                        "primary-fixed-dim": "#008ae7",
+                        "surface-variant": "#1f2729",
+                        "tertiary-container": "#bae3f8",
+                        "surface-container-highest": "#1f2729",
+                        "on-tertiary-container": "#2b5364",
+                        "secondary-fixed": "#aeecff",
+                        "tertiary": "#d2efff",
+                        "error": "#fa746f",
+                        "secondary-container": "#00424e",
+                        "primary-dim": "#3da2ff",
+                        "on-tertiary": "#345c6d",
                         "surface-tint": "#9fcaff",
-                        "background": "#1c0d26",
-                        "on-tertiary": "#3e235b",
-                        "on-secondary-fixed-variant": "#6c00ae",
-                        "on-error-container": "#ffdad6",
-                        "on-primary": "#003259",
-                        "inverse-on-surface": "#3a2a45",
-                        "inverse-surface": "#f3dafd",
-                        "surface-container-low": "#24152e",
-                        "surface-container-highest": "#3f2e49",
-                        "outline": "#89919e",
-                        "surface-dim": "#1c0d26",
-                        "on-background": "#f3dafd",
-                        "on-secondary-fixed": "#2e004e",
-                        "primary-container": "#0099ff",
-                        "tertiary-fixed-dim": "#dbb9fc",
-                        "secondary-fixed-dim": "#e0b6ff",
-                        "on-secondary": "#4c007c",
-                        "surface-container-lowest": "#160820",
-                        "surface-container-high": "#34243e",
-                        "on-primary-fixed": "#001d36",
-                        "inverse-primary": "#0061a5",
-                        "error": "#ffb4ab",
-                        "on-primary-fixed-variant": "#00497e",
-                        "primary-fixed": "#d2e4ff",
-                        "on-primary-container": "#002f54",
-                        "primary-fixed-dim": "#9fcaff",
-                        "surface": "#1c0d26",
-                        "secondary": "#e0b6ff",
-                        "tertiary": "#dbb9fc",
-                        "on-surface-variant": "#bfc7d5",
-                        "on-error": "#690005",
-                        "tertiary-container": "#a888c8",
-                        "outline-variant": "#3f4753",
-                        "surface-bright": "#44334e"
+                        "primary-fixed": "#0097fc",
+                        "secondary": "#25d8fc"
                     },
                     fontFamily: {
-                        "headline": ["Space Grotesk"],
+                        "headline": ["Manrope"],
                         "body": ["Inter"],
                         "label": ["Inter"]
                     },
-                    borderRadius: {"DEFAULT": "0.125rem", "lg": "0.25rem", "xl": "0.5rem", "full": "0.75rem"},
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
                 },
             },
         }
     </script>
 <style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            vertical-align: middle;
+        .glass-card {
+            background: rgba(31, 39, 41, 0.5);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(65, 73, 75, 0.2);
         }
-        .glass {
-            background: rgba(52, 36, 62, 0.6);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(37, 216, 252, 0.15);
         }
-        .text-glow {
-            text-shadow: 0 0 20px rgba(0, 153, 255, 0.4);
+        .text-gradient {
+            background: linear-gradient(135deg, #9fcaff 0%, #25d8fc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1c0d26; }
-        ::-webkit-scrollbar-thumb { background: #34243e; border-radius: 10px; }
+        .btn-primary {
+            background: linear-gradient(135deg, #9fcaff 0%, #25d8fc 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .btn-primary:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+        details > summary { list-style: none; }
+        details > summary::-webkit-details-marker { display: none; }
     </style>
 </head>
-<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-white">
-<!-- Top Navigation Bar -->
-<nav class="fixed top-0 w-full z-50 bg-[#1c0d26]/80 backdrop-blur-xl border-b border-[#3f4753]/15 shadow-[0_4px_20px_rgba(76,0,124,0.06)] flex justify-between items-center h-16 px-8">
-<div class="flex items-center gap-4">
-<img alt="Sentinel Logo" class="h-8 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNZXFZGtIIbYK5nQ_HwaUVYcVaIxtMTX5sOgAiqfnXyrtuydSbmf7s0dLZcowpI6e1-YVijj-c1DkzA5alhiJF9RjkXDgRfMFRLPWCfu-NO0x7Vu28ySvLUUFlqMpF8QBiMfKDeYjK0ASdxQqZPCUYbq3yPwwm1lxi5XEwwuu7niopAGoP5VPC1FG2-DHtS88Yj8ryhgydL4oDkDaB50xXcJSD1G2_jzAH9IHJJXtyM8_O40QdGB0heDd2bQ43KdP0PLls_8vF1KF9"/>
-<span class="text-xl font-black text-[#0099ff] tracking-tighter uppercase font-headline">EV_SENTINEL_ALPHA</span>
+<body class="bg-background text-on-surface font-body selection:bg-secondary/30">
+<!-- 1. Fixed Top Nav -->
+<nav class="fixed top-0 w-full z-50 bg-[#0b0f10]/60 backdrop-blur-xl flex justify-between items-center px-8 h-20 shadow-[0_20px_40px_rgba(0,66,78,0.08)]">
+<div class="text-xl font-headline font-bold tracking-tight text-on-background">Workplace Safety Fundamentals</div>
+<div class="hidden md:flex gap-8 text-sm font-medium">
+<a class="text-secondary border-b-2 border-secondary pb-1" href="#welcome">Modules</a>
+<a class="text-on-surface-variant hover:text-on-background transition-colors" href="#intro">Resources</a>
+<a class="text-on-surface-variant hover:text-on-background transition-colors" href="#glossary">Glossary</a>
+<a class="text-on-surface-variant hover:text-on-background transition-colors" href="#progress">Progress</a>
 </div>
-<div class="hidden md:flex gap-8 items-center">
-<a class="font-headline font-bold tracking-tight text-[#0099ff] border-b-2 border-[#0099ff] pb-1" href="#">Modules</a>
-<a class="font-headline font-bold tracking-tight text-[#bfc7d5] hover:text-white transition-colors" href="#">Safety</a>
-<a class="font-headline font-bold tracking-tight text-[#bfc7d5] hover:text-white transition-colors" href="#">Compliance</a>
-<a class="font-headline font-bold tracking-tight text-[#bfc7d5] hover:text-white transition-colors" href="#">Resources</a>
+<div class="flex items-center gap-6">
+<a class="text-primary-dim hover:underline text-sm font-medium" href="#">Back to Top</a>
+<span class="material-symbols-outlined text-on-surface-variant cursor-pointer">account_circle</span>
 </div>
-<div class="px-4 py-1 rounded-full bg-surface-container-high border border-outline-variant/20 text-xs font-bold text-primary tracking-widest">
-            PROGRESS: 65%
-        </div>
 </nav>
-<!-- Side Navigation (Web Only) -->
-<aside class="hidden lg:flex h-screen w-64 fixed left-0 top-0 pt-20 border-r border-[#3f4753]/15 bg-[#1c0d26] flex-col py-6 z-40">
-<div class="px-6 mb-8 flex items-center gap-3">
-<div class="w-10 h-10 rounded-lg bg-primary-container/20 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary">engineering</span>
-</div>
-<div>
-<p class="text-sm font-bold text-on-surface font-headline">Technical Operator</p>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">ID: 8829-X</p>
-</div>
-</div>
-<nav class="flex-1 space-y-1">
-<a class="flex items-center gap-3 px-6 py-3 bg-[#34243e] text-[#0099ff] border-r-4 border-[#0099ff] font-['Inter'] text-sm tracking-wide transition-all active:scale-95" href="#overview">
-<span class="material-symbols-outlined">dashboard</span> Overview
-            </a>
-<a class="flex items-center gap-3 px-6 py-3 text-[#bfc7d5] hover:bg-[#24152e] hover:text-white transition-all" href="#safety">
-<span class="material-symbols-outlined">battery_charging_full</span> Battery Safety
-            </a>
-<a class="flex items-center gap-3 px-6 py-3 text-[#bfc7d5] hover:bg-[#24152e] hover:text-white transition-all" href="#protocols">
-<span class="material-symbols-outlined">ev_station</span> Charging Protocols
-            </a>
-<a class="flex items-center gap-3 px-6 py-3 text-[#bfc7d5] hover:bg-[#24152e] hover:text-white transition-all" href="#emergency">
-<span class="material-symbols-outlined">emergency</span> Emergency Response
-            </a>
-<a class="flex items-center gap-3 px-6 py-3 text-[#bfc7d5] hover:bg-[#24152e] hover:text-white transition-all" href="#certification">
-<span class="material-symbols-outlined">verified</span> Certification
-            </a>
-</nav>
-<div class="px-6 mt-auto">
-<button class="w-full py-3 bg-gradient-to-br from-primary-container to-secondary-container text-white text-xs font-bold uppercase tracking-widest rounded-lg shadow-lg hover:brightness-110 transition-all">
-                Resume Module
-            </button>
-</div>
-</aside>
-<main class="lg:pl-64 pt-16 min-h-screen">
-<!-- 1. Hero Section -->
-<section class="relative h-[921px] flex items-center overflow-hidden">
+<main class="pt-20">
+<!-- 2. Hero Section -->
+<section class="relative min-h-[921px] flex items-center justify-center overflow-hidden px-8" data-component-type="hero" id="welcome">
 <div class="absolute inset-0 z-0">
-<div class="absolute inset-0 bg-gradient-to-r from-background via-background/80 to-transparent z-10"></div>
-<img class="w-full h-full object-cover grayscale opacity-40" data-alt="futuristic close-up of high-voltage electric vehicle components with blue neon glow and technical overlays in dark background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBicaBQr_rjjwF8vQyfAODRPnEYXLP2CWnAGedNhKTJ2e87L5FZjb5uvB_Ckrla-yepX7T-mBAydFaxRE6X4RbnwvKYXfM1KlIaD-ChtKCX_Lb9_A8kUnhSAR_v7g3J9c4td1c-X8uKQTsbIT5wJOAWuTh9WTz-HqHLTFL8xokMHlJNlkH0CKiJfIs2Bw_y8kXFCv1wskQPfbYGk5hX01xTVHGYL5npVsd1VT1-IEd_dqB_mTtrkzsvcH3_SZ-cWjw9uRYU5xt68C_I"/>
+<img alt="" class="w-full h-full object-cover opacity-30 grayscale" data-alt="cinematic wide shot of a modern clean industrial warehouse with high ceilings and morning light streaming through high windows" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6czTwurBUbu41Rw8eknfpWd0mpfs3oKn-R34uGiB2XIldcV8vdLnN3_yWa3xcbMIu-kS_ELC-0qitNY0dd3-anqyrImf1BHZzODj-u9UP_kVHoxwevX_XM72pG1teHqxOFLzpwHj-vwCeDHcCRT11WGav8u8pjkCq_tRcij6jqL-O5aOmi-ocipClcPjTFfuC0H9s4W5PxBy9pfzSoT7bi4Am1ffmSNb2MBZQTT4Nxen3BUiExSrSMMVxkcLUjIeabAu9CvZC2a6g"/>
+<div class="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
 </div>
-<div class="container mx-auto px-8 relative z-20">
-<div class="max-w-3xl">
-<div class="inline-block px-3 py-1 bg-primary-container/20 border border-primary/30 text-primary text-[10px] font-bold tracking-[0.2em] uppercase mb-6">
-                        Safety Critical Module 01
-                    </div>
-<h1 class="text-6xl md:text-8xl font-headline font-black text-white leading-none mb-6 tracking-tighter">
-                        EV Awareness <br/> <span class="text-primary text-glow">&amp; Safety</span>
+<div class="relative z-10 text-center max-w-4xl">
+<h1 class="font-headline text-6xl md:text-8xl font-extrabold tracking-tighter mb-6 text-on-background">
+                    Workplace Safety <span class="text-gradient">Fundamentals</span>
 </h1>
-<p class="text-xl text-on-surface-variant font-light leading-relaxed max-w-xl">
-                        Your essential guide to identifying, understanding, and working safely around electric and hybrid vehicles in high-voltage environments.
-                    </p>
-<div class="flex gap-4 mt-10">
-<button class="px-8 py-4 bg-gradient-to-r from-primary-container to-on-secondary-fixed-variant text-white font-bold rounded-lg uppercase tracking-widest text-sm flex items-center gap-2">
-                            Begin Module <span class="material-symbols-outlined">arrow_forward</span>
-</button>
+<p class="text-xl md:text-2xl text-on-surface-variant mb-12 max-w-2xl mx-auto leading-relaxed">
+                    Master the critical protocols that protect lives and ensure a secure environment for every professional.
+                </p>
+<button class="btn-primary text-on-primary-container px-10 py-5 rounded-full font-headline font-bold text-lg shadow-xl">
+                    Begin Course
+                </button>
 </div>
+</section>
+<!-- 3. Introduction -->
+<section class="py-24 px-8 max-w-4xl mx-auto" data-component-type="text" id="intro">
+<div class="mb-4 flex items-center gap-4">
+<div class="h-px w-12 bg-secondary/50"></div>
+<span class="text-secondary font-headline uppercase tracking-widest text-sm font-bold">The Core Mandate</span>
+</div>
+<h2 class="font-headline text-4xl font-bold mb-8">Why Safety Matters</h2>
+<div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
+<p>Safety is not merely a set of rules; it is a shared culture of vigilance. In every workplace, from the corporate office to the industrial floor, the primary objective remains the same: ensuring every team member returns home in the same condition they arrived.</p>
+<p>By understanding the fundamentals of hazard identification and risk management, we transform from passive observers into active guardians of our collective well-being.</p>
+</div>
+</section>
+<!-- 4. Stat Callout -->
+<section class="py-24 px-8 bg-surface-container-low" data-component-type="stat-callout">
+<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-center">
+<div class="space-y-2">
+<div class="text-5xl font-headline font-extrabold text-gradient">2.3M</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest font-bold">Annual Incidents</p>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-extrabold text-gradient">72%</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest font-bold">Preventable Errors</p>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-extrabold text-gradient">$170B</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest font-bold">Global Loss</p>
+</div>
+<div class="space-y-2">
+<div class="text-5xl font-headline font-extrabold text-gradient">14%</div>
+<p class="text-on-surface-variant text-sm uppercase tracking-widest font-bold">Efficiency Boost</p>
 </div>
 </div>
 </section>
-<!-- 2. Introduction & Objectives -->
-<section class="py-24 px-8 bg-surface-container-low" id="overview">
-<div class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-20">
-<div>
-<h2 class="text-4xl font-headline font-bold text-white mb-8 tracking-tight">Systemic Integrity: <br/>Introduction</h2>
+<!-- 5. Graphic-Text -->
+<section class="py-32 px-8 max-w-7xl mx-auto grid md:grid-cols-2 gap-20 items-center" data-component-type="graphic-text">
+<div class="order-2 md:order-1">
+<h2 class="font-headline text-4xl font-bold mb-8">Hierarchy of Controls</h2>
 <p class="text-lg text-on-surface-variant leading-relaxed mb-6">
-                        Modern automotive technology is evolving rapidly. High-voltage systems present unique risks that traditional mechanics rarely encounter. This module establishes the baseline for "The Digital Sentinel"—an operator who acts as the first line of defense in EV safety.
-                    </p>
-<p class="text-on-surface-variant leading-relaxed">
-                        Understanding the distinction between HEVs, PHEVs, and BEVs is not just technical knowledge; it is a life-safety requirement for everyone from first responders to valeting staff.
-                    </p>
+                    The Hierarchy of Controls is a system used in industry to minimize or eliminate exposure to hazards. It is a widely accepted system that is promoted by numerous safety organizations.
+                </p>
+<div class="space-y-4">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary">verified</span>
+<p class="text-on-surface">Most effective methods involve complete removal of the hazard.</p>
 </div>
-<div>
-<h3 class="text-xs font-black tracking-widest uppercase text-primary mb-6">Learning Objectives</h3>
-<div class="space-y-4" data-accordion="objectives">
-<div class="bg-surface-container-high border-l-4 border-primary p-6 rounded-r-lg">
-<h4 class="font-bold text-white flex justify-between items-center cursor-pointer">
-                                Know About EV Types
-                                <span class="material-symbols-outlined">expand_more</span>
-</h4>
-<p class="mt-4 text-sm text-on-surface-variant leading-relaxed">Identify the architectural differences between fully electric, hybrid, and fuel-cell systems.</p>
-</div>
-<div class="bg-surface-container rounded-lg p-6 opacity-80 hover:opacity-100 transition-opacity">
-<h4 class="font-bold text-on-surface flex justify-between items-center cursor-pointer">
-                                Understand EV Hazards
-                                <span class="material-symbols-outlined">expand_more</span>
-</h4>
-</div>
-<div class="bg-surface-container rounded-lg p-6 opacity-80 hover:opacity-100 transition-opacity">
-<h4 class="font-bold text-on-surface flex justify-between items-center cursor-pointer">
-                                Work Safely Around EVs
-                                <span class="material-symbols-outlined">expand_more</span>
-</h4>
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined text-secondary">warning</span>
+<p class="text-on-surface">PPE is considered the last line of defense, not the first.</p>
 </div>
 </div>
 </div>
+<div class="order-1 md:order-2 glass-card rounded-3xl p-8">
+<img alt="Hierarchy of Controls Pyramid" class="rounded-2xl shadow-2xl" data-alt="abstract architectural minimalist pyramid structure with dramatic upward lighting in a dark industrial space" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDFy9U7XV2CclOAayMTc4prwDDOwLEWE8GIE3ma3iSkT99-rOjEKSC-IPHuQRjM3HVmA_H5qc7qtTBdGZZysF8cfgmAx6Q2duaLV1AJ12U6ArGcFJ2RSvb-dyHMgvzOPPkac0lRjzfbv9q2951XYlUXjhpmmFJL_p9TmDJXS44W46rg_5O2dPYlnsu1f5We2dHq7YxuUj-6rQhFG6Sby9tFEmTSxOXw_PB07GclpimiUPPXVD-ACCDO3Cpl6uxgpnE6Ya45c4M9HgDF"/>
 </div>
 </section>
-<!-- 3. Role Selection -->
-<section class="py-24 px-8">
-<div class="max-w-6xl mx-auto text-center mb-16">
-<h2 class="text-3xl font-headline font-bold text-white mb-4">Select Your Operating Role</h2>
-<p class="text-on-surface-variant">The Sentinel interface adjusts content priority based on your deployment context.</p>
-</div>
-<div class="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6">
-<button class="p-8 bg-surface-container-high border border-outline-variant/15 hover:border-primary transition-all group flex flex-col items-center gap-4 rounded-xl">
-<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">construction</span>
-<span class="font-headline font-bold text-xs uppercase tracking-widest">Technician</span>
-</button>
-<button class="p-8 bg-surface-container-high border border-outline-variant/15 hover:border-primary transition-all group flex flex-col items-center gap-4 rounded-xl">
-<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">emergency</span>
-<span class="font-headline font-bold text-xs uppercase tracking-widest">Responder</span>
-</button>
-<button class="p-8 bg-surface-container-high border border-outline-variant/15 hover:border-primary transition-all group flex flex-col items-center gap-4 rounded-xl">
-<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">local_shipping</span>
-<span class="font-headline font-bold text-xs uppercase tracking-widest">Logistics</span>
-</button>
-<button class="p-8 bg-surface-container-high border border-outline-variant/15 hover:border-primary transition-all group flex flex-col items-center gap-4 rounded-xl">
-<span class="material-symbols-outlined text-4xl text-primary group-hover:scale-110 transition-transform">cleaning_services</span>
-<span class="font-headline font-bold text-xs uppercase tracking-widest">Maintenance</span>
-</button>
-</div>
-</section>
-<!-- 4. Recognising an EV -->
-<section class="py-24 px-8 bg-surface-container-lowest">
-<div class="max-w-6xl mx-auto">
-<div class="flex flex-col md:flex-row gap-16 items-center mb-24">
-<div class="flex-1">
-<h2 class="text-4xl font-headline font-bold text-white mb-6">Visual Identification: <br/>The Exterior Shield</h2>
-<p class="text-on-surface-variant leading-relaxed">
-                            Before initiating contact with any vehicle, a visual sweep is mandatory. Look for subtle identifiers that signal the presence of high-voltage lithium-ion storage.
-                        </p>
-</div>
-<div class="flex-1 grid grid-cols-1 gap-4">
-<div class="flex gap-6 items-start p-6 bg-surface-container rounded-lg">
-<div class="w-12 h-12 bg-primary-container/10 flex items-center justify-center rounded border border-primary/20 shrink-0">
-<span class="material-symbols-outlined text-primary">label</span>
-</div>
-<div>
-<h4 class="font-bold text-white mb-1">Badging &amp; Emblems</h4>
-<p class="text-xs text-on-surface-variant uppercase font-medium">Hybrid, Electric, or E-Motion indicators.</p>
-</div>
-</div>
-<div class="flex gap-6 items-start p-6 bg-surface-container rounded-lg">
-<div class="w-12 h-12 bg-primary-container/10 flex items-center justify-center rounded border border-primary/20 shrink-0">
-<span class="material-symbols-outlined text-primary">ev_station</span>
-</div>
-<div>
-<h4 class="font-bold text-white mb-1">Charge Port Location</h4>
-<p class="text-xs text-on-surface-variant uppercase font-medium">Front grilles, wings, or traditional fuel flap zones.</p>
-</div>
-</div>
-</div>
-</div>
-<h3 class="text-xs font-black tracking-[0.3em] uppercase text-center mb-12 text-primary">Internal Indicators (Bento Analysis)</h3>
-<div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-4 h-auto md:h-[600px]">
-<div class="md:col-span-2 md:row-span-2 bg-surface-container-high rounded-xl p-8 relative overflow-hidden group border border-outline-variant/10">
-<div class="relative z-10 h-full flex flex-col justify-end">
-<span class="material-symbols-outlined text-4xl text-error mb-4" style="font-variation-settings: 'FILL' 1;">warning</span>
-<h4 class="text-2xl font-headline font-bold text-white mb-2">Orange HV Cabling</h4>
-<p class="text-sm text-on-surface-variant">Industry standard color for wiring carrying over 60V DC or 30V AC.</p>
-</div>
-<img class="absolute inset-0 w-full h-full object-cover opacity-20 group-hover:scale-105 transition-transform" data-alt="bright orange high voltage industrial electrical cables inside a modern engine bay with clean metal surfaces" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD1PUE7yTLb-gjNEShL8v__R5FN468Po2caHHvD2MGvYezGdLyqz6mAJ2ms9upajpiuE5Mv7UqYxQIlqYNHnmByfAf7lFeebw76CzIjHtylljiZsB68okyajjJ8yhFvMKswTSC4fd-VdRGsQ-ckNFvEI-4AkemRn_IrhPaFavz9mb2xsWERvdSGJn3QBh-1FVrSv1IWDfwY3B7-ZZsMSgJghYHOYPzXCo0BPmG79p_mSjlxfcRweNreGPGYrKO4ruckVShZAbI87cA4"/>
-</div>
-<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
-<span class="material-symbols-outlined text-primary mb-3">settings_input_component</span>
-<h4 class="font-bold text-white mb-1">Power Controller</h4>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Inverter assemblies often sit atop the motor.</p>
-</div>
-<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/10">
-<span class="material-symbols-outlined text-primary mb-3">speed</span>
-<h4 class="font-bold text-white mb-1">Instrument Cluster</h4>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Silent running mode indicators (READY lamp).</p>
-</div>
-<div class="md:col-span-2 bg-surface-container-high rounded-xl p-6 border border-outline-variant/10 flex items-center gap-6">
-<div class="flex-1">
-<span class="material-symbols-outlined text-error mb-3">notification_important</span>
-<h4 class="font-bold text-white mb-1">Warning Labels</h4>
-<p class="text-sm text-on-surface-variant">Explicit high-voltage caution decals under the hood.</p>
-</div>
-<div class="w-1/3 h-full rounded bg-error-container/20 flex items-center justify-center">
-<span class="material-symbols-outlined text-4xl text-error">bolt</span>
-</div>
-</div>
-</div>
+<!-- 6. Accordion -->
+<section class="py-24 px-8 max-w-4xl mx-auto" data-component-type="accordion">
+<h3 class="font-headline text-2xl font-bold mb-12 text-center">The Five Levels of Hazard Control</h3>
+<div class="space-y-4">
+<details class="group glass-card rounded-2xl p-6 transition-all duration-300 open:ring-1 open:ring-secondary/30">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
+                        Elimination
+                        <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="mt-4 text-on-surface-variant leading-relaxed">
+                        Physically remove the hazard. This is the most effective control. If a task is not necessary, or the hazard can be removed entirely, this must be the first choice.
+                    </div>
+</details>
+<details class="group glass-card rounded-2xl p-6 transition-all duration-300">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
+                        Substitution
+                        <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="mt-4 text-on-surface-variant leading-relaxed">
+                        Replace the hazard with something less dangerous. For example, using a non-toxic chemical instead of a corrosive one.
+                    </div>
+</details>
+<details class="group glass-card rounded-2xl p-6 transition-all duration-300">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
+                        Engineering Controls
+                        <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="mt-4 text-on-surface-variant leading-relaxed">
+                        Isolate people from the hazard through physical barriers, guards, or ventilation systems.
+                    </div>
+</details>
 </div>
 </section>
-<!-- 5. UK Govt Highlight -->
-<section class="py-12 bg-primary-container/10 border-y border-primary-container/20">
-<div class="max-w-4xl mx-auto px-8 flex flex-col md:flex-row items-center gap-8">
-<span class="material-symbols-outlined text-5xl text-primary">account_balance</span>
+<!-- 7. Tabs -->
+<section class="py-32 px-8 bg-surface-container-low" data-component-type="tabs">
+<div class="max-w-5xl mx-auto">
+<h2 class="font-headline text-4xl font-bold mb-16 text-center">Types of Workplace Hazards</h2>
+<div class="flex flex-wrap justify-center gap-4 mb-12" data-tabs="">
+<button class="px-8 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm uppercase tracking-wider" data-tab-trigger="physical">Physical</button>
+<button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="chemical">Chemical</button>
+<button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="biological">Biological</button>
+<button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="ergonomic">Ergonomic</button>
+</div>
+<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="physical">
+<div class="grid md:grid-cols-2 gap-12 items-center">
 <div>
-<h4 class="font-headline font-bold text-white text-xl">Verification Protocol</h4>
-<p class="text-on-surface-variant text-sm">Use the official <span class="text-primary font-bold">UK Government Vehicle Enquiry Service</span> to confirm propulsion type via VRM (Vehicle Registration Mark).</p>
-</div>
-<button class="shrink-0 px-6 py-2 border border-primary text-primary text-xs font-bold uppercase tracking-widest hover:bg-primary hover:text-white transition-all rounded">Access Portal</button>
-</div>
-</section>
-<!-- 6. Types of Electric Vehicle -->
-<section class="py-24">
-<div class="max-w-6xl mx-auto px-8">
-<div class="relative w-full h-[400px] rounded-2xl overflow-hidden mb-16">
-<img class="w-full h-full object-cover grayscale brightness-50" data-alt="line-up of modern electric vehicle silhouettes in a dark minimalist garage with blue floor lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9UZ40ZWaJoPrIWko9RzzmNPBitcP6k90KH9bhG5gnBzmdUy4di2eoicLsKJdlvykzheKv7P8uC6ezzV7Cy93vcOG_aJ-mo3P6qphgnvoDe-I28HxUkr_JtAiaMbhgUG3tFowGNKpBOdMMUwiEgOxsuCX5lpx-Orr-_RyJuSweEzuGeiIw4Pd4dOkAiSShKcj5RefIeKFQkNJHugoZ1MKESSwegcKRXNu_hi53EjgRKVn3O4tqlXAz-_AtquEuYRjnpUVYjw6bIW6G"/>
-<div class="absolute inset-0 flex items-center justify-center p-12 text-center">
-<div>
-<h2 class="text-5xl font-headline font-black text-white uppercase tracking-tighter">The Architecture of Power</h2>
-<p class="mt-4 text-on-surface-variant max-w-xl mx-auto">Not all EVs are created equal. Use the matrix below to distinguish between powertrain architectures.</p>
-</div>
-</div>
-</div>
-<!-- Interactive Tabs -->
-<div class="bg-surface-container-low rounded-2xl p-4 md:p-8" data-tabs="ev-types">
-<div class="flex flex-wrap gap-2 mb-8 border-b border-outline-variant/15 pb-4">
-<button class="px-6 py-2 bg-primary-container text-white text-xs font-bold tracking-widest uppercase rounded">BEV</button>
-<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold tracking-widest uppercase rounded">HEV</button>
-<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold tracking-widest uppercase rounded">PHEV</button>
-<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold tracking-widest uppercase rounded">EREV</button>
-<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold tracking-widest uppercase rounded">FCEV</button>
-<button class="px-6 py-2 bg-surface-container-high text-on-surface-variant text-xs font-bold tracking-widest uppercase rounded">ICE</button>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-<div>
-<h3 class="text-3xl font-headline font-bold text-white mb-4">Battery Electric Vehicle (BEV)</h3>
-<p class="text-on-surface-variant leading-relaxed">
-                                100% electric. No combustion engine. These vehicles rely entirely on massive high-voltage battery packs and one or more electric motors. They represent the highest energy density hazard in the fleet.
-                            </p>
-<ul class="mt-6 space-y-3">
-<li class="flex items-center gap-3 text-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> Zero Tailpipe Emissions</li>
-<li class="flex items-center gap-3 text-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> Massive HV Storage (40-100kWh+)</li>
-<li class="flex items-center gap-3 text-sm text-on-surface"><span class="material-symbols-outlined text-primary text-sm">check_circle</span> Regenerative Braking System</li>
+<h4 class="font-headline text-2xl font-bold mb-4">Physical Hazards</h4>
+<p class="text-on-surface-variant leading-relaxed mb-6">Physical hazards are environmental factors that can cause harm to a worker even without touching them. They are common in almost all work settings.</p>
+<ul class="space-y-3">
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm">circle</span> Noise pollution</li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm">circle</span> Radiation exposure</li>
+<li class="flex items-center gap-3"><span class="material-symbols-outlined text-secondary text-sm">circle</span> Temperature extremes</li>
 </ul>
 </div>
-<div class="rounded-xl overflow-hidden border border-outline-variant/15">
-<img class="w-full h-full object-cover" data-alt="technical 3D cutaway illustration of a battery electric vehicle chassis showing large floor-mounted battery pack and electric motor units" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvDXyGPzNWQBrsw6ntl1aN80fvjRzsxAyvVZq8xVfIgesU2tBLf4ktBeBJm9qFoddb9HtEH9lGG8udv1RifHdwRm1MpZhCyWyJzF2VDrS7BzrV7WoNEx3cKlQwtKKXQ9uVAjmVNPqc05XUbq8yOvQF6civcxBU2Ap_lnI_4f24pO8iPaARiMndKFlsK8CXhStWdfPF_SXPu88UwCARoXQUXs41S-JxrqOn8ZJlph5uVySHI-OacO5lzPLaoXauzznSbuW2dSrYH1KL"/>
-</div>
+<img alt="Industrial site" class="rounded-2xl" data-alt="construction worker in high visibility vest wearing protective ear muffs and hard hat in a sunlit industrial zone" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrzqbPcfb7dzJv3Y2pHidsYUbamWAAlzyQpnLycn9794r3pD360aWiBB1-YDWa_vmY9fU91ny1n7UkyuBw_1GQyLl5vSSo0RZZCk_osulw_ZeQE7wQZfxANwS73NEU1OGDrQsD85gWOqPVkmFphqDsJhkx8EbNpGI6QjuiTVbQ3JsrmYxxPOgz3Orja35JH9Yfl0OTEvUG4wOuBo9tAaSgm_kesxM6XcTGQvAudPK1AH9pdcniyUq2pTFBRCeGQCorSK0Pgk4RJBtD"/>
 </div>
 </div>
 </div>
 </section>
-<!-- 8. Quiz -->
-<section class="py-24 bg-surface-container-highest">
-<div class="max-w-3xl mx-auto px-8">
-<div class="text-center mb-12">
-<span class="material-symbols-outlined text-5xl text-primary mb-4">quiz</span>
-<h2 class="text-3xl font-headline font-bold text-white">Knowledge Check 01</h2>
-<p class="text-on-surface-variant">Identify the vehicle architecture based on the visual signal.</p>
+<!-- 8. Bento Grid -->
+<section class="py-32 px-8 max-w-7xl mx-auto" data-component-type="bento">
+<h2 class="font-headline text-4xl font-bold mb-16">Recognising Hazards in Your Environment</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+<div class="md:col-span-2 md:row-span-2 glass-card rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group">
+<img alt="" class="absolute inset-0 object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" data-alt="point of view shot walking through a modern clean clinical laboratory with glowing scientific equipment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc3UghuuF93axqtLx_nMPkb5tJHmXlLOshYLQ_oBhbp_YRNlHJhYskkMmAgpjBH7IvAoP3Yze2ePgPNoMzvKeN99SeLI3_-j2r_O9ogFURb4f7FgsTHsDRWTXqO1MB9IUOXBjjHcPFVT0yusINDGu0gDPuQ0DH9kZNxSBcABstyJ4tAujViBk_HDVDLZ5euBWQQawmQL3UQjvxRi6jWvaMwm480tYJcesIR2rt04XOzh4PtKfSHKK4l_6sP0fR3XEbZ3W_j2Ks08mE"/>
+<div class="relative z-10">
+<span class="material-symbols-outlined text-secondary text-4xl mb-4">directions_walk</span>
+<h4 class="font-headline text-2xl font-bold mb-2">Walk the Floor</h4>
+<p class="text-on-surface-variant">Perform regular visual inspections to identify visible risks before they escalate.</p>
 </div>
-<div class="bg-surface-container-low rounded-2xl p-10 shadow-2xl border border-outline-variant/20" data-quiz="ev-identification">
-<h4 class="text-xl font-bold text-white mb-8">If a vehicle features a green flash on the left side of its license plate, what is it most likely to be?</h4>
+</div>
+<div class="md:col-span-2 glass-card rounded-3xl p-8 flex items-center gap-8">
+<div class="bg-secondary-container p-4 rounded-2xl">
+<span class="material-symbols-outlined text-secondary text-4xl">hearing</span>
+</div>
+<div>
+<h4 class="font-headline text-xl font-bold mb-1">Listen for Warnings</h4>
+<p class="text-on-surface-variant">Identify abnormal mechanical sounds or alarm signals immediately.</p>
+</div>
+</div>
+<div class="glass-card rounded-3xl p-8 flex flex-col justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4">analytics</span>
+<h4 class="font-headline text-lg font-bold mb-1">Check Logs</h4>
+<p class="text-sm text-on-surface-variant">Review incident history.</p>
+</div>
+<div class="glass-card rounded-3xl p-8 flex flex-col justify-center">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4">forum</span>
+<h4 class="font-headline text-lg font-bold mb-1">Team Input</h4>
+<p class="text-sm text-on-surface-variant">Consult with specialists.</p>
+</div>
+</div>
+</section>
+<!-- 9. Full-Bleed -->
+<section class="relative h-[614px] flex items-center justify-center overflow-hidden" data-component-type="full-bleed">
+<img alt="" class="absolute inset-0 w-full h-full object-cover" data-alt="dramatic wide shot of a glowing emergency exit sign in a dark smoky hallway with cool cyan and deep blue lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAuUy80syX_AMDshVZ03nCzD0ItpsgyWX0oy6K8X-iZR1y7RscOG5ecuLGr4Uf5-fJpYWZRoPGoOSFlgnnM3HhPFDG9c5ufwF5AJbz9Dw_jlrB69yTuptmdxN9OzHi2J2LPBTbZ4_ndo9lG8aT_zQj1ZKlZhoeCkcTfNq2Lt89GKYh4Pb5q5E3LELcld0kODuUakS_UFYYjNhBqAlUD4HDDzTpHSjoBTwXhLSYCTdb_qxz-u8qd-Gy6e5tIlj-37nwMnrbmw3VJH3Ki"/>
+<div class="absolute inset-0 bg-background/60 backdrop-blur-sm"></div>
+<div class="relative z-10 text-center max-w-4xl px-8">
+<h2 class="font-headline text-5xl md:text-7xl font-extrabold mb-6">When Seconds Count</h2>
+<p class="text-2xl text-secondary font-medium italic">"Preparation is the only antidote to panic."</p>
+</div>
+</section>
+<!-- 10. Timeline -->
+<section class="py-32 px-8 max-w-4xl mx-auto" data-component-type="timeline">
+<h2 class="font-headline text-4xl font-bold mb-20 text-center">Emergency Response Sequence</h2>
+<div class="relative border-l-2 border-outline-variant ml-4 space-y-16">
+<div class="relative pl-12">
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-secondary shadow-[0_0_10px_rgba(37,216,252,0.5)]"></div>
+<div class="font-headline text-xl font-bold text-secondary mb-2">01. Alert</div>
+<p class="text-on-surface-variant">Immediately sound the alarm and notify emergency services if necessary.</p>
+</div>
+<div class="relative pl-12">
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
+<div class="font-headline text-xl font-bold mb-2">02. Assess</div>
+<p class="text-on-surface-variant">Quickly evaluate the nature and scale of the emergency without placing yourself in danger.</p>
+</div>
+<div class="relative pl-12">
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
+<div class="font-headline text-xl font-bold mb-2">03. Act</div>
+<p class="text-on-surface-variant">Implement immediate containment or first-aid measures according to training.</p>
+</div>
+</div>
+</section>
+<!-- 11. Process Flow -->
+<section class="py-24 px-8 bg-surface-container-low" data-component-type="process-flow">
+<div class="max-w-6xl mx-auto">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">Fire Response Decision Tree</h2>
+<div class="flex flex-col md:flex-row items-center justify-center gap-8">
+<div class="glass-card px-8 py-6 rounded-2xl border-secondary/30 text-center w-full max-w-xs">
+<div class="font-bold text-secondary mb-2">START</div>
+<div class="font-headline font-bold">Discover Fire</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="glass-card px-8 py-6 rounded-2xl text-center w-full max-w-xs border-dashed border-outline-variant">
+<div class="font-headline font-bold">Assess Size</div>
+</div>
+<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>
+<div class="glass-card px-8 py-6 rounded-2xl text-center w-full max-w-xs bg-error-container/20">
+<div class="font-bold text-error mb-2">ACTION</div>
+<div class="font-headline font-bold">Evacuate</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 12. MCQ -->
+<section class="py-32 px-8 max-w-3xl mx-auto" data-component-type="mcq" data-quiz="controls">
+<div class="glass-card p-12 rounded-[2rem]">
+<div class="text-secondary font-bold text-sm mb-4">KNOWLEDGE CHECK</div>
+<h3 class="font-headline text-2xl font-bold mb-8">In the Hierarchy of Controls, which method is considered the "Last Line of Defence"?</h3>
 <div class="space-y-4">
-<button class="w-full text-left p-6 bg-surface-container rounded-lg border border-outline-variant/10 hover:border-primary transition-all flex items-center justify-between group" data-choice="0">
-<span>A standard Diesel vehicle (ICE)</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_unchecked</span>
+<div class="group flex items-center p-5 rounded-xl bg-surface-variant/30 hover:bg-surface-variant cursor-pointer transition-all border border-transparent hover:border-secondary/30" data-choice="a">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary"></div>
+<span>Engineering Controls</span>
+</div>
+<div class="group flex items-center p-5 rounded-xl bg-surface-variant/30 hover:bg-surface-variant cursor-pointer transition-all border border-transparent hover:border-secondary/30" data-choice="b">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary"></div>
+<span>Substitution</span>
+</div>
+<div class="group flex items-center p-5 rounded-xl bg-secondary-container/20 border border-secondary/50" data-choice="c">
+<div class="w-6 h-6 rounded-full bg-secondary border-2 border-secondary mr-4 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-secondary text-sm font-bold">check</span>
+</div>
+<span class="font-bold text-secondary">Personal Protective Equipment (PPE)</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 13. Terminology -->
+<section class="py-24 px-8 max-w-6xl mx-auto" data-component-type="key-term" id="glossary">
+<h2 class="font-headline text-3xl font-bold mb-16">Key Terminology</h2>
+<div class="grid md:grid-cols-3 gap-8">
+<div class="glass-card p-8 rounded-2xl">
+<div class="text-secondary font-headline font-bold text-xl mb-3">Hazard</div>
+<p class="text-on-surface-variant text-sm">A potential source of harm or adverse health effect on a person or persons.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl">
+<div class="text-secondary font-headline font-bold text-xl mb-3">Risk</div>
+<p class="text-on-surface-variant text-sm">The likelihood that a person may be harmed or suffer adverse health effects if exposed to a hazard.</p>
+</div>
+<div class="glass-card p-8 rounded-2xl">
+<div class="text-secondary font-headline font-bold text-xl mb-3">Near Miss</div>
+<p class="text-on-surface-variant text-sm">An unplanned event that did not result in injury but had the potential to do so.</p>
+</div>
+</div>
+</section>
+<!-- 14. Flashcards -->
+<section class="py-24 px-8 bg-surface-container-low overflow-hidden" data-component-type="flashcard">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">Protocol Flashcards</h2>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-flashcard="">
+<div class="perspective-1000 h-64 group cursor-pointer">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
+<div class="text-center">
+<div class="material-symbols-outlined text-secondary text-4xl mb-4">info</div>
+<div class="font-headline font-bold text-xl">ALARP</div>
+</div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<p class="text-on-secondary-container font-medium">As Low As Reasonably Practicable — reducing risk to the point where cost of further reduction is disproportionate.</p>
+</div>
+</div>
+</div>
+<div class="perspective-1000 h-64 group cursor-pointer">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
+<div class="text-center">
+<div class="material-symbols-outlined text-secondary text-4xl mb-4">local_fire_department</div>
+<div class="font-headline font-bold text-xl">Fire Triangle</div>
+</div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<p class="text-on-secondary-container font-medium">Heat, Fuel, and Oxygen. Removing any one stops the fire.</p>
+</div>
+</div>
+</div>
+<div class="perspective-1000 h-64 group cursor-pointer">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
+<div class="text-center">
+<div class="material-symbols-outlined text-secondary text-4xl mb-4">pan_tool</div>
+<div class="font-headline font-bold text-xl">Mandatory Signs</div>
+</div>
+</div>
+<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<p class="text-on-secondary-container font-medium">Blue circle with white symbols. Indicates a specific action must be taken (e.g. wear goggles).</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 15. Narrative Carousel -->
+<section class="py-32 px-8 max-w-5xl mx-auto" data-carousel="warehouse" data-component-type="narrative">
+<h2 class="font-headline text-3xl font-bold mb-12">The Warehouse Incident</h2>
+<div class="glass-card rounded-[2.5rem] p-12 relative">
+<div class="flex flex-col md:flex-row gap-12 items-center" data-slide="1">
+<img alt="" class="w-full md:w-1/2 h-64 object-cover rounded-2xl" data-alt="unorganized warehouse shelving with boxes leaning precariously and poor lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9ITB6wpOAvIA16nPtvfGsmJTFKWL0MClBgfL3jKlmgr3cEB3hc3veL0ixz8rpb6_9iBh3J-trNUGhNRw_J8E30L-V-BHt6a-1vKfQ0qlUPdwSeKEmNvONYU38svmtXy4EDbNHQ3wK84G7anN_8vPBQ7svbxRzUnOWkFv8JDWFMdN1KlKdP0mDwJo4r0kXHy15Y_uX5spAsGWa0XDMOKMksYRwsZ5Qu0FpNqcopUmsRB3_bUn9aK457D3RF_90sNNaMfQ-3IXP8ha7"/>
+<div class="md:w-1/2">
+<div class="text-secondary font-bold mb-4">SCENE 01 / 05</div>
+<h4 class="font-headline text-2xl font-bold mb-4">The Hazard Noted</h4>
+<p class="text-on-surface-variant">Worker A noticed a spill of hydraulic fluid near Bay 4. Instead of reporting it immediately, they decided to finish their picking run first.</p>
+</div>
+</div>
+<div class="absolute bottom-12 right-12 flex gap-4">
+<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev="">
+<span class="material-symbols-outlined">chevron_left</span>
 </button>
-<button class="w-full text-left p-6 bg-surface-container rounded-lg border border-outline-variant/10 hover:border-primary transition-all flex items-center justify-between group" data-choice="1" data-correct="1">
-<span>A zero-emission vehicle (BEV or FCEV)</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_unchecked</span>
-</button>
-<button class="w-full text-left p-6 bg-surface-container rounded-lg border border-outline-variant/10 hover:border-primary transition-all flex items-center justify-between group" data-choice="2">
-<span>A generic hybrid vehicle (HEV)</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_unchecked</span>
+<button class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next="">
+<span class="material-symbols-outlined">chevron_right</span>
 </button>
 </div>
-<div class="mt-8 pt-8 border-t border-outline-variant/15 flex justify-between items-center">
-<p class="text-xs text-on-surface-variant uppercase tracking-widest">Question 1 of 5</p>
-<button class="px-8 py-3 bg-primary-container text-white font-bold rounded-lg uppercase tracking-widest text-xs">Submit Response</button>
-</div>
-</div>
 </div>
 </section>
-<!-- 9. EV Safety & Hazards -->
-<section class="py-24 px-8" id="safety">
-<div class="max-w-6xl mx-auto">
-<div class="grid grid-cols-1 md:grid-cols-2 gap-16 mb-24">
-<div>
-<h2 class="text-4xl font-headline font-bold text-white mb-6">Legislative Guardrails</h2>
-<p class="text-on-surface-variant leading-relaxed mb-6">
-                            Safety is not a suggestion; it is a legal framework. All operations involving high-voltage vehicles are governed by the <span class="text-white font-bold">Electricity at Work Regulations 1989</span> and <span class="text-white font-bold">HSE INDG 439</span> guidance.
-                        </p>
-<div class="grid grid-cols-2 gap-4">
-<div class="p-6 bg-surface-container-low border-l-2 border-error">
-<p class="text-3xl font-headline font-black text-error mb-1">&gt; 60V DC</p>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">Lethal Voltage Threshold</p>
-</div>
-<div class="p-6 bg-surface-container-low border-l-2 border-error">
-<p class="text-3xl font-headline font-black text-error mb-1">&gt; 30V AC</p>
-<p class="text-[10px] text-on-surface-variant uppercase tracking-widest font-bold">AC Conductivity Danger</p>
-</div>
-</div>
-</div>
-<div>
-<h3 class="text-xs font-black tracking-widest uppercase text-primary mb-6">Workplace Risk Assessment</h3>
-<div class="space-y-4" data-accordion="workplace-risks">
-<div class="bg-surface-container-high p-4 rounded cursor-pointer border border-outline-variant/10">
-<h4 class="font-bold text-sm flex justify-between items-center">Silent Running Hazard <span class="material-symbols-outlined">add</span></h4>
-</div>
-<div class="bg-surface-container-high p-4 rounded cursor-pointer border border-outline-variant/10">
-<h4 class="font-bold text-sm flex justify-between items-center">Battery Electrolyte Spillage <span class="material-symbols-outlined">add</span></h4>
-</div>
-<div class="bg-surface-container-high p-4 rounded cursor-pointer border border-outline-variant/10">
-<h4 class="font-bold text-sm flex justify-between items-center">Thermal Runaway / Fire <span class="material-symbols-outlined">add</span></h4>
-</div>
-<div class="bg-surface-container-high p-4 rounded cursor-pointer border border-outline-variant/10">
-<h4 class="font-bold text-sm flex justify-between items-center">Magnetic Field (EMF) Risks <span class="material-symbols-outlined">add</span></h4>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- 10. Checklist -->
-<section class="py-24 bg-surface-container-low border-y border-outline-variant/10">
-<div class="max-w-4xl mx-auto px-8">
-<h2 class="text-3xl font-headline font-bold text-white mb-12 text-center">HSE Work Categories Check</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-checklist="hse-categories">
-<div class="p-4 bg-background border border-outline-variant/20 rounded-lg flex items-center gap-4">
-<div class="w-6 h-6 border-2 border-primary rounded flex items-center justify-center cursor-pointer"></div>
-<span class="text-sm font-medium">Valeting &amp; Detailing (Non-HV parts)</span>
-</div>
-<div class="p-4 bg-background border border-outline-variant/20 rounded-lg flex items-center gap-4">
-<div class="w-6 h-6 border-2 border-primary rounded flex items-center justify-center cursor-pointer"></div>
-<span class="text-sm font-medium">Mechanical Repair (Non-Electrical)</span>
-</div>
-<div class="p-4 bg-background border border-outline-variant/20 rounded-lg flex items-center gap-4">
-<div class="w-6 h-6 border-2 border-primary rounded flex items-center justify-center cursor-pointer"></div>
-<span class="text-sm font-medium">Work on HV High Voltage Systems</span>
-</div>
-<div class="p-4 bg-background border border-outline-variant/20 rounded-lg flex items-center gap-4">
-<div class="w-6 h-6 border-2 border-primary rounded flex items-center justify-center cursor-pointer"></div>
-<span class="text-sm font-medium">Work on Accident Damaged Vehicles</span>
-</div>
-</div>
-</div>
-</section>
-<!-- 11. Low Risk & Emergencies -->
-<section class="py-24 px-8" id="emergency">
-<div class="max-w-6xl mx-auto">
-<div class="mb-24">
-<h2 class="text-4xl font-headline font-bold text-white mb-12 text-center">Emergency Response Protocols</h2>
-<div class="flex flex-col md:flex-row items-center gap-0">
-<div class="flex-1 bg-surface-container-high p-10 rounded-l-2xl border-y border-l border-outline-variant/10">
-<h4 class="text-xs font-black text-primary tracking-widest uppercase mb-4">Phase 01: Identification</h4>
-<p class="text-sm text-on-surface-variant">Secure the perimeter. Check for 'Silent' ignition status. Ensure handbrake is active.</p>
-</div>
-<div class="w-20 h-20 bg-primary-container text-white flex items-center justify-center rounded-full z-10 shadow-xl border-4 border-background">
-<span class="material-symbols-outlined text-3xl">bolt</span>
-</div>
-<div class="flex-1 bg-surface-container-high p-10 rounded-r-2xl border-y border-r border-outline-variant/10">
-<h4 class="text-xs font-black text-primary tracking-widest uppercase mb-4">Phase 02: Isolation</h4>
-<p class="text-sm text-on-surface-variant">Deploy high-voltage disconnect switch (Service Plug) if trained and equipped.</p>
-</div>
-</div>
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
-<img class="rounded-2xl shadow-2xl grayscale" data-alt="emergency rescue crew wearing specialized high voltage protective gear working around a damaged electric sedan at night with high contrast spotlighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwEHECRfks9niSH4jW52bT5AlGH9SIkp2buf47fLPZHU8An3Rct_Fsl2XpxmL0xzgskDn52qR5Q_SALsGBooOFlb6QmbUphfk1ujS8pz_DcCJMRNzS2eEdYnmczPd4-o9mddipU_Dy5AxCAmebyrw7XpTCGM5mwt8Hqr-YAvZbaUBq9nlG6rwmfq3Xkq4gFZAn6UJN24BBK3uif5cliWZYzd4mU0jz4ET1ITW5TUWKMJLcyEqxohZ5awsXN1fJelMGJDEacXRKHj3W"/>
-<div>
-<h3 class="text-3xl font-headline font-bold text-white mb-6">Severity of Shock</h3>
-<p class="text-on-surface-variant leading-relaxed mb-6">
-                            AC is generally more dangerous than DC because it causes muscle tetany (the "can't let go" effect). However, the DC batteries in EVs can discharge enormous current instantaneously, leading to severe thermal burns and electrolysis of the blood.
-                        </p>
-<div class="p-6 bg-error-container/10 border border-error/20 rounded-lg">
-<p class="text-sm text-error font-bold mb-2 flex items-center gap-2">
-<span class="material-symbols-outlined">warning</span> CRITICAL WARNING
-                            </p>
-<p class="text-xs text-on-surface-variant">Never touch orange cables or damaged battery packs without appropriate Class 0 rated PPE.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- 13. Flashcards -->
-<section class="py-24 bg-surface-container-lowest overflow-hidden">
-<div class="max-w-6xl mx-auto px-8">
-<h2 class="text-3xl font-headline font-bold text-white mb-16 text-center">Risks &amp; Mitigation Matrix</h2>
-<div class="flex flex-wrap justify-center gap-8">
-<!-- Flashcard 1 -->
-<div class="w-64 h-80 perspective group" data-flashcard="thermal-runaway">
-<div class="relative w-full h-full transition-transform duration-500 transform-style-3d group-hover:rotate-y-180">
-<div class="absolute inset-0 backface-hidden bg-surface-container-high rounded-xl p-8 flex flex-col items-center justify-center text-center border border-outline-variant/20">
-<span class="material-symbols-outlined text-primary text-5xl mb-4">local_fire_department</span>
-<h4 class="font-bold text-white uppercase tracking-widest">Thermal Runaway</h4>
-</div>
-<div class="absolute inset-0 backface-hidden bg-primary-container rounded-xl p-8 flex flex-col items-center justify-center text-center rotate-y-180">
-<p class="text-xs font-bold text-on-primary-container uppercase mb-4">MITIGATION</p>
-<p class="text-sm text-on-primary-container leading-relaxed font-medium">Use continuous cooling with water. Isolate vehicle for 48 hours to monitor for reignition.</p>
-</div>
-</div>
-</div>
-<!-- Flashcard 2 -->
-<div class="w-64 h-80 perspective group" data-flashcard="silent-movement">
-<div class="relative w-full h-full transition-transform duration-500 transform-style-3d group-hover:rotate-y-180">
-<div class="absolute inset-0 backface-hidden bg-surface-container-high rounded-xl p-8 flex flex-col items-center justify-center text-center border border-outline-variant/20">
-<span class="material-symbols-outlined text-primary text-5xl mb-4">volume_off</span>
-<h4 class="font-bold text-white uppercase tracking-widest">Silent Movement</h4>
-</div>
-<div class="absolute inset-0 backface-hidden bg-primary-container rounded-xl p-8 flex flex-col items-center justify-center text-center rotate-y-180">
-<p class="text-xs font-bold text-on-primary-container uppercase mb-4">MITIGATION</p>
-<p class="text-sm text-on-primary-container leading-relaxed font-medium">Chock wheels. Verify "OFF" status on cluster. Remote keys must be stored in signal-blocking pouches.</p>
-</div>
-</div>
-</div>
-<!-- Flashcard 3 -->
-<div class="w-64 h-80 perspective group" data-flashcard="arc-flash">
-<div class="relative w-full h-full transition-transform duration-500 transform-style-3d group-hover:rotate-y-180">
-<div class="absolute inset-0 backface-hidden bg-surface-container-high rounded-xl p-8 flex flex-col items-center justify-center text-center border border-outline-variant/20">
-<span class="material-symbols-outlined text-primary text-5xl mb-4">electric_bolt</span>
-<h4 class="font-bold text-white uppercase tracking-widest">Arc Flash</h4>
-</div>
-<div class="absolute inset-0 backface-hidden bg-primary-container rounded-xl p-8 flex flex-col items-center justify-center text-center rotate-y-180">
-<p class="text-xs font-bold text-on-primary-container uppercase mb-4">MITIGATION</p>
-<p class="text-sm text-on-primary-container leading-relaxed font-medium">Maintain a 2m exclusion zone. Use insulated tools and non-conductive safety barriers.</p>
-</div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- 14. Charging Narratives -->
-<section class="py-24 px-8" id="protocols">
-<div class="max-w-6xl mx-auto">
-<h2 class="text-4xl font-headline font-bold text-white mb-12">Charging Infrastructure</h2>
-<div class="relative" data-carousel="charging-types">
-<div class="overflow-hidden rounded-2xl">
-<div class="flex transition-transform duration-700">
-<!-- Home Charging -->
-<div class="min-w-full grid grid-cols-1 md:grid-cols-2 items-stretch bg-surface-container-high">
+<!-- 16. Comparison -->
+<section class="py-24 px-8 max-w-6xl mx-auto" data-component-type="comparison">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">Safety Improvements: Before vs After</h2>
+<div class="grid md:grid-cols-2 gap-px bg-outline-variant/30 rounded-3xl overflow-hidden glass-card">
 <div class="p-12">
-<span class="text-[10px] font-black tracking-[0.4em] text-primary uppercase mb-4 block">Charging Level 01</span>
-<h3 class="text-3xl font-headline font-bold text-white mb-6">Domestic 3-Pin / Wall Box</h3>
-<p class="text-on-surface-variant leading-relaxed">Most EVs are charged at home using either a standard 3-pin domestic plug (slow/trickle) or a dedicated wall box (7kW). These AC systems are the most common interface for users.</p>
-<div class="mt-8 flex gap-4">
-<div class="flex-1 p-4 bg-background rounded">
-<p class="text-xs text-primary font-bold uppercase mb-1">Time (0-80%)</p>
-<p class="text-white">8-20 Hours</p>
+<div class="text-error font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">cancel</span>
+                        LEGACY SETUP
+                    </div>
+<ul class="space-y-4 text-on-surface-variant">
+<li class="flex items-start gap-3">Dim incandescent lighting.</li>
+<li class="flex items-start gap-3">Manual lifting for all crates.</li>
+<li class="flex items-start gap-3">Minimal walkway markings.</li>
+</ul>
 </div>
-<div class="flex-1 p-4 bg-background rounded">
-<p class="text-xs text-primary font-bold uppercase mb-1">Voltage</p>
-<p class="text-white">230V AC</p>
+<div class="p-12 bg-secondary-container/5">
+<div class="text-secondary font-bold mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined">check_circle</span>
+                        CURRENT PROTOCOL
+                    </div>
+<ul class="space-y-4 text-on-surface">
+<li class="flex items-start gap-3">High-lumen LED task lighting.</li>
+<li class="flex items-start gap-3">Assisted hydraulic lift stations.</li>
+<li class="flex items-start gap-3">Reflective high-visibility lanes.</li>
+</ul>
 </div>
 </div>
+</section>
+<!-- 17. Graphic -->
+<section class="py-32 px-8 max-w-7xl mx-auto" data-component-type="graphic">
+<div class="glass-card rounded-[3rem] p-16 text-center">
+<h2 class="font-headline text-3xl font-bold mb-12">Optimal Ergonomic Setup</h2>
+<img alt="Ergonomic Workstation Illustration" class="w-full max-w-4xl mx-auto rounded-2xl shadow-2xl" data-alt="minimalist white desk with ergonomic chair, dual monitors at eye level, and soft natural window light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBO0lIn6dX76gDxfqEBU1RUZPrd6GfwpBOlN9WmzXOLJtVj6Ys01JiXPTRWdSjXXFp1UB-z62SMS-DHyY0SJopz7DEnZEm9y_3xMJPkCddTTNioIfgWlngQyEfzN_Ag8dCShQw1vft6awws2pvRJVocz6Z6pcM89RIidEno2S2xZeOqb8nuhimhf_IlaBDgW4OCfeKHgOePLB_yBAm2TKTHnCsUBHpteYwDowFC8gKVoL0lzLDI9ziZi23iRq_z1O8ShHOjr7TWJx-P"/>
 </div>
-<div class="relative min-h-[300px]">
-<img class="w-full h-full object-cover" data-alt="sleek modern home electric vehicle charging station mounted on a dark wooden textured wall with glowing status lights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFB1kqhJzVloyFZ0N8MNvtEv-K_nxNQJo8vttPFyPpTZPeysxP1oqVx_Urb1c3oGYJqKJYnUdwaU09ptJFj2zm0kbyGOHoaycAAp7IJrydFPICACxmpCwqUaYPUz3Ox38-qWi8Hi8_7v0XBGlj_ZiObFI3LDb8ICF8qP0jCPNCwVDDwLPUQKhQy5Se374q5K1v-nyc5h0qHjQwdE7t1ssXr6kCsawkNb0JxmA-ycUwW2GCbYGK9EoXpBeCwdfayX1e8g0LinCvAEHj"/>
+</section>
+<!-- 18. Checklist -->
+<section class="py-24 px-8 max-w-3xl mx-auto" data-component-type="checklist">
+<div class="glass-card p-12 rounded-3xl" data-checklist="">
+<h2 class="font-headline text-2xl font-bold mb-8">Ergonomic Workstation Checklist</h2>
+<div class="space-y-4">
+<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
+<input class="w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent" type="checkbox"/>
+<span class="text-on-surface-variant">Monitor is at arm's length distance.</span>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
+<input class="w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent" type="checkbox"/>
+<span class="text-on-surface-variant">Feet rest flat on the floor or footrest.</span>
+</label>
+<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
+<input class="w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent" type="checkbox"/>
+<span class="text-on-surface-variant">Backrest supports the lower back curve.</span>
+</label>
 </div>
 </div>
+</section>
+<!-- 19. Data Table -->
+<section class="py-24 px-8 max-w-5xl mx-auto" data-component-type="data-table">
+<h2 class="font-headline text-3xl font-bold mb-12">Incident Classification Matrix</h2>
+<div class="overflow-x-auto glass-card rounded-2xl">
+<table class="w-full text-left">
+<thead class="bg-surface-container-high border-b border-outline-variant">
+<tr>
+<th class="p-6 font-headline font-bold">Level</th>
+<th class="p-6 font-headline font-bold">Severity</th>
+<th class="p-6 font-headline font-bold">Reporting Requirement</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/30">
+<tr>
+<td class="p-6">L1</td>
+<td class="p-6">Negligible</td>
+<td class="p-6 text-on-surface-variant">Internal Log</td>
+</tr>
+<tr>
+<td class="p-6">L3</td>
+<td class="p-6">Moderate</td>
+<td class="p-6 text-on-surface-variant">Manager &amp; Safety Lead</td>
+</tr>
+<tr>
+<td class="p-6">L5</td>
+<td class="p-6 text-error font-bold">Catastrophic</td>
+<td class="p-6 text-on-surface-variant">Immediate Board Notification</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 20. Pullquote -->
+<section class="py-32 px-8 text-center max-w-4xl mx-auto" data-component-type="pullquote">
+<span class="material-symbols-outlined text-secondary text-6xl mb-8">format_quote</span>
+<blockquote class="font-headline text-3xl md:text-4xl font-bold leading-tight mb-8">
+                "If you think safety is expensive, try an accident."
+            </blockquote>
+<cite class="text-secondary font-bold uppercase tracking-widest text-sm">— Sir Brian Appleton</cite>
+</section>
+<!-- 21. Personal Commitment -->
+<section class="py-24 px-8 bg-surface-container-low" data-component-type="textinput">
+<div class="max-w-3xl mx-auto glass-card p-12 rounded-[2rem]">
+<h2 class="font-headline text-3xl font-bold mb-8">Personal Commitment</h2>
+<div class="space-y-8">
+<div>
+<label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">One hazard I will check tomorrow</label>
+<input class="w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary" placeholder="e.g. Chemical storage ventilation" type="text"/>
+</div>
+<div>
+<label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">A new safety habit for this week</label>
+<input class="w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary" placeholder="e.g. Testing emergency lighting" type="text"/>
+</div>
+<button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary-container w-full">Save Commitment</button>
 </div>
 </div>
-<div class="absolute -bottom-16 left-1/2 -translate-x-1/2 flex gap-4">
-<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary transition-all"><span class="material-symbols-outlined">chevron_left</span></button>
-<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-primary transition-all"><span class="material-symbols-outlined">chevron_right</span></button>
+</section>
+<!-- 22. Branching Scenario -->
+<section class="py-32 px-8 max-w-4xl mx-auto" data-component-type="branching">
+<div class="glass-card p-12 rounded-3xl border-l-8 border-secondary">
+<h3 class="font-headline text-2xl font-bold mb-6">What Would You Do?</h3>
+<p class="text-lg text-on-surface-variant mb-10 italic">"You discover an unidentified chemical leaking from a drum in the delivery bay. No one else is around."</p>
+<div class="grid gap-4">
+<button class="p-6 rounded-2xl bg-surface-variant/30 text-left hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">
+<div class="font-bold mb-1">Option A: Contain it</div>
+<div class="text-sm text-on-surface-variant">Find some absorbent rags and stop the spread.</div>
+</button>
+<button class="p-6 rounded-2xl bg-surface-variant/30 text-left hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">
+<div class="font-bold mb-1 text-secondary">Option B: Isolate &amp; Report</div>
+<div class="text-sm text-on-surface-variant">Cordon off the area, consult the SDS, and call the hazardous response team.</div>
+</button>
+</div>
+</div>
+</section>
+<!-- 23. Media (Video) -->
+<section class="py-24 px-8 max-w-5xl mx-auto" data-component-type="media">
+<div class="aspect-video bg-surface-container-highest rounded-[2.5rem] flex flex-items-center justify-center relative overflow-hidden group">
+<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-40" data-alt="blurred motion of people walking through emergency exit during a safety drill in a large industrial plant" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBrj5NUQlM_8bumB7f3neZFm1Dp4yWQMTiChDUAQwNliRpxep7UupOMCHqO5_i0joJAFvXtj02Tsp8YyJWcFJzbiaBVP4-GGb6hkq3EbCT6gATzSBHupB2kF372LPUZlH_MZhma3Y7X64MrsUBHPK0rRJ9ftR2jc8zg1H2YuaFan6Val585YHp9nMmupprYT394CCvDfWVBRFaabH_Z2DsFwVutsO4hFJxd7ekHz_9_n8C4pCCcKrromOAbpUBzoqbgRN--3bIew0vR"/>
+<button class="relative z-10 w-24 h-24 rounded-full bg-secondary flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-on-secondary text-5xl" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</button>
+</div>
+</section>
+<!-- 24. Video Transcript -->
+<section class="py-12 px-8 max-w-5xl mx-auto" data-component-type="video-transcript">
+<details class="glass-card rounded-2xl">
+<summary class="p-6 flex justify-between items-center cursor-pointer font-bold">
+<span>Video Transcript: The PASS Technique</span>
+<span class="material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-8 border-t border-outline-variant/20 text-on-surface-variant leading-relaxed text-sm">
+                    "When using a fire extinguisher, remember the acronym PASS. P: Pull the pin. A: Aim at the base of the fire. S: Squeeze the trigger. S: Sweep from side to side..."
+                </div>
+</details>
+</section>
+<!-- 25. Labeled Image -->
+<section class="py-32 px-8 max-w-5xl mx-auto text-center" data-component-type="labeled-image">
+<h2 class="font-headline text-3xl font-bold mb-16">Fire Extinguisher Anatomy</h2>
+<div class="relative inline-block glass-card p-4 rounded-3xl">
+<img alt="Fire Extinguisher" class="max-w-2xl rounded-2xl" data-alt="studio product shot of a red fire extinguisher against a dark minimalist background with professional lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB-7xAdHP9FeuBZIPe3nlbDUqxOf8oiwHo1_dYEfBU_HlDQbDax6OEFG-_j87nktVZmxU_eBY_xGCKbgpxDJH2X-TWpls79AKb1qhGBPrRh3PxBTqgpbjw697eCu8nKFhNGiAxsqtuHnN-s7cu82VDs_FvOEy0QImRnaFMv8jTpo2q4FoPvAuiy45dKZL6fnwuWtDm09m2oaATmoqlFgWakrL7lf99hg3jSrV_vtnzpBbBJ1SwwOp4CvnUm4Rv_2NhXCrkcIz_vJvRj"/>
+<!-- Markers -->
+<div class="absolute top-1/4 left-1/3 group">
+<div class="w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-on-secondary font-bold cursor-pointer glow-cyan">1</div>
+<div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-surface-bright p-3 rounded-lg text-xs whitespace-nowrap shadow-xl transition-opacity">Operating Lever</div>
+</div>
+<div class="absolute top-1/2 left-2/3 group">
+<div class="w-8 h-8 rounded-full bg-secondary/80 flex items-center justify-center text-on-secondary font-bold cursor-pointer glow-cyan">2</div>
+<div class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-surface-bright p-3 rounded-lg text-xs whitespace-nowrap shadow-xl transition-opacity">Discharge Hose</div>
+</div>
+</div>
+</section>
+<!-- 26. Image Gallery -->
+<section class="py-24 px-8 bg-surface-container-low" data-component-type="image-gallery">
+<div class="max-w-7xl mx-auto">
+<h2 class="font-headline text-3xl font-bold mb-16">Essential Equipment Gallery</h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+<div class="glass-card rounded-2xl overflow-hidden group">
+<img alt="" class="h-64 w-full object-cover group-hover:scale-105 transition-transform" data-alt="close up of a yellow industrial hard hat on a concrete surface" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOhltoANOoQvHia1L3g5vgzhbnKBcqugJ1MRUoAG9CefdqT3TM1klPfWijsoRAWB8zsNfATGsOn6hb6iGLPqyQOa-xJOGntXh-1g33BahKADT7y1FFrUUGd8Lzuh6nE3CWdkX44Q2G67SyTQwAZzTFQ3h7iB7pV-6aQIMnjUujCjyI1RnRO-xO8oQYqCAkZ1A3MTZ30kdRRyO2wSZ3P2hBo8fglQzWav3EPwr2Ng0Y8e6qD9y9gDYSqmUJzHz7ugBacsecCySl5Hpc"/>
+<div class="p-4 text-center font-bold">Hard Hat</div>
+</div>
+<div class="glass-card rounded-2xl overflow-hidden group">
+<img alt="" class="h-64 w-full object-cover group-hover:scale-105 transition-transform" data-alt="professional clear safety goggles resting on a technical drawing" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDlFku9aAnV0a8HWV_jyAGCMwk9MeHB7LKdtZLn833hVy0vVwLKvx_Eh4pp9PGGwJP7rNK32bv-23CtBy1XxSQhNTB4bgmpf9S966Vi98m25Bbs0NaXbZ5dhMESInJa8P6UOBSXf5Ng9tcLVeUc5B9mr1cTDu-nS3hx-hlVZ9PgDkMQ5biOIVR1io8psIpFXGjvSCrPwx6kCu2FPlXexwrEC1cdKh51m02BI9z-mRiopBDYDt_xYYQOaDiTU7NIrC3L6qCrZJizmj5v"/>
+<div class="p-4 text-center font-bold">Safety Goggles</div>
+</div>
+<div class="glass-card rounded-2xl overflow-hidden group">
+<img alt="" class="h-64 w-full object-cover group-hover:scale-105 transition-transform" data-alt="high visibility orange safety vest hanging on a metal rack" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-eZznDk-1toPrJHHsylF62t58okcfZB8i4nh7Y2oYY1HK4Tcbxmb8PUtXe7C7hm03YklBB5iFWNyW140JapeoNIPAdXMCUWa-3scYtjyjze8fLGX_ByP8EeR01y67M6t-YPi4sJrgH8pPE3enyuySTevC1UJvbqq-hgypizMbuq-Df_6T-3JApr-IvKof5a-PPl4YQSGa_tsJ5bgMFqct-xBHPOeNki__kJ5Xq0AYZWI9Bnzkq6VxvIPohduP5E-QEocl-jj6pYp6"/>
+<div class="p-4 text-center font-bold">Hi-Vis Vest</div>
+</div>
+<div class="glass-card rounded-2xl overflow-hidden group">
+<img alt="" class="h-64 w-full object-cover group-hover:scale-105 transition-transform" data-alt="heavy duty ear protection muffs against a neutral industrial background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAU9Kxlysu_-Y2K9Cm07XbaKW6IgG943noyIJAgk7bEPe2O17a2oTHgW2lWjLLPEXbvRgtdihWvc0mMRQvOMtduGgXVLl2DCiYxEebV2vVy4KBpKJVMNotiJOYDlgdH5Io0HFukyvI4XqjH-3hV3g6lURhdA_AsFor1YcffH5YtseqU6HawiFszcjVqp_oQlJhuCnABg3m3hLlOinoWhy3Ce0sYemTsC01OIp-eMmlI_3QaMEQl1Tz8YKnKqFxPYa7S8658XiATHKmF"/>
+<div class="p-4 text-center font-bold">Ear Defenders</div>
 </div>
 </div>
 </div>
 </section>
-<!-- 15. Glossary & Completion -->
-<section class="py-24 px-8 bg-surface-container-low" id="certification">
-<div class="max-w-4xl mx-auto">
-<h2 class="text-xs font-black tracking-widest uppercase text-primary mb-8 text-center">Technical Glossary</h2>
-<div class="space-y-2 mb-24" data-accordion="glossary">
-<div class="p-6 bg-surface-container hover:bg-surface-container-high transition-colors flex justify-between items-center group cursor-pointer border-b border-outline-variant/10">
-<span class="font-bold text-white">Regenerative Braking</span>
-<span class="material-symbols-outlined">keyboard_arrow_down</span>
-</div>
-<div class="p-6 bg-surface-container hover:bg-surface-container-high transition-colors flex justify-between items-center group cursor-pointer border-b border-outline-variant/10">
-<span class="font-bold text-white">Thermal Runaway</span>
-<span class="material-symbols-outlined">keyboard_arrow_down</span>
-</div>
-<div class="p-6 bg-surface-container hover:bg-surface-container-high transition-colors flex justify-between items-center group cursor-pointer">
-<span class="font-bold text-white">Inverter / Converter</span>
-<span class="material-symbols-outlined">keyboard_arrow_down</span>
+<!-- 27. Final MCQ -->
+<section class="py-32 px-8 max-w-3xl mx-auto" data-component-type="mcq">
+<div class="glass-card p-12 rounded-[2rem] border-2 border-secondary/20">
+<h3 class="font-headline text-2xl font-bold mb-8">What is the first step when discovering a chemical spill of unknown origin?</h3>
+<div class="space-y-4">
+<button class="w-full text-left p-6 rounded-xl bg-surface-variant/30 hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">A. Clean it up with water</button>
+<button class="w-full text-left p-6 rounded-xl bg-secondary-container/20 border border-secondary/50 font-bold text-secondary">B. Evacuate and isolate the area</button>
+<button class="w-full text-left p-6 rounded-xl bg-surface-variant/30 hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">C. Identify it by smell</button>
 </div>
 </div>
-<div class="bg-gradient-to-br from-[#0099ff] to-[#6c00ae] p-1 rounded-2xl">
-<div class="bg-background rounded-[calc(1rem-4px)] p-12 text-center">
-<span class="material-symbols-outlined text-6xl text-primary mb-6" style="font-variation-settings: 'FILL' 1;">verified</span>
-<h2 class="text-4xl font-headline font-bold text-white mb-4">Module Complete</h2>
-<p class="text-on-surface-variant max-w-xl mx-auto mb-10">You have finalized the Awareness &amp; Identification phase. Your status as a Technical Operator has been updated in the Sentinel network.</p>
-<button class="px-10 py-4 bg-primary text-on-primary font-black uppercase tracking-widest text-sm rounded shadow-[0_0_30px_rgba(0,153,255,0.3)] hover:scale-105 transition-all">Generate Certificate</button>
+</section>
+<!-- 28. Congratulations -->
+<section class="py-40 px-8 text-center bg-gradient-to-b from-transparent to-secondary-container/10" data-component-type="text" id="progress">
+<div class="max-w-2xl mx-auto">
+<div class="w-24 h-24 rounded-full bg-secondary/20 flex items-center justify-center mx-auto mb-10">
+<span class="material-symbols-outlined text-secondary text-5xl" style="font-variation-settings: 'FILL' 1;">stars</span>
 </div>
+<h2 class="font-headline text-5xl font-bold mb-6">Course Complete</h2>
+<p class="text-xl text-on-surface-variant leading-relaxed">
+                    You have successfully completed the Workplace Safety Fundamentals module. Your commitment to safety ensures a stronger, more resilient workplace.
+                </p>
+<div class="mt-12 flex justify-center gap-4">
+<button class="btn-primary px-10 py-4 rounded-full font-bold text-on-primary-container">Download Certificate</button>
 </div>
 </div>
 </section>
 </main>
 <!-- Footer -->
-<footer class="w-full py-12 border-t border-[#3f4753]/15 bg-[#160820] flex flex-col items-center gap-6 px-4">
-<div class="flex gap-8">
-<a class="font-label text-[10px] uppercase tracking-[0.1em] text-[#bfc7d5]/60 hover:text-[#0099ff] transition-all" href="#">Glossary</a>
-<a class="font-label text-[10px] uppercase tracking-[0.1em] text-[#bfc7d5]/60 hover:text-[#0099ff] transition-all" href="#">Technical Specs</a>
-<a class="font-label text-[10px] uppercase tracking-[0.1em] text-[#bfc7d5]/60 hover:text-[#0099ff] transition-all" href="#">Support</a>
-<a class="font-label text-[10px] uppercase tracking-[0.1em] text-[#bfc7d5]/60 hover:text-[#0099ff] transition-all" href="#">Privacy Policy</a>
+<footer class="bg-[#0b0f10] mt-24 py-12 px-8 border-t border-outline-variant/10">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+<div class="text-lg font-headline font-bold text-on-background">The Ethereal Archive.</div>
+<div class="flex gap-8 text-sm font-medium text-on-surface-variant">
+<a class="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="hover:text-primary transition-colors" href="#">Help Center</a>
+<a class="hover:text-primary transition-colors" href="#">Accessibility</a>
 </div>
-<p class="font-label text-[10px] uppercase tracking-[0.1em] text-[#bfc7d5]/60">© 2024 DIGITAL SENTINEL COMPLIANCE. ALL RIGHTS RESERVED.</p>
+<p class="text-sm font-medium text-on-surface-variant opacity-60">© 2024 Workplace Safety Fundamentals.</p>
+</div>
 </footer>
-<!-- CSS Perspective and Flip styles -->
-<style>
-        .perspective {
-            perspective: 1000px;
-        }
-        .backface-hidden {
-            backface-visibility: hidden;
-            -webkit-backface-visibility: hidden;
-        }
-        .transform-style-3d {
-            transform-style: preserve-3d;
-        }
-        .rotate-y-180 {
-            transform: rotateY(180deg);
-        }
-    </style>
 </body></html>

@@ -1,18 +1,22 @@
 #!/usr/bin/env node
 /**
- * V4 Image Generator — Stitch-Informed
+ * V5 Image Generator — Design-Token-Informed
  *
- * Reads course-layout.json AND stitch-course-raw.html to generate images
+ * Reads course-layout.json AND design-tokens.json to generate images
  * that fit the actual designed page. Runs AFTER Stitch, not in parallel.
  *
+ * V5 upgrade: Reads from design-tokens.json (extracted by generate-course-html.js)
+ * instead of parsing raw Stitch HTML. Falls back to raw HTML if tokens unavailable.
+ *
  * The image prompts from course-layout.json describe WHAT to show (subject).
- * The Stitch design analysis determines HOW it should look (treatment).
+ * The Stitch design tokens determine HOW it should look (treatment).
  *
  * Usage:
  *   node v4/scripts/generate-images.js
  *
  * Input:  v4/output/course-layout.json  (content subjects)
- *         v4/output/stitch-course-raw.html  (design treatment source)
+ *         v4/output/design-tokens.json   (V5 — extracted design tokens)
+ *         v4/output/stitch-course-raw.html  (fallback design treatment source)
  *         v4/output/brand-profile.json  (fallback if no Stitch output)
  * Output: v4/output/images/*.jpg + updated course-layout.json
  */
@@ -29,6 +33,7 @@ const HF_TOKEN = process.env.HF_TOKEN || '';
 const OUTPUT_DIR = path.resolve('v4/output/images');
 const LAYOUT_PATH = path.resolve('v4/output/course-layout.json');
 const BRAND_PATH = path.resolve('v4/output/brand-profile.json');
+const TOKENS_PATH = path.resolve('v4/output/design-tokens.json');
 const STITCH_PATH = path.resolve('v4/output/stitch-course-raw.html');
 
 const DELAY_MS = 3000;
@@ -53,8 +58,53 @@ function getDimensions(componentType) {
   return DIMENSIONS[componentType] || DIMENSIONS.default;
 }
 
+// ─── Design Token Analysis (V5) ──────────────────────────────────────
+// Reads from extracted design-tokens.json for cleaner, more reliable analysis
+function analyseDesignTokens(tokens) {
+  const design = {
+    colourTemperature: 'neutral',
+    lightingMood: 'balanced',
+    styleRegister: 'professional',
+    dominantTones: [],
+    isDark: tokens.isDark || false,
+  };
+
+  // Theme-based lighting
+  if (tokens.isDark) {
+    const bgColor = tokens.colors?.background || '';
+    const lum = bgColor ? perceivedLuminance(bgColor) : 0.1;
+    design.lightingMood = lum < 0.15 ? 'moody' : 'balanced';
+  } else {
+    design.lightingMood = 'bright';
+  }
+
+  // Colour temperature from primary/secondary
+  const primary = tokens.colors?.primary;
+  const secondary = tokens.colors?.secondary;
+  const tones = [];
+  if (primary) { tones.push(primary); design.colourTemperature = getColourTemperature(primary); }
+  if (secondary) {
+    tones.push(secondary);
+    const temp2 = getColourTemperature(secondary);
+    if (design.colourTemperature !== temp2 && temp2 !== 'neutral') {
+      design.colourTemperature = temp2;
+    }
+  }
+  design.dominantTones = tones;
+
+  // Style register from border radius and glass effects
+  const hasSmallRadius = tokens.borderRadius?.DEFAULT && parseFloat(tokens.borderRadius.DEFAULT) < 0.2;
+  const hasGlass = tokens.tailwindConfig && /glass|blur|backdrop/i.test(tokens.tailwindConfig);
+
+  if (hasGlass) design.styleRegister = 'creative';
+  else if (hasSmallRadius) design.styleRegister = 'editorial';
+  else design.styleRegister = 'professional';
+
+  return design;
+}
+
 // ─── Stitch Design Analysis ──────────────────────────────────────────
-// Extracts design treatment from Stitch's actual HTML output
+// Extracts design treatment from Stitch's actual HTML output (V4 fallback)
 function analyseStitchDesign(stitchHtml) {
   const design = {
     colourTemperature: 'neutral',  // warm, cool, neutral
@@ -257,11 +307,20 @@ async function main() {
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
 
   // Analyse Stitch design for visual treatment
+  // V5: Try design-tokens.json first, then fall back to raw HTML, then brand profile
   let design;
-  if (fs.existsSync(STITCH_PATH)) {
+  if (fs.existsSync(TOKENS_PATH)) {
+    const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+    console.log('Using design-tokens.json for image treatment (V5):');
+    design = analyseDesignTokens(tokens);
+    console.log(`  Colour temperature: ${design.colourTemperature}`);
+    console.log(`  Lighting mood: ${design.lightingMood}`);
+    console.log(`  Style register: ${design.styleRegister}`);
+    console.log(`  Theme: ${design.isDark ? 'dark' : 'light'}`);
+  } else if (fs.existsSync(STITCH_PATH)) {
     const stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
     design = analyseStitchDesign(stitchHtml);
-    console.log('Stitch design analysis:');
+    console.log('Using stitch-course-raw.html for image treatment (fallback):');
     console.log(`  Colour temperature: ${design.colourTemperature}`);
     console.log(`  Lighting mood: ${design.lightingMood}`);
     console.log(`  Style register: ${design.styleRegister}`);
@@ -273,7 +332,7 @@ async function main() {
     if (fs.existsSync(BRAND_PATH)) {
       brand = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
     }
-    const isDark = brand?.style?.theme === 'dark';
+    const isDark = brand?.colors?.isDark || brand?.style?.theme === 'dark';
     design = {
       colourTemperature: 'neutral',
       lightingMood: isDark ? 'moody' : 'bright',
