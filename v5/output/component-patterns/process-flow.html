@@ -1,26 +1,17 @@
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="process-flow">
-<div class="max-w-6xl mx-auto text-center">
-<h2 class="font-headline text-4xl font-bold mb-16">Fire Response Decision Tree</h2>
-<div class="flex flex-col items-center gap-10">
-<div class="bg-white p-8 rounded-xl shadow-lg border-2 border-primary w-full max-w-sm">
-<p class="font-bold text-lg">Did you discover a fire?</p>
+<div class="bg-surface-container/60 p-12 rounded-lg border-l-4 border-error" data-component-type="process-flow">
+<h3 class="text-2xl font-headline font-bold text-white mb-8 uppercase tracking-tighter">Fire Response Tree</h3>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="bg-surface-bright w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">DIS</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Discover Fire</div>
 </div>
-<div class="flex gap-20">
-<div class="flex flex-col items-center gap-6">
-<span class="material-symbols-outlined text-4xl text-primary" data-icon="south_west">south_west</span>
-<div class="bg-white p-6 rounded-xl shadow-md w-48">
-<p class="text-sm font-bold text-primary">Small &amp; Contained</p>
-<p class="text-xs mt-2">Attempt PASS technique if safe.</p>
+<div class="flex items-center gap-4">
+<div class="bg-surface-bright w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">ALA</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Sound Alarm</div>
 </div>
-</div>
-<div class="flex flex-col items-center gap-6">
-<span class="material-symbols-outlined text-4xl text-error" data-icon="south_east">south_east</span>
-<div class="bg-white p-6 rounded-xl shadow-md w-48">
-<p class="text-sm font-bold text-error">Large or Spreading</p>
-<p class="text-xs mt-2">Evacuate immediately.</p>
+<div class="flex items-center gap-4">
+<div class="bg-error/20 text-error w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">EVA</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Evacuate &amp; Report</div>
 </div>
 </div>
 </div>
-</div>
-</div>
-</section>

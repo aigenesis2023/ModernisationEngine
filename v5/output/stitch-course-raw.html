@@ -1,728 +1,625 @@
 <!DOCTYPE html>
 
-<html class="scroll-smooth" lang="en"><head>
+<html class="dark" lang="en"><head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workplace Safety Fundamentals | Kinetic Architect Systems</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@300;400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 48;
-        }
-        details summary::-webkit-details-marker { display:none; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
         tailwind.config = {
-          darkMode: "class",
-          theme: {
-            extend: {
-              colors: {
-                "primary-container": "#7c3aed",
-                "secondary-fixed-dim": "#bac5f0",
-                "surface-container": "#e9edff",
-                "on-secondary-fixed-variant": "#3a456a",
-                "surface-tint": "#732ee4",
-                "on-tertiary-container": "#ffdce9",
-                "tertiary-fixed-dim": "#ffafd3",
-                "surface-container-lowest": "#ffffff",
-                "on-secondary-container": "#4f5a80",
-                "tertiary": "#8f1e62",
-                "on-error-container": "#93000a",
-                "on-error": "#ffffff",
-                "inverse-on-surface": "#edf0ff",
-                "secondary": "#525d83",
-                "primary-fixed": "#eaddff",
-                "on-surface-variant": "#4a4455",
-                "primary": "#630ed4",
-                "on-primary-fixed-variant": "#5a00c6",
-                "inverse-surface": "#293040",
-                "background": "#f9f9ff",
-                "on-secondary-fixed": "#0d1a3c",
-                "on-primary": "#ffffff",
-                "on-surface": "#141b2b",
-                "tertiary-fixed": "#ffd8e7",
-                "on-tertiary-fixed-variant": "#85145a",
-                "surface-container-highest": "#dce2f7",
-                "surface-bright": "#f9f9ff",
-                "on-tertiary-fixed": "#3d0026",
-                "on-tertiary": "#ffffff",
-                "error": "#ba1a1a",
-                "on-primary-container": "#ede0ff",
-                "secondary-container": "#c8d3ff",
-                "surface-container-low": "#f1f3ff",
-                "secondary-fixed": "#dbe1ff",
-                "on-secondary": "#ffffff",
-                "tertiary-container": "#ae397b",
-                "outline-variant": "#ccc3d8",
-                "inverse-primary": "#d2bbff",
-                "on-background": "#141b2b",
-                "surface-variant": "#dce2f7",
-                "outline": "#7b7487",
-                "surface-container-high": "#e1e8fd",
-                "primary-fixed-dim": "#d2bbff",
-                "error-container": "#ffdad6",
-                "surface-dim": "#d3daef",
-                "on-primary-fixed": "#25005a",
-                "surface": "#f9f9ff"
-              },
-              fontFamily: {
-                "headline": ["Manrope"],
-                "body": ["Inter"],
-                "label": ["Inter"]
-              },
-              borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary": "#e2e2e2",
+                        "surface-container-lowest": "#000000",
+                        "on-primary-fixed-variant": "#006266",
+                        "inverse-surface": "#fcf8f8",
+                        "secondary-fixed-dim": "#d4d4d4",
+                        "on-error": "#490006",
+                        "on-secondary-fixed": "#3e4040",
+                        "surface-container-highest": "#262626",
+                        "on-secondary-container": "#d0d0d0",
+                        "secondary-fixed": "#e2e2e2",
+                        "surface-variant": "#262626",
+                        "tertiary-container": "#45a6fa",
+                        "tertiary-fixed": "#6bb6ff",
+                        "secondary-dim": "#d4d4d4",
+                        "on-tertiary-fixed": "#00192f",
+                        "background": "#0e0e0e",
+                        "on-tertiary-container": "#002440",
+                        "on-primary-fixed": "#004346",
+                        "primary-fixed": "#00f4fe",
+                        "inverse-primary": "#006a6e",
+                        "tertiary": "#64b3ff",
+                        "surface": "#0e0e0e",
+                        "surface-dim": "#0e0e0e",
+                        "on-secondary": "#505252",
+                        "primary-dim": "#00e5ee",
+                        "on-surface-variant": "#adaaaa",
+                        "on-secondary-fixed-variant": "#5a5c5c",
+                        "on-tertiary-fixed-variant": "#003c65",
+                        "surface-container": "#1a1919",
+                        "error-container": "#9f0519",
+                        "surface-container-high": "#201f1f",
+                        "on-primary-container": "#00575b",
+                        "surface-tint": "#a1faff",
+                        "on-primary": "#006165",
+                        "on-surface": "#ffffff",
+                        "outline-variant": "#494847",
+                        "on-tertiary": "#003053",
+                        "primary": "#a1faff",
+                        "outline": "#777575",
+                        "on-background": "#ffffff",
+                        "secondary-container": "#454747",
+                        "primary-fixed-dim": "#00e5ee",
+                        "tertiary-fixed-dim": "#49a8fc",
+                        "on-error-container": "#ffa8a3",
+                        "surface-bright": "#2c2c2c",
+                        "error": "#ff716c",
+                        "error-dim": "#d7383b",
+                        "primary-container": "#00f4fe",
+                        "tertiary-dim": "#41a3f7",
+                        "surface-container-low": "#131313",
+                        "inverse-on-surface": "#565554"
+                    },
+                    fontFamily: {
+                        "headline": ["Space Grotesk"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
             },
-          },
         }
-      </script>
+    </script>
+<style>body {
+    font-family: "Inter", sans-serif;
+    background-color: #0e0e0e;
+    color: white;
+    -webkit-font-smoothing: antialiased
+    }
+.glass {
+    background: rgba(26, 25, 25, 0.7);
+    backdrop-filter: blur(20px)
+    }
+.primary-gradient {
+    background: linear-gradient(135deg, #a1faff 0%, #00f4fe 100%)
+    }
+.noise-texture {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.02;
+    z-index: 9999;
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuAja7YprSpA-ry0aZbwflnslIKBlxYj5m_lyaaLW1LR99ucbO9VEDKvFfwjOShS7_GE7shH1j5IKJS4cfvX6ofIDVsnpyAibUgo-JPcexmR7zF6za52dmHfpWTvf_2sh86vZ6rpIaMws246JNDLTIzgWFO_hJ54a4zycACTkP4UXRcGQPPhw-A5ulFzi9f-sRYW-zE1o15JquPU7Z_9kbj3yHFti1ywbWWgOwlVcnPO2wagf7PIMJ6KCWCG-Mjc1f-iFoKnEQ8RcebT)
+    }
+details > summary {
+    list-style: none
+    }
+details > summary::-webkit-details-marker {
+    display: none
+    }
+.material-symbols-outlined {
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+    vertical-align: middle
+    }</style>
 </head>
-<body class="bg-background text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-fixed">
-<!-- 1. Navigation -->
-<nav class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-sm shadow-violet-900/5 transition-all duration-300" data-component-type="TopNavBar">
-<div class="flex justify-between items-center px-8 py-4 max-w-full mx-auto">
-<div class="flex items-center gap-8">
-<span class="text-xl font-black tracking-tighter text-violet-700">Workplace Safety Fundamentals</span>
-<div class="hidden md:flex items-center gap-6">
-<a class="text-violet-700 border-b-2 border-violet-600 pb-1 font-bold" href="#modules">Modules</a>
-<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors" href="#resources">Resources</a>
-<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors" href="#safety-prep">Safety Prep</a>
-<a class="text-slate-500 font-medium hover:text-violet-500 transition-colors" href="#support">Support</a>
-</div>
+<body class="bg-background text-on-background selection:bg-primary-container selection:text-on-primary-container">
+<div class="noise-texture"></div>
+<!-- Navigation -->
+<nav class="fixed top-0 w-full z-50 bg-neutral-950/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,245,255,0.05)]" data-component-type="TopNavBar">
+<div class="flex justify-between items-center px-8 h-20 w-full mx-auto">
+<div class="text-2xl font-bold tracking-tighter text-white font-headline">Workplace Safety</div>
+<div class="hidden md:flex space-x-8 font-['Space_Grotesk'] tracking-[-0.04em] uppercase text-sm font-bold">
+<a class="text-neutral-400 hover:text-white transition-colors" href="#curriculum">Curriculum</a>
+<a class="text-neutral-400 hover:text-white transition-colors" href="#hazards">Hazards</a>
+<a class="text-neutral-400 hover:text-white transition-colors" href="#assessment">Assessment</a>
+<a class="text-neutral-400 hover:text-white transition-colors" href="#resources">Resources</a>
 </div>
 <div class="flex items-center gap-4">
-<a class="text-violet-600 font-headline font-bold hover:opacity-80 transition-all px-4 py-2" href="#top">Back to Top</a>
-<span class="material-symbols-outlined text-on-surface-variant cursor-pointer text-2xl" data-icon="account_circle">account_circle</span>
+<a class="text-cyan-400 font-headline uppercase text-xs tracking-widest font-bold hover:scale-95 transition-transform" href="#">Back to Top</a>
+<span class="material-symbols-outlined text-white text-2xl cursor-pointer">account_circle</span>
 </div>
 </div>
 </nav>
-<main class="pt-20" id="top">
-<!-- 2. Hero Section -->
-<section class="relative min-h-[870px] flex items-center overflow-hidden px-8 py-20 bg-surface" data-component-type="hero">
-<div class="absolute inset-0 z-0 overflow-hidden">
-<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-tertiary-container/5"></div>
-<img class="w-full h-full object-cover mix-blend-overlay opacity-40" data-alt="Modern high-tech industrial workplace with clean surfaces, blue lighting, and architectural lines, soft focus background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUlG41UGNXOZaHiPLUav-HTg7MkzOS-3hunESsZtU6QknikvEbBm4A8GWZILo-ZqfdUZOkm-r1ZMEmsNyb2dcS6FFhSY2f0WFCU7F0BGMC4LCfTpNCXfs_F5CJsuOs5RrcmDgwnz9XfteZipptAVtNnrMreiOJ8cfrmm2QHg915d4LXHxHC9MgD8R-ZJteMm_MJkVTIIaFeZFtK0ilTjrtYiXUjm-glBuIzq9JgEtBkTI3IYS0fleD144Uyl6I38U_KCNdhuDqq7I"/>
+<main>
+<!-- Section 1: Hero -->
+<section class="relative min-h-screen flex items-center justify-center overflow-hidden" data-component-type="hero">
+<div class="absolute inset-0 z-0">
+<img class="w-full h-full object-cover opacity-40" data-alt="Modern high-tech industrial facility with blue ambient lighting and clean architectural lines at night" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCBxBXw82K781vvncw3D9hnJ7sK-qDZRQjblxlLyU24WRWI3O-xGFD3A-7p0tx_rPPLgd_hM7vIA9848Ufpizj_hTFn5oVF3gTpq4a_NIv9U4oinyxYioJzojoDF2xq3QbG7hjlw4qa5leHzXdeNeIoCvTJlXPjsAY9JggMAsDakaiCznOe6SrCm1LcnAJ6yS7y-T1y5Z50FXr3m2NaY6ZiogMJjXhXffDunKk532oyNQ2vcEmyKY3NerojWoKjtfFTGIrA4jub9gDY"/>
+<div class="absolute inset-0 bg-gradient-to-b from-transparent via-background/80 to-background"></div>
 </div>
-<div class="relative z-10 max-w-4xl">
-<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter text-on-surface leading-[1.1] mb-6">
-                    Workplace Safety <span class="text-primary">Fundamentals</span>
+<div class="relative z-10 text-center max-w-4xl px-8">
+<h1 class="text-7xl md:text-9xl font-headline font-bold tracking-tighter text-white mb-6 uppercase">
+                    Workplace Safety <br/><span class="text-primary">Fundamentals</span>
 </h1>
-<p class="text-xl text-on-surface-variant font-light leading-relaxed max-w-2xl mb-10">
-                    Master the essential protocols, risk assessment techniques, and emergency response procedures required to maintain a secure and professional working environment.
+<p class="text-xl md:text-2xl text-on-surface-variant font-body mb-10 max-w-2xl mx-auto">
+                    Your comprehensive guide to operational excellence, risk mitigation, and the kinetic architecture of a safe workspace.
                 </p>
-<div class="flex flex-wrap gap-4">
-<button class="bg-gradient-to-br from-primary to-tertiary-container text-white px-10 py-5 rounded-full font-bold shadow-xl shadow-primary/20 hover:scale-105 transition-transform">
-                        Begin Course
-                    </button>
-<button class="bg-secondary-container text-on-secondary-container px-10 py-5 rounded-full font-bold hover:bg-secondary-fixed transition-colors">
-                        View Syllabus
-                    </button>
-</div>
+<button class="primary-gradient text-on-primary-fixed px-12 py-5 rounded-full font-headline font-bold uppercase tracking-widest text-lg hover:scale-105 transition-transform shadow-[0_0_30px_rgba(161,250,255,0.3)]">
+                    Begin Course
+                </button>
 </div>
 </section>
-<!-- 3. Why Safety Matters -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="text">
-<div class="max-w-3xl mx-auto text-center">
-<h2 class="font-headline text-4xl font-bold mb-8">Why Safety Matters</h2>
-<div class="space-y-6 text-lg text-on-surface-variant leading-relaxed font-light">
-<p>Safety is not merely a collection of rules; it is the cornerstone of operational excellence and employee well-being. A robust safety culture ensures that every individual returns home in the same condition they arrived.</p>
-<p>Effective training empowers teams to recognize latent hazards before they manifest as incidents, fostering a proactive environment where responsibility is shared and vigilance is a collective habit.</p>
-</div>
-</div>
-</section>
-<!-- 4. Stat Callout -->
-<section class="py-24 px-8 bg-surface" data-component-type="stat-callout">
-<div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
-<div class="p-8 rounded-lg">
-<div class="text-primary text-5xl font-black font-headline mb-2">98%</div>
-<div class="text-on-surface font-bold text-lg mb-1">Preventable Incidents</div>
-<p class="text-on-surface-variant font-light text-sm">Most workplace injuries can be avoided through early hazard identification.</p>
-</div>
-<div class="p-8 rounded-lg bg-surface-container-lowest shadow-sm">
-<div class="text-tertiary text-5xl font-black font-headline mb-2">$170B</div>
-<div class="text-on-surface font-bold text-lg mb-1">Annual Cost</div>
-<p class="text-on-surface-variant font-light text-sm">Combined direct and indirect costs of workplace injuries globally each year.</p>
-</div>
-<div class="p-8 rounded-lg">
-<div class="text-primary text-5xl font-black font-headline mb-2">15 Sec</div>
-<div class="text-on-surface font-bold text-lg mb-1">Response Window</div>
-<p class="text-on-surface-variant font-light text-sm">Critical time required for immediate fire response to prevent major escalation.</p>
-</div>
-</div>
-</section>
-<!-- 5. Graphic Text: Hierarchy of Controls -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="graphic-text">
-<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<!-- Section 2: Why Safety Matters -->
+<section class="py-32 px-8 max-w-7xl mx-auto" data-component-type="text">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-20 items-end">
 <div>
-<h2 class="font-headline text-4xl font-bold mb-6">Understanding the Hierarchy of Controls</h2>
-<p class="text-on-surface-variant text-lg leading-relaxed font-light mb-8">
-                        The Hierarchy of Controls is a systematic approach to eliminating or reducing workplace hazards. It prioritizes methods that are most effective at protecting workers, moving from the most reliable physical changes to the least reliable administrative and personal protective measures.
+<h2 class="text-5xl font-headline font-bold text-white mb-8">Why Safety Matters</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed max-w-xl">
+                        Operational safety is the backbone of sustainable industry. Beyond compliance, it represents a commitment to human capital and technical precision.
                     </p>
-<div class="flex items-center gap-4 p-6 bg-surface-container-highest rounded-lg">
-<span class="material-symbols-outlined text-primary text-3xl" data-icon="lightbulb">lightbulb</span>
-<p class="text-sm font-medium">Always aim for <strong>Elimination</strong> before settling for Personal Protective Equipment (PPE).</p>
 </div>
+<div class="grid grid-cols-2 gap-4" data-component-type="stat-callout">
+<div class="bg-surface-container-low p-8 border-l-2 border-primary">
+<div class="text-4xl font-headline font-bold text-primary mb-2">2.3M</div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant">Annual Injuries</div>
 </div>
-<div class="relative group">
-<div class="absolute -inset-4 bg-gradient-to-tr from-primary/20 to-tertiary/20 rounded-xl blur-2xl opacity-50 group-hover:opacity-100 transition duration-1000"></div>
-<div class="relative bg-white p-12 rounded-xl shadow-2xl">
-<img class="w-full rounded-lg" data-alt="Conceptual pyramid showing levels of control from wide base to narrow peak, industrial aesthetic with clean icons" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCpp6_9VkZxyTJP4DzPi5q8rGERK5k7nBFuYbQk18-LiygrCQysfk629YxDUR71dI5FIcthNevGXq4RpZ-XXmQ10T-JXg8TEV77wen1WMHo01HS2-y-MnBO1JFb44C-hJIsj8gDPdKdhHBv8HJdA46aR4BNrzpGDkwUzPKcOUSzK1ng1HQWOJTSxoGHuoaUswOOwuxtnpaT50awJSmygZtLkvRZyP1fe85zGMBLSMNlwUJDI_OLam-x_bQ6isR8Oo8IragiQ7EsC0k"/>
+<div class="bg-surface-container-low p-8 border-l-2 border-primary">
+<div class="text-4xl font-headline font-bold text-primary mb-2">72%</div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant">Preventable</div>
 </div>
+<div class="bg-surface-container-low p-8 border-l-2 border-primary">
+<div class="text-4xl font-headline font-bold text-primary mb-2">$170B</div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant">Economic Cost</div>
 </div>
-</div>
-</section>
-<!-- 6. Accordion: Five Levels -->
-<section class="py-24 px-8 bg-surface" data-component-type="accordion">
-<div class="max-w-3xl mx-auto">
-<h3 class="font-headline text-3xl font-bold mb-12 text-center">The Five Levels of Hazard Control</h3>
-<div class="space-y-4">
-<details class="group bg-surface-container-low rounded-lg overflow-hidden">
-<summary class="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-on-surface">
-<span>1. Elimination</span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
-</summary>
-<div class="p-6 pt-0 text-on-surface-variant font-light border-t border-outline-variant/10">
-                            Physically remove the hazard. This is the most effective control measure. If the task or material isn't necessary, remove it entirely.
-                        </div>
-</details>
-<details class="group bg-surface-container-low rounded-lg overflow-hidden">
-<summary class="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-on-surface">
-<span>2. Substitution</span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
-</summary>
-<div class="p-6 pt-0 text-on-surface-variant font-light border-t border-outline-variant/10">
-                            Replace the hazard with something less dangerous. For example, using water-based paint instead of solvent-based paint.
-                        </div>
-</details>
-<details class="group bg-surface-container-low rounded-lg overflow-hidden">
-<summary class="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-on-surface">
-<span>3. Engineering Controls</span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
-</summary>
-<div class="p-6 pt-0 text-on-surface-variant font-light border-t border-outline-variant/10">
-                            Isolate people from the hazard. Installing physical barriers, ventilation systems, or machine guarding.
-                        </div>
-</details>
-<details class="group bg-surface-container-low rounded-lg overflow-hidden">
-<summary class="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-on-surface">
-<span>4. Administrative Controls</span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
-</summary>
-<div class="p-6 pt-0 text-on-surface-variant font-light border-t border-outline-variant/10">
-                            Change the way people work. Training, procedure changes, and signage are examples of administrative controls.
-                        </div>
-</details>
-<details class="group bg-surface-container-low rounded-lg overflow-hidden">
-<summary class="flex items-center justify-between p-6 cursor-pointer list-none font-bold text-on-surface">
-<span>5. Personal Protective Equipment (PPE)</span>
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform" data-icon="expand_more">expand_more</span>
-</summary>
-<div class="p-6 pt-0 text-on-surface-variant font-light border-t border-outline-variant/10">
-                            Protect the worker with equipment. Hard hats, gloves, and earplugs. This is the last line of defense.
-                        </div>
-</details>
-</div>
-</div>
-</section>
-<!-- 7. Tabs: Types of Hazards -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="tabs">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12 text-center">Types of Workplace Hazards</h2>
-<div class="flex flex-col md:flex-row gap-8" data-tabs="">
-<div class="md:w-1/3 flex flex-col gap-2">
-<button class="text-left p-6 rounded-lg bg-primary text-white font-bold transition-all shadow-lg shadow-primary/20" data-tab-trigger="physical">Physical Hazards</button>
-<button class="text-left p-6 rounded-lg bg-surface-container-lowest hover:bg-surface-container-high font-bold transition-all" data-tab-trigger="chemical">Chemical Hazards</button>
-<button class="text-left p-6 rounded-lg bg-surface-container-lowest hover:bg-surface-container-high font-bold transition-all" data-tab-trigger="biological">Biological Hazards</button>
-<button class="text-left p-6 rounded-lg bg-surface-container-lowest hover:bg-surface-container-high font-bold transition-all" data-tab-trigger="ergonomic">Ergonomic Hazards</button>
-</div>
-<div class="md:w-2/3 bg-surface-container-lowest p-12 rounded-lg min-h-[400px]">
-<div data-tab-panel="physical">
-<h4 class="text-2xl font-bold mb-4">Physical Hazards</h4>
-<p class="text-on-surface-variant leading-relaxed font-light mb-6">Physical hazards are environmental factors that can harm an employee without necessarily touching them. These are common across almost all industries.</p>
-<ul class="space-y-4">
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span> <span>Radiation (UV, X-rays)</span></li>
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span> <span>Extreme temperatures</span></li>
-<li class="flex items-start gap-3"><span class="material-symbols-outlined text-primary" data-icon="check_circle">check_circle</span> <span>Constant loud noise</span></li>
-</ul>
-</div>
-<div class="hidden" data-tab-panel="chemical">
-<h4 class="text-2xl font-bold mb-4">Chemical Hazards</h4>
-<p>Content for chemical hazards goes here...</p>
-</div>
-<!-- Additional panels omitted for brevity but following the same pattern -->
+<div class="bg-surface-container-low p-8 border-l-2 border-primary">
+<div class="text-4xl font-headline font-bold text-primary mb-2">14%</div>
+<div class="text-xs uppercase tracking-widest text-on-surface-variant">Reduction Rate</div>
 </div>
 </div>
 </div>
 </section>
-<!-- 8. Bento Grid: Recognising Hazards -->
-<section class="py-32 px-8 bg-surface" data-component-type="bento">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-16 text-center">Recognising Hazards in Your Environment</h2>
-<div class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-auto md:h-[700px]">
-<div class="md:col-span-2 md:row-span-2 bg-primary-container text-white p-10 rounded-xl flex flex-col justify-end relative overflow-hidden group">
-<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-105 transition-transform duration-700" data-alt="Close up of a safety inspection clipboard with industrial background, dramatic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDyVtjlD3BqXCwgOETSDWU8tDdbbt-XOUexYP3a_FEipxwqXEG_QZbW2W3Yij4P_lwiW2h8vDqfS6qZtLI8h2Xe_cqSy8P65MjLkTXOTU-HyOX95BKSafkhY315jIexWzoNzx3rtU-CWwT_ra4StySw_YeNvv9BBwFPMPUILXfZ52UNtFzCeNyZMFUqeeAj4Y_b3gd-5QqnRPtQihvIF15cgFiz_IdJItLhWhydrVtBEL8Ygc9D3s3ONiXwVBy3lulA6oc7idSCU8"/>
+<!-- Section 3: Hierarchy of Controls -->
+<section class="py-32 bg-surface-container-low" data-component-type="graphic-text">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row gap-20 items-center">
+<div class="flex-1">
+<h2 class="text-5xl font-headline font-bold text-white mb-12">Hierarchy of Controls</h2>
+<div class="space-y-4" data-component-type="accordion">
+<details class="group bg-surface-container-highest rounded-lg overflow-hidden">
+<summary class="p-6 cursor-pointer flex justify-between items-center hover:bg-surface-bright transition-colors">
+<span class="font-headline font-bold uppercase tracking-tight">1. Elimination</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant text-sm border-t border-outline-variant/20">
+                                Physically remove the hazard. The most effective method of control.
+                            </div>
+</details>
+<details class="group bg-surface-container-highest rounded-lg">
+<summary class="p-6 cursor-pointer flex justify-between items-center">
+<span class="font-headline font-bold uppercase tracking-tight">2. Substitution</span>
+<span class="material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant text-sm">Replace the hazard with something less dangerous.</div>
+</details>
+<details class="group bg-surface-container-highest rounded-lg">
+<summary class="p-6 cursor-pointer flex justify-between items-center">
+<span class="font-headline font-bold uppercase tracking-tight">3. Engineering</span>
+<span class="material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant text-sm">Isolate people from the hazard through physical barriers or ventilation.</div>
+</details>
+<details class="group bg-surface-container-highest rounded-lg">
+<summary class="p-6 cursor-pointer flex justify-between items-center">
+<span class="font-headline font-bold uppercase tracking-tight">4. Administrative</span>
+<span class="material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant text-sm">Change the way people work through training and procedures.</div>
+</details>
+<details class="group bg-surface-container-highest rounded-lg">
+<summary class="p-6 cursor-pointer flex justify-between items-center">
+<span class="font-headline font-bold uppercase tracking-tight">5. PPE</span>
+<span class="material-symbols-outlined">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant text-sm">Protect the worker with Personal Protective Equipment. The last line of defense.</div>
+</details>
+</div>
+</div>
+<div class="flex-1 relative">
+<img class="rounded-lg shadow-2xl" data-alt="Blueprint schematic overlaying a physical industrial machine part, glowing cyan lines indicating structural analysis" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMdK6HMWTV26CsPtC_o0RgboFylPJthKrzVDOKukJawoHSp_fyWeKGgFXAftibqvblQd0Mb-tAM74D4wNOaqgnOl1ljGnKBReErsvBTdIPerVEFIh25pSv7iqeiTr14M_5RhjXw5aLcQqLhKUganCWGDzfOXxviFnCJ1wuDNkFNya6vKPss7QRykg7jygkAw7G5qOOAc6mhqM6PykcD17KjUio3aKb8bKghGVh_hgyiui5TQPhbwuK2lRQ1C9puxeWFfFFjSoLlBgE"/>
+<div class="absolute -bottom-10 -left-10 bg-primary p-8 rounded-lg text-on-primary-fixed hidden lg:block">
+<span class="font-headline font-black text-6xl">05</span>
+<p class="font-bold uppercase tracking-tighter text-sm">Critical Layers</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 4: Types of Hazards & Bento -->
+<section class="py-32 px-8 max-w-7xl mx-auto" data-component-type="tabs" id="hazards">
+<h2 class="text-4xl font-headline font-bold text-center mb-16 uppercase tracking-widest">Hazard Identification</h2>
+<div class="flex justify-center gap-4 mb-16 overflow-x-auto pb-4" data-tabs="">
+<button class="bg-primary text-on-primary-fixed px-8 py-3 rounded-full font-headline font-bold text-sm uppercase" data-tab-trigger="physical">Physical</button>
+<button class="bg-surface-container-highest text-white px-8 py-3 rounded-full font-headline font-bold text-sm uppercase hover:bg-surface-bright transition-colors" data-tab-trigger="chemical">Chemical</button>
+<button class="bg-surface-container-highest text-white px-8 py-3 rounded-full font-headline font-bold text-sm uppercase hover:bg-surface-bright" data-tab-trigger="biological">Biological</button>
+<button class="bg-surface-container-highest text-white px-8 py-3 rounded-full font-headline font-bold text-sm uppercase hover:bg-surface-bright" data-tab-trigger="ergonomic">Ergonomic</button>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-12 gap-6" data-component-type="bento" data-tab-panel="physical">
+<div class="md:col-span-8 bg-surface-container-high p-10 flex flex-col justify-end min-h-[400px] relative overflow-hidden group">
+<img class="absolute inset-0 w-full h-full object-cover opacity-30 group-hover:scale-110 transition-transform duration-700" data-alt="Technical close-up of heavy industrial machinery gears with vibrant cyan sparks and motion blur" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5vUTvmAolZ5F0qWPCzhIqrPBt4pvHl4UQ-RO92mDpyEQ7d_L5JSyd27-Qc0uioqdryg3-HWm4SDkBG3r5IUqTKG5DcMys9qWUB_aj1lcbp8xRNapJad1fcGPuwq_cWPHZ_GHuDeeGBqKsbbv_3ccqdklQNsmeVHQ9dZBeFq7QFbZZ7Anc4yyzw4QvpHCQpE_PbQQxE4dAoJkqhqNFJsYXmDNaEsz4b4UsssJKinA6RNv7w89LVWRPM7rY8kQcA3Xad4HnhhPBNT9Z"/>
 <div class="relative z-10">
-<h3 class="text-3xl font-bold mb-4">Systematic Observation</h3>
-<p class="text-primary-fixed/80 font-light leading-relaxed">The "Walkthrough" technique involves scanning the workspace at three levels: Eye level, Floor level, and Above-head level.</p>
+<h3 class="text-3xl font-headline font-bold text-white mb-4 uppercase">Walk the Floor</h3>
+<p class="text-on-surface-variant max-w-md">Regular visual inspections are the first step in identifying mechanical and structural risks.</p>
 </div>
 </div>
-<div class="md:col-span-1 bg-surface-container-high p-8 rounded-xl flex flex-col justify-between">
-<span class="material-symbols-outlined text-primary text-4xl" data-icon="psychology">psychology</span>
+<div class="md:col-span-4 bg-primary p-10 flex flex-col justify-between">
+<span class="material-symbols-outlined text-on-primary-fixed text-6xl">hearing</span>
 <div>
-<h4 class="font-bold mb-2">Mental Models</h4>
-<p class="text-sm text-on-surface-variant font-light">Ask: "What is the worst thing that could happen here?"</p>
+<h3 class="text-2xl font-headline font-bold text-on-primary-fixed mb-2 uppercase">Listen</h3>
+<p class="text-on-primary-fixed/80 text-sm">Abnormal sounds often precede mechanical failures.</p>
 </div>
 </div>
-<div class="md:col-span-1 bg-secondary-container p-8 rounded-xl flex flex-col justify-between">
-<span class="material-symbols-outlined text-on-secondary-container text-4xl" data-icon="groups">groups</span>
-<div>
-<h4 class="font-bold mb-2">Team Dialogue</h4>
-<p class="text-sm text-on-secondary-container/80 font-light">Consult with daily operators for hidden risks.</p>
+<div class="md:col-span-4 bg-surface-container-high p-8">
+<h3 class="font-headline font-bold text-white mb-4 uppercase text-sm tracking-widest">Check Equipment</h3>
+<p class="text-on-surface-variant text-sm">Pre-op checks ensure safety guards and sensors are active.</p>
 </div>
+<div class="md:col-span-4 bg-surface-container-high p-8">
+<h3 class="font-headline font-bold text-white mb-4 uppercase text-sm tracking-widest">Review Near Misses</h3>
+<p class="text-on-surface-variant text-sm">Data analysis of close calls prevents future incidents.</p>
 </div>
-<div class="md:col-span-2 bg-surface-container-lowest border border-outline-variant/10 p-8 rounded-xl shadow-sm flex items-center gap-8">
-<div class="w-24 h-24 shrink-0 bg-tertiary-fixed rounded-full flex items-center justify-center">
-<span class="material-symbols-outlined text-tertiary text-4xl" data-icon="history">history</span>
-</div>
-<div>
-<h4 class="font-bold text-xl mb-2">Historical Analysis</h4>
-<p class="text-on-surface-variant font-light">Reviewing past near-miss reports is the best predictor of future accidents.</p>
-</div>
-</div>
+<div class="md:col-span-4 bg-surface-container-high p-8 flex items-center justify-between group cursor-pointer hover:bg-surface-bright">
+<span class="font-headline font-bold uppercase text-sm">Follow Signs</span>
+<span class="material-symbols-outlined text-primary group-hover:translate-x-2 transition-transform">arrow_forward</span>
 </div>
 </div>
 </section>
-<!-- 9. Full-Bleed -->
-<section class="relative h-[600px] flex items-center justify-center text-center px-8 overflow-hidden" data-component-type="full-bleed">
-<img class="absolute inset-0 w-full h-full object-cover" data-alt="A dramatic low-angle shot of a glowing emergency exit sign in a dark corridor with atmospheric haze" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaZz7Js5_AClAQBHFLXEcr0u3u_jlpNTleQuB4v28LcGiRIgALaMLonDzTpPJKPIwDm-UNL_5F7V_a9e9q6gg4otWj2czmhO469aaT7MvdoOdntC144tyjmkoTjH5O14pvrNOvOyXlbgrDkbvKP7NPAuRV2OAmCRlWHZQwrRt3MS5fEzQAxHxH0cF5MQIMqY2bPcWCkyUIKiF_j4j0qrZRQ1KV7kxnwoFkZaxH_KScVCWjoKl9A3Ip0-yXbw2V2gZy1wlYkKaWyg4"/>
-<div class="absolute inset-0 bg-black/50 backdrop-blur-sm"></div>
-<div class="relative z-10 max-w-4xl">
-<h2 class="font-headline text-5xl md:text-7xl font-black text-white mb-6 uppercase tracking-widest">When Seconds Count</h2>
-<p class="text-white/80 text-xl font-light tracking-wide">Emergency preparedness isn't about knowing the steps; it's about making them instinctive.</p>
-</div>
-</section>
-<!-- 10. Timeline -->
-<section class="py-32 px-8 bg-surface" data-component-type="timeline">
-<div class="max-w-4xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-16 text-center">Emergency Response Sequence</h2>
-<div class="space-y-12">
-<div class="flex gap-8 group">
-<div class="flex flex-col items-center">
-<div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl ring-8 ring-primary/10">1</div>
-<div class="w-0.5 h-full bg-outline-variant/20 mt-4"></div>
-</div>
-<div class="pb-12">
-<h4 class="text-xl font-bold mb-2">Immediate Alert</h4>
-<p class="text-on-surface-variant font-light">Trigger the manual fire alarm and announce the emergency clearly to others in the vicinity.</p>
-</div>
-</div>
-<div class="flex gap-8 group">
-<div class="flex flex-col items-center">
-<div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl ring-8 ring-primary/10">2</div>
-<div class="w-0.5 h-full bg-outline-variant/20 mt-4"></div>
-</div>
-<div class="pb-12">
-<h4 class="text-xl font-bold mb-2">Emergency Services Contact</h4>
-<p class="text-on-surface-variant font-light">Call 911 (or local equivalent). Provide precise location, nature of emergency, and number of affected people.</p>
-</div>
-</div>
-<div class="flex gap-8 group">
-<div class="flex flex-col items-center">
-<div class="w-12 h-12 bg-primary text-white rounded-full flex items-center justify-center font-bold text-xl ring-8 ring-primary/10">3</div>
-</div>
+<!-- Section 5: When Seconds Count -->
+<section class="relative py-48 overflow-hidden" data-component-type="full-bleed">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Wide shot of a modern factory floor with emergency exit signs glowing brightly in a dimly lit, high-tech environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAUEZnyDc9Z2pXUbjkcTicT7lQcubdt9p9lg8V9J3tdyAPdZ30vcCSWnme4NlYlrc3TrZJlByT5Ops-ArVASBTI4gdiWWg_3Ia3hyroP40qEopSqFcxpGewaMKhM5-TZPrU6cXoDg2IvSp7q2ZhsYdKsl4vPl3FcjrykKj7_tAuJ43X03i383lwDFUOvCqRgU7GKaenwS4KVqPACvLiXk95mX-PrQIZkrEFqq3-zCTzjF7b0zCYsbnTjv6BGXK-ETMus-sxwesHd8tx"/>
+<div class="absolute inset-0 bg-neutral-950/80 backdrop-blur-sm"></div>
+<div class="relative z-10 max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
 <div>
-<h4 class="text-xl font-bold mb-2">Controlled Evacuation</h4>
-<p class="text-on-surface-variant font-light">Evacuate via the nearest safe exit. Do not use elevators. Assist those with mobility challenges.</p>
+<h2 class="text-6xl font-headline font-bold text-white mb-8">When Seconds Count</h2>
+<div class="space-y-8 relative before:content-[''] before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-primary/20" data-component-type="timeline">
+<div class="relative pl-10 flex items-start gap-6">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-primary border-4 border-background"></div>
+<div>
+<h4 class="font-headline font-bold text-primary uppercase text-sm">01 Alert</h4>
+<p class="text-on-surface-variant text-sm">Immediately sound the alarm and notify others.</p>
+</div>
+</div>
+<div class="relative pl-10 flex items-start gap-6">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-surface-container-highest border-4 border-background group-hover:bg-primary transition-colors"></div>
+<div>
+<h4 class="font-headline font-bold text-white uppercase text-sm">02 Assess</h4>
+<p class="text-on-surface-variant text-sm">Evaluate the magnitude and type of threat.</p>
+</div>
+</div>
+<div class="relative pl-10 flex items-start gap-6">
+<div class="absolute left-0 w-6 h-6 rounded-full bg-surface-container-highest border-4 border-background"></div>
+<div>
+<h4 class="font-headline font-bold text-white uppercase text-sm">03 Act</h4>
+<p class="text-on-surface-variant text-sm">Engage emergency shutdown or first aid protocols.</p>
 </div>
 </div>
 </div>
 </div>
-</section>
-<!-- 11. Process Flow -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="process-flow">
-<div class="max-w-6xl mx-auto text-center">
-<h2 class="font-headline text-4xl font-bold mb-16">Fire Response Decision Tree</h2>
-<div class="flex flex-col items-center gap-10">
-<div class="bg-white p-8 rounded-xl shadow-lg border-2 border-primary w-full max-w-sm">
-<p class="font-bold text-lg">Did you discover a fire?</p>
+<div class="bg-surface-container/60 p-12 rounded-lg border-l-4 border-error" data-component-type="process-flow">
+<h3 class="text-2xl font-headline font-bold text-white mb-8 uppercase tracking-tighter">Fire Response Tree</h3>
+<div class="space-y-6">
+<div class="flex items-center gap-4">
+<div class="bg-surface-bright w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">DIS</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Discover Fire</div>
 </div>
-<div class="flex gap-20">
-<div class="flex flex-col items-center gap-6">
-<span class="material-symbols-outlined text-4xl text-primary" data-icon="south_west">south_west</span>
-<div class="bg-white p-6 rounded-xl shadow-md w-48">
-<p class="text-sm font-bold text-primary">Small &amp; Contained</p>
-<p class="text-xs mt-2">Attempt PASS technique if safe.</p>
+<div class="flex items-center gap-4">
+<div class="bg-surface-bright w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">ALA</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Sound Alarm</div>
 </div>
-</div>
-<div class="flex flex-col items-center gap-6">
-<span class="material-symbols-outlined text-4xl text-error" data-icon="south_east">south_east</span>
-<div class="bg-white p-6 rounded-xl shadow-md w-48">
-<p class="text-sm font-bold text-error">Large or Spreading</p>
-<p class="text-xs mt-2">Evacuate immediately.</p>
+<div class="flex items-center gap-4">
+<div class="bg-error/20 text-error w-12 h-12 flex items-center justify-center rounded-full text-xs font-bold">EVA</div>
+<div class="flex-1 border-b border-outline-variant/30 pb-2">Evacuate &amp; Report</div>
 </div>
 </div>
 </div>
 </div>
 </div>
 </section>
-<!-- 12. Knowledge Check MCQ -->
-<section class="py-32 px-8 bg-surface" data-component-type="mcq">
-<div class="max-w-3xl mx-auto bg-surface-container-lowest p-12 rounded-xl shadow-xl border border-outline-variant/10" data-quiz="">
-<span class="text-primary font-bold uppercase tracking-widest text-sm">Knowledge Check</span>
-<h3 class="text-2xl font-bold mt-2 mb-8">Which control measure is considered the "last line of defense" in the hierarchy of controls?</h3>
+<!-- Section 6: Knowledge Check 1 -->
+<section class="py-32 px-8 max-w-3xl mx-auto" data-component-type="mcq">
+<div class="bg-surface-container-high p-12 rounded-2xl border-t-4 border-primary shadow-2xl" data-quiz="">
+<span class="text-primary font-headline text-xs uppercase font-black tracking-widest mb-4 block">Knowledge Check 01</span>
+<h2 class="text-3xl font-headline font-bold text-white mb-10">In the Hierarchy of Controls, which method is scientifically proven to be the most effective?</h2>
 <div class="space-y-4">
-<button class="w-full text-left p-6 rounded-lg border-2 border-outline-variant/20 hover:border-primary transition-all flex justify-between items-center group" data-choice="0" data-correct="false">
-<span>Substitution</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100" data-icon="radio_button_unchecked">radio_button_unchecked</span>
+<button class="w-full text-left p-6 rounded-xl bg-surface-bright hover:bg-primary hover:text-on-primary-fixed transition-all font-bold group flex justify-between items-center" data-choice="" data-correct="0">
+<span>Eliminate the Hazard</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100">check_circle</span>
 </button>
-<button class="w-full text-left p-6 rounded-lg border-2 border-outline-variant/20 hover:border-primary transition-all flex justify-between items-center group" data-choice="1" data-correct="true">
-<span>Personal Protective Equipment (PPE)</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100" data-icon="radio_button_unchecked">radio_button_unchecked</span>
-</button>
-<button class="w-full text-left p-6 rounded-lg border-2 border-outline-variant/20 hover:border-primary transition-all flex justify-between items-center group" data-choice="2" data-correct="false">
-<span>Engineering Controls</span>
-<span class="material-symbols-outlined opacity-0 group-hover:opacity-100" data-icon="radio_button_unchecked">radio_button_unchecked</span>
-</button>
+<button class="w-full text-left p-6 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-all font-medium" data-choice="">
+                        Wearing Personal Protective Equipment
+                    </button>
+<button class="w-full text-left p-6 rounded-xl bg-surface-container-highest hover:bg-surface-bright transition-all font-medium" data-choice="">
+                        Administrative Controls (Training)
+                    </button>
 </div>
 </div>
 </section>
-<!-- 13. Key Term -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="key-term">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12">Essential Safety Vocabulary</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-<div class="p-8 bg-white rounded-lg">
-<span class="text-primary font-black text-2xl mb-4 block">Hazard</span>
-<p class="text-on-surface-variant font-light">Anything with the potential to cause harm, ill health, or damage to property.</p>
+<!-- Section 7: Flashcards & Terms -->
+<section class="py-32 bg-surface" data-component-type="key-term">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-20">
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20 hover:border-primary transition-colors">
+<span class="block font-headline font-bold text-white mb-1">HAZARD</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Potential Harm</span>
 </div>
-<div class="p-8 bg-white rounded-lg">
-<span class="text-primary font-black text-2xl mb-4 block">Risk</span>
-<p class="text-on-surface-variant font-light">The likelihood that a hazard will cause harm, combined with the severity of that harm.</p>
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20">
+<span class="block font-headline font-bold text-white mb-1">RISK</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Likelihood</span>
 </div>
-<div class="p-8 bg-white rounded-lg">
-<span class="text-primary font-black text-2xl mb-4 block">Near Miss</span>
-<p class="text-on-surface-variant font-light">An unplanned event that did not result in injury or damage but had the potential to do so.</p>
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20">
+<span class="block font-headline font-bold text-white mb-1">NEAR MISS</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Narrow Escape</span>
 </div>
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20">
+<span class="block font-headline font-bold text-white mb-1">PPE</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Personal Protection</span>
 </div>
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20">
+<span class="block font-headline font-bold text-white mb-1">SDS</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Safety Data</span>
 </div>
-</section>
-<!-- 14. Flashcard -->
-<section class="py-32 px-8 bg-surface" data-component-type="flashcard">
-<div class="max-w-xl mx-auto">
-<h2 class="font-headline text-3xl font-bold mb-12 text-center">Test Your Knowledge</h2>
-<div class="relative h-96 w-full cursor-pointer group" data-flashcard="">
-<div class="absolute inset-0 bg-primary text-white rounded-xl p-12 flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 backface-hidden group-hover:rotate-y-180">
-<span class="material-symbols-outlined text-6xl mb-6" data-icon="help_center">help_center</span>
-<h4 class="text-3xl font-bold">What does ALARP stand for?</h4>
-<p class="mt-4 text-primary-fixed/60 text-sm">Click to flip</p>
-</div>
-<div class="absolute inset-0 bg-white border-2 border-primary rounded-xl p-12 flex flex-col items-center justify-center text-center shadow-2xl transition-all duration-500 opacity-0 group-hover:opacity-100">
-<h4 class="text-2xl font-bold text-primary mb-4">As Low As Reasonably Practicable</h4>
-<p class="text-on-surface-variant font-light">The standard that involves weighing a risk against the trouble, time, and money needed to control it.</p>
+<div class="bg-surface-container-low p-6 rounded-lg text-center border-b-2 border-primary/20">
+<span class="block font-headline font-bold text-white mb-1">INCIDENT</span>
+<span class="text-[10px] text-on-surface-variant uppercase tracking-tighter">Occurrence</span>
 </div>
 </div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8" data-flashcard="">
+<div class="aspect-[4/5] bg-surface-container-high rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer hover:scale-[1.02] transition-transform border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-5xl mb-6">info</span>
+<h3 class="text-2xl font-headline font-bold uppercase mb-4">ALARP</h3>
+<p class="text-on-surface-variant text-sm">As Low As Reasonably Practicable</p>
 </div>
-</section>
-<!-- 15. Narrative Carousel -->
-<section class="py-32 px-8 bg-surface-container-low overflow-hidden" data-component-type="narrative">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12">Case Study — The Warehouse Incident</h2>
-<div class="relative flex overflow-x-auto snap-x snap-mandatory no-scrollbar gap-8 pb-10" data-carousel="">
-<div class="min-w-full md:min-w-[800px] snap-center bg-white rounded-2xl p-12 shadow-lg flex flex-col md:flex-row gap-10 items-center">
-<img class="w-full md:w-1/3 h-64 object-cover rounded-xl" data-alt="Modern logistic warehouse interior with high shelves and workers in safety vests" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgiGu4BAB2IF8whHpuYdAOy5l3BjfpcZ6MFUb9ZZvxGXBUBB5buKUvgj4H1gBKSlD7pFtxfIr0gRXlK3D-8kJN-jrapANGac0BTdt1OphqbG-V_T6IOM7AmfGzZt2xn6vXfK214frtF2YaI8tDbQU1WlRUci5mQe2H6pUUMhlMPtQBNSZpJOrM3gUrHY45okFOPsXOQbeQj1HJnzg_oI3JwUSGPicls5UT4KsGYfwYN-WC41ovEsoAM5JFCQvLKFBDlhviqGYWpe4"/>
-<div>
-<span class="text-tertiary font-bold">Slide 1: The Context</span>
-<h3 class="text-2xl font-bold mt-2 mb-4">Monday Morning, 09:15 AM</h3>
-<p class="text-on-surface-variant font-light leading-relaxed">A standard shift began at the Logistics Hub. Forklift operators were clearing the overnight shipment backlogs. The pressure was high due to a pending inspection.</p>
+<div class="aspect-[4/5] bg-surface-container-high rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-5xl mb-6">local_fire_department</span>
+<h3 class="text-2xl font-headline font-bold uppercase mb-4">Fire Triangle</h3>
+<p class="text-on-surface-variant text-sm">Heat, Fuel, and Oxygen</p>
 </div>
-</div>
-<div class="min-w-full md:min-w-[800px] snap-center bg-white rounded-2xl p-12 shadow-lg flex flex-col md:flex-row gap-10 items-center">
-<div class="w-full md:w-1/3 h-64 bg-error-container rounded-xl flex items-center justify-center">
-<span class="material-symbols-outlined text-error text-6xl" data-icon="warning">warning</span>
-</div>
-<div>
-<span class="text-tertiary font-bold">Slide 2: The Incident</span>
-<h3 class="text-2xl font-bold mt-2 mb-4">The Near Miss</h3>
-<p class="text-on-surface-variant font-light leading-relaxed">An operator, rushing to beat a timer, bypassed a blind corner without sounding the horn. A pedestrian worker was nearly struck, only avoiding impact by jumping behind a pillar.</p>
-</div>
+<div class="aspect-[4/5] bg-surface-container-high rounded-xl p-10 flex flex-col items-center justify-center text-center cursor-pointer border border-outline-variant/10">
+<span class="material-symbols-outlined text-primary text-5xl mb-6">medical_services</span>
+<h3 class="text-2xl font-headline font-bold uppercase mb-4">DRSABCD</h3>
+<p class="text-on-surface-variant text-sm">First Aid Primary Response Sequence</p>
 </div>
 </div>
 </div>
 </section>
-<!-- 16. Comparison -->
-<section class="py-32 px-8 bg-surface" data-component-type="comparison">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-16 text-center">Before vs After — Safety Improvements</h2>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-px bg-outline-variant/20 rounded-2xl overflow-hidden shadow-2xl">
-<div class="bg-white p-12">
-<div class="flex items-center gap-3 mb-6 text-error">
-<span class="material-symbols-outlined" data-icon="cancel">cancel</span>
-<span class="font-bold uppercase tracking-widest">Unsafe Condition</span>
-</div>
-<img class="w-full h-64 object-cover rounded-lg mb-8" data-alt="Cluttered workshop with cables on the floor and poorly lit corners" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt6-M6lGZVf_FCEG-vhOIYF0PAAlMmAUtjj8tGgbxCFhvpjKMGPt_9nQjILoHsxNKvqap00ATG2UCnaRma1Ut63EPd1zf4t-h7bOLv3tpWgfGWjym1acXxpGMEWTq8EcjZwvAj28Ly5g61XNxTfDQ5xeLoaASfnl761Fgt_5GARdS_BSE1HLHOTdJlHxJggdHhWSAP9ZOotbIoKVB2oCYd8ueDtCONouVJj5AgtUnx7kRfEqzu8P0t2MgAOvVJmoHH4BBVzdhht2s"/>
-<ul class="space-y-4 text-on-surface-variant font-light">
-<li>• Loose cabling causing trip hazards</li>
-<li>• Obstructed emergency exit routes</li>
-<li>• Inadequate lighting in high-risk zones</li>
+<!-- Section 8: Case Study Carousel -->
+<section class="py-32 bg-surface-container-low overflow-hidden" data-component-type="narrative">
+<div class="max-w-7xl mx-auto px-8" data-carousel="">
+<h2 class="text-5xl font-headline font-bold text-white mb-16">The Warehouse Incident</h2>
+<div class="bg-background rounded-3xl p-12 flex flex-col lg:flex-row gap-12 relative">
+<div class="lg:w-1/2">
+<span class="bg-primary/20 text-primary px-4 py-1 rounded text-xs font-bold uppercase mb-6 inline-block">Case Study #42</span>
+<h3 class="text-3xl font-headline font-bold text-white mb-6">A Failure of Engineering Controls</h3>
+<p class="text-on-surface-variant mb-6 italic">"The forklift impact was avoidable. The sensors had been deactivated for maintenance and never re-engaged."</p>
+<ul class="space-y-4 text-sm text-on-surface-variant">
+<li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> <strong>Incident:</strong> Structural collapse of racking system</li>
+<li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> <strong>Root Cause:</strong> Lack of preventative inspections</li>
+<li class="flex items-center gap-3"><span class="w-1.5 h-1.5 rounded-full bg-primary"></span> <strong>Takeaway:</strong> Digital audit trails are mandatory</li>
 </ul>
 </div>
-<div class="bg-white p-12 border-l border-outline-variant/10">
-<div class="flex items-center gap-3 mb-6 text-primary">
-<span class="material-symbols-outlined" data-icon="check_circle">check_circle</span>
-<span class="font-bold uppercase tracking-widest">Safety Standard</span>
+<div class="lg:w-1/2" data-component-type="comparison">
+<div class="relative rounded-xl overflow-hidden h-[350px] group">
+<img class="absolute inset-0 w-full h-full object-cover" data-alt="Messy warehouse floor with tangled cables, spilled boxes, and dim yellow lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq6didY4De5sSNKkHcik-Q0bpcqCJTIg5axorKxXH9gjWhPrZPIVLYctNjmTcqkK3PLbAJcBCsArooBXXULsRgUuio-J7oII8m7t9rAJ5BXe7LSt-K_CpYzi68hmxKfx3a3hGg32AXathwXinaJyy6Xmif2WmcSXm6rXKbqbGct0Jwg6l7LdFfwnDsEnAav9UBLyi9fdOCDcylK_JdDExjjNSu84q8l7Ygli59gYVlhHUoOmp4oXTKaB4xYZoa_NZzG3W5DTOj7eDQ"/>
+<div class="absolute inset-0 bg-error/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="bg-background px-6 py-2 font-bold uppercase">Before</span>
 </div>
-<img class="w-full h-64 object-cover rounded-lg mb-8" data-alt="Clean organized workspace with cables secured in conduits and bright LED lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB27UwmHJPMzGATIB8EpwD02IU3GUS6j4UaWGAMQGgGGpEiWHOH6JldXp6TJTrcswSr6rnaCM8AYu7dtesCsX-7TfkQBy5NBOGTZ8xRYN6LrOhj1r3pwfaVI6QkU5FGdEWZqvvb_KlUyAJBuafN4WHTWUon0eBNZoifYy_Q2BK7raMJsryRFGwKSLxhwSa7_RSIPpq540_cTsEa-8ubU_D0CIUqghnxES7YSlADb2-SvnytlaohRU2ZG32XMsW5N-a5LGanHCx5jCA"/>
-<ul class="space-y-4 text-on-surface-variant font-light">
-<li>• Cable management systems installed</li>
-<li>• Clearly marked and cleared exit zones</li>
-<li>• High-output LED task lighting</li>
-</ul>
+</div>
 </div>
 </div>
 </div>
 </section>
-<!-- 17 & 18. Graphic + Checklist: Ergonomics -->
-<section class="py-32 px-8 bg-surface-container-low">
-<div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
-<div data-component-type="graphic">
-<h2 class="font-headline text-4xl font-bold mb-8">Ergonomic Principles</h2>
-<div class="relative bg-white p-12 rounded-2xl shadow-xl">
-<img class="w-full rounded-lg" data-alt="Professional office setup with ergonomic chair and desk, demonstrating proper posture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCltCJWhl4ZVdOHoUcYvqvbzAvAwA6DWcrhhYg4Oo77yz4IK_g4VmneQnG90NAXljAlbCIJlhPhUL7N1RBQPxdc3b5qkN-IZtnQgxsSZnrOe1k-gjLN-pZP-N5tXliW7AI3Ftj06X0hXfssqykD7DwFSQSKUOKNSyrQ18XUk7D493gIKIrxFVpIeZT-DzRNuUkLNHU-aoyxCTA8X1o4ssV8Hi4P5mQ8qo1xp0x2rA-ntQbD4sIYUdnBpaiQ2IzTba70hKQW4zOQ3i4"/>
-<div class="mt-8 grid grid-cols-2 gap-4">
-<div class="p-4 bg-surface-container-low rounded-lg text-sm"><strong>Eyes:</strong> Level with top third of screen.</div>
-<div class="p-4 bg-surface-container-low rounded-lg text-sm"><strong>Elbows:</strong> At 90-degree angle.</div>
+<!-- Section 9: Ergonomics -->
+<section class="py-32 px-8 max-w-7xl mx-auto" data-component-type="graphic">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+<div class="relative">
+<img class="rounded-3xl shadow-[0_0_60px_rgba(0,0,0,0.5)]" data-alt="Ultra-modern ergonomic office setup with minimalist desk, adjustable chair, and multiple screens with blue light filters" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDrg2CUFOt_wsTXRlpvK10v7dZEfZxj8BAHpY4m-tO0RhiaMt6neW-Q9r7Bep5jMm6hypVhaRZ6ACvRQrr9zNSp7tkYdP7WBAa-z0w-iJuglPYN0EPE7M_ftWo_JlEYI4Ont7fT-Qe-IQ64a8yl7eHAvPTldEEUiBSAfa29Y9Ngt1_3PfSew1ODPWD3SZWMr4F_yUMZQCeS3hIiabplEccsSmNk6mblDeR-F5rkxetfDhG249wk_scLtzjntpTnAC-YwQnQ5Eno7rRR"/>
+<div class="absolute top-10 right-10 flex flex-col gap-2">
+<div class="bg-primary text-on-primary-fixed w-10 h-10 rounded-full flex items-center justify-center font-bold">1</div>
+<div class="bg-primary text-on-primary-fixed w-10 h-10 rounded-full flex items-center justify-center font-bold">2</div>
 </div>
 </div>
-</div>
-<div data-component-type="checklist">
-<h2 class="font-headline text-4xl font-bold mb-8">Station Checklist</h2>
-<div class="bg-white p-10 rounded-2xl shadow-xl space-y-6" data-checklist="">
-<label class="flex items-center gap-4 cursor-pointer group">
-<input class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary" type="checkbox"/>
-<span class="text-lg font-light group-hover:text-primary transition-colors">Feet flat on the floor or footrest?</span>
+<div>
+<h2 class="text-4xl font-headline font-bold text-white mb-8">Ergonomic Architecture</h2>
+<p class="text-on-surface-variant mb-10">Optimizing the workspace for the human form to prevent musculoskeletal disorders (MSDs).</p>
+<div class="grid grid-cols-1 gap-4" data-component-type="checklist">
+<label class="flex items-center gap-4 bg-surface-container-high p-5 rounded-xl cursor-pointer hover:bg-surface-bright">
+<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<span class="font-headline font-medium">Monitor at eye level (20-30 inches away)</span>
 </label>
-<label class="flex items-center gap-4 cursor-pointer group">
-<input class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary" type="checkbox"/>
-<span class="text-lg font-light group-hover:text-primary transition-colors">Lower back supported by chair?</span>
+<label class="flex items-center gap-4 bg-surface-container-high p-5 rounded-xl cursor-pointer hover:bg-surface-bright">
+<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary" type="checkbox"/>
+<span class="font-headline font-medium">Chair provides lumbar back support</span>
 </label>
-<label class="flex items-center gap-4 cursor-pointer group">
-<input class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary" type="checkbox"/>
-<span class="text-lg font-light group-hover:text-primary transition-colors">Screen at arm's length distance?</span>
+<label class="flex items-center gap-4 bg-surface-container-high p-5 rounded-xl cursor-pointer hover:bg-surface-bright">
+<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary" type="checkbox"/>
+<span class="font-headline font-medium">Feet flat on floor or footrest</span>
 </label>
-<label class="flex items-center gap-4 cursor-pointer group">
-<input class="w-6 h-6 rounded-full border-2 border-primary text-primary focus:ring-primary" type="checkbox"/>
-<span class="text-lg font-light group-hover:text-primary transition-colors">Wrists straight when typing?</span>
+<label class="flex items-center gap-4 bg-surface-container-high p-5 rounded-xl cursor-pointer hover:bg-surface-bright">
+<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary" type="checkbox"/>
+<span class="font-headline font-medium">Elbows at 90-degree angle</span>
 </label>
 </div>
 </div>
 </div>
 </section>
-<!-- 19. Data Table -->
-<section class="py-32 px-8 bg-surface" data-component-type="data-table">
-<div class="max-w-5xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12 text-center">Incident Classification Matrix</h2>
-<div class="overflow-hidden rounded-2xl border border-outline-variant/10 shadow-sm">
+<!-- Section 10: Classification Matrix -->
+<section class="py-32 bg-surface-container-low" data-component-type="data-table">
+<div class="max-w-7xl mx-auto px-8">
+<h2 class="text-3xl font-headline font-bold text-white mb-12 uppercase tracking-tight">Incident Classification Matrix</h2>
+<div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
-<thead class="bg-surface-container-high font-bold">
-<tr>
-<th class="p-6">Severity Level</th>
-<th class="p-6">Description</th>
-<th class="p-6">Response Time</th>
+<thead>
+<tr class="border-b border-outline-variant/30 text-primary uppercase text-xs tracking-widest font-bold">
+<th class="py-6 px-4">Severity</th>
+<th class="py-6 px-4">Description</th>
+<th class="py-6 px-4">Response</th>
+<th class="py-6 px-4">Reporting</th>
 </tr>
 </thead>
-<tbody class="divide-y divide-outline-variant/10">
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-6 font-bold text-error flex items-center gap-2"><span class="w-3 h-3 bg-error rounded-full"></span> Critical</td>
-<td class="p-6 font-light">Life-threatening or major infrastructure damage.</td>
-<td class="p-6">Immediate / 0 mins</td>
+<tbody class="text-on-surface-variant text-sm">
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+<td class="py-6 px-4 font-bold text-white">Minor</td>
+<td class="py-6 px-4">First aid required only</td>
+<td class="py-6 px-4">On-site treatment</td>
+<td class="py-6 px-4">Within 24 Hours</td>
 </tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-6 font-bold text-tertiary flex items-center gap-2"><span class="w-3 h-3 bg-tertiary rounded-full"></span> Serious</td>
-<td class="p-6 font-light">Non-life threatening injury requiring medical aid.</td>
-<td class="p-6">&lt; 15 mins</td>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container transition-colors">
+<td class="py-6 px-4 font-bold text-white">Serious</td>
+<td class="py-6 px-4">Medical treatment / Lost time</td>
+<td class="py-6 px-4">External medical aid</td>
+<td class="py-6 px-4">Immediate / Verbal</td>
 </tr>
-<tr class="hover:bg-surface-container-low transition-colors">
-<td class="p-6 font-bold text-primary flex items-center gap-2"><span class="w-3 h-3 bg-primary rounded-full"></span> Minor</td>
-<td class="p-6 font-light">Small injury requiring first-aid kit only.</td>
-<td class="p-6">&lt; 60 mins</td>
+<tr class="border-b border-outline-variant/10 hover:bg-surface-container transition-colors bg-error/5">
+<td class="py-6 px-4 font-bold text-error">Critical</td>
+<td class="py-6 px-4">Permanent injury / Fatality</td>
+<td class="py-6 px-4">Emergency services</td>
+<td class="py-6 px-4">Statutory notification</td>
 </tr>
 </tbody>
 </table>
 </div>
+<div class="mt-20 max-w-4xl mx-auto text-center" data-component-type="pullquote">
+<blockquote class="text-4xl font-headline italic text-on-surface-variant leading-tight mb-8">
+                        "Safety is not an intellectual exercise to keep us in work. It is a matter of life and death. It is the sum of our contributions to managed risk."
+                    </blockquote>
+<cite class="text-primary font-bold uppercase tracking-widest not-italic">— Sir Brian Appleton</cite>
+</div>
 </div>
 </section>
-<!-- 20. Pullquote -->
-<section class="py-40 px-8 bg-surface-container-low relative" data-component-type="pullquote">
-<span class="absolute top-20 left-1/2 -translate-x-1/2 text-[200px] leading-none text-primary/5 font-black pointer-events-none select-none">“</span>
-<div class="max-w-4xl mx-auto text-center relative z-10">
-<blockquote class="text-4xl md:text-5xl font-headline font-extrabold italic text-on-surface leading-tight mb-10">
-                    "Safety is not an intellectual exercise to keep us in a good state of mind. It is a matter of life and death. It is the sum of our contributions to safety management."
-                </blockquote>
-<cite class="text-xl font-bold text-primary not-italic">— Sir Brian Appleton</cite>
-</div>
-</section>
-<!-- 21. Text Input -->
-<section class="py-32 px-8 bg-surface" data-component-type="textinput">
-<div class="max-w-2xl mx-auto bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/10">
-<h3 class="text-3xl font-bold mb-4">Personal Safety Commitment</h3>
-<p class="text-on-surface-variant font-light mb-8">Articulate one specific change you will make in your daily routine to improve safety.</p>
-<form class="space-y-6">
-<div>
-<label class="block text-sm font-bold mb-2 uppercase tracking-wide">My Commitment</label>
-<textarea class="w-full p-5 bg-surface-container-low rounded-xl border-2 border-transparent focus:border-primary/40 focus:ring-0 transition-all min-h-[150px] font-light" placeholder="e.g., I will clear my workstation cables every Friday..."></textarea>
-</div>
-<button class="bg-primary text-white font-bold py-4 px-10 rounded-full hover:scale-105 transition-transform shadow-lg shadow-primary/20" type="submit">Submit Commitment</button>
-</form>
-</div>
-</section>
-<!-- 22. Branching -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="branching">
-<div class="max-w-5xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12 text-center">What Would You Do?</h2>
+<!-- Section 11: Personal Commitment Form -->
+<section class="py-32 px-8 max-w-4xl mx-auto" data-component-type="textinput">
+<div class="bg-surface-container-high p-12 rounded-3xl border border-outline-variant/20 shadow-2xl">
+<h2 class="text-4xl font-headline font-bold text-white mb-8">Safety Commitment</h2>
+<form class="space-y-8">
 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-<button class="group p-10 bg-white rounded-2xl border-2 border-transparent hover:border-primary text-left transition-all shadow-md">
-<span class="material-symbols-outlined text-4xl text-primary mb-6" data-icon="report">report</span>
-<h4 class="text-2xl font-bold mb-4">Scenario A: The Oil Spill</h4>
-<p class="text-on-surface-variant font-light">You notice a large puddle of unidentified liquid in a high-traffic hallway. What is your first action?</p>
-<span class="mt-8 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform">Choose Path <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span></span>
+<div>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Full Name</label>
+<input class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4" type="text"/>
+</div>
+<div>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Department</label>
+<input class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Your Top Safety Priority</label>
+<textarea class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4 h-32"></textarea>
+</div>
+<button class="primary-gradient w-full py-5 rounded-full font-headline font-bold uppercase tracking-widest text-on-primary-fixed">Sign &amp; Finalize</button>
+</form>
+<div class="mt-16 p-8 bg-surface-container rounded-xl" data-component-type="branching">
+<h3 class="font-headline font-bold text-primary mb-4 uppercase text-sm">Branching Scenario: Chemical Spill</h3>
+<p class="text-sm text-on-surface-variant mb-6">You witness an unknown liquid leaking from a 45-gallon drum. What is your move?</p>
+<div class="flex gap-4">
+<button class="bg-surface-bright text-xs font-bold uppercase p-4 flex-1 rounded hover:bg-error transition-colors">Cleanup Immediately</button>
+<button class="bg-surface-bright text-xs font-bold uppercase p-4 flex-1 rounded hover:bg-primary hover:text-on-primary-fixed transition-colors">Secure Area &amp; Report</button>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 12: Media & Equipment -->
+<section class="py-32 bg-surface-container-low" data-component-type="media">
+<div class="max-w-7xl mx-auto px-8">
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-20">
+<div data-component-type="video-transcript">
+<div class="aspect-video bg-neutral-900 rounded-2xl flex items-center justify-center relative group overflow-hidden mb-8">
+<img class="absolute inset-0 w-full h-full object-cover opacity-60" data-alt="Cinematic still of a safety training video showing a fire extinguisher being used in a controlled lab setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwdav-aKJ-6ZrhXJZjoowbKIdsCK-GEyYqax0XdXf5CFvTLz7MIr12SbVDNLT6zh4GyVecYyzOh8D36YDKPZrzCyQBE7NwtC7c9HBdFgBkpIvXM3_eIRmlTdsXyEPE9m03zy_lyo4d-W8zQ3LBQZh21Gf0litdWv70IjLWuLR6RWLTSaQYE-sa4VgbJFjT8A57MXBj5zotaeKf_cIKKBtnRwZsw5F4Xj1G-JE9u7hZYdQMVWYaXxkskOlCfgwRxWiEgSP0tdISJlPV"/>
+<span class="material-symbols-outlined text-white text-8xl relative z-10 group-hover:scale-110 transition-transform cursor-pointer">play_circle</span>
+</div>
+<h3 class="text-2xl font-headline font-bold text-white mb-4 uppercase">PASS Technique</h3>
+<p class="text-on-surface-variant text-sm leading-relaxed">
+<strong>Transcript excerpt:</strong> "Pull the pin, Aim at the base of the fire, Squeeze the handle, Sweep from side to side. Remember, never turn your back on a fire even if it appears out..."
+                        </p>
+</div>
+<div data-component-type="labeled-image">
+<div class="relative bg-background p-4 rounded-2xl">
+<img class="rounded-xl" data-alt="Isolated red fire extinguisher on a dark background with anatomical markers pointing to key components" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCncmPO0dj94dzNvtvA0IS6XhbkSBou1H9lEmnJYJBWVLYXDn-iwg6zIYZ_CIEO_vbwTZj7q8510SirM5H3i2sl8mDYhE6Iot88IU8d0cB1TJX_l0hKT2dBeLxP_pD3dfSncyMgHYxCdJs03MU0yef001L2ySF66YF0eM0skvXjkm6ZWDffrLRqYX07PaDwprWo0xS4EWApw_-fUmePQEGR6DWmdID333DT71aSHQiZ9HA3Da1r3WNR1BeGFwGzSgASozB3oQ_tibiH"/>
+<!-- Markers -->
+<div class="absolute top-[5%] left-[50%] w-6 h-6 bg-primary rounded-full border-2 border-white animate-pulse"></div>
+<div class="absolute top-[15%] left-[50%] w-6 h-6 bg-primary rounded-full border-2 border-white"></div>
+<div class="absolute top-[30%] left-[30%] w-6 h-6 bg-primary rounded-full border-2 border-white"></div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20" data-component-type="image-gallery">
+<div class="group relative overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Close-up of a high-visibility yellow hard hat with reflective tape and workplace debris" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBFAtC4yrV7pGZ4QzeYrgoRkbJPKqQKY51wGM_Jg5Kk5VechTmbv9HkupbN66tS8SIth2EAvfxZwX_5YsLf9R_3wuWbm3rNdsU8Q7SuYXfWnlSfgHz_G2jH8JpnzkL2sjVsXFBvBuJ2r95HPqL8StMmM825eA2uiwoABsCuuxH0OZHGQE_FcoDAu5lT9GnpvzPLT33q6QBSIhP9XFbRwj_bmg2GKhaDjtnIwyxQpGSMKGTRXWX2xLQFgcoBqFQ3qhdFOZNaSLUv7fjn"/>
+<div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold uppercase">Hard Hat</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Impact resistant safety goggles with clear lenses and blue frames resting on a technical diagram" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9fMVeKdR8tbzB8gUTlKrQ10znjY5hXV5IsOC9b35Ij53l9i0y35hYn2azXQh8pQxFA29AMmtZ9v6BIRAcMkBWYvAkKunyUYPO8oV86cYMETxQC9AOZfZ0v5mXp0UFSeRwuicG-zRNeppFVJXFG0--vPSz8DVTfHFMaT3HXC5rDW8e6Vq08e0Mvt18MSkoyAL7zlv7X6Om_FZLlzYXi7fydSwZEfu0xlpdOxNZdIWi8_xLx_z45p-ZhkV02rc8in5HUWI4iDexEy1D"/>
+<div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold uppercase">Goggles</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Heavy duty safety vest with high-reflectivity strips hanging in a locker room" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBxYR1UnfQV2W2pB_JFdY6rNze4HXQiKiOgrQrvbdvZH0Ay9T3OAF6rMpsh42VI941ZeLATDifkBP_pJ3hYyo0S0LNClHHOvikcvgVPzSSAnaQfKH1seg1mJpBPB7WGmFFg7U7DQdzyHQTb4Z2Iq5twKJ-36ftos1W1yNMxNhyrm6IriH208jHhEscRHQSwt-h5854vQTH-E5hsewgAWZLUrXCt6haC2_qj-r8He83e6a7o7h-STgjlbgw5UTWuP1od6VYb9yMa-v6K"/>
+<div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold uppercase">High-Vis</div>
+</div>
+<div class="group relative overflow-hidden rounded-xl aspect-square">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform" data-alt="Noise-cancelling industrial ear defenders on a dark metal table" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCvvV50ChM1Rw9SKfCK_8ZS3xxF9N4lVc32mP23PraIT6PFTl5G1fJ_1fi6OSRG8VKgR6AJHHN4QzvT8jpAy3lP2wf4Y7-WbxBXVJ0lz5ZtolZY2t2x-FNhm3Faubxu8CIMedTAozreE1IKqyuhkbO10UdW4xZ5H2M8r58xCZN5DGOgZWkyLHHymW9wyYub-kEAlz9tWlhr0CPqWfcV9XZNOSZhkHwlMew4ctnEitR9bqkEdgjOkmg9hGFOP5xZOcG5WZ-Na0YtUc6E"/>
+<div class="absolute inset-0 bg-primary/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center font-bold uppercase">Ear Defenders</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Section 13: Final Assessment -->
+<section class="py-32 px-8 max-w-4xl mx-auto" data-component-type="mcq" id="assessment">
+<div class="bg-surface-container-high p-16 rounded-[2rem] border-2 border-primary/30 shadow-[0_0_100px_rgba(161,250,255,0.1)]" data-quiz="">
+<div class="flex items-center gap-4 mb-8">
+<span class="bg-primary text-on-primary-fixed p-3 rounded-full flex items-center justify-center">
+<span class="material-symbols-outlined font-bold">assignment_turned_in</span>
+</span>
+<h2 class="text-3xl font-headline font-bold uppercase tracking-tight">Final Assessment</h2>
+</div>
+<h3 class="text-2xl font-body font-medium text-white mb-12">You encounter an unknown chemical spill in the main hallway. What is your FIRST response?</h3>
+<div class="grid grid-cols-1 gap-4">
+<button class="w-full text-left p-8 rounded-2xl bg-surface-bright border border-outline-variant/10 hover:border-primary transition-all flex justify-between items-center group" data-choice="" data-correct="0">
+<span class="font-headline font-bold text-lg">Secure the area and report it to a supervisor</span>
+<span class="material-symbols-outlined text-primary opacity-0 group-hover:opacity-100">task_alt</span>
 </button>
-<button class="group p-10 bg-white rounded-2xl border-2 border-transparent hover:border-primary text-left transition-all shadow-md">
-<span class="material-symbols-outlined text-4xl text-primary mb-6" data-icon="construction">construction</span>
-<h4 class="text-2xl font-bold mb-4">Scenario B: Broken Guard</h4>
-<p class="text-on-surface-variant font-light">A colleague is using a machine with a missing safety guard because they are behind schedule. How do you intervene?</p>
-<span class="mt-8 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform">Choose Path <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span></span>
+<button class="w-full text-left p-8 rounded-2xl bg-surface-container-highest border border-outline-variant/10 hover:bg-surface-bright transition-all" data-choice="">
+<span class="font-headline font-bold text-lg">Look for a mop and cleanup kit immediately</span>
+</button>
+<button class="w-full text-left p-8 rounded-2xl bg-surface-container-highest border border-outline-variant/10 hover:bg-surface-bright transition-all" data-choice="">
+<span class="font-headline font-bold text-lg">Ignore it if it's not in your workspace</span>
 </button>
 </div>
 </div>
 </section>
-<!-- 23. Media -->
-<section class="py-32 px-8 bg-surface" data-component-type="media">
-<div class="max-w-6xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12 text-center">Emergency Evacuation Drill Walkthrough</h2>
-<div class="relative aspect-video rounded-3xl overflow-hidden shadow-2xl group">
-<img class="w-full h-full object-cover" data-alt="CCTV-style perspective of a modern hallway with emergency lighting active, clean and focused" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD55PhYXRIsmdSL4nhZYj-tF9vFHJL0OIhHtFEchod8zuseJOLfClH6M4HHqINmKdmdloYBkOMH3m3j7Hi0hbRbfJU-QUg1deagBiwAk91hrFIZtzL5np2RHLNckp-YhYO4cVJtu70gjum140zFZLq9Ld48_GsfIo2nSku6-ZpUM3POsuqWTbp4WOLZm7lm7VPMViCIbLKcQHe6rgzBNwlRukpaosxh9AkmcKkUd40DwcuSbUfTWk6vcFprUjzj_O7oToVTI9XxtNM"/>
-<div class="absolute inset-0 flex items-center justify-center bg-black/40 group-hover:bg-black/20 transition-all cursor-pointer">
-<div class="w-24 h-24 bg-white/30 backdrop-blur-md rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-<span class="material-symbols-outlined text-white text-5xl" data-icon="play_arrow" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- 24. Video Transcript -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="video-transcript">
-<div class="max-w-4xl mx-auto">
-<h2 class="font-headline text-3xl font-bold mb-8">Fire Extinguisher Training — PASS Technique</h2>
-<div class="bg-white rounded-2xl overflow-hidden shadow-lg">
-<div class="p-8 border-b border-outline-variant/10 bg-surface-container-high font-bold flex items-center gap-3">
-<span class="material-symbols-outlined text-primary" data-icon="description">description</span>
-                        Video Transcript
-                    </div>
-<div class="p-8 max-h-60 overflow-y-auto font-light leading-relaxed text-on-surface-variant">
-<p class="mb-4"><strong>[00:00]</strong> Welcome to the fire safety practical session. Today we cover the P.A.S.S. technique.</p>
-<p class="mb-4"><strong>[00:15]</strong> P is for Pull the pin. This allows you to discharge the extinguisher.</p>
-<p class="mb-4"><strong>[00:30]</strong> A is for Aim. Always aim the nozzle at the base of the fire, not the flames.</p>
-<p class="mb-4"><strong>[00:45]</strong> S is for Squeeze. Squeeze the handle to release the agent.</p>
-<p class="mb-4"><strong>[01:00]</strong> S is for Sweep. Sweep side to side until the flames are fully extinguished.</p>
-</div>
-</div>
-</div>
-</section>
-<!-- 25. Labeled Image -->
-<section class="py-32 px-8 bg-surface" data-component-type="labeled-image">
-<div class="max-w-5xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12 text-center">Fire Extinguisher Anatomy</h2>
-<div class="relative max-w-2xl mx-auto">
-<img class="w-full rounded-2xl" data-alt="Studio shot of a standard red fire extinguisher against a neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9vLZsOpmFH5Ql_4mJJzUtqhn4CMUNS0NBORReb-dc-lCuUVU_QlT6YK9Wm9BF1eOBI3fn1J90QO-uIc9WxlG5G1wkLCDKItjQCHi9hxFj3NyxARKBuFVgnuJ5fUbRAtr5h0Pl1Z0J58eK1Ic4l7yWWL2jgjFtjjMty56f8k9YJJZg0nPLvZt9f6tvOEPhTERHIeVfqHI8Gv6SxQYk1WcMXm7HYpNLQ5JwSldiRhWUARV3l4WSq4Hsl_Pa5m_7pWANeQ5IFx7N4qw"/>
-<!-- Marker 1 -->
-<div class="absolute top-[20%] left-[50%] group">
-<div class="w-8 h-8 bg-primary rounded-full border-4 border-white shadow-lg animate-pulse cursor-pointer"></div>
-<div class="absolute left-10 top-0 bg-white p-4 rounded-lg shadow-xl w-48 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none">
-<p class="font-bold text-sm">Discharge Lever</p>
-<p class="text-xs font-light">Squeeze this to release the contents.</p>
-</div>
-</div>
-<!-- Marker 2 -->
-<div class="absolute top-[35%] left-[30%] group">
-<div class="w-8 h-8 bg-primary rounded-full border-4 border-white shadow-lg animate-pulse cursor-pointer"></div>
-<div class="absolute right-10 top-0 bg-white p-4 rounded-lg shadow-xl w-48 opacity-0 group-hover:opacity-100 transition-opacity z-20 pointer-events-none text-right">
-<p class="font-bold text-sm">Pressure Gauge</p>
-<p class="text-xs font-light">Ensure the needle is in the green zone.</p>
-</div>
-</div>
-</div>
-</div>
-</section>
-<!-- 26. Image Gallery -->
-<section class="py-32 px-8 bg-surface-container-low" data-component-type="image-gallery">
-<div class="max-w-7xl mx-auto">
-<h2 class="font-headline text-4xl font-bold mb-12">Safety Equipment Gallery</h2>
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-<div class="aspect-square rounded-2xl overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Yellow hard hat on a concrete floor, sharp focus, industrial lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuACJCTygaIoKo_Nj-aTKOIh6d7msoFs7nqrsSKyar36iOdSns621k40px3H1TfkOYNj39xO2TeyRXpMUIMi2GBUMGR0lvGTdv0Bcsx4yjxrYln-A5BXxbhmpEB_iZinc4UI-EToXkuz59VG52gwYhXBdt19_tXahcqFfMSII30wskj5E7nStmGfeXXRPLqzNlAD8HTwUc864ArRihV2YDnDR3sSlSdrEApTQsWlHnhCsk4retL6KYe8YpVSTZikkZPVkl3ML_eWySY"/>
-</div>
-<div class="aspect-square rounded-2xl overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Clear safety goggles resting on a blueprints, professional engineering vibe" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIsPHG5-2NHfo5L1mbLM0_NMYfNPF64XFZhNvDUAZz_j8EBxisGX73zKJC9pehm3WZh44YeXyZEkEafG213_e6MhhEXShTTjA8kKp9syjdrrsq58CL6h-fQo-u6mELHOmh7a5huTHnhttoMrzZRyCCRuHWvqV_MEqwS4ZCteQjFeOOnZ1rkxmjLTwkkfze4Up481ap1aZeWIyBvOjKfBqzmkiG_Z98uRUBf3UovWfJh4O6KlmaUcV1mpX77GPRkZUpkP9UbVHSEAc"/>
-</div>
-<div class="aspect-square rounded-2xl overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="High-visibility orange safety vest with reflective strips, hanging on a locker" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRVVsNiQV0fJEBxYf5Kzs1q-0vfO9I2tXi19dSY4gEswIkcw-hWLGtEkp5awXn-e99cigTNUj9jpaHYAmwpPUu4E-1L9ZL1ukbc1_aae-f9YXv3JLsbTY63fwxgnp0MVfOac90ymSuNiBAgAkJGwAbqPE6m51kEDC_e0tGz3GvmBZPOUDgCRqqejSdJnadORwzaYr8mSXdnnx2wWjM681LjfZFNXy6pGZjhWfMTzB5yFTxrE3r-9YvuPTBsf6X8dl8t6GthU1UUTk"/>
-</div>
-<div class="aspect-square rounded-2xl overflow-hidden group">
-<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" data-alt="Professional noise-canceling ear defenders, sleek design, grey background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALXNfWsZJ3ypOyIktLc3vT67jDvHaGJ5nwA2eNMbe4T49KLtjZavEPgA3x1swZmmqTO543RBsQmPCLowP6yCQivbnTpSNFmC10eUErw1Th3Z17ZkKsOFL-zNFkMsdKkyw09ExFIu1IRVF6n5CHm3iBA6m6zwK9gQMp70NYc45JIVBYgnn6kTfGPAKVRhD3lY6POxqh3yNK5FI2pY66cyeX7q-5DDEV9238pZ5Z3ktsFSUPOEvpp6BVqmoRF6YN051ABMeL8JdLPCE"/>
-</div>
-</div>
-</div>
-</section>
-<!-- 27. Final Assessment -->
-<section class="py-32 px-8 bg-surface" data-component-type="mcq">
-<div class="max-w-3xl mx-auto bg-primary rounded-3xl p-16 text-white shadow-2xl relative overflow-hidden" data-quiz="">
-<div class="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full blur-3xl"></div>
-<div class="relative z-10">
-<span class="text-primary-fixed font-bold uppercase tracking-widest text-sm">Final Assessment</span>
-<h3 class="text-3xl font-bold mt-2 mb-10">In the event of a fire, what is the correct priority sequence?</h3>
-<div class="space-y-4">
-<button class="w-full text-left p-6 rounded-xl bg-white/10 border-2 border-white/20 hover:bg-white/20 transition-all" data-choice="0" data-correct="false">
-                            1. Save Equipment, 2. Alert Others, 3. Call 911
-                        </button>
-<button class="w-full text-left p-6 rounded-xl bg-white/10 border-2 border-white/20 hover:bg-white/20 transition-all" data-choice="1" data-correct="true">
-                            1. Life Safety, 2. Incident Stabilization, 3. Property Conservation
-                        </button>
-<button class="w-full text-left p-6 rounded-xl bg-white/10 border-2 border-white/20 hover:bg-white/20 transition-all" data-choice="2" data-correct="false">
-                            1. Call Manager, 2. Find Fire Extinguisher, 3. Evacuate
-                        </button>
-</div>
-</div>
-</div>
-</section>
-<!-- 28. Congratulations -->
-<section class="py-40 px-8 bg-surface-container-low text-center" data-component-type="text">
-<div class="max-w-2xl mx-auto">
-<div class="w-24 h-24 bg-primary rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl shadow-primary/30">
-<span class="material-symbols-outlined text-white text-5xl" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
-</div>
-<h2 class="font-headline text-5xl font-black mb-6">Congratulations</h2>
-<p class="text-xl text-on-surface-variant font-light mb-12 leading-relaxed">You have completed the Workplace Safety Fundamentals course. Your commitment to safety ensures a better work environment for everyone.</p>
-<button class="bg-primary text-white font-bold py-5 px-12 rounded-full hover:scale-105 transition-transform flex items-center gap-3 mx-auto">
-                    Download Certificate
-                    <span class="material-symbols-outlined" data-icon="download">download</span>
-</button>
+<!-- Section 14: Congratulations -->
+<section class="py-48 text-center px-8 bg-gradient-to-t from-surface-container-lowest to-transparent" data-component-type="text">
+<span class="material-symbols-outlined text-9xl text-primary mb-12 animate-bounce">verified</span>
+<h2 class="text-7xl font-headline font-bold text-white mb-6 uppercase tracking-tighter">Congratulations</h2>
+<p class="text-on-surface-variant text-xl max-w-2xl mx-auto font-light leading-relaxed">
+                You have completed the Workplace Safety Fundamentals curriculum. You are now equipped with the precision mindset required for operational excellence.
+            </p>
+<div class="mt-16 flex justify-center gap-6">
+<button class="primary-gradient text-on-primary-fixed px-10 py-4 rounded-full font-bold uppercase tracking-widest hover:scale-105 transition-transform">Download Certificate</button>
+<button class="bg-surface-container-highest px-10 py-4 rounded-full font-bold uppercase tracking-widest hover:bg-surface-bright transition-colors">Course Feedback</button>
 </div>
 </section>
 </main>
 <!-- Footer -->
-<footer class="w-full py-12 px-8 mt-20 bg-slate-50 border-t border-slate-100" data-component-type="Footer">
-<div class="flex flex-col md:flex-row justify-between items-center gap-6 max-w-7xl mx-auto">
-<div class="flex flex-col items-center md:items-start">
-<span class="font-['Manrope'] font-bold text-slate-900 text-xl">Workplace Safety Fundamentals</span>
-<span class="font-['Inter'] font-light text-sm tracking-wide text-slate-600 mt-1">© 2024 Ethereal Academy. All rights reserved.</span>
+<footer class="bg-neutral-950 border-t border-neutral-800/30 w-full py-12 px-8" data-component-type="Footer">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-7xl mx-auto">
+<div>
+<span class="text-lg font-bold text-white mb-4 block font-headline uppercase tracking-tighter">Workplace Safety Fundamentals</span>
+<p class="font-['Inter'] text-xs text-neutral-500 max-w-xs">
+                    Advancing industrial safety standards through architectural precision and data-driven learning.
+                </p>
 </div>
-<div class="flex gap-8">
-<a class="text-slate-500 hover:text-violet-600 transition-colors" href="#">Privacy Policy</a>
-<a class="text-slate-500 hover:text-violet-600 transition-colors" href="#">Terms of Service</a>
-<a class="text-slate-500 hover:text-violet-600 transition-colors" href="#">Accessibility</a>
-<a class="text-slate-500 hover:text-violet-600 transition-colors" href="#">Contact</a>
+<div class="flex flex-col md:items-end justify-between">
+<div class="flex gap-8 mb-8">
+<a class="text-neutral-500 hover:text-neutral-300 font-['Inter'] text-xs transition-colors" href="#">Privacy Policy</a>
+<a class="text-neutral-500 hover:text-neutral-300 font-['Inter'] text-xs transition-colors" href="#">Safety Standards</a>
+<a class="text-neutral-500 hover:text-neutral-300 font-['Inter'] text-xs transition-colors" href="#">Technical Support</a>
+<a class="text-neutral-500 hover:text-neutral-300 font-['Inter'] text-xs transition-colors" href="#">Compliance Docs</a>
+</div>
+<div class="font-['Inter'] text-xs text-neutral-500">
+                    © 2024 Workplace Safety Fundamentals. Kinetic Architect Systems.
+                </div>
 </div>
 </div>
 </footer>

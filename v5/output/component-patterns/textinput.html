@@ -1,13 +1,30 @@
-<section class="py-32 px-8 bg-surface" data-component-type="textinput">
-<div class="max-w-2xl mx-auto bg-white p-12 rounded-2xl shadow-xl border border-outline-variant/10">
-<h3 class="text-3xl font-bold mb-4">Personal Safety Commitment</h3>
-<p class="text-on-surface-variant font-light mb-8">Articulate one specific change you will make in your daily routine to improve safety.</p>
-<form class="space-y-6">
+<section class="py-32 px-8 max-w-4xl mx-auto" data-component-type="textinput">
+<div class="bg-surface-container-high p-12 rounded-3xl border border-outline-variant/20 shadow-2xl">
+<h2 class="text-4xl font-headline font-bold text-white mb-8">Safety Commitment</h2>
+<form class="space-y-8">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 <div>
-<label class="block text-sm font-bold mb-2 uppercase tracking-wide">My Commitment</label>
-<textarea class="w-full p-5 bg-surface-container-low rounded-xl border-2 border-transparent focus:border-primary/40 focus:ring-0 transition-all min-h-[150px] font-light" placeholder="e.g., I will clear my workstation cables every Friday..."></textarea>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Full Name</label>
+<input class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4" type="text"/>
 </div>
-<button class="bg-primary text-white font-bold py-4 px-10 rounded-full hover:scale-105 transition-transform shadow-lg shadow-primary/20" type="submit">Submit Commitment</button>
+<div>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Department</label>
+<input class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4" type="text"/>
+</div>
+</div>
+<div>
+<label class="block text-xs uppercase text-on-surface-variant font-bold mb-3">Your Top Safety Priority</label>
+<textarea class="w-full bg-surface-container-highest border-none border-b-2 border-outline-variant focus:border-primary focus:ring-0 text-white p-4 h-32"></textarea>
+</div>
+<button class="primary-gradient w-full py-5 rounded-full font-headline font-bold uppercase tracking-widest text-on-primary-fixed">Sign &amp; Finalize</button>
 </form>
+<div class="mt-16 p-8 bg-surface-container rounded-xl" data-component-type="branching">
+<h3 class="font-headline font-bold text-primary mb-4 uppercase text-sm">Branching Scenario: Chemical Spill</h3>
+<p class="text-sm text-on-surface-variant mb-6">You witness an unknown liquid leaking from a 45-gallon drum. What is your move?</p>
+<div class="flex gap-4">
+<button class="bg-surface-bright text-xs font-bold uppercase p-4 flex-1 rounded hover:bg-error transition-colors">Cleanup Immediately</button>
+<button class="bg-surface-bright text-xs font-bold uppercase p-4 flex-1 rounded hover:bg-primary hover:text-on-primary-fixed transition-colors">Secure Area &amp; Report</button>
+</div>
+</div>
 </div>
 </section>
