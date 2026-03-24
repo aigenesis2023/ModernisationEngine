@@ -1,40 +1,41 @@
-# DESIGN.md — Landio Brand Brief
+# DESIGN.md — Brand Brief
 
 ## Visual Theme & Atmosphere
-Dark, sleek, tech-forward, premium. A sophisticated AI/SaaS aesthetic built on deep blacks and near-black surfaces with crisp white typography and subtle accent glows. Feels cutting-edge and authoritative — like a premium enterprise software product. Minimal, clean, and professional with understated elegance.
+Light, airy, modern, approachable. A clean SaaS product feel with soft purple-violet accents on a bright white foundation. Friendly and professional — the atmosphere evokes trust and innovation without being intimidating. Gentle gradients and rounded shapes create a warm, welcoming experience.
 
 ## Colour Palette & Roles
-- **Background:** Deep black to very dark charcoal — near-black surfaces with subtle gradient depth
-- **Text primary:** Pure white for headlines and key text — maximum contrast against dark backgrounds
-- **Text secondary:** Soft gray-white for body copy and supporting text — readable but less prominent
-- **Accent/CTA:** Clean white buttons with dark text for primary calls-to-action — high contrast pill shapes
-- **Surface containers:** Very dark gray cards with subtle borders — slightly lifted from the background with thin white/gray outline strokes
-- **Glow effects:** Subtle cool blue-purple ambient glow around featured elements — understated and atmospheric
-- **Borders:** Thin gray-white lines at low opacity separating sections and cards
+- **Background:** Clean white — the dominant canvas
+- **Surface:** Very light grey with a hint of lavender — for cards and elevated containers
+- **Primary / Accent:** Soft purple-violet — used for call-to-action buttons, highlighted text, and interactive elements. This is the signature brand colour.
+- **Secondary:** Light periwinkle blue — used for subtle gradients and secondary highlights
+- **Gradient:** A gentle gradient from soft purple through lavender to light pink — used as decorative background accents
+- **Text — Primary:** Dark charcoal, nearly black — for headlines and body content
+- **Text — Secondary:** Medium grey — for descriptions and supporting text
+- **Borders:** Very light grey, subtle and soft — delicate separation between elements
 
 ## Typography Rules
-- **Headings:** Large, bold sans-serif with tight tracking — display-weight for maximum impact. Mixed-weight headlines where key words are in italic or different weight for emphasis. Use INTER or SPACE_GROTESK
-- **Body text:** Clean, light-weight sans-serif in gray-white — small to medium size for readability against dark backgrounds. Use INTER
-- **Navigation:** Small, uppercase tracking-wide sans-serif links with subtle hover states
-- **Accent text:** Small badges with subtle backgrounds — "NEW" labels, category tags
+- **Headlines:** Bold modern sans-serif, clean and confident. Use DM_SANS or INTER for geometric clarity.
+- **Body text:** Light-weight sans-serif, highly readable with generous line height. Use INTER for comfort.
+- **Accent text:** Purple-coloured text used to highlight key phrases within headlines — a signature brand treatment.
 
 ## Component Stylings
-- **Buttons:** Pill-shaped (fully rounded) with solid white fill and dark text for primary CTAs. Secondary buttons use ghost style with thin white borders
-- **Cards:** Dark surface cards with thin border strokes in gray/white at low opacity. Subtle hover lift effects. Rounded corners (medium radius)
-- **Navigation:** Minimal sticky header with logo left, text links center, CTA button right. Semi-transparent dark background with backdrop blur
-- **Hero sections:** Full-width dark backgrounds with centered text, large display headlines, and gradient ambient effects
-- **Badges:** Small pill-shaped labels with subtle dark backgrounds and light text
+- **Buttons:** Rounded pill-shaped with purple-violet fill for primary actions. White text. A secondary outlined variant with rounded shape.
+- **Cards:** Light, barely-elevated panels with soft shadows and generous border radius (16-24px). Clean and minimal.
+- **Navigation:** Clean white header bar with logo left, navigation links centre, CTA button right. Simple and uncluttered.
+- **Avatar groups:** Overlapping circular avatars used as social proof — a common SaaS pattern.
+- **Badges:** Small pill-shaped indicators with light purple background.
 
 ## Layout Principles
-- **Generous whitespace** on dark backgrounds — content breathes with ample vertical spacing
-- **Centered layouts** — hero content, section headings, and CTAs are center-aligned
-- **Clean grid structure** for cards and feature sections — well-organized with consistent spacing
-- **Full-width sections** with contained content — dark backgrounds extend edge-to-edge
-- **Hierarchical typography** — large headlines draw attention, body text supports
+- Very generous whitespace — spacious and breathing
+- Content centred with comfortable max-width
+- Hero section uses large typography with a soft gradient background element
+- Card-based layouts for features and content below the fold
+- Light mode throughout — no dark mode variant
 
 ## Image Treatment
-- **Photographic mood:** Dark, moody, low-key lighting
-- **Lighting:** Dramatic shadows with subtle cool highlights — tech-noir atmosphere
-- **Colour temperature:** Cool — blues and purples in shadows, neutral whites in highlights
-- **Composition:** Clean, minimal product/UI screenshots or abstract tech imagery
-- **Overall feel:** Premium, polished, enterprise-grade — dark and sophisticated
+- **Photographic mood:** Bright, well-lit, optimistic
+- **Colour temperature:** Cool undertones — soft purples, lavenders, light blues
+- **Composition:** Clean, professional, people-focused with soft backgrounds
+- **Atmosphere:** Fresh and modern — bright even lighting with gentle soft-focus backgrounds
+
+## colorMode: LIGHT
