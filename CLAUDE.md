@@ -85,10 +85,6 @@ engine/
   scorm-parser.js                      ← V1 browser-based SCORM parser (reference only)
   brand-scraper.js                     ← V1 browser-based brand scraper (reference only)
 
-blade-runner-engine/                   ← V3 React renderer (LEGACY — kept as reference)
-  src/                                 ← React components, CSS, theme engine
-  package.json                         ← React/Vite deps (node_modules removed)
-
 v4/                                    ← ALL ACTIVE V4 CODE
   schemas/
     content-bucket.schema.json         ← Extraction output format
@@ -118,7 +114,6 @@ v4/                                    ← ALL ACTIVE V4 CODE
     course.html                        ← Final single-file output (467KB)
 
 EV/                                    ← Test SCORM (108 slides, gitignored in Codespace)
-TEST SCORM/                            ← Small test SCORM (committed)
 ```
 
 ---
@@ -280,17 +275,21 @@ GitHub Pages serves from root `index.html` (main branch). `build-course.js` writ
 ## ⛔ ABSOLUTE RULES
 
 ### UNIVERSAL ENGINE
-Every change must work for ANY Storyline SCORM file. Test files are diagnostic tools, not the product.
+The purpose of every conversation is to improve the **engine** — the scripts, prompts, schemas, and templates that power the pipeline. The test SCORM file (`EV/`, gitignored) and test brand URL are **diagnostic tools only**. We run them through the pipeline to verify the engine works, the same way you'd run a test suite. If the output looks wrong, the question is always "what's wrong with the engine?" — never "how do I patch this specific output?"
 
-**ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA.**
+Every change must work for ANY Storyline SCORM file and ANY brand URL. A fix that makes the EV course look better but wouldn't help a different SCORM file is the wrong fix.
+
+**ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
 When a visual issue is found, the fix goes in:
 - Templates: `v4/scripts/build-course.js` (component template functions)
 - Hydration: `v4/scripts/hydrate.js` (interactivity logic)
 - Extraction: `v4/scripts/extract.js` (SCORM parsing)
 - Layout: `v4/scripts/design-course.js` (content structuring)
+- Layout prompt: `v4/prompts/layout-engine.md` (AI layout instructions)
 - Stitch prompt: `v4/scripts/generate-course-html.js` (design instructions)
+- Schemas: `v4/schemas/` (component definitions, output formats)
 
-NEVER edit output files (`v4/output/*.json`, `v4/output/*.html`) to fix problems.
+NEVER edit output files (`v4/output/*.json`, `v4/output/*.html`) to fix problems. NEVER tailor engine logic to one specific SCORM file or brand — every decision must be generic.
 
 ### STITCH IS THE DESIGNER
 Stitch designs the visual system. We don't hardcode design decisions. The build script extracts Stitch's Tailwind config and CSS patterns and uses them as templates. Different SCORM + different brand → different Stitch design → different visual output.

@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "course-layout.schema.json",
   "title": "Course Layout",
-  "description": "Output of the AI layout engine. Defines the complete course structure: sections, components, and image prompts. This JSON is consumed by the React renderer (blade-runner-engine) and the image generator script.",
+  "description": "Output of the AI layout engine. Defines the complete course structure: sections, components, and image prompts. This JSON is consumed by build-course.js and the image generator script.",
 
   "type": "object",
   "required": ["course", "sections"],
