@@ -149,23 +149,32 @@ Extracts all educational content from the SCORM file:
 
 ### Phase 2 — Brand Analysis (`v5/scripts/scrape-brand.js`)
 **Input:** Brand URL
-**Output:** `v5/output/brand-profile.json` + `v5/output/brand-design.md`
+**Output:** `v5/output/brand-profile.json` + `v5/output/brand-design.md` + `v5/output/brand-screenshot.png`
 
-Uses **Playwright** to visit the landing page (the exact URL provided — no sub-pages), take a screenshot, and extract **computed styles from visible elements**. This is far more reliable than parsing raw CSS, which picks up platform defaults and unused styles:
-- Launches headless Chromium, navigates to URL, waits for render
-- Takes a screenshot → `brand-screenshot.png` (for future vision API / IMAGE_TO_UI)
-- Extracts computed styles from buttons (primary colour), headings (fonts), body text, cards (style)
-- Filters out browser/platform default colours (Framer `#0099ff`, browser `#0000ee`, etc.)
-- Only sees what the browser actually renders — no CSS parsing artifacts
-- Maps fonts to Stitch's 28 supported fonts (closest match)
-- Maps visual patterns to Stitch vocabulary (roundness, spacingScale, colorVariant)
-- Detects theme (light/dark) using multiple signals
-- Generates `brand-design.md` in DESIGN.md format:
-  - Visual Theme & Atmosphere (evocative adjectives)
-  - Colour Palette & Roles (semantic names + hex)
-  - Typography Rules (Stitch-supported font names)
-  - Component Stylings (button shapes, card styles, border treatments)
-  - Layout Principles (whitespace strategy, grid patterns)
+Uses **Playwright** to visit the **landing page only** (the exact URL provided — no sub-pages) and take a screenshot. The screenshot is then described in **natural language** using design vocabulary — this is what Stitch wants. No hex codes, no CSS parsing. Stitch is trained on natural language design briefs, not colour dumps.
+
+**How the brand description works (two modes, same pattern as Phase 3):**
+
+**Manual mode (no `ANTHROPIC_API_KEY`):**
+1. Playwright visits the URL, takes screenshot → `brand-screenshot.png`
+2. Script outputs the screenshot path and pauses
+3. **Claude Code (in conversation) views the screenshot and writes a natural language design description**
+4. Description is saved as `brand-design.md` in DESIGN.md format
+5. This is real work — Claude Code must describe the visual design like a professional designer
+
+**API mode (when `ANTHROPIC_API_KEY` is set):**
+1. Playwright visits the URL, takes screenshot → `brand-screenshot.png`
+2. Script sends the screenshot to Claude Vision API automatically
+3. Claude Vision returns a natural language design description
+4. Description is saved as `brand-design.md` — no manual step needed
+
+**The brand brief (brand-design.md) must be pure natural language in Stitch's DESIGN.md format:**
+- Visual Theme & Atmosphere (evocative adjectives — "dark, moody, glass-forward")
+- Colour descriptions in words ("vibrant lime green buttons on near-black background")
+- Typography descriptions ("bold modern sans-serif headings, clean body text")
+- Component styles ("pill-shaped buttons, frosted glass cards with backdrop blur")
+- Layout feel ("generous whitespace, premium spacing")
+- NO hex codes, NO CSS values — Stitch interprets natural language with its own design intelligence
 
 ### Phase 3 — AI Layout Engine (`v5/scripts/design-course.js`)
 **Input:** `content-bucket.json` + `brand-profile.json` + `layout-engine.md`
@@ -369,8 +378,10 @@ node v5/scripts/extract.js EV
 
 ### Phase 2 — Brand scrape
 ```bash
-node v5/scripts/scrape-brand.js "<brand-url>"
+node v5/scripts/scrape-brand.js
 ```
+Script reads URL from `brand/url.txt`, visits with Playwright, takes screenshot.
+**Claude Code then views `brand-screenshot.png` and writes a natural language design description** saved as `brand-design.md`. Describe colours in words, not hex. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added, this step runs automatically via Claude Vision API.
 
 ### Phase 3 — Layout engine
 ```bash
@@ -402,7 +413,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 
 - `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys
 - `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens (free tier works)
-- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 3 runs automatically without `--manual`
+- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 2 brand description + Phase 3 layout engine both run automatically without `--manual`
 
 ---
 
