@@ -1,40 +1,39 @@
-# DESIGN.md — Landio Brand Brief
+# DESIGN.MD — Brand Brief
 
 ## Visual Theme & Atmosphere
-Dark, sleek, tech-forward, premium. A sophisticated AI/SaaS aesthetic built on deep blacks and near-black surfaces with crisp white typography and subtle accent glows. Feels cutting-edge and authoritative — like a premium enterprise software product. Minimal, clean, and professional with understated elegance.
+Dark, dramatic, commanding. Deep black void with smouldering crimson energy. Premium SaaS analytics aesthetic — data-dense yet luxurious. Glowing orbs and radiant light effects create depth and mystery. The mood is powerful, authoritative, and futuristic.
 
 ## Colour Palette & Roles
-- **Background:** Deep black to very dark charcoal — near-black surfaces with subtle gradient depth
-- **Text primary:** Pure white for headlines and key text — maximum contrast against dark backgrounds
-- **Text secondary:** Soft gray-white for body copy and supporting text — readable but less prominent
-- **Accent/CTA:** Clean white buttons with dark text for primary calls-to-action — high contrast pill shapes
-- **Surface containers:** Very dark gray cards with subtle borders — slightly lifted from the background with thin white/gray outline strokes
-- **Glow effects:** Subtle cool blue-purple ambient glow around featured elements — understated and atmospheric
-- **Borders:** Thin gray-white lines at low opacity separating sections and cards
+- **Background:** Pure deep black — the void that everything floats on
+- **Surface containers:** Very dark charcoal, near-black panels with subtle warm undertones
+- **Primary accent:** Rich crimson red — used for CTAs, active states, and glowing highlights
+- **Secondary accent:** Warm coral-orange — used sparingly for data visualisation and chart highlights
+- **Text — primary:** Clean white for headings and key content
+- **Text — secondary:** Muted warm grey for body text and descriptions
+- **Borders & dividers:** Very subtle dark grey, almost invisible separation lines
+- **Status colours:** Crimson red for alerts, warm orange for warnings, muted green for success
 
 ## Typography Rules
-- **Headings:** Large, bold sans-serif with tight tracking — display-weight for maximum impact. Mixed-weight headlines where key words are in italic or different weight for emphasis. Use INTER or SPACE_GROTESK
-- **Body text:** Clean, light-weight sans-serif in gray-white — small to medium size for readability against dark backgrounds. Use INTER
-- **Navigation:** Small, uppercase tracking-wide sans-serif links with subtle hover states
-- **Accent text:** Small badges with subtle backgrounds — "NEW" labels, category tags
+Bold, modern sans-serif throughout. Headings are large, high-contrast white with tight tracking and strong weight. Body text is clean and readable in lighter grey. Numbers and statistics use a slightly condensed weight for dashboard feel. Overall typographic hierarchy is clear and commanding.
+
+**Recommended fonts:** INTER for body, SPACE_GROTESK for headings and display text
 
 ## Component Stylings
-- **Buttons:** Pill-shaped (fully rounded) with solid white fill and dark text for primary CTAs. Secondary buttons use ghost style with thin white borders
-- **Cards:** Dark surface cards with thin border strokes in gray/white at low opacity. Subtle hover lift effects. Rounded corners (medium radius)
-- **Navigation:** Minimal sticky header with logo left, text links center, CTA button right. Semi-transparent dark background with backdrop blur
-- **Hero sections:** Full-width dark backgrounds with centered text, large display headlines, and gradient ambient effects
-- **Badges:** Small pill-shaped labels with subtle dark backgrounds and light text
+- **Buttons:** Rounded pill-shaped with solid crimson red fill, white text. Ghost variant uses subtle border on dark background
+- **Cards:** Dark glass-card panels with very subtle warm border, slight elevation through shadow. Dashboard-style cards with internal data layouts
+- **Navigation:** Fixed top bar, dark and transparent with backdrop blur, logo left, hamburger right
+- **Inputs:** Dark filled backgrounds with subtle border, focus state glows crimson
+- **Tags/badges:** Small rounded pills with muted background and light text
+- **Data visualisations:** Crimson and coral gradients on dark backgrounds
 
 ## Layout Principles
-- **Generous whitespace** on dark backgrounds — content breathes with ample vertical spacing
-- **Centered layouts** — hero content, section headings, and CTAs are center-aligned
-- **Clean grid structure** for cards and feature sections — well-organized with consistent spacing
-- **Full-width sections** with contained content — dark backgrounds extend edge-to-edge
-- **Hierarchical typography** — large headlines draw attention, body text supports
+Generous vertical spacing between sections. Content centred with comfortable max-width. Hero section uses dramatic full-viewport height with glowing orb backdrop. Cards and panels use consistent rounded corners (large radius — 16px to 24px). Overall feel is spacious, premium, and uncluttered.
 
 ## Image Treatment
-- **Photographic mood:** Dark, moody, low-key lighting
-- **Lighting:** Dramatic shadows with subtle cool highlights — tech-noir atmosphere
-- **Colour temperature:** Cool — blues and purples in shadows, neutral whites in highlights
-- **Composition:** Clean, minimal product/UI screenshots or abstract tech imagery
-- **Overall feel:** Premium, polished, enterprise-grade — dark and sophisticated
+Dark dramatic photography. Low-key lighting with deep shadows and selective warm crimson highlights. Cool-to-neutral colour temperature with warm red accent lighting. Professional, moody, cinematic composition. Images should feel like they emerge from darkness.
+
+## Design System Tokens
+- **colorMode:** DARK
+- **colorVariant:** VIBRANT
+- **roundness:** ROUND_TWELVE
+- **spacingScale:** 3 (spacious)
