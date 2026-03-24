@@ -225,7 +225,25 @@ Uses HuggingFace Inference API (FLUX.1-schnell model). Always regenerates all im
 **Input:** `component-patterns/` + `design-tokens.json` + `stitch-course-raw.html` + `course-layout.json` + `images/`
 **Output:** `v5/output/course.html` + root `index.html`
 
-Pattern-fill approach — Stitch provides the design system, we provide the content:
+Pattern-fill approach — Stitch provides the DESIGN, we provide the CONTENT and LAYOUT:
+
+**⛔ CRITICAL ARCHITECTURAL RULE: Separate Design from Layout**
+
+Stitch controls: colours, fonts, border-radius, shadows, backgrounds — pure visual tokens.
+We control: grids, containment, overflow, spacing, positioning — pure layout structure.
+
+These MUST be completely separated. Stitch's CSS must NEVER affect layout. Currently, `build-course.js` copies Stitch's entire raw `<head>` block into the final HTML. This is the root cause of layout regressions across different brands — Stitch's custom CSS includes layout-affecting rules that conflict with our fill functions' hardcoded grid/flex/containment classes.
+
+**The fix (TODO — next architecture session):**
+1. **Build our OWN `<head>` block** using only `design-tokens.json` (colours, fonts, border-radius, isDark)
+2. **Generate our OWN Tailwind config** from design tokens — the `tailwindConfig` field in design-tokens.json already has the data
+3. **Define our OWN layout CSS** — `glass-card`, `text-gradient`, `btn-primary`, and any other custom classes we use in fill functions. These definitions are OURS, not Stitch's. They use Stitch's colour tokens but our layout rules.
+4. **Never copy Stitch's raw `<head>`** — Stitch's CSS can define global rules, custom component styles, and Tailwind overrides that break our grids. We only want its colour/font values.
+5. **Never extract CSS classes from Stitch patterns for layout** — only for visual styling (background colours, border colours). All containment, grid structure, flex layout, gap, min-width must come from our fill functions.
+
+**Why this matters:** Every Stitch call generates completely different CSS. If our layout depends on Stitch's CSS classes, the layout breaks with every new brand. If our layout is self-contained and only Stitch's COLOURS change, the layout is bulletproof.
+
+**Current approach (until refactored):**
 1. Loads the Stitch `<head>` block (Tailwind config, custom CSS, fonts, Material Design tokens)
 2. Rebuilds nav and footer using CSS classes from Stitch's page shell + real course data
 3. For each component in course-layout.json:
