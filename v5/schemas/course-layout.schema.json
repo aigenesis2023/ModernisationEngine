@@ -1,0 +1,257 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "course-layout.schema.json",
+  "title": "Course Layout",
+  "description": "Output of the AI layout engine. Defines the complete course structure: sections, components, and image prompts. This JSON is consumed by build-course.js and the image generator script.",
+
+  "type": "object",
+  "required": ["course", "sections"],
+  "additionalProperties": false,
+
+  "properties": {
+    "course": {
+      "type": "object",
+      "required": ["title", "subtitle"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Display title for the course (may be refined from the original SCORM title)"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "One-sentence course description shown in the hero"
+        },
+        "totalSections": {
+          "type": "integer",
+          "description": "Number of sections in the layout"
+        }
+      }
+    },
+
+    "sections": {
+      "type": "array",
+      "description": "Ordered sections of the course. Each section is a logical topic grouping rendered as a visual section with its own heading.",
+      "items": { "$ref": "#/$defs/section" },
+      "minItems": 2
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "Generation metadata",
+      "properties": {
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "sourceScorm": { "type": "string" },
+        "brandSource": { "type": "string" },
+        "componentCount": { "type": "integer" },
+        "imageCount": { "type": "integer" }
+      }
+    }
+  },
+
+  "$defs": {
+    "section": {
+      "type": "object",
+      "required": ["sectionId", "title", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "sectionId": {
+          "type": "string",
+          "description": "Unique section identifier (e.g. 'section-01')"
+        },
+        "title": {
+          "type": "string",
+          "description": "Section display title. This becomes the article heading with accent bar."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Optional one-line section description"
+        },
+        "components": {
+          "type": "array",
+          "description": "Ordered components within this section. 1-6 components per section.",
+          "items": { "$ref": "#/$defs/component" },
+          "minItems": 1,
+          "maxItems": 8
+        }
+      }
+    },
+
+    "component": {
+      "type": "object",
+      "required": ["componentId", "type"],
+      "description": "A single rendered component. The 'type' field maps to the ComponentRegistry. All other fields are passed as the 'data' prop to the React component.",
+      "properties": {
+        "componentId": {
+          "type": "string",
+          "description": "Unique component identifier (e.g. 'comp-01')"
+        },
+        "type": {
+          "type": "string",
+          "description": "Component type string from the component library. Must match a registered type.",
+          "enum": [
+            "hero", "text", "graphic", "graphic-text", "accordion", "mcq",
+            "narrative", "bento", "data-table", "media", "textinput", "branching",
+            "timeline", "comparison", "stat-callout", "pullquote", "key-term",
+            "checklist", "tabs", "flashcard", "labeled-image", "process-flow",
+            "image-gallery", "full-bleed", "video-transcript"
+          ]
+        },
+        "displayTitle": { "type": "string" },
+        "body": { "type": "string" },
+        "instruction": { "type": "string" },
+
+        "_graphic": { "$ref": "#/$defs/graphic" },
+        "_imageAlign": { "type": "string", "enum": ["left", "right"] },
+        "_items": {
+          "type": "array",
+          "description": "Item arrays for components that use them (accordion, narrative, bento, mcq, etc.)",
+          "items": { "$ref": "#/$defs/componentItem" }
+        },
+        "_selectable": { "type": "integer" },
+        "_feedback": { "$ref": "#/$defs/feedback" },
+        "_media": { "$ref": "#/$defs/media" },
+        "_markers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/marker" }
+        },
+        "_nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/processNode" }
+        },
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/comparisonColumn" }
+        },
+        "rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/comparisonRow" }
+        },
+        "transcript": { "type": "string" },
+        "attribution": { "type": "string" },
+        "role": { "type": "string" },
+        "overlayPosition": { "type": "string", "enum": ["center", "left", "right"] },
+
+        "imagePrompt": {
+          "type": "string",
+          "description": "AI image generation prompt for this component. Used by generate-images.js to create visuals via Pollinations. Include subject, style, mood, and brand color hints."
+        },
+        "imagePrompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "prompt", "dimensions"],
+            "properties": {
+              "key": { "type": "string", "description": "Identifier for this image (e.g. 'item-0', 'item-1')" },
+              "prompt": { "type": "string", "description": "Image generation prompt" },
+              "dimensions": { "type": "string", "description": "Target dimensions (e.g. '800x600')" }
+            }
+          },
+          "description": "Multiple image prompts for components with per-item images (narrative, bento, gallery)"
+        }
+      }
+    },
+
+    "graphic": {
+      "type": "object",
+      "properties": {
+        "large": { "type": "string", "description": "Image URL or path (populated by build script)" },
+        "alt": { "type": "string", "description": "Descriptive alt text" },
+        "src": { "type": "string", "description": "Alias for large" }
+      }
+    },
+
+    "componentItem": {
+      "type": "object",
+      "description": "Generic item for list-based components. Fields used depend on the parent component type.",
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "text": { "type": "string" },
+        "_shouldBeSelected": { "type": "boolean" },
+        "_graphic": { "$ref": "#/$defs/graphic" },
+        "prefix": { "type": "string" },
+        "placeholder": { "type": "string" },
+        "front": { "type": "string" },
+        "back": { "type": "string" },
+        "term": { "type": "string" },
+        "definition": { "type": "string" },
+        "detail": { "type": "string" },
+        "caption": { "type": "string" },
+        "value": { "type": "string" },
+        "label": { "type": "string" },
+        "suffix": { "type": "string" }
+      }
+    },
+
+    "feedback": {
+      "type": "object",
+      "properties": {
+        "correct": { "type": "string" },
+        "_incorrect": {
+          "type": "object",
+          "properties": {
+            "final": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "media": {
+      "type": "object",
+      "properties": {
+        "mp4": { "type": "string" },
+        "poster": { "type": "string" },
+        "source": { "type": "string" },
+        "src": { "type": "string" }
+      }
+    },
+
+    "marker": {
+      "type": "object",
+      "required": ["x", "y", "label", "body"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100, "description": "Horizontal position as percentage" },
+        "y": { "type": "number", "minimum": 0, "maximum": 100, "description": "Vertical position as percentage" },
+        "label": { "type": "string" },
+        "body": { "type": "string" }
+      }
+    },
+
+    "processNode": {
+      "type": "object",
+      "required": ["title", "body"],
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "type": { "type": "string", "enum": ["start", "process", "decision", "end"] }
+      }
+    },
+
+    "comparisonColumn": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" }
+      }
+    },
+
+    "comparisonRow": {
+      "type": "object",
+      "required": ["label", "values"],
+      "properties": {
+        "label": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "string" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,392 +1,476 @@
-# CLAUDE.md — Modernisation Engine V2
+# CLAUDE.md — Modernisation Engine
 
 ## What This Is
-An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern, branded, premium deep-scroll web experiences. The SCORM file is a **knowledge base** — content is extracted, then an AI layout engine redesigns the course from scratch using a premium React component library and AI-generated branded images.
+An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern, branded, premium deep-scroll web experiences. The SCORM file is a **knowledge base** — content is extracted, an AI layout engine structures it, **Google Stitch designs a complete branded component kit**, and we assemble the final course with 100% content fidelity + interactivity via a hydration script.
 
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
+**Branch:** `Current-working-2` (this is the ONLY working branch — never work from or reference `main`)
+
+**Future:** An AI-First authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
+
 ---
 
-## Architecture
+## Architecture (V5 — Stitch Component Kit)
 
 ```
 SCORM File ──→ extract.js        ──→ Content Bucket (JSON)
-Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON)
+Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand Design (DESIGN.md)
                                           │
                     ┌─────────────────────┘
                     ▼
-         design-course.js
+         design-course.js (AI layout engine)
          ├─ Reads layout-engine.md (system prompt)
          ├─ Reads content-bucket.json + brand-profile.json
-         ├─ Assembles the full LLM message
-         ├─ Gets LLM response (API call OR manual paste)
-         ├─ Validates against course-layout.schema.json
-         └─→ course-layout.json
+         ├─ AI structures content, picks best components
+         └─→ course-layout.json (all content + component types)
                     │
-              ┌─────┴─────┐
-              ▼            ▼
-    generate-images.js   build-course.js
-    (HF Inference API)   (React renderer)
-              │            │
-              ▼            ▼
-         images/      Static HTML course
+                    ▼
+         generate-course-html.js (Google Stitch — GEMINI_3_1_PRO)
+         ├─ Sends brand-design.md (DESIGN.md format brief)
+         ├─ Sends representative-course.md (all 25 component types)
+         ├─ Stitch designs complete branded page experience
+         ├─ Extracts: page shell, component patterns, design tokens
+         └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
+                    │
+                    ▼
+         generate-images.js (HF Inference API)
+         ├─ Analyses Stitch design tokens for visual treatment
+         ├─ Combines content subjects with design treatment
+         ├─ Always regenerates all images
+         └─→ images/*.jpg (design-matched images)
+                    │
+                    ▼
+         build-course.js (content assembly)
+         ├─ Reads component patterns from Stitch output
+         ├─ For each component in course-layout.json:
+         │   finds matching pattern, fills with SCORM content
+         ├─ 100% content fidelity — every word from the SCORM
+         ├─ Embeds images as base64
+         ├─ Inlines hydrate.js for interactivity
+         └─→ course.html (single self-contained file)
 ```
 
-### Core Principle
-The SCORM file's internal structure (layers, triggers, states, coordinates) is **ignored**. We extract raw text, quiz data, and media inventory — then the AI designs the presentation from scratch. This eliminates all the V1 heuristic complexity and gives full creative control.
+### Core Principles
 
-### Everything is codified — nothing ad-hoc
-All prompts, schemas, and scripts live in `v2/`. Every step of the pipeline is a script that reads files and writes files. The LLM is one step in that pipeline — not something done ad-hoc in a chat window.
+**1. Stitch designs the component kit. We control the content.**
+Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types with example content). It designs the complete visual system — every component type, page shell, transitions, navigation. We extract those patterns and fill them with real SCORM content. Different brand URL → different Stitch design → different visual output. Same content.
 
-### The `design-course.js` Workflow (CRITICAL)
+**2. Content fidelity is non-negotiable.**
+All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs the look, we guarantee the content. Enterprise clients require 100% accuracy.
+
+**3. The design system is a reusable asset.**
+Stitch's output (component patterns, design tokens) is extracted and stored. The future authoring layer can re-render the course with different content or swapped component types without calling Stitch again. Users can change "accordion" to "cards" and it renders instantly because Stitch already designed both.
+
+**4. Speak Stitch's language.**
+We generate a DESIGN.md brand brief using Stitch's native vocabulary — semantic colour names, Stitch-supported fonts, Material Design colour system, evocative atmospheric descriptions. Not raw CSS hex dumps. Stitch is trained to understand DESIGN.md format.
+
+### The `design-course.js` Workflow
 
 This script is the bridge between "content extraction" and "course rendering". It operates in three modes:
 
 **Mode 1 — Manual (Claude Code / development):**
 ```bash
-node v2/scripts/design-course.js --manual
+node v5/scripts/design-course.js --manual
 ```
-1. Script assembles the full prompt (system prompt + content bucket + brand profile)
-2. Writes it to `v2/output/design-prompt.txt`
-3. Developer pastes this into Claude Code (or any LLM chat)
-4. Developer pastes the LLM's JSON response back
-5. Script validates and saves to `v2/output/course-layout.json`
-
-In this mode, Claude Code is literally just a stand-in for an API call. The script does all the assembly, validation, and file I/O. The chat just provides the LLM response.
+Claude Code (or any LLM) acts as the layout engine — reads the content bucket and designs the course structure.
 
 **Mode 2 — API (production):**
 ```bash
-ANTHROPIC_API_KEY=sk-... node v2/scripts/design-course.js
+ANTHROPIC_API_KEY=sk-... node v5/scripts/design-course.js
 ```
-1. Script assembles the exact same prompt
-2. Sends it to the Claude API
-3. Receives the JSON response
-4. Validates and saves to `v2/output/course-layout.json`
+Calls Claude API directly. Same prompt, same output.
 
-**Mode 3 — Load (replay a saved response):**
+**Mode 3 — Load (replay):**
 ```bash
-node v2/scripts/design-course.js --load response.json
+node v5/scripts/design-course.js --load response.json
 ```
-1. Loads a previously saved LLM JSON response from file
-2. Validates against schema
-3. Saves to `v2/output/course-layout.json`
-
-Useful for re-validating or re-processing a response without re-running the LLM.
-
-**The output is identical in all modes.** Same validation, same output file. This means:
-- Every improvement to the prompt, schema, or validation logic is permanent in the repo
-- Switching from manual to API mode is just adding an API key — zero code changes
-- The production UI will call the same script with the same code path
+Loads a previously saved response.
 
 ---
 
 ## File Structure
 
 ```
-CLAUDE.md                              ← This file — project reference
-WEBSITE BRANDING REF.rtf               ← Brand URL for testing
-index.html                             ← GitHub Pages entry point (generated by build-course.js)
-package.json / package-lock.json       ← Root-level dependencies
-preview-sw.js                          ← Service worker for preview serving
+CLAUDE.md                              ← This file
+index.html                             ← GitHub Pages entry (generated by build-course.js)
+package.json / package-lock.json       ← Root dependencies (@google/stitch-sdk, dotenv)
 
-engine/
-  scorm-parser.js                      ← V1 browser-based SCORM parser (reference)
-  brand-scraper.js                     ← V1 browser-based brand scraper (reference)
-
-blade-runner-engine/                   ← React + Vite renderer (the visual output)
-  src/
-    App.jsx                            ← Entry: loads courseData + brandData
-    main.jsx                           ← React root mount
-    index.css                          ← CSS design system (all via custom properties)
-    components/
-      ComponentRegistry.js             ← Maps 26 type strings → React components (includes aliases)
-      CourseRenderer.jsx               ← Recursive JSON → React tree
-      — 12 original components —
-      HeroSplash.jsx                   ← Full-viewport hero with animation
-      TextBlock.jsx                    ← Text with heading
-      GraphicBlock.jsx                 ← Full-width image
-      GraphicText.jsx                  ← Side-by-side text + image split
-      SilkyAccordion.jsx               ← Expandable panels
-      MCQPro.jsx                       ← Quiz with feedback + retry
-      NarrativeSlider.jsx              ← Carousel with prev/next
-      BentoGrid.jsx                    ← Multi-card grid
-      DataTable.jsx                    ← Parsed table
-      MediaBlock.jsx                   ← Video player
-      TextInputBlock.jsx               ← Form fields
-      BranchingCards.jsx               ← Selectable option cards
-      — 13 new V2 components —
-      TimelineStepper.jsx              ← Numbered steps with connecting line
-      ComparisonTable.jsx              ← Side-by-side columns with checks/crosses
-      StatCallout.jsx                  ← Animated large numbers with labels
-      PullQuote.jsx                    ← Emphasized text with accent bar
-      KeyTerm.jsx                      ← Vocabulary terms with definitions
-      Checklist.jsx                    ← Checkable items with progress bar
-      TabPanel.jsx                     ← Horizontal tabbed content
-      Flashcard.jsx                    ← 3D flip cards for review
-      LabeledImage.jsx                 ← Image with numbered hotspot markers
-      ProcessFlow.jsx                  ← Connected workflow nodes with arrows
-      ImageGallery.jsx                 ← Grid of images with lightbox
-      FullBleedImage.jsx               ← Edge-to-edge parallax image with overlay
-      VideoTranscript.jsx              ← Video with expandable transcript
-    store/courseStore.js                ← Zustand state
-    theme/ThemeEngine.js               ← Brand → CSS variables
-  package.json                         ← React/Vite/Tailwind/Framer deps
-
-blade-runner-template.html             ← Pre-built single-file renderer (~449KB)
-
-adapt-template/                        ← Legacy Adapt framework template (experimental, not used in V2)
-
-test/                                  ← Test generation and runner scripts
-  generate.js                          ← Test generation
-  run-test.js                          ← Test runner
-
-v2/                                    ← ALL V2 WORK GOES HERE
+v5/                                    ← ALL ACTIVE CODE
   schemas/
     content-bucket.schema.json         ← Extraction output format
     course-layout.schema.json          ← Layout engine output format
-    component-library.json             ← All 25 components: type, props, usage, examples
+    component-library.json             ← 25 components: type, props, usage, examples
   prompts/
     layout-engine.md                   ← System prompt for AI layout engine
-    image-generator.md                 ← Prompt templates for image generation
+    representative-course.md           ← All 25 component types for Stitch to design
   scripts/
     extract.js                         ← SCORM folder → content-bucket.json
-    scrape-brand.js                    ← Brand URL → brand-profile.json
-    design-course.js                   ← THE LAYOUT ENGINE SCRIPT (manual + API + load modes)
-    generate-images.js                 ← Layout JSON → HF Inference API → images/
-    build-course.js                    ← Layout + images + brand → static HTML
+    scrape-brand.js                    ← Brand URL → screenshot + natural language description
+    design-course.js                   ← AI layout engine (manual + API + load modes)
+    generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
+    generate-images.js                 ← Design-informed image generation (runs after Stitch)
+    build-course.js                    ← Pattern fill: Stitch patterns + real content → course.html
+    hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
   output/
     content-bucket.json                ← Extracted from test SCORM
-    brand-profile.json                 ← Scraped from brand URL
-    design-prompt.txt                  ← Assembled prompt (written by design-course.js)
-    course-layout.json                 ← Layout engine output (validated)
-    images/                            ← Generated images
+    brand-profile.json                 ← Scraped from brand URL (raw data)
+    brand-screenshot.png               ← Playwright screenshot of brand landing page
+    brand-design.md                    ← Natural language brand description for Stitch
+    course-layout.json                 ← AI-structured course
+    stitch-course-raw.html             ← Stitch's complete designed page
+    stitch-course-meta.json            ← Stitch API response metadata
+    stitch-course-screenshot.png       ← Stitch's design preview
+    design-tokens.json                 ← Extracted design system tokens
+    component-patterns/                ← Extracted HTML pattern per component type (25)
+    images/                            ← HF-generated images
     course.html                        ← Final single-file output
 
-v1-archive/                            ← Old V1 code (reference only, not used)
+screenshots/                           ← Dev screenshots (gitignored, overwritten each run)
 
-EV/                                    ← Test SCORM (gitignored, in Codespace)
-TEST SCORM/                            ← Small test SCORM (committed)
+EV/                                    ← Test SCORM (64 slides, gitignored in Codespace)
 ```
 
 ---
 
 ## The 5 Phases
 
-### Phase 1 — Extraction (`v2/scripts/extract.js`)
+### Phase 1 — Extraction (`v5/scripts/extract.js`)
 **Input:** SCORM folder (e.g., `EV/`)
-**Output:** `v2/output/content-bucket.json`
+**Output:** `v5/output/content-bucket.json`
 
-Simplified "structured dumb" extraction. No layout inference, no interaction analysis.
-
-**Extracts:**
+Extracts all educational content from the SCORM file:
 - Course title from imsmanifest.xml
-- Scene boundaries (Storyline's intentional topic groupings)
-- All text per slide: headings, body paragraphs, callouts (cleaned of junk)
-- Quiz data: question, choices with correct answers, feedback (structured)
+- Scene boundaries (Storyline's topic groupings)
+- All text per slide: headings, body paragraphs, callouts
+- Quiz data: question, choices with correct answers, feedback
 - Form fields: labels, types
-- Media inventory: list of all real image/video filenames (shapes and text-as-image excluded)
+- Media inventory: image/video filenames
 
-**Noise filtering (kept from V1):**
-- Shape filenames: `Shape*.png`, `txt__default_*.png`
-- Auto-generated labels: "Rectangle 1", "Oval 3", "Slide 2.1"
-- Icon alt-text: "arrow icon 1", "check icon 1"
-- Storyline UI text: player instructions, variable placeholders
-- Very short strings (< 3 chars)
+### Phase 2 — Brand Analysis (`v5/scripts/scrape-brand.js`)
+**Input:** Brand URL
+**Output:** `v5/output/brand-profile.json` + `v5/output/brand-design.md` + `v5/output/brand-screenshot.png`
 
-### Phase 2 — Brand Scraping (`v2/scripts/scrape-brand.js`)
-**Input:** Brand URL (e.g., `https://www.backgrounds.supply`)
-**Output:** `v2/output/brand-profile.json`
+Uses **Playwright** to visit the **landing page only** (the exact URL provided — no sub-pages) and take a screenshot. The screenshot is then described in **natural language** using design vocabulary — this is what Stitch wants. No hex codes, no CSS parsing. Stitch is trained on natural language design briefs, not colour dumps.
 
-Reuses `engine/brand-scraper.js` logic. Fetches URL via CORS proxy, extracts:
-- Colors: primary, secondary, accent, background, surface, text, gradient
-- Typography: heading font, body font, sizes, weights, line-height, Google Fonts URL
-- Style: border-radius, button style (pill/rounded/solid), card style, mood
-- Logo: URL, dimensions, alt text
+**How the brand description works (two modes, same pattern as Phase 3):**
 
-CORS proxy: `https://cors-proxy.leoduncan-elearning.workers.dev`
+**Manual mode (no `ANTHROPIC_API_KEY`):**
+1. Playwright visits the URL, takes screenshot → `brand-screenshot.png`
+2. Script outputs the screenshot path and pauses
+3. **Claude Code (in conversation) views the screenshot and writes a natural language design description**
+4. Description is saved as `brand-design.md` in DESIGN.md format
+5. This is real work — Claude Code must describe the visual design like a professional designer
 
-### Phase 3 — AI Layout Engine (`v2/scripts/design-course.js`)
-**Script:** `v2/scripts/design-course.js`
+**API mode (when `ANTHROPIC_API_KEY` is set):**
+1. Playwright visits the URL, takes screenshot → `brand-screenshot.png`
+2. Script sends the screenshot to Claude Vision API automatically
+3. Claude Vision returns a natural language design description
+4. Description is saved as `brand-design.md` — no manual step needed
+
+**The brand brief (brand-design.md) must be pure natural language in Stitch's DESIGN.md format:**
+- Visual Theme & Atmosphere (evocative adjectives — "dark, moody, glass-forward")
+- Colour descriptions in words ("vibrant lime green buttons on near-black background")
+- Typography descriptions ("bold modern sans-serif headings, clean body text")
+- Component styles ("pill-shaped buttons, frosted glass cards with backdrop blur")
+- Layout feel ("generous whitespace, premium spacing")
+- NO hex codes, NO CSS values — Stitch interprets natural language with its own design intelligence
+
+### Phase 3 — AI Layout Engine (`v5/scripts/design-course.js`)
 **Input:** `content-bucket.json` + `brand-profile.json` + `layout-engine.md`
-**Output:** `v2/output/course-layout.json`
-
-The `design-course.js` script orchestrates the AI layout step:
-
-1. Reads the system prompt from `v2/prompts/layout-engine.md`
-2. Reads `content-bucket.json` and `brand-profile.json`
-3. Assembles a complete LLM message and writes it to `v2/output/design-prompt.txt`
-4. Gets the LLM response (manual paste OR API call — see modes below)
-5. Extracts and validates JSON against `v2/schemas/course-layout.schema.json`
-6. Writes validated output to `v2/output/course-layout.json`
+**Output:** `v5/output/course-layout.json`
 
 The AI redesigns the course from scratch:
-- Decides how many sections and what each contains
-- Chooses the best component type for each content block
-- Writes display titles, rewrites/tightens body text
-- Specifies image prompts for each section (what to generate)
+- Groups content into sections (8-12 typically)
+- Chooses the best component type for each content block (from 25 available)
+- Writes display titles, rewrites body text for modern format
+- Specifies image prompts for components that need images
+- Preserves ALL quiz questions from the SCORM with correct answers
 - Ensures visual variety (no consecutive identical component types)
-- Follows brand aesthetic (dark/light, colors, typography mood)
 
-**Manual mode** (`--manual`): Script writes the assembled prompt to a file. Developer pastes it into Claude Code (or any LLM), then pastes the response back. The script validates and saves.
-**API mode** (`ANTHROPIC_API_KEY=...`): Script calls the Claude API directly. Same prompt, same validation, same output.
-**Load mode** (`--load file.json`): Loads a previously saved response, validates, and saves. Useful for replaying without re-running the LLM.
+### Phase 4a — Stitch Component Kit (`v5/scripts/generate-course-html.js`)
+**Input:** `brand-design.md` + `representative-course.md`
+**Output:** `stitch-course-raw.html` + `component-patterns/` + `design-tokens.json`
+**Model:** GEMINI_3_1_PRO
 
-The prompt, validation, and all logic live in the repo. The LLM is a function call — not a manual process.
+Sends Stitch two things:
+1. The brand brief in DESIGN.md format (how it should look)
+2. A representative course exercising ALL 25 component types (what to design)
 
-### Phase 4 — Image Generation (`v2/scripts/generate-images.js`)
-**Input:** `course-layout.json` + `brand-profile.json` (contains image prompts per component)
-**Output:** Images in `v2/output/images/` (JPGs), updates `course-layout.json` with image paths
-**Requires:** `HF_TOKEN` environment variable
+Stitch designs a complete, branded page experience — not just colours, but the full visual system including navigation, section flow, every component type, and footer.
 
-Uses Hugging Face Inference API with the FLUX.1-schnell model.
-- Each component that needs an image has an `imagePrompt` field in the layout JSON
-- Prompts include: topic context, brand colors, style directive, dimensions
-- Dimensions per component type: 16:9 (hero, full-bleed), 4:3 (graphic-text), 1:1 (cards)
-- Rate limiting: 3s between requests, 8s retry delay
-- Style: modern, clean, tech-professional, matching brand aesthetic
+We extract:
+- **Page shell** — navigation, section wrappers, footer
+- **Component patterns** — one HTML fragment per component type (all 25)
+- **Design tokens** — Tailwind config, colour system, fonts, spacing
 
-User can replace any image via the AI editor (future).
+This is a **reusable design asset**. The authoring layer can re-render courses with different content or swapped components without re-calling Stitch.
 
-### Phase 5 — Build (`v2/scripts/build-course.js`)
-**Input:** `course-layout.json` + `images/` + `brand-profile.json`
-**Output:** `v2/output/course.html` + root `index.html` (for GitHub Pages)
+### Phase 4b — Image Generation (`v5/scripts/generate-images.js`)
+**Input:** `course-layout.json` (content subjects) + `brand-design.md` (photographic mood)
+**Output:** Images in `v5/output/images/`
+**Runs AFTER Phase 4a** — images are informed by the brand description.
 
-- Converts course-layout.json into the `window.courseData` format the React renderer expects
-- Embeds images as base64 data URLs
-- Injects brand data as `window.brandData`
-- Uses `ThemeEngine.generateBrandCSS()` to inject brand CSS
-- Injects into `blade-runner-template.html`
-- Outputs final single-file HTML to both `v2/output/course.html` and root `index.html`
+Reads the "Image Treatment" section from `brand-design.md` to determine **photographic mood only** — lighting (dramatic/bright/soft), colour temperature (warm/cool), composition style (professional/artistic). This is combined with the content subject from each component's `imagePrompt`.
 
----
+**Critical rule:** Image treatment is ONLY photographic terms. Never includes UI design elements (glassmorphism, pill buttons, brand accent colours, etc.). A dark moody brand gets "dramatic low-key lighting, dark atmosphere" — NOT "green-tinted, glass-effect images".
 
-## Component Library (25 components — all built)
+Falls back to: `brand-profile.json` (imageTreatment field) → `design-tokens.json` (legacy) → defaults.
 
-All 25 components are built, registered in `ComponentRegistry.js`, and documented in `v2/schemas/component-library.json` with: type string, required/optional props, when to use, when NOT to use, and example JSON. The registry also includes aliases: `text-featured` → TextBlock, `assessmentResults` → TextBlock (fallback). Unknown types fall back to TextBlock.
+Uses HuggingFace Inference API (FLUX.1-schnell model). Always regenerates all images.
 
-| Type | Component | Category | Purpose |
-|---|---|---|---|
-| `hero` | HeroSplash | structural | Full-viewport opening, animated title, background image |
-| `text` | TextBlock | content | Clean text with heading and body |
-| `graphic` | GraphicBlock | visual | Full-width image with hover zoom |
-| `graphic-text` | GraphicText | content | Side-by-side text + image (alternates left/right) |
-| `accordion` | SilkyAccordion | interactive | Expandable panels with completion tracking |
-| `mcq` | MCQPro | assessment | Quiz: select, submit, feedback, retry |
-| `narrative` | NarrativeSlider | interactive | Carousel with prev/next and dots |
-| `bento` | BentoGrid | content | Multi-card grid with image backgrounds |
-| `data-table` | DataTable | content | Auto-parsed table from structured data |
-| `media` | MediaBlock | visual | Video player with custom overlay |
-| `textinput` | TextInputBlock | interactive | Multi-field form with submit |
-| `branching` | BranchingCards | interactive | Selectable option cards |
-| `timeline` | TimelineStepper | content | Numbered steps with connecting line |
-| `comparison` | ComparisonTable | content | Side-by-side columns with checks/crosses |
-| `stat-callout` | StatCallout | visual | Animated large numbers with context labels |
-| `pullquote` | PullQuote | visual | Emphasized text with accent bar |
-| `key-term` | KeyTerm | content | Vocabulary terms with definitions |
-| `checklist` | Checklist | interactive | Checkable items with progress bar |
-| `tabs` | TabPanel | interactive | Horizontal tabbed content |
-| `flashcard` | Flashcard | interactive | 3D flip cards for term/definition review |
-| `labeled-image` | LabeledImage | visual | Image with numbered hotspot markers |
-| `process-flow` | ProcessFlow | content | Connected workflow nodes with arrows |
-| `image-gallery` | ImageGallery | visual | Grid of images with lightbox zoom |
-| `full-bleed` | FullBleedImage | visual | Edge-to-edge parallax image with overlay text |
-| `video-transcript` | VideoTranscript | visual | Video with expandable transcript panel |
+### Phase 5 — Build (`v5/scripts/build-course.js`)
+**Input:** `component-patterns/` + `design-tokens.json` + `stitch-course-raw.html` + `course-layout.json` + `images/`
+**Output:** `v5/output/course.html` + root `index.html`
+
+Pattern-fill approach — Stitch provides the design system, we provide the content:
+1. Loads the Stitch `<head>` block (Tailwind config, custom CSS, fonts, Material Design tokens)
+2. Rebuilds nav and footer using CSS classes from Stitch's page shell + real course data
+3. For each component in course-layout.json:
+   - Loads the matching HTML pattern from `component-patterns/`
+   - **Extracts CSS classes** from the pattern (section wrappers, card styles, button styles, etc.)
+   - **Rebuilds the inner HTML** entirely with real SCORM content using those classes
+   - Never does text replacement on Stitch's example content — always full rebuild (Approach A)
+4. Handles special cases: quiz correct answer indices, image base64 embedding, interactive data attributes
+5. Assembles full page: Stitch head → nav → filled components → footer → hydrate.js
+
+All 25 component types use Approach A (extract classes, rebuild). Zero Stitch example content leaks. Different brand URL → different Stitch kit → different CSS classes → different visual output.
+
+### Hydration (`v5/scripts/hydrate.js`)
+Vanilla JS script injected into the final HTML. Handles:
+- **Quizzes**: Select answer → submit → correct/incorrect feedback → retry
+- **Accordions**: Native `<details>` with smooth animation
+- **Tabs**: Click tab → show panel, style active/inactive
+- **Flashcards**: Click to flip (3D CSS transform)
+- **Carousels**: Prev/next navigation with dot indicators
+- **Checklists**: Check/uncheck with progress tracking
+- **Scroll progress bar**: Fixed bar at top showing read percentage
+- **Smooth scroll**: Anchor link navigation
 
 ---
 
-## Design System
+## Component Library (25 types)
 
-### CSS Custom Properties (set by ThemeEngine from brand profile)
-```
-Colors:     --brand-primary, --brand-secondary, --brand-accent, --brand-heading
-            --brand-bg, --brand-surface, --brand-text, --brand-text-muted
-            --brand-success, --brand-error, --brand-gradient, --brand-glow
-Glass:      --ui-glass, --ui-glass-border, --ui-glass-hover
-Shadows:    --ui-card-shadow, --ui-card-shadow-hover, --section-alt-bg
-Radius:     --ui-radius, --ui-radius-sm, --ui-radius-lg, --ui-button-radius
-Fonts:      --font-heading, --font-body
-Typography: --font-base-size, --font-h1, --font-h2, --font-h3
-            --font-heading-weight, --font-body-weight, --font-line-height
-Spacing:    --spacing-unit, --spacing-section, --spacing-section-heading
-            --spacing-block-gap, --spacing-block-padding, --spacing-content-padding
-Layout:     --content-max-width (derived from brand mood: corporate=960px, creative=1060px, default=1000px)
-```
+| Type | Purpose |
+|---|---|
+| `hero` | Full-viewport opening with background image, title, CTA |
+| `text` | Prose paragraphs, introductions, explanations |
+| `graphic` | Full-width image |
+| `graphic-text` | Side-by-side text + image (alternates left/right) |
+| `accordion` | Expandable panels with smooth animation |
+| `mcq` | Quiz: select answer, submit, feedback, retry |
+| `narrative` | Carousel with prev/next navigation |
+| `bento` | Multi-card grid with optional images |
+| `data-table` | Structured data table |
+| `media` | Video player |
+| `textinput` | Form fields with submit |
+| `branching` | Selectable option cards |
+| `timeline` | Numbered sequential steps |
+| `comparison` | Side-by-side columns with check/cross indicators |
+| `stat-callout` | Large numbers with labels |
+| `pullquote` | Emphasized text with accent bar |
+| `key-term` | Vocabulary terms with definitions |
+| `checklist` | Checkable items with progress |
+| `tabs` | Tabbed content panels |
+| `flashcard` | 3D flip cards |
+| `labeled-image` | Image with hotspot markers |
+| `process-flow` | Connected workflow nodes |
+| `image-gallery` | Grid of images with lightbox |
+| `full-bleed` | Edge-to-edge image with text overlay |
+| `video-transcript` | Video with expandable transcript |
 
-### Theme detection
-ThemeEngine computes actual background luminance from hex color (ignores theme strings). Dark bg (luminance < 0.55) gets dark-mode glass. Light bg gets light-mode glass. All components use CSS variables — never hardcoded colors.
+---
 
-### Building the renderer
+## Stitch Integration Notes
+
+### SDK Version
+`@google/stitch-sdk` v0.0.3 — MCP-based API.
+
+### Available Models
+- `GEMINI_3_FLASH` — faster, lower quality
+- `GEMINI_3_1_PRO` — Deep Think mode, significantly better for design reasoning (USE THIS)
+- `GEMINI_3_PRO` — deprecated
+
+### DESIGN.md Format (what Stitch understands)
+Stitch is trained to interpret DESIGN.md files. Structure:
+1. **Visual Theme & Atmosphere** — evocative adjectives (e.g., "Airy, glass-forward, ethereal")
+2. **Colour Palette & Roles** — semantic names + hex (e.g., "Soft Amethyst (#522c66) — primary actions")
+3. **Typography Rules** — must use Stitch's 28 supported fonts
+4. **Component Stylings** — natural language (e.g., "Pill-shaped buttons, frosted glass cards")
+5. **Layout Principles** — whitespace strategy, grid patterns
+
+### Stitch's 28 Supported Fonts
+BE_VIETNAM_PRO, EPILOGUE, INTER, LEXEND, MANROPE, NEWSREADER, NOTO_SERIF, PLUS_JAKARTA_SANS, PUBLIC_SANS, SPACE_GROTESK, SPLINE_SANS, WORK_SANS, DOMINE, LIBRE_CASLON_TEXT, EB_GARAMOND, LITERATA, SOURCE_SERIF_FOUR, MONTSERRAT, METROPOLIS, SOURCE_SANS_THREE, NUNITO_SANS, ARIMO, HANKEN_GROTESK, RUBIK, GEIST, DM_SANS, IBM_PLEX_SANS, SORA
+
+### DesignTheme Vocabulary
+When describing brands, use Stitch's native terms:
+- `colorMode`: LIGHT or DARK
+- `colorVariant`: MONOCHROME, NEUTRAL, TONAL_SPOT, VIBRANT, EXPRESSIVE, FIDELITY, CONTENT, RAINBOW, FRUIT_SALAD
+- `roundness`: ROUND_FOUR, ROUND_EIGHT, ROUND_TWELVE, ROUND_FULL
+- `spacingScale`: 0 (minimal), 1 (compact), 2 (normal), 3 (spacious)
+
+### Future: IMAGE_TO_UI
+The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from CSS scraping. Monitor SDK updates.
+
+### API Constraints (IMPORTANT)
+- `generate_screen_from_text` only accepts: `projectId`, `prompt`, `deviceType`, `modelId`
+- There is NO theme parameter on the API input. DesignTheme fields appear in the OUTPUT schema only.
+- Therefore: the DESIGN.md content must go INSIDE the text `prompt` parameter. Stitch understands it there because it's trained on DESIGN.md format.
+- Do NOT try to pass DesignTheme as a separate API parameter — it won't work.
+
+### Prompt Enhancement (from stitch-skills repo)
+The stitch-design skill (https://github.com/google-labs-code/stitch-skills) specifies that enhanced prompts should include:
+1. Platform specification (Web Desktop)
+2. Design system brief (the DESIGN.md content)
+3. Palette with semantic role naming + hex codes
+4. Style descriptors for roundness and shadow/elevation
+5. Detailed PAGE STRUCTURE with Header, Hero, Content Area, Footer
+- Convert informal language to professional UI/UX terminology (e.g., "nice header" → "sticky navigation bar with glassmorphism")
+- Use evocative atmospheric direction (Minimalist, Vibrant, Brutalist, etc.)
+
+### Component Pattern Extraction (working)
+After Stitch returns the full HTML page, `generate-course-html.js` extracts individual component patterns:
+- The representative course prompt instructs Stitch to wrap each component with `data-component-type="hero"`, `data-component-type="accordion"`, etc.
+- Extraction parses the returned HTML by `data-component-type` attributes (regex, no DOM library needed)
+- Each fragment is stored in `component-patterns/{type}.html`
+- The page shell (nav, footer, head content) is extracted separately to `_page-shell.json`
+- `build-course.js` loads each pattern and fills it with real content via per-type fill functions
+- Confirmed working: 25/25 patterns extracted, 40/40 components filled with 0 fallbacks
+
+### What hydrate.js Expects (data attributes)
+hydrate.js looks for these specific data attributes to add interactivity:
+- **Quizzes:** `data-quiz` on container, `data-correct="N"` (zero-indexed), `data-choice` on each option
+- **Accordions:** Native `<details><summary>` elements
+- **Tabs:** `data-tabs` on container, `data-tab-trigger` on buttons, `data-tab-panel` on panels
+- **Flashcards:** `data-flashcard` on card container
+- **Checklists:** `data-checklist` on container, native `<input type="checkbox">`
+- **Carousels:** `data-carousel` on container, `data-slide` on slides, `data-prev`/`data-next` on nav
+- **Text inputs:** Native `<form>` with `<input>` elements
+
+These MUST be included in the Stitch prompt so Stitch generates HTML with these exact attributes. hydrate.js then "lights them up" with interactivity.
+
+### representative-course.md Design Requirements
+This file must:
+- Include ALL 25 component types (no gaps — the authoring layer needs every type designed)
+- Arrange them in a realistic e-learning flow (hero → intro text → content → quiz → etc.)
+- Use generic but realistic example content (not tied to any specific SCORM)
+- Request `data-component-type` attributes on each component wrapper for extraction
+- Request all interactive data attributes listed above for hydrate.js compatibility
+- Be a SINGLE deep-scroll page (not multiple pages)
+
+---
+
+## ⛔ Full Pipeline — MANDATORY CHECKLIST
+
+**Every test run MUST execute ALL phases. No skipping. No reusing stale outputs.**
+
+When asked to "run it" or "test with a brand URL", follow this checklist exactly:
+
+### Pre-run: Clear stale outputs
 ```bash
-cd blade-runner-engine && npm install && npx vite build && cp dist/index.html ../blade-runner-template.html
+# Clear everything EXCEPT content-bucket.json (only if same SCORM file)
+rm -rf v5/output/component-patterns/ v5/output/images/
+rm -f v5/output/brand-profile.json v5/output/brand-design.md
+rm -f v5/output/course-layout.json v5/output/design-tokens.json
+rm -f v5/output/stitch-course-raw.html v5/output/stitch-course-meta.json
+rm -f v5/output/stitch-course-screenshot.png v5/output/course.html
 ```
-**Must rebuild after any component/CSS change.**
+
+### Phase 1 — Extract (skip ONLY if same SCORM file)
+```bash
+node v5/scripts/extract.js EV
+```
+
+### Phase 2 — Brand scrape
+```bash
+node v5/scripts/scrape-brand.js
+```
+Script reads URL from `brand/url.txt`, visits with Playwright, takes screenshot.
+**Claude Code then views `brand-screenshot.png` and writes a natural language design description** saved as `brand-design.md`. Describe colours in words, not hex. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added, this step runs automatically via Claude Vision API.
+
+### Phase 3 — Layout engine
+```bash
+node v5/scripts/design-course.js --manual
+```
+**Claude Code acts as the layout engine.** Read content-bucket.json + layout-engine.md, produce course-layout.json. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added to `.env`, this step runs automatically without `--manual`.
+
+### Phase 4a — Stitch component kit
+```bash
+node v5/scripts/generate-course-html.js
+```
+Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
+
+### Phase 4b — Image generation (AFTER 4a)
+```bash
+node v5/scripts/generate-images.js
+```
+
+### Phase 5 — Build
+```bash
+node v5/scripts/build-course.js
+```
+
+**If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**
+
+**API Keys:**
+All keys are stored in `.env` (gitignored, never committed). Scripts load them automatically via dotenv.
+Open `.env` directly in VS Code to set your keys — **never paste keys in the chat**.
+
+- `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys
+- `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens (free tier works)
+- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 2 brand description + Phase 3 layout engine both run automatically without `--manual`
 
 ---
 
 ## Test Data
-- **SCORM:** `EV/` — 108-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URL:** `https://www.backgrounds.supply/?ref=onepagelove` (in `WEBSITE BRANDING REF.rtf`)
-- Brand profile: dark theme (#383838 bg), blue (#0099ff) + pink (#ff3c71), Satoshi/Inter fonts
+- **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
+- **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst)
 
----
+## Screenshots Workflow
+Dev screenshots go in `screenshots/` (gitignored). Overwrite the same filenames each run:
+- `screenshots/desktop-top.jpeg` — hero + nav viewport
+- `screenshots/desktop-scroll1.jpeg` — first scroll (text, accordion)
+- `screenshots/desktop-scroll2.jpeg` — mid-page (graphic-text, bento)
+- `screenshots/desktop-scroll3.jpeg` — interactive (quiz, flashcard)
+- `screenshots/mobile-top.jpeg` — mobile viewport hero
 
-## Full Pipeline Command Sequence
-
-```bash
-# Phase 1 — Extract content from SCORM
-node v2/scripts/extract.js EV
-
-# Phase 2 — Scrape brand from URL
-node v2/scripts/scrape-brand.js "https://www.backgrounds.supply/?ref=onepagelove"
-
-# Phase 3 — Design course layout (manual mode: paste prompt into Claude Code)
-node v2/scripts/design-course.js --manual
-# ... or with API key:
-# ANTHROPIC_API_KEY=sk-... node v2/scripts/design-course.js
-# ... or load a saved response:
-# node v2/scripts/design-course.js --load response.json
-
-# Phase 4 — Generate images (requires HF_TOKEN)
-HF_TOKEN=hf_... node v2/scripts/generate-images.js
-
-# Phase 5 — Build final HTML
-node v2/scripts/build-course.js
-```
-
-Each script reads from `v2/output/` and writes to `v2/output/`. They are independent and can be re-run individually (e.g., regenerate images without re-designing the layout).
+Use Playwright: `npx http-server -p 8765 -c-1 --silent &` then navigate to `http://localhost:8765/v5/output/course.html`.
 
 ---
 
 ## Deployment
-
-GitHub Pages serves from the root `index.html` (main branch). No GitHub Actions — `build-course.js` writes directly to root `index.html`. Commit and push to deploy.
-
----
-
-## Future Roadmap
-1. **Production UI:** Upload SCORM + brand URL + API key input → calls the same scripts
-2. **API mode is already built into `design-course.js`** — just needs an API key
-3. **AI Editor:** Click block → sidebar → change component, swap/regenerate image, edit text
-4. **SCORM packaging:** JSZip export with imsmanifest.xml
-5. **LMS tracking:** Lightweight SCORM shim for progress/completion reporting
-
-The production UI is a thin wrapper around the existing scripts. It does NOT require rewriting the pipeline — it calls `extract.js`, `scrape-brand.js`, `design-course.js` (API mode), `generate-images.js`, and `build-course.js` in sequence.
+GitHub Pages serves from root `index.html` on `Current-working-2`. `build-course.js` writes directly to root `index.html`. Commit and push to `Current-working-2` to deploy. **Never commit to or push to `main`.**
 
 ---
 
-## ⛔ ABSOLUTE RULE — UNIVERSAL ENGINE
+## ⛔ ABSOLUTE RULES
 
-Every change must work for ANY Storyline SCORM file. Test files are diagnostic tools, not the product.
+### UNIVERSAL ENGINE
+The purpose of every conversation is to improve the **engine** — the scripts, prompts, schemas, and templates that power the pipeline. The test SCORM file (`EV/`, gitignored) and test brand URL are **diagnostic tools only**. We run them through the pipeline to verify the engine works, the same way you'd run a test suite. If the output looks wrong, the question is always "what's wrong with the engine?" — never "how do I patch this specific output?"
 
-**ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA.**
-When a visual issue is found in preview output, the fix MUST be in the engine code:
-- Components: `blade-runner-engine/src/components/*.jsx`
-- CSS: `blade-runner-engine/src/index.css`
-- Theme: `blade-runner-engine/src/theme/ThemeEngine.js`
-- Renderer: `blade-runner-engine/src/components/CourseRenderer.jsx`
+Every change must work for ANY Storyline SCORM file and ANY brand URL. A fix that makes the EV course look better but wouldn't help a different SCORM file is the wrong fix.
 
-NEVER edit `v2/output/course-layout.json`, `v2/output/brand-profile.json`, or any output file to fix visual problems. The test SCORM's improved output should be a BYPRODUCT of a better engine — not the goal. If you fix the output file directly, the engine remains broken for every other SCORM file.
+**ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
+When a visual issue is found, the fix goes in:
+- Component patterns: `v5/scripts/build-course.js` (pattern-based rendering)
+- Hydration: `v5/scripts/hydrate.js` (interactivity logic)
+- Extraction: `v5/scripts/extract.js` (SCORM parsing)
+- Layout: `v5/scripts/design-course.js` (content structuring)
+- Layout prompt: `v5/prompts/layout-engine.md` (AI layout instructions)
+- Stitch prompt: `v5/scripts/generate-course-html.js` (design instructions)
+- Representative course: `v5/prompts/representative-course.md` (component coverage)
+- Brand analysis: `v5/scripts/scrape-brand.js` (DESIGN.md generation)
+- Schemas: `v5/schemas/` (component definitions, output formats)
 
-**Branding:** Brand URL = only source for visual identity. SCORM styling is irrelevant.
-**Content:** SCORM = only source for educational content. AI redesigns the presentation.
+NEVER edit output files (`v5/output/*.json`, `v5/output/*.html`) to fix problems. NEVER tailor engine logic to one specific SCORM file or brand — every decision must be generic.
+
+### STITCH DESIGNS THE COMPONENT KIT
+Stitch designs the visual system — every component type, page shell, design tokens. We don't hardcode design decisions. The build script uses Stitch's actual component patterns as templates, filled with real SCORM content. Different brand URL → different Stitch kit → different visual output.
+
+### CONTENT FIDELITY
+All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs with representative examples. The build script guarantees 100% content fidelity from course-layout.json. The AI layout engine rewords for clarity but never invents facts or drops content.
+
+### AUTHORING LAYER COMPATIBILITY
+The design system (component patterns + design tokens) is a reusable asset. The future authoring layer must be able to: re-render with edited content, swap component types (e.g., accordion → cards), and customise without re-calling Stitch. All 25 component types must be designed by Stitch upfront.

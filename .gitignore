@@ -3,3 +3,12 @@ node_modules/
 .DS_Store
 EV/
 .playwright-screenshots/
+.playwright-mcp/
+screenshots/
+.env
+
+# Dev screenshots (Playwright viewport/full-page captures)
+# Keep screenshots/ folder tracked, ignore loose images in root
+/*.jpeg
+/*.png
+screenshots/

@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Workplace Safety Fundamentals | The Ethereal Archive</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#19191e",
+                        "surface-container-high": "#1f1f25",
+                        "surface-tint": "#46a5ff",
+                        "outline": "#75757d",
+                        "primary": "#46a5ff",
+                        "on-secondary-fixed-variant": "#326800",
+                        "on-error": "#490006",
+                        "secondary": "#87dc47",
+                        "secondary-fixed-dim": "#94ea53",
+                        "error": "#ff716c",
+                        "tertiary-fixed": "#e6fe2c",
+                        "secondary-dim": "#7acd39",
+                        "surface-dim": "#0e0e12",
+                        "on-background": "#e6e4ee",
+                        "surface-variant": "#25252c",
+                        "on-primary-fixed": "#00294a",
+                        "on-primary-container": "#001429",
+                        "on-surface": "#e6e4ee",
+                        "on-primary": "#002442",
+                        "on-tertiary-fixed": "#444c00",
+                        "surface-container-lowest": "#000000",
+                        "on-error-container": "#ff9993",
+                        "on-secondary-container": "#66b723",
+                        "tertiary-container": "#e0f824",
+                        "background": "#0e0e12",
+                        "secondary-container": "#112c00",
+                        "on-tertiary-fixed-variant": "#5f6a00",
+                        "primary-container": "#0097fc",
+                        "primary-fixed": "#94c4ff",
+                        "on-secondary": "#214900",
+                        "inverse-surface": "#fbf8fe",
+                        "on-tertiary": "#5a6500",
+                        "surface-bright": "#2b2c33",
+                        "tertiary-fixed-dim": "#d8ef15",
+                        "primary-fixed-dim": "#78b7ff",
+                        "inverse-on-surface": "#555459",
+                        "surface-container-low": "#131317",
+                        "error-dim": "#c94947",
+                        "on-secondary-fixed": "#214800",
+                        "primary-dim": "#3da2ff",
+                        "tertiary-dim": "#d8ef15",
+                        "surface-container-highest": "#25252c",
+                        "tertiary": "#f7ffba",
+                        "secondary-fixed": "#a2f960",
+                        "on-primary-fixed-variant": "#00477b",
+                        "error-container": "#8a1a1e",
+                        "outline-variant": "#47474f",
+                        "on-tertiary-container": "#525c00",
+                        "inverse-primary": "#0062a6",
+                        "surface": "#0e0e12",
+                        "on-surface-variant": "#abaab3"
+                    },
+                    fontFamily: {
+                        "headline": ["Inter"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .glass { background: rgba(25, 25, 30, 0.6); backdrop-filter: blur(20px); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        details > summary::-webkit-details-marker { display: none; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-surface-dim text-on-surface font-body selection:bg-primary/30 selection:text-primary">
+<!-- TopNavBar -->
+<nav class="fixed top-0 w-full z-50 bg-[#19191e]/60 backdrop-blur-xl shadow-[0_12px_40px_rgba(0,0,0,0.06)] flex justify-between items-center px-8 h-20 w-full" data-component-type="navigation">
+<div class="flex items-center gap-4">
+<span class="text-xl font-black tracking-tighter text-[#46a5ff] italic">THE ETHEREAL ARCHIVE</span>
+<div class="h-6 w-px bg-white/10 hidden md:block"></div>
+<span class="text-[#46a5ff] font-['Inter'] font-bold tracking-tight text-sm uppercase hidden md:block">Workplace Safety</span>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+<a class="text-[#46a5ff] border-b-2 border-[#46a5ff] pb-1 font-['Inter'] font-bold tracking-tight text-sm uppercase transition-all duration-300" href="#hero">Modules</a>
+<a class="text-slate-400 hover:text-white transition-colors font-['Inter'] font-bold tracking-tight text-sm uppercase" href="#hierarchy">Resources</a>
+<a class="text-slate-400 hover:text-white transition-colors font-['Inter'] font-bold tracking-tight text-sm uppercase" href="#assessment">Archive</a>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-white/5 p-2 rounded-full transition-all duration-300 scale-95 active:scale-90">
+<span class="material-symbols-outlined text-slate-400">notifications</span>
+</button>
+<button class="hover:bg-white/5 p-2 rounded-full transition-all duration-300 scale-95 active:scale-90">
+<span class="material-symbols-outlined text-slate-400">account_circle</span>
+</button>
+<a class="md:hidden text-primary" href="#hero">
+<span class="material-symbols-outlined">expand_less</span>
+</a>
+</div>
+</nav>
+<main class="pt-20">
+<!-- 1. HERO -->
+<section class="relative h-screen flex items-center justify-center overflow-hidden" data-component-type="hero" id="hero">
+<div class="absolute inset-0 z-0">
+<div class="absolute inset-0 bg-gradient-to-b from-surface-dim/20 via-surface-dim/60 to-surface-dim z-10"></div>
+<img alt="modern industrial workspace" class="w-full h-full object-cover grayscale opacity-40" data-alt="cinematic wide shot of a clean modern industrial warehouse with high ceilings and atmospheric blue light filtering through skylights" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLUr7-3zBOg0uS3V5suw6CWzWpEk30x1kgxiYagIuGH5LEMrtBornpWffcytX-RsSCeQvA4kAPATzlwM2mfCJt9bzbOhI3E_1N36dXkGyLJQ60iL7VMfZsfHARDkmiEu_oSVs3CzdfoAD4djuZpwNfhGqVKRLfVHiiDi6WjrOneye4KfrduqJRJfpSs5a6vdp8iLhg-fwvrgb9WT9PyCPPlzCme-mRK4lXasMpkEtt7vMNOcH4O7dMT5uRAHZAnO43cVtQCUS4TmeH"/>
+</div>
+<div class="relative z-20 text-center px-6 max-w-4xl">
+<span class="inline-block py-1 px-4 mb-6 rounded-full bg-primary/10 border border-primary/20 text-primary text-xs font-bold tracking-widest uppercase">Fundamental Track</span>
+<h1 class="text-6xl md:text-8xl font-black tracking-tighter mb-6 leading-tight">Workplace Safety <br/><span class="text-primary">Fundamentals</span></h1>
+<p class="text-xl md:text-2xl text-on-surface-variant mb-10 max-w-2xl mx-auto leading-relaxed">Your comprehensive guide to hazard identification, risk mitigation, and the culture of collective responsibility.</p>
+<div class="flex flex-col md:flex-row gap-4 justify-center">
+<button class="px-8 py-4 bg-gradient-to-br from-primary to-primary-container text-on-primary-container font-bold rounded-lg shadow-lg hover:shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95">Begin Course</button>
+<button class="px-8 py-4 glass border border-outline-variant/30 text-on-surface font-bold rounded-lg hover:bg-white/5 transition-all">Explore Modules</button>
+</div>
+</div>
+<div class="absolute bottom-10 left-1/2 -translate-x-1/2 animate-bounce">
+<span class="material-symbols-outlined text-primary/50 text-4xl">expand_more</span>
+</div>
+</section>
+<!-- 2. TEXT - Why Safety Matters -->
+<section class="py-32 px-6 max-w-5xl mx-auto" data-component-type="text">
+<div class="grid md:grid-cols-12 gap-12 items-center">
+<div class="md:col-span-4">
+<h2 class="text-4xl font-bold tracking-tight mb-4">Why Safety <br/>Matters.</h2>
+<div class="w-12 h-1 bg-secondary rounded-full"></div>
+</div>
+<div class="md:col-span-8">
+<p class="text-xl text-on-surface-variant leading-relaxed mb-6">Every year, thousands of incidents occur in workplaces across the globe. Beyond the staggering financial implications, these events represent human stories—interruptions to careers, well-being, and lives.</p>
+<p class="text-xl text-on-surface-variant leading-relaxed">A culture of safety isn't built on compliance checklists; it's forged through the understanding that every individual has the power—and the obligation—to observe, report, and act.</p>
+</div>
+</div>
+</section>
+<!-- 3. STAT-CALLOUT -->
+<section class="py-24 bg-surface-container-low" data-component-type="stat-callout">
+<div class="max-w-7xl mx-auto px-6">
+<div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+<div class="p-8 glass rounded-2xl border-l-4 border-primary">
+<div class="text-4xl md:text-5xl font-black text-primary mb-2">2.3M</div>
+<div class="text-xs font-bold uppercase tracking-widest text-slate-500">Global Injuries</div>
+</div>
+<div class="p-8 glass rounded-2xl border-l-4 border-secondary">
+<div class="text-4xl md:text-5xl font-black text-secondary mb-2">72%</div>
+<div class="text-xs font-bold uppercase tracking-widest text-slate-500">Preventable</div>
+</div>
+<div class="p-8 glass rounded-2xl border-l-4 border-error">
+<div class="text-4xl md:text-5xl font-black text-error mb-2">$170B</div>
+<div class="text-xs font-bold uppercase tracking-widest text-slate-500">Economic Cost</div>
+</div>
+<div class="p-8 glass rounded-2xl border-l-4 border-tertiary">
+<div class="text-4xl md:text-5xl font-black text-tertiary mb-2">14%</div>
+<div class="text-xs font-bold uppercase tracking-widest text-slate-500">Incident Reduction</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 4. GRAPHIC-TEXT - Hierarchy of Controls -->
+<section class="py-32 px-6 max-w-7xl mx-auto" data-component-type="graphic-text" id="hierarchy">
+<div class="flex flex-col md:flex-row gap-20 items-center">
+<div class="w-full md:w-1/2 order-2 md:order-1">
+<div class="relative group">
+<div class="absolute -inset-4 bg-primary/10 blur-3xl group-hover:bg-primary/20 transition-all"></div>
+<!-- Pyramid Visualization -->
+<div class="relative flex flex-col items-center">
+<div class="w-[80%] h-16 bg-primary/20 border-b border-primary/40 flex items-center justify-center font-bold tracking-widest text-primary clip-pyramid-1">ELIMINATION</div>
+<div class="w-[85%] h-16 bg-primary/15 border-b border-primary/30 flex items-center justify-center font-bold tracking-widest text-primary/80">SUBSTITUTION</div>
+<div class="w-[90%] h-16 bg-primary/10 border-b border-primary/20 flex items-center justify-center font-bold tracking-widest text-primary/60">ENGINEERING</div>
+<div class="w-[95%] h-16 bg-primary/5 border-b border-primary/10 flex items-center justify-center font-bold tracking-widest text-primary/40">ADMINISTRATIVE</div>
+<div class="w-full h-16 bg-surface-container border-b border-white/5 flex items-center justify-center font-bold tracking-widest text-slate-600">PPE</div>
+</div>
+</div>
+</div>
+<div class="w-full md:w-1/2 order-1 md:order-2">
+<h2 class="text-5xl font-black tracking-tighter mb-8 leading-none">Hierarchy of <span class="text-primary">Controls</span></h2>
+<p class="text-lg text-on-surface-variant leading-relaxed mb-6 italic">The gold standard for workplace safety prioritization.</p>
+<p class="text-lg text-on-surface-variant leading-relaxed">This systemic approach ensures that the most effective methods—removing the hazard entirely—are considered before relying on human behavior or personal protective equipment.</p>
+</div>
+</div>
+</section>
+<!-- 5. ACCORDION -->
+<section class="py-24 px-6 max-w-4xl mx-auto" data-component-type="accordion">
+<h3 class="text-2xl font-bold mb-12 flex items-center gap-4">
+<span class="w-8 h-8 rounded-full bg-secondary/10 text-secondary flex items-center justify-center text-sm">01</span>
+                The Five Levels of Hazard Control
+            </h3>
+<div class="space-y-4">
+<details class="group glass rounded-xl border border-white/5 overflow-hidden transition-all duration-300">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-white/5">
+<span class="font-bold text-lg">1. Elimination</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-on-surface-variant border-t border-white/5 pt-4">
+                        Physically remove the hazard. This is the most effective control measure. Example: Removing a trip hazard from a walkway.
+                    </div>
+</details>
+<details class="group glass rounded-xl border border-white/5 overflow-hidden transition-all duration-300">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-white/5">
+<span class="font-bold text-lg">2. Substitution</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-on-surface-variant border-t border-white/5 pt-4">
+                        Replace the hazard with a safer alternative. Example: Using a water-based solvent instead of a flammable chemical.
+                    </div>
+</details>
+<details class="group glass rounded-xl border border-white/5 overflow-hidden transition-all duration-300">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-white/5">
+<span class="font-bold text-lg">3. Engineering Controls</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-on-surface-variant border-t border-white/5 pt-4">
+                        Isolate people from the hazard through physical barriers or mechanical systems. Example: Installing machine guarding or ventilation.
+                    </div>
+</details>
+<details class="group glass rounded-xl border border-white/5 overflow-hidden transition-all duration-300">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-white/5">
+<span class="font-bold text-lg">4. Administrative Controls</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-on-surface-variant border-t border-white/5 pt-4">
+                        Change the way people work through training, signage, and policy. Example: Safety training sessions or warning signs.
+                    </div>
+</details>
+<details class="group glass rounded-xl border border-white/5 overflow-hidden transition-all duration-300">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-white/5">
+<span class="font-bold text-lg">5. PPE (Personal Protective Equipment)</span>
+<span class="material-symbols-outlined transition-transform group-open:rotate-180">expand_more</span>
+</summary>
+<div class="px-6 pb-6 text-on-surface-variant border-t border-white/5 pt-4">
+                        Protect the worker with equipment. This is the least effective control as it relies on human compliance and equipment failure is possible.
+                    </div>
+</details>
+</div>
+</section>
+<!-- 6. TABS - Types of Hazards -->
+<section class="py-32 bg-surface-container-lowest" data-component-type="tabs">
+<div class="max-w-7xl mx-auto px-6">
+<div class="mb-16 text-center">
+<h2 class="text-4xl font-black mb-4">Types of Workplace Hazards</h2>
+<p class="text-slate-500">Select a category to explore common risks and mitigation strategies.</p>
+</div>
+<div class="flex flex-col md:flex-row gap-12" data-tabs="">
+<div class="flex flex-col md:w-1/3 gap-4" data-tab-triggers="">
+<button class="flex items-center gap-4 p-6 glass rounded-xl border-r-4 border-primary text-left transition-all hover:translate-x-2" data-tab-trigger="physical">
+<span class="material-symbols-outlined text-primary">warning</span>
+<span class="font-bold uppercase tracking-widest text-sm">Physical</span>
+</button>
+<button class="flex items-center gap-4 p-6 glass rounded-xl border-r-4 border-transparent text-left opacity-50 transition-all hover:opacity-100" data-tab-trigger="chemical">
+<span class="material-symbols-outlined text-secondary">science</span>
+<span class="font-bold uppercase tracking-widest text-sm">Chemical</span>
+</button>
+<button class="flex items-center gap-4 p-6 glass rounded-xl border-r-4 border-transparent text-left opacity-50 transition-all hover:opacity-100" data-tab-trigger="biological">
+<span class="material-symbols-outlined text-tertiary">coronavirus</span>
+<span class="font-bold uppercase tracking-widest text-sm">Biological</span>
+</button>
+<button class="flex items-center gap-4 p-6 glass rounded-xl border-r-4 border-transparent text-left opacity-50 transition-all hover:opacity-100" data-tab-trigger="ergonomic">
+<span class="material-symbols-outlined text-primary-fixed">accessibility_new</span>
+<span class="font-bold uppercase tracking-widest text-sm">Ergonomic</span>
+</button>
+</div>
+<div class="md:w-2/3 glass rounded-3xl p-12 min-h-[400px] flex items-center" data-tab-panels="">
+<div class="space-y-6" data-tab-panel="" id="physical">
+<h4 class="text-3xl font-bold text-primary">Physical Hazards</h4>
+<p class="text-lg text-on-surface-variant leading-relaxed">Physical hazards are environmental factors that can harm an employee without necessarily touching them. These include heights, noisy environments, radiation, and extreme temperatures.</p>
+<ul class="grid grid-cols-2 gap-4">
+<li class="flex items-center gap-2 text-slate-400"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> Slippery Surfaces</li>
+<li class="flex items-center gap-2 text-slate-400"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> Moving Machinery</li>
+<li class="flex items-center gap-2 text-slate-400"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> Electrical Risks</li>
+<li class="flex items-center gap-2 text-slate-400"><span class="w-1.5 h-1.5 bg-primary rounded-full"></span> Falling Objects</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 7. BENTO - Recognising Hazards -->
+<section class="py-32 px-6 max-w-7xl mx-auto" data-component-type="bento">
+<h2 class="text-5xl font-black tracking-tighter mb-16">Recognising <br/><span class="text-secondary">Hazards</span></h2>
+<div class="grid grid-cols-1 md:grid-cols-6 md:grid-rows-2 gap-6 h-auto md:h-[600px]">
+<div class="md:col-span-3 md:row-span-2 glass rounded-3xl p-10 flex flex-col justify-end relative overflow-hidden group">
+<img alt="walking the floor" class="absolute inset-0 object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" data-alt="a pair of industrial safety boots walking on a polished warehouse floor with perspective lines leading to the distance" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB8guPp7bHYgdH3GnaWVV5sRjaySkYGv8IbJOgn7tazSxVMslMvxGe6AXaPnAapLxR5WvZsxfj8TJPSd49dBBPwuIayYa8c_plhL8bPNEvcrKp9cqpqh0MVAS4xQNQ7v6xkR2t0PpOBzLGT_uTHRhyHLKAMkrg_7Bz8-AW0RexDikHnRuGpPuhvEpRjKjd1XVUlpoX24Fb2hVNUcb_vGneyTuF3WjmZ16efm4MzpjvAIgr7xr9NK0byBjNPCUvBHPQMsXU8o-ss5wao"/>
+<div class="relative z-10">
+<h4 class="text-3xl font-bold mb-4">Walk the Floor</h4>
+<p class="text-slate-400">Regular environmental assessments are the first line of defense against stagnant risks.</p>
+</div>
+</div>
+<div class="md:col-span-3 glass rounded-3xl p-10 flex items-center gap-6 border-l-4 border-primary">
+<span class="material-symbols-outlined text-5xl text-primary">hearing</span>
+<div>
+<h4 class="text-xl font-bold">Listen for Warnings</h4>
+<p class="text-slate-500 text-sm">Unusual sounds from machinery often precede mechanical failure.</p>
+</div>
+</div>
+<div class="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-6">
+<div class="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined text-primary mb-2 group-hover:scale-110 transition-transform">settings_accessibility</span>
+<span class="text-xs font-bold uppercase tracking-tight">Check Equipment</span>
+</div>
+<div class="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-secondary/10 transition-colors">
+<span class="material-symbols-outlined text-secondary mb-2 group-hover:scale-110 transition-transform">report</span>
+<span class="text-xs font-bold uppercase tracking-tight">Review Misses</span>
+</div>
+<div class="glass rounded-2xl p-6 flex flex-col items-center justify-center text-center group cursor-pointer hover:bg-tertiary/10 transition-colors">
+<span class="material-symbols-outlined text-tertiary mb-2 group-hover:scale-110 transition-transform">signpost</span>
+<span class="text-xs font-bold uppercase tracking-tight">Follow Signs</span>
+</div>
+</div>
+</div>
+</section>
+<!-- 8. FULL-BLEED -->
+<section class="relative h-[614px] flex items-center overflow-hidden" data-component-type="full-bleed">
+<img alt="emergency response" class="absolute inset-0 w-full h-full object-cover" data-alt="dramatic low angle shot of industrial emergency alarm flashing red in a dark corridor with atmospheric smoke or haze" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfJrGaMK_fpph9LFGhVsbQTUp8pzvc0FUtY7UFBZdDls2zq1VACcAUIPgaimnbcjuDHSA5VQfLxpu1TJYiBsPAxVr0Ck5tt7a3BdjSByn_LSsSrI-GugsjCSiVw3AYBXlAGv4fcVk2tvdO-cWF4AfjL0AZAiDuvCWGQBecuCUD3htQb77KMe_nPHs_JtWU_6iHUKERvvyDaKzLgLO9OyIxWOuSdstYKRz6zskiuL3vci98roGaCeq6zPjmMSfycBcTIKfyBB1nlqUE"/>
+<div class="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
+<div class="relative z-10 max-w-7xl mx-auto px-6 w-full">
+<h2 class="text-7xl font-black italic tracking-tighter text-white drop-shadow-2xl">When Seconds Count.</h2>
+<div class="h-1.5 w-48 bg-error mt-4"></div>
+</div>
+</section>
+<!-- 9. TIMELINE -->
+<section class="py-32 px-6 max-w-5xl mx-auto" data-component-type="timeline">
+<h3 class="text-3xl font-bold text-center mb-20">Emergency Response Sequence</h3>
+<div class="relative space-y-12">
+<div class="absolute left-[15px] md:left-1/2 top-0 bottom-0 w-px bg-white/10"></div>
+<div class="relative flex flex-col md:flex-row items-center md:justify-between group">
+<div class="md:w-5/12 text-left md:text-right">
+<h4 class="text-xl font-bold text-primary">Alert</h4>
+<p class="text-slate-500">Trigger the alarm and notify others immediately.</p>
+</div>
+<div class="absolute left-0 md:left-1/2 -translate-x-[4px] md:-translate-x-1/2 w-4 h-4 rounded-full bg-primary border-4 border-surface-dim z-10 group-hover:scale-150 transition-transform"></div>
+<div class="hidden md:block md:w-5/12"></div>
+</div>
+<div class="relative flex flex-col md:flex-row items-center md:justify-between group">
+<div class="hidden md:block md:w-5/12"></div>
+<div class="absolute left-0 md:left-1/2 -translate-x-[4px] md:-translate-x-1/2 w-4 h-4 rounded-full bg-secondary border-4 border-surface-dim z-10 group-hover:scale-150 transition-transform"></div>
+<div class="md:w-5/12 text-left">
+<h4 class="text-xl font-bold text-secondary">Assess</h4>
+<p class="text-slate-500">Quickly evaluate the nature of the emergency.</p>
+</div>
+</div>
+<div class="relative flex flex-col md:flex-row items-center md:justify-between group">
+<div class="md:w-5/12 text-left md:text-right">
+<h4 class="text-xl font-bold text-tertiary">Act</h4>
+<p class="text-slate-500">Apply primary response skills (Fire, First Aid).</p>
+</div>
+<div class="absolute left-0 md:left-1/2 -translate-x-[4px] md:-translate-x-1/2 w-4 h-4 rounded-full bg-tertiary border-4 border-surface-dim z-10 group-hover:scale-150 transition-transform"></div>
+<div class="hidden md:block md:w-5/12"></div>
+</div>
+</div>
+</section>
+<!-- 11. MCQ - Knowledge Check -->
+<section class="py-32 px-6" data-component-type="mcq" id="assessment">
+<div class="max-w-3xl mx-auto glass rounded-3xl p-12 border border-primary/20 shadow-2xl shadow-primary/5">
+<span class="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">Knowledge Check 01</span>
+<h3 class="text-3xl font-bold mb-8 leading-tight">What is the MOST effective way to control a hazard within the hierarchy?</h3>
+<div class="space-y-4" data-correct="0" data-quiz="">
+<button class="w-full text-left p-6 rounded-xl glass border border-white/5 hover:border-primary/50 transition-all flex justify-between items-center group" data-choice="0">
+<span>Eliminate the hazard at the source</span>
+<span class="material-symbols-outlined opacity-0 group-hover:opacity-100">check_circle</span>
+</button>
+<button class="w-full text-left p-6 rounded-xl glass border border-white/5 hover:border-error/50 transition-all flex justify-between items-center group" data-choice="1">
+<span>Provide Personal Protective Equipment (PPE)</span>
+<span class="material-symbols-outlined opacity-0">cancel</span>
+</button>
+<button class="w-full text-left p-6 rounded-xl glass border border-white/5 hover:border-error/50 transition-all flex justify-between items-center group" data-choice="2">
+<span>Implement administrative controls</span>
+<span class="material-symbols-outlined opacity-0">cancel</span>
+</button>
+<button class="w-full text-left p-6 rounded-xl glass border border-white/5 hover:border-error/50 transition-all flex justify-between items-center group" data-choice="3">
+<span>Apply engineering controls</span>
+<span class="material-symbols-outlined opacity-0">cancel</span>
+</button>
+</div>
+</div>
+</section>
+<!-- 13. FLASHCARD -->
+<section class="py-24 px-6 overflow-hidden" data-component-type="flashcard">
+<div class="max-w-7xl mx-auto">
+<h3 class="text-2xl font-bold mb-12">Core Concepts: Tap to Flip</h3>
+<div class="flex gap-6 overflow-x-auto pb-12 hide-scrollbar">
+<div class="flex-none w-80 h-96 [perspective:1000px] group" data-flashcard="">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] cursor-pointer group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 glass rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden]">
+<span class="material-symbols-outlined text-5xl text-primary mb-4">psychology</span>
+<h4 class="text-2xl font-black">ALARP</h4>
+</div>
+<div class="absolute inset-0 bg-primary rounded-3xl p-8 flex flex-col items-center justify-center text-on-primary text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+<p class="font-bold text-lg">As Low As Reasonably Practicable</p>
+<p class="text-sm mt-4 opacity-80">Balancing the risk reduction against the cost, time, and effort required.</p>
+</div>
+</div>
+</div>
+<div class="flex-none w-80 h-96 [perspective:1000px] group" data-flashcard="">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] cursor-pointer group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 glass rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden]">
+<span class="material-symbols-outlined text-5xl text-secondary mb-4">local_fire_department</span>
+<h4 class="text-2xl font-black">Fire Triangle</h4>
+</div>
+<div class="absolute inset-0 bg-secondary rounded-3xl p-8 flex flex-col items-center justify-center text-on-secondary text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+<p class="font-bold text-lg">Heat, Fuel, Oxygen</p>
+<p class="text-sm mt-4 opacity-80">Remove any one of these elements to extinguish a fire.</p>
+</div>
+</div>
+</div>
+<div class="flex-none w-80 h-96 [perspective:1000px] group" data-flashcard="">
+<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d] cursor-pointer group-hover:[transform:rotateY(180deg)]">
+<div class="absolute inset-0 glass rounded-3xl p-8 flex flex-col items-center justify-center [backface-visibility:hidden]">
+<span class="material-symbols-outlined text-5xl text-tertiary mb-4">medical_services</span>
+<h4 class="text-2xl font-black">DRSABCD</h4>
+</div>
+<div class="absolute inset-0 bg-tertiary rounded-3xl p-8 flex flex-col items-center justify-center text-on-tertiary text-center [backface-visibility:hidden] [transform:rotateY(180deg)]">
+<p class="font-bold text-lg">Danger, Response...</p>
+<p class="text-sm mt-4 opacity-80">Send for Help, Airway, Breathing, CPR, Defibrillation.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 15. COMPARISON Table -->
+<section class="py-32 px-6 max-w-5xl mx-auto" data-component-type="comparison">
+<h2 class="text-3xl font-black mb-12">The Impact of Standards</h2>
+<div class="overflow-hidden glass rounded-3xl border border-white/5">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-white/5">
+<th class="p-6 font-bold uppercase tracking-widest text-xs text-slate-500">Feature</th>
+<th class="p-6 font-bold uppercase tracking-widest text-xs text-error/70">Unregulated</th>
+<th class="p-6 font-bold uppercase tracking-widest text-xs text-secondary">Archive Standard</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-white/5">
+<tr>
+<td class="p-6 font-bold">Signage</td>
+<td class="p-6 text-slate-500">Ad-hoc/Missing</td>
+<td class="p-6 text-on-surface">ISO Certified / High Vis</td>
+</tr>
+<tr>
+<td class="p-6 font-bold">Maintenance</td>
+<td class="p-6 text-slate-500">Reactive only</td>
+<td class="p-6 text-on-surface">Predictive / Logged</td>
+</tr>
+<tr>
+<td class="p-6 font-bold">Reporting</td>
+<td class="p-6 text-slate-500">Paper-based/Slow</td>
+<td class="p-6 text-on-surface">Instant Digital Capture</td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<!-- 19. PULLQUOTE -->
+<section class="py-48 px-6 text-center" data-component-type="pullquote">
+<div class="max-w-4xl mx-auto">
+<span class="material-symbols-outlined text-6xl text-primary/20 mb-8" style="font-variation-settings: 'FILL' 1;">format_quote</span>
+<blockquote class="text-4xl md:text-5xl font-light italic leading-tight text-on-surface/90 mb-10">
+                    "Safety is not an intellectual exercise to keep us in work. It is a matter of life and death. It is the sum of our contributions to managed risk."
+                </blockquote>
+<cite class="text-primary font-bold tracking-widest uppercase text-sm">— Sir Brian Appleton</cite>
+</div>
+</section>
+<!-- 24. LABELED-IMAGE - Fire Extinguisher Anatomy -->
+<section class="py-32 px-6 bg-surface-container-low" data-component-type="labeled-image">
+<div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-16 items-center">
+<div class="md:w-1/2 relative">
+<div class="absolute -inset-10 bg-error/10 blur-3xl rounded-full"></div>
+<div class="relative glass p-4 rounded-3xl">
+<img alt="fire extinguisher" class="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700" data-alt="studio product shot of a red commercial fire extinguisher with metallic pin and black hose against a dark textured background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHNaDhxHVbQ2RcWQFP4VCsqakk49Jl0UXr22p0P9DQYyCLwAIn1NNJpz5CY5g-hzyj7rVEGVauYBt7cBUdKWG1SYcfLboTmQtXjPMAPFe3O6chpHzKaXYK9VKelOg4p82QQuAhO8nxBcnukvoyqr9CcqwUAaG0OmmjdLYVBUIrerJ9E7OLs1LqArIBvBFs0GvW4WtxLHKlaH687C6OVbcHUVTmx-qO8lWAkz2H-HgO5iw71jPs6NRkTgAwVkQT6sZMnUeR7ka_5I3g"/>
+<!-- Markers -->
+<div class="absolute top-[5%] left-[50%] -translate-x-1/2 w-6 h-6 bg-error rounded-full border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold">1</div>
+<div class="absolute top-[15%] left-[50%] -translate-x-1/2 w-6 h-6 bg-error rounded-full border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold">2</div>
+<div class="absolute top-[30%] left-[30%] -translate-x-1/2 w-6 h-6 bg-error rounded-full border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold">3</div>
+<div class="absolute top-[50%] left-[50%] -translate-x-1/2 w-6 h-6 bg-error rounded-full border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold">4</div>
+<div class="absolute top-[25%] left-[65%] -translate-x-1/2 w-6 h-6 bg-error rounded-full border-2 border-white shadow-xl flex items-center justify-center text-[10px] font-bold">5</div>
+</div>
+</div>
+<div class="md:w-1/2">
+<h3 class="text-4xl font-black mb-10">Extinguisher Anatomy</h3>
+<div class="space-y-6">
+<div class="flex gap-6 items-start">
+<span class="w-8 h-8 rounded-lg bg-error/20 text-error flex-shrink-0 flex items-center justify-center font-bold">1</span>
+<div>
+<h5 class="font-bold">Operating Handle</h5>
+<p class="text-slate-500 text-sm">Squeeze to release the extinguishing agent.</p>
+</div>
+</div>
+<div class="flex gap-6 items-start">
+<span class="w-8 h-8 rounded-lg bg-error/20 text-error flex-shrink-0 flex items-center justify-center font-bold">2</span>
+<div>
+<h5 class="font-bold">Locking Pin</h5>
+<p class="text-slate-500 text-sm">Prevents accidental discharge; must be pulled before use.</p>
+</div>
+</div>
+<div class="flex gap-6 items-start">
+<span class="w-8 h-8 rounded-lg bg-error/20 text-error flex-shrink-0 flex items-center justify-center font-bold">3</span>
+<div>
+<h5 class="font-bold">Pressure Gauge</h5>
+<p class="text-slate-500 text-sm">Needle should be in the green zone for readiness.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- 27. TEXT - Congratulations -->
+<section class="py-48 px-6 text-center" data-component-type="text">
+<div class="max-w-2xl mx-auto glass rounded-[3rem] p-16 border border-secondary/20 relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-secondary/10 blur-3xl"></div>
+<span class="material-symbols-outlined text-7xl text-secondary mb-8">verified</span>
+<h2 class="text-5xl font-black mb-6">Congratulations.</h2>
+<p class="text-lg text-on-surface-variant mb-10 leading-relaxed">You have completed the Workplace Safety Fundamentals. Your certificate is now available for download in your profile archive.</p>
+<button class="px-10 py-4 bg-secondary text-on-secondary font-black rounded-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-secondary/20">Claim Certificate</button>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-[#0e0e12] w-full py-12 border-t border-white/5" data-component-type="footer">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-2 items-center md:items-start">
+<span class="text-lg font-bold text-slate-200">The Ethereal Archive</span>
+<span class="font-['Inter'] text-xs text-slate-500 leading-relaxed">© 2024 The Ethereal Archive. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="font-['Inter'] text-xs text-slate-500 hover:text-[#46a5ff] transition-colors" href="#">Privacy Policy</a>
+<a class="font-['Inter'] text-xs text-slate-500 hover:text-[#46a5ff] transition-colors" href="#">Terms of Service</a>
+<a class="font-['Inter'] text-xs text-slate-500 hover:text-[#46a5ff] transition-colors" href="#">Cookie Settings</a>
+<a class="font-['Inter'] text-xs text-slate-500 hover:text-[#46a5ff] transition-colors" href="#">Support</a>
+</div>
+<div class="flex gap-4">
+<span class="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary transition-colors cursor-pointer">
+<span class="material-symbols-outlined text-sm">share</span>
+</span>
+</div>
+</div>
+</footer>
+<!-- Fixed Back to Top -->
+<a class="fixed bottom-8 right-8 w-12 h-12 glass border border-white/10 rounded-full flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 shadow-2xl z-50" href="#hero">
+<span class="material-symbols-outlined">arrow_upward</span>
+</a>
+<style>
+        .clip-pyramid-1 { clip-path: polygon(10% 0, 90% 0, 100% 100%, 0 100%); }
+    </style>
+</body></html>
