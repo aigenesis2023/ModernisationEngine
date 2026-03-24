@@ -1,8 +1,8 @@
 {
   "course": {
     "title": "EV Awareness & Safety",
-    "subtitle": "Master the fundamentals of electric vehicle identification, high-voltage hazards, safety equipment, emergency response, and charging procedures.",
-    "totalSections": 11
+    "subtitle": "Your essential guide to identifying, understanding, and working safely around electric and hybrid vehicles.",
+    "totalSections": 10
   },
   "sections": [
     {
@@ -13,66 +13,62 @@
           "componentId": "comp-000",
           "type": "hero",
           "displayTitle": "EV Awareness & Safety",
-          "body": "<p>Your essential guide to identifying electric vehicles, understanding high-voltage hazards, and working safely in the modern automotive workplace.</p>",
-          "imagePrompt": "Modern electric vehicle in a sleek automotive workshop, dramatic lighting with electric blue accent glow, dark atmospheric background, cinematic wide-angle composition, professional photography, high resolution, no text",
+          "body": "<p>Your essential guide to identifying, understanding, and working safely around electric and hybrid vehicles.</p>",
+          "imagePrompt": "Dramatic wide shot of a modern electric vehicle in a professional workshop environment, high voltage orange cables visible under the bonnet, dark moody lighting with red and orange accent highlights, professional automotive setting, cinematic composition",
           "_graphic": {
             "large": "images/comp-000.jpg",
-            "alt": "Electric vehicle in a modern workshop with dramatic blue lighting"
+            "alt": "Electric vehicle in a professional workshop with high voltage components visible"
           }
         }
       ]
     },
     {
       "sectionId": "section-01",
-      "title": "Course Overview",
+      "title": "Introduction & Learning Objectives",
       "components": [
         {
           "componentId": "comp-001",
           "type": "text",
-          "displayTitle": "About This Course",
-          "body": "<p>This training course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle.</p><p><strong>Important:</strong> This first-level online course does not qualify you to work directly on high-voltage systems. You should inform your colleagues of your current trained level and request further assistance from a suitably trained person when necessary.</p>"
+          "displayTitle": "Before You Begin",
+          "body": "<p>This course is designed to improve your knowledge of Electric Vehicles (EVs) and make you aware of the associated risks, so that you may exercise appropriate care for yourself and others when working near an Electric Vehicle.</p><p><strong>Important:</strong> This first level online course does not qualify you to work directly upon the High Voltage systems on the vehicle. You should inform your colleagues of your current trained level and request further assistance from a suitably trained person when necessary.</p>"
         },
         {
           "componentId": "comp-002",
           "type": "accordion",
           "displayTitle": "Learning Objectives",
-          "instruction": "Explore each objective to understand what you'll learn.",
+          "body": "<p>By the end of this course, you will be able to:</p>",
           "_items": [
             {
-              "title": "Identify Electric & Hybrid Vehicles",
-              "body": "<p>Know about the types of electric and hybrid vehicles currently available. State how to identify electric/hybrid vehicles and give examples of the electric/hybrid vehicles that are currently available.</p>"
+              "title": "Know About EV Types",
+              "body": "<p>State how to identify electric/hybrid vehicles. Give examples of the electric/hybrid vehicles that are currently available. Identify alternative fuel source vehicles.</p>"
             },
             {
-              "title": "Understand High-Voltage Hazards",
-              "body": "<p>Understand the hazards around motor vehicle high energy electrical systems. State the hazards associated with high energy electricity and those present when connecting and charging electric/hybrid vehicles.</p>"
+              "title": "Understand EV Hazards",
+              "body": "<p>State the hazards associated with high energy electricity. State the hazards that may be present when connecting and charging electric/hybrid vehicles.</p>"
             },
             {
               "title": "Work Safely Around EVs",
-              "body": "<p>Know how to work safely around electric/hybrid vehicles. State safety precautions to be taken before approaching and working around electric/hybrid vehicles. Identify high energy cabling and components.</p>"
-            },
-            {
-              "title": "Safe Charging Procedures",
-              "body": "<p>Understand how vehicles may be safely charged using an external source. Know the correct procedures and terminology for EV charging systems.</p>"
+              "body": "<p>State safety precautions to be taken before approaching and working around electric/hybrid vehicles. State how to identify motor vehicle high energy cabling and associated components. State how the vehicle may be safely charged using an external source.</p>"
             }
           ]
         },
         {
           "componentId": "comp-003",
-          "type": "textinput",
-          "displayTitle": "Learner Registration",
-          "body": "<p>Please enter your details before continuing.</p>",
+          "type": "branching",
+          "displayTitle": "Select Your Role",
+          "body": "<p>Click on the most relevant role to you. This helps tailor the course content to your level of involvement with EVs.</p>",
           "_items": [
             {
-              "prefix": "Name",
-              "placeholder": "Enter your full name"
+              "title": "Non-Technical",
+              "body": "<p>Site logistics, car parking and movements, valeting.</p>"
             },
             {
-              "prefix": "Organisation",
-              "placeholder": "Enter your organisation"
+              "title": "Semi-Technical",
+              "body": "<p>Service advisor, customer liaison.</p>"
             },
             {
-              "prefix": "Email",
-              "placeholder": "Enter your email address"
+              "title": "Technical",
+              "body": "<p>Bodyshop & workshop technicians, workshop manager.</p>"
             }
           ]
         }
@@ -80,349 +76,378 @@
     },
     {
       "sectionId": "section-02",
-      "title": "Recognising an Electric Vehicle",
+      "title": "Recognising an EV",
       "components": [
         {
-          "componentId": "comp-010",
+          "componentId": "comp-004",
           "type": "text",
-          "displayTitle": "Why Identification Matters",
-          "body": "<p>It is important that you can recognise an electric vehicle when it comes into your workplace. You will then be ready to exercise the correct procedures necessary for a safe visit.</p><p>Identifying features will differ between manufacturers. This means you may need to exercise your skill and experience to determine the vehicle type — getting it wrong could be dangerous.</p>"
+          "displayTitle": "Why Recognition Matters",
+          "body": "<p>It is important that you can recognise an electric vehicle when it comes into your workplace. You will then be ready to exercise the correct procedures necessary for a safe visit.</p><p>Identifying features of electric vehicles will differ between manufacturers. This means that you may need to exercise your skill and experience to make sure that you know what type of vehicle you are looking at — getting it wrong could be risky.</p>"
         },
         {
-          "componentId": "comp-011",
+          "componentId": "comp-005",
           "type": "graphic-text",
           "displayTitle": "Exterior Identification",
           "_imageAlign": "right",
-          "body": "<p>Look for these key exterior features:</p><ul><li><strong>Number plate:</strong> Full EVs may have a green border (not mandatory)</li><li><strong>Badging:</strong> Many EVs display a badge indicating electric power</li><li><strong>Charge port:</strong> BEVs and PHEVs have a battery charge connector port on the vehicle exterior</li></ul>",
-          "imagePrompt": "Close-up of electric vehicle exterior showing green number plate border and EV badge, modern car in workshop, professional photography, dark background with blue accent lighting, 800x600, no text",
+          "body": "<p>You can spot an EV from the outside by looking for these key features:</p><ul><li><strong>Number Plate:</strong> Full EVs may have a green border (not mandatory)</li><li><strong>Badging:</strong> Many EVs will have a badge indicating they are electric</li><li><strong>Charge Port:</strong> Battery EVs (BEV) and Plug-in Hybrids (PHEV) will have a battery charge lead connector port somewhere on the vehicle</li></ul>",
+          "imagePrompt": "Close-up of the rear of a modern electric vehicle showing a green number plate strip, EV badge, and charge port cover, professional automotive photography, clean background, red and dark tones",
           "_graphic": {
-            "large": "images/comp-011.jpg",
-            "alt": "Electric vehicle exterior showing green number plate and charging port"
+            "large": "images/comp-005.jpg",
+            "alt": "Rear of an electric vehicle showing EV identification features"
           }
         },
         {
-          "componentId": "comp-012",
-          "type": "graphic-text",
-          "displayTitle": "Under the Bonnet",
-          "_imageAlign": "left",
-          "body": "<p>When inspecting the engine bay, look for these indicators:</p><ul><li><strong>Orange high-voltage cables</strong> — the universal indicator of an EV electrical system</li><li><strong>Power controller / inverter</strong> — converts battery DC to motor AC</li><li><strong>Warning labels</strong> — high-voltage warnings on components and covers</li></ul>",
-          "imagePrompt": "EV engine bay close-up showing bright orange high-voltage cables power inverter and warning labels, technical automotive photography, dark moody lighting, 800x600, no text",
-          "_graphic": {
-            "large": "images/comp-012.jpg",
-            "alt": "EV engine bay with orange high-voltage cables and warning labels"
-          }
-        },
-        {
-          "componentId": "comp-013",
-          "type": "checklist",
-          "displayTitle": "EV Identification Checklist",
-          "body": "<p>You can recognise an Electric Vehicle by looking for these identifying criteria. Not all types of EV will have the same identifiers.</p>",
-          "instruction": "Review each indicator you would check when identifying an EV.",
+          "componentId": "comp-006",
+          "type": "bento",
+          "displayTitle": "Under the Skin — Other EV Indicators",
+          "body": "<p>Beyond exterior features, there are internal and underbody indicators that a vehicle is electric.</p>",
           "_items": [
             {
-              "text": "Badging on exterior bodywork",
-              "detail": "Look for EV, Electric, e-tron, or similar manufacturer badges."
+              "title": "Orange HV Cables",
+              "body": "<p>Bright-coloured high voltage cables are a clear indicator of an EV powertrain.</p>"
             },
             {
-              "text": "External mains charging connection port",
-              "detail": "Present on BEV and PHEV vehicles — not on standard HEV."
+              "title": "Power Controller / Inverter",
+              "body": "<p>Electronic controllers managing the flow of high voltage power.</p>"
             },
             {
-              "text": "Instrument cluster warnings and messages",
-              "detail": "Dashboard displays showing EV status and high-voltage warnings."
+              "title": "Warning Labels",
+              "body": "<p>High voltage warning labels on components and under the bonnet.</p>"
             },
             {
-              "text": "Power flow / energy use screen on dashboard",
-              "detail": "Shows real-time energy flow between battery, motor, and wheels."
-            },
-            {
-              "text": "Bright-coloured (orange) high-voltage cables",
-              "detail": "The universal indicator of high-voltage systems in any EV."
-            },
-            {
-              "text": "Green band on number plate",
-              "detail": "Not mandatory — do not rely on this alone."
-            },
-            {
-              "text": "Warning labels on HV components",
-              "detail": "Yellow and black high-voltage warning triangles on covers and components."
+              "title": "Instrument Cluster",
+              "body": "<p>EV-specific warning messages and power flow/energy usage screens on the dashboard.</p>"
             }
           ]
         },
         {
-          "componentId": "comp-014",
-          "type": "pullquote",
-          "body": "Not all types of EV will have the same identifying features. A Hybrid Electric Vehicle (HEV) may not have a charging port, but it still contains high-voltage components that present serious risks.",
-          "attribution": "EV Safety Guidelines",
-          "role": "Industry Best Practice"
+          "componentId": "comp-007",
+          "type": "graphic-text",
+          "displayTitle": "Government Vehicle Enquiry",
+          "_imageAlign": "left",
+          "body": "<p>If you're unsure about a vehicle's type, you can check using the UK Government's vehicle enquiry service at <strong>vehicleenquiry.service.gov.uk</strong>. Enter the vehicle registration number to confirm whether it's electric, hybrid, or conventional.</p>",
+          "imagePrompt": "Screenshot-style illustration of a government website vehicle enquiry form, clean minimal design, blue accent colours on a dark interface, professional and modern",
+          "_graphic": {
+            "large": "images/comp-007.jpg",
+            "alt": "Government vehicle enquiry website interface"
+          }
+        },
+        {
+          "componentId": "comp-008",
+          "type": "data-table",
+          "displayTitle": "EV Identification Features by Vehicle Type",
+          "body": "<p>Not all types of EV share the same identifying features. Use this reference table to understand which features apply to each vehicle type.</p>",
+          "_rows": [
+            [
+              "Feature",
+              "ICE",
+              "BEV",
+              "HEV",
+              "PHEV"
+            ],
+            [
+              "Badging",
+              "—",
+              "✓",
+              "✓",
+              "✓"
+            ],
+            [
+              "External mains charging port",
+              "—",
+              "✓",
+              "—",
+              "✓"
+            ],
+            [
+              "Instrument cluster warnings",
+              "—",
+              "✓",
+              "✓",
+              "✓"
+            ],
+            [
+              "Power flow/energy screen",
+              "—",
+              "✓",
+              "✓",
+              "✓"
+            ],
+            [
+              "Bright-coloured HV cables",
+              "—",
+              "✓",
+              "✓",
+              "✓"
+            ],
+            [
+              "Green band on number plate",
+              "—",
+              "✓",
+              "—",
+              "—"
+            ],
+            [
+              "Warning labels",
+              "—",
+              "✓",
+              "✓",
+              "✓"
+            ]
+          ]
         }
       ]
     },
     {
       "sectionId": "section-03",
-      "title": "Types of Electric Vehicles",
+      "title": "Types of Electric Vehicle",
       "components": [
         {
-          "componentId": "comp-020",
-          "type": "stat-callout",
-          "displayTitle": "The EV Landscape",
+          "componentId": "comp-009",
+          "type": "full-bleed",
+          "displayTitle": "Understanding the EV Family",
+          "body": "<p>Electric vehicles come in many forms — from mild hybrids to fully electric and hydrogen fuel cell. Each has different components, capabilities, and safety considerations.</p>",
+          "imagePrompt": "Aerial view of a row of different modern vehicles in a workshop car park, mix of electric and hybrid cars, dramatic cinematic lighting, dark tones with red and orange accents, wide panoramic shot",
+          "_graphic": {
+            "large": "images/comp-009.jpg",
+            "alt": "Aerial view of various electric and hybrid vehicles"
+          }
+        },
+        {
+          "componentId": "comp-010",
+          "type": "tabs",
+          "displayTitle": "EV Types Compared",
+          "body": "<p>Click each tab to learn about the different types of electric vehicle.</p>",
           "_items": [
             {
-              "value": "3",
-              "label": "Main types of electric vehicle"
+              "title": "BEV — Battery Electric",
+              "body": "<p>Driven 100% by electric motor with a large capacity rechargeable high voltage battery.</p><p><strong>Advantages:</strong> No tailpipe emissions, greatest electric-only driving range of all EV types. Easy to drive.</p><p><strong>Disadvantages:</strong> Reliance on charging network, battery repair costs compared to ICE repair costs.</p>"
             },
             {
-              "value": "650",
-              "suffix": "V",
-              "label": "Maximum voltage in modern EVs"
+              "title": "HEV — Hybrid Electric",
+              "body": "<p>Internal combustion engine combined with electric motor and smaller high voltage battery capacity.</p><p><strong>Advantages:</strong> Good compromise between range and clean running. Optimised use of both powertrains can lead to very high MPG figures.</p><p><strong>Disadvantages:</strong> Extra cost of EV systems. Battery-only range will be less than a BEV due to smaller battery sizes.</p>"
             },
             {
-              "value": "12",
-              "suffix": "V",
-              "label": "Standard ICE vehicle voltage"
+              "title": "PHEV — Plug-in Hybrid",
+              "body": "<p>High voltage battery can be charged by an external mains charger, hence the \"Plug-in\" hybrid name.</p><p><strong>Advantages:</strong> Offers both range and clean running. Larger battery than non plug-in hybrids. Can be charged from the mains.</p><p><strong>Disadvantages:</strong> Cost of EV systems means these vehicles are more expensive. Battery-only range will still be less than a BEV.</p>"
+            },
+            {
+              "title": "EREV — Extended-Range",
+              "body": "<p>100% electric motor drive. An external fuel-based power unit drives a generator to charge the battery and extend the vehicle range.</p><p><strong>Advantages:</strong> Combines electric drive with extended range from a fuel-powered generator.</p><p><strong>Disadvantages:</strong> Stretches the definition of \"Hybrid\". Complex dual powertrain.</p>"
+            },
+            {
+              "title": "FCEV — Fuel Cell Electric",
+              "body": "<p>Driven 100% by electric motor. Fuel cell converts hydrogen and oxygen into electric power.</p><p><strong>Advantages:</strong> Very clean running. Long range. Zero tailpipe emissions, producing only clean water vapour.</p><p><strong>Disadvantages:</strong> Expensive and rare. Hydrogen fueling infrastructure is not widely available.</p>"
+            },
+            {
+              "title": "ICE — Conventional",
+              "body": "<p>Traditional internal combustion engine running on petrol or diesel.</p><p><strong>Advantages:</strong> No cost of batteries or EV HV control systems. Good range. Quick to refuel.</p><p><strong>Disadvantages:</strong> Tailpipe emissions, noise pollution. Being phased out in various countries.</p>"
             }
           ]
         },
         {
-          "componentId": "comp-021",
-          "type": "bento",
-          "displayTitle": "Vehicle Categories",
-          "body": "<p>Understanding the differences between vehicle types is essential for assessing risk and applying the correct procedures.</p>",
-          "_items": [
-            {
-              "title": "BEV — Battery Electric Vehicle",
-              "body": "<p>Fully electric, powered entirely by a rechargeable battery pack. No internal combustion engine. Charged exclusively via external mains connection. Voltage range: 350-800V.</p>",
-              "imagePrompt": "Modern battery electric vehicle BEV sleek design blue accent lighting professional automotive photography dark background 600x400 no text",
-              "_graphic": {
-                "large": "images/comp-021-item-0.jpg",
-                "alt": "BEV — Battery Electric Vehicle"
-              }
-            },
-            {
-              "title": "HEV — Hybrid Electric Vehicle",
-              "body": "<p>Combines a conventional engine with an electric motor. The battery charges through regenerative braking — there is no external charging port. Voltage range: 200-400V.</p>",
-              "imagePrompt": "Hybrid electric vehicle cutaway showing dual powertrain engine and electric motor dark background with blue highlights 600x400 no text",
-              "_graphic": {
-                "large": "images/comp-021-item-1.jpg",
-                "alt": "HEV — Hybrid Electric Vehicle"
-              }
-            },
-            {
-              "title": "PHEV — Plug-in Hybrid Electric Vehicle",
-              "body": "<p>Has both a combustion engine and an electric motor with a larger battery than HEV. Can be charged via external mains connection for extended electric-only range. Voltage range: 200-450V.</p>",
-              "imagePrompt": "Plug-in hybrid vehicle charging at modern charging station illuminated charge port dark atmospheric setting 600x400 no text",
-              "_graphic": {
-                "large": "images/comp-021-item-2.jpg",
-                "alt": "PHEV — Plug-in Hybrid Electric Vehicle"
-              }
-            }
-          ]
+          "componentId": "comp-011",
+          "type": "graphic-text",
+          "displayTitle": "Inside a Fully Electric Vehicle",
+          "_imageAlign": "right",
+          "body": "<p>A fully electric vehicle contains several key high voltage components:</p><ul><li><strong>HV Battery Pack:</strong> Voltage approx. 60–800V, powers the electric drive motors</li><li><strong>Power Electronics Controller:</strong> Contains the inverter to change AC to DC current and controls power flow</li><li><strong>Electric Drive Motor:</strong> Powered by high voltage AC to drive the vehicle</li><li><strong>On-board Charger:</strong> Takes mains electricity and charges the vehicle's HV battery</li><li><strong>DC-DC Converter:</strong> Changes high voltage to low voltage for vehicle systems</li><li><strong>Battery Cooling System:</strong> Keeps the battery at optimal temperature</li></ul>",
+          "imagePrompt": "Technical cutaway illustration of an electric vehicle showing internal components, battery pack highlighted in orange, power electronics visible, clean technical style on dark background with red accent lighting",
+          "_graphic": {
+            "large": "images/comp-011.jpg",
+            "alt": "Cutaway diagram of a fully electric vehicle showing key components"
+          }
         },
         {
-          "componentId": "comp-022",
+          "componentId": "comp-012",
           "type": "comparison",
-          "displayTitle": "EV Identification Features by Type",
-          "body": "<p>Different vehicle types can be identified by different features. Use this table as a quick reference.</p>",
-          "columns": [
+          "displayTitle": "EV Components by Vehicle Type",
+          "body": "<p>Different EV types have different components fitted.</p>",
+          "_columns": [
+            {
+              "title": "Component",
+              "items": [
+                "HV Battery Pack",
+                "Power Electronics Controller",
+                "Electric Drive Motor",
+                "DC-DC Converter",
+                "Battery Cooling System",
+                "On-board Charger",
+                "Mains Charging Port",
+                "Internal Combustion Engine"
+              ]
+            },
             {
               "title": "BEV",
-              "subtitle": "Battery Electric"
-            },
-            {
-              "title": "HEV",
-              "subtitle": "Hybrid Electric"
+              "items": [
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "—"
+              ]
             },
             {
               "title": "PHEV",
-              "subtitle": "Plug-in Hybrid"
-            }
-          ],
-          "rows": [
-            {
-              "label": "Badging",
-              "values": [
-                true,
-                true,
-                true
+              "items": [
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓"
               ]
             },
             {
-              "label": "External charging port",
-              "values": [
-                true,
-                false,
-                true
-              ]
-            },
-            {
-              "label": "Instrument cluster warnings",
-              "values": [
-                true,
-                true,
-                true
-              ]
-            },
-            {
-              "label": "Power flow screen",
-              "values": [
-                true,
-                true,
-                true
-              ]
-            },
-            {
-              "label": "Orange HV cables",
-              "values": [
-                true,
-                true,
-                true
-              ]
-            },
-            {
-              "label": "Green number plate band",
-              "values": [
-                true,
-                false,
-                true
-              ]
-            },
-            {
-              "label": "Warning labels",
-              "values": [
-                true,
-                true,
-                true
+              "title": "HEV",
+              "items": [
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "✓",
+                "—",
+                "—",
+                "✓"
               ]
             }
           ]
-        },
-        {
-          "componentId": "comp-023",
-          "type": "mcq",
-          "displayTitle": "Knowledge Check",
-          "body": "<p>You can use the UK Government Vehicle Enquiry website to check a vehicle's fuel type using its registration number. Which of the following is the correct URL?</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
-          "_items": [
-            {
-              "text": "vehicleenquiry.service.gov.uk",
-              "_shouldBeSelected": true
-            },
-            {
-              "text": "dvla.gov.uk/vehicle-check",
-              "_shouldBeSelected": false
-            },
-            {
-              "text": "mot-check.service.gov.uk",
-              "_shouldBeSelected": false
-            }
-          ],
-          "_feedback": {
-            "correct": "Correct! The Government Vehicle Enquiry service at vehicleenquiry.service.gov.uk allows you to check a vehicle's fuel type.",
-            "incorrect": "Incorrect. The correct URL is vehicleenquiry.service.gov.uk"
-          }
         }
       ]
     },
     {
       "sectionId": "section-04",
-      "title": "",
+      "title": "Section 1 Knowledge Check",
       "components": [
         {
-          "componentId": "comp-030",
-          "type": "full-bleed",
-          "displayTitle": "Understanding the Hazards",
-          "body": "<p>High-voltage systems in EVs present unique risks that require specific knowledge and precautions.</p>",
-          "imagePrompt": "High-voltage warning signs and orange cables in automotive workshop dramatic lighting with warning amber and electric blue accents cinematic wide shot dark atmospheric 1920x800 no text",
-          "_graphic": {
-            "large": "images/comp-030.jpg",
-            "alt": "High-voltage warning signs and orange cables in automotive workshop"
+          "componentId": "comp-013",
+          "type": "pullquote",
+          "displayTitle": "",
+          "body": "<p>Let's test your knowledge on EV recognition and types so far with a few questions.</p>"
+        },
+        {
+          "componentId": "comp-014",
+          "type": "mcq",
+          "displayTitle": "EV Identification Quiz",
+          "body": "<p>Which of the following is NOT a reliable way to identify a Battery Electric Vehicle?</p>",
+          "_items": [
+            {
+              "text": "Looking for a green band on the number plate",
+              "correct": false
+            },
+            {
+              "text": "Checking for an external mains charging port",
+              "correct": false
+            },
+            {
+              "text": "Listening for engine noise at idle",
+              "correct": true
+            },
+            {
+              "text": "Looking for EV badging on the vehicle",
+              "correct": false
+            }
+          ],
+          "_feedback": {
+            "correct": "Correct! EVs are silent at idle, but this alone isn't a reliable identification method as the vehicle may simply be switched off.",
+            "incorrect": "Incorrect. Think about what distinguishes EVs from conventional vehicles at rest."
           }
         }
       ]
     },
     {
       "sectionId": "section-05",
-      "title": "Hazards & Legislation",
+      "title": "EV Safety & Hazards",
       "components": [
         {
-          "componentId": "comp-031",
-          "type": "text",
-          "displayTitle": "High-Voltage Hazards in the Workplace",
-          "body": "<p>Electric and hybrid vehicles introduce hazards into the workplace in addition to those normally associated with vehicle repair and maintenance.</p><p>Voltages present in EVs are significantly higher — currently up to <strong>650 Volts DC</strong> — compared to conventional vehicles (12/24V DC). In dry conditions, accidental contact with parts live at voltages above <strong>110V DC can be fatal</strong>.</p><p>Battery systems may contain chemicals that can be harmful if released. They also store significant amounts of energy that can give rise to explosion if not dealt with correctly.</p>"
+          "componentId": "comp-015",
+          "type": "full-bleed",
+          "displayTitle": "Hazards Around High Voltage Electrical Systems",
+          "body": "<p>Understanding the dangers associated with electric and hybrid vehicles is critical to keeping yourself and your colleagues safe.</p>",
+          "imagePrompt": "Dramatic close-up of orange high voltage cables inside a vehicle engine bay, warning labels visible, dark moody industrial lighting, red warning tones, professional automotive photography",
+          "_graphic": {
+            "large": "images/comp-015.jpg",
+            "alt": "High voltage cables and warning labels inside an EV engine bay"
+          }
         },
         {
-          "componentId": "comp-032",
-          "type": "accordion",
-          "displayTitle": "Key Risks of Working with EVs",
-          "instruction": "Select each risk category to learn more.",
+          "componentId": "comp-016",
+          "type": "text",
+          "displayTitle": "HSE Legislation",
+          "body": "<p>The UK Health and Safety Executive states that people in the motor vehicle repair and recovery industry need to be aware of the additional hazards when working with Electric & Hybrid Vehicles.</p><p><strong>Key fact:</strong> Voltages in E&HVs reach up to 650 Volts DC — far higher than the 12/24V in conventional vehicles. In dry conditions, contact with parts live at voltages above 110V DC can be fatal.</p><p>Battery systems may contain harmful chemicals and store significant energy that can cause explosion if not handled correctly.</p>"
+        },
+        {
+          "componentId": "comp-017",
+          "type": "stat-callout",
+          "displayTitle": "High Voltage in Context",
           "_items": [
             {
-              "title": "Fatal Electric Shock",
-              "body": "<p>The presence of high-voltage components and cabling capable of delivering a fatal electric shock. Components may retain dangerous voltage even when the vehicle is switched off.</p>"
+              "stat": "650V",
+              "label": "Maximum DC voltage in current EVs"
             },
             {
-              "title": "Fire & Explosion Risk",
-              "body": "<p>The storage of electrical energy with the potential to cause explosion or fire. Stored electrical energy can be sufficient to cause arc flash — a sudden release of energy through the air.</p>"
+              "stat": "110V",
+              "label": "DC threshold for fatal contact (dry conditions)"
             },
             {
-              "title": "Silent Operation",
-              "body": "<p>The possibility of people being unaware of vehicles moving, as when electrically driven they are silent in operation. Most EVs have AVAS (Acoustic Vehicle Alerting System), but the sound may not be what you expect.</p>"
+              "stat": ">60V",
+              "label": "ECE R100 high voltage classification threshold"
+            }
+          ]
+        },
+        {
+          "componentId": "comp-018",
+          "type": "accordion",
+          "displayTitle": "Workplace Risks from Electric & Hybrid Vehicles",
+          "body": "<p>EVs introduce hazards beyond those normally associated with vehicle repair and maintenance.</p>",
+          "_items": [
+            {
+              "title": "Electric Shock & Arc Flash",
+              "body": "<p>High voltage components and cabling capable of delivering a fatal electric shock. Stored electrical energy can cause explosion, fire, and arc/flash.</p>"
+            },
+            {
+              "title": "Residual Voltage",
+              "body": "<p>Components may retain a dangerous voltage even when the vehicle is switched off.</p>"
             },
             {
               "title": "Unexpected Movement",
-              "body": "<p>Electric motors or the vehicle itself may move unexpectedly due to magnetic forces within the motors. Vehicles can be ready to drive without a running engine.</p>"
+              "body": "<p>Electric motors or the vehicle itself may move unexpectedly due to magnetic forces within the motors.</p>"
             },
             {
-              "title": "Battery Chemical Hazards",
-              "body": "<p>The potential for release of explosive gases and harmful liquids and chemicals if batteries are damaged or incorrectly modified. Manual handling risks are also associated with battery replacement.</p>"
+              "title": "Silent Operation",
+              "body": "<p>People may be unaware of vehicles moving as EVs are silent in operation.</p>"
+            },
+            {
+              "title": "Battery Hazards",
+              "body": "<p>Potential for release of explosive gases and harmful chemicals if batteries are damaged. Manual handling risks with battery replacement.</p>"
             },
             {
               "title": "Medical Device Interference",
-              "body": "<p>The potential for the electrical systems on the vehicle to affect medical devices such as pacemakers. Personnel with medical implants should exercise additional caution.</p>"
+              "body": "<p>Vehicle electrical systems may affect medical devices such as pacemakers.</p>"
             }
           ]
         },
         {
-          "componentId": "comp-033",
-          "type": "key-term",
-          "displayTitle": "Legislation & Standards",
+          "componentId": "comp-019",
+          "type": "checklist",
+          "displayTitle": "HSE Work Categories",
+          "body": "<p>The UK HSE identifies 4 categories of work for Electric & High Voltage vehicles:</p>",
           "_items": [
             {
-              "term": "HSE Guidelines",
-              "definition": "The UK Health and Safety Executive provides specific guidance for working with electric and hybrid vehicles in the motor vehicle repair industry. Source: hse.gov.uk/mvr/topics/electric-hybrid.htm"
+              "text": "Valeting, sales and other lower risk activities"
             },
             {
-              "term": "ECE R100 Certification",
-              "definition": "A UN regulation that defines 'High Voltage' as >60V to ≤1500V DC (or >30V to ≤1000V AC). Specifies all required safety tests for EV approval."
+              "text": "Incident response including emergency services and vehicle recovery"
             },
             {
-              "term": "HSE Work Categories",
-              "definition": "The UK HSE identifies 4 categories of EV work: valeting/sales (low risk), incident response, routine maintenance (excluding HV), and working on high-voltage electrical systems (specialist only)."
-            }
-          ]
-        },
-        {
-          "componentId": "comp-034",
-          "type": "timeline",
-          "displayTitle": "Low-Risk Activity Precautions",
-          "body": "<p>Even for valeting, sales, and other lower-risk activities around EVs, these precautions must be followed:</p>",
-          "_items": [
-            {
-              "title": "Secure the Key Fob",
-              "body": "<p>Keep remote operation keys away from the vehicle to prevent accidental power-up. Use a signal-blocking pouch if available.</p>"
+              "text": "Maintenance and repair excluding high voltage electrical systems"
             },
             {
-              "title": "Be Aware of Silent Movement",
-              "body": "<p>People moving EVs around the workplace should be aware that others may not hear them approaching. Sound your horn when necessary.</p>"
-            },
-            {
-              "title": "Avoid Pressure Washing HV Components",
-              "body": "<p>High-pressure water can damage high-voltage electrical components and cables. Orange cables indicate HV systems — refer to manufacturer guidance before valeting.</p>"
-            },
-            {
-              "title": "Never Touch Orange Cables",
-              "body": "<p>Orange cables carry high voltage. Never handle, move, or lean tools against them. Report any visible damage immediately.</p>"
+              "text": "Working on high voltage electrical systems"
             }
           ]
         }
@@ -430,441 +455,373 @@
     },
     {
       "sectionId": "section-06",
-      "title": "Electric Shock & Emergency Response",
+      "title": "Low Risk Activities & Emergencies",
       "components": [
         {
-          "componentId": "comp-040",
+          "componentId": "comp-020",
+          "type": "bento",
+          "displayTitle": "Considerations for Low Risk Activities",
+          "body": "<p>Even in lower risk activities like valeting and site logistics, there are important safety considerations.</p>",
+          "_items": [
+            {
+              "title": "Key Proximity",
+              "body": "<p>Remote keys should be kept away from vehicles to prevent accidental power-up on keyless start vehicles.</p>"
+            },
+            {
+              "title": "Silent Movement",
+              "body": "<p>Others may not hear you approaching when driving an EV. Most have an AVAS (Acoustic Vehicle Alerting System), but the sound may not be what you expect.</p>"
+            },
+            {
+              "title": "Pressure Washing",
+              "body": "<p>Can damage HV electrical components and cables (usually coloured orange). Refer to manufacturer guidance before valeting underbody areas.</p>"
+            }
+          ]
+        },
+        {
+          "componentId": "comp-021",
           "type": "graphic-text",
           "displayTitle": "What Is an Electric Shock?",
           "_imageAlign": "right",
-          "body": "<p>A voltage as low as <strong>50 volts</strong> applied between two parts of the human body causes a current to flow that can block the electrical signals between the brain and the muscles.</p><p>This may cause:</p><ul><li>Stopping the heart beating properly</li><li>Preventing the person from breathing</li><li>Causing muscle spasms</li><li>Secondary injuries such as burns and fall injuries</li></ul>",
-          "imagePrompt": "Medical illustration showing effects of electric shock on human body stylised with electric blue current paths dark background professional medical style 800x600 no text",
+          "body": "<p>A voltage as low as 50 volts can block electrical signals between the brain and muscles, causing:</p><ul><li>Stopping the heart beating properly</li><li>Preventing the person from breathing</li><li>Causing muscle spasms</li><li>Secondary injuries such as burns and fall injuries</li></ul>",
+          "imagePrompt": "Medical illustration showing the effects of electric shock on the human body, anatomical diagram with highlighted nervous system pathways, dark background with red and orange warning tones, clean professional style",
           "_graphic": {
-            "large": "images/comp-040.jpg",
-            "alt": "Effects of electric shock on the human body"
+            "large": "images/comp-021.jpg",
+            "alt": "Diagram showing the effects of electric shock on the human body"
           }
         },
         {
-          "componentId": "comp-041",
-          "type": "narrative",
-          "displayTitle": "Shock Severity Factors",
-          "body": "<p>The severity of an electric shock depends on a combination of factors:</p>",
+          "componentId": "comp-022",
+          "type": "timeline",
+          "displayTitle": "Emergency Response — Electric Shock",
+          "body": "<p>If you encounter someone receiving an electric shock, follow these steps.</p>",
           "_items": [
             {
-              "title": "Voltage Level",
-              "body": "<p>EV systems operate at up to 650V DC — far exceeding the 50V threshold for danger. Higher voltage drives more current through the body.</p>"
+              "title": "Isolate the Power",
+              "body": "<p>For mains systems (chargers), turn off at the isolation switch. For HV vehicles, the supply normally disconnects by turning the vehicle off — but consider there may be a fault.</p>"
             },
             {
-              "title": "Body Resistance",
-              "body": "<p>Dry skin offers more resistance than wet skin. Non-conductive materials reduce current flow, while high-conductivity materials increase it significantly.</p>"
+              "title": "Separate Casualty from Source",
+              "body": "<p>If safe to do so, use a purpose-designed insulated rescue hook. The rescue hook should be kept visible and within easy reach at all times.</p>"
             },
             {
-              "title": "Current Path",
-              "body": "<p>Finger-to-finger (same hand) is less dangerous than hand-to-foot or across the chest, which can pass through the heart.</p>"
+              "title": "Perform Primary Survey",
+              "body": "<p>Once contact is broken, perform a primary survey and treat injuries. Seek assistance from the first aid person.</p>"
             },
             {
-              "title": "Duration of Contact",
-              "body": "<p>Even milliseconds of contact can cause injury. One second or more of sustained contact with high voltage is frequently fatal.</p>"
+              "title": "Call Emergency Services",
+              "body": "<p>Call 999 for emergency help immediately.</p>"
+            },
+            {
+              "title": "Secure the Scene",
+              "body": "<p>Cordon off the vehicle using a non-conductive barrier chain. No further work until risk assessed.</p>"
             }
           ]
         },
         {
-          "componentId": "comp-042",
-          "type": "process-flow",
-          "displayTitle": "Emergency Response Procedure",
-          "body": "<p>If you encounter someone receiving an electric shock, follow these steps in order:</p>",
-          "_nodes": [
-            {
-              "title": "Assess the Situation",
-              "body": "Do not touch the casualty if they are still in contact with the electrical source — you are at risk of electrocution.",
-              "type": "start"
-            },
-            {
-              "title": "Isolate the Power Source",
-              "body": "For mains chargers, turn off power at the isolation switch. For vehicles, the HV supply should disconnect when turning off with the key — but consider there may be a fault.",
-              "type": "process"
-            },
-            {
-              "title": "Separate Casualty from Source",
-              "body": "Use a purpose-designed insulated rescue hook. Do not attempt untested rescue methods if you are not trained.",
-              "type": "process"
-            },
-            {
-              "title": "Call 999",
-              "body": "Call emergency services immediately. Specify this is a high-voltage electrical incident.",
-              "type": "process"
-            },
-            {
-              "title": "Provide First Aid",
-              "body": "Once contact is broken, perform a primary survey and treat injuries. Seek assistance from qualified first aid personnel.",
-              "type": "process"
-            },
-            {
-              "title": "Secure the Scene",
-              "body": "Ensure no one else works on the vehicle until made safe. Cordon off with non-conductive barrier chain.",
-              "type": "end"
-            }
-          ]
+          "componentId": "comp-023",
+          "type": "pullquote",
+          "displayTitle": "",
+          "body": "<p>This training course does not replace dedicated First Aid & Emergency training. In all instances of accident and injury, seek medical professional advice as soon as possible.</p>"
         }
       ]
     },
     {
       "sectionId": "section-07",
-      "title": "Safety Equipment",
+      "title": "Equipment & Safety Quiz",
       "components": [
         {
-          "componentId": "comp-050",
+          "componentId": "comp-024",
           "type": "text",
-          "displayTitle": "Essential EV Safety Equipment",
-          "body": "<p>When electric vehicles enter your workplace, specific safety equipment must be available and correctly used. Test your knowledge of each piece of equipment below.</p>"
+          "displayTitle": "Specialist EV Equipment",
+          "body": "<p>To work safely around EVs, specialist equipment is required. The following quiz tests your knowledge of this equipment and its purpose.</p>"
         },
         {
-          "componentId": "comp-051",
-          "type": "tabs",
-          "displayTitle": "Equipment Overview",
-          "_items": [
-            {
-              "title": "Vehicle ID Sign",
-              "body": "<p>Should be present on every electric vehicle entering a workshop for repair so that all staff are aware it is an EV.</p>"
-            },
-            {
-              "title": "Barrier Chain",
-              "body": "<p>A non-conductive safety barrier used to alert others and prevent unauthorised access to the vehicle work area.</p>"
-            },
-            {
-              "title": "Key Signal Blocker",
-              "body": "<p>A protective pouch that blocks wireless signals from car keys, preventing accidental power-up on keyless-start vehicles.</p>"
-            },
-            {
-              "title": "Rescue Hook",
-              "body": "<p>An insulated rescue hook for trained staff to remove a casualty from an electric shock source. Must be kept visible and within easy reach.</p>"
-            },
-            {
-              "title": "Insulated Gloves",
-              "body": "<p>Class 0 rated gloves for up to 1500V DC. For suitably trained persons working on HV systems only.</p>"
-            },
-            {
-              "title": "Warning Signs",
-              "body": "<p>Warning and status signs that alert others to risks present. Includes 'Do Not Start / Work in Progress' signs.</p>"
-            }
-          ]
-        },
-        {
-          "componentId": "comp-052",
+          "componentId": "comp-025",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Vehicle ID Sign",
+          "displayTitle": "Vehicle Identification Sign",
           "body": "<p>Select the primary purpose for the vehicle identification sign.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
           "_items": [
             {
               "text": "Tells staff that the vehicle might need charging",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
-              "text": "Should be present on every electric vehicle entering a workshop so all staff are aware it is an EV",
-              "_shouldBeSelected": true
+              "text": "Should be present on every electric vehicle entering a workshop for repair so that all staff are aware that it is an EV",
+              "correct": true
             },
             {
               "text": "Allows the service advisor to find their cars easily",
-              "_shouldBeSelected": false
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! The vehicle ID sign ensures all staff know an EV is present.",
-            "incorrect": "Incorrect. The sign's primary purpose is to alert all staff that the vehicle is an EV."
+            "correct": "Correct! The sign ensures all staff are aware they are working around an EV.",
+            "incorrect": "Incorrect. The primary purpose is safety awareness for all staff."
           }
         },
         {
-          "componentId": "comp-053",
+          "componentId": "comp-026",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Barrier Chain",
+          "displayTitle": "Barrier Chain / Cordon",
           "body": "<p>Select the primary purpose for the barrier chain / cordon.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
           "_items": [
             {
               "text": "This is used to hang the signs on the vehicle",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
               "text": "Stops anyone moving the vehicle from the workbay",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
               "text": "Alerts others and prevents unauthorised access",
-              "_shouldBeSelected": true
+              "correct": true
             }
           ],
           "_feedback": {
-            "correct": "Correct! The barrier chain alerts others and prevents unauthorised access.",
-            "incorrect": "Incorrect. The barrier chain's primary purpose is to alert others and prevent unauthorised access."
+            "correct": "Correct!",
+            "incorrect": "Incorrect. Think about the safety purpose of a barrier around an EV being worked on."
           }
         },
         {
-          "componentId": "comp-054",
+          "componentId": "comp-027",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Key Signal Blocker",
-          "body": "<p>Select the primary purpose for the key signal blocker pouch.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
+          "displayTitle": "Key Signal Blocker Pouch",
+          "body": "<p>Select the primary purpose for the key signal blocker pouch / case.</p>",
           "_items": [
             {
               "text": "Prevents the key from being stolen",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
-              "text": "Prevents accidental power-up on keyless-start vehicles by blocking key signals",
-              "_shouldBeSelected": true
+              "text": "Prevents accidental power up on keyless start vehicles by blocking the key receiving and sending signals to the vehicle",
+              "correct": true
             },
             {
-              "text": "Stops the key from being lost",
-              "_shouldBeSelected": false
+              "text": "Stops the key being lost",
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! The signal blocker prevents accidental power-up by blocking key signals.",
-            "incorrect": "Incorrect. The pouch blocks key signals to prevent accidental vehicle power-up."
+            "correct": "Correct! The Faraday pouch blocks radio signals to prevent accidental vehicle power-up.",
+            "incorrect": "Incorrect. Consider the safety implications of a keyless vehicle powering up unexpectedly."
           }
         },
         {
-          "componentId": "comp-055",
+          "componentId": "comp-028",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Rescue Hook",
-          "body": "<p>Select the primary purpose for the insulated rescue hook.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
+          "displayTitle": "Rescue Hook",
+          "body": "<p>Select the primary purpose for the rescue hook.</p>",
           "_items": [
             {
-              "text": "To be used by suitably trained staff in an emergency to remove a casualty from an electric shock source",
-              "_shouldBeSelected": true
+              "text": "To be used by suitably trained staff in an emergency to remove a casualty from the source of an electric shock",
+              "correct": true
             },
             {
-              "text": "To be used by the workshop manager to drag a technician away from a shock source",
-              "_shouldBeSelected": false
+              "text": "To be used by the workshop manager to drag a technician away from an electric shock source",
+              "correct": false
             },
             {
-              "text": "To move high-voltage cables away from the car if they become short-circuited",
-              "_shouldBeSelected": false
+              "text": "To move the high voltage cables away from the car if they become short circuited",
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! The rescue hook is for trained staff to safely remove a casualty from a shock source.",
-            "incorrect": "Incorrect. The rescue hook is for suitably trained staff to remove a casualty from an electric shock source."
+            "correct": "Correct! The rescue hook is an insulated tool for safely separating a person from an electrical source.",
+            "incorrect": "Incorrect. The rescue hook is specifically for trained personnel to rescue shock victims."
           }
         },
         {
-          "componentId": "comp-056",
+          "componentId": "comp-029",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Insulated Gloves",
+          "displayTitle": "Insulated Gloves — Class 0",
           "body": "<p>Select the primary purpose for the insulated gloves — Class 0 rated 1500V DC.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
           "_items": [
             {
               "text": "Keeps hands clean and dry",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
               "text": "Prevents the spread of infection",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
-              "text": "Should be worn by suitably trained persons when working on the High Voltage system",
-              "_shouldBeSelected": true
+              "text": "Should be worn by suitably trained persons when working on the High Voltage system of the vehicle",
+              "correct": true
             }
           ],
           "_feedback": {
-            "correct": "Correct! These specialist gloves protect against high-voltage shock during HV system work.",
-            "incorrect": "Incorrect. These Class 0 rated gloves are specifically for HV system work by trained technicians."
+            "correct": "Correct! Class 0 insulated gloves provide protection when working on HV systems.",
+            "incorrect": "Incorrect. These are specialist safety equipment for high voltage work."
           }
         },
         {
-          "componentId": "comp-057",
+          "componentId": "comp-030",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Warning Signs",
+          "displayTitle": "Warning Signs",
           "body": "<p>Select the primary purpose for the warning signs.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
           "_items": [
             {
               "text": "Alerts others to the risks that are present",
-              "_shouldBeSelected": true
+              "correct": true
             },
             {
               "text": "Stops anyone moving the vehicle from the workbay",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
               "text": "Prevents access to the workbay",
-              "_shouldBeSelected": false
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! Warning signs alert others to the specific risks present.",
-            "incorrect": "Incorrect. The primary purpose of warning signs is to alert others to risks."
+            "correct": "Correct!",
+            "incorrect": "Incorrect. Think about the communication purpose of warning signage."
           }
         },
         {
-          "componentId": "comp-058",
+          "componentId": "comp-031",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Vehicle Status Signs",
+          "displayTitle": "Vehicle Status Signs",
           "body": "<p>Select the primary purpose for the vehicle status signs.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
           "_items": [
             {
               "text": "Tells staff that the vehicle might need charging",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
-              "text": "Placed on the vehicle to let everyone know the condition and operational status",
-              "_shouldBeSelected": true
+              "text": "Placed on the vehicle to let everyone know what the condition and operational status is",
+              "correct": true
             },
             {
               "text": "Allows the service advisor to find their cars easily",
-              "_shouldBeSelected": false
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! Status signs communicate the vehicle's condition and operational status.",
-            "incorrect": "Incorrect. Vehicle status signs let everyone know the current condition and operational status."
+            "correct": "Correct!",
+            "incorrect": "Incorrect. These signs communicate vehicle status for safety."
           }
         },
         {
-          "componentId": "comp-059",
+          "componentId": "comp-032",
           "type": "mcq",
-          "displayTitle": "Equipment Check: Do Not Start Sign",
-          "body": "<p>Select the primary purpose for the 'Do Not Start / Work in Progress' sign.</p>",
-          "instruction": "Choose the best answer.",
-          "_selectable": 1,
+          "displayTitle": "Do Not Start / Work in Progress Sign",
+          "body": "<p>Select the primary purpose for the do not start / work in progress sign.</p>",
           "_items": [
             {
-              "text": "Should be used to prevent damage or danger caused by unauthorised starting during repair",
-              "_shouldBeSelected": true
+              "text": "Should be used to prevent damage or danger being caused by unauthorised starting during the repair process",
+              "correct": true
             },
             {
               "text": "Should be used to save fuel by asking people not to start the vehicle",
-              "_shouldBeSelected": false
+              "correct": false
             },
             {
               "text": "Should be used to keep the steering wheel clean",
-              "_shouldBeSelected": false
+              "correct": false
             }
           ],
           "_feedback": {
-            "correct": "Correct! The sign prevents unauthorised starting that could cause damage or danger during repairs.",
-            "incorrect": "Incorrect. This sign prevents unauthorised starting during the repair process."
+            "correct": "Correct! This sign prevents the dangerous situation of a vehicle being started while being worked on.",
+            "incorrect": "Incorrect. This is a critical safety measure during the repair process."
           }
         }
       ]
     },
     {
       "sectionId": "section-08",
-      "title": "Risk Assessment",
+      "title": "Risks & Mitigation",
       "components": [
         {
-          "componentId": "comp-060",
-          "type": "graphic-text",
-          "displayTitle": "Matching Risks to Systems",
-          "_imageAlign": "left",
-          "body": "<p>Understanding which risks relate to which vehicle systems is critical for safe working.</p><ul><li><strong>Ready to drive without running engine:</strong> Risk of unexpected movement</li><li><strong>Silent electric motor operation:</strong> Pedestrians may not notice moving vehicles</li><li><strong>Automatic stop-start systems:</strong> Vehicle may start unexpectedly</li><li><strong>High-voltage components:</strong> Risk of electric shock from battery, cables, generator</li></ul>",
-          "imagePrompt": "Electric vehicle risk assessment diagram showing warning zones around vehicle professional technical illustration dark background with amber and red highlights 800x600 no text",
-          "_graphic": {
-            "large": "images/comp-060.jpg",
-            "alt": "Risk assessment diagram for electric vehicle systems"
-          }
-        },
-        {
-          "componentId": "comp-061",
-          "type": "bento",
-          "displayTitle": "Risk Mitigation Strategies",
-          "body": "<p>For each identified risk, specific mitigation steps must be followed:</p>",
+          "componentId": "comp-033",
+          "type": "flashcard",
+          "displayTitle": "Match the Risk to the Mitigation",
+          "body": "<p>Flip each card to reveal how to mitigate common EV workplace risks.</p>",
           "_items": [
             {
-              "title": "Unexpected Movement",
-              "body": "<p>Pay attention to instrument cluster warnings. Remove keys to prevent starting. Isolate HV and LV systems when working on the vehicle.</p>"
+              "front": "Unexpected movement when accelerator is used",
+              "back": "Pay attention to warnings and messages on the instrument cluster showing vehicle drive status."
             },
             {
-              "title": "Silent Operation Risk",
-              "body": "<p>Be vigilant when driving EVs near people. Ensure AVAS is functioning correctly. Sound your horn when approaching pedestrians.</p>"
+              "front": "Pedestrians and co-workers may not notice moving vehicles",
+              "back": "Be vigilant when driving EVs near other people. Ensure the acoustic warning system (AVAS) is functioning correctly."
             },
             {
-              "title": "Unexpected Engine Start",
-              "body": "<p>Remove keys and use signal blocker pouch. Disconnect low-voltage system. Set out signage to let others know this is an EV.</p>"
+              "front": "Vehicle may start unexpectedly",
+              "back": "Remove keys to prevent starting. Use a Faraday pouch for keyless vehicles. Isolate HV system or disconnect low voltage system."
             },
             {
-              "title": "Electric Shock Prevention",
-              "body": "<p>Isolate high-voltage system. Cordon off vehicles being worked on. Ensure only qualified persons work on the HV system.</p>"
+              "front": "Risk of electric shock from HV components",
+              "back": "Do not touch orange HV cables. Only trained and qualified personnel should work on HV systems. Use appropriate PPE including Class 0 insulated gloves."
             }
           ]
+        },
+        {
+          "componentId": "comp-034",
+          "type": "graphic-text",
+          "displayTitle": "Severity of Electric Shock",
+          "_imageAlign": "left",
+          "body": "<p>The severity of an electric shock is determined by four factors:</p><ul><li><strong>Voltage:</strong> Low, medium, or high</li><li><strong>Resistance:</strong> Non-conductive, low-conductivity, or high-conductivity material</li><li><strong>Path:</strong> Finger to finger (same hand), hand to foot, or across the body</li><li><strong>Duration:</strong> Milliseconds, fractions of a second, or one second or more</li></ul><p>A high voltage through high-conductivity material across the body for more than a second is the most dangerous combination.</p>",
+          "imagePrompt": "Technical diagram showing factors affecting electric shock severity, voltage resistance path and duration illustrated with clean iconography, dark background with red warning highlights, professional safety training style",
+          "_graphic": {
+            "large": "images/comp-034.jpg",
+            "alt": "Diagram showing the four factors that determine electric shock severity"
+          }
         }
       ]
     },
     {
       "sectionId": "section-09",
-      "title": "Charging Terminology",
+      "title": "Charging",
       "components": [
         {
-          "componentId": "comp-070",
-          "type": "graphic-text",
-          "displayTitle": "Understanding Charging",
-          "_imageAlign": "right",
-          "body": "<p>To work safely around EV charging systems, you need to understand the basic electrical terminology. These concepts determine charging speed, cable ratings, and safety thresholds.</p>",
-          "imagePrompt": "Modern EV charging station with illuminated connector plugged into vehicle blue LED glow professional photography dark moody atmosphere 800x600 no text",
+          "componentId": "comp-035",
+          "type": "full-bleed",
+          "displayTitle": "EV Charging Fundamentals",
+          "body": "<p>Understanding charging terminology and technology is essential for anyone working around electric vehicles.</p>",
+          "imagePrompt": "Modern electric vehicle connected to a sleek charging station at night, glowing charge indicator lights in red and orange, professional automotive environment, cinematic dark moody lighting",
           "_graphic": {
-            "large": "images/comp-070.jpg",
-            "alt": "Modern EV charging station with illuminated connector"
+            "large": "images/comp-035.jpg",
+            "alt": "Electric vehicle connected to a charging station at night"
           }
         },
         {
-          "componentId": "comp-071",
-          "type": "flashcard",
-          "displayTitle": "Key Electrical Terms",
-          "instruction": "Click each card to reveal the definition.",
+          "componentId": "comp-036",
+          "type": "key-term",
+          "displayTitle": "Essential Charging Terms",
           "_items": [
             {
-              "front": "What are Watts?",
-              "back": "Watts measure energy consumption — the rate at which electrical energy is used or generated. EV chargers are rated in kilowatts (kW)."
+              "term": "Voltage (V)",
+              "definition": "The electrical pressure. ICE vehicles use 12V, trucks/buses 24V, Mild Hybrids 48V, Hybrids 200–400V, Full EVs 350–800V."
             },
             {
-              "front": "What are Amps?",
-              "back": "Amps (amperes) measure electrical current — the flow of electricity through a circuit. A higher amp reading means more current is flowing."
+              "term": "Amps (A)",
+              "definition": "Measurement of electrical flow — the rate at which charge moves through a circuit."
             },
             {
-              "front": "What is Voltage?",
-              "back": "Voltage is electrical pressure — the force that pushes current through a circuit. ICE vehicles use 12V, trucks 24V, but EVs operate at 350-800V DC."
-            },
-            {
-              "front": "What does kWh mean?",
-              "back": "Kilowatt-hours measure battery capacity. A 52kWh battery charging at 2.3kW takes about 22.6 hours. Typical EV batteries range from 40-100kWh."
+              "term": "Watts (W) / Kilowatts (kW)",
+              "definition": "Energy consumption measurement. Charging speeds range from 2.3kW home charging to 360kW rapid chargers."
             }
           ]
         },
         {
-          "componentId": "comp-072",
-          "type": "stat-callout",
-          "displayTitle": "Charging Speeds",
+          "componentId": "comp-037",
+          "type": "narrative",
+          "displayTitle": "Charging Speeds Explained",
+          "body": "<p>Navigate through the different charging levels available for EVs.</p>",
           "_items": [
             {
-              "value": "2.3",
-              "suffix": "kW",
-              "label": "Standard home socket"
+              "title": "Home Charging — 2.3kW",
+              "body": "<p>Standard household power (230V) × cable amperage (10A) = 2.3kW. A 52kWh battery takes approximately 22.6 hours at this rate.</p>"
             },
             {
-              "value": "7-22",
-              "suffix": "kW",
-              "label": "Home wall box / commercial"
+              "title": "Wall Box — 7.4kW to 22kW",
+              "body": "<p>Dedicated home or workplace wall boxes provide significantly faster charging. A 7.4kW wall box charges a 52kWh battery in around 7 hours.</p>"
             },
             {
-              "value": "50",
-              "suffix": "kW+",
-              "label": "Rapid charger"
-            },
-            {
-              "value": "360",
-              "suffix": "kW",
-              "label": "Fastest UK charger"
+              "title": "Rapid Chargers — 50kW+",
+              "body": "<p>Public rapid chargers provide the fastest speeds. The UK's fastest deliver up to 360kW, adding significant range in minutes.</p>"
             }
           ]
         }
@@ -872,62 +829,71 @@
     },
     {
       "sectionId": "section-10",
-      "title": "Glossary & Summary",
+      "title": "Glossary & Course Completion",
       "components": [
         {
-          "componentId": "comp-080",
-          "type": "key-term",
-          "displayTitle": "Key Terms Reference",
+          "componentId": "comp-038",
+          "type": "accordion",
+          "displayTitle": "Glossary of EV Terms",
+          "body": "<p>Key technical terms used throughout this course.</p>",
           "_items": [
             {
-              "term": "Arc Flash",
-              "definition": "A sudden release of electrical energy through the air when a high-voltage gap is breached. Can cause serious burns, injuries, or equipment damage."
+              "title": "Arc/Flash",
+              "body": "<p>A dangerous release of energy caused by an electrical arc between conductors. Can cause severe burns and ignite flammable materials.</p>"
             },
             {
-              "term": "BEV",
-              "definition": "Battery Electric Vehicle — powered entirely by a rechargeable battery pack with no internal combustion engine."
+              "title": "BEV — Battery Electric Vehicle",
+              "body": "<p>A vehicle driven entirely by an electric motor powered by a rechargeable high voltage battery.</p>"
             },
             {
-              "term": "HEV",
-              "definition": "Hybrid Electric Vehicle — combines a conventional engine with an electric motor. Battery charges through regenerative braking only."
+              "title": "DC-DC Converter",
+              "body": "<p>Changes high voltage from the traction battery to low voltage for the vehicle's standard 12V systems.</p>"
             },
             {
-              "term": "PHEV",
-              "definition": "Plug-in Hybrid Electric Vehicle — has both a combustion engine and electric motor with external charging capability."
+              "title": "ECE R100",
+              "body": "<p>A UN regulation specifying tests for batteries in electric vehicles. Defines high voltage as >60V and ≤1500V DC.</p>"
             },
             {
-              "term": "MHEV",
-              "definition": "Mild Hybrid Electric Vehicle — has a small electric motor that assists the combustion engine but cannot power the vehicle alone. Typically 48V."
+              "title": "FCEV — Fuel Cell Electric Vehicle",
+              "body": "<p>A vehicle powered by a fuel cell that converts hydrogen and oxygen into electricity.</p>"
             },
             {
-              "term": "ECE R100",
-              "definition": "The UN regulation defining high voltage as >60V to ≤1500V DC for electric vehicles. Specifies all required safety tests."
+              "title": "HEV — Hybrid Electric Vehicle",
+              "body": "<p>A vehicle combining an internal combustion engine with an electric motor and smaller HV battery.</p>"
             },
             {
-              "term": "Traction Battery",
-              "definition": "The main high-voltage battery providing power to the electric motor in an EV."
+              "title": "Insulated Gloves (Class 0)",
+              "body": "<p>Specialist safety gloves rated to 1500V DC, worn when working on high voltage systems.</p>"
             },
             {
-              "term": "DC-DC Converter",
-              "definition": "Converts high-voltage DC from the traction battery to low-voltage 12V DC for vehicle accessories."
+              "title": "PHEV — Plug-in Hybrid Electric Vehicle",
+              "body": "<p>A hybrid with a larger battery that can be charged from an external mains supply.</p>"
             },
             {
-              "term": "Rescue Hook",
-              "definition": "An insulated tool for trained personnel to safely pull a person away from high-voltage components during electric shock."
+              "title": "Power Electronics Controller",
+              "body": "<p>Contains the inverter and electronic controller that manages power flow in the vehicle.</p>"
+            },
+            {
+              "title": "Rescue Hook",
+              "body": "<p>An insulated tool used to safely separate a casualty from an electrical source during an emergency.</p>"
+            },
+            {
+              "title": "Traction Battery",
+              "body": "<p>The main high voltage battery (typically 60–800V) that powers the electric drive motors.</p>"
             }
           ]
         },
         {
-          "componentId": "comp-081",
+          "componentId": "comp-039",
           "type": "text",
           "displayTitle": "Course Complete",
-          "body": "<p>You have completed the EV Awareness &amp; Safety course. Remember: always identify the vehicle type before beginning any work, never touch orange cables, and follow your organisation's specific EV safety procedures.</p><p>If you have any questions about working with electric vehicles, consult your workshop manager or a suitably trained EV specialist.</p>"
+          "body": "<p>Congratulations on completing the EV Awareness & Safety course. You should now have the knowledge to identify electric vehicles, understand their key components, recognise workplace hazards, and respond appropriately in an emergency.</p><p>Remember: always inform your colleagues of your current trained level and request further assistance from a suitably trained person when necessary.</p>"
         }
       ]
     }
   ],
   "metadata": {
-    "generatedAt": "2026-03-24T02:30:00Z",
+    "generatedAt": "2026-03-24T06:30:00Z",
     "sourceScorm": "EV Awareness & Safety",
     "componentCount": 40,
     "imageCount": 10

@@ -1,36 +1,36 @@
 {
-  "sourceUrl": "https://aidataguardians.com/",
+  "sourceUrl": "https://fluence.framer.website/",
   "colors": {
-    "primary": "#6366f1",
-    "secondary": "#a855f7",
-    "accent": "#3b82f6",
-    "background": "#000000",
-    "surface": "#121212",
-    "text": "#f0f0f0",
-    "textMuted": "#c8c8c8",
+    "primary": "#1b0c25",
+    "secondary": "#522c66",
+    "accent": "#0099ff",
+    "background": "#1b0c25",
+    "surface": "#262121",
+    "text": "#edebee",
+    "textMuted": "#c5c3c6",
     "success": "#10b981",
     "error": "#ef4444",
     "warning": "#f59e0b",
-    "gradient": "linear-gradient(135deg, #6366f1, #a855f7)"
+    "gradient": "linear-gradient(135deg, #1b0c25, #522c66)"
   },
   "typography": {
-    "headingFont": "Inter",
+    "headingFont": "General Sans",
     "bodyFont": "Inter",
-    "fontImportUrl": "https://fonts.googleapis.com",
-    "baseSize": 16,
+    "fontImportUrl": "https://fonts.googleapis.com/css2?family=General%20Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
+    "baseSize": 18,
     "headingSizes": {
-      "h1": 40,
-      "h2": 32,
-      "h3": 24
+      "h1": 45,
+      "h2": 36,
+      "h3": 27
     },
     "lineHeight": 1.6,
-    "headingWeight": 800,
+    "headingWeight": 900,
     "bodyWeight": 500
   },
   "style": {
-    "borderRadius": "20px",
+    "borderRadius": "16px",
     "cardStyle": "glass",
-    "buttonStyle": "gradient",
+    "buttonStyle": "rounded",
     "imageStyle": "rounded",
     "mood": "creative",
     "theme": "light",
@@ -40,5 +40,11 @@
       "element": 16
     }
   },
-  "scrapedAt": "2026-03-23T13:19:57.664Z"
+  "logo": {
+    "url": "https://framerusercontent.com/images/mNO89ys2gWfzwt1uvhnoJyIgupY.png?width=636&height=552",
+    "width": 636,
+    "height": 552,
+    "alt": "Logo"
+  },
+  "scrapedAt": "2026-03-24T06:59:31.307Z"
 }

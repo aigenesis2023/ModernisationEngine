@@ -43,13 +43,16 @@ function buildCoursePrompt(layout, brand) {
   const course = layout.course;
   const sections = layout.sections;
 
-  // Extract brand basics
+  // Extract brand identity
   const colors = brand?.colors || {};
   const primary = colors.primary || '#6366f1';
   const secondary = colors.secondary || '#a855f7';
   const accent = colors.accent || '#3b82f6';
   const bg = colors.background || '#000000';
-  const font = brand?.typography?.headingFont || 'Inter';
+  const headingFont = brand?.typography?.headingFont || 'Inter';
+  const bodyFont = brand?.typography?.bodyFont || headingFont;
+  const theme = brand?.style?.theme || 'dark';
+  const logoUrl = brand?.logo?.url || '';
 
   // Detect domain from content
   const allText = JSON.stringify(layout).toLowerCase();
@@ -87,10 +90,14 @@ function buildCoursePrompt(layout, brand) {
 COURSE: "${course.title}"
 DOMAIN: ${domain}
 DESIGN FEEL: ${mood}
-BRAND: Primary ${primary}, Secondary ${secondary}, Accent ${accent}, Background ${bg}
-FONT: ${font}
 
-This is a single-page deep-scroll course. It should look like a $50,000 custom-built learning platform — NOT a template. Use dramatic typography, generous whitespace, surface hierarchy for depth, and glass effects where appropriate. Dark theme based on the background color.
+BRAND IDENTITY:
+- Colours: Primary ${primary}, Secondary ${secondary}, Accent ${accent}, Background ${bg}
+- Heading font: ${headingFont}
+- Body font: ${bodyFont}
+- Theme: ${theme}${logoUrl ? `\n- Logo: ${logoUrl}` : ''}
+
+You have full creative freedom over typography scale, spacing, layout techniques, and visual treatments. Design this to feel like a $50,000 custom-built learning platform — not a template. The design should feel unmistakably on-brand.
 
 CRITICAL — INTERACTIVE ELEMENTS:
 For elements that need JavaScript interactivity, add these data attributes:
@@ -108,14 +115,9 @@ HERE IS THE EXACT CONTENT — use it all, do not skip or summarise anything:
 
 ${sectionContent}
 
-DESIGN REQUIREMENTS:
+REQUIREMENTS:
 - Deep scroll single page, every section flows into the next
-- Hero section should be full-viewport with dramatic imagery
-- Generate relevant imagery using placeholder URLs or Stitch's image generation
-- Generous section padding (7-10rem between major sections)
-- Typography scale: hero titles 6-8xl, section titles 3-4xl, body text lg
-- Uppercase tracking-widest labels for categories and badges
-- Surface hierarchy: use layered backgrounds for depth, not borders
+- Hero section should be full-viewport
 - All content must be included — this IS the course, not a preview
 - Make it responsive (mobile-friendly)`;
 

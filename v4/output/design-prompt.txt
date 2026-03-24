@@ -1,3 +1,246 @@
+=== SYSTEM PROMPT ===
+
+# AI Layout Engine — System Prompt
+
+You are a **Senior Instructional Designer and UX Architect** specializing in transforming raw educational content into premium, modern deep-scroll web learning experiences.
+
+You will receive two inputs:
+1. **Content Bucket** — extracted educational content from a SCORM course (text, quizzes, media references, organized by scenes/slides)
+2. **Brand Profile** — visual identity extracted from a brand URL (colors, fonts, style, logo)
+
+Your job is to **redesign the course from scratch** using a library of 25 premium React components. The SCORM file's original layout, structure, and visual design are irrelevant — you are creating a new, modern experience from the raw content.
+
+---
+
+## Your Design Process
+
+### Step 1: Understand the Content
+- Read all scenes and slides to understand the course's educational arc
+- Identify the core learning objectives
+- Note which content is introductory, which is detail, and which is assessment
+- Identify key terms, statistics, and quotable insights
+- Note any media files (videos, real images) in the inventory
+
+### Step 2: Plan the Structure
+- Group related content into **sections** (5-12 sections for a typical course)
+- Each section should have a clear topic and purpose
+- Plan the learning flow: introduce → explain → reinforce → assess
+- Decide where knowledge checks (MCQs) should appear
+
+### Step 3: Choose Components
+- For each piece of content, select the most effective component from the library
+- Follow the visual variety rules — never two of the same type in a row
+- Alternate between content-heavy and visual/interactive components
+- Place visual breaks (full-bleed, stat-callout, pullquote) between dense sections
+
+### Step 4: Write the Content
+- **Rewrite and tighten** all text for the modern format — no filler, no SCORM junk
+- Write clear, scannable headings (not "Slide 3.2" — real topic titles)
+- Convert long paragraphs into structured formats where possible (lists → checklists, steps → timelines)
+- Preserve all educational accuracy — don't invent facts
+- Write image prompts for AI generation that match the brand aesthetic
+
+---
+
+## Component Reference Sheet
+
+Use ONLY these component types. Each has specific use cases — follow them.
+
+### Structural
+| Type | Use For |
+|---|---|
+| `hero` | Course opening. Always first. Animated title + background image. |
+
+### Content Components
+| Type | Use For |
+|---|---|
+| `text` | Prose paragraphs, introductions, explanations |
+| `graphic-text` | Text + image side-by-side (alternate left/right) |
+| `bento` | 3-6 related cards with optional images (non-sequential) |
+| `data-table` | Structured data, specifications, reference tables |
+| `timeline` | 3-8 sequential steps connected by a line |
+| `comparison` | Side-by-side 2-3 column feature comparison with checks/crosses |
+| `key-term` | 1-5 vocabulary terms with definitions |
+| `process-flow` | 3-6 connected workflow nodes |
+
+### Visual Components
+| Type | Use For |
+|---|---|
+| `graphic` | Standalone full-width image with caption |
+| `stat-callout` | 2-4 large numbers/statistics with labels |
+| `pullquote` | Key message or quote with accent bar (1-2 per course max) |
+| `labeled-image` | Image with clickable numbered hotspot markers |
+| `image-gallery` | Grid of 3-8 related images with lightbox |
+| `full-bleed` | Edge-to-edge image with overlay text (section divider) |
+| `media` | Video player (only if video exists in content bucket) |
+| `video-transcript` | Video + expandable transcript (only if both exist) |
+
+### Interactive Components
+| Type | Use For |
+|---|---|
+| `accordion` | 3-8 expandable panels (non-sequential, equal weight) |
+| `narrative` | 3-7 slide carousel (sequential, with prev/next) |
+| `tabs` | 2-6 tabbed categories (alternative views) |
+| `flashcard` | 3-8 flip cards (term/answer review) |
+| `checklist` | 3-10 checkable action items |
+| `textinput` | Reflective text entry fields |
+| `branching` | Scenario-based choice cards |
+
+### Assessment
+| Type | Use For |
+|---|---|
+| `mcq` | Knowledge check quiz (single or multi-select) |
+
+---
+
+## Design Rules (MUST follow)
+
+### Layout Rules
+1. **Every course starts with exactly one `hero` component** — no exceptions
+2. **Never place two consecutive components of the same type**
+3. **Each section has 2-6 components** (split if it grows beyond 6)
+4. **Alternate `graphic-text` image alignment** — left, right, left, right
+5. **Space MCQ components at least 3-5 components apart** — after teaching, not before
+6. **Use visual breaks** (full-bleed, stat-callout, pullquote) between dense content sections
+
+### Content Rules
+7. **Rewrite all text** — clean, concise, modern tone. Remove SCORM artifacts, slide labels, instruction junk
+8. **Preserve educational accuracy** — never invent facts, statistics, or technical details that weren't in the original content
+9. **Write real headings** — descriptive topic titles, not "Slide 1" or "Scene 2"
+10. **Structure content appropriately** — steps → timeline, terms → key-term, comparisons → comparison table
+11. **Quiz questions must come from the original content** — preserve correct answers, refine wording only
+
+### Image Rules
+12. **Write imagePrompt for every component that displays an image** — hero, graphic, graphic-text, bento cards, narrative slides, full-bleed, labeled-image, gallery items
+13. **Image prompts must include**: subject matter, style (modern, clean, professional), color hints from brand, and mood
+14. **Never reference the brand name in image prompts** — describe the visual, not the brand
+15. **Use appropriate dimensions** per component type:
+    - Hero, full-bleed: 1920x1080 or 1920x800
+    - Graphic: 1920x1080
+    - Graphic-text: 800x600
+    - Bento cards: 600x400
+    - Narrative slides: 800x600
+    - Gallery items: 600x400
+    - Labeled-image: 1200x800
+
+### Media Rules
+16. **Only use `media` or `video-transcript` components when video files exist** in the content bucket's media inventory
+17. **Reference actual filenames** from the media inventory — don't fabricate video sources
+
+---
+
+## Brand-Aware Design
+
+The brand profile tells you:
+- **Colors**: Use brand primary, secondary, accent in image prompts. The renderer handles CSS variables automatically.
+- **Typography mood**: Informs tone — corporate brands get professional language, creative brands get more expressive copy
+- **Theme**: Dark or light background affects image prompt style (light subjects on dark backgrounds, etc.)
+- **Style mood**: creative / elegant / corporate / friendly / technical — adjust content tone accordingly
+
+---
+
+## Output Format
+
+Output a single JSON object matching the `course-layout.schema.json` schema:
+
+```json
+{
+  "course": {
+    "title": "Course Display Title",
+    "subtitle": "One-sentence course description",
+    "totalSections": 8
+  },
+  "sections": [
+    {
+      "sectionId": "section-00",
+      "title": "",
+      "components": [
+        {
+          "componentId": "comp-000",
+          "type": "hero",
+          "displayTitle": "Course Title Here",
+          "body": "<p>Subtitle text</p>",
+          "imagePrompt": "description of hero background image...",
+          "_graphic": {
+            "large": "",
+            "alt": "Alt text describing the image"
+          }
+        }
+      ]
+    },
+    {
+      "sectionId": "section-01",
+      "title": "First Topic Section",
+      "components": [
+        {
+          "componentId": "comp-001",
+          "type": "text",
+          "displayTitle": "Introduction",
+          "body": "<p>Clean, rewritten content here.</p>"
+        },
+        {
+          "componentId": "comp-002",
+          "type": "graphic-text",
+          "displayTitle": "Key Concept",
+          "body": "<p>Explanation paired with image.</p>",
+          "_imageAlign": "right",
+          "imagePrompt": "description of side image...",
+          "_graphic": {
+            "large": "",
+            "alt": "Alt text"
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "generatedAt": "2026-03-23T12:00:00Z",
+    "sourceScorm": "EV Awareness Course",
+    "componentCount": 42,
+    "imageCount": 18
+  }
+}
+```
+
+### Key Points
+- **`_graphic.large`** fields start empty — the image generator fills them with actual paths
+- **`imagePrompt`** is your instruction to the image generator — be descriptive and specific
+- **`imagePrompts`** (plural) is used for components with multiple images (narrative, bento, gallery) — each entry has a `key`, `prompt`, and `dimensions`
+- **`componentId`** must be unique across the entire course (use `comp-000`, `comp-001`, etc.)
+- **`sectionId`** must be unique (use `section-00`, `section-01`, etc.)
+- **Hero section** should have `"title": ""` (empty) since the hero IS the title
+- HTML in body fields uses basic tags: `<p>`, `<ul>`, `<ol>`, `<li>`, `<strong>`, `<em>`, `<h3>`
+
+---
+
+## Quality Checklist
+
+Before finalizing your output, verify:
+
+- [ ] Course starts with exactly one hero component
+- [ ] No two consecutive components have the same type
+- [ ] Every image-bearing component has an imagePrompt
+- [ ] MCQ questions match the original SCORM quiz content
+- [ ] All componentId values are unique
+- [ ] All sectionId values are unique
+- [ ] Sections have 2-6 components each
+- [ ] graphic-text components alternate _imageAlign
+- [ ] No fabricated video/media sources
+- [ ] Text is clean and modern — no SCORM artifacts
+- [ ] Output is valid JSON matching course-layout.schema.json
+
+
+=== USER MESSAGE ===
+
+## Your Task
+
+Design a complete course layout for the following content. Read ALL the content carefully, then create a premium deep-scroll web learning experience using the component library.
+
+---
+
+## Content Bucket (extracted from SCORM)
+
+```json
 {
   "courseTitle": "EV",
   "courseId": "_6Zo2D9z7Fgr",
@@ -7119,3 +7362,1177 @@
   },
   "extractedAt": "2026-03-24T06:21:36.083Z"
 }
+```
+
+---
+
+## Brand Profile (extracted from brand URL)
+
+```json
+{
+  "sourceUrl": "https://triumphmotorcycles.co.uk",
+  "colors": {
+    "primary": "#cd192d",
+    "secondary": "#ff611b",
+    "accent": "#0062c8",
+    "background": "#2a2a2a",
+    "surface": "#333333",
+    "text": "#f6eede",
+    "textMuted": "#cec6b6",
+    "success": "#10b981",
+    "error": "#ef4444",
+    "warning": "#f59e0b",
+    "gradient": "linear-gradient(55deg,#222,#222 10px,#333 0,#333 20px)"
+  },
+  "typography": {
+    "headingFont": "myriad-pro",
+    "bodyFont": "DIN2014-Demi",
+    "fontImportUrl": "https://fonts.googleapis.com/css2?family=myriad-pro:wght@400;500;600;700&family=DIN2014-Demi:wght@400;500;600;700&display=swap",
+    "baseSize": 16,
+    "headingSizes": {
+      "h1": 40,
+      "h2": 32,
+      "h3": 24
+    },
+    "lineHeight": 1.6,
+    "headingWeight": 900,
+    "bodyWeight": 500
+  },
+  "style": {
+    "borderRadius": "4px",
+    "cardStyle": "elevated",
+    "buttonStyle": "gradient",
+    "imageStyle": "sharp",
+    "mood": "corporate",
+    "theme": "dark",
+    "spacing": {
+      "unit": 8,
+      "section": 64,
+      "element": 16
+    }
+  },
+  "logo": {
+    "url": "https://media.triumphmotorcycles.co.uk/image/upload/f_auto/q_auto:eco/sitecoremedialibrary/media-library/misc/misc-images/logo.svg?la=en-GB&hash=0D6B9EBF7B27F4B8AEA925EDA35FD9284343B0DE",
+    "width": 200,
+    "height": 60,
+    "alt": "Triumph Logo"
+  },
+  "scrapedAt": "2026-03-24T06:21:39.537Z"
+}
+```
+
+---
+
+## Component Library Reference
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Component Library",
+  "description": "Complete reference for all 25 components available to the AI layout engine. Each entry defines the component type string, required/optional props, ideal use cases, and a valid JSON example. The layout engine MUST only use components defined here.",
+  "version": "2.0.0",
+
+  "components": [
+    {
+      "type": "hero",
+      "component": "HeroSplash",
+      "category": "structural",
+      "status": "built",
+      "description": "Full-viewport opening section with animated title, optional background image, and scroll-down indicator. Sets the tone for the entire course.",
+      "when_to_use": "Always use as the FIRST component. Every course starts with a hero. Use the course title and a short subtitle that frames the learning journey.",
+      "when_not_to_use": "Never use more than once per course.",
+      "image_dimensions": "1920x1080 (16:9)",
+      "props": {
+        "required": {
+          "displayTitle": "string — Course title, large animated text",
+          "body": "string (HTML) — Subtitle or course description, 1-2 sentences"
+        },
+        "optional": {
+          "_graphic": {
+            "large": "string — URL for background image (16:9, will be overlaid with dark scrim)",
+            "alt": "string — Alt text for the image"
+          }
+        }
+      },
+      "example": {
+        "_component": "hero",
+        "displayTitle": "Electric Vehicle Awareness & Safety",
+        "body": "<p>Master the fundamentals of EV technology, safety protocols, and maintenance best practices.</p>",
+        "_graphic": {
+          "large": "images/hero-ev-charging.jpg",
+          "alt": "Modern electric vehicle at a charging station"
+        }
+      }
+    },
+
+    {
+      "type": "text",
+      "component": "TextBlock",
+      "category": "content",
+      "status": "built",
+      "description": "Clean text block with heading and body. The workhorse component for explanatory content.",
+      "when_to_use": "For introductory paragraphs, explanations, context-setting text, or any content that is primarily prose. Works well as the first block in a section to set context before interactive components.",
+      "when_not_to_use": "Don't use for content that would benefit from visual structure (lists → checklist, steps → timeline, definitions → key-term).",
+      "props": {
+        "required": {
+          "body": "string (HTML) — Main content. Can include <p>, <ul>, <ol>, <h3>, <strong>, <em> tags."
+        },
+        "optional": {
+          "displayTitle": "string — Section heading above the body text",
+          "instruction": "string — Italic helper text (e.g. 'Read the following carefully')"
+        }
+      },
+      "example": {
+        "_component": "text",
+        "displayTitle": "What Makes EVs Different?",
+        "body": "<p>Electric vehicles replace the internal combustion engine with an electric motor powered by a rechargeable battery pack. This fundamental difference affects every aspect of how the vehicle is maintained, repaired, and handled in emergencies.</p>"
+      }
+    },
+
+    {
+      "type": "graphic",
+      "component": "GraphicBlock",
+      "category": "visual",
+      "status": "built",
+      "description": "Full-width image with hover zoom effect and optional caption. Provides visual breathing room between text-heavy sections.",
+      "when_to_use": "For standalone images that deserve full attention — diagrams, photographs, infographics. Place between text sections to break up content rhythm.",
+      "when_not_to_use": "Don't use for images paired with explanatory text (use graphic-text instead). Don't use for decorative images with no educational value.",
+      "image_dimensions": "1920x1080 (16:9)",
+      "props": {
+        "required": {
+          "_graphic": {
+            "large": "string — Image URL",
+            "alt": "string — Descriptive alt text"
+          }
+        },
+        "optional": {
+          "displayTitle": "string — Title above the image",
+          "body": "string (HTML) — Caption below the image"
+        }
+      },
+      "example": {
+        "_component": "graphic",
+        "displayTitle": "EV Battery Architecture",
+        "_graphic": {
+          "large": "images/battery-architecture.jpg",
+          "alt": "Cutaway diagram showing battery cell arrangement in an EV chassis"
+        },
+        "body": "<p>A typical EV battery pack contains thousands of individual cells arranged in modules.</p>"
+      }
+    },
+
+    {
+      "type": "graphic-text",
+      "component": "GraphicText",
+      "category": "content",
+      "status": "built",
+      "description": "Side-by-side split layout with text on one side and image on the other. Alternates left/right for visual rhythm.",
+      "when_to_use": "For content that pairs an explanation with a supporting image. Ideal for concept introductions, feature descriptions, or any text that benefits from a visual anchor. Alternate _imageAlign between sections for visual variety.",
+      "when_not_to_use": "Don't use back-to-back more than twice. If the image isn't directly related to the text, use separate text + graphic components.",
+      "image_dimensions": "800x600 (4:3)",
+      "props": {
+        "required": {
+          "displayTitle": "string — Heading for the text side",
+          "body": "string (HTML) — Explanatory content",
+          "_graphic": {
+            "large": "string — Image URL",
+            "alt": "string — Alt text"
+          }
+        },
+        "optional": {
+          "_imageAlign": "string — 'left' or 'right' (default: right). Alternate for visual rhythm."
+        }
+      },
+      "example": {
+        "_component": "graphic-text",
+        "displayTitle": "Regenerative Braking",
+        "body": "<p>When you lift your foot off the accelerator, the electric motor reverses its role — becoming a generator that converts kinetic energy back into electrical energy stored in the battery.</p><p>This process can recover up to 70% of braking energy, extending range significantly.</p>",
+        "_graphic": {
+          "large": "images/regen-braking.jpg",
+          "alt": "Diagram showing energy flow during regenerative braking"
+        },
+        "_imageAlign": "right"
+      }
+    },
+
+    {
+      "type": "accordion",
+      "component": "SilkyAccordion",
+      "category": "interactive",
+      "status": "built",
+      "description": "Expandable panels with smooth animation and completion tracking. Each panel has a title and rich body content revealed on click.",
+      "when_to_use": "For content with 3-8 distinct topics of roughly equal weight that learners can explore in any order. Great for: detailed explanations, safety procedures, FAQ-style content, or when you want to reduce initial visual overwhelm.",
+      "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for critical content that ALL learners must see (it's optional to expand).",
+      "props": {
+        "required": {
+          "_items": "array — 3-8 accordion panels, each with { title: string, body: string (HTML) }"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading above the accordion",
+          "body": "string (HTML) — Intro text above the panels",
+          "instruction": "string — Helper text (e.g. 'Select each panel to learn more')"
+        }
+      },
+      "example": {
+        "_component": "accordion",
+        "displayTitle": "EV Safety Systems",
+        "instruction": "Select each panel to explore the safety features.",
+        "_items": [
+          {
+            "title": "High-Voltage Isolation",
+            "body": "<p>EV battery packs operate at 400-800V. Multiple isolation barriers prevent current from reaching the vehicle chassis or occupants.</p>"
+          },
+          {
+            "title": "Battery Management System (BMS)",
+            "body": "<p>The BMS continuously monitors cell temperature, voltage, and current. It can disconnect the battery in milliseconds if anomalies are detected.</p>"
+          },
+          {
+            "title": "Thermal Runaway Protection",
+            "body": "<p>Modern EVs use liquid cooling, fire-resistant barriers between cells, and venting systems to prevent and contain thermal events.</p>"
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "mcq",
+      "component": "MCQPro",
+      "category": "assessment",
+      "status": "built",
+      "description": "Multiple-choice quiz with selection, submit, visual feedback, and retry. Supports single and multi-select modes.",
+      "when_to_use": "For knowledge checks after a teaching section. Place after 3-5 content components to reinforce learning. Use the question to test comprehension, not recall of trivia.",
+      "when_not_to_use": "Don't cluster multiple quizzes together. Space them throughout the course for better learning reinforcement.",
+      "props": {
+        "required": {
+          "displayTitle": "string — Question heading (e.g. 'Knowledge Check')",
+          "body": "string (HTML) — The question text",
+          "_items": "array — Answer choices: [{ text: string, _shouldBeSelected: boolean }]"
+        },
+        "optional": {
+          "instruction": "string — Helper text (e.g. 'Choose the best answer')",
+          "_selectable": "number — How many choices can be selected (default: 1). Use >1 for multi-select.",
+          "_feedback": {
+            "correct": "string (HTML) — Feedback for correct answer",
+            "_incorrect": {
+              "final": "string (HTML) — Feedback for incorrect answer"
+            }
+          }
+        }
+      },
+      "example": {
+        "_component": "mcq",
+        "displayTitle": "Knowledge Check",
+        "body": "<p>What is the typical voltage range of an EV battery pack?</p>",
+        "instruction": "Choose the best answer.",
+        "_selectable": 1,
+        "_items": [
+          { "text": "12-48V", "_shouldBeSelected": false },
+          { "text": "100-200V", "_shouldBeSelected": false },
+          { "text": "400-800V", "_shouldBeSelected": true },
+          { "text": "1000-2000V", "_shouldBeSelected": false }
+        ],
+        "_feedback": {
+          "correct": "<p>Correct! Most modern EVs operate in the 400-800V range, with some performance vehicles reaching even higher.</p>",
+          "_incorrect": {
+            "final": "<p>Not quite. EV battery packs typically operate at 400-800V, which is why special safety protocols are essential.</p>"
+          }
+        }
+      }
+    },
+
+    {
+      "type": "narrative",
+      "component": "NarrativeSlider",
+      "category": "interactive",
+      "status": "built",
+      "description": "Carousel slider with prev/next navigation, dot indicators, and optional images per slide. Content is presented sequentially.",
+      "when_to_use": "For sequential content that tells a story or walks through a process step by step. Works well for: guided walkthroughs, case studies with multiple stages, or when showing progression. Use 3-7 slides.",
+      "when_not_to_use": "Don't use for content that isn't sequential. Don't use for critical must-see content (users may skip slides). Don't use with fewer than 3 slides.",
+      "image_dimensions": "800x600 (4:3) per slide",
+      "props": {
+        "required": {
+          "_items": "array — 3-7 slides: [{ title: string, body: string (HTML), _graphic?: { large: string, alt: string } }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading above the slider",
+          "body": "string (HTML) — Intro text above the slider"
+        }
+      },
+      "example": {
+        "_component": "narrative",
+        "displayTitle": "Emergency Response Procedure",
+        "_items": [
+          {
+            "title": "Step 1: Scene Assessment",
+            "body": "<p>Before approaching the vehicle, assess the scene for immediate hazards: fire, fluid leaks, structural damage, or downed power lines.</p>",
+            "_graphic": { "large": "images/scene-assessment.jpg", "alt": "First responder assessing an EV accident scene" }
+          },
+          {
+            "title": "Step 2: Disable the Vehicle",
+            "body": "<p>Locate and activate the high-voltage disconnect. This is typically found in the engine bay or under the rear seat.</p>",
+            "_graphic": { "large": "images/hv-disconnect.jpg", "alt": "High-voltage disconnect switch location" }
+          },
+          {
+            "title": "Step 3: Establish Safe Zone",
+            "body": "<p>Create a 10-metre exclusion zone around the vehicle. Ensure all personnel wear appropriate PPE including insulated gloves rated to 1000V.</p>",
+            "_graphic": { "large": "images/safe-zone.jpg", "alt": "Exclusion zone diagram around damaged EV" }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "bento",
+      "component": "BentoGrid",
+      "category": "content",
+      "status": "built",
+      "description": "Multi-card grid layout with optional image backgrounds. First card can span 2 columns for visual hierarchy. Cards have hover effects.",
+      "when_to_use": "For presenting 3-6 related concepts, features, or topics at a glance. Perfect for: feature overviews, key benefits, topic summaries, or any content where items are peers (not sequential).",
+      "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for long-form content that needs full reading.",
+      "image_dimensions": "600x400 (3:2) per card",
+      "props": {
+        "required": {
+          "_items": "array — 3-6 cards: [{ title: string, body: string (HTML), _graphic?: { large: string, src: string, alt: string } }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading above the grid",
+          "body": "string (HTML) — Intro text above the grid"
+        }
+      },
+      "example": {
+        "_component": "bento",
+        "displayTitle": "Types of EV Charging",
+        "_items": [
+          {
+            "title": "Level 1 — Home Outlet",
+            "body": "<p>Standard 120V outlet. Adds 5-8km of range per hour. Best for overnight charging at home.</p>",
+            "_graphic": { "large": "images/level1-charging.jpg", "alt": "EV plugged into home outlet" }
+          },
+          {
+            "title": "Level 2 — Dedicated Charger",
+            "body": "<p>240V installation. Adds 40-50km of range per hour. Ideal for home and workplace charging.</p>",
+            "_graphic": { "large": "images/level2-charging.jpg", "alt": "Wall-mounted Level 2 charger" }
+          },
+          {
+            "title": "DC Fast Charging",
+            "body": "<p>Direct current at 50-350kW. Can charge to 80% in 20-40 minutes. Found at public charging stations.</p>",
+            "_graphic": { "large": "images/dc-fast-charging.jpg", "alt": "DC fast charging station" }
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "data-table",
+      "component": "DataTable",
+      "category": "content",
+      "status": "built",
+      "description": "Auto-formatted data table with sticky header, alternating rows, and monospace number styling. Parses structured data from HTML.",
+      "when_to_use": "For comparative data, specifications, reference tables, or any structured information with consistent columns. Great for: specs comparison, schedules, reference data.",
+      "when_not_to_use": "Don't use for simple two-column comparisons (use comparison instead). Don't use for narrative content forced into table format.",
+      "props": {
+        "required": {
+          "body": "string (HTML) — Table data as <ul>/<li> items or <p> lines, with columns separated by ' - ', ' : ', or ' | '"
+        },
+        "optional": {
+          "displayTitle": "string — Table title (shown as sticky header)"
+        }
+      },
+      "example": {
+        "_component": "data-table",
+        "displayTitle": "EV Battery Specifications",
+        "body": "<ul><li>Battery Capacity | 75 kWh</li><li>Voltage | 400V</li><li>Weight | 450 kg</li><li>Warranty | 8 years / 160,000 km</li><li>Cycle Life | 1,500+ cycles</li></ul>"
+      }
+    },
+
+    {
+      "type": "media",
+      "component": "MediaBlock",
+      "category": "visual",
+      "status": "built",
+      "description": "Video player with custom play/pause overlay, poster image, and hover controls bar.",
+      "when_to_use": "For video content extracted from the SCORM package. Only use when actual video files exist in the media inventory.",
+      "when_not_to_use": "Never fabricate video sources. Only reference videos that exist in the content bucket's media inventory.",
+      "props": {
+        "required": {
+          "_media": {
+            "mp4": "string — Video file URL"
+          }
+        },
+        "optional": {
+          "displayTitle": "string — Title above the video",
+          "body": "string (HTML) — Description above the video",
+          "_media.poster": "string — Poster image URL"
+        }
+      },
+      "example": {
+        "_component": "media",
+        "displayTitle": "EV Safety Demonstration",
+        "body": "<p>Watch how the battery management system responds to a simulated fault condition.</p>",
+        "_media": {
+          "mp4": "media/safety-demo.mp4",
+          "poster": "images/safety-demo-poster.jpg"
+        }
+      }
+    },
+
+    {
+      "type": "textinput",
+      "component": "TextInputBlock",
+      "category": "interactive",
+      "status": "built",
+      "description": "Multi-field form with labeled text inputs and submit button. Used for reflection prompts or data entry activities.",
+      "when_to_use": "For reflective exercises where learners type their own responses. Great for: personal action plans, reflection questions, note-taking activities.",
+      "when_not_to_use": "Don't use for assessed content (use mcq). Don't use for simple yes/no questions.",
+      "props": {
+        "required": {
+          "_items": "array — Form fields: [{ prefix: string (label), placeholder?: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Form heading",
+          "body": "string (HTML) — Instructions above the form"
+        }
+      },
+      "example": {
+        "_component": "textinput",
+        "displayTitle": "Personal Action Plan",
+        "body": "<p>Based on what you've learned, document your key takeaways and next steps.</p>",
+        "_items": [
+          { "prefix": "Key takeaway from this module", "placeholder": "What stood out most to you?" },
+          { "prefix": "How will you apply this in your role?", "placeholder": "Describe a specific action..." },
+          { "prefix": "Questions you still have", "placeholder": "What would you like to explore further?" }
+        ]
+      }
+    },
+
+    {
+      "type": "branching",
+      "component": "BranchingCards",
+      "category": "interactive",
+      "status": "built",
+      "description": "Selectable option cards with letter labels (A, B, C...) and selection indicator. For scenario-based choices or self-assessment.",
+      "when_to_use": "For scenario-based learning where learners choose a path or option. Good for: decision-making exercises, self-assessment, preference selection.",
+      "when_not_to_use": "Don't use for graded questions (use mcq). Don't use with more than 5 options.",
+      "props": {
+        "required": {
+          "displayTitle": "string — The scenario or question heading",
+          "body": "string (HTML) — Options as <li> items or <p> paragraphs (parsed into cards)"
+        }
+      },
+      "example": {
+        "_component": "branching",
+        "displayTitle": "What would you do?",
+        "body": "<ul><li>Immediately approach the vehicle to check for injuries</li><li>Call emergency services and establish a safe perimeter</li><li>Attempt to disconnect the battery yourself</li><li>Wait for the vehicle manufacturer's emergency response team</li></ul>"
+      }
+    },
+
+    {
+      "type": "timeline",
+      "component": "TimelineStepper",
+      "category": "content",
+      "status": "new",
+      "description": "Numbered steps connected by a vertical line. Each step has a number badge, title, and body content. Scroll-triggered reveal animation.",
+      "when_to_use": "For sequential processes, historical timelines, or step-by-step procedures where ORDER matters. Use 3-8 steps. Each step should be a distinct phase or milestone.",
+      "when_not_to_use": "Don't use for non-sequential content (use accordion or bento). Don't use for very short steps with just a title (use checklist).",
+      "props": {
+        "required": {
+          "_items": "array — 3-8 steps: [{ title: string, body: string (HTML) }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading",
+          "body": "string (HTML) — Intro text above the timeline"
+        }
+      },
+      "example": {
+        "_component": "timeline",
+        "displayTitle": "EV Maintenance Schedule",
+        "_items": [
+          { "title": "Monthly Check", "body": "<p>Inspect tyre pressure, washer fluid, and charge cable condition. Check for any dashboard warning lights.</p>" },
+          { "title": "Every 6 Months", "body": "<p>Rotate tyres, inspect brake pads (they last longer on EVs due to regenerative braking), and check coolant levels.</p>" },
+          { "title": "Annual Service", "body": "<p>Full diagnostic scan, cabin air filter replacement, battery health check, and software updates.</p>" },
+          { "title": "Every 2 Years", "body": "<p>Replace brake fluid, inspect suspension components, and check high-voltage cable insulation integrity.</p>" }
+        ]
+      }
+    },
+
+    {
+      "type": "comparison",
+      "component": "ComparisonTable",
+      "category": "content",
+      "status": "new",
+      "description": "Side-by-side comparison columns with check/cross icons for features. Clean, scannable format for comparing two or three options.",
+      "when_to_use": "For comparing 2-3 options, plans, approaches, or technologies across multiple criteria. Great for: pros/cons, feature comparisons, before/after.",
+      "when_not_to_use": "Don't use for data-heavy tables (use data-table). Don't compare more than 3 columns.",
+      "props": {
+        "required": {
+          "columns": "array — 2-3 column definitions: [{ title: string, subtitle?: string }]",
+          "rows": "array — Comparison rows: [{ label: string, values: array of (true | false | string) per column }]"
+        },
+        "optional": {
+          "displayTitle": "string — Table heading",
+          "body": "string (HTML) — Intro text"
+        }
+      },
+      "example": {
+        "_component": "comparison",
+        "displayTitle": "EV vs ICE: Maintenance Comparison",
+        "columns": [
+          { "title": "Electric Vehicle", "subtitle": "Battery-powered" },
+          { "title": "ICE Vehicle", "subtitle": "Petrol/Diesel" }
+        ],
+        "rows": [
+          { "label": "Oil changes required", "values": [false, true] },
+          { "label": "Brake pad replacement frequency", "values": ["Every 80,000 km", "Every 40,000 km"] },
+          { "label": "Transmission service", "values": [false, true] },
+          { "label": "Battery health monitoring", "values": [true, false] },
+          { "label": "Software updates", "values": [true, "Rare"] }
+        ]
+      }
+    },
+
+    {
+      "type": "stat-callout",
+      "component": "StatCallout",
+      "category": "visual",
+      "status": "new",
+      "description": "Large prominent numbers or statistics with labels and optional context. Animated count-up on scroll. Displayed in a row of 2-4 stats.",
+      "when_to_use": "For impactful statistics, key metrics, or numbers that deserve emphasis. Place after introductory content to reinforce with data. Use 2-4 stats that tell a compelling story together.",
+      "when_not_to_use": "Don't use for non-numeric content. Don't use more than 4 stats (gets overwhelming).",
+      "props": {
+        "required": {
+          "_items": "array — 2-4 stats: [{ value: string, label: string, suffix?: string, prefix?: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading",
+          "body": "string (HTML) — Context text"
+        }
+      },
+      "example": {
+        "_component": "stat-callout",
+        "displayTitle": "The EV Revolution in Numbers",
+        "_items": [
+          { "value": "14", "suffix": "M+", "label": "EVs sold globally in 2023" },
+          { "value": "70", "suffix": "%", "label": "Reduction in moving parts vs ICE" },
+          { "value": "80", "suffix": "%", "label": "Lower fuel costs per km" }
+        ]
+      }
+    },
+
+    {
+      "type": "pullquote",
+      "component": "PullQuote",
+      "category": "visual",
+      "status": "new",
+      "description": "Emphasized text with a vertical accent bar and optional attribution. Draws attention to key messages or expert quotes.",
+      "when_to_use": "For highlighting a critical insight, expert quote, or key message that learners should remember. Use sparingly — 1-2 per course maximum. Place after the content it summarizes.",
+      "when_not_to_use": "Don't overuse. Don't use for generic text that doesn't deserve emphasis.",
+      "props": {
+        "required": {
+          "body": "string — The quote or key message text (plain text, not HTML)"
+        },
+        "optional": {
+          "attribution": "string — Source or speaker name",
+          "role": "string — Speaker's title or role"
+        }
+      },
+      "example": {
+        "_component": "pullquote",
+        "body": "The shift to electric vehicles isn't just about changing fuel sources — it's about fundamentally rethinking how we approach vehicle safety and maintenance.",
+        "attribution": "National EV Safety Council",
+        "role": "2024 Safety Guidelines"
+      }
+    },
+
+    {
+      "type": "key-term",
+      "component": "KeyTerm",
+      "category": "content",
+      "status": "new",
+      "description": "Highlighted vocabulary term with its definition. Styled with a distinctive background and icon to stand out from body text.",
+      "when_to_use": "For introducing domain-specific terminology that learners need to know. Place immediately before or after the content that uses the term. Can group 2-5 terms together.",
+      "when_not_to_use": "Don't use for common words. Don't use for full paragraphs of explanation (use text instead).",
+      "props": {
+        "required": {
+          "_items": "array — 1-5 terms: [{ term: string, definition: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading (e.g. 'Key Terms')"
+        }
+      },
+      "example": {
+        "_component": "key-term",
+        "displayTitle": "Key Terms",
+        "_items": [
+          { "term": "Thermal Runaway", "definition": "An uncontrolled chain reaction in battery cells where rising temperature causes further heat generation, potentially leading to fire or explosion." },
+          { "term": "State of Charge (SoC)", "definition": "The current battery charge level expressed as a percentage of total capacity, similar to a fuel gauge." },
+          { "term": "Regenerative Braking", "definition": "A system that recovers kinetic energy during deceleration by using the electric motor as a generator to recharge the battery." }
+        ]
+      }
+    },
+
+    {
+      "type": "checklist",
+      "component": "Checklist",
+      "category": "interactive",
+      "status": "new",
+      "description": "Checkable items with completion tracking and a progress indicator. Items can be ticked off by the learner.",
+      "when_to_use": "For action lists, pre-task checklists, safety procedures, or any content where learners should confirm they've understood each item. Good for: PPE requirements, pre-work checklists, compliance items.",
+      "when_not_to_use": "Don't use for informational lists without actionable items (use text with <ul>). Don't use for sequential steps (use timeline).",
+      "props": {
+        "required": {
+          "_items": "array — 3-10 items: [{ text: string, detail?: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Checklist heading",
+          "body": "string (HTML) — Intro text",
+          "instruction": "string — Helper text (e.g. 'Check each item as you complete it')"
+        }
+      },
+      "example": {
+        "_component": "checklist",
+        "displayTitle": "Pre-Inspection Safety Checklist",
+        "instruction": "Confirm each item before beginning work on an EV.",
+        "_items": [
+          { "text": "Insulated gloves rated to 1000V are available and inspected", "detail": "Check for tears, holes, or signs of damage before each use." },
+          { "text": "Vehicle is powered off and key is removed", "detail": "Verify 'Ready' light on dashboard is off." },
+          { "text": "High-voltage service disconnect is confirmed open" },
+          { "text": "Area is clear of water and conductive materials" },
+          { "text": "Emergency response plan is reviewed and understood" }
+        ]
+      }
+    },
+
+    {
+      "type": "tabs",
+      "component": "TabPanel",
+      "category": "interactive",
+      "status": "new",
+      "description": "Horizontal tabbed interface where each tab reveals different content. Only one tab visible at a time.",
+      "when_to_use": "For 2-6 categories of content that are alternatives (not sequential). Users choose which to view. Great for: role-based content, topic categories, different perspectives on the same subject.",
+      "when_not_to_use": "Don't use for sequential content (use narrative). Don't use with more than 6 tabs (use accordion). Don't nest tabs inside tabs.",
+      "props": {
+        "required": {
+          "_items": "array — 2-6 tabs: [{ title: string, body: string (HTML), _graphic?: { large: string, alt: string } }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading above the tabs",
+          "body": "string (HTML) — Intro text"
+        }
+      },
+      "example": {
+        "_component": "tabs",
+        "displayTitle": "EV Components by System",
+        "_items": [
+          {
+            "title": "Battery Pack",
+            "body": "<p>The battery pack is the most expensive component, typically comprising 30-40% of the vehicle's total cost. It consists of modules containing thousands of individual lithium-ion cells.</p>"
+          },
+          {
+            "title": "Electric Motor",
+            "body": "<p>Modern EVs use permanent magnet or induction motors that convert electrical energy to mechanical motion. They deliver instant torque from zero RPM.</p>"
+          },
+          {
+            "title": "Power Electronics",
+            "body": "<p>The inverter converts DC battery power to AC for the motor. The onboard charger handles AC-to-DC conversion during charging.</p>"
+          }
+        ]
+      }
+    },
+
+    {
+      "type": "flashcard",
+      "component": "Flashcard",
+      "category": "interactive",
+      "status": "new",
+      "description": "Flip-card interaction showing a term or question on the front and the answer/definition on the back. Click to flip with 3D rotation animation.",
+      "when_to_use": "For vocabulary review, Q&A pairs, or any content where learners should try to recall before seeing the answer. Good for: term/definition drilling, review activities, memory reinforcement.",
+      "when_not_to_use": "Don't use for first-time content delivery (learners haven't learned the terms yet). Don't use for complex multi-paragraph content. Place after the teaching section.",
+      "props": {
+        "required": {
+          "_items": "array — 3-8 cards: [{ front: string, back: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Section heading",
+          "instruction": "string — Helper text (e.g. 'Click each card to reveal the answer')"
+        }
+      },
+      "example": {
+        "_component": "flashcard",
+        "displayTitle": "Review: Key Concepts",
+        "instruction": "Click each card to test your knowledge.",
+        "_items": [
+          { "front": "What voltage range do EV batteries typically operate at?", "back": "400-800V DC, with some performance vehicles exceeding 800V." },
+          { "front": "What is regenerative braking?", "back": "A system that uses the electric motor as a generator during deceleration to convert kinetic energy back into stored electrical energy." },
+          { "front": "What PPE is required for EV high-voltage work?", "back": "Class 0 insulated gloves (rated to 1000V), safety glasses, and insulated tools." }
+        ]
+      }
+    },
+
+    {
+      "type": "labeled-image",
+      "component": "LabeledImage",
+      "category": "visual",
+      "status": "new",
+      "description": "An image with numbered hotspot markers at specific positions. Clicking a marker reveals a tooltip or sidebar with information about that point.",
+      "when_to_use": "For diagrams, equipment photos, or illustrations where specific parts need identification. Great for: anatomy diagrams, equipment labels, spatial relationships.",
+      "when_not_to_use": "Don't use if the image is simple enough for a caption (use graphic). Don't fabricate hotspot positions — this component requires the AI to generate an appropriate image.",
+      "image_dimensions": "1200x800 (3:2)",
+      "props": {
+        "required": {
+          "_graphic": {
+            "large": "string — Image URL",
+            "alt": "string — Alt text"
+          },
+          "_markers": "array — 3-8 hotspots: [{ x: number (0-100 %), y: number (0-100 %), label: string, body: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Image title",
+          "instruction": "string — Helper text (e.g. 'Click each marker to learn more')"
+        }
+      },
+      "example": {
+        "_component": "labeled-image",
+        "displayTitle": "EV Battery Pack Components",
+        "instruction": "Click each numbered marker to explore the components.",
+        "_graphic": {
+          "large": "images/battery-cutaway.jpg",
+          "alt": "Cutaway view of an EV battery pack showing internal components"
+        },
+        "_markers": [
+          { "x": 25, "y": 40, "label": "Battery Cells", "body": "Individual lithium-ion cells arranged in series and parallel to achieve target voltage and capacity." },
+          { "x": 60, "y": 30, "label": "Cooling System", "body": "Liquid cooling channels that maintain optimal cell temperature between 20-40°C." },
+          { "x": 80, "y": 60, "label": "BMS Module", "body": "The Battery Management System that monitors and balances all cells." },
+          { "x": 15, "y": 75, "label": "HV Connector", "body": "High-voltage connector with safety interlock that disconnects during service." }
+        ]
+      }
+    },
+
+    {
+      "type": "process-flow",
+      "component": "ProcessFlow",
+      "category": "content",
+      "status": "new",
+      "description": "Connected workflow nodes showing a process from start to end. Each node has a title and description, connected by directional arrows.",
+      "when_to_use": "For workflows, decision trees, or any process where the flow and connections matter. Great for: troubleshooting flows, business processes, system architecture overviews.",
+      "when_not_to_use": "Don't use for simple linear steps (use timeline). Best for processes with 3-6 nodes.",
+      "props": {
+        "required": {
+          "_nodes": "array — 3-6 process nodes: [{ title: string, body: string, type?: 'start' | 'process' | 'decision' | 'end' }]"
+        },
+        "optional": {
+          "displayTitle": "string — Flow title",
+          "body": "string (HTML) — Intro text"
+        }
+      },
+      "example": {
+        "_component": "process-flow",
+        "displayTitle": "EV Charging Decision Flow",
+        "_nodes": [
+          { "title": "Check Battery Level", "body": "Read the current State of Charge on the dashboard.", "type": "start" },
+          { "title": "Below 20%?", "body": "If SoC is below 20%, proceed to charge immediately.", "type": "decision" },
+          { "title": "Select Charger Type", "body": "Choose between Level 2 (if time available) or DC Fast Charge (if urgent).", "type": "process" },
+          { "title": "Connect & Charge", "body": "Plug in, authenticate, and monitor charging progress via the app.", "type": "process" },
+          { "title": "Charged to 80%+", "body": "Disconnect once target SoC is reached. Avoid routinely charging to 100%.", "type": "end" }
+        ]
+      }
+    },
+
+    {
+      "type": "image-gallery",
+      "component": "ImageGallery",
+      "category": "visual",
+      "status": "new",
+      "description": "Grid or masonry layout of multiple images with lightbox zoom on click. Captions shown on hover.",
+      "when_to_use": "For showcasing multiple related images — equipment photos, examples, visual references. Use when images from the SCORM package deserve to be shown together. 3-8 images.",
+      "when_not_to_use": "Don't fabricate many images just to fill a gallery. Only use when the content genuinely benefits from showing multiple visuals.",
+      "image_dimensions": "600x400 (3:2) per image",
+      "props": {
+        "required": {
+          "_items": "array — 3-8 images: [{ _graphic: { large: string, alt: string }, caption?: string }]"
+        },
+        "optional": {
+          "displayTitle": "string — Gallery title",
+          "body": "string (HTML) — Intro text"
+        }
+      },
+      "example": {
+        "_component": "image-gallery",
+        "displayTitle": "EV Charger Types",
+        "_items": [
+          { "_graphic": { "large": "images/type1-connector.jpg", "alt": "Type 1 (J1772) connector" }, "caption": "Type 1 / J1772 — Standard in North America" },
+          { "_graphic": { "large": "images/type2-connector.jpg", "alt": "Type 2 (Mennekes) connector" }, "caption": "Type 2 / Mennekes — Standard in Europe" },
+          { "_graphic": { "large": "images/ccs-connector.jpg", "alt": "CCS Combo connector" }, "caption": "CCS Combo — DC fast charging" },
+          { "_graphic": { "large": "images/chademo-connector.jpg", "alt": "CHAdeMO connector" }, "caption": "CHAdeMO — Japanese standard DC fast charging" }
+        ]
+      }
+    },
+
+    {
+      "type": "full-bleed",
+      "component": "FullBleedImage",
+      "category": "visual",
+      "status": "new",
+      "description": "Edge-to-edge full-width image with optional text overlay. Creates visual impact and section breaks. Parallax scroll effect.",
+      "when_to_use": "For dramatic visual section dividers between major topics. Use to create breathing room and visual impact. 1-3 per course maximum.",
+      "when_not_to_use": "Don't overuse. Don't use for images that need captions or detailed study (use graphic or labeled-image).",
+      "image_dimensions": "1920x800 (12:5 ultra-wide)",
+      "props": {
+        "required": {
+          "_graphic": {
+            "large": "string — Full-width image URL",
+            "alt": "string — Alt text"
+          }
+        },
+        "optional": {
+          "displayTitle": "string — Overlay heading text",
+          "body": "string (HTML) — Overlay body text",
+          "overlayPosition": "string — 'center' | 'left' | 'right' (default: center)"
+        }
+      },
+      "example": {
+        "_component": "full-bleed",
+        "displayTitle": "The Road Ahead",
+        "body": "<p>As EV adoption accelerates, your expertise in safety and maintenance becomes increasingly vital.</p>",
+        "_graphic": {
+          "large": "images/ev-highway-panorama.jpg",
+          "alt": "Fleet of electric vehicles on a modern highway at sunset"
+        },
+        "overlayPosition": "center"
+      }
+    },
+
+    {
+      "type": "video-transcript",
+      "component": "VideoTranscript",
+      "category": "visual",
+      "status": "new",
+      "description": "Video player with an expandable transcript panel below. Combines media playback with accessible text content.",
+      "when_to_use": "Only when both a video file AND its transcript text are available in the content bucket. Enhances accessibility and allows learners to read along or search the content.",
+      "when_not_to_use": "Don't use if there's no video (use text). Don't use if there's no transcript (use media).",
+      "props": {
+        "required": {
+          "_media": {
+            "mp4": "string — Video file URL"
+          },
+          "transcript": "string (HTML) — Full transcript text"
+        },
+        "optional": {
+          "displayTitle": "string — Title above the video",
+          "body": "string (HTML) — Description above the video",
+          "_media.poster": "string — Poster image URL"
+        }
+      },
+      "example": {
+        "_component": "video-transcript",
+        "displayTitle": "Expert Interview: EV Battery Safety",
+        "_media": {
+          "mp4": "media/battery-safety-interview.mp4",
+          "poster": "images/interview-poster.jpg"
+        },
+        "transcript": "<p><strong>Interviewer:</strong> Can you explain the safety systems built into modern EV batteries?</p><p><strong>Dr. Chen:</strong> Absolutely. Modern battery packs have multiple layers of protection...</p>"
+      }
+    }
+  ],
+
+  "design_rules": {
+    "visual_variety": "Never place two consecutive components of the same type. Alternate between content-heavy and visual components.",
+    "section_rhythm": "Each section should follow a pattern: context (text/graphic-text) → detail (accordion/tabs/narrative) → reinforce (mcq/flashcard/checklist). Not every section needs all three.",
+    "image_alternation": "When using multiple graphic-text components, alternate _imageAlign between 'left' and 'right'.",
+    "assessment_spacing": "Space MCQ components at least 3-5 components apart. Place after teaching, not before.",
+    "hero_rule": "Every course starts with exactly one hero component.",
+    "max_components_per_section": "Keep sections to 3-6 components. If a section grows beyond 6, split it into two sections.",
+    "visual_breaks": "Use full-bleed, stat-callout, or pullquote between dense content sections to create breathing room."
+  },
+
+  "component_categories": {
+    "structural": ["hero"],
+    "content": ["text", "graphic-text", "bento", "data-table", "timeline", "comparison", "key-term", "process-flow"],
+    "visual": ["graphic", "media", "stat-callout", "pullquote", "labeled-image", "image-gallery", "full-bleed", "video-transcript"],
+    "interactive": ["accordion", "narrative", "textinput", "branching", "checklist", "tabs", "flashcard"],
+    "assessment": ["mcq"]
+  }
+}
+
+```
+
+---
+
+## Output Schema
+
+Your response must be a single JSON object matching this schema:
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "course-layout.schema.json",
+  "title": "Course Layout",
+  "description": "Output of the AI layout engine. Defines the complete course structure: sections, components, and image prompts. This JSON is consumed by build-course.js and the image generator script.",
+
+  "type": "object",
+  "required": ["course", "sections"],
+  "additionalProperties": false,
+
+  "properties": {
+    "course": {
+      "type": "object",
+      "required": ["title", "subtitle"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Display title for the course (may be refined from the original SCORM title)"
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "One-sentence course description shown in the hero"
+        },
+        "totalSections": {
+          "type": "integer",
+          "description": "Number of sections in the layout"
+        }
+      }
+    },
+
+    "sections": {
+      "type": "array",
+      "description": "Ordered sections of the course. Each section is a logical topic grouping rendered as a visual section with its own heading.",
+      "items": { "$ref": "#/$defs/section" },
+      "minItems": 2
+    },
+
+    "metadata": {
+      "type": "object",
+      "description": "Generation metadata",
+      "properties": {
+        "generatedAt": { "type": "string", "format": "date-time" },
+        "sourceScorm": { "type": "string" },
+        "brandSource": { "type": "string" },
+        "componentCount": { "type": "integer" },
+        "imageCount": { "type": "integer" }
+      }
+    }
+  },
+
+  "$defs": {
+    "section": {
+      "type": "object",
+      "required": ["sectionId", "title", "components"],
+      "additionalProperties": false,
+      "properties": {
+        "sectionId": {
+          "type": "string",
+          "description": "Unique section identifier (e.g. 'section-01')"
+        },
+        "title": {
+          "type": "string",
+          "description": "Section display title. This becomes the article heading with accent bar."
+        },
+        "subtitle": {
+          "type": "string",
+          "description": "Optional one-line section description"
+        },
+        "components": {
+          "type": "array",
+          "description": "Ordered components within this section. 1-6 components per section.",
+          "items": { "$ref": "#/$defs/component" },
+          "minItems": 1,
+          "maxItems": 8
+        }
+      }
+    },
+
+    "component": {
+      "type": "object",
+      "required": ["componentId", "type"],
+      "description": "A single rendered component. The 'type' field maps to the ComponentRegistry. All other fields are passed as the 'data' prop to the React component.",
+      "properties": {
+        "componentId": {
+          "type": "string",
+          "description": "Unique component identifier (e.g. 'comp-01')"
+        },
+        "type": {
+          "type": "string",
+          "description": "Component type string from the component library. Must match a registered type.",
+          "enum": [
+            "hero", "text", "graphic", "graphic-text", "accordion", "mcq",
+            "narrative", "bento", "data-table", "media", "textinput", "branching",
+            "timeline", "comparison", "stat-callout", "pullquote", "key-term",
+            "checklist", "tabs", "flashcard", "labeled-image", "process-flow",
+            "image-gallery", "full-bleed", "video-transcript"
+          ]
+        },
+        "displayTitle": { "type": "string" },
+        "body": { "type": "string" },
+        "instruction": { "type": "string" },
+
+        "_graphic": { "$ref": "#/$defs/graphic" },
+        "_imageAlign": { "type": "string", "enum": ["left", "right"] },
+        "_items": {
+          "type": "array",
+          "description": "Item arrays for components that use them (accordion, narrative, bento, mcq, etc.)",
+          "items": { "$ref": "#/$defs/componentItem" }
+        },
+        "_selectable": { "type": "integer" },
+        "_feedback": { "$ref": "#/$defs/feedback" },
+        "_media": { "$ref": "#/$defs/media" },
+        "_markers": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/marker" }
+        },
+        "_nodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/processNode" }
+        },
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/comparisonColumn" }
+        },
+        "rows": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/comparisonRow" }
+        },
+        "transcript": { "type": "string" },
+        "attribution": { "type": "string" },
+        "role": { "type": "string" },
+        "overlayPosition": { "type": "string", "enum": ["center", "left", "right"] },
+
+        "imagePrompt": {
+          "type": "string",
+          "description": "AI image generation prompt for this component. Used by generate-images.js to create visuals via Pollinations. Include subject, style, mood, and brand color hints."
+        },
+        "imagePrompts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["key", "prompt", "dimensions"],
+            "properties": {
+              "key": { "type": "string", "description": "Identifier for this image (e.g. 'item-0', 'item-1')" },
+              "prompt": { "type": "string", "description": "Image generation prompt" },
+              "dimensions": { "type": "string", "description": "Target dimensions (e.g. '800x600')" }
+            }
+          },
+          "description": "Multiple image prompts for components with per-item images (narrative, bento, gallery)"
+        }
+      }
+    },
+
+    "graphic": {
+      "type": "object",
+      "properties": {
+        "large": { "type": "string", "description": "Image URL or path (populated by build script)" },
+        "alt": { "type": "string", "description": "Descriptive alt text" },
+        "src": { "type": "string", "description": "Alias for large" }
+      }
+    },
+
+    "componentItem": {
+      "type": "object",
+      "description": "Generic item for list-based components. Fields used depend on the parent component type.",
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "text": { "type": "string" },
+        "_shouldBeSelected": { "type": "boolean" },
+        "_graphic": { "$ref": "#/$defs/graphic" },
+        "prefix": { "type": "string" },
+        "placeholder": { "type": "string" },
+        "front": { "type": "string" },
+        "back": { "type": "string" },
+        "term": { "type": "string" },
+        "definition": { "type": "string" },
+        "detail": { "type": "string" },
+        "caption": { "type": "string" },
+        "value": { "type": "string" },
+        "label": { "type": "string" },
+        "suffix": { "type": "string" }
+      }
+    },
+
+    "feedback": {
+      "type": "object",
+      "properties": {
+        "correct": { "type": "string" },
+        "_incorrect": {
+          "type": "object",
+          "properties": {
+            "final": { "type": "string" }
+          }
+        }
+      }
+    },
+
+    "media": {
+      "type": "object",
+      "properties": {
+        "mp4": { "type": "string" },
+        "poster": { "type": "string" },
+        "source": { "type": "string" },
+        "src": { "type": "string" }
+      }
+    },
+
+    "marker": {
+      "type": "object",
+      "required": ["x", "y", "label", "body"],
+      "properties": {
+        "x": { "type": "number", "minimum": 0, "maximum": 100, "description": "Horizontal position as percentage" },
+        "y": { "type": "number", "minimum": 0, "maximum": 100, "description": "Vertical position as percentage" },
+        "label": { "type": "string" },
+        "body": { "type": "string" }
+      }
+    },
+
+    "processNode": {
+      "type": "object",
+      "required": ["title", "body"],
+      "properties": {
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "type": { "type": "string", "enum": ["start", "process", "decision", "end"] }
+      }
+    },
+
+    "comparisonColumn": {
+      "type": "object",
+      "required": ["title"],
+      "properties": {
+        "title": { "type": "string" },
+        "subtitle": { "type": "string" }
+      }
+    },
+
+    "comparisonRow": {
+      "type": "object",
+      "required": ["label", "values"],
+      "properties": {
+        "label": { "type": "string" },
+        "values": {
+          "type": "array",
+          "items": {
+            "oneOf": [
+              { "type": "boolean" },
+              { "type": "string" }
+            ]
+          }
+        }
+      }
+    }
+  }
+}
+
+```
+
+---
+
+## Instructions
+
+1. Read all scenes and slides to understand the full educational arc
+2. Design 5-12 sections that tell a coherent learning story
+3. Choose the best component for each piece of content
+4. Rewrite all text to be clean, modern, and scannable
+5. Write imagePrompt for every component that shows an image
+6. Include brand colors in image prompts
+7. Follow ALL design rules from the system prompt
+8. Output ONLY valid JSON — no markdown fences, no explanation text
+
+**Respond with the complete course-layout JSON object only.**

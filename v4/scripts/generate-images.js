@@ -1,15 +1,19 @@
 #!/usr/bin/env node
 /**
- * V4 Image Generator
+ * V4 Image Generator — Stitch-Informed
  *
- * Reads course-layout.json, generates images via Hugging Face Inference API,
- * and updates the layout JSON with actual image paths.
+ * Reads course-layout.json AND stitch-course-raw.html to generate images
+ * that fit the actual designed page. Runs AFTER Stitch, not in parallel.
+ *
+ * The image prompts from course-layout.json describe WHAT to show (subject).
+ * The Stitch design analysis determines HOW it should look (treatment).
  *
  * Usage:
- *   HF_TOKEN=hf_... node v4/scripts/generate-images.js
- *   node v4/scripts/generate-images.js                    # reads from env
+ *   node v4/scripts/generate-images.js
  *
- * Input:  v4/output/course-layout.json
+ * Input:  v4/output/course-layout.json  (content subjects)
+ *         v4/output/stitch-course-raw.html  (design treatment source)
+ *         v4/output/brand-profile.json  (fallback if no Stitch output)
  * Output: v4/output/images/*.jpg + updated course-layout.json
  */
 
@@ -25,16 +29,14 @@ const HF_TOKEN = process.env.HF_TOKEN || '';
 const OUTPUT_DIR = path.resolve('v4/output/images');
 const LAYOUT_PATH = path.resolve('v4/output/course-layout.json');
 const BRAND_PATH = path.resolve('v4/output/brand-profile.json');
+const STITCH_PATH = path.resolve('v4/output/stitch-course-raw.html');
 
-// Rate limiting: 3s between requests (HF free tier)
 const DELAY_MS = 3000;
 const RETRY_DELAY_MS = 8000;
-
-// HF Inference has max dimensions — we generate at supported sizes
-// then the renderer scales them via CSS. FLUX.1-schnell supports up to 1024.
 const MAX_DIM = 1024;
 
 // ─── Dimensions by component type ────────────────────────────────────
+// Fallback dimensions when Stitch HTML doesn't provide sizing info
 const DIMENSIONS = {
   hero:           { width: 1024, height: 576  },  // 16:9
   graphic:        { width: 1024, height: 576  },  // 16:9
@@ -51,34 +53,80 @@ function getDimensions(componentType) {
   return DIMENSIONS[componentType] || DIMENSIONS.default;
 }
 
-function parseDimensionString(dimStr) {
-  const match = (dimStr || '').match(/(\d+)x(\d+)/);
-  if (match) {
-    // Clamp to max supported dimensions
-    return {
-      width: Math.min(+match[1], MAX_DIM),
-      height: Math.min(+match[2], MAX_DIM),
-    };
+// ─── Stitch Design Analysis ──────────────────────────────────────────
+// Extracts design treatment from Stitch's actual HTML output
+function analyseStitchDesign(stitchHtml) {
+  const design = {
+    colourTemperature: 'neutral',  // warm, cool, neutral
+    lightingMood: 'moody',         // moody, bright, balanced
+    styleRegister: 'professional', // professional, creative, technical, editorial
+    dominantTones: [],             // hex colours that dominate the design
+    isDark: true,
+  };
+
+  // Extract Tailwind config colours from Stitch output
+  const configMatch = stitchHtml.match(/tailwind\.config\s*=\s*(\{[\s\S]*?\})\s*<\/script>/);
+  if (!configMatch) return design;
+
+  // Extract background colour
+  const bgMatch = stitchHtml.match(/"background"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
+  if (bgMatch) {
+    const lum = perceivedLuminance(bgMatch[1]);
+    design.isDark = lum < 0.4;
+    design.lightingMood = lum < 0.15 ? 'moody' : lum < 0.4 ? 'balanced' : 'bright';
   }
-  return DIMENSIONS.default;
+
+  // Extract primary and secondary colours to determine temperature
+  const primaryMatch = stitchHtml.match(/"primary"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
+  const secondaryMatch = stitchHtml.match(/"secondary"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
+  const surfaceMatch = stitchHtml.match(/"surface"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
+
+  const tones = [];
+  if (primaryMatch) tones.push(primaryMatch[1]);
+  if (secondaryMatch) tones.push(secondaryMatch[1]);
+  if (surfaceMatch) tones.push(surfaceMatch[1]);
+  design.dominantTones = tones;
+
+  // Determine colour temperature from primary/secondary
+  if (primaryMatch) {
+    const temp = getColourTemperature(primaryMatch[1]);
+    if (secondaryMatch) {
+      const temp2 = getColourTemperature(secondaryMatch[1]);
+      // Average the two
+      design.colourTemperature = (temp === temp2) ? temp :
+        (temp === 'neutral' || temp2 === 'neutral') ? (temp === 'neutral' ? temp2 : temp) : 'neutral';
+    } else {
+      design.colourTemperature = temp;
+    }
+  }
+
+  // Determine style register from CSS patterns
+  const hasGlass = /glass|backdrop-filter|blur/i.test(stitchHtml);
+  const hasGradients = (stitchHtml.match(/gradient/gi) || []).length > 5;
+  const hasSharpCorners = /"borderRadius".*?"DEFAULT"\s*:\s*"0\.(0|1)/i.test(stitchHtml);
+
+  if (hasGlass && hasGradients) {
+    design.styleRegister = 'creative';
+  } else if (hasSharpCorners) {
+    design.styleRegister = 'editorial';
+  } else {
+    design.styleRegister = 'professional';
+  }
+
+  return design;
 }
 
-// ─── Brand color enhancement ─────────────────────────────────────────
-function buildBrandSuffix(brand) {
-  if (!brand?.colors) return '';
-  const c = brand.colors;
-  const parts = [];
-  if (c.primary) parts.push(`accent color ${c.primary}`);
-  if (c.accent && c.accent !== c.primary) parts.push(`highlight color ${c.accent}`);
+function getColourTemperature(hex) {
+  if (!hex || !hex.startsWith('#') || hex.length < 7) return 'neutral';
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
 
-  const bgLum = c.background ? perceivedLuminance(c.background) : 0.5;
-  if (bgLum < 0.4) {
-    parts.push('dark moody atmosphere');
-  } else {
-    parts.push('bright clean atmosphere');
-  }
-
-  return parts.length > 0 ? ', ' + parts.join(', ') : '';
+  // Warm = red/orange/yellow dominant, Cool = blue/purple dominant
+  const warmth = (r * 1.2 + g * 0.5) - (b * 1.5 + g * 0.3);
+  if (warmth > 60) return 'warm';
+  if (warmth < -60) return 'cool';
+  return 'neutral';
 }
 
 function perceivedLuminance(hex) {
@@ -89,19 +137,45 @@ function perceivedLuminance(hex) {
   return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
+// ─── Design-Informed Prompt Enhancement ──────────────────────────────
+// Combines the content subject (from layout) with visual treatment (from Stitch)
+function buildDesignTreatment(design) {
+  const parts = [];
+
+  // Lighting mood
+  if (design.lightingMood === 'moody') {
+    parts.push('dramatic low-key lighting, deep shadows, selective highlights');
+  } else if (design.lightingMood === 'bright') {
+    parts.push('clean bright natural lighting, soft even illumination');
+  } else {
+    parts.push('balanced professional lighting');
+  }
+
+  // Colour temperature
+  if (design.colourTemperature === 'warm') {
+    parts.push('warm colour tones in highlights and ambient light');
+  } else if (design.colourTemperature === 'cool') {
+    parts.push('cool blue-toned shadows and ambient light');
+  }
+
+  // Style register
+  if (design.styleRegister === 'creative') {
+    parts.push('artistic composition, dynamic angles');
+  } else if (design.styleRegister === 'editorial') {
+    parts.push('editorial photography style, precise composition');
+  } else if (design.styleRegister === 'technical') {
+    parts.push('technical precision, clean detailed rendering');
+  } else {
+    parts.push('professional photography, clean composition');
+  }
+
+  return parts.join(', ');
+}
+
 // ─── Image generation via Hugging Face ───────────────────────────────
 async function generateImage(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
   const outputPath = path.join(OUTPUT_DIR, outputFilename);
-
-  // Skip if already exists and is a real image
-  if (fs.existsSync(outputPath)) {
-    const stats = fs.statSync(outputPath);
-    if (stats.size > 5000) {
-      console.log(`  Skip (exists): ${outputFilename}`);
-      return outputPath;
-    }
-  }
 
   const enhancedPrompt = `${prompt}, high resolution, sharp details, no text, no watermarks`;
 
@@ -119,10 +193,9 @@ async function generateImage(prompt, dimensions, outputFilename) {
           inputs: enhancedPrompt,
           parameters: { width, height },
         }),
-        signal: AbortSignal.timeout(120000), // 2 min timeout — generation can be slow
+        signal: AbortSignal.timeout(120000),
       });
 
-      // HF returns 503 when model is loading — wait and retry
       if (resp.status === 503) {
         const body = await resp.json().catch(() => ({}));
         const waitTime = (body.estimated_time || 20) * 1000;
@@ -131,7 +204,6 @@ async function generateImage(prompt, dimensions, outputFilename) {
         continue;
       }
 
-      // HF returns 429 for rate limiting
       if (resp.status === 429) {
         console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
         await sleep(RETRY_DELAY_MS);
@@ -145,7 +217,6 @@ async function generateImage(prompt, dimensions, outputFilename) {
 
       const buffer = Buffer.from(await resp.arrayBuffer());
 
-      // Verify it's actually an image (not JSON error)
       if (buffer.length < 1000) {
         const text = buffer.toString('utf-8');
         if (text.includes('"error"')) throw new Error(`API error: ${text.substring(0, 200)}`);
@@ -171,30 +242,60 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// ─── Process all components ──────────────────────────────────────────
+// ─── Main ────────────────────────────────────────────────────────────
 async function main() {
-  // Check for token
   if (!HF_TOKEN) {
     console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: HF_TOKEN=hf_... node v4/scripts/generate-images.js');
+    console.error('Usage: node v4/scripts/generate-images.js');
     process.exit(1);
   }
 
-  // Load layout
   if (!fs.existsSync(LAYOUT_PATH)) {
     console.error('Error: course-layout.json not found at', LAYOUT_PATH);
     process.exit(1);
   }
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
 
-  // Load brand (optional, for color hints)
-  let brand = null;
-  if (fs.existsSync(BRAND_PATH)) {
-    brand = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
+  // Analyse Stitch design for visual treatment
+  let design;
+  if (fs.existsSync(STITCH_PATH)) {
+    const stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
+    design = analyseStitchDesign(stitchHtml);
+    console.log('Stitch design analysis:');
+    console.log(`  Colour temperature: ${design.colourTemperature}`);
+    console.log(`  Lighting mood: ${design.lightingMood}`);
+    console.log(`  Style register: ${design.styleRegister}`);
+    console.log(`  Theme: ${design.isDark ? 'dark' : 'light'}`);
+  } else {
+    // Fallback to brand profile if no Stitch output
+    console.log('No Stitch output found — using brand profile for image treatment.');
+    let brand = null;
+    if (fs.existsSync(BRAND_PATH)) {
+      brand = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
+    }
+    const isDark = brand?.style?.theme === 'dark';
+    design = {
+      colourTemperature: 'neutral',
+      lightingMood: isDark ? 'moody' : 'bright',
+      styleRegister: 'professional',
+      dominantTones: [brand?.colors?.primary, brand?.colors?.secondary].filter(Boolean),
+      isDark,
+    };
   }
-  const brandSuffix = buildBrandSuffix(brand);
 
-  // Ensure output directory
+  const treatment = buildDesignTreatment(design);
+  console.log(`  Treatment: ${treatment}\n`);
+
+  // Clear existing images — always regenerate
+  if (fs.existsSync(OUTPUT_DIR)) {
+    const existing = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.jpg') || f.endsWith('.png'));
+    if (existing.length > 0) {
+      console.log(`Clearing ${existing.length} existing images...\n`);
+      for (const file of existing) {
+        fs.unlinkSync(path.join(OUTPUT_DIR, file));
+      }
+    }
+  }
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   const queue = [];
@@ -204,8 +305,10 @@ async function main() {
     for (const comp of section.components) {
       if (comp.imagePrompt) {
         const dims = getDimensions(comp.type);
+        // Combine content subject + design treatment
+        const fullPrompt = `${comp.imagePrompt}, ${treatment}`;
         queue.push({
-          prompt: comp.imagePrompt + brandSuffix,
+          prompt: fullPrompt,
           dimensions: dims,
           filename: `${comp.componentId}.jpg`,
           component: comp,
@@ -217,8 +320,9 @@ async function main() {
       if (comp.imagePrompts && Array.isArray(comp.imagePrompts)) {
         for (const ip of comp.imagePrompts) {
           const dims = ip.dimensions ? parseDimensionString(ip.dimensions) : getDimensions(comp.type);
+          const fullPrompt = `${ip.prompt}, ${treatment}`;
           queue.push({
-            prompt: ip.prompt + brandSuffix,
+            prompt: fullPrompt,
             dimensions: dims,
             filename: `${comp.componentId}-${ip.key}.jpg`,
             component: comp,
@@ -231,7 +335,7 @@ async function main() {
   }
 
   const totalImages = queue.length;
-  console.log(`\nGenerating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
+  console.log(`Generating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
 
   let successImages = 0;
 
@@ -271,10 +375,17 @@ async function main() {
   console.log(`\nComplete: ${successImages}/${totalImages} images generated`);
   console.log(`Layout updated: ${LAYOUT_PATH}`);
   console.log(`Images saved to: ${OUTPUT_DIR}`);
+}
 
-  if (successImages < totalImages) {
-    console.log(`\nTo retry failed images, run the script again — it skips existing ones.`);
+function parseDimensionString(dimStr) {
+  const match = (dimStr || '').match(/(\d+)x(\d+)/);
+  if (match) {
+    return {
+      width: Math.min(+match[1], MAX_DIM),
+      height: Math.min(+match[2], MAX_DIM),
+    };
   }
+  return DIMENSIONS.default;
 }
 
 main().catch(err => {

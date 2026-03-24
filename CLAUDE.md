@@ -1,20 +1,22 @@
-# CLAUDE.md — Modernisation Engine V4
+# CLAUDE.md — Modernisation Engine
 
 ## What This Is
-An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern, branded, premium deep-scroll web experiences. The SCORM file is a **knowledge base** — content is extracted, an AI layout engine structures it, **Google Stitch designs the complete visual page**, and we add interactivity via a hydration script.
+An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern, branded, premium deep-scroll web experiences. The SCORM file is a **knowledge base** — content is extracted, an AI layout engine structures it, **Google Stitch designs a complete branded component kit**, and we assemble the final course with 100% content fidelity + interactivity via a hydration script.
 
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `v3-experiment` (v4 code lives here despite the branch name)
+**Branch:** `Current-working-2`
+
+**Future:** An AI-First authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
 ---
 
-## Architecture (V4 — Stitch-First Rendering)
+## Architecture (V5 — Stitch Component Kit)
 
 ```
 SCORM File ──→ extract.js        ──→ Content Bucket (JSON)
-Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON)
+Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand Design (DESIGN.md)
                                           │
                     ┌─────────────────────┘
                     ▼
@@ -24,31 +26,45 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON)
          ├─ AI structures content, picks best components
          └─→ course-layout.json (all content + component types)
                     │
-              ┌─────┴──────────────────────┐
-              ▼                            ▼
-    generate-course-html.js         generate-images.js
-    (Google Stitch API)             (HF Inference API)
-    ├─ Sends full course content    ├─ Reads imagePrompt fields
-    ├─ Stitch designs entire page   ├─ Generates per-component
-    └─→ stitch-course-raw.html      └─→ images/*.jpg
-              │                            │
-              └──────────┬─────────────────┘
-                         ▼
-                  build-course.js
-                  ├─ Extracts Stitch design DNA (Tailwind config, CSS, fonts)
-                  ├─ Uses Stitch class patterns as templates
-                  ├─ Fills templates with SCORM content from course-layout.json
-                  ├─ Embeds images as base64
-                  ├─ Inlines hydrate.js for interactivity
-                  └─→ course.html (single self-contained file)
+                    ▼
+         generate-course-html.js (Google Stitch — GEMINI_3_1_PRO)
+         ├─ Sends brand-design.md (DESIGN.md format brief)
+         ├─ Sends representative-course.md (all 25 component types)
+         ├─ Stitch designs complete branded page experience
+         ├─ Extracts: page shell, component patterns, design tokens
+         └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
+                    │
+                    ▼
+         generate-images.js (HF Inference API)
+         ├─ Analyses Stitch design tokens for visual treatment
+         ├─ Combines content subjects with design treatment
+         ├─ Always regenerates all images
+         └─→ images/*.jpg (design-matched images)
+                    │
+                    ▼
+         build-course.js (content assembly)
+         ├─ Reads component patterns from Stitch output
+         ├─ For each component in course-layout.json:
+         │   finds matching pattern, fills with SCORM content
+         ├─ 100% content fidelity — every word from the SCORM
+         ├─ Embeds images as base64
+         ├─ Inlines hydrate.js for interactivity
+         └─→ course.html (single self-contained file)
 ```
 
-### Core Principle
-**Stitch is the designer. We control the content and interactivity.**
+### Core Principles
 
-Stitch receives the course content and brand colors and designs a complete, beautiful page. We extract Stitch's design system (Tailwind config, CSS classes, typography, spacing) and use those exact patterns as templates — filling them with the actual SCORM content and generated images. A lightweight vanilla JS hydration script adds interactivity (quiz logic, accordion toggles, flashcard flips, etc.).
+**1. Stitch designs the component kit. We control the content.**
+Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types with example content). It designs the complete visual system — every component type, page shell, transitions, navigation. We extract those patterns and fill them with real SCORM content. Different brand URL → different Stitch design → different visual output. Same content.
 
-No React. No component library rendering. Stitch's design is used directly.
+**2. Content fidelity is non-negotiable.**
+All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs the look, we guarantee the content. Enterprise clients require 100% accuracy.
+
+**3. The design system is a reusable asset.**
+Stitch's output (component patterns, design tokens) is extracted and stored. The future authoring layer can re-render the course with different content or swapped component types without calling Stitch again. Users can change "accordion" to "cards" and it renders instantly because Stitch already designed both.
+
+**4. Speak Stitch's language.**
+We generate a DESIGN.md brand brief using Stitch's native vocabulary — semantic colour names, Stitch-supported fonts, Material Design colour system, evocative atmospheric descriptions. Not raw CSS hex dumps. Stitch is trained to understand DESIGN.md format.
 
 ### The `design-course.js` Workflow
 
@@ -79,9 +95,9 @@ Loads a previously saved response.
 ```
 CLAUDE.md                              ← This file
 index.html                             ← GitHub Pages entry (generated by build-course.js)
-package.json / package-lock.json       ← Root dependencies (@google/stitch-sdk)
+package.json / package-lock.json       ← Root dependencies (@google/stitch-sdk, dotenv)
 
-v4/                                    ← ALL ACTIVE V4 CODE
+v4/                                    ← ALL ACTIVE CODE
   schemas/
     content-bucket.schema.json         ← Extraction output format
     course-layout.schema.json          ← Layout engine output format
@@ -89,27 +105,29 @@ v4/                                    ← ALL ACTIVE V4 CODE
   prompts/
     layout-engine.md                   ← System prompt for AI layout engine
     image-generator.md                 ← Prompt templates for image generation
+    representative-course.md           ← [NEW] All 25 component types for Stitch to design
   scripts/
     extract.js                         ← SCORM folder → content-bucket.json
-    scrape-brand.js                    ← Brand URL → brand-profile.json
+    scrape-brand.js                    ← Brand URL → brand-profile.json + brand-design.md
     design-course.js                   ← AI layout engine (manual + API + load modes)
-    generate-course-html.js            ← Sends full course to Stitch → stitch-course-raw.html
-    generate-images.js                 ← Layout JSON → HF Inference API → images/
-    build-course.js                    ← Stitch design + content + images → course.html
+    generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
+    generate-images.js                 ← Design-informed image generation (runs after Stitch)
+    build-course.js                    ← Component patterns + real content → course.html
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
     plan-visual-media.js               ← Agent decides per-component: photo vs illustration vs none
-    scrape-brand.js                    ← Brand URL → brand-profile.json
   output/
     content-bucket.json                ← Extracted from test SCORM
-    brand-profile.json                 ← Scraped from brand URL
-    course-layout.json                 ← AI-structured course (38 components, 9 quizzes)
+    brand-profile.json                 ← Scraped from brand URL (raw data)
+    brand-design.md                    ← [NEW] DESIGN.md format brief for Stitch
+    course-layout.json                 ← AI-structured course
     stitch-course-raw.html             ← Stitch's complete designed page
     stitch-course-meta.json            ← Stitch API response metadata
-    stitch-course-prompt.txt           ← Prompt sent to Stitch
-    images/                            ← HF-generated images (10 JPGs)
-    course.html                        ← Final single-file output (467KB)
+    design-tokens.json                 ← [NEW] Extracted design system tokens
+    component-patterns/                ← [NEW] Extracted HTML pattern per component type
+    images/                            ← HF-generated images
+    course.html                        ← Final single-file output
 
-EV/                                    ← Test SCORM (108 slides, gitignored in Codespace)
+EV/                                    ← Test SCORM (64 slides, gitignored in Codespace)
 ```
 
 ---
@@ -128,14 +146,21 @@ Extracts all educational content from the SCORM file:
 - Form fields: labels, types
 - Media inventory: image/video filenames
 
-### Phase 2 — Brand Scraping (`v4/scripts/scrape-brand.js`)
+### Phase 2 — Brand Analysis (`v4/scripts/scrape-brand.js`)
 **Input:** Brand URL
-**Output:** `v4/output/brand-profile.json`
+**Output:** `v4/output/brand-profile.json` + `v4/output/brand-design.md`
 
-Extracts from the URL:
-- Colors: primary, secondary, accent, background, text
-- Typography: heading font, body font, Google Fonts URL
-- Style: border-radius, button style, card style, mood
+Scrapes the URL for raw design data, then translates it into Stitch's native language:
+- Extracts: colours, fonts, border-radius, spacing, visual patterns
+- Maps fonts to Stitch's 28 supported fonts (closest match)
+- Maps visual patterns to Stitch vocabulary (roundness, spacingScale, colorVariant)
+- Detects theme (light/dark) using multiple signals
+- Generates `brand-design.md` in DESIGN.md format:
+  - Visual Theme & Atmosphere (evocative adjectives)
+  - Colour Palette & Roles (semantic names + hex)
+  - Typography Rules (Stitch-supported font names)
+  - Component Stylings (button shapes, card styles, border treatments)
+  - Layout Principles (whitespace strategy, grid patterns)
 
 ### Phase 3 — AI Layout Engine (`v4/scripts/design-course.js`)
 **Input:** `content-bucket.json` + `brand-profile.json` + `layout-engine.md`
@@ -149,36 +174,43 @@ The AI redesigns the course from scratch:
 - Preserves ALL quiz questions from the SCORM with correct answers
 - Ensures visual variety (no consecutive identical component types)
 
-### Phase 4a — Stitch Design (`v4/scripts/generate-course-html.js`)
-**Input:** `course-layout.json` + `brand-profile.json`
-**Output:** `v4/output/stitch-course-raw.html` + `stitch-course-meta.json`
-**Requires:** `STITCH_API_KEY` environment variable
+### Phase 4a — Stitch Component Kit (`v4/scripts/generate-course-html.js`)
+**Input:** `brand-design.md` + `representative-course.md`
+**Output:** `stitch-course-raw.html` + `component-patterns/` + `design-tokens.json`
+**Model:** GEMINI_3_1_PRO
 
-Sends the FULL course content to Google Stitch:
-- Every section heading, paragraph, quiz question, accordion item
-- Brand colors and font
-- Course domain/mood for design direction
-- Instructions for data attributes on interactive elements
+Sends Stitch two things:
+1. The brand brief in DESIGN.md format (how it should look)
+2. A representative course exercising ALL 25 component types (what to design)
 
-Stitch returns a complete, premium-designed HTML page. This page serves as the **design reference** — we extract its Tailwind config, CSS classes, and visual patterns.
+Stitch designs a complete, branded page experience — not just colours, but the full visual system including navigation, section flow, every component type, and footer.
+
+We extract:
+- **Page shell** — navigation, section wrappers, footer
+- **Component patterns** — one HTML fragment per component type (all 25)
+- **Design tokens** — Tailwind config, colour system, fonts, spacing
+
+This is a **reusable design asset**. The authoring layer can re-render courses with different content or swapped components without re-calling Stitch.
 
 ### Phase 4b — Image Generation (`v4/scripts/generate-images.js`)
-**Input:** `course-layout.json` (reads imagePrompt fields)
+**Input:** `course-layout.json` (content subjects) + `design-tokens.json` (design treatment)
 **Output:** Images in `v4/output/images/`
-**Requires:** `HF_TOKEN` environment variable
+**Runs AFTER Phase 4a** — images are informed by Stitch's design.
+
+Analyses design tokens to determine visual treatment (colour temperature, lighting mood, style register). Combines content subjects from image prompts with the design treatment. Always regenerates all images.
 
 Uses HuggingFace Inference API (FLUX.1-schnell model).
 
 ### Phase 5 — Build (`v4/scripts/build-course.js`)
-**Input:** `stitch-course-raw.html` + `course-layout.json` + `images/`
+**Input:** `component-patterns/` + `design-tokens.json` + `course-layout.json` + `images/`
 **Output:** `v4/output/course.html` + root `index.html`
 
-The build script:
-1. Extracts the design system from Stitch's HTML (Tailwind config, CSS, fonts, glass effects)
-2. For each component in course-layout.json, generates HTML using Stitch's exact Tailwind class patterns
-3. Embeds images as base64 data URLs
-4. Inlines the hydration script for interactivity
-5. Outputs single self-contained HTML file
+For each component in course-layout.json:
+1. Finds the matching component pattern from Stitch's kit
+2. Fills it with real SCORM content (100% fidelity)
+3. Handles special cases: quiz correct answers, image embedding, data attributes
+
+Assembles into full page using the extracted page shell. Embeds images as base64. Inlines hydrate.js for interactivity. All 25 component types work — no fallbacks.
 
 ### Hydration (`v4/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
@@ -225,27 +257,58 @@ Vanilla JS script injected into the final HTML. Handles:
 
 ---
 
+## Stitch Integration Notes
+
+### SDK Version
+`@google/stitch-sdk` v0.0.3 — MCP-based API.
+
+### Available Models
+- `GEMINI_3_FLASH` — faster, lower quality
+- `GEMINI_3_1_PRO` — Deep Think mode, significantly better for design reasoning (USE THIS)
+- `GEMINI_3_PRO` — deprecated
+
+### DESIGN.md Format (what Stitch understands)
+Stitch is trained to interpret DESIGN.md files. Structure:
+1. **Visual Theme & Atmosphere** — evocative adjectives (e.g., "Airy, glass-forward, ethereal")
+2. **Colour Palette & Roles** — semantic names + hex (e.g., "Soft Amethyst (#522c66) — primary actions")
+3. **Typography Rules** — must use Stitch's 28 supported fonts
+4. **Component Stylings** — natural language (e.g., "Pill-shaped buttons, frosted glass cards")
+5. **Layout Principles** — whitespace strategy, grid patterns
+
+### Stitch's 28 Supported Fonts
+BE_VIETNAM_PRO, EPILOGUE, INTER, LEXEND, MANROPE, NEWSREADER, NOTO_SERIF, PLUS_JAKARTA_SANS, PUBLIC_SANS, SPACE_GROTESK, SPLINE_SANS, WORK_SANS, DOMINE, LIBRE_CASLON_TEXT, EB_GARAMOND, LITERATA, SOURCE_SERIF_FOUR, MONTSERRAT, METROPOLIS, SOURCE_SANS_THREE, NUNITO_SANS, ARIMO, HANKEN_GROTESK, RUBIK, GEIST, DM_SANS, IBM_PLEX_SANS, SORA
+
+### DesignTheme Vocabulary
+When describing brands, use Stitch's native terms:
+- `colorMode`: LIGHT or DARK
+- `colorVariant`: MONOCHROME, NEUTRAL, TONAL_SPOT, VIBRANT, EXPRESSIVE, FIDELITY, CONTENT, RAINBOW, FRUIT_SALAD
+- `roundness`: ROUND_FOUR, ROUND_EIGHT, ROUND_TWELVE, ROUND_FULL
+- `spacingScale`: 0 (minimal), 1 (compact), 2 (normal), 3 (spacious)
+
+### Future: IMAGE_TO_UI
+The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from CSS scraping. Monitor SDK updates.
+
+---
+
 ## Full Pipeline Command Sequence
 
 ```bash
 # Phase 1 — Extract content from SCORM
 node v4/scripts/extract.js EV
 
-# Phase 2 — Scrape brand from URL
+# Phase 2 — Analyse brand from URL
 node v4/scripts/scrape-brand.js "https://www.example.com"
 
 # Phase 3 — Design course layout (manual mode for Claude Code)
 node v4/scripts/design-course.js --manual
-# ... or with API key:
-# ANTHROPIC_API_KEY=sk-... node v4/scripts/design-course.js
 
-# Phase 4a — Generate Stitch design (requires API key in terminal)
-STITCH_API_KEY=<key> node v4/scripts/generate-course-html.js
+# Phase 4a — Stitch designs component kit (GEMINI_3_1_PRO)
+node v4/scripts/generate-course-html.js
 
-# Phase 4b — Generate images (can run in parallel with 4a)
-HF_TOKEN=<token> node v4/scripts/generate-images.js
+# Phase 4b — Generate images (runs AFTER 4a — design-informed)
+node v4/scripts/generate-images.js
 
-# Phase 5 — Build final HTML
+# Phase 5 — Build final HTML (component patterns + real content)
 node v4/scripts/build-course.js
 ```
 
@@ -260,7 +323,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URL:** `https://triumphmotorcycles.co.uk`
+- **Brand URL:** `https://fluence.framer.website/`
 
 ---
 
@@ -278,18 +341,23 @@ Every change must work for ANY Storyline SCORM file and ANY brand URL. A fix tha
 
 **ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
 When a visual issue is found, the fix goes in:
-- Templates: `v4/scripts/build-course.js` (component template functions)
+- Component patterns: `v4/scripts/build-course.js` (pattern-based rendering)
 - Hydration: `v4/scripts/hydrate.js` (interactivity logic)
 - Extraction: `v4/scripts/extract.js` (SCORM parsing)
 - Layout: `v4/scripts/design-course.js` (content structuring)
 - Layout prompt: `v4/prompts/layout-engine.md` (AI layout instructions)
 - Stitch prompt: `v4/scripts/generate-course-html.js` (design instructions)
+- Representative course: `v4/prompts/representative-course.md` (component coverage)
+- Brand analysis: `v4/scripts/scrape-brand.js` (DESIGN.md generation)
 - Schemas: `v4/schemas/` (component definitions, output formats)
 
 NEVER edit output files (`v4/output/*.json`, `v4/output/*.html`) to fix problems. NEVER tailor engine logic to one specific SCORM file or brand — every decision must be generic.
 
-### STITCH IS THE DESIGNER
-Stitch designs the visual system. We don't hardcode design decisions. The build script extracts Stitch's Tailwind config and CSS patterns and uses them as templates. Different SCORM + different brand → different Stitch design → different visual output.
+### STITCH DESIGNS THE COMPONENT KIT
+Stitch designs the visual system — every component type, page shell, design tokens. We don't hardcode design decisions. The build script uses Stitch's actual component patterns as templates, filled with real SCORM content. Different brand URL → different Stitch kit → different visual output.
 
 ### CONTENT FIDELITY
-All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. The AI layout engine rewords for clarity but never invents facts or drops content.
+All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs with representative examples. The build script guarantees 100% content fidelity from course-layout.json. The AI layout engine rewords for clarity but never invents facts or drops content.
+
+### AUTHORING LAYER COMPATIBILITY
+The design system (component patterns + design tokens) is a reusable asset. The future authoring layer must be able to: re-render with edited content, swap component types (e.g., accordion → cards), and customise without re-calling Stitch. All 25 component types must be designed by Stitch upfront.
