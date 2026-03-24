@@ -326,28 +326,28 @@ function fillDataTable(pattern, comp) {
         if (v === false || v === 'false') return '<td class="px-8 py-4 text-error">&#10007;</td>';
         return `<td class="px-8 py-4 text-on-surface-variant">${esc(String(v))}</td>`;
       }).join('');
-      return `<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
+      return `<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
     }).join('\n');
     headerHtml = `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
   } else if (rows.length > 0 && Array.isArray(rows[0])) {
     const headers = rows[0];
     headerHtml = headers.map(h => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
     bodyHtml = rows.slice(1).map(row =>
-      `<tr class="hover:bg-white/5 transition-colors">${row.map(cell => `<td class="px-8 py-4">${esc(cell)}</td>`).join('')}</tr>`
+      `<tr class="hover:bg-on-surface/5 transition-colors">${row.map(cell => `<td class="px-8 py-4">${esc(cell)}</td>`).join('')}</tr>`
     ).join('\n');
   }
 
   return `<section class="${secClass}" data-component-type="data-table">
 <div class="max-w-6xl mx-auto px-8">
 ${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
-<div class="overflow-hidden rounded-xl border border-white/5 glass">
-<div class="px-8 py-6 border-b border-white/5">
+<div class="overflow-hidden rounded-xl border border-on-surface/5 glass">
+<div class="px-8 py-6 border-b border-on-surface/5">
 <h3 class="text-2xl font-bold tracking-tight">${title}</h3>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
-<thead><tr class="bg-white/5">${headerHtml}</tr></thead>
-<tbody class="divide-y divide-white/5">${bodyHtml}</tbody>
+<thead><tr class="bg-on-surface/5">${headerHtml}</tr></thead>
+<tbody class="divide-y divide-on-surface/5">${bodyHtml}</tbody>
 </table>
 </div>
 </div>
@@ -463,17 +463,17 @@ function fillComparison(pattern, comp) {
       if (v === false || v === 'false') return '<td class="p-6 text-center text-error text-xl">&#10007;</td>';
       return `<td class="p-6 text-on-surface-variant">${esc(String(v))}</td>`;
     }).join('');
-    return `<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
+    return `<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="comparison">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)}</p>` : ''}
-<div class="overflow-x-auto glass rounded-3xl border border-white/5">
+<div class="overflow-x-auto glass rounded-3xl border border-on-surface/5">
 <table class="w-full text-left">
-<thead class="bg-white/5"><tr>${headerHtml}</tr></thead>
-<tbody class="divide-y divide-white/5">${rowsHtml}</tbody>
+<thead class="bg-on-surface/5"><tr>${headerHtml}</tr></thead>
+<tbody class="divide-y divide-on-surface/5">${rowsHtml}</tbody>
 </table>
 </div>
 </div>
@@ -607,9 +607,9 @@ function fillFlashcard(pattern, comp) {
   const newCards = items.map((item, i) => {
     const front = esc(item.front || item.title || item.term || '');
     const back = item.back || item.definition || item.body || '';
-    return `<div class="perspective-1000 h-64 group cursor-pointer" data-flashcard>
+    return `<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
+<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[i % icons.length]}</div>
 <div class="font-headline font-bold text-xl">${front}</div>
@@ -705,7 +705,7 @@ function fillFullBleed(pattern, comp) {
 
   return `<section class="${sectionClass}" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
-<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/60 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/70 to-surface-dim/30"></div>
 <div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col ${alignClass}">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-4">${title}</h2>
 ${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
@@ -725,7 +725,7 @@ function fillGraphic(pattern, comp) {
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
 <div class="rounded-2xl overflow-hidden">
-${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto max-h-[60vh] object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
 </div>
 ${body ? `<div class="mt-4 text-on-surface-variant">${body}</div>` : ''}
 </div>
@@ -867,28 +867,35 @@ function fillComponent(pattern, comp, index) {
 function buildNav(shell, layout) {
   if (!shell || !shell.nav) return '';
   const courseTitle = esc(layout.course.title || 'Course');
-  const sections = layout.sections.filter(s => s.title).slice(0, 6);
+  const sections = layout.sections.filter(s => s.title).slice(0, 5);
 
-  const navClass = shell.nav.match(/<nav[^>]*class="([^"]*)"/)?.[1] || 'fixed top-0 w-full z-50 bg-surface-container/60 backdrop-blur-xl flex justify-between items-center px-8 h-20';
+  let navClass = shell.nav.match(/<nav[^>]*class="([^"]*)"/)?.[1] || '';
+  // Ensure critical nav layout classes are always present
+  const requiredNav = ['fixed', 'top-0', 'w-full', 'z-50', 'flex', 'justify-between', 'items-center'];
+  requiredNav.forEach(cls => { if (!navClass.includes(cls)) navClass += ` ${cls}`; });
+  if (!/h-\d+/.test(navClass)) navClass += ' h-20';
+  if (!/px-\d+/.test(navClass)) navClass += ' px-8';
+  if (!navClass.includes('bg-')) navClass += ' bg-surface-container/60 backdrop-blur-xl';
+  navClass = navClass.trim();
 
   const activeLinkClass = shell.nav.match(/<a[^>]*class="([^"]*border-b[^"]*)"/)?.[1] || "text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm uppercase";
   const inactiveLinkClass = shell.nav.match(/<a[^>]*class="([^"]*hover:text-white[^"]*)"/)?.[1] || "text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase";
 
   const navLinks = sections.map((s, i) => {
     const cls = i === 0 ? activeLinkClass : inactiveLinkClass;
-    return `<a class="${cls}" href="#${s.sectionId || `section-${i}`}">${esc(s.title)}</a>`;
+    return `<a class="${cls} whitespace-nowrap" href="#${s.sectionId || `section-${i}`}">${esc(s.title)}</a>`;
   }).join('\n');
 
   return `<nav class="${navClass}" data-component-type="navigation">
 <div class="flex items-center gap-4">
 <span class="text-xl font-black tracking-tighter text-primary italic">${courseTitle}</span>
 </div>
-<div class="hidden md:flex gap-8 items-center">
+<div class="hidden md:flex gap-6 items-center overflow-hidden">
 ${navLinks}
 </div>
 <div class="flex items-center gap-4">
-<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
-<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
+<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
+<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
 </div>
 </nav>`;
 }
@@ -898,7 +905,7 @@ function buildFooter(shell, layout) {
   const courseTitle = esc(layout.course.title || 'Course');
   const year = new Date().getFullYear();
 
-  const footerClass = shell.footer.match(/<footer[^>]*class="([^"]*)"/)?.[1] || 'bg-surface-dim w-full py-12 border-t border-white/5';
+  const footerClass = shell.footer.match(/<footer[^>]*class="([^"]*)"/)?.[1] || 'bg-surface-dim w-full py-12 border-t border-on-surface/5';
 
   return `<footer class="${footerClass}" data-component-type="footer">
 <div class="max-w-6xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -984,7 +991,7 @@ function build() {
     if (componentHtmls.length > 0) {
       const sectionTitle = section.title || '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-6xl mx-auto px-8 pt-24 pb-8" id="${sectionId}">
+        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-6" id="${sectionId}">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
 <h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
@@ -1050,7 +1057,7 @@ ${navHtml}
 ${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
-<section class="py-32 text-center">
+<section class="py-20 text-center">
 <div class="max-w-6xl mx-auto px-8">
   <span class="material-symbols-outlined text-6xl text-secondary mb-8">verified_user</span>
   <h2 class="font-headline text-3xl font-bold mb-8">Course Complete</h2>

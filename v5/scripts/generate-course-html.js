@@ -49,8 +49,30 @@ if (!API_KEY) {
 
 // ─── Build the Stitch prompt ────────────────────────────────────────
 
+/** Detect colorMode from brand brief text — prevents Stitch from guessing wrong */
+function detectColorMode(designMd) {
+  const lower = designMd.toLowerCase();
+  // Count dark vs light indicators
+  const darkSignals = ['dark background', 'deep black', 'near-black', 'dark surface', 'dark charcoal',
+    'dark theme', 'dark aesthetic', 'moody', 'dark, sleek', 'dark and '].filter(s => lower.includes(s)).length;
+  const lightSignals = ['light background', 'white background', 'cream background', 'light theme',
+    'airy', 'bright background', 'warm pink', 'light, clean', 'light and '].filter(s => lower.includes(s)).length;
+  // Also check the explicit Background description for dark terms
+  const bgSection = lower.match(/background[:\s]+(.*?)(?:\n|$)/);
+  if (bgSection && /deep|black|dark|charcoal|midnight/.test(bgSection[1])) return 'DARK';
+  if (bgSection && /white|cream|light|bright|pale/.test(bgSection[1])) return 'LIGHT';
+  if (darkSignals > lightSignals) return 'DARK';
+  if (lightSignals > darkSignals) return 'LIGHT';
+  // Default: check if gradient-based (typically light)
+  if (lower.includes('gradient') && !lower.includes('dark')) return 'LIGHT';
+  return 'LIGHT'; // safe default
+}
+
 function buildStitchPrompt(designMd, representativeCourse) {
+  const colorMode = detectColorMode(designMd);
   return `You are designing a complete, premium e-learning course page.
+
+IMPORTANT: This design MUST use a ${colorMode} color mode. ${colorMode === 'DARK' ? 'Use dark backgrounds (near-black, dark charcoal) with light text.' : 'Use light backgrounds (white, cream, light gray) with dark text.'}
 
 === DESIGN SYSTEM BRIEF ===
 

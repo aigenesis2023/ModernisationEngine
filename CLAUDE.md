@@ -242,6 +242,10 @@ All 25 component types use Approach A (extract classes, rebuild). Zero Stitch ex
 1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag handles spacing/background only (via `sectionOnly()` helper that strips containment classes from Stitch patterns). An inner `<div>` provides containment.
 2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2×2, not 3+1).
 3. **Typography:** Headings use a consistent scale — `h2 = text-3xl`, `h3 = text-2xl`, `h4 = text-xl` — no random size spikes. Hero `h1` is exempt (uses `text-6xl md:text-8xl`).
+4. **Theme-safe colours:** All semi-transparent overlays use `on-surface/5` (not `white/5`) — adapts to both light and dark themes. `on-surface` resolves to black on light, white on dark.
+5. **Nav enforcement:** `buildNav()` injects required layout classes (`fixed`, `flex`, `justify-between`, `items-center`, `h-20`) if Stitch's nav pattern omits them. Max 5 nav links with `whitespace-nowrap`.
+6. **Graphic max-height:** Standalone images get `max-h-[60vh]` to prevent viewport domination.
+7. **Flashcard visibility:** Front faces get `shadow-md border border-outline-variant/10` so cards are visible on light themes where `glass-card` may be transparent.
 
 ### Hydration (`v5/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
@@ -315,6 +319,9 @@ When describing brands, use Stitch's native terms:
 - `colorVariant`: MONOCHROME, NEUTRAL, TONAL_SPOT, VIBRANT, EXPRESSIVE, FIDELITY, CONTENT, RAINBOW, FRUIT_SALAD
 - `roundness`: ROUND_FOUR, ROUND_EIGHT, ROUND_TWELVE, ROUND_FULL
 - `spacingScale`: 0 (minimal), 1 (compact), 2 (normal), 3 (spacious)
+
+### ColorMode Detection (generate-course-html.js)
+`detectColorMode()` analyses the brand brief text for light/dark keywords and injects an explicit `colorMode` directive into the Stitch prompt. This prevents Stitch from guessing wrong — e.g., choosing dark for a clearly light gradient brand like FitFlow. Detection defaults to LIGHT if ambiguous. The directive is prompt-only — it doesn't affect downstream processing. `design-tokens.json` `isDark` is always extracted from Stitch's actual CSS output.
 
 ### Future: IMAGE_TO_UI
 The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from screenshot description. Monitor SDK updates.
@@ -433,7 +440,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
 - **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
-- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate)
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate), `https://fitflow-template.framer.website/` (light, pink-blue gradient), `https://landio.framer.website/` (dark, sleek SaaS)
 
 ## Phase 6 — Visual Review (`v5/scripts/review-course.js`)
 

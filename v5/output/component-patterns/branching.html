@@ -1,25 +1,27 @@
-<section class="py-32 px-12 bg-surface" data-component-type="branching">
-<div class="max-w-7xl mx-auto grid md:grid-cols-2 gap-24 items-center">
-<div>
-<span class="text-primary font-headline uppercase tracking-[0.4em] text-xs mb-4 block">Interactive Scenario</span>
-<h2 class="text-6xl font-headline font-bold tracking-tighter mb-8">What Would You Do?</h2>
-<p class="text-on-surface-variant text-lg leading-relaxed mb-12">You witness a colleague accidentally tip over a drum of unidentified industrial solvent in a confined storage area. They are attempting to wipe it up with paper towels without gloves.</p>
-<div class="space-y-4">
-<button class="w-full text-left p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 transition-all flex items-center justify-between">
-<span>Intervene immediately and stop them</span>
-<span class="material-symbols-outlined text-primary">arrow_forward</span>
-</button>
-<button class="w-full text-left p-6 rounded-2xl bg-surface-container-low hover:bg-surface-container-high border border-outline-variant/20 transition-all flex items-center justify-between">
-<span>Go find the Safety Data Sheet (SDS) first</span>
-<span class="material-symbols-outlined text-primary">arrow_forward</span>
-</button>
+<section class="py-32 bg-surface-container-low px-8" data-component-type="branching">
+<div class="max-w-7xl mx-auto flex flex-col md:flex-row gap-20">
+<div class="flex-1">
+<span class="text-primary text-xs uppercase tracking-widest font-bold mb-4 block">Interactive Scenario</span>
+<h2 class="text-5xl font-headline font-bold text-white mb-8 tracking-tighter">What Would You Do?</h2>
+<p class="text-on-surface-variant text-lg leading-relaxed mb-8">A barrel in the chemical storage area has developed a small leak. A faint yellow mist is visible, and there is a strong pungent odor. You are alone in the section.</p>
 </div>
-</div>
-<div class="glass-panel p-10 rounded-3xl" data-component-type="textinput">
-<h3 class="text-xl font-headline font-bold mb-6">Personal Safety Commitment</h3>
-<p class="text-sm text-on-surface-variant mb-8">Define one specific action you will take tomorrow to improve the safety of your immediate work area.</p>
-<textarea class="w-full bg-surface-container-low border-b-2 border-outline-variant focus:border-primary border-t-0 border-x-0 rounded-none p-4 text-on-surface focus:ring-0 min-h-[150px]" placeholder="Type your commitment here..."></textarea>
-<button class="mt-8 bg-primary-container text-on-primary-container px-8 py-3 rounded-full font-headline font-bold uppercase tracking-widest text-xs">Save Commitment</button>
+<div class="flex-1 space-y-4">
+<button class="w-full p-6 text-left bg-surface rounded-xl border border-outline-variant/20 hover:border-primary transition-all group">
+<div class="text-primary text-[10px] uppercase font-bold mb-2">Option A</div>
+<p class="font-headline font-bold">Find a mop and bucket to contain the spread.</p>
+</button>
+<button class="w-full p-6 text-left bg-surface rounded-xl border border-outline-variant/20 hover:border-primary transition-all group">
+<div class="text-primary text-[10px] uppercase font-bold mb-2">Option B</div>
+<p class="font-headline font-bold">Sound the alarm and evacuate immediately.</p>
+</button>
+<button class="w-full p-6 text-left bg-surface rounded-xl border border-outline-variant/20 hover:border-primary transition-all group">
+<div class="text-primary text-[10px] uppercase font-bold mb-2">Option C</div>
+<p class="font-headline font-bold">Identify the SDS before taking any further action.</p>
+</button>
+<button class="w-full p-6 text-left bg-surface rounded-xl border border-outline-variant/20 hover:border-primary transition-all group">
+<div class="text-primary text-[10px] uppercase font-bold mb-2">Option D</div>
+<p class="font-headline font-bold">Try to tighten the valve with your gloved hands.</p>
+</button>
 </div>
 </div>
 </section>
