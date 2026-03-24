@@ -6,7 +6,7 @@
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <title>EV Awareness &amp; Safety</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
@@ -15,98 +15,106 @@
             theme: {
                 extend: {
                     colors: {
-                        "tertiary": "#e9ddff",
-                        "error": "#ffb4ab",
-                        "error-container": "#93000a",
-                        "on-tertiary-fixed": "#ffffff",
                         "on-error": "#690005",
-                        "surface-tint": "#c6c6c7",
-                        "surface-container-high": "#2a2a2a",
-                        "surface-container-lowest": "#0e0e0e",
-                        "inverse-on-surface": "#303030",
-                        "background": "#131313",
-                        "surface-container": "#1f1f1f",
-                        "inverse-surface": "#e2e2e2",
-                        "surface-bright": "#393939",
-                        "on-primary": "#1a1c1c",
-                        "tertiary-fixed": "#6d3bd7",
-                        "on-secondary-container": "#d8e2ff",
-                        "secondary-fixed": "#adc6ff",
-                        "on-primary-fixed-variant": "#e2e2e2",
-                        "on-primary-fixed": "#ffffff",
-                        "secondary-fixed-dim": "#81aaff",
-                        "secondary": "#adc6ff",
-                        "on-tertiary-container": "#000000",
-                        "on-surface-variant": "#c6c6c6",
-                        "primary-container": "#d4d4d4",
+                        "on-tertiary-container": "#c9fffe",
                         "surface-dim": "#131313",
-                        "on-tertiary": "#23005c",
+                        "on-tertiary-fixed": "#002020",
                         "surface": "#131313",
-                        "primary-fixed-dim": "#454747",
-                        "on-secondary-fixed-variant": "#00397f",
-                        "on-secondary": "#001a42",
-                        "surface-container-highest": "#353535",
-                        "on-error-container": "#ffdad6",
-                        "on-secondary-fixed": "#001a42",
-                        "inverse-primary": "#5d5f5f",
-                        "outline": "#919191",
-                        "tertiary-fixed-dim": "#5516be",
-                        "outline-variant": "#474747",
-                        "surface-container-low": "#1b1b1b",
-                        "tertiary-container": "#a078ff",
-                        "on-surface": "#e2e2e2",
-                        "primary": "#ffffff",
-                        "on-tertiary-fixed-variant": "#e9ddff",
-                        "surface-variant": "#353535",
-                        "on-background": "#e2e2e2",
-                        "secondary-container": "#004395",
-                        "on-primary-container": "#000000",
-                        "primary-fixed": "#5d5f5f"
+                        "surface-tint": "#ffb3b3",
+                        "primary": "#ffb3b3",
+                        "inverse-primary": "#bf0030",
+                        "primary-container": "#dc143c",
+                        "secondary": "#ffb59c",
+                        "secondary-container": "#8e2c01",
+                        "on-surface-variant": "#e6bdbc",
+                        "inverse-on-surface": "#313030",
+                        "on-secondary-container": "#ffaa8d",
+                        "surface-container-lowest": "#0e0e0e",
+                        "inverse-surface": "#e5e2e1",
+                        "on-primary-container": "#fff1f0",
+                        "on-surface": "#e5e2e1",
+                        "on-background": "#e5e2e1",
+                        "surface-container-high": "#2a2a2a",
+                        "surface-bright": "#3a3939",
+                        "on-primary-fixed": "#40000a",
+                        "primary-fixed-dim": "#ffb3b3",
+                        "surface-container-highest": "#353534",
+                        "on-secondary": "#5c1a00",
+                        "on-primary-fixed-variant": "#920022",
+                        "background": "#131313",
+                        "secondary-fixed-dim": "#ffb59c",
+                        "primary-fixed": "#ffdad9",
+                        "tertiary-container": "#007d7d",
+                        "tertiary-fixed": "#95f2f1",
+                        "error-container": "#93000a",
+                        "on-secondary-fixed-variant": "#822800",
+                        "surface-container": "#201f1f",
+                        "tertiary": "#78d6d5",
+                        "on-tertiary": "#003737",
+                        "on-primary": "#680015",
+                        "on-tertiary-fixed-variant": "#004f4f",
+                        "on-secondary-fixed": "#380c00",
+                        "surface-variant": "#353534",
+                        "outline": "#ac8888",
+                        "error": "#ffb4ab",
+                        "secondary-fixed": "#ffdbcf",
+                        "outline-variant": "#5c3f3f",
+                        "surface-container-low": "#1c1b1b",
+                        "tertiary-fixed-dim": "#78d6d5",
+                        "on-error-container": "#ffdad6"
                     },
                     fontFamily: {
                         "headline": ["Space Grotesk"],
                         "body": ["Inter"],
                         "label": ["Inter"]
                     },
-                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "1.5rem", "full": "9999px"},
                 },
             },
         }
     </script>
 <style>
-        body { background-color: #131313; color: #e2e2e2; font-family: 'Inter', sans-serif; }
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .glass-nav { backdrop-filter: blur(20px); border-bottom: 1px solid rgba(71, 71, 71, 0.15); }
-        details summary::-webkit-details-marker { display: none; }
-        .bento-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 1.5rem; }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #0e0e0e; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #353535; border-radius: 10px; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(28, 27, 27, 0.7);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .crimson-glow {
+            box-shadow: 0 0 40px -10px rgba(220, 20, 60, 0.2);
+        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0e0e0e; }
+        ::-webkit-scrollbar-thumb { background: #353534; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #dc143c; }
     </style>
 
 </head>
 <body class="bg-background text-on-background font-body selection:bg-primary-container selection:text-on-primary-container">
 
-<nav class="fixed top-0 w-full z-50 bg-[#131313]/70 backdrop-blur-xl shadow-[0_4px_30px_rgba(0,0,0,0.1)] flex justify-between items-center px-8 h-20 max-w-none" data-component-type="navigation">
+<nav class="fixed top-0 w-full z-50 bg-[#131313]/80 backdrop-blur-xl shadow-[0_20px_40px_-15px_rgba(146,0,34,0.08)] flex justify-between items-center h-20 px-8" data-component-type="navigation">
 <div class="flex items-center gap-4">
 <span class="text-xl font-black tracking-tighter text-primary italic">EV Awareness &amp; Safety</span>
 </div>
 <div class="hidden md:flex gap-6 items-center overflow-hidden">
-<a class="text-white border-b border-white pb-1 whitespace-nowrap" href="#section-01">Getting Started</a>
-<a class="text-[#c6c6c6] hover:text-white transition-colors whitespace-nowrap" href="#section-02">Recognising an EV</a>
-<a class="text-[#c6c6c6] hover:text-white transition-colors whitespace-nowrap" href="#section-03">Types of Electric Vehicle</a>
-<a class="text-[#c6c6c6] hover:text-white transition-colors whitespace-nowrap" href="#section-04">Under the Bonnet</a>
-<a class="text-[#c6c6c6] hover:text-white transition-colors whitespace-nowrap" href="#section-05">Section 1 Knowledge Check</a>
+<a class="text-[#DC143C] border-b-2 border-[#DC143C] pb-1 transition-colors duration-300 whitespace-nowrap" href="#section-01">Getting Started</a>
+<a class="text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase whitespace-nowrap" href="#section-02">Recognising an EV</a>
+<a class="text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase whitespace-nowrap" href="#section-03">Types of Electric Vehicle</a>
+<a class="text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase whitespace-nowrap" href="#section-04">Under the Bonnet</a>
+<a class="text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase whitespace-nowrap" href="#section-05">Section 1 Knowledge Check</a>
 </div>
 <div class="flex items-center gap-4">
-<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
-<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
+<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
+<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
 </div>
 </nav>
 
 <main class="min-h-screen bg-background overflow-x-hidden pt-20">
 
-<section id="section-00" class="relative h-[921px] flex items-center px-8 overflow-hidden" data-component-type="hero">
+<section id="section-00" class="relative h-[921px] flex items-center justify-start overflow-hidden rounded-xl" data-component-type="hero">
 <img alt="Modern electric vehicle in a professional workshop with dramatic lighting" class="absolute inset-0 w-full h-full object-cover" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjgwMCIgdmlld0JveD0iMCAwIDE5MjAgODAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNGE0YTRhO3N0b3Atb3BhY2l0eToxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzJhMmEyYTtzdG9wLW9wYWNpdHk6MSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iODAwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDx0ZXh0IHg9Ijk2MCIgeT0iNDAwIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjMyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCI+Y29tcC0wMDAgW2hlcm9dPC90ZXh0Pgo8L3N2Zz4="/>
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
 <div class="relative z-10 text-center max-w-6xl mx-auto px-8">
@@ -126,7 +134,7 @@
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32" data-component-type="text">
+<section class="py-24" data-component-type="text">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">About This Course</h2>
 <div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
@@ -135,61 +143,61 @@
 </div>
 </section>
 
-<section class="py-32" data-component-type="checklist">
+<section class="glass-panel p-10 rounded-lg" data-component-type="checklist">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-3xl" data-checklist>
+<div class="glass-card p-6 md:p-12 rounded-3xl" data-checklist>
 <h2 class="font-headline text-3xl font-bold mb-8">Learning Objectives</h2>
 <div class="space-y-2">
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Know about the types of electric and hybrid vehicles available</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">State how to identify electric/hybrid vehicles and give examples of those currently available</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Identify alternative fuel source vehicles</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Understand the hazards around motor vehicle high energy electrical systems</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">State safety precautions to be taken before approaching and working around electric/hybrid vehicles</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">State how to identify motor vehicle high energy cabling and associated components</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">State how the vehicle may be safely charged using an external source</span>
 </label>
 </div>
-<div class="mt-6 text-sm text-on-surface-variant font-bold">0 / 7 complete</div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / 7 complete</div>
 </div>
 </div>
 </section>
 
-<section class="py-32" data-component-type="textinput">
+<section class="space-y-8 glass-panel p-10 rounded-lg" data-component-type="textinput">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <h2 class="font-headline text-3xl font-bold mb-8">Your Details</h2>
 <div class="space-y-8">
 <div>
 <label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Name</label>
-<input class="w-full bg-surface-container-highest border-b-2 border-primary/20 focus:border-primary transition-all p-4 outline-none rounded-t-lg" placeholder="Your full name" type="text"/>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 focus:ring-2 focus:ring-primary-dim text-white placeholder:text-zinc-600" placeholder="Your full name" type="text"/>
 </div>
 <div>
 <label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Organisation</label>
-<input class="w-full bg-surface-container-highest border-b-2 border-primary/20 focus:border-primary transition-all p-4 outline-none rounded-t-lg" placeholder="Your organisation" type="text"/>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 focus:ring-2 focus:ring-primary-dim text-white placeholder:text-zinc-600" placeholder="Your organisation" type="text"/>
 </div>
 <div>
 <label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">Email</label>
-<input class="w-full bg-surface-container-highest border-b-2 border-primary/20 focus:border-primary transition-all p-4 outline-none rounded-t-lg" placeholder="Your email address" type="text"/>
+<input class="w-full bg-surface-container-highest border-none rounded-lg p-4 focus:ring-2 focus:ring-primary-dim text-white placeholder:text-zinc-600" placeholder="Your email address" type="text"/>
 </div>
 <button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary-container w-full">Submit</button>
 </div>
@@ -197,9 +205,9 @@
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-low" data-component-type="branching">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8" data-component-type="branching">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-3xl border-l-8 border-secondary">
+<div class="glass-card p-6 md:p-12 rounded-3xl border-l-8 border-secondary">
 <h3 class="font-headline text-2xl font-bold mb-6">Select Your Role</h3>
 <p class="text-lg text-on-surface-variant mb-10 italic">Choose the role that best describes your work. This helps us tailor the course content to your needs.</p>
 <div class="grid gap-6">
@@ -227,7 +235,7 @@
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32 flex flex-col md:flex-row items-center" data-component-type="graphic-text">
+<section class="asymmetric- items-center" data-component-type="graphic-text">
 <div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 <div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0 flex flex-col justify-center">
@@ -242,11 +250,11 @@
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-low" data-component-type="accordion">
+<section class="space-y-4" data-component-type="accordion">
 <div class="max-w-6xl mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-12 text-center">Exterior Identification Features</h3>
 <div class="space-y-4">
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Number Plate
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -255,7 +263,7 @@ Number Plate
 <p>Fully electric vehicles may have a green border on their number plate, though this is not mandatory.</p>
 </div>
 </details>
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Badging
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -264,7 +272,7 @@ Badging
 <p>Many EVs will have a badge indicating that they are an electric vehicle. Look for manufacturer-specific EV emblems.</p>
 </div>
 </details>
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Charge Port
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -273,7 +281,7 @@ Charge Port
 <p>On Battery Electric Vehicles (BEV) and Plug-in Hybrids (PHEV) there will be a battery charge lead connector port somewhere on the vehicle.</p>
 </div>
 </details>
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Orange High Voltage Cables
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -282,7 +290,7 @@ Orange High Voltage Cables
 <p>Bright-coloured (typically orange) high voltage cables are a clear indicator of an electric or hybrid vehicle.</p>
 </div>
 </details>
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Warning Labels
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -291,7 +299,7 @@ Warning Labels
 <p>Look for high voltage warning labels, particularly in the engine bay and near battery components.</p>
 </div>
 </details>
-<details class="group bg-surface rounded-xl overflow-hidden border border-outline-variant/10">
+<details class="group bg-surface-container-low rounded-lg border border-white/5">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
 Instrument Cluster
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
@@ -304,7 +312,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 flex flex-col md:flex-row items-center" data-component-type="graphic-text">
+<section class="asymmetric- items-center" data-component-type="graphic-text">
 <div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 <div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0 order-2 md:order-1">
@@ -319,23 +327,23 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="data-table">
+<section class="overflow-x-auto" data-component-type="data-table">
 <div class="max-w-6xl mx-auto px-8">
 <div class="mb-8 text-on-surface-variant"><p>Not all types of EV share the same identifying features. Use this reference table to understand which identifiers apply to each vehicle type.</p></div>
-<div class="overflow-hidden rounded-xl border border-white/5 glass">
-<div class="px-8 py-6 border-b border-white/5">
+<div class="overflow-hidden rounded-xl border border-on-surface/5 glass">
+<div class="px-8 py-6 border-b border-on-surface/5">
 <h3 class="text-2xl font-bold tracking-tight">EV Identification Features by Vehicle Type</h3>
 </div>
 <div class="overflow-x-auto">
 <table class="w-full text-left border-collapse">
-<thead><tr class="bg-white/5"><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Feature</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">ICE</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">BEV</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">HEV</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">PHEV</th></tr></thead>
-<tbody class="divide-y divide-white/5"><tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">Badging</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">External Charging Port</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">Instrument Cluster Warnings</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">Power Flow Screen</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">High Voltage Cables</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">Green Number Plate Band</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-error">&#10007;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">Warning Labels</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr></tbody>
+<thead><tr class="bg-on-surface/5"><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">Feature</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">ICE</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">BEV</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">HEV</th><th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">PHEV</th></tr></thead>
+<tbody class="divide-y divide-on-surface/5"><tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">Badging</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">External Charging Port</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">Instrument Cluster Warnings</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">Power Flow Screen</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">High Voltage Cables</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">Green Number Plate Band</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-error">&#10007;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">Warning Labels</td><td class="px-8 py-4 text-error">&#10007;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td><td class="px-8 py-4 text-secondary">&#10003;</td></tr></tbody>
 </table>
 </div>
 </div>
@@ -349,7 +357,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="relative h-[614px] flex items-center justify-center text-center px-8" data-component-type="full-bleed">
+<section class="relative h-[400px] flex items-center justify-center overflow-hidden -mx-6 md:-mx-12 lg:-mx-72" data-component-type="full-bleed">
 <img alt="Multiple electric vehicles in a modern showroom" class="absolute inset-0 w-full h-full object-cover" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjgwMCIgdmlld0JveD0iMCAwIDE5MjAgODAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNGE0YTRhO3N0b3Atb3BhY2l0eToxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzJhMmEyYTtzdG9wLW9wYWNpdHk6MSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iODAwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDx0ZXh0IHg9Ijk2MCIgeT0iNDAwIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjMyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCI+Y29tcC0wMDkgW2Z1bGwtYmxlZWRdPC90ZXh0Pgo8L3N2Zz4="/>
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/70 to-surface-dim/30"></div>
 <div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col text-left items-start">
@@ -358,40 +366,42 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="tabs">
+<section class="space-y-8" data-component-type="tabs">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">Vehicle Categories</h2>
-<div class="flex flex-wrap justify-center gap-4 mb-12" data-tabs>
+<div data-tabs>
+<div class="flex flex-wrap justify-center gap-4 mb-12">
 <button class="px-8 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm uppercase tracking-wider" data-tab-trigger="0">ICE</button>
 <button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="1">BEV</button>
 <button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="2">HEV</button>
 <button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="3">PHEV</button>
 <button class="px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider" data-tab-trigger="4">MHEV</button>
 </div>
-<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="0">
+<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="0">
 <h4 class="font-headline text-xl font-bold mb-4">ICE</h4>
 <div class="text-on-surface-variant leading-relaxed"><p><strong>Internal Combustion Engine</strong></p><p>Powered solely by a petrol or diesel engine — no electric motor or battery for propulsion. Energy is produced by burning fuel and transmitted mechanically to the wheels. Emits CO₂ and other pollutants. Still common globally, but being phased out in many regions due to environmental regulations.</p></div>
 </div>
-<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="1" style="display:none">
+<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="1" style="display:none">
 <h4 class="font-headline text-xl font-bold mb-4">BEV</h4>
 <div class="text-on-surface-variant leading-relaxed"><p><strong>Battery Electric Vehicle</strong></p><p>Driven entirely by an electric motor, with no internal combustion engine. Has a large capacity high voltage battery to provide the required driving range. Instant torque gives strong performance with no engine noise. The high voltage system can be identified by orange or brightly coloured cabling.</p></div>
 </div>
-<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="2" style="display:none">
+<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="2" style="display:none">
 <h4 class="font-headline text-xl font-bold mb-4">HEV</h4>
 <div class="text-on-surface-variant leading-relaxed"><p><strong>Hybrid Electric Vehicle</strong></p><p>Usually fitted with an ICE, high voltage battery, and electric motor assembly. Some use their electric motor simultaneously with the ICE to drive the wheels (Parallel Hybrid). Others use the petrol engine to charge the battery only (Series Hybrid). Some can switch between both modes (Series/Parallel Hybrid).</p></div>
 </div>
-<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="3" style="display:none">
+<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="3" style="display:none">
 <h4 class="font-headline text-xl font-bold mb-4">PHEV</h4>
 <div class="text-on-surface-variant leading-relaxed"><p><strong>Plug-in Hybrid Electric Vehicle</strong></p><p>The high voltage battery can be charged using an external mains charger. Has a larger capacity battery than standard hybrids, increasing electric-only range. The vehicle also has a combustion engine for extended range. Can operate as Parallel or Series hybrid depending on the model.</p></div>
 </div>
-<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="4" style="display:none">
+<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="4" style="display:none">
 <h4 class="font-headline text-xl font-bold mb-4">MHEV</h4>
 <div class="text-on-surface-variant leading-relaxed"><p><strong>Mild Hybrid Electric Vehicle</strong></p><p>Uses a combustion engine with a belt-integrated starter generator that provides extra power when pulling away or accelerating. Cannot operate in fully electric mode. Typically operates at 48V — below the recognised definition of "High Voltage". The 48V system wiring is often coloured purple or blue.</p></div>
 </div>
 </div>
+</div>
 </section>
 
-<section class="py-32 flex flex-col md:flex-row items-center" data-component-type="graphic-text">
+<section class="asymmetric- items-center" data-component-type="graphic-text">
 <div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 <div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0 flex flex-col justify-center">
@@ -406,20 +416,20 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="comparison">
+<section class="grid grid-cols-1 md:grid-cols-2 rounded-lg overflow-hidden border border-white/5" data-component-type="comparison">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">Advantages &amp; Disadvantages</h2>
 <p class="text-center text-on-surface-variant mb-12">Compare the key benefits and drawbacks of the main EV types.</p>
-<div class="overflow-x-auto glass rounded-3xl border border-white/5">
+<div class="overflow-x-auto glass rounded-3xl border border-on-surface/5">
 <table class="w-full text-left">
-<thead class="bg-white/5"><tr><th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">BEV</th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">HEV</th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">PHEV</th></tr></thead>
-<tbody class="divide-y divide-white/5"><tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">Zero tailpipe emissions</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">Greatest electric-only range</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">Petrol/diesel engine as backup</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">Can be mains charged</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">High MPG capability</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">No range anxiety</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
-<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">Lower purchase cost</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr></tbody>
+<thead class="bg-on-surface/5"><tr><th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">BEV</th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">HEV</th><th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">PHEV</th></tr></thead>
+<tbody class="divide-y divide-on-surface/5"><tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">Zero tailpipe emissions</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">Greatest electric-only range</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">Petrol/diesel engine as backup</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">Can be mains charged</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">High MPG capability</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">No range anxiety</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td><td class="p-6 text-center text-secondary text-xl">&#10003;</td></tr>
+<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">Lower purchase cost</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td><td class="p-6 text-center text-error text-xl">&#10007;</td></tr></tbody>
 </table>
 </div>
 </div>
@@ -432,7 +442,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-40 bg-surface-container-lowest flex items-center justify-center" data-component-type="pullquote">
+<section class="text-center space-y-8 relative" data-component-type="pullquote">
 <div class="max-w-6xl mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary">
 <span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
@@ -442,10 +452,10 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-low overflow-hidden" data-component-type="narrative" data-carousel>
+<section class="relative" data-component-type="narrative" data-carousel>
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-12">Key EV Components</h2>
-<div class="glass-card rounded-[2.5rem] p-12 relative">
+<div class="glass-card rounded-[2.5rem] p-6 md:p-12 relative">
 <div data-slide="1">
 <div class="text-secondary font-bold mb-4">01 / 06</div>
 <h4 class="font-headline text-xl font-bold mb-4">HV Battery Pack</h4>
@@ -488,7 +498,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 flex flex-col md:flex-row items-center" data-component-type="graphic-text">
+<section class="asymmetric- items-center" data-component-type="graphic-text">
 <div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 <div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0 order-2 md:order-1">
@@ -510,7 +520,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-24 bg-surface-container-lowest" data-component-type="stat-callout">
+<section class="grid grid-cols-1 md:grid-cols-3 gap-12 text-center" data-component-type="stat-callout">
 <div class="max-w-6xl mx-auto px-8">
 <div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-center">
 <div class="space-y-2 min-w-[120px]">
@@ -529,9 +539,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! Using multiple identification methods, including the government database, is the most reliable approach since not all EVs share the same visual identifiers." data-feedback-incorrect="Not quite. While individual features can indicate an EV, using multiple identification methods including the government vehicle enquiry service is the most reliable approach.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! Using multiple identification methods, including the government database, is the most reliable approach since not all EVs share the same visual identifiers." data-feedback-incorrect="Not quite. While individual features can indicate an EV, using multiple identification methods including the government vehicle enquiry service is the most reliable approach.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -557,9 +567,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! MHEVs typically operate at 48V, which is below the recognised definition of &quot;High Voltage&quot; for electric vehicles." data-feedback-incorrect="Incorrect. Mild Hybrid Electric Vehicles typically operate at 48V — below the 60V high voltage threshold.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! MHEVs typically operate at 48V, which is below the recognised definition of &quot;High Voltage&quot; for electric vehicles." data-feedback-incorrect="Incorrect. Mild Hybrid Electric Vehicles typically operate at 48V — below the 60V high voltage threshold.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -592,7 +602,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32" data-component-type="text">
+<section class="py-24" data-component-type="text">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">High Voltage Hazards</h2>
 <div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
@@ -601,7 +611,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-lowest" data-component-type="bento">
+<section class="grid grid-cols-1 md:grid-cols-4 grid-rows-2 gap-6 h-[600px]" data-component-type="bento">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">Workplace Risks</h2>
 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
@@ -650,7 +660,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 flex flex-col md:flex-row items-center" data-component-type="graphic-text">
+<section class="asymmetric- items-center" data-component-type="graphic-text">
 <div class="max-w-6xl mx-auto px-8">
 <div class="flex flex-col md:flex-row gap-12 items-center">
 <div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0 flex flex-col justify-center">
@@ -665,7 +675,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-lowest" data-component-type="key-term">
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6" data-component-type="key-term">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">HSE Work Categories</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2  gap-10">
@@ -696,58 +706,58 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32" data-component-type="flashcard">
+<section class="grid grid-cols-1 md:grid-cols-2 gap-8 perspective" data-component-type="flashcard">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">Electric Shock Effects</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2  gap-8">
-<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
+<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">info</div>
 <div class="font-headline font-bold text-xl">Heart</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
 <p class="text-on-secondary-container font-medium">A voltage as low as 50V can block electrical signals between the brain and muscles, potentially stopping the heart from beating properly.</p>
 </div>
 </div>
 </div>
-<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
+<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">local_fire_department</div>
 <div class="font-headline font-bold text-xl">Breathing</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
 <p class="text-on-secondary-container font-medium">Electric shock can prevent the person from breathing by disrupting the nerve signals that control respiratory muscles.</p>
 </div>
 </div>
 </div>
-<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
+<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">pan_tool</div>
 <div class="font-headline font-bold text-xl">Muscles</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
 <p class="text-on-secondary-container font-medium">Electrical current passing through the body causes severe muscle spasms that can prevent the victim from releasing the source.</p>
 </div>
 </div>
 </div>
-<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
+<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">bolt</div>
 <div class="font-headline font-bold text-xl">Secondary Injuries</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
 <p class="text-on-secondary-container font-medium">Burns at entry and exit points, fall injuries from being thrown or losing balance, and internal tissue damage are common secondary effects.</p>
 </div>
 </div>
@@ -756,37 +766,37 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="timeline">
+<section class="space-y-12" data-component-type="timeline">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-20 text-center">Electric Shock Response Steps</h2>
 <div class="relative border-l-2 border-outline-variant ml-4 space-y-16">
 <div class="relative pl-12">
-<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-secondary shadow-[0_0_10px_rgba(37,216,252,0.5)]"></div>
+<div class="absolute left-6 top-0 w-4 h-4 rounded-full bg-secondary ring-8 ring-background"></div>
 <div class="font-headline text-xl font-bold text-secondary mb-2">01. Isolate the Power</div>
 <p class="text-on-surface-variant">For mains systems (vehicle chargers for BEV/PHEV), turn off the power at the isolation switch. For high voltage vehicles, the supply is normally disconnected when turning the vehicle off — but consider there may be a fault.</p>
 </div>
 <div class="relative pl-12">
-<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/20 -translate-y-1/2 hidden md:block"></div>
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
 <div class="font-headline text-xl font-bold mb-2">02. Do Not Touch the Casualty</div>
 <p class="text-on-surface-variant">Do not touch the casualty if they are still in contact with the electrical source — you are at risk of electrocution.</p>
 </div>
 <div class="relative pl-12">
-<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/20 -translate-y-1/2 hidden md:block"></div>
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
 <div class="font-headline text-xl font-bold mb-2">03. Use a Rescue Hook</div>
 <p class="text-on-surface-variant">If safe to do so, use a purpose-designed insulated rescue hook to separate them from the power supply. The rescue hook should be kept visible and accessible at the EV charging bay at all times.</p>
 </div>
 <div class="relative pl-12">
-<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/20 -translate-y-1/2 hidden md:block"></div>
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
 <div class="font-headline text-xl font-bold mb-2">04. Call 999</div>
 <p class="text-on-surface-variant">Call emergency services immediately for professional medical assistance.</p>
 </div>
 <div class="relative pl-12">
-<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/20 -translate-y-1/2 hidden md:block"></div>
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
 <div class="font-headline text-xl font-bold mb-2">05. Perform Primary Survey</div>
 <p class="text-on-surface-variant">Once contact is broken, perform a primary survey and treat injuries. Seek assistance from the company first aid person if available.</p>
 </div>
 <div class="relative pl-12">
-<div class="absolute top-1/2 left-0 w-full h-px bg-outline-variant/20 -translate-y-1/2 hidden md:block"></div>
+<div class="absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant"></div>
 <div class="font-headline text-xl font-bold mb-2">06. Secure the Area</div>
 <p class="text-on-surface-variant">Cordon off the vehicle using a non-conductive safety barrier chain. No one should work on the vehicle until it has been made safe and the risk reassessed.</p>
 </div>
@@ -794,37 +804,37 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="checklist">
+<section class="glass-panel p-10 rounded-lg" data-component-type="checklist">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-3xl" data-checklist>
+<div class="glass-card p-6 md:p-12 rounded-3xl" data-checklist>
 <h2 class="font-headline text-3xl font-bold mb-8">Low Risk Activity Safety Checklist</h2>
 <div class="space-y-2">
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Keep remote operation keys away from vehicles to prevent accidental power-up</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Be aware that EVs may not make normal engine sounds when moving</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Note that AVAS (Acoustic Vehicle Alerting System) sounds may not be what you expect</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Alert pedestrians and co-workers when driving EVs near people</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Avoid pressure washing under-body areas — high voltage cables (usually orange) can be damaged</span>
 </label>
 <label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
-<input class="w-6 h-6 rounded border-outline-variant bg-transparent text-primary focus:ring-primary" type="checkbox"/>
+<input class="w-6 h-6 rounded border-zinc-700 bg-zinc-900 text-primary-dim focus:ring-primary-dim" type="checkbox"/>
 <span class="text-on-surface-variant">Refer to manufacturer guidance before valeting engine bay areas</span>
 </label>
 </div>
-<div class="mt-6 text-sm text-on-surface-variant font-bold">0 / 6 complete</div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / 6 complete</div>
 </div>
 </div>
 </section>
@@ -836,7 +846,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32" data-component-type="text">
+<section class="py-24" data-component-type="text">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">Essential Safety Equipment</h2>
 <div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
@@ -845,9 +855,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! The sign ensures that all workshop staff are immediately aware they are dealing with an electric vehicle." data-feedback-incorrect="Incorrect. The primary purpose is to ensure all staff are aware the vehicle is an EV, so appropriate safety precautions are taken.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! The sign ensures that all workshop staff are immediately aware they are dealing with an electric vehicle." data-feedback-incorrect="Incorrect. The primary purpose is to ensure all staff are aware the vehicle is an EV, so appropriate safety precautions are taken.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -869,9 +879,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! The barrier chain alerts others to the presence of an EV and prevents unauthorised access to the work area." data-feedback-incorrect="Incorrect. The primary purpose is to alert others and prevent unauthorised access to the vehicle work area.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! The barrier chain alerts others to the presence of an EV and prevents unauthorised access to the work area." data-feedback-incorrect="Incorrect. The primary purpose is to alert others and prevent unauthorised access to the vehicle work area.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -893,9 +903,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! The signal blocker prevents the vehicle from accidentally powering up when the keyless key is nearby." data-feedback-incorrect="Incorrect. The primary purpose is to block signals between the key and vehicle, preventing accidental power-up.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! The signal blocker prevents the vehicle from accidentally powering up when the keyless key is nearby." data-feedback-incorrect="Incorrect. The primary purpose is to block signals between the key and vehicle, preventing accidental power-up.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -917,9 +927,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! The rescue hook is specifically designed for trained staff to safely separate a casualty from an electrical source." data-feedback-incorrect="Incorrect. The rescue hook is for suitably trained staff to use in an emergency to safely remove a casualty from an electrical source.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! The rescue hook is specifically designed for trained staff to safely separate a casualty from an electrical source." data-feedback-incorrect="Incorrect. The rescue hook is for suitably trained staff to use in an emergency to safely remove a casualty from an electrical source.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Knowledge Check</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -948,7 +958,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="relative h-[614px] flex items-center justify-center text-center px-8" data-component-type="full-bleed">
+<section class="relative h-[400px] flex items-center justify-center overflow-hidden -mx-6 md:-mx-12 lg:-mx-72" data-component-type="full-bleed">
 <img alt="Modern EV charging station at night" class="absolute inset-0 w-full h-full object-cover" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIwIiBoZWlnaHQ9IjgwMCIgdmlld0JveD0iMCAwIDE5MjAgODAwIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojNGE0YTRhO3N0b3Atb3BhY2l0eToxIi8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzJhMmEyYTtzdG9wLW9wYWNpdHk6MSIvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjE5MjAiIGhlaWdodD0iODAwIiBmaWxsPSJ1cmwoI2JnKSIvPgogIDx0ZXh0IHg9Ijk2MCIgeT0iNDAwIiBmb250LWZhbWlseT0iQXJpYWwsIEhlbHZldGljYSwgc2Fucy1zZXJpZiIKICAgICAgICBmb250LXNpemU9IjMyIiBmaWxsPSIjOTk5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCI+Y29tcC0wMzEgW2Z1bGwtYmxlZWRdPC90ZXh0Pgo8L3N2Zz4="/>
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/70 to-surface-dim/30"></div>
 <div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col text-center items-center">
@@ -957,7 +967,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-lowest" data-component-type="key-term">
+<section class="grid grid-cols-1 md:grid-cols-3 gap-6" data-component-type="key-term">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">Charging Terminology</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10">
@@ -977,7 +987,7 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32 bg-surface-container-low" data-component-type="process-flow">
+<section class="flex flex-col md:flex-row items-center justify-between gap-12 py-12" data-component-type="process-flow">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">Charging Power Levels</h2>
 <div class="flex flex-col md:flex-row items-stretch gap-6">
@@ -1011,7 +1021,7 @@ Instrument Cluster
 <div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
 </div>
 </div>
-<section class="py-32 bg-surface-container-lowest" data-component-type="graphic">
+<section class="w-full" data-component-type="graphic">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">Course Review</h2>
 <div class="rounded-2xl overflow-hidden">
@@ -1021,9 +1031,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! Insulated gloves rated to 1500V DC are essential PPE for anyone working directly on high voltage systems." data-feedback-incorrect="Incorrect. These specialised gloves must be worn by trained personnel when working on high voltage vehicle systems for protection against electric shock.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="2" data-feedback-correct="Correct! Insulated gloves rated to 1500V DC are essential PPE for anyone working directly on high voltage systems." data-feedback-incorrect="Incorrect. These specialised gloves must be worn by trained personnel when working on high voltage vehicle systems for protection against electric shock.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Final Assessment</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -1045,9 +1055,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! Warning signs alert all staff and visitors to the specific risks present during high voltage work." data-feedback-incorrect="Incorrect. The primary purpose of warning signs is to alert others to the risks that are present.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! Warning signs alert all staff and visitors to the specific risks present during high voltage work." data-feedback-incorrect="Incorrect. The primary purpose of warning signs is to alert others to the risks that are present.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Final Assessment</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -1069,9 +1079,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! Vehicle status signs communicate the current condition and operational status to all staff." data-feedback-incorrect="Incorrect. Vehicle status signs are placed on vehicles to communicate their current condition and operational status to all staff.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="1" data-feedback-correct="Correct! Vehicle status signs communicate the current condition and operational status to all staff." data-feedback-incorrect="Incorrect. Vehicle status signs are placed on vehicles to communicate their current condition and operational status to all staff.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Final Assessment</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -1093,9 +1103,9 @@ Instrument Cluster
 </div>
 </section>
 
-<section class="py-32" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! This sign prevents unauthorised starting of the vehicle during repairs, which could endanger technicians." data-feedback-incorrect="Incorrect. The sign's primary purpose is to prevent damage or danger from unauthorised starting during the repair process.">
+<section class="glass-panel p-10 rounded-lg border border-white/5" data-component-type="mcq" data-quiz data-correct="0" data-feedback-correct="Correct! This sign prevents unauthorised starting of the vehicle during repairs, which could endanger technicians." data-feedback-incorrect="Incorrect. The sign's primary purpose is to prevent damage or danger from unauthorised starting during the repair process.">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-[2rem]">
+<div class="glass-card p-6 md:p-12 rounded-[2rem]">
 <div class="text-secondary font-bold text-sm mb-4">Final Assessment</div>
 <h3 class="font-headline text-2xl font-bold mb-8">Choose the best answer.</h3>
 <div class="space-y-4">
@@ -1129,7 +1139,7 @@ Instrument Cluster
 </div>
 </section>
 
-<footer class="bg-[#0e0e0e] w-full py-16 border-t border-[#474747]/15" data-component-type="footer">
+<footer class="bg-[#0e0e0e] border-t border-[#5c3f3f]/15 w-full py-12 px-8" data-component-type="footer">
 <div class="max-w-6xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
 <div class="flex flex-col gap-2 items-center md:items-start">
 <span class="text-lg font-bold text-on-surface">EV Awareness &amp; Safety</span>
@@ -1166,10 +1176,15 @@ Instrument Cluster
     var quizzes = document.querySelectorAll('[data-quiz]');
     quizzes.forEach(function (quiz) {
       var choices = quiz.querySelectorAll('[data-choice]');
-      var correctBtn = quiz.querySelector('[data-correct]');
+      // Resolve correct answer by index from quiz container attribute
+      var correctIdx = parseInt(quiz.getAttribute('data-correct'), 10);
+      var correctBtn = isNaN(correctIdx) ? null : choices[correctIdx] || null;
       var selected = null;
       var submitBtn = null;
       var feedbackEl = null;
+      // Find the best container for injecting submit/feedback (inside the card, not the section)
+      var choiceContainer = quiz.querySelector('.space-y-4') || quiz.querySelector('.space-y-3');
+      var injectTarget = choiceContainer ? choiceContainer.parentElement : quiz;
 
       function resetQuiz() {
         selected = null;
@@ -1199,7 +1214,7 @@ Instrument Cluster
             submitBtn = document.createElement('button');
             submitBtn.textContent = 'Submit';
             submitBtn.className = 'mt-4 px-6 py-2 rounded-lg bg-primary text-on-primary font-semibold cursor-pointer hover:opacity-90 transition-opacity';
-            quiz.appendChild(submitBtn);
+            injectTarget.appendChild(submitBtn);
 
             submitBtn.addEventListener('click', function () {
               if (!selected) return;
@@ -1227,7 +1242,7 @@ Instrument Cluster
                 tryAgain.addEventListener('click', resetQuiz);
                 feedbackEl.appendChild(tryAgain);
               }
-              quiz.appendChild(feedbackEl);
+              injectTarget.appendChild(feedbackEl);
               submitBtn.remove();
               submitBtn = null;
             });
@@ -1242,15 +1257,13 @@ Instrument Cluster
       var triggers = container.querySelectorAll('[data-tab-trigger]');
       var panels = container.querySelectorAll('[data-tab-panel]');
 
+      // Capture the initial active/inactive class strings from Stitch's design
+      var activeClasses = triggers.length > 0 ? triggers[0].className : '';
+      var inactiveClasses = triggers.length > 1 ? triggers[1].className : activeClasses;
+
       function activateTab(index) {
         triggers.forEach(function (t, i) {
-          if (i === index) {
-            t.classList.add('border-b-2', 'border-primary', 'text-on-surface');
-            t.classList.remove('text-outline');
-          } else {
-            t.classList.remove('border-b-2', 'border-primary', 'text-on-surface');
-            t.classList.add('text-outline');
-          }
+          t.className = i === index ? activeClasses : inactiveClasses;
         });
         panels.forEach(function (p, i) {
           p.style.display = i === index ? '' : 'none';
@@ -1269,20 +1282,21 @@ Instrument Cluster
     var flashcards = document.querySelectorAll('[data-flashcard]');
     flashcards.forEach(function (card) {
       card.style.cursor = 'pointer';
-      var inner = card.querySelector('[class*="preserve-3d"]') ||
-                  card.querySelector('.preserve-3d') ||
-                  card.firstElementChild;
+      var inner = card.firstElementChild;
       if (!inner) return;
+      var flipped = false;
 
       function toggle(e) {
         e.preventDefault();
-        inner.classList.toggle('rotate-y-180');
+        flipped = !flipped;
+        inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       }
       card.addEventListener('click', toggle);
       card.addEventListener('touchend', function (e) {
         // Prevent double-fire on touch devices
         e.preventDefault();
-        inner.classList.toggle('rotate-y-180');
+        flipped = !flipped;
+        inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       });
     });
 

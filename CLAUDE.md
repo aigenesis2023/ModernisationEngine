@@ -246,15 +246,18 @@ All 25 component types use Approach A (extract classes, rebuild). Zero Stitch ex
 5. **Nav enforcement:** `buildNav()` injects required layout classes (`fixed`, `flex`, `justify-between`, `items-center`, `h-20`) if Stitch's nav pattern omits them. Max 5 nav links with `whitespace-nowrap`.
 6. **Graphic max-height:** Standalone images get `max-h-[60vh]` to prevent viewport domination.
 7. **Flashcard visibility:** Front faces get `shadow-md border border-outline-variant/10` so cards are visible on light themes where `glass-card` may be transparent.
+8. **Responsive padding:** All glass-card containers use `p-6 md:p-12` — prevents content cramping on mobile (375px viewport). Applies to MCQ cards, text input cards, tab panels, narrative cards, branching cards, checklist cards.
+9. **Flashcard 3D via inline styles:** `perspective`, `transform-style`, `backface-visibility`, and `transform: rotateY(180deg)` use inline `style` attributes, NOT Tailwind utility classes — Tailwind CDN doesn't generate `perspective-*` or `rotate-y-*` utilities.
+10. **Tabs structure:** Tab panels (`[data-tab-panel]`) must be INSIDE the `[data-tabs]` wrapper, not siblings — hydrate.js scopes its `querySelectorAll` to the container.
 
 ### Hydration (`v5/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
-- **Quizzes**: Select answer → submit → correct/incorrect feedback → retry
+- **Quizzes**: Select answer → submit → correct/incorrect feedback → retry. Correct answer resolved by reading `data-correct` index from the quiz container and looking up `choices[idx]`. Submit button and feedback are injected inside the glass-card (choice container's parent), not the outer section.
 - **Accordions**: Native `<details>` with smooth animation
-- **Tabs**: Click tab → show panel, style active/inactive
-- **Flashcards**: Click to flip (3D CSS transform)
+- **Tabs**: Click tab → show panel. Active/inactive styling captured from Stitch's initial class strings at init time, then swapped as full `className` — works with any Stitch button style (pills, underlines, etc.).
+- **Flashcards**: Click to flip via inline `style.transform = 'rotateY(180deg)'` (not Tailwind class toggle)
 - **Carousels**: Prev/next navigation with dot indicators
-- **Checklists**: Check/uncheck with progress tracking
+- **Checklists**: Check/uncheck with progress tracking. Build-course.js writes a static counter with `data-checklist-progress` attr — hydrate.js finds and reuses it instead of creating a duplicate.
 - **Scroll progress bar**: Fixed bar at top showing read percentage
 - **Smooth scroll**: Anchor link navigation
 
@@ -440,7 +443,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
 - **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
-- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate), `https://fitflow-template.framer.website/` (light, pink-blue gradient), `https://landio.framer.website/` (dark, sleek SaaS)
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate), `https://fitflow-template.framer.website/` (light, pink-blue gradient), `https://landio.framer.website/` (dark, sleek SaaS), `https://crimzon.framer.website/` (dark, crimson red), `https://aigents.framer.ai/` (light, purple-violet)
 
 ## Phase 6 — Visual Review (`v5/scripts/review-course.js`)
 

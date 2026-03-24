@@ -192,7 +192,8 @@ function fillMCQ(pattern, comp) {
 
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
   const secClass = sectionOnly(rawClass);
-  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  const cardClassRaw = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  const cardClass = cardClassRaw.replace(/\bp-12\b/, 'p-6 md:p-12');
   const labelDiv = pattern.match(/<div class="text-secondary[^"]*">[^<]*<\/div>/)?.[0] || '';
 
   const firstChoice = pattern.match(/<div[^>]*data-choice="a"[^>]*>[\s\S]*?<\/span>\s*<\/div>/i);
@@ -360,7 +361,8 @@ function fillTextInput(pattern, comp) {
   const title = esc(comp.displayTitle || '');
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low';
   const secClass = sectionOnly(rawClass);
-  const cardClass = pattern.match(/<div[^>]*class="([^"]*glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  const cardClassRaw2 = pattern.match(/<div[^>]*class="([^"]*glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
+  const cardClass = cardClassRaw2.replace(/\bp-12\b/, 'p-6 md:p-12');
   const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
 
   const newInputs = items.map(item =>
@@ -399,7 +401,7 @@ function fillBranching(pattern, comp) {
 
   return `<section class="${secClass}" data-component-type="branching">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-12 rounded-3xl border-l-8 border-secondary">
+<div class="glass-card p-6 md:p-12 rounded-3xl border-l-8 border-secondary">
 <h3 class="font-headline text-2xl font-bold mb-6">${title}</h3>
 <p class="text-lg text-on-surface-variant mb-10 italic">${bodyText}</p>
 <div class="grid gap-6">
@@ -536,7 +538,8 @@ function fillChecklist(pattern, comp) {
   const title = esc(comp.displayTitle || '');
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
   const secClass = sectionOnly(rawClass);
-  const cardClass = pattern.match(/<div[^>]*class="(glass-card[^"]*)"[^>]*data-checklist/)?.[1] || 'glass-card p-12 rounded-3xl';
+  const cardClassRaw3 = pattern.match(/<div[^>]*class="(glass-card[^"]*)"[^>]*data-checklist/)?.[1] || 'glass-card p-12 rounded-3xl';
+  const cardClass = cardClassRaw3.replace(/\bp-12\b/, 'p-6 md:p-12');
 
   const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent';
 
@@ -554,7 +557,7 @@ function fillChecklist(pattern, comp) {
 <div class="space-y-2">
 ${newLabels}
 </div>
-<div class="mt-6 text-sm text-on-surface-variant font-bold">0 / ${items.length} complete</div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / ${items.length} complete</div>
 </div>
 </div>
 </section>`;
@@ -578,7 +581,7 @@ function fillTabs(pattern, comp) {
   ).join('\n');
 
   const panels = items.map((item, i) =>
-    `<div class="glass-card rounded-3xl p-12 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+    `<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
 <h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
 <div class="text-on-surface-variant leading-relaxed">${item.body || ''}</div>
 </div>`
@@ -587,10 +590,12 @@ function fillTabs(pattern, comp) {
   return `<section class="${secClass}" data-component-type="tabs">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="flex flex-wrap justify-center gap-4 mb-12" data-tabs>
+<div data-tabs>
+<div class="flex flex-wrap justify-center gap-4 mb-12">
 ${triggers}
 </div>
 ${panels}
+</div>
 </div>
 </section>`;
 }
@@ -607,15 +612,15 @@ function fillFlashcard(pattern, comp) {
   const newCards = items.map((item, i) => {
     const front = esc(item.front || item.title || item.term || '');
     const back = item.back || item.definition || item.body || '';
-    return `<div class="perspective-1000 h-48 group cursor-pointer" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
-<div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10 [backface-visibility:hidden]">
+    return `<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[i % icons.length]}</div>
 <div class="font-headline font-bold text-xl">${front}</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-8 bg-secondary-container rounded-3xl [backface-visibility:hidden] [transform:rotateY(180deg)] text-center">
+<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
 <p class="text-on-secondary-container font-medium">${back}</p>
 </div>
 </div>
@@ -653,7 +658,7 @@ function fillNarrative(pattern, comp) {
   return `<section class="${secClass}" data-component-type="narrative" data-carousel>
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>
-<div class="glass-card rounded-[2.5rem] p-12 relative">
+<div class="glass-card rounded-[2.5rem] p-6 md:p-12 relative">
 ${newSlides}
 <div class="flex gap-4 mt-8">
 <button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>

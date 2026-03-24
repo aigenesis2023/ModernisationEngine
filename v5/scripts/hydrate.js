@@ -20,10 +20,15 @@
     var quizzes = document.querySelectorAll('[data-quiz]');
     quizzes.forEach(function (quiz) {
       var choices = quiz.querySelectorAll('[data-choice]');
-      var correctBtn = quiz.querySelector('[data-correct]');
+      // Resolve correct answer by index from quiz container attribute
+      var correctIdx = parseInt(quiz.getAttribute('data-correct'), 10);
+      var correctBtn = isNaN(correctIdx) ? null : choices[correctIdx] || null;
       var selected = null;
       var submitBtn = null;
       var feedbackEl = null;
+      // Find the best container for injecting submit/feedback (inside the card, not the section)
+      var choiceContainer = quiz.querySelector('.space-y-4') || quiz.querySelector('.space-y-3');
+      var injectTarget = choiceContainer ? choiceContainer.parentElement : quiz;
 
       function resetQuiz() {
         selected = null;
@@ -53,7 +58,7 @@
             submitBtn = document.createElement('button');
             submitBtn.textContent = 'Submit';
             submitBtn.className = 'mt-4 px-6 py-2 rounded-lg bg-primary text-on-primary font-semibold cursor-pointer hover:opacity-90 transition-opacity';
-            quiz.appendChild(submitBtn);
+            injectTarget.appendChild(submitBtn);
 
             submitBtn.addEventListener('click', function () {
               if (!selected) return;
@@ -81,7 +86,7 @@
                 tryAgain.addEventListener('click', resetQuiz);
                 feedbackEl.appendChild(tryAgain);
               }
-              quiz.appendChild(feedbackEl);
+              injectTarget.appendChild(feedbackEl);
               submitBtn.remove();
               submitBtn = null;
             });
@@ -96,15 +101,13 @@
       var triggers = container.querySelectorAll('[data-tab-trigger]');
       var panels = container.querySelectorAll('[data-tab-panel]');
 
+      // Capture the initial active/inactive class strings from Stitch's design
+      var activeClasses = triggers.length > 0 ? triggers[0].className : '';
+      var inactiveClasses = triggers.length > 1 ? triggers[1].className : activeClasses;
+
       function activateTab(index) {
         triggers.forEach(function (t, i) {
-          if (i === index) {
-            t.classList.add('border-b-2', 'border-primary', 'text-on-surface');
-            t.classList.remove('text-outline');
-          } else {
-            t.classList.remove('border-b-2', 'border-primary', 'text-on-surface');
-            t.classList.add('text-outline');
-          }
+          t.className = i === index ? activeClasses : inactiveClasses;
         });
         panels.forEach(function (p, i) {
           p.style.display = i === index ? '' : 'none';
@@ -123,20 +126,21 @@
     var flashcards = document.querySelectorAll('[data-flashcard]');
     flashcards.forEach(function (card) {
       card.style.cursor = 'pointer';
-      var inner = card.querySelector('[class*="preserve-3d"]') ||
-                  card.querySelector('.preserve-3d') ||
-                  card.firstElementChild;
+      var inner = card.firstElementChild;
       if (!inner) return;
+      var flipped = false;
 
       function toggle(e) {
         e.preventDefault();
-        inner.classList.toggle('rotate-y-180');
+        flipped = !flipped;
+        inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       }
       card.addEventListener('click', toggle);
       card.addEventListener('touchend', function (e) {
         // Prevent double-fire on touch devices
         e.preventDefault();
-        inner.classList.toggle('rotate-y-180');
+        flipped = !flipped;
+        inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       });
     });
 
