@@ -11,20 +11,20 @@
  *   2. Fill it with real content (title, body, items, quiz answers, etc.)
  *   3. Handle interactive data attributes for hydrate.js
  *
- * Usage: node v4/scripts/build-course.js
+ * Usage: node v5/scripts/build-course.js
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const PATTERNS_DIR = path.resolve(ROOT, 'v4/output/component-patterns');
+const PATTERNS_DIR = path.resolve(ROOT, 'v5/output/component-patterns');
 const SHELL_PATH = path.resolve(PATTERNS_DIR, '_page-shell.json');
-const TOKENS_PATH = path.resolve(ROOT, 'v4/output/design-tokens.json');
-const STITCH_PATH = path.resolve(ROOT, 'v4/output/stitch-course-raw.html');
-const LAYOUT_PATH = path.resolve(ROOT, 'v4/output/course-layout.json');
-const HYDRATE_PATH = path.resolve(ROOT, 'v4/scripts/hydrate.js');
-const OUTPUT_PATH = path.resolve(ROOT, 'v4/output/course.html');
+const TOKENS_PATH = path.resolve(ROOT, 'v5/output/design-tokens.json');
+const STITCH_PATH = path.resolve(ROOT, 'v5/output/stitch-course-raw.html');
+const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
+const HYDRATE_PATH = path.resolve(ROOT, 'v5/scripts/hydrate.js');
+const OUTPUT_PATH = path.resolve(ROOT, 'v5/output/course.html');
 const PAGES_PATH = path.resolve(ROOT, 'index.html');
 
 // ─── HTML helpers ────────────────────────────────────────────────────
@@ -41,7 +41,7 @@ function stripTags(html) {
 function embedImage(imagePath) {
   if (!imagePath) return '';
   if (imagePath.startsWith('data:') || imagePath.startsWith('http')) return imagePath;
-  const fullPath = path.resolve(ROOT, 'v4/output', imagePath);
+  const fullPath = path.resolve(ROOT, 'v5/output', imagePath);
   if (!fs.existsSync(fullPath)) return imagePath;
   const buffer = fs.readFileSync(fullPath);
   const ext = path.extname(fullPath).toLowerCase();

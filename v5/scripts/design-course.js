@@ -11,9 +11,9 @@
  * The output is identical in both modes: validated course-layout.json.
  *
  * Usage:
- *   node v4/scripts/design-course.js --manual          # Write prompt, wait for paste
- *   ANTHROPIC_API_KEY=sk-... node v4/scripts/design-course.js  # Call API directly
- *   node v4/scripts/design-course.js --load response.json      # Load a saved response
+ *   node v5/scripts/design-course.js --manual          # Write prompt, wait for paste
+ *   ANTHROPIC_API_KEY=sk-... node v5/scripts/design-course.js  # Call API directly
+ *   node v5/scripts/design-course.js --load response.json      # Load a saved response
  */
 
 const fs = require('fs');
@@ -21,13 +21,13 @@ const path = require('path');
 const readline = require('readline');
 
 // ─── Paths ───────────────────────────────────────────────────────────
-const PROMPT_PATH = path.resolve('v4/prompts/layout-engine.md');
-const COMPONENT_LIB_PATH = path.resolve('v4/schemas/component-library.json');
-const CONTENT_PATH = path.resolve('v4/output/content-bucket.json');
-const BRAND_PATH = path.resolve('v4/output/brand-profile.json');
-const SCHEMA_PATH = path.resolve('v4/schemas/course-layout.schema.json');
-const OUTPUT_PATH = path.resolve('v4/output/course-layout.json');
-const ASSEMBLED_PROMPT_PATH = path.resolve('v4/output/design-prompt.txt');
+const PROMPT_PATH = path.resolve('v5/prompts/layout-engine.md');
+const COMPONENT_LIB_PATH = path.resolve('v5/schemas/component-library.json');
+const CONTENT_PATH = path.resolve('v5/output/content-bucket.json');
+const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
+const SCHEMA_PATH = path.resolve('v5/schemas/course-layout.schema.json');
+const OUTPUT_PATH = path.resolve('v5/output/course-layout.json');
+const ASSEMBLED_PROMPT_PATH = path.resolve('v5/output/design-prompt.txt');
 
 // ─── Assemble the full prompt ────────────────────────────────────────
 function assemblePrompt() {
@@ -252,7 +252,7 @@ async function readManualResponse() {
   console.log('  2. Paste into Claude Code (or any LLM chat)');
   console.log('  3. Copy the JSON response');
   console.log('  4. Either:');
-  console.log('     a. Save it to a file and run: node v4/scripts/design-course.js --load <file>');
+  console.log('     a. Save it to a file and run: node v5/scripts/design-course.js --load <file>');
   console.log('     b. Paste it below (end with a line containing just "END")\n');
   console.log('Waiting for response (paste JSON then type END on a new line):');
   console.log('-'.repeat(70));
@@ -331,7 +331,7 @@ async function main() {
   } catch (err) {
     console.error(`  Error: ${err.message}`);
     // Save raw response for debugging
-    const debugPath = path.resolve('v4/output/design-response-raw.txt');
+    const debugPath = path.resolve('v5/output/design-response-raw.txt');
     fs.writeFileSync(debugPath, response);
     console.error(`  Raw response saved to: ${debugPath}`);
     process.exit(1);
@@ -372,8 +372,8 @@ async function main() {
   }
 
   console.log('\nNext steps:');
-  console.log('  node v4/scripts/generate-images.js    # Generate images');
-  console.log('  node v4/scripts/build-course.js        # Build final HTML');
+  console.log('  node v5/scripts/generate-images.js    # Generate images');
+  console.log('  node v5/scripts/build-course.js        # Build final HTML');
   console.log('\nDone.');
 }
 

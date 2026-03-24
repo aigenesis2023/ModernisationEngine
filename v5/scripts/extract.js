@@ -5,8 +5,8 @@
  * Reads a Storyline SCORM package from disk and produces content-bucket.json.
  * Extracts raw educational content — no layout, no coordinates, no interaction logic.
  *
- * Usage: node v4/scripts/extract.js <scorm-folder>
- * Output: v4/output/content-bucket.json
+ * Usage: node v5/scripts/extract.js <scorm-folder>
+ * Output: v5/output/content-bucket.json
  */
 
 const fs = require('fs');
@@ -553,7 +553,7 @@ if (!fs.existsSync(resolvedDir)) {
 const result = extract(resolvedDir);
 
 // Write output
-const outputDir = path.resolve('v4/output');
+const outputDir = path.resolve('v5/output');
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
 const outputPath = path.join(outputDir, 'content-bucket.json');

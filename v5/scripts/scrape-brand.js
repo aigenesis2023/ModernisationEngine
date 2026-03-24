@@ -13,8 +13,8 @@
  *   - Multi-signal theme detection (fixes Fluence-style false dark detection)
  *   - DESIGN.md generation in Stitch's native format
  *
- * Usage: node v4/scripts/scrape-brand.js <brand-url>
- * Output: v4/output/brand-profile.json + v4/output/brand-design.md
+ * Usage: node v5/scripts/scrape-brand.js <brand-url>
+ * Output: v5/output/brand-profile.json + v5/output/brand-design.md
  */
 
 const fs = require('fs');
@@ -843,11 +843,11 @@ if (!brandUrl) {
       console.log(`Found brand URL in ref file: ${urlMatch[0]}`);
       run(urlMatch[0]);
     } else {
-      console.error('Usage: node v4/scripts/scrape-brand.js <brand-url>');
+      console.error('Usage: node v5/scripts/scrape-brand.js <brand-url>');
       process.exit(1);
     }
   } else {
-    console.error('Usage: node v4/scripts/scrape-brand.js <brand-url>');
+    console.error('Usage: node v5/scripts/scrape-brand.js <brand-url>');
     process.exit(1);
   }
 } else {
@@ -858,7 +858,7 @@ async function run(url) {
   try {
     const profile = await scrapeBrand(url);
 
-    const outputDir = path.resolve('v4/output');
+    const outputDir = path.resolve('v5/output');
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     // Output 1: Raw brand profile (kept for reference, used by other scripts)

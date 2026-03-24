@@ -12,13 +12,13 @@
  * The Stitch design tokens determine HOW it should look (treatment).
  *
  * Usage:
- *   node v4/scripts/generate-images.js
+ *   node v5/scripts/generate-images.js
  *
- * Input:  v4/output/course-layout.json  (content subjects)
- *         v4/output/design-tokens.json   (V5 — extracted design tokens)
- *         v4/output/stitch-course-raw.html  (fallback design treatment source)
- *         v4/output/brand-profile.json  (fallback if no Stitch output)
- * Output: v4/output/images/*.jpg + updated course-layout.json
+ * Input:  v5/output/course-layout.json  (content subjects)
+ *         v5/output/design-tokens.json   (V5 — extracted design tokens)
+ *         v5/output/stitch-course-raw.html  (fallback design treatment source)
+ *         v5/output/brand-profile.json  (fallback if no Stitch output)
+ * Output: v5/output/images/*.jpg + updated course-layout.json
  */
 
 const fs = require('fs');
@@ -30,11 +30,11 @@ const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const HF_TOKEN = process.env.HF_TOKEN || '';
 
-const OUTPUT_DIR = path.resolve('v4/output/images');
-const LAYOUT_PATH = path.resolve('v4/output/course-layout.json');
-const BRAND_PATH = path.resolve('v4/output/brand-profile.json');
-const TOKENS_PATH = path.resolve('v4/output/design-tokens.json');
-const STITCH_PATH = path.resolve('v4/output/stitch-course-raw.html');
+const OUTPUT_DIR = path.resolve('v5/output/images');
+const LAYOUT_PATH = path.resolve('v5/output/course-layout.json');
+const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
+const TOKENS_PATH = path.resolve('v5/output/design-tokens.json');
+const STITCH_PATH = path.resolve('v5/output/stitch-course-raw.html');
 
 const DELAY_MS = 3000;
 const RETRY_DELAY_MS = 8000;
@@ -296,7 +296,7 @@ function sleep(ms) {
 async function main() {
   if (!HF_TOKEN) {
     console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: node v4/scripts/generate-images.js');
+    console.error('Usage: node v5/scripts/generate-images.js');
     process.exit(1);
   }
 
