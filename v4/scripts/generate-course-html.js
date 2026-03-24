@@ -23,10 +23,12 @@
 import { readFileSync, writeFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { config } from 'dotenv';
 import { StitchToolClient } from '@google/stitch-sdk';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
+config({ path: join(ROOT, '.env') });
 const OUTPUT_DIR = join(ROOT, 'v4/output');
 
 const API_KEY = process.env.STITCH_API_KEY;

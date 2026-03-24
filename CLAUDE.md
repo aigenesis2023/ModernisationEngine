@@ -249,17 +249,18 @@ HF_TOKEN=<token> node v4/scripts/generate-images.js
 node v4/scripts/build-course.js
 ```
 
-**API Key Notes:**
-- `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys. Never commit to repo.
-- `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens. Free tier works.
-- `ANTHROPIC_API_KEY`: Only needed for API mode of design-course.js. Optional — manual mode works without it.
+**API Keys:**
+All keys are stored in `.env` (gitignored, never committed). Scripts load them automatically via dotenv.
+Open `.env` directly in VS Code to set your keys — **never paste keys in the chat**.
+
+- `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys
+- `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens (free tier works)
 
 ---
 
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URL:** `https://aidataguardians.com/`
-- Brand profile: dark theme (#000000 bg), indigo (#6366f1) + purple (#a855f7), Inter font
+- **Brand URL:** `https://triumphmotorcycles.co.uk`
 
 ---
 

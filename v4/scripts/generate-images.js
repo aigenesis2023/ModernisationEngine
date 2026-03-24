@@ -15,6 +15,7 @@
 
 const fs = require('fs');
 const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Config ──────────────────────────────────────────────────────────
 const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';

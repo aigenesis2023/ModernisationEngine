@@ -4,6 +4,7 @@
     "jsdom": "^29.0.1"
   },
   "dependencies": {
-    "@google/stitch-sdk": "^0.0.3"
+    "@google/stitch-sdk": "^0.0.3",
+    "dotenv": "^17.3.1"
   }
 }
