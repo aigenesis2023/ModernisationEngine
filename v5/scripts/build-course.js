@@ -45,7 +45,7 @@ function embedImage(imagePath) {
   if (!fs.existsSync(fullPath)) return imagePath;
   const buffer = fs.readFileSync(fullPath);
   const ext = path.extname(fullPath).toLowerCase();
-  const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp' };
+  const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
   return `data:${mimeMap[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
 }
 
@@ -143,9 +143,11 @@ ${item.body || ''}
   ).join('\n');
 
   return `<section class="${sectionClass}" data-component-type="accordion">
+<div class="max-w-4xl mx-auto">
 <h3 class="font-headline text-2xl font-bold mb-12 text-center">${title}</h3>
 <div class="space-y-4">
 ${newDetails}
+</div>
 </div>
 </section>`;
 }
@@ -160,7 +162,7 @@ function fillMCQ(pattern, comp) {
   let correctIdx = items.findIndex(i => i.correct || i._shouldBeSelected);
   if (correctIdx < 0) correctIdx = 0;
 
-  const questionText = stripTags(comp.body || '');
+  const questionText = stripTags(comp.instruction || comp.body || '');
   const title = esc(comp.displayTitle || 'Knowledge Check');
 
   // Extract the first unselected choice as a template (data-choice="a" or "b")
@@ -181,10 +183,10 @@ function fillMCQ(pattern, comp) {
       c = c.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(item.text || '')}</span>`);
       return c;
     }
-    // Fallback if no template found
-    return `<div class="group flex items-center p-5 rounded-xl bg-surface-variant/30 hover:bg-surface-variant cursor-pointer transition-all border border-transparent hover:border-secondary/30" data-choice="${i}">
-<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary"></div>
-<span>${esc(item.text || '')}</span>
+    // Fallback if no template found — use glass-card for contrast on any background
+    return `<div class="group flex items-center p-5 rounded-xl bg-surface-container/80 hover:bg-surface-container cursor-pointer transition-all border border-outline-variant/20 hover:border-secondary/50 backdrop-blur-sm" data-choice="${i}">
+<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary flex-shrink-0"></div>
+<span class="text-on-surface">${esc(item.text || '')}</span>
 </div>`;
   }).join('\n');
 
@@ -213,25 +215,35 @@ ${newChoices}
 function fillGraphicText(pattern, comp, index) {
   const title = esc(comp.displayTitle || '');
   const bodyText = comp.body || '';
-  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-6 max-w-7xl mx-auto';
+  // Override pattern's section class — we rebuild the layout entirely with flex,
+  // so the pattern's grid/column classes would conflict. Keep only spacing/bg classes.
+  const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || '';
+  // Strip grid-related classes that would conflict with our flex layout
+  const sectionClass = rawClass
+    .replace(/grid\b/g, '').replace(/md:grid-cols-\d/g, '').replace(/gap-\d+/g, '')
+    .replace(/max-w-\[[^\]]*\]/g, '').replace(/max-w-\w+/g, '')
+    .replace(/\s+/g, ' ').trim()
+    || 'py-24 px-8';
   const align = comp._imageAlign || (index % 2 === 0 ? 'right' : 'left');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
-  const imageDiv = `<div class="w-full md:w-1/2${align === 'left' ? ' order-2 md:order-1' : ''}">
-<div class="relative group rounded-2xl overflow-hidden">
-${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
+  const imageDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}">
+<div class="relative group rounded-2xl overflow-hidden aspect-[4/3]">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container rounded-2xl"></div>'}
 </div>
 </div>`;
 
-  const textDiv = `<div class="w-full md:w-1/2${align === 'left' ? ' order-1 md:order-2' : ''}">
-<h2 class="font-headline text-5xl font-black tracking-tighter mb-8 leading-none">${title}</h2>
-<div class="text-lg text-on-surface-variant leading-relaxed">${bodyText}</div>
+  const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center">
+<h2 class="font-headline text-4xl font-black tracking-tighter mb-6 leading-tight">${title}</h2>
+<div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
 
   return `<section class="${sectionClass}" data-component-type="graphic-text">
-<div class="flex flex-col md:flex-row gap-20 items-center">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row gap-12 items-center">
 ${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
+</div>
 </div>
 </section>`;
 }
@@ -518,9 +530,10 @@ function fillChecklist(pattern, comp) {
   return `<section class="${sectionClass}" data-component-type="checklist">
 <div class="${cardClass}" data-checklist>
 <h2 class="font-headline text-2xl font-bold mb-8">${title}</h2>
-<div class="space-y-4">
+<div class="space-y-2">
 ${newLabels}
 </div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold">0 / ${items.length} complete</div>
 </div>
 </section>`;
 }
@@ -570,7 +583,7 @@ function fillFlashcard(pattern, comp) {
 
   const newCards = items.map((item, i) => {
     const front = esc(item.front || item.title || item.term || '');
-    const back = esc(item.back || item.definition || item.body || '');
+    const back = item.back || item.definition || item.body || '';
     return `<div class="perspective-1000 h-64 group cursor-pointer" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500 [transform-style:preserve-3d]">
 <div class="absolute inset-0 flex items-center justify-center p-8 glass-card rounded-3xl [backface-visibility:hidden]">
@@ -695,24 +708,32 @@ function fillProcessFlow(pattern, comp) {
 
   const arrowHtml = '<span class="material-symbols-outlined text-outline-variant">arrow_forward</span>';
 
+  // For many nodes, use vertical layout (more readable). For few nodes, horizontal.
+  const useVertical = items.length > 4;
+
   const newNodes = items.map((item, i) => {
-    const nodeClass = i === 0
-      ? 'glass-card px-8 py-6 rounded-2xl border-secondary/30 text-center w-full max-w-xs'
-      : 'glass-card px-8 py-6 rounded-2xl text-center w-full max-w-xs';
-    return `<div class="${nodeClass}">
-<div class="font-headline font-bold">${esc(item.title || '')}</div>
-${item.body ? `<div class="text-sm text-on-surface-variant mt-2">${stripTags(item.body)}</div>` : ''}
+    const isFirst = i === 0;
+    const isLast = i === items.length - 1;
+    const borderClass = isFirst ? 'border-l-4 border-secondary' : isLast ? 'border-l-4 border-primary' : '';
+    return `<div class="glass-card px-8 py-6 rounded-2xl ${borderClass} ${useVertical ? 'w-full' : 'flex-1 min-w-[200px]'}">
+<div class="font-headline font-bold text-lg mb-2">${esc(item.title || '')}</div>
+${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
 </div>`;
   });
 
+  const arrowIcon = useVertical ? 'arrow_downward' : 'arrow_forward';
+  const arrowEl = `<div class="flex justify-center"><span class="material-symbols-outlined text-outline-variant">${arrowIcon}</span></div>`;
+
   const withArrows = newNodes.flatMap((n, i) =>
-    i < newNodes.length - 1 ? [n, arrowHtml] : [n]
+    i < newNodes.length - 1 ? [n, arrowEl] : [n]
   ).join('\n');
 
+  const flexDir = useVertical ? 'flex-col' : 'flex-col md:flex-row';
+
   return `<section class="${sectionClass}" data-component-type="process-flow">
-<div class="max-w-6xl mx-auto">
+<div class="max-w-5xl mx-auto">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="flex flex-col md:flex-row items-center justify-center gap-8">
+<div class="flex ${flexDir} items-stretch gap-4">
 ${withArrows}
 </div>
 </div>
@@ -916,15 +937,34 @@ function build() {
     });
 
     if (componentHtmls.length > 0) {
-      // Wrap non-section components in a section container
-      const wrapped = componentHtmls.map(h => {
-        // If it already has a <section> wrapper, use as-is
-        if (h.trim().startsWith('<section')) return h;
-        // Otherwise wrap it
-        return `<section class="py-24 px-8 max-w-7xl mx-auto" id="${sectionId}">\n${h}\n</section>`;
+      // Section title bar (visual divider between topic groups)
+      // Skip for hero section (empty title) — hero stands alone
+      const sectionTitle = section.title || '';
+      const titleBar = sectionTitle
+        ? `<div class="max-w-7xl mx-auto px-8 pt-24 pb-8" id="${sectionId}">
+<div class="flex items-center gap-6">
+<div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
+<h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
+<div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
+</div>
+</div>`
+        : '';
+
+      // Components that already have <section> wrappers (hero, full-bleed, etc.)
+      // get rendered as-is. Other components are grouped into the section flow.
+      // Reduce spacing between consecutive components within the same section.
+      const wrapped = componentHtmls.map((h, i) => {
+        if (h.trim().startsWith('<section')) {
+          // Self-contained component — add section ID to first one if no title bar
+          if (i === 0 && !sectionTitle) {
+            return h.replace(/<section/, `<section id="${sectionId}"`);
+          }
+          return h;
+        }
+        return `<div class="py-12 px-8 max-w-7xl mx-auto">\n${h}\n</div>`;
       }).join('\n\n');
 
-      sectionsHtml.push(wrapped);
+      sectionsHtml.push(titleBar + '\n' + wrapped);
     }
   });
 

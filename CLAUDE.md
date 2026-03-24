@@ -112,6 +112,7 @@ v5/                                    ← ALL ACTIVE CODE
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
     generate-images.js                 ← Design-informed image generation (runs after Stitch)
     build-course.js                    ← Pattern fill: Stitch patterns + real content → course.html
+    review-course.js                   ← Playwright screenshot capture (Phase 6 visual review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
   output/
     content-bucket.json                ← Extracted from test SCORM
@@ -426,17 +427,34 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
 - **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
-- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst)
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate)
 
-## Screenshots Workflow
-Dev screenshots go in `screenshots/` (gitignored). Overwrite the same filenames each run:
-- `screenshots/desktop-top.jpeg` — hero + nav viewport
-- `screenshots/desktop-scroll1.jpeg` — first scroll (text, accordion)
-- `screenshots/desktop-scroll2.jpeg` — mid-page (graphic-text, bento)
-- `screenshots/desktop-scroll3.jpeg` — interactive (quiz, flashcard)
-- `screenshots/mobile-top.jpeg` — mobile viewport hero
+## Phase 6 — Visual Review (`v5/scripts/review-course.js`)
 
-Use Playwright: `npx http-server -p 8765 -c-1 --silent &` then navigate to `http://localhost:8765/v5/output/course.html`.
+Automated Playwright screenshot capture for every section + mobile. **This is mandatory after every pipeline run.**
+
+```bash
+node v5/scripts/review-course.js
+```
+
+Outputs to `screenshots/` (gitignored):
+- `section-00.jpeg` through `section-NN.jpeg` — one per section from course-layout.json
+- `footer.jpeg` — course complete + footer
+- `mobile-hero.jpeg` — mobile viewport hero
+- `mobile-mid.jpeg` — mobile viewport mid-page
+- `brand.jpeg` — brand reference screenshot
+
+**The review loop workflow:**
+1. Run full pipeline (Phases 1-5)
+2. Run `review-course.js`
+3. Claude Code views every section screenshot (vision), diagnoses layout/design issues
+4. Fix the **engine** (build-course.js, hydrate.js, prompts, etc.)
+5. Rebuild + re-review
+6. Repeat until clean
+
+**When doing review runs, alternate brand URLs** between `najaf.framer.ai` (dark/green) and `ailyx.framer.website` (light/blue) to ensure fixes are universal. A fix that works for one brand but breaks the other is the wrong fix.
+
+**Image generation must achieve 100% coverage.** `generate-images.js` has retry logic (Pass 1 + Pass 2) and SVG placeholder fallback. Do not proceed to Build if images are missing — the script guarantees 100% asset delivery.
 
 ---
 
