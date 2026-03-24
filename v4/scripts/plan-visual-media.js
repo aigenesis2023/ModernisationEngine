@@ -11,8 +11,8 @@
  * - Conceptual/abstract subjects (processes, diagrams, comparisons) → "illustration" (Stitch)
  * - Hero/full-bleed backgrounds → always "photo" (atmosphere matters)
  *
- * Input:  v3/output/course-layout.json
- * Output: v3/output/media-plan.json
+ * Input:  v4/output/course-layout.json
+ * Output: v4/output/media-plan.json
  */
 
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
@@ -181,9 +181,9 @@ function generateIllustrationPrompt(component, brandProfile) {
 
 // --- Main ---
 function main() {
-  const layoutPath = join(ROOT, 'v3/output/course-layout.json');
-  const brandPath = join(ROOT, 'v3/output/brand-profile.json');
-  const outputDir = join(ROOT, 'v3/output');
+  const layoutPath = join(ROOT, 'v4/output/course-layout.json');
+  const brandPath = join(ROOT, 'v4/output/brand-profile.json');
+  const outputDir = join(ROOT, 'v4/output');
 
   const layout = JSON.parse(readFileSync(layoutPath, 'utf8'));
   const brand = JSON.parse(readFileSync(brandPath, 'utf8'));

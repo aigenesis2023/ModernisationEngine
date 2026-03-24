@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * V2 Image Generator
+ * V4 Image Generator
  *
  * Reads course-layout.json, generates images via Hugging Face Inference API,
  * and updates the layout JSON with actual image paths.
  *
  * Usage:
- *   HF_TOKEN=hf_... node v3/scripts/generate-images.js
- *   node v3/scripts/generate-images.js                    # reads from env
+ *   HF_TOKEN=hf_... node v4/scripts/generate-images.js
+ *   node v4/scripts/generate-images.js                    # reads from env
  *
- * Input:  v3/output/course-layout.json
- * Output: v3/output/images/*.jpg + updated course-layout.json
+ * Input:  v4/output/course-layout.json
+ * Output: v4/output/images/*.jpg + updated course-layout.json
  */
 
 const fs = require('fs');
@@ -175,7 +175,7 @@ async function main() {
   // Check for token
   if (!HF_TOKEN) {
     console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: HF_TOKEN=hf_... node v3/scripts/generate-images.js');
+    console.error('Usage: HF_TOKEN=hf_... node v4/scripts/generate-images.js');
     process.exit(1);
   }
 
