@@ -1,17 +1,17 @@
 {
-  "sourceUrl": "https://sprig.framer.website/",
+  "sourceUrl": "https://najaf.framer.ai/",
   "colors": {
     "primary": "#0099ff",
-    "secondary": "#1fd6fa",
-    "accent": "#003242",
-    "background": "#262626",
-    "surface": "#171b1c",
+    "secondary": "#9cf35b",
+    "accent": "#e7ff2e",
+    "background": "#28282c",
+    "surface": "#171717",
     "text": "#f0f0f0",
     "textMuted": "#c8c8c8",
     "success": "#10b981",
     "error": "#ef4444",
     "warning": "#f59e0b",
-    "gradient": "linear-gradient(135deg, #0099ff, #1fd6fa)",
+    "gradient": "linear-gradient(135deg, #0099ff, #9cf35b)",
     "isDark": true,
     "_themeSignals": {
       "light": 0,
@@ -19,26 +19,26 @@
     }
   },
   "typography": {
-    "headingFont": "Manrope",
-    "bodyFont": "Inter",
-    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap",
-    "baseSize": 16,
+    "headingFont": "Inter Display",
+    "bodyFont": "Roboto Mono",
+    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Inter%20Display:wght@400;500;600;700&family=Roboto%20Mono:wght@400;500;600;700&display=swap",
+    "baseSize": 26,
     "headingSizes": {
-      "h1": 40,
-      "h2": 32,
-      "h3": 24
+      "h1": 65,
+      "h2": 52,
+      "h3": 39
     },
     "lineHeight": 1.6,
     "headingWeight": 700,
     "bodyWeight": 500
   },
   "style": {
-    "borderRadius": "12px",
+    "borderRadius": "8px",
     "cardStyle": "glass",
-    "buttonStyle": "rounded",
+    "buttonStyle": "solid",
     "imageStyle": "rounded",
     "mood": "creative",
-    "medianRadius": 12,
+    "medianRadius": 8,
     "hasBoxShadow": true,
     "hasBackdropFilter": true,
     "hasTransparentBg": true,
@@ -49,10 +49,10 @@
     }
   },
   "logo": {
-    "url": "https://framerusercontent.com/images/7uN0qKMaTTsYJr5x6lvz2GyQ1g.jpg?width=1922&height=1204",
-    "width": 1922,
-    "height": 1204,
-    "alt": "Logo"
+    "url": "https://framerusercontent.com/images/mSo32qHoUzHmqG3MGK4w5ZSXjo4.png",
+    "width": 200,
+    "height": 60,
+    "alt": "Free Framer Template for SaaS"
   },
-  "scrapedAt": "2026-03-24T09:32:06.630Z"
+  "scrapedAt": "2026-03-24T11:50:00.893Z"
 }

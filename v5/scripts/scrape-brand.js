@@ -832,27 +832,8 @@ async function scrapeBrand(url) {
 }
 
 // ─── CLI entry point ─────────────────────────────────────────────────
-const brandUrl = process.argv[2];
-if (!brandUrl) {
-  // Try reading from WEBSITE BRANDING REF.rtf
-  const refFile = path.resolve('WEBSITE BRANDING REF.rtf');
-  if (fs.existsSync(refFile)) {
-    const content = fs.readFileSync(refFile, 'utf-8');
-    const urlMatch = content.match(/https?:\/\/[^\s]+/);
-    if (urlMatch) {
-      console.log(`Found brand URL in ref file: ${urlMatch[0]}`);
-      run(urlMatch[0]);
-    } else {
-      console.error('Usage: node v5/scripts/scrape-brand.js <brand-url>');
-      process.exit(1);
-    }
-  } else {
-    console.error('Usage: node v5/scripts/scrape-brand.js <brand-url>');
-    process.exit(1);
-  }
-} else {
-  run(brandUrl);
-}
+const brandUrl = process.argv[2] || fs.readFileSync(path.resolve('brand/url.txt'), 'utf-8').trim();
+run(brandUrl);
 
 async function run(url) {
   try {
