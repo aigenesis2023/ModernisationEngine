@@ -3,4 +3,6 @@ node_modules/
 .DS_Store
 EV/
 .playwright-screenshots/
+.playwright-mcp/
+screenshots/
 .env

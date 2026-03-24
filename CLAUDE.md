@@ -149,6 +149,7 @@ Extracts all educational content from the SCORM file:
 ### Phase 2 — Brand Analysis (`v4/scripts/scrape-brand.js`)
 **Input:** Brand URL
 **Output:** `v4/output/brand-profile.json` + `v4/output/brand-design.md`
+**Known bug:** Theme detection currently uses only body/root CSS background-color, which can be wrong (e.g., Fluence has `#1b0c25` in CSS but is visually a light/airy site). Fix: use multiple signals — count of dark vs light backgrounds across all elements, check for gradient overlays, check actual content area backgrounds, not just body.
 
 Scrapes the URL for raw design data, then translates it into Stitch's native language:
 - Extracts: colours, fonts, border-radius, spacing, visual patterns
@@ -287,6 +288,50 @@ When describing brands, use Stitch's native terms:
 
 ### Future: IMAGE_TO_UI
 The SDK's internal schema references `IMAGE_TO_UI` project types. When this tool is exposed, we can pass brand URL screenshots directly to Stitch instead of generating DESIGN.md from CSS scraping. Monitor SDK updates.
+
+### API Constraints (IMPORTANT)
+- `generate_screen_from_text` only accepts: `projectId`, `prompt`, `deviceType`, `modelId`
+- There is NO theme parameter on the API input. DesignTheme fields appear in the OUTPUT schema only.
+- Therefore: the DESIGN.md content must go INSIDE the text `prompt` parameter. Stitch understands it there because it's trained on DESIGN.md format.
+- Do NOT try to pass DesignTheme as a separate API parameter — it won't work.
+
+### Prompt Enhancement (from stitch-skills repo)
+The stitch-design skill (https://github.com/google-labs-code/stitch-skills) specifies that enhanced prompts should include:
+1. Platform specification (Web Desktop)
+2. Design system brief (the DESIGN.md content)
+3. Palette with semantic role naming + hex codes
+4. Style descriptors for roundness and shadow/elevation
+5. Detailed PAGE STRUCTURE with Header, Hero, Content Area, Footer
+- Convert informal language to professional UI/UX terminology (e.g., "nice header" → "sticky navigation bar with glassmorphism")
+- Use evocative atmospheric direction (Minimalist, Vibrant, Brutalist, etc.)
+
+### Component Pattern Extraction (key engineering challenge)
+After Stitch returns the full HTML page, we must extract individual component patterns. Strategy:
+- In the representative course prompt, instruct Stitch to wrap each component in a container with `data-component-type="hero"`, `data-component-type="accordion"`, etc.
+- Parse the returned HTML to extract each component's HTML fragment by its data attribute
+- Store each fragment as a fillable template in `component-patterns/`
+- The build script matches course-layout.json component types to the extracted patterns
+
+### What hydrate.js Expects (data attributes)
+hydrate.js looks for these specific data attributes to add interactivity:
+- **Quizzes:** `data-quiz` on container, `data-correct="N"` (zero-indexed), `data-choice` on each option
+- **Accordions:** Native `<details><summary>` elements
+- **Tabs:** `data-tabs` on container, `data-tab-trigger` on buttons, `data-tab-panel` on panels
+- **Flashcards:** `data-flashcard` on card container
+- **Checklists:** `data-checklist` on container, native `<input type="checkbox">`
+- **Carousels:** `data-carousel` on container, `data-slide` on slides, `data-prev`/`data-next` on nav
+- **Text inputs:** Native `<form>` with `<input>` elements
+
+These MUST be included in the Stitch prompt so Stitch generates HTML with these exact attributes. hydrate.js then "lights them up" with interactivity.
+
+### representative-course.md Design Requirements
+This file must:
+- Include ALL 25 component types (no gaps — the authoring layer needs every type designed)
+- Arrange them in a realistic e-learning flow (hero → intro text → content → quiz → etc.)
+- Use generic but realistic example content (not tied to any specific SCORM)
+- Request `data-component-type` attributes on each component wrapper for extraction
+- Request all interactive data attributes listed above for hydrate.js compatibility
+- Be a SINGLE deep-scroll page (not multiple pages)
 
 ---
 
