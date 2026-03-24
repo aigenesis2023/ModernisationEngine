@@ -1,29 +1,109 @@
-<section class="relative py-12" data-component-type="process-flow">
-<div class="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-0">
-<!-- Step 1 -->
-<div class="flex flex-col items-center gap-4 z-10 w-full md:w-1/4">
-<div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center text-on-primary font-black text-xl shadow-[0_0_20px_rgba(70,165,255,0.4)]">1</div>
-<div class="text-center">
-<h6 class="font-bold text-on-surface">Assimilation</h6>
-<p class="text-xs text-on-surface-variant mt-1">Absorb foundational data</p>
+<section class="px-8 py-16 max-w-7xl mx-auto" data-component-type="process-flow">
+<div class="mb-20">
+<h1 class="text-6xl md:text-8xl font-headline font-black text-primary tracking-tighter uppercase mb-4">
+          Mastery Path
+        </h1>
+<div class="h-1 w-32 bg-primary mb-6 shadow-[0_0_12px_#59ee50]"></div>
+<p class="text-on-surface-variant text-lg max-w-2xl font-body leading-relaxed">
+          The systematic progression of architectural thinking and code mastery. Follow the sequential darkroom process to develop high-performance resilient systems.
+        </p>
+</div>
+<div class="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+<!-- Connection Lines (Desktop) -->
+<div class="hidden lg:block absolute top-1/2 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent -translate-y-1/2 z-0"></div>
+<!-- Node 1 -->
+<div class="relative z-10 group">
+<div class="absolute -top-4 -left-4 text-primary/10 font-headline font-black text-9xl select-none group-hover:text-primary/20 transition-colors">01</div>
+<div class="bg-surface-container/60 backdrop-blur-xl border border-white/5 p-8 rounded-DEFAULT hover:bg-surface-container-high transition-all duration-300 hover:scale-[1.02] shadow-[0_24_80px_rgba(0,0,0,0.5)] h-full flex flex-col">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-on-primary transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="psychology">psychology</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-3 text-on-surface uppercase">Foundational Logic</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
+              Establish core mental models for distributed systems and asynchronous communication patterns.
+            </p>
+<div class="mt-auto flex items-center text-primary font-label text-xs tracking-widest uppercase">
+<span>Status: Completed</span>
+<span class="ml-auto material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
 </div>
 </div>
-<div class="hidden md:block flex-1 h-[2px] bg-gradient-to-r from-primary to-secondary/50 opacity-20 mx-4"></div>
-<!-- Step 2 -->
-<div class="flex flex-col items-center gap-4 z-10 w-full md:w-1/4">
-<div class="w-16 h-16 rounded-full glass-panel border border-secondary flex items-center justify-center text-secondary font-black text-xl">2</div>
-<div class="text-center">
-<h6 class="font-bold text-on-surface">Synthesis</h6>
-<p class="text-xs text-on-surface-variant mt-1">Cross-reference concepts</p>
+</div>
+<!-- Node 2 -->
+<div class="relative z-10 group">
+<div class="absolute -top-4 -left-4 text-primary/10 font-headline font-black text-9xl select-none group-hover:text-primary/20 transition-colors">02</div>
+<div class="bg-surface-container/60 backdrop-blur-xl border border-white/5 p-8 rounded-DEFAULT hover:bg-surface-container-high transition-all duration-300 hover:scale-[1.02] shadow-[0_24_80px_rgba(0,0,0,0.5)] h-full flex flex-col">
+<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center text-primary mb-6 group-hover:bg-primary group-hover:text-on-primary transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="terminal">terminal</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-3 text-on-surface uppercase">Execution Context</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
+              Deep dive into runtime internals, memory management, and high-frequency execution pipelines.
+            </p>
+<div class="mt-auto flex items-center text-primary font-label text-xs tracking-widest uppercase">
+<span>Status: Active</span>
+<span class="ml-auto w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_#59ee50]"></span>
 </div>
 </div>
-<div class="hidden md:block flex-1 h-[2px] bg-gradient-to-r from-secondary/50 to-tertiary/50 opacity-20 mx-4"></div>
-<!-- Step 3 -->
-<div class="flex flex-col items-center gap-4 z-10 w-full md:w-1/4">
-<div class="w-16 h-16 rounded-full glass-panel border border-tertiary flex items-center justify-center text-tertiary font-black text-xl">3</div>
-<div class="text-center">
-<h6 class="font-bold text-on-surface">Manifestation</h6>
-<p class="text-xs text-on-surface-variant mt-1">Apply results to output</p>
+</div>
+<!-- Node 3 -->
+<div class="relative z-10 group opacity-70">
+<div class="absolute -top-4 -left-4 text-primary/10 font-headline font-black text-9xl select-none group-hover:text-primary/20 transition-colors">03</div>
+<div class="bg-surface-container/60 backdrop-blur-xl border border-white/5 p-8 rounded-DEFAULT hover:bg-surface-container-high transition-all duration-300 hover:scale-[1.02] shadow-[0_24_80px_rgba(0,0,0,0.5)] h-full flex flex-col">
+<div class="w-14 h-14 rounded-full bg-surface-variant flex items-center justify-center text-outline mb-6 transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-3 text-on-surface uppercase">Neural Grid</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
+              Building mesh architectures and self-healing service discovery protocols for global scale.
+            </p>
+<div class="mt-auto flex items-center text-outline font-label text-xs tracking-widest uppercase">
+<span>Locked</span>
+<span class="ml-auto material-symbols-outlined text-sm">lock</span>
+</div>
+</div>
+</div>
+<!-- Node 4 -->
+<div class="relative z-10 group opacity-70">
+<div class="absolute -top-4 -left-4 text-primary/10 font-headline font-black text-9xl select-none group-hover:text-primary/20 transition-colors">04</div>
+<div class="bg-surface-container/60 backdrop-blur-xl border border-white/5 p-8 rounded-DEFAULT hover:bg-surface-container-high transition-all duration-300 hover:scale-[1.02] shadow-[0_24_80px_rgba(0,0,0,0.5)] h-full flex flex-col">
+<div class="w-14 h-14 rounded-full bg-surface-variant flex items-center justify-center text-outline mb-6 transition-all duration-300">
+<span class="material-symbols-outlined" data-icon="diamond">diamond</span>
+</div>
+<h3 class="font-headline font-bold text-2xl mb-3 text-on-surface uppercase">Absolute Performance</h3>
+<p class="font-body text-sm text-on-surface-variant leading-relaxed mb-6">
+              Final-stage optimization: squeezing every millisecond of latency from critical path operations.
+            </p>
+<div class="mt-auto flex items-center text-outline font-label text-xs tracking-widest uppercase">
+<span>Locked</span>
+<span class="ml-auto material-symbols-outlined text-sm">lock</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Detail Card Asymmetric Layout -->
+<div class="mt-32 grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+<div class="lg:col-span-7 rounded-DEFAULT overflow-hidden relative group aspect-video lg:aspect-auto lg:h-[500px]">
+<img alt="Cybersecurity hardware" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700" data-alt="Close-up of futuristic computer motherboard with neon green circuit lines glowing in the dark, cinematic technical aesthetic" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmIokj942jly-d4EV6kVccW7YMIOEPY9UG9Z9yqqSCyg42myWhUE1RSRDthZx2lns5nnfOnScvNd53--99HPjjkDIqpYMloAq1mK_N2VTlSITP6GeHipZBpQFMbGPYeiqucT0DG38hmDkE-kh6bSZsJwSz-tbP8xhg6VOpo0hgBTqxeQxjVjyXzP2JezFfBED9RQqlDxg-4Hd5anrheOY9btTEsZu_mRkvwBi39Q2MEQTDcMFhM21wolRNm2lw8pA4u0Y9Lhed_4nx"/>
+<div class="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent"></div>
+<div class="absolute bottom-8 left-8">
+<span class="inline-block bg-primary text-on-primary px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase mb-4">Live Session</span>
+<h2 class="font-headline text-3xl font-black text-white uppercase max-w-sm">Optimizing Low-Level I/O Operations</h2>
+</div>
+</div>
+<div class="lg:col-span-5 space-y-8">
+<div class="space-y-2">
+<div class="text-primary font-headline font-bold text-sm tracking-widest uppercase">Current Objective</div>
+<h3 class="text-4xl font-headline font-black text-white uppercase leading-none">The Terminal<br/>Interface</h3>
+</div>
+<div class="space-y-4 font-body text-on-surface-variant leading-relaxed">
+<p>To master the Kinetic Darkroom, one must first understand the abstraction layers between the interface and the metal. Our current module focuses on minimizing context switching.</p>
+<p class="text-sm border-l-2 border-primary pl-6 py-2 italic bg-white/5">"Architecture is not about making things look clean, it's about making them invisible."</p>
+</div>
+<div class="pt-6">
+<button class="px-8 py-4 border border-primary/20 text-primary rounded-full font-headline font-bold text-sm tracking-widest uppercase hover:bg-primary/10 transition-all active:scale-95 flex items-center gap-4">
+              Access Lab Environment
+              <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
 </div>
 </div>
 </div>

@@ -7360,7 +7360,7 @@ Design a complete course layout for the following content. Read ALL the content 
       }
     ]
   },
-  "extractedAt": "2026-03-24T11:49:54.546Z"
+  "extractedAt": "2026-03-24T14:37:48.914Z"
 }
 ```
 
@@ -7370,63 +7370,11 @@ Design a complete course layout for the following content. Read ALL the content 
 
 ```json
 {
-  "sourceUrl": "https://najaf.framer.ai/",
-  "colors": {
-    "primary": "#0099ff",
-    "secondary": "#9cf35b",
-    "accent": "#e7ff2e",
-    "background": "#28282c",
-    "surface": "#171717",
-    "text": "#f0f0f0",
-    "textMuted": "#c8c8c8",
-    "success": "#10b981",
-    "error": "#ef4444",
-    "warning": "#f59e0b",
-    "gradient": "linear-gradient(135deg, #0099ff, #9cf35b)",
-    "isDark": true,
-    "_themeSignals": {
-      "light": 0,
-      "dark": 2
-    }
-  },
-  "typography": {
-    "headingFont": "Inter Display",
-    "bodyFont": "Roboto Mono",
-    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Inter%20Display:wght@400;500;600;700&family=Roboto%20Mono:wght@400;500;600;700&display=swap",
-    "baseSize": 26,
-    "headingSizes": {
-      "h1": 65,
-      "h2": 52,
-      "h3": 39
-    },
-    "lineHeight": 1.6,
-    "headingWeight": 700,
-    "bodyWeight": 500
-  },
-  "style": {
-    "borderRadius": "8px",
-    "cardStyle": "glass",
-    "buttonStyle": "solid",
-    "imageStyle": "rounded",
-    "mood": "creative",
-    "medianRadius": 8,
-    "hasBoxShadow": true,
-    "hasBackdropFilter": true,
-    "hasTransparentBg": true,
-    "spacing": {
-      "unit": 8,
-      "section": 64,
-      "element": 16
-    }
-  },
-  "logo": {
-    "url": "https://framerusercontent.com/images/mSo32qHoUzHmqG3MGK4w5ZSXjo4.png",
-    "width": 200,
-    "height": 60,
-    "alt": "Free Framer Template for SaaS"
-  },
-  "scrapedAt": "2026-03-24T11:50:00.893Z"
+  "sourceUrl": "https://ailyx.framer.website/",
+  "scrapedAt": "2026-03-24T00:00:00.000Z",
+  "imageTreatment": "Bright, well-lit professional photography with cool blue colour temperature, soft clean lighting with gentle gradients, modern corporate atmosphere"
 }
+
 ```
 
 ---

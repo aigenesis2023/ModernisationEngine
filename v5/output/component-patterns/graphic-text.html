@@ -1,22 +1,52 @@
-<section class="py-32 px-6 max-w-7xl mx-auto" data-component-type="graphic-text" id="hierarchy">
-<div class="flex flex-col md:flex-row gap-20 items-center">
-<div class="w-full md:w-1/2 order-2 md:order-1">
-<div class="relative group">
-<div class="absolute -inset-4 bg-primary/10 blur-3xl group-hover:bg-primary/20 transition-all"></div>
-<!-- Pyramid Visualization -->
-<div class="relative flex flex-col items-center">
-<div class="w-[80%] h-16 bg-primary/20 border-b border-primary/40 flex items-center justify-center font-bold tracking-widest text-primary clip-pyramid-1">ELIMINATION</div>
-<div class="w-[85%] h-16 bg-primary/15 border-b border-primary/30 flex items-center justify-center font-bold tracking-widest text-primary/80">SUBSTITUTION</div>
-<div class="w-[90%] h-16 bg-primary/10 border-b border-primary/20 flex items-center justify-center font-bold tracking-widest text-primary/60">ENGINEERING</div>
-<div class="w-[95%] h-16 bg-primary/5 border-b border-primary/10 flex items-center justify-center font-bold tracking-widest text-primary/40">ADMINISTRATIVE</div>
-<div class="w-full h-16 bg-surface-container border-b border-white/5 flex items-center justify-center font-bold tracking-widest text-slate-600">PPE</div>
+<section class="py-32 px-12 bg-surface" data-component-type="graphic-text">
+<div class="max-w-7xl mx-auto">
+<div class="flex flex-col md:flex-row gap-16 items-center">
+<div class="w-full md:w-1/2 relative">
+<div class="absolute -inset-10 bg-primary/5 blur-3xl rounded-full"></div>
+<div class="relative glass-panel p-12 rounded-3xl overflow-hidden aspect-square flex flex-col justify-end">
+<div class="absolute inset-0 light-streak"></div>
+<h3 class="text-6xl font-headline font-bold tracking-tighter mb-4">Hierarchy of <br/><span class="text-primary">Controls</span></h3>
+<p class="text-on-surface-variant">The inverted pyramid of risk management strategy.</p>
 </div>
 </div>
+<div class="w-full md:w-1/2" data-component-type="accordion">
+<h4 class="text-sm font-headline tracking-[0.4em] uppercase text-primary mb-8">The Five Levels</h4>
+<div class="space-y-4">
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border-b border-outline-variant/10">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-surface-container-high transition-colors list-none">
+<span class="font-headline font-bold text-xl flex items-center gap-4">
+<span class="text-primary-dim text-sm opacity-50">01</span> ELIMINATION
+                                    </span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant leading-relaxed text-sm">
+                                    Physically remove the hazard. This is the most effective control measure. If the hazard is not there, it cannot cause harm.
+                                </div>
+</details>
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border-b border-outline-variant/10">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-surface-container-high transition-colors list-none">
+<span class="font-headline font-bold text-xl flex items-center gap-4">
+<span class="text-primary-dim text-sm opacity-50">02</span> SUBSTITUTION
+                                    </span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant leading-relaxed text-sm">
+                                    Replace the hazard with something less dangerous (e.g., using a water-based solvent instead of a chemical-based one).
+                                </div>
+</details>
+<details class="group bg-surface-container-low rounded-xl overflow-hidden border-b border-outline-variant/10">
+<summary class="flex justify-between items-center p-6 cursor-pointer hover:bg-surface-container-high transition-colors list-none">
+<span class="font-headline font-bold text-xl flex items-center gap-4">
+<span class="text-primary-dim text-sm opacity-50">03</span> ENGINEERING
+                                    </span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+</summary>
+<div class="p-6 pt-0 text-on-surface-variant leading-relaxed text-sm">
+                                    Isolate people from the hazard through physical barriers, ventilation systems, or automated machine guards.
+                                </div>
+</details>
 </div>
-<div class="w-full md:w-1/2 order-1 md:order-2">
-<h2 class="text-5xl font-black tracking-tighter mb-8 leading-none">Hierarchy of <span class="text-primary">Controls</span></h2>
-<p class="text-lg text-on-surface-variant leading-relaxed mb-6 italic">The gold standard for workplace safety prioritization.</p>
-<p class="text-lg text-on-surface-variant leading-relaxed">This systemic approach ensures that the most effective methods—removing the hazard entirely—are considered before relying on human behavior or personal protective equipment.</p>
+</div>
 </div>
 </div>
 </section>

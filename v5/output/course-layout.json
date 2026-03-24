@@ -16,7 +16,7 @@
           "body": "<p>Your essential guide to identifying, understanding, and working safely around electric and hybrid vehicles.</p>",
           "imagePrompt": "Sleek modern electric vehicle in a professional workshop environment, dramatic lighting with cyan and lime accent glows, dark moody atmosphere, high-end automotive photography style, 1920x1080",
           "_graphic": {
-            "large": "images/comp-000.jpg",
+            "large": "images/comp-000.svg",
             "alt": "Modern electric vehicle in a professional workshop with dramatic lighting"
           }
         }
@@ -115,7 +115,7 @@
           "_imageAlign": "right",
           "imagePrompt": "Close-up of an electric vehicle badge and charge port on a modern car, professional automotive photography, dark background with cyan accent lighting, 800x600",
           "_graphic": {
-            "large": "images/comp-005.jpg",
+            "large": "images/comp-005.svg",
             "alt": "Close-up of an electric vehicle badge and charging port"
           }
         },
@@ -159,7 +159,7 @@
           "_imageAlign": "left",
           "imagePrompt": "Modern electric vehicle interior dashboard showing digital displays and energy flow screen, clean professional photography, dark theme with cool blue accent lighting, 800x600",
           "_graphic": {
-            "large": "images/comp-007.jpg",
+            "large": "images/comp-007.svg",
             "alt": "Electric vehicle interior dashboard with digital energy display"
           }
         },
@@ -265,7 +265,7 @@
           "overlayPosition": "left",
           "imagePrompt": "Dramatic wide shot of multiple electric vehicles lined up in a modern showroom, dark moody atmosphere with cyan and green accent lighting, cinematic composition, 1920x800",
           "_graphic": {
-            "large": "images/comp-009.jpg",
+            "large": "images/comp-009.svg",
             "alt": "Multiple electric vehicles in a modern showroom"
           }
         },
@@ -305,7 +305,7 @@
           "_imageAlign": "right",
           "imagePrompt": "Technical illustration showing electric vehicle powertrain family tree diagram, clean modern infographic style with dark background and cyan/lime accent colors, 800x600",
           "_graphic": {
-            "large": "images/comp-011.jpg",
+            "large": "images/comp-011.svg",
             "alt": "EV family tree showing the different categories of electric vehicles"
           }
         },
@@ -407,42 +407,42 @@
               "title": "HV Battery Pack",
               "body": "<p>High voltage traction battery — typically 60–800V. Powers the electric drive motors. This is the primary energy storage component and represents the most significant safety consideration.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-0.jpg"
+                "large": "images/comp-014-item-0.svg"
               }
             },
             {
               "title": "Power Electronics Controller",
               "body": "<p>Contains the inverter to change AC to DC current and vice versa, plus the electronic controller that manages power flow throughout the vehicle.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-1.jpg"
+                "large": "images/comp-014-item-1.svg"
               }
             },
             {
               "title": "Electric Drive Motor",
               "body": "<p>Powered by high voltage AC from the electronics controller to drive the vehicle. In some configurations, it can also work as a generator during regenerative braking.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-2.jpg"
+                "large": "images/comp-014-item-2.svg"
               }
             },
             {
               "title": "DC/DC Converter",
               "body": "<p>Converts high voltage from the traction battery to low voltage (12V) for the vehicle's conventional electrical systems — lights, radio, and control modules.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-3.jpg"
+                "large": "images/comp-014-item-3.svg"
               }
             },
             {
               "title": "Battery Cooling System",
               "body": "<p>Maintains optimal battery temperature. Essential for performance, longevity, and safety. Overheating batteries can lead to thermal runaway.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-4.jpg"
+                "large": "images/comp-014-item-4.svg"
               }
             },
             {
               "title": "On-Board Charger",
               "body": "<p>Found in BEVs and PHEVs. Takes mains electricity and converts it to charge the vehicle's high voltage battery. Connected via the mains charging port.</p>",
               "_graphic": {
-                "large": "images/comp-014-item-5.jpg"
+                "large": "images/comp-014-item-5.svg"
               }
             }
           ],
@@ -487,7 +487,7 @@
           "_imageAlign": "left",
           "imagePrompt": "Screenshot-style illustration of a government vehicle database interface showing electric vehicle details, clean UI design, dark theme, 800x600",
           "_graphic": {
-            "large": "images/comp-015.jpg",
+            "large": "images/comp-015.svg",
             "alt": "Government vehicle enquiry service showing EV details"
           }
         }
@@ -602,42 +602,42 @@
               "title": "Electric Shock",
               "body": "<p>High voltage components and cabling capable of delivering a fatal electric shock. Stored electrical energy can cause arc/flash.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-0.jpg"
+                "large": "images/comp-020-item-0.svg"
               }
             },
             {
               "title": "Silent Operation",
               "body": "<p>People may be unaware of vehicles moving as they are silent when electrically driven. AVAS warning systems may not sound as expected.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-1.jpg"
+                "large": "images/comp-020-item-1.svg"
               }
             },
             {
               "title": "Battery Hazards",
               "body": "<p>Potential release of explosive gases and harmful liquids if batteries are damaged or incorrectly modified.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-2.jpg"
+                "large": "images/comp-020-item-2.svg"
               }
             },
             {
               "title": "Residual Voltage",
               "body": "<p>Components may retain dangerous voltage even when the vehicle is switched off.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-3.jpg"
+                "large": "images/comp-020-item-3.svg"
               }
             },
             {
               "title": "Unexpected Movement",
               "body": "<p>Electric motors or the vehicle itself may move unexpectedly due to magnetic forces within the motors.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-4.jpg"
+                "large": "images/comp-020-item-4.svg"
               }
             },
             {
               "title": "Medical Devices",
               "body": "<p>The electrical systems on the vehicle may affect medical devices such as pacemakers.</p>",
               "_graphic": {
-                "large": "images/comp-020-item-5.jpg"
+                "large": "images/comp-020-item-5.svg"
               }
             }
           ],
@@ -682,7 +682,7 @@
           "_imageAlign": "right",
           "imagePrompt": "High voltage warning symbol with electrical safety equipment including insulated gloves and tools, dark professional photography with yellow/orange warning color accents, 800x600",
           "_graphic": {
-            "large": "images/comp-021.jpg",
+            "large": "images/comp-021.svg",
             "alt": "High voltage warning symbol with safety equipment"
           }
         },
@@ -935,7 +935,7 @@
           "overlayPosition": "center",
           "imagePrompt": "Modern EV charging station at night with multiple charging points, dramatic lighting with glowing cyan and green LED indicators, cinematic dark atmosphere, 1920x800",
           "_graphic": {
-            "large": "images/comp-031.jpg",
+            "large": "images/comp-031.svg",
             "alt": "Modern EV charging station at night"
           }
         },
@@ -998,7 +998,7 @@
           "body": "<p>You've covered all the essential knowledge for EV awareness and safety. Complete the final assessment below.</p>",
           "imagePrompt": "Professional workshop team standing near an electric vehicle with safety equipment visible, confident and professional atmosphere, dark moody lighting with cyan accents, 1920x1080",
           "_graphic": {
-            "large": "images/comp-034.jpg",
+            "large": "images/comp-034.svg",
             "alt": "Professional workshop team with EV safety equipment"
           }
         },

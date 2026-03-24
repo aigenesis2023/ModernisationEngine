@@ -2,50 +2,46 @@ You are designing a complete, premium e-learning course page.
 
 === DESIGN SYSTEM BRIEF ===
 
-# DESIGN.md — Brand Design Brief for Stitch
+# DESIGN.md — Brand Brief
 
 ## Visual Theme & Atmosphere
-Sophisticated, Moody, Glass-forward, Ethereal, Creative
-
-This design should feel like a premium, custom-built learning platform. The overall mood is **creative** with a **dark** colour scheme.
+Dark, sleek, tech-forward, high-contrast. The overall feel is bold and modern — a near-black background with vivid lime-green accents creating a striking, premium technology aesthetic. The atmosphere is confident, cutting-edge, and developer-oriented with subtle organic texture from diagonal light streaks.
 
 ## Colour Palette & Roles
-- **Cyan** (#0099ff) — Primary actions, key interactive elements, navigation accents
-- **Soft Emerald** (#9cf35b) — Secondary actions, supporting elements, section highlights
-- **Soft Lime** (#e7ff2e) — Accent highlights, hover states, decorative elements
-- **Background** (#28282c) — Page background
-- **Surface** (#171717) — Card backgrounds, elevated containers
-- **Text** (#f0f0f0) — Primary body text
-- **Text Muted** (#c8c8c8) — Secondary text, captions, labels
-
-Material Design System:
-- colorMode: DARK
-- colorVariant: EXPRESSIVE
+- **Primary surface:** Deep black / near-black — the dominant background colour
+- **Primary accent:** Vibrant lime green — used for CTAs, highlighted text, and interactive elements
+- **Primary text:** Crisp white for headlines and body text against the dark background
+- **Secondary text:** Muted gray for supporting copy and navigation links
+- **Surface containers:** Dark charcoal cards with subtle borders, slightly lighter than the background
+- **Trust indicators:** Soft gold/amber for award laurels and social proof elements
 
 ## Typography Rules
-- **Headings:** Inter (INTER) — bold, confident, clear hierarchy
-- **Body:** Inter (INTER) — readable, comfortable, generous line height
-- Let Stitch determine the exact font sizes, weights, and line heights for optimal readability
+- **Headings:** Large-scale, bold sans-serif with tight tracking — clean and geometric
+- **Body text:** Medium-weight sans-serif, comfortable reading size with good line spacing
+- **Navigation:** Small, lightweight uppercase text with generous letter spacing
+- **Suggested Stitch fonts:** SPACE_GROTESK for headlines, INTER for body text
 
 ## Component Stylings
-- **Cards:** Frosted glass cards with backdrop blur and subtle borders
-- **Buttons:** Solid fill buttons with subtle corner radius
-- **Borders:** Soft rounded corners on images and containers
-- **Interactive elements:** Clear hover states, smooth transitions, focus indicators for accessibility
-- **Glass effects:** Use backdrop-filter blur for overlays and floating elements
-
-Stitch DesignTheme:
-- roundness: ROUND_EIGHT
-- spacingScale: 2
+- **Buttons:** Rounded pill shape with lime-green fill for primary CTAs, outlined with green border for secondary actions
+- **Cards:** Dark glass-like panels with subtle borders, rounded corners (12-16px), slight elevation
+- **Navigation bar:** Transparent, blending with dark background, white text links, green pill CTA on right
+- **Award badges:** Laurel wreath icons in muted gold with small text labels
+- **Feature icons:** Contained in rounded dark panels with subtle green accents
 
 ## Layout Principles
-- **Whitespace:** Balanced whitespace for comfortable reading
-- **Grid:** Responsive grid that works from mobile to desktop
-- **Section rhythm:** Alternate between content-dense and visual-break sections for reading flow
-- **Visual hierarchy:** Clear distinction between headings, subheadings, body text, and labels
+- Generous vertical spacing with dramatic section padding
+- Full-width hero with oversized typography dominating the viewport
+- Centered content alignment with comfortable max-width
+- Grid-based feature sections below the fold
+- Diagonal light streaks add depth without distracting from content
 
-## Brand Logo
-Logo URL: https://framerusercontent.com/images/mSo32qHoUzHmqG3MGK4w5ZSXjo4.png
+## Image Treatment
+- Dark, dramatic, low-key lighting
+- Cool green-black colour temperature
+- Moody atmospheric feel with deep shadows
+- Abstract organic textures — flowing light streaks and subtle gradients
+- Professional and futuristic mood
+
 
 === COURSE CONTENT TO DESIGN ===
 

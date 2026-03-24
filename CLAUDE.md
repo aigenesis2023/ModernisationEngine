@@ -238,6 +238,11 @@ Pattern-fill approach — Stitch provides the design system, we provide the cont
 
 All 25 component types use Approach A (extract classes, rebuild). Zero Stitch example content leaks. Different brand URL → different Stitch kit → different CSS classes → different visual output.
 
+**Layout rules enforced by every fill function (non-negotiable):**
+1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag handles spacing/background only (via `sectionOnly()` helper that strips containment classes from Stitch patterns). An inner `<div>` provides containment.
+2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2×2, not 3+1).
+3. **Typography:** Headings use a consistent scale — `h2 = text-3xl`, `h3 = text-2xl`, `h4 = text-xl` — no random size spikes. Hero `h1` is exempt (uses `text-6xl md:text-8xl`).
+
 ### Hydration (`v5/scripts/hydrate.js`)
 Vanilla JS script injected into the final HTML. Handles:
 - **Quizzes**: Select answer → submit → correct/incorrect feedback → retry
@@ -406,6 +411,7 @@ Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
 ```bash
 node v5/scripts/generate-images.js
 ```
+**Note:** HuggingFace Inference API credits are depleted (as of 2026-03-24). For review runs, skip this step and create SVG placeholders instead. The build script handles SVG placeholders fine. Layout review doesn't need real images.
 
 ### Phase 5 — Build
 ```bash
