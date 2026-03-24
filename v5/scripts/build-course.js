@@ -87,44 +87,36 @@ function findAll(html, re) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function fillHero(pattern, comp) {
-  let html = pattern;
-  // Replace h1 title
-  html = replaceFirstTag(html, 'h1', esc(comp.displayTitle || ''));
-  // Replace the subtitle paragraph
+  const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  html = replaceFirstTag(html, 'p', bodyText);
-  // Replace image if we have one
-  if (comp._graphic) {
-    const src = embedImage(comp._graphic.large);
-    const alt = esc(comp._graphic.alt || '');
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
-    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
-  }
-  return html;
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'relative min-h-screen flex items-center justify-center overflow-hidden';
+  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
+  const imgAlt = esc(comp._graphic?.alt || '');
+
+  return `<section class="${sectionClass}" data-component-type="hero">
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
+<div class="relative z-10 text-center max-w-4xl mx-auto px-8">
+<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8">${title}</h1>
+<p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12">${bodyText}</p>
+<div class="flex gap-4 justify-center">
+<button class="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold">Begin Course</button>
+<button class="px-8 py-4 border border-outline-variant rounded-xl font-bold hover:bg-surface-variant transition-colors">Explore Modules</button>
+</div>
+</div>
+</section>`;
 }
 
 function fillText(pattern, comp) {
-  let html = pattern;
-  // Replace section title (h2)
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
-  // Replace body content - find the div with paragraphs
-  const bodyDiv = html.match(/(<div class="space-y-6[^"]*">)([\s\S]*?)(<\/div>)/);
-  if (bodyDiv) {
-    html = html.replace(bodyDiv[0], `${bodyDiv[1]}${comp.body || ''}${bodyDiv[3]}`);
-  } else {
-    // Fallback: replace all <p> content
-    const paragraphs = (comp.body || '').split(/<\/?p>/g).filter(s => s.trim());
-    let pIdx = 0;
-    html = html.replace(/<p[^>]*>[\s\S]*?<\/p>/gi, (match) => {
-      if (pIdx === 0 && paragraphs.length > 0) {
-        pIdx++;
-        return paragraphs.map(p => `<p>${p}</p>`).join('\n');
-      }
-      pIdx++;
-      return '';
-    });
-  }
-  return html;
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
+
+  return `<section class="${sectionClass}" data-component-type="text">
+<h2 class="font-headline text-4xl font-bold mb-8">${title}</h2>
+<div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
+${comp.body || ''}
+</div>
+</section>`;
 }
 
 function fillAccordion(pattern, comp) {
@@ -219,42 +211,29 @@ ${newChoices}
 }
 
 function fillGraphicText(pattern, comp, index) {
-  let html = pattern;
-  // Replace title
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  const title = esc(comp.displayTitle || '');
+  const bodyText = comp.body || '';
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32 px-6 max-w-7xl mx-auto';
+  const align = comp._imageAlign || (index % 2 === 0 ? 'right' : 'left');
+  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
+  const imgAlt = esc(comp._graphic?.alt || '');
 
-  const bodyContent = comp.body || '';
-  const bodyPlain = stripTags(bodyContent);
+  const imageDiv = `<div class="w-full md:w-1/2${align === 'left' ? ' order-2 md:order-1' : ''}">
+<div class="relative group rounded-2xl overflow-hidden">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
+</div>
+</div>`;
 
-  // Replace the main paragraph
-  html = html.replace(/(<p class="text-lg[^"]*">)([\s\S]*?)(<\/p>)/i, `$1${bodyPlain}$3`);
+  const textDiv = `<div class="w-full md:w-1/2${align === 'left' ? ' order-1 md:order-2' : ''}">
+<h2 class="font-headline text-5xl font-black tracking-tighter mb-8 leading-none">${title}</h2>
+<div class="text-lg text-on-surface-variant leading-relaxed">${bodyText}</div>
+</div>`;
 
-  // Handle bullet points: replace the entire space-y-4 div with real content or remove it
-  const bulletContainer = html.match(/<div class="space-y-4">([\s\S]*?)<\/div>/i);
-  if (bulletContainer) {
-    if (bodyContent.includes('<li>')) {
-      // Extract list items from body HTML
-      const lis = bodyContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
-      const iconSpan = '<span class="material-symbols-outlined text-secondary">verified</span>';
-      const newBullets = lis.map(li => {
-        const text = stripTags(li);
-        return `<div class="flex items-start gap-4">${iconSpan}<p class="text-on-surface">${text}</p></div>`;
-      }).join('\n');
-      html = html.replace(bulletContainer[0], `<div class="space-y-4">\n${newBullets}\n</div>`);
-    } else {
-      // No bullets in content — remove the bullet container entirely
-      html = html.replace(bulletContainer[0], '');
-    }
-  }
-
-  // Replace image
-  if (comp._graphic) {
-    const src = embedImage(comp._graphic.large);
-    const alt = esc(comp._graphic.alt || '');
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
-    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
-  }
-  return html;
+  return `<section class="${sectionClass}" data-component-type="graphic-text">
+<div class="flex flex-col md:flex-row gap-20 items-center">
+${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
+</div>
+</section>`;
 }
 
 function fillBento(pattern, comp) {
@@ -307,36 +286,55 @@ ${newCards}
 }
 
 function fillDataTable(pattern, comp) {
-  let html = pattern;
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
+  const title = esc(comp.displayTitle || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-5xl mx-auto';
+  const body = comp.body || '';
 
-  const rows = comp._rows || [];
-  if (rows.length === 0) return html;
+  // Support both schema formats: columns+rows (layout engine) and _rows (legacy)
+  const columns = comp.columns || [];
+  const rows = comp.rows || comp._rows || [];
 
-  // First row is headers
-  const headers = rows[0];
-  const dataRows = rows.slice(1);
+  let headerHtml = '';
+  let bodyHtml = '';
 
-  // Replace thead
-  const theadMatch = html.match(/<thead[\s\S]*?<\/thead>/i);
-  if (theadMatch) {
-    const headerClass = theadMatch[0].match(/class="([^"]*)"/)?.[1] || '';
-    const thClass = 'p-6 font-headline font-bold';
-    const newThead = `<thead class="${headerClass}"><tr>${headers.map(h => `<th class="${thClass}">${esc(h)}</th>`).join('')}</tr></thead>`;
-    html = html.replace(theadMatch[0], newThead);
-  }
-
-  // Replace tbody
-  const tbodyMatch = html.match(/<tbody[\s\S]*?<\/tbody>/i);
-  if (tbodyMatch) {
-    const tbodyClass = tbodyMatch[0].match(/class="([^"]*)"/)?.[1] || '';
-    const newRows = dataRows.map(row =>
-      `<tr>${row.map(cell => `<td class="p-6">${esc(cell)}</td>`).join('')}</tr>`
+  if (columns.length > 0) {
+    // columns + rows format from layout engine
+    headerHtml = columns.map(c => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(c.title || '')}</th>`).join('');
+    bodyHtml = rows.map(row => {
+      const label = row.label || '';
+      const vals = row.values || [];
+      const cells = vals.map(v => {
+        if (v === true || v === 'true') return '<td class="px-8 py-4 text-secondary">&#10003;</td>';
+        if (v === false || v === 'false') return '<td class="px-8 py-4 text-error">&#10007;</td>';
+        return `<td class="px-8 py-4 text-on-surface-variant">${esc(String(v))}</td>`;
+      }).join('');
+      return `<tr class="hover:bg-white/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
+    }).join('\n');
+    // Prepend the label column header
+    headerHtml = `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
+  } else if (rows.length > 0 && Array.isArray(rows[0])) {
+    // Legacy _rows format (array of arrays, first row = headers)
+    const headers = rows[0];
+    headerHtml = headers.map(h => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
+    bodyHtml = rows.slice(1).map(row =>
+      `<tr class="hover:bg-white/5 transition-colors">${row.map(cell => `<td class="px-8 py-4">${esc(cell)}</td>`).join('')}</tr>`
     ).join('\n');
-    html = html.replace(tbodyMatch[0], `<tbody class="${tbodyClass}">\n${newRows}\n</tbody>`);
   }
 
-  return html;
+  return `<section class="${sectionClass}" data-component-type="data-table">
+${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
+<div class="overflow-hidden rounded-xl border border-white/5 glass">
+<div class="px-8 py-6 border-b border-white/5">
+<h3 class="text-xl font-bold tracking-tight">${title}</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead><tr class="bg-white/5">${headerHtml}</tr></thead>
+<tbody class="divide-y divide-white/5">${bodyHtml}</tbody>
+</table>
+</div>
+</div>
+</section>`;
 }
 
 function fillTextInput(pattern, comp) {
@@ -419,40 +417,38 @@ ${newSteps}
 }
 
 function fillComparison(pattern, comp) {
-  const columns = comp._columns || [];
-  if (columns.length < 2) return pattern;
-
   const title = esc(comp.displayTitle || '');
-  // Extract section classes from pattern
+  const body = comp.body || '';
   const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
 
-  // For multi-column comparison data, render as a table (more flexible than 2-col layout)
-  const headers = columns.map(c => c.title || '');
-  const rowCount = Math.max(...columns.map(c => (c.items || []).length));
+  // Support both formats: columns+rows (layout engine) and _columns (legacy)
+  const columns = comp.columns || comp._columns || [];
+  const rows = comp.rows || [];
 
-  const headerHtml = headers.map(h =>
-    `<th class="p-6 font-headline font-bold text-on-surface">${esc(h)}</th>`
-  ).join('');
+  if (columns.length === 0) return pattern;
 
-  const rowsHtml = [];
-  for (let r = 0; r < rowCount; r++) {
-    const cells = columns.map(col => {
-      const val = (col.items || [])[r] || '';
-      return `<td class="p-6 text-on-surface-variant">${esc(val)}</td>`;
+  // Build header — prepend empty cell for the row label column
+  const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th>` +
+    columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">${esc(c.title || '')}</th>`).join('');
+
+  // Build rows
+  const rowsHtml = rows.map(row => {
+    const label = row.label || '';
+    const vals = (row.values || []).map(v => {
+      if (v === true || v === 'true') return '<td class="p-6 text-center text-secondary text-xl">&#10003;</td>';
+      if (v === false || v === 'false') return '<td class="p-6 text-center text-error text-xl">&#10007;</td>';
+      return `<td class="p-6 text-on-surface-variant">${esc(String(v))}</td>`;
     }).join('');
-    rowsHtml.push(`<tr>${cells}</tr>`);
-  }
+    return `<tr class="hover:bg-white/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
+  }).join('\n');
 
   return `<section class="${sectionClass}" data-component-type="comparison">
-<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="overflow-x-auto glass-card rounded-3xl">
+<h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
+${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)}</p>` : ''}
+<div class="overflow-x-auto glass rounded-3xl border border-white/5">
 <table class="w-full text-left">
-<thead class="bg-surface-container-high border-b border-outline-variant">
-<tr>${headerHtml}</tr>
-</thead>
-<tbody class="divide-y divide-outline-variant/30">
-${rowsHtml.join('\n')}
-</tbody>
+<thead class="bg-white/5"><tr>${headerHtml}</tr></thead>
+<tbody class="divide-y divide-white/5">${rowsHtml}</tbody>
 </table>
 </div>
 </section>`;
@@ -490,21 +486,17 @@ ${newStats}
 }
 
 function fillPullquote(pattern, comp) {
-  let html = pattern;
   const quote = stripTags(comp.body || '');
-  // Replace blockquote text
-  html = html.replace(/(<blockquote[^>]*>)([\s\S]*?)(<\/blockquote>)/i,
-    `$1\n${quote}\n$3`);
-  // Also try if it's just text inside the section
-  if (!html.includes('<blockquote')) {
-    // Some patterns have the quote directly in a styled element
-    const h3Match = html.match(/<h3[^>]*>[\s\S]*?<\/h3>/i);
-    if (!h3Match) {
-      // Replace the main paragraph
-      html = replaceFirstTag(html, 'p', quote);
-    }
-  }
-  return html;
+  const attribution = esc(comp.attribution || '');
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-4xl mx-auto';
+
+  return `<section class="${sectionClass}" data-component-type="pullquote">
+<div class="relative pl-8 border-l-4 border-primary">
+<span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
+<blockquote class="text-2xl font-headline font-bold leading-relaxed">${quote}</blockquote>
+${attribution ? `<p class="mt-4 text-on-surface-variant">— ${attribution}</p>` : ''}
+</div>
+</section>`;
 }
 
 function fillChecklist(pattern, comp) {
@@ -519,7 +511,7 @@ function fillChecklist(pattern, comp) {
   const newLabels = items.map(item =>
     `<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface-variant">${esc(item.text || '')}</span>
+<span class="text-on-surface-variant">${esc(item.text || item.title || '')}</span>
 </label>`
   ).join('\n');
 
@@ -660,31 +652,38 @@ ${newCards}
 }
 
 function fillFullBleed(pattern, comp) {
-  let html = pattern;
-  // Replace heading
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
-  // Replace body text
+  const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  html = html.replace(/<p class="text-2xl[^"]*">[^<]*<\/p>/i,
-    `<p class="text-2xl text-secondary font-medium italic">${bodyText}</p>`);
-  // Replace image
-  if (comp._graphic) {
-    const src = embedImage(comp._graphic.large);
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
-  }
-  return html;
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'relative h-[60vh] flex items-center justify-center overflow-hidden';
+  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
+  const imgAlt = esc(comp._graphic?.alt || '');
+  const pos = comp.overlayPosition || 'center';
+  const alignClass = pos === 'left' ? 'text-left items-start' : pos === 'right' ? 'text-right items-end' : 'text-center items-center';
+
+  return `<section class="${sectionClass}" data-component-type="full-bleed">
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/60 to-transparent"></div>
+<div class="relative z-10 max-w-4xl mx-auto px-8 flex flex-col ${alignClass}">
+<h2 class="font-headline text-5xl font-black tracking-tighter mb-4">${title}</h2>
+${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
+</div>
+</section>`;
 }
 
 function fillGraphic(pattern, comp) {
-  let html = pattern;
-  if (comp._graphic) {
-    const src = embedImage(comp._graphic.large);
-    const alt = esc(comp._graphic.alt || '');
-    html = html.replace(/src="https:\/\/lh3\.googleusercontent\.com[^"]*"/g, `src="${src}"`);
-    html = html.replace(/data-alt="[^"]*"/g, `alt="${alt}"`);
-  }
-  html = replaceFirstTag(html, 'h2', esc(comp.displayTitle || ''));
-  return html;
+  const title = esc(comp.displayTitle || '');
+  const body = comp.body || '';
+  const sectionClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 px-8 max-w-6xl mx-auto';
+  const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
+  const imgAlt = esc(comp._graphic?.alt || '');
+
+  return `<section class="${sectionClass}" data-component-type="graphic">
+${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
+<div class="rounded-2xl overflow-hidden">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
+</div>
+${body ? `<div class="mt-4 text-on-surface-variant">${body}</div>` : ''}
+</section>`;
 }
 
 function fillProcessFlow(pattern, comp) {
@@ -798,49 +797,55 @@ function fillComponent(pattern, comp, index) {
 
 function buildNav(shell, layout) {
   if (!shell || !shell.nav) return '';
-  let nav = shell.nav;
   const courseTitle = esc(layout.course.title || 'Course');
+  const sections = layout.sections.filter(s => s.title).slice(0, 6);
 
-  // Replace the site name
-  nav = nav.replace(/>Workplace Safety Fundamentals</, `>${courseTitle}<`);
+  // Extract nav classes from the pattern
+  const navClass = shell.nav.match(/<nav[^>]*class="([^"]*)"/)?.[1] || 'fixed top-0 w-full z-50 bg-surface-container/60 backdrop-blur-xl flex justify-between items-center px-8 h-20';
 
-  // Replace nav links with real section links
-  const sections = layout.sections.filter(s => s.title).slice(0, 4);
-  const linkRe = /<a[^>]*href="#[^"]*"[^>]*>[^<]*<\/a>/gi;
-  const allLinks = findAll(nav, linkRe);
+  // Extract link classes
+  const activeLinkClass = shell.nav.match(/<a[^>]*class="([^"]*border-b[^"]*)"/)?.[1] || "text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm uppercase";
+  const inactiveLinkClass = shell.nav.match(/<a[^>]*class="([^"]*hover:text-white[^"]*)"/)?.[1] || "text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase";
 
-  if (allLinks.length > 0 && sections.length > 0) {
-    const activeTemplate = allLinks[0].match;
-    const inactiveTemplate = allLinks.length > 1 ? allLinks[1].match : activeTemplate;
+  const navLinks = sections.map((s, i) => {
+    const cls = i === 0 ? activeLinkClass : inactiveLinkClass;
+    return `<a class="${cls}" href="#${s.sectionId || `section-${i}`}">${esc(s.title)}</a>`;
+  }).join('\n');
 
-    const newLinks = sections.map((s, i) => {
-      let link = i === 0 ? activeTemplate : inactiveTemplate;
-      link = link.replace(/href="#[^"]*"/, `href="#${s.sectionId || `section-${i}`}"`);
-      link = link.replace(/>([^<]*)<\/a>/, `>${esc(s.title)}</a>`);
-      return link;
-    }).join('\n');
-
-    // Replace all existing links
-    let result = nav;
-    allLinks.forEach(l => { result = result.replace(l.match, ''); });
-    result = result.replace(/(hidden md:flex[^>]*>)\s*/i, `$1\n${newLinks}\n`);
-    nav = result;
-  }
-
-  return nav;
+  return `<nav class="${navClass}" data-component-type="navigation">
+<div class="flex items-center gap-4">
+<span class="text-xl font-black tracking-tighter text-primary italic">${courseTitle}</span>
+</div>
+<div class="hidden md:flex gap-8 items-center">
+${navLinks}
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
+<button class="hover:bg-white/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
+</div>
+</nav>`;
 }
 
 function buildFooter(shell, layout) {
   if (!shell || !shell.footer) return '';
-  let footer = shell.footer;
   const courseTitle = esc(layout.course.title || 'Course');
+  const year = new Date().getFullYear();
 
-  // Replace generic names
-  footer = footer.replace(/The Ethereal Archive\./g, courseTitle);
-  footer = footer.replace(/Workplace Safety Fundamentals/g, courseTitle);
-  footer = footer.replace(/© \d{4}/g, `© ${new Date().getFullYear()}`);
+  // Extract footer classes from pattern
+  const footerClass = shell.footer.match(/<footer[^>]*class="([^"]*)"/)?.[1] || 'bg-surface-dim w-full py-12 border-t border-white/5';
 
-  return footer;
+  return `<footer class="${footerClass}" data-component-type="footer">
+<div class="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
+<div class="flex flex-col gap-2 items-center md:items-start">
+<span class="text-lg font-bold text-on-surface">${courseTitle}</span>
+<span class="text-xs text-on-surface-variant">© ${year} ${courseTitle}. All rights reserved.</span>
+</div>
+<div class="flex gap-8">
+<a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+</div>
+</div>
+</footer>`;
 }
 
 // ═══════════════════════════════════════════════════════════════════════

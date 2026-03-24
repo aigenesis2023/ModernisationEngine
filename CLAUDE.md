@@ -6,7 +6,7 @@ An AI-powered tool that converts legacy SCORM 1.2 e-learning courses into modern
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `Current-working-2`
+**Branch:** `Current-working-2` (this is the ONLY working branch — never work from or reference `main`)
 
 **Future:** An AI-First authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
@@ -151,8 +151,12 @@ Extracts all educational content from the SCORM file:
 **Input:** Brand URL
 **Output:** `v5/output/brand-profile.json` + `v5/output/brand-design.md`
 
-Scrapes the URL for raw design data, then translates it into Stitch's native language:
-- Extracts: colours, fonts, border-radius, spacing, visual patterns
+Uses **Playwright** to visit the landing page (the exact URL provided — no sub-pages), take a screenshot, and extract **computed styles from visible elements**. This is far more reliable than parsing raw CSS, which picks up platform defaults and unused styles:
+- Launches headless Chromium, navigates to URL, waits for render
+- Takes a screenshot → `brand-screenshot.png` (for future vision API / IMAGE_TO_UI)
+- Extracts computed styles from buttons (primary colour), headings (fonts), body text, cards (style)
+- Filters out browser/platform default colours (Framer `#0099ff`, browser `#0000ee`, etc.)
+- Only sees what the browser actually renders — no CSS parsing artifacts
 - Maps fonts to Stitch's 28 supported fonts (closest match)
 - Maps visual patterns to Stitch vocabulary (roundness, spacingScale, colorVariant)
 - Detects theme (light/dark) using multiple signals
@@ -404,7 +408,8 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URLs tested:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst)
+- **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst)
 
 ## Screenshots Workflow
 Dev screenshots go in `screenshots/` (gitignored). Overwrite the same filenames each run:
@@ -419,7 +424,7 @@ Use Playwright: `npx http-server -p 8765 -c-1 --silent &` then navigate to `http
 ---
 
 ## Deployment
-GitHub Pages serves from root `index.html` (main branch). `build-course.js` writes directly to root `index.html`. Commit and push to deploy.
+GitHub Pages serves from root `index.html` on `Current-working-2`. `build-course.js` writes directly to root `index.html`. Commit and push to `Current-working-2` to deploy. **Never commit to or push to `main`.**
 
 ---
 

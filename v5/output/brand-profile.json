@@ -1,41 +1,41 @@
 {
   "sourceUrl": "https://najaf.framer.ai/",
   "colors": {
-    "primary": "#0099ff",
-    "secondary": "#9cf35b",
-    "accent": "#e7ff2e",
-    "background": "#28282c",
-    "surface": "#171717",
-    "text": "#f0f0f0",
+    "primary": "#9cf35b",
+    "secondary": "#88df47",
+    "accent": "#b0ff6f",
+    "background": "#060703",
+    "surface": "#10110d",
+    "text": "#fafafa",
     "textMuted": "#c8c8c8",
     "success": "#10b981",
     "error": "#ef4444",
     "warning": "#f59e0b",
-    "gradient": "linear-gradient(135deg, #0099ff, #9cf35b)",
+    "gradient": "linear-gradient(135deg, #9cf35b, #88df47)",
     "isDark": true,
     "_themeSignals": {
       "light": 0,
-      "dark": 2
+      "dark": 1
     }
   },
   "typography": {
     "headingFont": "Inter Display",
-    "bodyFont": "Roboto Mono",
-    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Inter%20Display:wght@400;500;600;700&family=Roboto%20Mono:wght@400;500;600;700&display=swap",
-    "baseSize": 26,
+    "bodyFont": "Inter Display",
+    "fontImportUrl": "https://fonts.googleapis.com/css2?family=Inter%20Display:wght@400;500;600;700&display=swap",
+    "baseSize": 16,
     "headingSizes": {
-      "h1": 65,
-      "h2": 52,
-      "h3": 39
+      "h1": 40,
+      "h2": 32,
+      "h3": 24
     },
     "lineHeight": 1.6,
-    "headingWeight": 700,
-    "bodyWeight": 500
+    "headingWeight": 500,
+    "bodyWeight": 400
   },
   "style": {
     "borderRadius": "8px",
     "cardStyle": "glass",
-    "buttonStyle": "solid",
+    "buttonStyle": "pill",
     "imageStyle": "rounded",
     "mood": "creative",
     "medianRadius": 8,
@@ -49,10 +49,10 @@
     }
   },
   "logo": {
-    "url": "https://framerusercontent.com/images/mSo32qHoUzHmqG3MGK4w5ZSXjo4.png",
+    "url": "https://framerusercontent.com/images/9EchmviCN3Lx0S31It8bFrWK1I.png",
     "width": 200,
     "height": 60,
-    "alt": "Free Framer Template for SaaS"
+    "alt": "Logo"
   },
-  "scrapedAt": "2026-03-24T11:50:00.893Z"
+  "scrapedAt": "2026-03-24T12:52:29.467Z"
 }

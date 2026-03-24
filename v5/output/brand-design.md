@@ -1,22 +1,22 @@
 # DESIGN.md — Brand Design Brief for Stitch
 
 ## Visual Theme & Atmosphere
-Sophisticated, Moody, Glass-forward, Ethereal, Creative
+Sophisticated, Moody, Glass-forward, Ethereal, Harmonious
 
 This design should feel like a premium, custom-built learning platform. The overall mood is **creative** with a **dark** colour scheme.
 
 ## Colour Palette & Roles
-- **Cyan** (#0099ff) — Primary actions, key interactive elements, navigation accents
-- **Soft Emerald** (#9cf35b) — Secondary actions, supporting elements, section highlights
-- **Soft Lime** (#e7ff2e) — Accent highlights, hover states, decorative elements
-- **Background** (#28282c) — Page background
-- **Surface** (#171717) — Card backgrounds, elevated containers
-- **Text** (#f0f0f0) — Primary body text
+- **Soft Emerald** (#9cf35b) — Primary actions, key interactive elements, navigation accents
+- **Soft Emerald** (#88df47) — Secondary actions, supporting elements, section highlights
+- **Soft Emerald** (#b0ff6f) — Accent highlights, hover states, decorative elements
+- **Background** (#060703) — Page background
+- **Surface** (#10110d) — Card backgrounds, elevated containers
+- **Text** (#fafafa) — Primary body text
 - **Text Muted** (#c8c8c8) — Secondary text, captions, labels
 
 Material Design System:
 - colorMode: DARK
-- colorVariant: EXPRESSIVE
+- colorVariant: TONAL_SPOT
 
 ## Typography Rules
 - **Headings:** Inter (INTER) — bold, confident, clear hierarchy
@@ -25,7 +25,7 @@ Material Design System:
 
 ## Component Stylings
 - **Cards:** Frosted glass cards with backdrop blur and subtle borders
-- **Buttons:** Solid fill buttons with subtle corner radius
+- **Buttons:** Pill-shaped buttons with full border radius
 - **Borders:** Soft rounded corners on images and containers
 - **Interactive elements:** Clear hover states, smooth transitions, focus indicators for accessibility
 - **Glass effects:** Use backdrop-filter blur for overlays and floating elements
@@ -41,4 +41,4 @@ Stitch DesignTheme:
 - **Visual hierarchy:** Clear distinction between headings, subheadings, body text, and labels
 
 ## Brand Logo
-Logo URL: https://framerusercontent.com/images/mSo32qHoUzHmqG3MGK4w5ZSXjo4.png
+Logo URL: https://framerusercontent.com/images/9EchmviCN3Lx0S31It8bFrWK1I.png
