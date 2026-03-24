@@ -26,7 +26,6 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PATTERNS_DIR = path.resolve(ROOT, 'v5/output/component-patterns');
 const SHELL_PATH = path.resolve(PATTERNS_DIR, '_page-shell.json');
 const TOKENS_PATH = path.resolve(ROOT, 'v5/output/design-tokens.json');
-const STITCH_PATH = path.resolve(ROOT, 'v5/output/stitch-course-raw.html');
 const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
 const HYDRATE_PATH = path.resolve(ROOT, 'v5/scripts/hydrate.js');
 const OUTPUT_PATH = path.resolve(ROOT, 'v5/output/course.html');
@@ -52,6 +51,143 @@ function embedImage(imagePath) {
   const ext = path.extname(fullPath).toLowerCase();
   const mimeMap = { '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.gif': 'image/gif', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
   return `data:${mimeMap[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
+}
+
+// ─── Generate <head> from design-tokens.json ─────────────────────────
+// CRITICAL: We build our own <head> instead of copying Stitch's raw <head>.
+// Stitch controls DESIGN (colours, fonts, shadows). We control LAYOUT.
+// This ensures layout is consistent across all brands — only colours/fonts change.
+function generateHead(tokens, courseTitle) {
+  const colors = tokens.colors || {};
+  const fonts = tokens.fonts || {};
+  const isDark = tokens.isDark !== false;
+
+  // Build Tailwind color config from tokens
+  const colorEntries = Object.entries(colors)
+    .map(([k, v]) => `                        "${k}": "${v}"`)
+    .join(',\n');
+
+  // Font families
+  const headlineFont = fonts.headline || 'Inter';
+  const bodyFont = fonts.body || 'Inter';
+  const labelFont = fonts.label || bodyFont;
+
+  // Google Fonts URL — request both font families with useful weights
+  const fontFamilies = [...new Set([headlineFont, bodyFont, labelFont])];
+  const googleFontsUrl = 'https://fonts.googleapis.com/css2?' +
+    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@300;400;500;600;700`).join('&') +
+    '&display=swap';
+
+  // Derive key colours for custom CSS definitions
+  const bg = colors['background'] || '#131313';
+  const onSurface = colors['on-surface'] || '#e2e2e2';
+  const surfaceContainer = colors['surface-container'] || '#1f1f1f';
+  const outlineVariant = colors['outline-variant'] || '#474747';
+  const primary = colors['primary'] || '#ffffff';
+  const primaryContainer = colors['primary-container'] || '#d4d4d4';
+  const onPrimaryContainer = colors['on-primary-container'] || '#000000';
+  const secondary = colors['secondary'] || '#adc6ff';
+  const tertiary = colors['tertiary'] || '#e9ddff';
+  const surfaceContainerHigh = colors['surface-container-high'] || '#2a2a2a';
+
+  return `<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>${esc(courseTitle)}</title>
+
+<!-- Tailwind CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+
+<!-- Google Fonts -->
+<link href="${googleFontsUrl}" rel="stylesheet"/>
+
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- Tailwind Config — colours + fonts from design-tokens.json -->
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+${colorEntries}
+                },
+                fontFamily: {
+                    "headline": ["${headlineFont}"],
+                    "body": ["${bodyFont}"],
+                    "label": ["${labelFont}"]
+                },
+                borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+            },
+        },
+    }
+</script>
+
+<!-- Custom classes — WE define these, not Stitch -->
+<style>
+    /* Base */
+    body { background-color: ${bg}; color: ${onSurface}; font-family: '${bodyFont}', sans-serif; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+
+    /* Glass card — frosted surface panel */
+    .glass-card {
+        background: ${surfaceContainer}cc;
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid ${outlineVariant}26;
+    }
+
+    /* Glass — lighter variant for tables/containers */
+    .glass {
+        background: ${surfaceContainer}99;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    /* Glass nav */
+    .glass-nav {
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid ${outlineVariant}26;
+    }
+
+    /* Text gradient — brand gradient on text */
+    .text-gradient {
+        background: linear-gradient(135deg, ${primary}, ${secondary}, ${tertiary});
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    /* Primary button */
+    .btn-primary {
+        background: ${primaryContainer};
+        color: ${onPrimaryContainer};
+        transition: opacity 0.2s, transform 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+    /* Scroll progress bar */
+    #scroll-progress {
+        position: fixed; top: 0; left: 0; height: 3px; z-index: 9999;
+        background: linear-gradient(90deg, ${secondary}, ${primary});
+        transition: width 0.1s;
+    }
+
+    /* Utility: hide details marker */
+    details summary::-webkit-details-marker { display: none; }
+
+    /* Custom scrollbar */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: ${colors['surface-container-lowest'] || '#0e0e0e'}; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: ${colors['surface-variant'] || '#353535'}; border-radius: 10px; }
+
+    /* Layout: smooth scroll */
+    html { scroll-behavior: smooth; }
+
+    /* Layout: containment safety net */
+    img, video, iframe { max-width: 100%; }
+</style>`;
 }
 
 // ─── Load patterns ───────────────────────────────────────────────────
@@ -947,16 +1083,13 @@ function build() {
     console.log(`[ok] Loaded page shell (nav: ${(shell.nav || '').length} chars, footer: ${(shell.footer || '').length} chars)`);
   }
 
-  // Load Stitch raw HTML for <head> content
-  let stitchHtml = '';
-  if (fs.existsSync(STITCH_PATH)) {
-    stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
-    console.log(`[ok] Loaded stitch-course-raw.html (${stitchHtml.length} chars)`);
+  // Load design tokens — the ONLY source for colours/fonts in the <head>
+  if (!fs.existsSync(TOKENS_PATH)) {
+    console.error('ERROR: design-tokens.json not found');
+    process.exit(1);
   }
-
-  // Extract <head> from Stitch HTML
-  const headMatch = stitchHtml.match(/<head[^>]*>([\s\S]*?)<\/head>/i);
-  const headContent = headMatch ? headMatch[1] : '';
+  const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+  console.log(`[ok] Loaded design-tokens.json (${Object.keys(tokens.colors || {}).length} colours, fonts: ${tokens.fonts?.headline}/${tokens.fonts?.body}, isDark: ${tokens.isDark})`);
 
   // Count patterns available
   const patternFiles = fs.readdirSync(PATTERNS_DIR).filter(f => f.endsWith('.html'));
@@ -1031,23 +1164,13 @@ function build() {
     hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
   }
 
-  // Determine theme
-  let isDark = true;
-  if (fs.existsSync(TOKENS_PATH)) {
-    const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
-    isDark = tokens.isDark !== false;
-  }
-
-  // Course title
+  // Theme + course title
+  const isDark = tokens.isDark !== false;
   const courseTitle = layout.course.title || 'Course';
 
-  // Replace title in head
-  let finalHead = headContent;
-  if (finalHead.includes('<title>')) {
-    finalHead = finalHead.replace(/<title>[^<]*<\/title>/i, `<title>${esc(courseTitle)}</title>`);
-  } else {
-    finalHead = `<title>${esc(courseTitle)}</title>\n${finalHead}`;
-  }
+  // Generate <head> from design-tokens.json — NOT from Stitch raw HTML
+  const finalHead = generateHead(tokens, courseTitle);
+  console.log(`[ok] Generated <head> from design-tokens.json (${finalHead.length} chars)`);
 
   const finalHtml = `<!DOCTYPE html>
 <html class="${isDark ? 'dark' : ''}" lang="en">
