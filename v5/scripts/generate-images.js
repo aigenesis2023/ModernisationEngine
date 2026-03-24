@@ -25,6 +25,11 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Config ──────────────────────────────────────────────────────────
+// Primary: Gemini (fast, credit-efficient). Fallback: HuggingFace FLUX.
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = 'gemini-2.5-flash-image';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
 const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const HF_TOKEN = process.env.HF_TOKEN || '';
@@ -267,7 +272,85 @@ function buildDesignTreatment(design) {
   return parts.join(', ');
 }
 
-// ─── Image generation via Hugging Face ───────────────────────────────
+// ─── Image generation via Gemini ─────────────────────────────────────
+async function generateImageGemini(prompt, dimensions, outputFilename) {
+  const outputPath = path.join(OUTPUT_DIR, outputFilename);
+  const enhancedPrompt = `Generate a photographic image: ${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`  Generating via Gemini: ${outputFilename} (attempt ${attempt})...`);
+
+      const resp = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: enhancedPrompt }] }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+
+      if (resp.status === 429) {
+        const errBody = await resp.text().catch(() => '');
+        if (errBody.includes('quota') && errBody.includes('limit: 0')) {
+          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
+        }
+        console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      if (!resp.ok) {
+        const errText = await resp.text().catch(() => '');
+        if (errText.includes('paid plan') || errText.includes('quota') && errText.includes('limit: 0')) {
+          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
+        }
+        throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 300)}`);
+      }
+
+      const data = await resp.json();
+
+      // Extract image from response — Gemini returns inline_data with base64
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+
+      if (!imagePart) {
+        const textParts = parts.filter(p => p.text).map(p => p.text).join(' ');
+        throw new Error(`No image in response. Text: ${textParts.substring(0, 200)}`);
+      }
+
+      const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+      if (buffer.length < 500) {
+        throw new Error(`Image too small (${buffer.length} bytes)`);
+      }
+
+      // Determine extension from mime type
+      const mime = imagePart.inlineData.mimeType;
+      const ext = mime.includes('png') ? '.png' : '.jpg';
+      const finalFilename = outputFilename.replace(/\.\w+$/, ext);
+      const finalPath = path.join(OUTPUT_DIR, finalFilename);
+
+      fs.writeFileSync(finalPath, buffer);
+      console.log(`  Saved: ${finalFilename} (${Math.round(buffer.length / 1024)}KB)`);
+      return { path: finalPath, filename: finalFilename };
+
+    } catch (err) {
+      console.log(`  Failed (attempt ${attempt}): ${err.message}`);
+      if (attempt < 3) {
+        await sleep(RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  console.log(`  FAILED via Gemini: ${outputFilename}`);
+  return null;
+}
+
+// ─── Image generation via Hugging Face (fallback) ────────────────────
 async function generateImage(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
   const outputPath = path.join(OUTPUT_DIR, outputFilename);
@@ -378,11 +461,17 @@ function sleep(ms) {
 
 // ─── Main ────────────────────────────────────────────────────────────
 async function main() {
-  if (!HF_TOKEN) {
-    console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: node v5/scripts/generate-images.js');
+  const useGemini = !!GEMINI_API_KEY;
+  const useHF = !!HF_TOKEN;
+
+  if (!useGemini && !useHF) {
+    console.error('Error: No image generation API key found.');
+    console.error('Set GEMINI_API_KEY (preferred) or HF_TOKEN in .env');
     process.exit(1);
   }
+
+  const provider = useGemini ? 'Gemini' : 'HuggingFace';
+  console.log(`Image provider: ${provider}${useGemini ? ` (${GEMINI_MODEL})` : ` (${HF_MODEL})`}\n`);
 
   if (!fs.existsSync(LAYOUT_PATH)) {
     console.error('Error: course-layout.json not found at', LAYOUT_PATH);
@@ -485,7 +574,7 @@ async function main() {
   }
 
   const totalImages = queue.length;
-  console.log(`Generating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
+  console.log(`Generating ${totalImages} images via ${provider}...\n`);
 
   let successImages = 0;
   const failedTasks = [];
@@ -495,42 +584,62 @@ async function main() {
     const task = queue[i];
     console.log(`[${i + 1}/${totalImages}] ${task.filename}`);
 
-    const result = await generateImage(task.prompt, task.dimensions, task.filename);
-
-    if (result) {
-      successImages++;
-      updateLayout(task, `images/${task.filename}`);
+    let result = null;
+    if (useGemini) {
+      result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
+      if (result) {
+        successImages++;
+        updateLayout(task, `images/${result.filename}`);
+      }
     } else {
+      result = await generateImage(task.prompt, task.dimensions, task.filename);
+      if (result) {
+        successImages++;
+        updateLayout(task, `images/${task.filename}`);
+      }
+    }
+
+    if (!result) {
       failedTasks.push(task);
     }
 
     // Rate limit (skip delay on last item)
     if (i < queue.length - 1) {
-      await sleep(DELAY_MS);
+      await sleep(useGemini ? 1500 : DELAY_MS); // Gemini is faster, shorter delay
     }
   }
 
-  // ─── Pass 2: Retry failures with longer delay ──────────────────────
+  // ─── Pass 2: Retry failures ────────────────────────────────────────
   if (failedTasks.length > 0) {
-    console.log(`\n─── Retrying ${failedTasks.length} failed images (pass 2, longer delay)... ───\n`);
-    await sleep(10000); // 10s cooldown before retry pass
+    console.log(`\n─── Retrying ${failedTasks.length} failed images (pass 2)... ───\n`);
+    await sleep(5000);
 
     const stillFailed = [];
     for (let i = 0; i < failedTasks.length; i++) {
       const task = failedTasks[i];
       console.log(`[retry ${i + 1}/${failedTasks.length}] ${task.filename}`);
 
-      const result = await generateImage(task.prompt, task.dimensions, task.filename);
-
-      if (result) {
-        successImages++;
-        updateLayout(task, `images/${task.filename}`);
+      let result = null;
+      if (useGemini) {
+        result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
+        if (result) {
+          successImages++;
+          updateLayout(task, `images/${result.filename}`);
+        }
       } else {
+        result = await generateImage(task.prompt, task.dimensions, task.filename);
+        if (result) {
+          successImages++;
+          updateLayout(task, `images/${task.filename}`);
+        }
+      }
+
+      if (!result) {
         stillFailed.push(task);
       }
 
       if (i < failedTasks.length - 1) {
-        await sleep(DELAY_MS * 2); // Double delay on retry pass
+        await sleep(DELAY_MS);
       }
     }
 
