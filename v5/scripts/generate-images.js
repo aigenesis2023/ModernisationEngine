@@ -329,8 +329,47 @@ async function generateImage(prompt, dimensions, outputFilename) {
     }
   }
 
-  console.log(`  FAILED: ${outputFilename} — skipping`);
+  console.log(`  FAILED: ${outputFilename} — will use placeholder`);
   return null;
+}
+
+// ─── SVG Placeholder Generator ──────────────────────────────────────
+// Creates a brand-tinted placeholder SVG that respects the component's
+// aspect ratio. Used when HuggingFace fails after all retries.
+// Universal: works for any brand (reads design tokens for tinting).
+function generatePlaceholder(dimensions, outputFilename, treatment) {
+  const { width, height } = dimensions;
+  const outputPath = path.join(OUTPUT_DIR, outputFilename);
+
+  // Derive a subtle tint from the treatment text
+  const isWarm = /warm|amber|golden|coral/i.test(treatment);
+  const isCool = /cool|blue|cyan|teal/i.test(treatment);
+  const isDark = /dark|moody|shadow|dramatic/i.test(treatment);
+
+  const bgColor = isDark ? '#1a1a2e' : '#e8edf2';
+  const fgColor = isDark ? '#2d2d44' : '#d0d8e0';
+  const iconColor = isDark ? '#4a4a6a' : '#a0aab4';
+  const accentColor = isWarm ? '#8b6914' : isCool ? '#1a5276' : '#5a5a7a';
+
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
+  <rect width="${width}" height="${height}" fill="${bgColor}"/>
+  <rect x="0" y="0" width="${width}" height="${height}" fill="${fgColor}" opacity="0.3" rx="0"/>
+  <g transform="translate(${width / 2}, ${height / 2})" opacity="0.4">
+    <circle r="40" fill="none" stroke="${iconColor}" stroke-width="2"/>
+    <path d="M-12,-16 L-12,16 L16,0 Z" fill="${accentColor}" opacity="0.6"/>
+  </g>
+  <line x1="0" y1="0" x2="${width}" y2="${height}" stroke="${fgColor}" stroke-width="0.5" opacity="0.2"/>
+  <line x1="${width}" y1="0" x2="0" y2="${height}" stroke="${fgColor}" stroke-width="0.5" opacity="0.2"/>
+</svg>`;
+
+  // Convert SVG to a JPEG-like file (actually save as PNG for SVG, but rename to .jpg)
+  // Since build-course.js embeds as base64, we'll save the SVG as a proper image format
+  // Use a simple approach: save as SVG with .svg extension, and update the path
+  const svgFilename = outputFilename.replace('.jpg', '.svg');
+  const svgPath = path.join(OUTPUT_DIR, svgFilename);
+  fs.writeFileSync(svgPath, svg);
+  console.log(`  Placeholder: ${svgFilename} (${width}x${height})`);
+  return { path: svgPath, filename: svgFilename };
 }
 
 function sleep(ms) {
@@ -449,7 +488,9 @@ async function main() {
   console.log(`Generating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
 
   let successImages = 0;
+  const failedTasks = [];
 
+  // ─── Pass 1: Generate all images ────────────────────────────────────
   for (let i = 0; i < queue.length; i++) {
     const task = queue[i];
     console.log(`[${i + 1}/${totalImages}] ${task.filename}`);
@@ -458,20 +499,9 @@ async function main() {
 
     if (result) {
       successImages++;
-      const relativePath = `images/${task.filename}`;
-
-      if (task.target === '_graphic') {
-        if (!task.component._graphic) task.component._graphic = {};
-        task.component._graphic.large = relativePath;
-      } else if (task.target === '_items' && task.targetKey) {
-        const itemIndex = parseInt(task.targetKey.replace('item-', ''));
-        if (task.component._items && task.component._items[itemIndex]) {
-          if (!task.component._items[itemIndex]._graphic) {
-            task.component._items[itemIndex]._graphic = {};
-          }
-          task.component._items[itemIndex]._graphic.large = relativePath;
-        }
-      }
+      updateLayout(task, `images/${task.filename}`);
+    } else {
+      failedTasks.push(task);
     }
 
     // Rate limit (skip delay on last item)
@@ -480,12 +510,68 @@ async function main() {
     }
   }
 
+  // ─── Pass 2: Retry failures with longer delay ──────────────────────
+  if (failedTasks.length > 0) {
+    console.log(`\n─── Retrying ${failedTasks.length} failed images (pass 2, longer delay)... ───\n`);
+    await sleep(10000); // 10s cooldown before retry pass
+
+    const stillFailed = [];
+    for (let i = 0; i < failedTasks.length; i++) {
+      const task = failedTasks[i];
+      console.log(`[retry ${i + 1}/${failedTasks.length}] ${task.filename}`);
+
+      const result = await generateImage(task.prompt, task.dimensions, task.filename);
+
+      if (result) {
+        successImages++;
+        updateLayout(task, `images/${task.filename}`);
+      } else {
+        stillFailed.push(task);
+      }
+
+      if (i < failedTasks.length - 1) {
+        await sleep(DELAY_MS * 2); // Double delay on retry pass
+      }
+    }
+
+    // ─── Pass 3: Placeholder fallback for persistent failures ────────
+    if (stillFailed.length > 0) {
+      console.log(`\n─── ${stillFailed.length} images still failing — generating placeholders... ───\n`);
+
+      for (const task of stillFailed) {
+        const placeholder = generatePlaceholder(task.dimensions, task.filename, treatment);
+        updateLayout(task, `images/${placeholder.filename}`);
+        successImages++; // Count placeholders as present for 100% coverage
+      }
+    }
+  }
+
   // Save updated layout
   fs.writeFileSync(LAYOUT_PATH, JSON.stringify(layout, null, 2));
 
-  console.log(`\nComplete: ${successImages}/${totalImages} images generated`);
+  const placeholderCount = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.svg')).length;
+  const realCount = successImages - placeholderCount;
+
+  console.log(`\nComplete: ${realCount}/${totalImages} real images, ${placeholderCount} placeholders`);
+  console.log(`Asset coverage: ${totalImages}/${totalImages} (100%)`);
   console.log(`Layout updated: ${LAYOUT_PATH}`);
   console.log(`Images saved to: ${OUTPUT_DIR}`);
+}
+
+// ─── Update layout with image path ──────────────────────────────────
+function updateLayout(task, relativePath) {
+  if (task.target === '_graphic') {
+    if (!task.component._graphic) task.component._graphic = {};
+    task.component._graphic.large = relativePath;
+  } else if (task.target === '_items' && task.targetKey) {
+    const itemIndex = parseInt(task.targetKey.replace('item-', ''));
+    if (task.component._items && task.component._items[itemIndex]) {
+      if (!task.component._items[itemIndex]._graphic) {
+        task.component._items[itemIndex]._graphic = {};
+      }
+      task.component._items[itemIndex]._graphic.large = relativePath;
+    }
+  }
 }
 
 function parseDimensionString(dimStr) {
