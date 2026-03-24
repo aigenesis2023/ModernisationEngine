@@ -342,27 +342,55 @@ This file must:
 
 ---
 
-## Full Pipeline Command Sequence
+## ⛔ Full Pipeline — MANDATORY CHECKLIST
 
+**Every test run MUST execute ALL phases. No skipping. No reusing stale outputs.**
+
+When asked to "run it" or "test with a brand URL", follow this checklist exactly:
+
+### Pre-run: Clear stale outputs
 ```bash
-# Phase 1 — Extract content from SCORM
+# Clear everything EXCEPT content-bucket.json (only if same SCORM file)
+rm -rf v5/output/component-patterns/ v5/output/images/
+rm -f v5/output/brand-profile.json v5/output/brand-design.md
+rm -f v5/output/course-layout.json v5/output/design-tokens.json
+rm -f v5/output/stitch-course-raw.html v5/output/stitch-course-meta.json
+rm -f v5/output/stitch-course-screenshot.png v5/output/course.html
+```
+
+### Phase 1 — Extract (skip ONLY if same SCORM file)
+```bash
 node v5/scripts/extract.js EV
+```
 
-# Phase 2 — Analyse brand from URL
-node v5/scripts/scrape-brand.js "https://www.example.com"
+### Phase 2 — Brand scrape
+```bash
+node v5/scripts/scrape-brand.js "<brand-url>"
+```
 
-# Phase 3 — Design course layout (manual mode for Claude Code)
+### Phase 3 — Layout engine
+```bash
 node v5/scripts/design-course.js --manual
+```
+**Claude Code acts as the layout engine.** Read content-bucket.json + layout-engine.md, produce course-layout.json. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added to `.env`, this step runs automatically without `--manual`.
 
-# Phase 4a — Stitch designs component kit (GEMINI_3_1_PRO)
+### Phase 4a — Stitch component kit
+```bash
 node v5/scripts/generate-course-html.js
+```
+Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
 
-# Phase 4b — Generate images (runs AFTER 4a — design-informed)
+### Phase 4b — Image generation (AFTER 4a)
+```bash
 node v5/scripts/generate-images.js
+```
 
-# Phase 5 — Build final HTML (component patterns + real content)
+### Phase 5 — Build
+```bash
 node v5/scripts/build-course.js
 ```
+
+**If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**
 
 **API Keys:**
 All keys are stored in `.env` (gitignored, never committed). Scripts load them automatically via dotenv.
@@ -370,6 +398,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 
 - `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys
 - `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens (free tier works)
+- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 3 runs automatically without `--manual`
 
 ---
 
