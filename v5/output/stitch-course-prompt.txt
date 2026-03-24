@@ -1,50 +1,50 @@
 You are designing a complete, premium e-learning course page.
 
-IMPORTANT: This design MUST use a LIGHT color mode. Use light backgrounds (white, cream, light gray) with dark text.
+IMPORTANT: This design MUST use a DARK color mode. Use dark backgrounds (near-black, dark charcoal) with light text.
 
 === DESIGN SYSTEM BRIEF ===
 
 # DESIGN.md — Brand Brief
 
 ## Visual Theme & Atmosphere
-Light, airy, modern, approachable. A clean SaaS product feel with soft purple-violet accents on a bright white foundation. Friendly and professional — the atmosphere evokes trust and innovation without being intimidating. Gentle gradients and rounded shapes create a warm, welcoming experience.
+Dark, sleek, tech-forward, minimal. A modern AI/SaaS product feel with near-black backgrounds and vibrant cyan-teal accents. The atmosphere is confident, cutting-edge, and developer-oriented — precision meets polish. Clean lines, sharp contrast, and a sense of quiet power.
 
 ## Colour Palette & Roles
-- **Background:** Clean white — the dominant canvas
-- **Surface:** Very light grey with a hint of lavender — for cards and elevated containers
-- **Primary / Accent:** Soft purple-violet — used for call-to-action buttons, highlighted text, and interactive elements. This is the signature brand colour.
-- **Secondary:** Light periwinkle blue — used for subtle gradients and secondary highlights
-- **Gradient:** A gentle gradient from soft purple through lavender to light pink — used as decorative background accents
-- **Text — Primary:** Dark charcoal, nearly black — for headlines and body content
-- **Text — Secondary:** Medium grey — for descriptions and supporting text
-- **Borders:** Very light grey, subtle and soft — delicate separation between elements
+- **Background:** Deep near-black — the dominant canvas throughout
+- **Surface:** Very dark grey, slightly lifted from background — for cards and dashboard panels
+- **Primary / Accent:** Bright cyan-teal — used for primary CTA buttons, active states, and key highlights. Energetic and eye-catching against the dark backdrop.
+- **Secondary:** Soft white — used for secondary buttons and text elements
+- **Text — Primary:** Pure white for headlines and primary content
+- **Text — Secondary:** Medium grey for body text and descriptions
+- **Borders:** Very subtle dark grey lines — minimal separation between elements
+- **Badge/pill accents:** Cyan-teal outlined pills for announcements and labels
 
 ## Typography Rules
-- **Headlines:** Bold modern sans-serif, clean and confident. Use DM_SANS or INTER for geometric clarity.
-- **Body text:** Light-weight sans-serif, highly readable with generous line height. Use INTER for comfort.
-- **Accent text:** Purple-coloured text used to highlight key phrases within headlines — a signature brand treatment.
+- **Headlines:** Bold modern sans-serif, large scale, tight tracking. Confident and commanding. Use INTER or SPACE_GROTESK for geometric precision.
+- **Body text:** Clean lightweight sans-serif, high readability on dark backgrounds. Use INTER for comfort.
+- **Labels & UI:** Small, clean, uppercase tracking for navigation items and badge text.
 
 ## Component Stylings
-- **Buttons:** Rounded pill-shaped with purple-violet fill for primary actions. White text. A secondary outlined variant with rounded shape.
-- **Cards:** Light, barely-elevated panels with soft shadows and generous border radius (16-24px). Clean and minimal.
-- **Navigation:** Clean white header bar with logo left, navigation links centre, CTA button right. Simple and uncluttered.
-- **Avatar groups:** Overlapping circular avatars used as social proof — a common SaaS pattern.
-- **Badges:** Small pill-shaped indicators with light purple background.
+- **Buttons:** Rounded pill-shaped CTAs — primary in bright cyan-teal with white text, secondary outlined in white/grey. Subtle hover glow.
+- **Cards:** Dark glass panels with very subtle borders — near-invisible elevation on near-black backgrounds. Rounded corners.
+- **Navigation:** Clean dark header with logo left, text links centre, CTA button right. Minimal and professional.
+- **Dashboard mockup:** Dark themed UI with data visualisations, showing the product in action — reinforces the tech-forward feel.
+- **Announcement pills:** Small rounded badges with cyan outline — "Announcing: ..." style.
 
 ## Layout Principles
-- Very generous whitespace — spacious and breathing
+- Generous vertical spacing — premium breathing room
 - Content centred with comfortable max-width
-- Hero section uses large typography with a soft gradient background element
-- Card-based layouts for features and content below the fold
-- Light mode throughout — no dark mode variant
+- Hero dominates with large bold typography and clear CTA hierarchy
+- Below-the-fold shows product dashboard mockup — proof of capability
+- Dark mode throughout — no light variant
 
 ## Image Treatment
-- **Photographic mood:** Bright, well-lit, optimistic
-- **Colour temperature:** Cool undertones — soft purples, lavenders, light blues
-- **Composition:** Clean, professional, people-focused with soft backgrounds
-- **Atmosphere:** Fresh and modern — bright even lighting with gentle soft-focus backgrounds
+- **Photographic mood:** Dark, dramatic, high-contrast
+- **Colour temperature:** Cool undertones — cyan, teal, blue highlights against deep blacks
+- **Composition:** Clean, tech-focused, interface-style imagery with dramatic lighting
+- **Atmosphere:** Futuristic and precise — sharp focus with selective cool-toned highlights
 
-## colorMode: LIGHT
+## colorMode: DARK
 
 
 === COURSE CONTENT TO DESIGN ===

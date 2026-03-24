@@ -35,17 +35,18 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
                     │
                     ▼
-         generate-images.js (HF Inference API)
-         ├─ Analyses Stitch design tokens for visual treatment
-         ├─ Combines content subjects with design treatment
+         generate-images.js (Pexels stock → Gemini AI → HF AI → SVG placeholder)
+         ├─ Converts image prompts to search queries for stock photos
+         ├─ Falls back to AI generation or SVG placeholders
          ├─ Always regenerates all images
-         └─→ images/*.jpg (design-matched images)
+         └─→ images/*.jpg (stock photos or AI-generated)
                     │
                     ▼
-         build-course.js (content assembly)
-         ├─ Reads component patterns from Stitch output
-         ├─ For each component in course-layout.json:
-         │   finds matching pattern, fills with SCORM content
+         build-course.js (content assembly — design/layout separation)
+         ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
+         ├─ Extracts VISUAL classes from Stitch patterns (shadows, hovers, gradients)
+         ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
+         ├─ For each component: our HTML structure + Stitch's visual styling
          ├─ 100% content fidelity — every word from the SCORM
          ├─ Embeds images as base64
          ├─ Inlines hydrate.js for interactivity
@@ -54,8 +55,8 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
 
 ### Core Principles
 
-**1. Stitch designs the component kit. We control the content.**
-Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types with example content). It designs the complete visual system — every component type, page shell, transitions, navigation. We extract those patterns and fill them with real SCORM content. Different brand URL → different Stitch design → different visual output. Same content.
+**1. Stitch designs the visual system. We control layout and content.**
+Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types). It designs the complete visual system — colours, fonts, shadows, gradients, hover effects. We extract **visual-only** classes from patterns (shadows, hovers, transitions, brand-specific card backgrounds) and apply them to our hardcoded layout structure. We build our own `<head>` from `design-tokens.json` — never copy Stitch's raw CSS. Different brand URL → different Stitch kit → different visual character, identical layout.
 
 **2. Content fidelity is non-negotiable.**
 All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs the look, we guarantee the content. Enterprise clients require 100% accuracy.
@@ -213,48 +214,43 @@ This is a **reusable design asset**. The authoring layer can re-render courses w
 **Output:** Images in `v5/output/images/`
 **Runs AFTER Phase 4a** — images are informed by the brand description.
 
-Reads the "Image Treatment" section from `brand-design.md` to determine **photographic mood only** — lighting (dramatic/bright/soft), colour temperature (warm/cool), composition style (professional/artistic). This is combined with the content subject from each component's `imagePrompt`.
+**Image source priority chain:**
+1. **Pexels stock photos** (default, free) — `PEXELS_API_KEY` — 200 req/hr, instant key from pexels.com/api
+2. **Gemini AI generation** — `GEMINI_API_KEY` — requires paid Google plan for image models
+3. **HuggingFace FLUX** — `HF_TOKEN` — may have credit limits
+4. **SVG placeholders** — always works, no API key needed
 
-**Critical rule:** Image treatment is ONLY photographic terms. Never includes UI design elements (glassmorphism, pill buttons, brand accent colours, etc.). A dark moody brand gets "dramatic low-key lighting, dark atmosphere" — NOT "green-tinted, glass-effect images".
+For stock photos: `promptToSearchQuery()` strips photographic treatment terms from AI image prompts, keeping only the content subject (e.g., "Modern electric vehicle in a professional workshop"). Picks randomly from top 3 Pexels results for variety.
 
-Falls back to: `brand-profile.json` (imageTreatment field) → `design-tokens.json` (legacy) → defaults.
+For AI generation: reads the "Image Treatment" section from `brand-design.md` to determine photographic mood. Combined with content subject from each component's `imagePrompt`.
 
-Uses HuggingFace Inference API (FLUX.1-schnell model). Always regenerates all images.
+**Critical rule:** Image treatment is ONLY photographic terms. Never includes UI design elements.
+
+Always regenerates all images. Guarantees 100% asset coverage (real images or SVG placeholders).
 
 ### Phase 5 — Build (`v5/scripts/build-course.js`)
-**Input:** `component-patterns/` + `design-tokens.json` + `stitch-course-raw.html` + `course-layout.json` + `images/`
+**Input:** `component-patterns/` + `design-tokens.json` + `course-layout.json` + `images/`
 **Output:** `v5/output/course.html` + root `index.html`
 
-Pattern-fill approach — Stitch provides the DESIGN, we provide the CONTENT and LAYOUT:
+**⛔ CRITICAL: Design/Layout Separation (IMPLEMENTED)**
 
-**⛔ CRITICAL ARCHITECTURAL RULE: Separate Design from Layout**
+Stitch controls **DESIGN**: colours, fonts, shadows, gradients, hover effects, brand-specific card backgrounds.
+We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML structure.
 
-Stitch controls: colours, fonts, border-radius, shadows, backgrounds — pure visual tokens.
-We control: grids, containment, overflow, spacing, positioning — pure layout structure.
+**How it works:**
 
-These MUST be completely separated. Stitch's CSS must NEVER affect layout. Currently, `build-course.js` copies Stitch's entire raw `<head>` block into the final HTML. This is the root cause of layout regressions across different brands — Stitch's custom CSS includes layout-affecting rules that conflict with our fill functions' hardcoded grid/flex/containment classes.
+1. **`generateHead()`** builds the entire `<head>` from `design-tokens.json` — Tailwind config (colours + fonts), Google Fonts, Material Symbols, and our own CSS definitions for `glass-card`, `text-gradient`, `btn-primary`, `glass-nav`. **Never copies Stitch's raw `<head>`.**
 
-**The fix (TODO — next architecture session):**
-1. **Build our OWN `<head>` block** using only `design-tokens.json` (colours, fonts, border-radius, isDark)
-2. **Generate our OWN Tailwind config** from design tokens — the `tailwindConfig` field in design-tokens.json already has the data
-3. **Define our OWN layout CSS** — `glass-card`, `text-gradient`, `btn-primary`, and any other custom classes we use in fill functions. These definitions are OURS, not Stitch's. They use Stitch's colour tokens but our layout rules.
-4. **Never copy Stitch's raw `<head>`** — Stitch's CSS can define global rules, custom component styles, and Tailwind overrides that break our grids. We only want its colour/font values.
-5. **Never extract CSS classes from Stitch patterns for layout** — only for visual styling (background colours, border colours). All containment, grid structure, flex layout, gap, min-width must come from our fill functions.
+2. **Visual extraction utilities** (`extractVisuals`, `getClasses`, `visualOnly`, `bgOnly`, `mc`) parse Stitch patterns and extract **visual-only** classes: shadows, hovers, transitions, gradients, ring effects, border colours, brand-specific card backgrounds.
 
-**Why this matters:** Every Stitch call generates completely different CSS. If our layout depends on Stitch's CSS classes, the layout breaks with every new brand. If our layout is self-contained and only Stitch's COLOURS change, the layout is bulletproof.
+3. **Fill functions** own the HTML structure and layout classes. For each component:
+   - Layout classes are hardcoded (grids, containment, spacing, typography scale)
+   - Visual classes come from Stitch patterns (shadows, hovers, gradients, brand colours)
+   - Content comes from course-layout.json (100% SCORM fidelity)
 
-**Current approach (until refactored):**
-1. Loads the Stitch `<head>` block (Tailwind config, custom CSS, fonts, Material Design tokens)
-2. Rebuilds nav and footer using CSS classes from Stitch's page shell + real course data
-3. For each component in course-layout.json:
-   - Loads the matching HTML pattern from `component-patterns/`
-   - **Extracts CSS classes** from the pattern (section wrappers, card styles, button styles, etc.)
-   - **Rebuilds the inner HTML** entirely with real SCORM content using those classes
-   - Never does text replacement on Stitch's example content — always full rebuild (Approach A)
-4. Handles special cases: quiz correct answer indices, image base64 embedding, interactive data attributes
-5. Assembles full page: Stitch head → nav → filled components → footer → hydrate.js
+4. **10 enhanced fill functions** extract visual richness: hero (gradient buttons, coloured shadows), pullquote (giant decorative quote watermark), timeline (numbered circles with glow rings), branching (hover borders, arrow animation), graphic-text (image glow wrapper), mcq (card shadow, choice hover, radio icons), flashcard (bold primary front vs glass-card), bento (per-card brand colour variety), checklist (label hover effects), stat-callout (per-stat alternating colours).
 
-All 25 component types use Approach A (extract classes, rebuild). Zero Stitch example content leaks. Different brand URL → different Stitch kit → different CSS classes → different visual output.
+**Result:** Different brand URL → different Stitch kit → different visual character, identical layout. Verified across 9+ brands.
 
 **Layout rules enforced by every fill function (non-negotiable):**
 1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag handles spacing/background only (via `sectionOnly()` helper that strips containment classes from Stitch patterns). An inner `<div>` provides containment.
@@ -439,7 +435,7 @@ Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
 ```bash
 node v5/scripts/generate-images.js
 ```
-**Note:** HuggingFace Inference API credits are depleted (as of 2026-03-24). For review runs, skip this step and create SVG placeholders instead. The build script handles SVG placeholders fine. Layout review doesn't need real images.
+Uses Pexels stock photos by default (free, fast). Falls back to Gemini AI → HuggingFace AI → SVG placeholders. Always run this step — the fallback chain guarantees 100% asset coverage.
 
 ### Phase 5 — Build
 ```bash
@@ -453,15 +449,17 @@ All keys are stored in `.env` (gitignored, never committed). Scripts load them a
 Open `.env` directly in VS Code to set your keys — **never paste keys in the chat**.
 
 - `STITCH_API_KEY`: Get from stitch.withgoogle.com → Settings → API Keys
-- `HF_TOKEN`: Get from huggingface.co → Settings → Access Tokens (free tier works)
+- `PEXELS_API_KEY`: Get from pexels.com/api → free, instant, 200 req/hr (recommended for images)
+- `GEMINI_API_KEY`: (Optional) For AI image generation (requires paid Google plan for image models)
+- `HF_TOKEN`: (Optional) Get from huggingface.co → Settings → Access Tokens
 - `ANTHROPIC_API_KEY`: (Optional) When set, Phase 2 brand description + Phase 3 layout engine both run automatically without `--manual`
 
 ---
 
 ## Test Data
 - **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
-- **Brand URL:** stored in `brand/url.txt` — currently `https://najaf.framer.ai/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
-- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate), `https://fitflow-template.framer.website/` (light, pink-blue gradient), `https://landio.framer.website/` (dark, sleek SaaS), `https://crimzon.framer.website/` (dark, crimson red), `https://aigents.framer.ai/` (light, purple-violet)
+- **Brand URL:** stored in `brand/url.txt` — currently `https://sprig.framer.website/`. `scrape-brand.js` reads this automatically when no CLI argument is given.
+- **Previously tested brands:** `https://sprig.framer.website/` (dark, cyan/teal), `https://fluence.framer.website/` (light, amethyst), `https://ailyx.framer.website/` (light, blue corporate), `https://fitflow-template.framer.website/` (light, pink-blue gradient), `https://landio.framer.website/` (dark, sleek SaaS), `https://crimzon.framer.website/` (dark, crimson red), `https://aigents.framer.ai/` (light, purple-violet), `https://najaf.framer.ai/` (dark, green)
 
 ## Phase 6 — Visual Review (`v5/scripts/review-course.js`)
 
@@ -488,7 +486,7 @@ Outputs to `screenshots/` (gitignored):
 
 **When doing review runs, alternate brand URLs** between `najaf.framer.ai` (dark/green) and `ailyx.framer.website` (light/blue) to ensure fixes are universal. A fix that works for one brand but breaks the other is the wrong fix.
 
-**Image asset coverage must be 100%.** `generate-images.js` has retry logic (Pass 1 + Pass 2) and SVG placeholder fallback. The script guarantees 100% asset delivery — either real images or SVG placeholders. Both work fine in the build.
+**Image asset coverage must be 100%.** `generate-images.js` has a fallback chain: Pexels stock → Gemini AI → HuggingFace AI → SVG placeholders. The script guarantees 100% asset delivery. Pexels is the default and typically delivers 100% real stock photos with no fallbacks needed.
 
 ---
 

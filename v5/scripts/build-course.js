@@ -234,6 +234,76 @@ function sectionOnly(cls) {
     .trim() || 'py-24';
 }
 
+// ─── Stitch Visual Extraction ────────────────────────────────────────
+// Extract visual-only classes from Stitch patterns (shadows, hovers,
+// transitions, gradients, rings, border colours). NEVER layout classes.
+// Stitch controls DESIGN. We control LAYOUT.
+
+/** Merge class strings, filtering empty/null, deduplicating */
+function mc(...parts) {
+  return parts.filter(Boolean).join(' ').replace(/\s+/g, ' ').trim();
+}
+
+/** Extract the class string from the first element matching a simple selector in HTML */
+function getClasses(html, selector) {
+  let re;
+  if (selector.startsWith('[')) {
+    // data attribute selector e.g. [data-quiz]
+    const attr = selector.slice(1, -1);
+    re = new RegExp(`<[^>]+${attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}[^>]*class="([^"]*)"`, 'i');
+    // Also try class before attr
+    const re2 = new RegExp(`class="([^"]*)"[^>]*${attr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'i');
+    return (html.match(re)?.[1] || html.match(re2)?.[1] || '');
+  }
+  if (selector.includes('[')) {
+    // tag[attr] e.g. button[data-choice]
+    const [tag, rest] = selector.split('[');
+    const attr = rest.replace(']', '');
+    re = new RegExp(`<${tag}[^>]*class="([^"]*)"[^>]*${attr}`, 'i');
+    const re2 = new RegExp(`<${tag}[^>]*${attr}[^>]*class="([^"]*)"`, 'i');
+    return (html.match(re)?.[1] || html.match(re2)?.[1] || '');
+  }
+  // Simple tag selector
+  re = new RegExp(`<${selector}[^>]*class="([^"]*)"`, 'i');
+  return (html.match(re)?.[1] || '');
+}
+
+/** Extract nth occurrence of a tag's class string */
+function getClassesNth(html, tag, n) {
+  const re = new RegExp(`<${tag}[^>]*class="([^"]*)"`, 'gi');
+  let m, i = 0;
+  while ((m = re.exec(html)) !== null) {
+    if (i === n) return m[1];
+    i++;
+  }
+  return '';
+}
+
+// Visual class patterns that are SAFE to extract (no layout impact)
+const VISUAL_RE = /^(shadow-|hover:|group-hover:|transition-?|duration-|ring-|scale-|opacity-|mix-blend-|backdrop-blur|bg-gradient|from-|to-|via-)/;
+const VISUAL_BORDER_COLOR_RE = /^border-(primary|secondary|tertiary|outline|error|surface|on-|transparent|white|black)/;
+const VISUAL_BG_RE = /^bg-(primary|secondary|tertiary|error|surface|on-|white|black)/;
+
+/** Extract only visual classes from a class string */
+function visualOnly(cls) {
+  if (!cls) return '';
+  return cls.split(/\s+/).filter(c =>
+    VISUAL_RE.test(c) || VISUAL_BORDER_COLOR_RE.test(c)
+  ).join(' ');
+}
+
+/** Extract background colour class from a class string (for card theming) */
+function bgOnly(cls) {
+  if (!cls) return '';
+  return cls.split(/\s+/).filter(c => VISUAL_BG_RE.test(c)).join(' ');
+}
+
+/** Extract a full HTML element matching a regex, or return fallback */
+function extractElement(html, re) {
+  const m = html.match(re);
+  return m ? m[0] : '';
+}
+
 // ═══════════════════════════════════════════════════════════════════════
 // FILL FUNCTIONS — one per component type
 // Each takes the Stitch pattern HTML and real content, returns filled HTML
@@ -243,6 +313,12 @@ function sectionOnly(cls) {
 //   - Inner div: max-w-6xl mx-auto px-8 (containment)
 //   - Grids: explicit gap-* + min-w on columns
 //   - Headings: h2=text-3xl, h3=text-2xl, h4=text-xl
+//
+// Visual contract (NEW):
+//   - Shadows, hovers, transitions, gradients, rings → extracted from Stitch
+//   - Card backgrounds → extracted from Stitch (brand-specific)
+//   - Decorative elements → extracted from Stitch where safe
+//   - All with safe fallbacks to current hardcoded defaults
 // ═══════════════════════════════════════════════════════════════════════
 
 function fillHero(pattern, comp) {
@@ -252,15 +328,31 @@ function fillHero(pattern, comp) {
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
+  // Extract Stitch visuals
+  const overlayDiv = getClassesNth(pattern, 'div', 1); // gradient overlay div
+  const overlayGradient = overlayDiv.split(/\s+/).filter(c => /^(bg-gradient|from-|to-|via-)/.test(c)).join(' ')
+    || 'bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40';
+  const imgVisuals = visualOnly(getClasses(pattern, 'img'));
+  const imgClass = mc('w-full h-full object-cover', imgVisuals || 'mix-blend-overlay opacity-40');
+  const btn1 = getClassesNth(pattern, 'button', 0);
+  const btn1Visual = visualOnly(btn1);
+  const btn1Bg = bgOnly(btn1) || 'bg-primary';
+  const btn1Gradient = btn1.split(/\s+/).filter(c => /^(bg-gradient|from-|to-|via-)/.test(c)).join(' ');
+  const btn1Round = btn1.match(/rounded-\S+/)?.[0] || 'rounded-xl';
+  const btn2 = getClassesNth(pattern, 'button', 1);
+  const btn2Visual = visualOnly(btn2);
+  const btn2Bg = bgOnly(btn2) || '';
+  const btn2Round = btn2.match(/rounded-\S+/)?.[0] || 'rounded-xl';
+
   return `<section class="${sectionClass}" data-component-type="hero">
-${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
-<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 ${imgClass}" src="${imgSrc}"/>` : ''}
+<div class="absolute inset-0 ${overlayGradient}"></div>
 <div class="relative z-10 text-center max-w-6xl mx-auto px-8">
 <h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8">${title}</h1>
 <p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12">${bodyText}</p>
-<div class="flex gap-4 justify-center">
-<button class="px-8 py-4 bg-primary text-on-primary rounded-xl font-bold">Begin Course</button>
-<button class="px-8 py-4 border border-outline-variant rounded-xl font-bold hover:bg-surface-variant transition-colors">Explore Modules</button>
+<div class="flex gap-4 justify-center flex-wrap">
+<button class="px-8 py-4 ${btn1Gradient || btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}">Begin Course</button>
+<button class="px-8 py-4 ${btn2Bg || 'border border-outline-variant'} ${btn2Round} font-bold ${btn2Visual || 'hover:bg-surface-variant transition-colors'}">Explore Modules</button>
 </div>
 </div>
 </section>`;
@@ -328,32 +420,47 @@ function fillMCQ(pattern, comp) {
 
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
   const secClass = sectionOnly(rawClass);
-  const cardClassRaw = pattern.match(/<div[^>]*class="(glass-card[^"]*)"/)?.[1] || 'glass-card p-12 rounded-[2rem]';
-  const cardClass = cardClassRaw.replace(/\bp-12\b/, 'p-6 md:p-12');
-  const labelDiv = pattern.match(/<div class="text-secondary[^"]*">[^<]*<\/div>/)?.[0] || '';
 
-  const firstChoice = pattern.match(/<div[^>]*data-choice="a"[^>]*>[\s\S]*?<\/span>\s*<\/div>/i);
-  let choiceTemplate = firstChoice ? firstChoice[0] : '';
+  // Extract Stitch's quiz card styling
+  const quizCardClass = getClasses(pattern, '[data-quiz]');
+  const cardBg = bgOnly(quizCardClass) || '';
+  const cardVisuals = quizCardClass.split(/\s+/).filter(c => /^(shadow-|border|rounded-)/.test(c)).join(' ');
+  const cardClass = mc(
+    cardBg || 'glass-card',
+    'p-6 md:p-12',
+    cardVisuals || 'rounded-[2rem]'
+  );
+
+  // Extract label styling
+  const labelMatch = pattern.match(/<span[^>]*class="([^"]*font-bold[^"]*tracking[^"]*)"[^>]*>/i)
+    || pattern.match(/<span[^>]*class="([^"]*uppercase[^"]*)"[^>]*>/i);
+  const labelClass = labelMatch?.[1] || 'text-secondary font-bold text-sm uppercase tracking-widest';
+
+  // Extract Stitch's choice button styling
+  const choiceBtnClass = getClasses(pattern, 'button[data-choice]') || getClasses(pattern, '[data-choice]');
+  const choiceVisuals = visualOnly(choiceBtnClass);
+  const choiceRound = choiceBtnClass.match(/rounded-\S+/)?.[0] || 'rounded-xl';
+  // Detect radio icon on hover
+  const hasRadioIcon = pattern.includes('radio_button_unchecked');
 
   const newChoices = items.map((item, i) => {
-    if (choiceTemplate) {
-      let c = choiceTemplate;
-      c = c.replace(/data-choice="[^"]*"/, `data-choice="${i}"`);
-      c = c.replace(/<span>[\s\S]*?<\/span>$/, `<span>${esc(item.text || '')}</span>`);
-      c = c.replace(/<span>([^<]*)<\/span>/i, `<span>${esc(item.text || '')}</span>`);
-      return c;
-    }
-    return `<div class="group flex items-center p-5 rounded-xl bg-surface-container/80 hover:bg-surface-container cursor-pointer transition-all border border-outline-variant/20 hover:border-secondary/50 backdrop-blur-sm" data-choice="${i}">
-<div class="w-6 h-6 rounded-full border-2 border-outline-variant mr-4 group-hover:border-secondary flex-shrink-0"></div>
+    const choiceTag = choiceBtnClass.includes('w-full') ? 'button' : 'div';
+    return `<${choiceTag} class="${mc(
+      choiceTag === 'button' ? 'w-full text-left' : 'group flex items-center cursor-pointer',
+      'p-5', choiceRound,
+      choiceVisuals || 'bg-surface-container/80 hover:bg-surface-container transition-all border border-outline-variant/20 hover:border-secondary/50',
+      hasRadioIcon ? 'flex justify-between items-center group' : ''
+    )}" data-choice="${i}">
 <span class="text-on-surface">${esc(item.text || '')}</span>
-</div>`;
+${hasRadioIcon ? '<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_unchecked</span>' : ''}
+</${choiceTag}>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
 <div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
-${labelDiv ? labelDiv.replace(/>.*</, `>${title}<`) : `<div class="text-secondary font-bold text-sm mb-4">${title}</div>`}
-<h3 class="font-headline text-2xl font-bold mb-8">${questionText}</h3>
+<span class="${labelClass}">${title}</span>
+<h3 class="font-headline text-2xl font-bold mt-2 mb-8">${questionText}</h3>
 <div class="space-y-4">
 ${newChoices}
 </div>
@@ -372,9 +479,19 @@ function fillGraphicText(pattern, comp, index) {
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
+  // Extract Stitch's image glow wrapper (absolute gradient blur behind image)
+  const glowMatch = pattern.match(/<div[^>]*class="(absolute[^"]*blur[^"]*)"[^>]*>/i);
+  const glowClass = glowMatch?.[1] || '';
+  // Extract image container shadow
+  const imgContainerMatch = pattern.match(/<div[^>]*class="(relative[^"]*shadow[^"]*)"[^>]*>/i);
+  const imgShadow = imgContainerMatch?.[1]?.split(/\s+/).filter(c => /^shadow-/.test(c)).join(' ') || '';
+
   const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}">
-<div class="relative group rounded-2xl overflow-hidden aspect-[4/3]">
+<div class="relative group">
+${glowClass ? `<div class="${glowClass}"></div>` : ''}
+<div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow}">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container rounded-2xl"></div>'}
+</div>
 </div>
 </div>`;
 
@@ -401,11 +518,18 @@ function fillBento(pattern, comp) {
 
   const icons = ['bolt', 'speed', 'shield', 'memory', 'hub', 'star', 'lightbulb', 'science'];
 
+  // Extract per-card backgrounds from Stitch pattern (brand-specific colour variety)
+  const cardDivs = findAll(pattern, /<div[^>]*class="([^"]*(?:col-span|row-span)[^"]*)"[^>]*>/gi);
+  const cardBgs = cardDivs.map(m => bgOnly(m.groups[1]));
+  // Extract image hover from Stitch
+  const imgHover = pattern.includes('group-hover:scale') ? 'group-hover:scale-105 transition-transform duration-700' : 'group-hover:scale-110 transition-transform duration-700';
+
   const newCards = items.map((item, i) => {
     if (i === 0) {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
-      return `<div class="md:col-span-2 md:row-span-2 glass-card rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group min-h-[200px]">
-${imgSrc ? `<img alt="" class="absolute inset-0 object-cover opacity-20 group-hover:scale-110 transition-transform duration-700" src="${imgSrc}"/>` : ''}
+      const bg0 = cardBgs[0] || 'glass-card';
+      return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group min-h-[200px]">
+${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[0]}</span>
 <h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
@@ -414,17 +538,18 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 object-cover opacity-20 group-ho
 </div>`;
     }
     if (i <= 2 && items.length > 3) {
-      return `<div class="md:col-span-2 glass-card rounded-3xl p-8 flex items-center gap-6 min-h-[100px]">
-<div class="bg-secondary-container p-4 rounded-2xl flex-shrink-0">
-<span class="material-symbols-outlined text-secondary text-4xl">${icons[i % icons.length]}</span>
-</div>
+      const bgI = cardBgs[i] || 'glass-card';
+      return `<div class="${i === 1 ? 'md:col-span-1' : 'md:col-span-1'} ${bgI} rounded-3xl p-8 flex flex-col justify-between min-h-[100px]">
+<span class="material-symbols-outlined text-primary text-4xl mb-4">${icons[i % icons.length]}</span>
 <div class="min-w-0">
 <h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+<p class="text-on-surface-variant text-sm">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
-    return `<div class="glass-card rounded-3xl p-8 flex flex-col justify-center min-h-[100px]">
+    const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
+    const bgShadow = cardDivs[i]?.groups[1]?.split(/\s+/).filter(c => /^(shadow-|border)/.test(c)).join(' ') || '';
+    return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-8 flex flex-col justify-center min-h-[100px] ${bgShadow}">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
 <h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
 <p class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</p>
@@ -528,21 +653,30 @@ function fillBranching(pattern, comp) {
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
   const secClass = sectionOnly(rawClass);
 
+  // Extract Stitch's button styling
+  const btnClass = getClasses(pattern, 'button');
+  const btnVisuals = visualOnly(btnClass);
+  const btnBg = bgOnly(btnClass);
+  const btnRound = btnClass.match(/rounded-\S+/)?.[0] || 'rounded-2xl';
+  // Detect arrow animation element
+  const hasArrow = pattern.includes('group-hover:translate-x');
+  const arrowSpanMatch = pattern.match(/<span[^>]*class="([^"]*group-hover:translate[^"]*)"[^>]*>/);
+  const arrowClass = arrowSpanMatch?.[1] || 'mt-6 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform';
+
   const newButtons = items.map(item =>
-    `<button class="p-6 rounded-2xl bg-surface-variant/30 text-left hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30">
+    `<button class="group p-6 md:p-8 ${btnBg || 'bg-surface-variant/30'} ${btnRound} text-left ${btnVisuals || 'hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30'}">
 <div class="font-bold mb-1">${esc(item.title || '')}</div>
 <div class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</div>
+${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-outlined">arrow_forward</span></span>` : ''}
 </button>`
   ).join('\n');
 
   return `<section class="${secClass}" data-component-type="branching">
 <div class="max-w-6xl mx-auto px-8">
-<div class="glass-card p-6 md:p-12 rounded-3xl border-l-8 border-secondary">
-<h3 class="font-headline text-2xl font-bold mb-6">${title}</h3>
-<p class="text-lg text-on-surface-variant mb-10 italic">${bodyText}</p>
-<div class="grid gap-6">
+<h3 class="font-headline text-2xl font-bold mb-6 text-center">${title}</h3>
+${bodyText ? `<p class="text-lg text-on-surface-variant mb-10 text-center italic">${bodyText}</p>` : ''}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 ${newButtons}
-</div>
 </div>
 </div>
 </section>`;
@@ -556,6 +690,44 @@ function fillTimeline(pattern, comp) {
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-32';
   const secClass = sectionOnly(rawClass);
 
+  // Detect Stitch's numbered-circle style (w-12 h-12 bg-primary rounded-full with ring)
+  const stepDotClass = getClasses(pattern, 'div').match(/w-12[^"]*rounded-full/) ? '' : null;
+  const hasNumberedCircles = pattern.includes('ring-') && pattern.includes('rounded-full');
+
+  // Extract the circle styling from Stitch
+  const circleMatch = pattern.match(/class="(w-\d+\s+h-\d+\s+[^"]*rounded-full[^"]*)"/);
+  const circleClass = circleMatch?.[1] || '';
+  const circleVisuals = circleClass.split(/\s+/).filter(c => /^(ring-|shadow-|bg-primary|bg-secondary|text-white|text-on)/.test(c)).join(' ');
+
+  if (hasNumberedCircles && circleClass) {
+    // Use Stitch's numbered circle + connector layout
+    const connectorClass = pattern.match(/class="(w-0[^"]*bg-outline[^"]*)"/)?.[1] || 'w-0.5 h-full bg-outline-variant/20 mt-4';
+    const newSteps = items.map((item, i) => {
+      const num = i + 1;
+      const isLast = i === items.length - 1;
+      return `<div class="flex gap-8">
+<div class="flex flex-col items-center">
+<div class="${circleClass} flex items-center justify-center font-bold">${num}</div>
+${!isLast ? `<div class="${connectorClass}"></div>` : ''}
+</div>
+<div class="${isLast ? '' : 'pb-12'}">
+<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+</div>
+</div>`;
+    }).join('\n');
+
+    return `<section class="${secClass}" data-component-type="timeline">
+<div class="max-w-6xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<div class="space-y-0">
+${newSteps}
+</div>
+</div>
+</section>`;
+  }
+
+  // Fallback: border-l dot layout (original)
   const activeDotClass = pattern.match(/class="(absolute[^"]*bg-secondary[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-secondary shadow-[0_0_10px_rgba(37,216,252,0.5)]';
   const inactiveDotClass = pattern.match(/class="(absolute[^"]*bg-outline-variant[^"]*)"/)?.[1] || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant';
 
@@ -625,23 +797,34 @@ function fillStatCallout(pattern, comp) {
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24 bg-surface-container-low';
   const secClass = sectionOnly(rawClass);
 
-  const statMatch = pattern.match(/<div class="space-y-2">[\s\S]*?<\/div>\s*<\/div>/i);
-  const numClass = statMatch
-    ? (statMatch[0].match(/<div class="(text-5xl[^"]*)"/)?.[1] || 'text-5xl font-headline font-extrabold text-gradient')
-    : 'text-5xl font-headline font-extrabold text-gradient';
-  const labelClass = statMatch
-    ? (statMatch[0].match(/<p class="([^"]*)"/)?.[1] || 'text-on-surface-variant text-sm uppercase tracking-widest font-bold')
-    : 'text-on-surface-variant text-sm uppercase tracking-widest font-bold';
+  // Extract per-stat styling from Stitch (each stat div may have different colours)
+  const statDivs = findAll(pattern, /<div[^>]*class="([^"]*)"[^>]*>\s*<div[^>]*class="([^"]*text-\d+xl[^"]*)"[^>]*>/gi);
+  const statStyles = statDivs.map(m => ({
+    cardClass: m.groups[1] || '',
+    numClass: m.groups[2] || ''
+  }));
+
+  // Extract sublabel if present (font-bold text-lg between number and description)
+  const hasSublabel = pattern.includes('font-bold text-lg');
 
   const colCount = Math.min(items.length, 4);
   const gridCols = `grid-cols-2 md:grid-cols-${colCount}`;
 
-  const newStats = items.map(item =>
-    `<div class="space-y-2 min-w-[120px]">
-<div class="${numClass}">${esc(item.stat || item.value || '')}</div>
-<p class="${labelClass}">${esc(item.label || '')}</p>
-</div>`
-  ).join('\n');
+  const newStats = items.map((item, i) => {
+    const style = statStyles[i] || statStyles[0] || {};
+    const cardBg = bgOnly(style.cardClass);
+    const cardShadow = style.cardClass.split(/\s+/).filter(c => /^shadow-/.test(c)).join(' ');
+    const cardRound = style.cardClass.match(/rounded-\S+/)?.[0] || 'rounded-lg';
+    const numColor = style.numClass.split(/\s+/).filter(c => /^text-(primary|secondary|tertiary|error|gradient)/.test(c)).join(' ')
+      || 'text-gradient';
+    const numWeight = style.numClass.split(/\s+/).filter(c => /^font-(black|extrabold|bold)/.test(c)).join(' ')
+      || 'font-extrabold';
+    return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, 'min-w-[120px]')}">
+<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2">${esc(item.stat || item.value || '')}</div>
+${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
+<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm uppercase tracking-widest font-bold'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
+</div>`;
+  }).join('\n');
 
   return `<section class="${secClass}" data-component-type="stat-callout">
 <div class="max-w-6xl mx-auto px-8">
@@ -658,11 +841,36 @@ function fillPullquote(pattern, comp) {
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
   const secClass = sectionOnly(rawClass);
 
+  // Extract Stitch's decorative quote mark (the giant " character)
+  const decorativeSpan = extractElement(pattern, /<span[^>]*class="[^"]*text-\[?\d+[^"]*pointer-events-none[^"]*"[^>]*>[^<]*<\/span>/i);
+  const hasDecorativeQuote = !!decorativeSpan;
+
+  // Extract blockquote styling from Stitch
+  const bqClass = getClasses(pattern, 'blockquote');
+  const bqStyle = bqClass.split(/\s+/).filter(c => /^(text-\d|md:text-|font-|italic|leading-)/.test(c)).join(' ')
+    || 'text-2xl font-headline font-bold leading-relaxed';
+
+  // Extract citation styling
+  const citeClass = getClasses(pattern, 'cite');
+  const citeStyle = citeClass || 'text-on-surface-variant';
+
+  if (hasDecorativeQuote) {
+    // Use Stitch's centre-aligned decorative layout
+    return `<section class="${secClass} relative" data-component-type="pullquote">
+${decorativeSpan}
+<div class="max-w-6xl mx-auto px-8 text-center relative z-10">
+<blockquote class="${mc('font-headline', bqStyle)}">${quote}</blockquote>
+${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}">— ${attribution}</cite>` : ''}
+</div>
+</section>`;
+  }
+
+  // Fallback: border-l accent bar layout
   return `<section class="${secClass}" data-component-type="pullquote">
 <div class="max-w-6xl mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary">
 <span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
-<blockquote class="text-2xl font-headline font-bold leading-relaxed">${quote}</blockquote>
+<blockquote class="${mc('font-headline', bqStyle)}">${quote}</blockquote>
 ${attribution ? `<p class="mt-4 text-on-surface-variant">— ${attribution}</p>` : ''}
 </div>
 </div>
@@ -674,15 +882,26 @@ function fillChecklist(pattern, comp) {
   const title = esc(comp.displayTitle || '');
   const rawClass = pattern.match(/<section[^>]*class="([^"]*)"/)?.[1] || 'py-24';
   const secClass = sectionOnly(rawClass);
-  const cardClassRaw3 = pattern.match(/<div[^>]*class="(glass-card[^"]*)"[^>]*data-checklist/)?.[1] || 'glass-card p-12 rounded-3xl';
-  const cardClass = cardClassRaw3.replace(/\bp-12\b/, 'p-6 md:p-12');
 
+  // Extract Stitch's card styling
+  const checklistCard = getClasses(pattern, '[data-checklist]');
+  const cardBg = bgOnly(checklistCard);
+  const cardShadow = checklistCard.split(/\s+/).filter(c => /^shadow-/.test(c)).join(' ');
+  const cardRound = checklistCard.match(/rounded-\S+/)?.[0] || 'rounded-3xl';
+  const cardClass = mc(cardBg || 'glass-card', 'p-6 md:p-12', cardRound, cardShadow);
+
+  // Extract input styling
   const inputClass = pattern.match(/<input[^>]*class="([^"]*)"/)?.[1] || 'w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent';
 
+  // Extract label hover from Stitch
+  const labelSpan = pattern.match(/<span[^>]*class="([^"]*group-hover[^"]*)"[^>]*>/i);
+  const labelHover = labelSpan?.[1]?.split(/\s+/).filter(c => /^(group-hover:|transition-)/.test(c)).join(' ')
+    || 'hover:bg-surface-variant/50 transition-colors';
+
   const newLabels = items.map(item =>
-    `<label class="flex items-center gap-4 p-4 rounded-xl hover:bg-surface-variant/50 cursor-pointer transition-colors">
+    `<label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer group ${labelHover}">
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface-variant">${esc(item.text || item.title || '')}</span>
+<span class="text-on-surface-variant ${labelSpan ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
 </label>`
   ).join('\n');
 
@@ -745,19 +964,38 @@ function fillFlashcard(pattern, comp) {
   const secClass = sectionOnly(rawClass);
   const icons = ['info', 'local_fire_department', 'pan_tool', 'bolt', 'shield', 'warning', 'speed', 'memory'];
 
+  // Extract Stitch's front/back face styling
+  const frontMatch = pattern.match(/class="([^"]*)"[^>]*style="[^"]*backface/i);
+  const frontClass = frontMatch?.[1] || '';
+  const frontBg = bgOnly(frontClass) || '';
+  const frontShadow = frontClass.split(/\s+/).filter(c => /^shadow-/.test(c)).join(' ') || 'shadow-md';
+  const frontRound = frontClass.match(/rounded-\S+/)?.[0] || 'rounded-3xl';
+  // Detect if Stitch uses solid primary bg (bold style) vs glass-card (subtle style)
+  const useBoldFront = frontBg.includes('bg-primary');
+
+  const backMatch = pattern.match(/class="([^"]*)"[^>]*style="[^"]*rotateY/i);
+  const backClass = backMatch?.[1] || '';
+  const backBg = bgOnly(backClass) || 'bg-secondary-container';
+  const backBorder = backClass.split(/\s+/).filter(c => /^border-/.test(c)).join(' ');
+  const backRound = backClass.match(/rounded-\S+/)?.[0] || 'rounded-3xl';
+
   const newCards = items.map((item, i) => {
     const front = esc(item.front || item.title || item.term || '');
     const back = item.back || item.definition || item.body || '';
+    const frontFaceClass = useBoldFront
+      ? mc(frontBg, 'text-white', frontRound, frontShadow, 'p-6 md:p-8')
+      : mc('glass-card', frontRound, frontShadow, 'border border-outline-variant/10 p-6 md:p-8');
+    const backFaceClass = mc(backBg, backBorder, backRound, 'p-6 md:p-8 text-center');
     return `<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
-<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 glass-card rounded-3xl shadow-md border border-outline-variant/10" style="backface-visibility:hidden">
+<div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
 <div class="text-center">
-<div class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[i % icons.length]}</div>
+<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-4xl mb-4">${icons[i % icons.length]}</div>
 <div class="font-headline font-bold text-xl">${front}</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center p-6 md:p-8 bg-secondary-container rounded-3xl text-center" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium">${back}</p>
+<div class="absolute inset-0 flex items-center justify-center ${backFaceClass}" style="backface-visibility:hidden;transform:rotateY(180deg)">
+<p class="${useBoldFront ? 'text-on-secondary-container' : 'text-on-secondary-container'} font-medium">${back}</p>
 </div>
 </div>
 </div>`;

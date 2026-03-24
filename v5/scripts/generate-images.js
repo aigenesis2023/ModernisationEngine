@@ -1,22 +1,21 @@
 #!/usr/bin/env node
 /**
- * V5 Image Generator — Brand-Description-Informed
+ * V5 Image Generator — Stock Photos + AI Fallback
  *
- * Reads course-layout.json for content subjects and brand-design.md for
- * photographic treatment. Generates images that match the brand mood.
+ * Priority chain: Pexels stock (free) → Gemini AI → HuggingFace AI → SVG placeholder
  *
- * The image prompts from course-layout.json describe WHAT to show (subject).
- * The brand description determines HOW it should look (photographic mood).
- * Image prompts contain ONLY photographic terms — never UI design elements.
+ * Reads course-layout.json for content subjects. Image prompts describe
+ * WHAT to show — these are converted to search queries for stock photos.
+ * For AI generation, brand-design.md provides photographic treatment.
  *
  * Usage:
  *   node v5/scripts/generate-images.js
  *
- * Input:  v5/output/course-layout.json   (content subjects)
- *         v5/output/brand-design.md       (primary — natural language brand description)
- *         v5/output/brand-profile.json    (fallback — imageTreatment field)
- *         v5/output/design-tokens.json    (legacy fallback)
- *         v5/output/stitch-course-raw.html (legacy fallback)
+ * API Keys (in .env):
+ *   PEXELS_API_KEY  — Free stock photos (recommended default, 200 req/hr)
+ *   GEMINI_API_KEY  — AI image generation (requires paid plan)
+ *   HF_TOKEN        — HuggingFace FLUX (may have credit limits)
+ *
  * Output: v5/output/images/*.jpg + updated course-layout.json
  */
 
@@ -25,6 +24,14 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Config ──────────────────────────────────────────────────────────
+// Priority: Pexels stock (default, free) → Gemini AI → HuggingFace AI → SVG placeholder
+const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
+const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
+
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+const GEMINI_MODEL = 'gemini-2.5-flash-image';
+const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
+
 const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
 const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
 const HF_TOKEN = process.env.HF_TOKEN || '';
@@ -267,7 +274,176 @@ function buildDesignTreatment(design) {
   return parts.join(', ');
 }
 
-// ─── Image generation via Hugging Face ───────────────────────────────
+// ─── Stock photo via Pexels (default) ────────────────────────────────
+// Converts the AI image prompt into a search query, finds a matching
+// stock photo, downloads it. Free tier: 200 req/hr, 20k/month.
+function promptToSearchQuery(prompt) {
+  // Strip photographic treatment terms — keep only the content subject
+  return prompt
+    .replace(/,\s*(high resolution|sharp details|no text|no watermarks|dramatic|cinematic|moody|professional|clean|bright|warm|cool|balanced|artistic|editorial|low-key|lighting|shadows|highlights|illumination|composition|atmosphere|tones?|undertones?|colour temperature|photographic mood)[^,]*/gi, '')
+    .replace(/,\s*-\s*\*\*[^*]+\*\*[^,]*/g, '') // strip markdown bold items
+    .replace(/\*\*/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .split(',')[0] // take first phrase (the subject)
+    .trim()
+    .substring(0, 100); // Pexels max query length
+}
+
+async function fetchStockPhoto(prompt, dimensions, outputFilename) {
+  const query = promptToSearchQuery(prompt);
+  const outputPath = path.join(OUTPUT_DIR, outputFilename);
+  const orientation = dimensions.width > dimensions.height ? 'landscape' : 'portrait';
+
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      console.log(`  Searching Pexels: "${query}" (${orientation})...`);
+
+      const url = `${PEXELS_API_URL}?query=${encodeURIComponent(query)}&per_page=5&orientation=${orientation}`;
+      const resp = await fetch(url, {
+        headers: { 'Authorization': PEXELS_API_KEY },
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (resp.status === 429) {
+        console.log(`  Pexels rate limited, waiting...`);
+        await sleep(5000);
+        continue;
+      }
+
+      if (!resp.ok) {
+        throw new Error(`Pexels HTTP ${resp.status}`);
+      }
+
+      const data = await resp.json();
+      if (!data.photos || data.photos.length === 0) {
+        // Try a simpler query (first 2 words)
+        if (attempt === 1) {
+          console.log(`  No results, will retry with simpler query...`);
+          continue;
+        }
+        throw new Error('No photos found');
+      }
+
+      // Pick a random photo from top results for variety
+      const photo = data.photos[Math.floor(Math.random() * Math.min(data.photos.length, 3))];
+
+      // Choose size based on target dimensions
+      const targetWidth = dimensions.width;
+      let photoUrl;
+      if (targetWidth > 900) {
+        photoUrl = photo.src.large2x || photo.src.large;
+      } else if (targetWidth > 500) {
+        photoUrl = photo.src.large;
+      } else {
+        photoUrl = photo.src.medium;
+      }
+
+      // Download the image
+      console.log(`  Downloading: ${photo.photographer} (${photo.width}x${photo.height})...`);
+      const imgResp = await fetch(photoUrl, { signal: AbortSignal.timeout(30000) });
+      if (!imgResp.ok) throw new Error(`Download failed: HTTP ${imgResp.status}`);
+
+      const buffer = Buffer.from(await imgResp.arrayBuffer());
+      if (buffer.length < 1000) throw new Error('Downloaded image too small');
+
+      // Pexels always returns JPEG
+      const jpgFilename = outputFilename.replace(/\.\w+$/, '.jpg');
+      const jpgPath = path.join(OUTPUT_DIR, jpgFilename);
+      fs.writeFileSync(jpgPath, buffer);
+      console.log(`  Saved: ${jpgFilename} (${Math.round(buffer.length / 1024)}KB) — ${photo.photographer}`);
+      return { path: jpgPath, filename: jpgFilename };
+
+    } catch (err) {
+      console.log(`  Pexels failed (attempt ${attempt}): ${err.message}`);
+      if (attempt < 2) {
+        await sleep(2000);
+      }
+    }
+  }
+
+  return null;
+}
+
+// ─── Image generation via Gemini ─────────────────────────────────────
+async function generateImageGemini(prompt, dimensions, outputFilename) {
+  const outputPath = path.join(OUTPUT_DIR, outputFilename);
+  const enhancedPrompt = `Generate a photographic image: ${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`  Generating via Gemini: ${outputFilename} (attempt ${attempt})...`);
+
+      const resp = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          contents: [{ parts: [{ text: enhancedPrompt }] }],
+          generationConfig: {
+            responseModalities: ['TEXT', 'IMAGE'],
+          },
+        }),
+        signal: AbortSignal.timeout(60000),
+      });
+
+      if (resp.status === 429) {
+        const errBody = await resp.text().catch(() => '');
+        if (errBody.includes('quota') && errBody.includes('limit: 0')) {
+          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
+        }
+        console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
+        await sleep(RETRY_DELAY_MS);
+        continue;
+      }
+
+      if (!resp.ok) {
+        const errText = await resp.text().catch(() => '');
+        if (errText.includes('paid plan') || errText.includes('quota') && errText.includes('limit: 0')) {
+          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
+        }
+        throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 300)}`);
+      }
+
+      const data = await resp.json();
+
+      // Extract image from response — Gemini returns inline_data with base64
+      const parts = data.candidates?.[0]?.content?.parts || [];
+      const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+
+      if (!imagePart) {
+        const textParts = parts.filter(p => p.text).map(p => p.text).join(' ');
+        throw new Error(`No image in response. Text: ${textParts.substring(0, 200)}`);
+      }
+
+      const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+
+      if (buffer.length < 500) {
+        throw new Error(`Image too small (${buffer.length} bytes)`);
+      }
+
+      // Determine extension from mime type
+      const mime = imagePart.inlineData.mimeType;
+      const ext = mime.includes('png') ? '.png' : '.jpg';
+      const finalFilename = outputFilename.replace(/\.\w+$/, ext);
+      const finalPath = path.join(OUTPUT_DIR, finalFilename);
+
+      fs.writeFileSync(finalPath, buffer);
+      console.log(`  Saved: ${finalFilename} (${Math.round(buffer.length / 1024)}KB)`);
+      return { path: finalPath, filename: finalFilename };
+
+    } catch (err) {
+      console.log(`  Failed (attempt ${attempt}): ${err.message}`);
+      if (attempt < 3) {
+        await sleep(RETRY_DELAY_MS);
+      }
+    }
+  }
+
+  console.log(`  FAILED via Gemini: ${outputFilename}`);
+  return null;
+}
+
+// ─── Image generation via Hugging Face (fallback) ────────────────────
 async function generateImage(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
   const outputPath = path.join(OUTPUT_DIR, outputFilename);
@@ -378,11 +554,18 @@ function sleep(ms) {
 
 // ─── Main ────────────────────────────────────────────────────────────
 async function main() {
-  if (!HF_TOKEN) {
-    console.error('Error: HF_TOKEN environment variable not set.');
-    console.error('Usage: node v5/scripts/generate-images.js');
+  const usePexels = !!PEXELS_API_KEY;
+  const useGemini = !!GEMINI_API_KEY;
+  const useHF = !!HF_TOKEN;
+
+  if (!usePexels && !useGemini && !useHF) {
+    console.error('Error: No image API key found.');
+    console.error('Set PEXELS_API_KEY (free, recommended), GEMINI_API_KEY, or HF_TOKEN in .env');
     process.exit(1);
   }
+
+  const provider = usePexels ? 'Pexels (stock)' : useGemini ? `Gemini (${GEMINI_MODEL})` : `HuggingFace (${HF_MODEL})`;
+  console.log(`Image provider: ${provider}\n`);
 
   if (!fs.existsSync(LAYOUT_PATH)) {
     console.error('Error: course-layout.json not found at', LAYOUT_PATH);
@@ -485,7 +668,7 @@ async function main() {
   }
 
   const totalImages = queue.length;
-  console.log(`Generating ${totalImages} images via Hugging Face (${HF_MODEL})...\n`);
+  console.log(`Generating ${totalImages} images via ${provider}...\n`);
 
   let successImages = 0;
   const failedTasks = [];
@@ -495,42 +678,58 @@ async function main() {
     const task = queue[i];
     console.log(`[${i + 1}/${totalImages}] ${task.filename}`);
 
-    const result = await generateImage(task.prompt, task.dimensions, task.filename);
+    let result = null;
+    if (usePexels) {
+      result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
+    } else if (useGemini) {
+      result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
+    } else {
+      result = await generateImage(task.prompt, task.dimensions, task.filename);
+    }
 
     if (result) {
       successImages++;
-      updateLayout(task, `images/${task.filename}`);
+      const fn = result.filename || result.path ? result.filename : task.filename;
+      updateLayout(task, `images/${fn}`);
     } else {
       failedTasks.push(task);
     }
 
     // Rate limit (skip delay on last item)
     if (i < queue.length - 1) {
-      await sleep(DELAY_MS);
+      await sleep(usePexels ? 500 : useGemini ? 1500 : DELAY_MS);
     }
   }
 
-  // ─── Pass 2: Retry failures with longer delay ──────────────────────
+  // ─── Pass 2: Retry failures ────────────────────────────────────────
   if (failedTasks.length > 0) {
-    console.log(`\n─── Retrying ${failedTasks.length} failed images (pass 2, longer delay)... ───\n`);
-    await sleep(10000); // 10s cooldown before retry pass
+    console.log(`\n─── Retrying ${failedTasks.length} failed images (pass 2)... ───\n`);
+    await sleep(5000);
 
     const stillFailed = [];
     for (let i = 0; i < failedTasks.length; i++) {
       const task = failedTasks[i];
       console.log(`[retry ${i + 1}/${failedTasks.length}] ${task.filename}`);
 
-      const result = await generateImage(task.prompt, task.dimensions, task.filename);
+      let result = null;
+      if (usePexels) {
+        result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
+      } else if (useGemini) {
+        result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
+      } else {
+        result = await generateImage(task.prompt, task.dimensions, task.filename);
+      }
 
       if (result) {
         successImages++;
-        updateLayout(task, `images/${task.filename}`);
+        const fn = result.filename || task.filename;
+        updateLayout(task, `images/${fn}`);
       } else {
         stillFailed.push(task);
       }
 
       if (i < failedTasks.length - 1) {
-        await sleep(DELAY_MS * 2); // Double delay on retry pass
+        await sleep(DELAY_MS);
       }
     }
 
