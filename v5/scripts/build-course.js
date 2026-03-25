@@ -336,16 +336,16 @@ function fillAccordion(comp) {
 
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC.accordion || {}).section || 'py-24');
-  const detailsClass = c.detailsClass || 'group glass-card rounded-2xl p-6 transition-all duration-300';
+  const detailsClass = c.detailsClass || 'group glass-card rounded-2xl transition-all duration-300';
   const bodyClass = c.bodyClass || 'mt-4 text-on-surface-variant leading-relaxed';
 
   const newDetails = items.map(item =>
     `<details class="${detailsClass}">
-<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg px-8 py-5">
 ${esc(item.title || '')}
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform">expand_more</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4">expand_more</span>
 </summary>
-<div class="${bodyClass}">
+<div class="${bodyClass} px-8 pb-6">
 ${item.body || ''}
 </div>
 </details>`
@@ -354,7 +354,7 @@ ${item.body || ''}
   return `<section class="${secClass}" data-component-type="accordion">
 <div class="max-w-6xl mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-12 text-center" data-animate="fade-up">${title}</h3>
-<div class="space-y-4" data-animate-stagger="fade-up">
+<div class="space-y-6" data-animate-stagger="fade-up">
 ${newDetails}
 </div>
 </div>
@@ -397,16 +397,14 @@ function fillMCQ(comp) {
   const hasRadioIcon = c.hasRadioIcon || false;
 
   const newChoices = items.map((item, i) => {
-    const tag = choiceIsButton ? 'button' : 'div';
-    const tagAttrs = choiceIsButton ? 'w-full text-left' : 'group flex items-center cursor-pointer';
-    return `<${tag} class="${mc(
-      tagAttrs, 'p-5', choiceRound, choiceVisuals,
-      (hasCheckIcon || hasRadioIcon) ? 'flex justify-between items-center group' : ''
+    return `<button class="${mc(
+      'w-full text-left flex items-center gap-4 p-5', choiceRound,
+      'bg-surface-container/60 border border-outline-variant/20',
+      'hover:bg-surface-container hover:border-secondary/50 transition-all cursor-pointer group'
     )}" data-choice="${i}">
+<span class="material-symbols-outlined text-outline-variant/50 group-hover:text-secondary transition-colors flex-shrink-0">radio_button_unchecked</span>
 <span class="text-on-surface">${esc(item.text || '')}</span>
-${hasRadioIcon ? '<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">radio_button_unchecked</span>' : ''}
-${hasCheckIcon ? '<span class="material-symbols-outlined opacity-0 group-hover:opacity-100 transition-opacity">check_circle</span>' : ''}
-</${tag}>`;
+</button>`;
   }).join('\n');
 
   // Draw metadata: if this MCQ is part of a question bank draw, emit attributes
@@ -480,7 +478,7 @@ function fillBento(comp) {
     if (i === 0) {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       const bg0 = cardBgs[0] || 'glass-card';
-      return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-8 flex flex-col justify-end relative overflow-hidden group min-h-[200px]">
+      return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[0]}</span>
@@ -523,8 +521,20 @@ function fillDataTable(comp) {
   const secClass = sectionOnly((DC['data-table'] || {}).section || 'py-24');
   const body = comp.body || '';
 
-  const columns = comp.columns || [];
-  const rows = comp.rows || comp._rows || [];
+  let columns = comp.columns || [];
+  let rows = comp.rows || comp._rows || [];
+
+  // Fallback: parse pipe-separated data from body <li> elements
+  if (columns.length === 0 && rows.length === 0 && body) {
+    const liMatches = body.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+    if (liMatches.length >= 2) {
+      const parsedRows = liMatches.map(li => stripTags(li).split('|').map(c => c.trim()));
+      // First row = headers
+      if (parsedRows.length > 0 && parsedRows[0].length >= 2) {
+        rows = parsedRows;
+      }
+    }
+  }
 
   let headerHtml = '';
   let bodyHtml = '';
@@ -631,9 +641,16 @@ ${newButtons}
 }
 
 function fillBranching(comp) {
-  const items = comp._items || [];
+  let items = comp._items || [];
+  // Fallback: if no _items but body has <li> elements, extract them as options
+  if (items.length === 0 && comp.body) {
+    const liMatches = comp.body.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
+    if (liMatches.length > 0) {
+      items = liMatches.map(li => ({ title: stripTags(li) }));
+    }
+  }
   const title = esc(comp.displayTitle || '');
-  const bodyText = stripTags(comp.body || '');
+  const bodyText = items.length > 0 ? '' : stripTags(comp.body || '');
   const c = DC.branching || {};
   const secClass = sectionOnly((DC.branching || {}).section || 'py-32');
 
@@ -739,11 +756,11 @@ function fillComparison(comp) {
   const rowsHtml = rows.map(row => {
     const label = row.label || '';
     const vals = (row.values || []).map(v => {
-      if (v === true || v === 'true') return '<td class="p-6 text-center text-secondary text-xl">&#10003;</td>';
-      if (v === false || v === 'false') return '<td class="p-6 text-center text-error text-xl">&#10007;</td>';
+      if (v === true || v === 'true') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-secondary">check_circle</span></td>';
+      if (v === false || v === 'false') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-error/60">cancel</span></td>';
       return `<td class="p-6 text-on-surface-variant">${esc(String(v))}</td>`;
     }).join('');
-    return `<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
+    return `<tr class="hover:bg-on-surface/5 transition-colors border-b border-on-surface/5 last:border-0"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
@@ -780,8 +797,10 @@ function fillStatCallout(comp) {
     const cardBorder = style.cardBorder || '';
     const numColor = style.numColor || 'text-gradient';
     const numWeight = style.numWeight || 'font-extrabold';
+    // Combine value + suffix so the counter animation can parse "60%", "$10.5T", etc.
+    const displayValue = (item.stat || item.value || '') + (item.suffix || '');
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
-<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(item.stat || item.value || '')}</div>
+<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(displayValue)}</div>
 ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
 <p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm uppercase tracking-widest font-bold'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
@@ -819,7 +838,7 @@ ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-an
   return `<section class="${secClass}" data-component-type="pullquote">
 <div class="max-w-6xl mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
-<span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
+<span class="text-primary/20 text-7xl font-serif absolute -top-6 -left-1 leading-none select-none" aria-hidden="true">&ldquo;</span>
 <blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
 ${attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}</p>` : ''}
 </div>
@@ -1042,31 +1061,30 @@ function fillProcessFlow(comp) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC['process-flow'] || {}).section || 'py-24 bg-surface-container-low');
 
-  const useVertical = items.length > 4;
-
   const newNodes = items.map((item, i) => {
     const isFirst = i === 0;
     const isLast = i === items.length - 1;
     const borderClass = isFirst ? 'border-l-4 border-secondary' : isLast ? 'border-l-4 border-primary' : '';
-    return `<div class="glass-card px-8 py-6 rounded-2xl ${borderClass} ${useVertical ? 'w-full' : 'flex-1 min-w-[200px]'}">
-<div class="font-headline font-bold text-lg mb-2">${esc(item.title || '')}</div>
+    const stepNum = String(i + 1).padStart(2, '0');
+    return `<div class="glass-card px-6 py-4 rounded-xl ${borderClass} flex items-start gap-4">
+<span class="text-primary/40 font-headline font-bold text-sm mt-1 flex-shrink-0">${stepNum}</span>
+<div class="min-w-0">
+<div class="font-headline font-bold mb-1">${esc(item.title || '')}</div>
 ${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
+</div>
 </div>`;
   });
 
-  const arrowIcon = useVertical ? 'arrow_downward' : 'arrow_forward';
-  const arrowEl = `<div class="flex justify-center"><span class="material-symbols-outlined text-outline-variant">${arrowIcon}</span></div>`;
+  const arrowEl = `<div class="flex justify-center py-1"><span class="material-symbols-outlined text-outline-variant/50 text-lg">arrow_downward</span></div>`;
 
   const withArrows = newNodes.flatMap((n, i) =>
     i < newNodes.length - 1 ? [n, arrowEl] : [n]
   ).join('\n');
 
-  const flexDir = useVertical ? 'flex-col' : 'flex-col md:flex-row';
-
   return `<section class="${secClass}" data-component-type="process-flow">
-<div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="flex ${flexDir} items-stretch gap-6" data-animate-stagger="fade-up">
+<div class="max-w-4xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-12 text-center">${title}</h2>
+<div class="flex flex-col gap-2" data-animate-stagger="fade-up">
 ${withArrows}
 </div>
 </div>
@@ -1331,7 +1349,7 @@ function build() {
       // Track sections with interactive components for progress
       const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-6" id="${sectionId}"${trackAttr}>
+        ? `<div class="max-w-6xl mx-auto px-8 pt-12 pb-8" id="${sectionId}"${trackAttr}>
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
 <h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
