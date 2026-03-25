@@ -24,86 +24,13 @@ const AGENT_TASK_PATH = path.resolve('v5/prompts/generation-agent.md');
 const COMPONENT_LIB_PATH = path.resolve('v5/schemas/component-library.json');
 const KB_PATH = path.resolve('v5/output/knowledge-base.json');
 const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
+const BRAND_DESIGN_PATH = path.resolve('v5/output/brand-design.md');
 const SCHEMA_PATH = path.resolve('v5/schemas/course-layout.schema.json');
 const OUTPUT_PATH = path.resolve('v5/output/course-layout.json');
 const ASSEMBLED_PROMPT_PATH = path.resolve('v5/output/generation-prompt.txt');
 
-// ─── Validate the layout JSON ────────────────────────────────────────
-function validateLayout(layout) {
-  const errors = [];
-
-  if (!layout.course?.title) errors.push('Missing course.title');
-  if (!layout.sections || !Array.isArray(layout.sections)) errors.push('Missing sections array');
-  if (layout.sections?.length < 2) errors.push('Need at least 2 sections');
-
-  const componentIds = new Set();
-  const sectionIds = new Set();
-  let totalComponents = 0;
-  let totalImages = 0;
-  const typesUsed = new Set();
-
-  const validTypes = [
-    'hero', 'text', 'graphic', 'graphic-text', 'accordion', 'mcq',
-    'narrative', 'bento', 'data-table', 'media', 'textinput', 'branching',
-    'timeline', 'comparison', 'stat-callout', 'pullquote', 'key-term',
-    'checklist', 'tabs', 'flashcard', 'labeled-image', 'process-flow',
-    'image-gallery', 'full-bleed', 'video-transcript', 'path-selector',
-  ];
-
-  for (const section of (layout.sections || [])) {
-    if (!section.sectionId) errors.push('Section missing sectionId');
-    if (sectionIds.has(section.sectionId)) errors.push(`Duplicate sectionId: ${section.sectionId}`);
-    sectionIds.add(section.sectionId);
-
-    let prevType = null;
-    for (const comp of (section.components || [])) {
-      totalComponents++;
-
-      if (!comp.componentId) errors.push('Component missing componentId');
-      if (componentIds.has(comp.componentId)) errors.push(`Duplicate componentId: ${comp.componentId}`);
-      componentIds.add(comp.componentId);
-
-      if (!comp.type) errors.push(`Component ${comp.componentId} missing type`);
-      if (comp.type && !validTypes.includes(comp.type)) {
-        errors.push(`Unknown component type: ${comp.type}`);
-      }
-
-      if (comp.type) typesUsed.add(comp.type);
-
-      // Check consecutive same types
-      if (comp.type === prevType) {
-        errors.push(`Consecutive same type "${comp.type}" in section ${section.sectionId}`);
-      }
-      prevType = comp.type;
-
-      if (comp.imagePrompt) totalImages++;
-      if (comp.imagePrompts) totalImages += comp.imagePrompts.length;
-    }
-  }
-
-  // Check hero exists as first component
-  const firstComp = layout.sections?.[0]?.components?.[0];
-  if (firstComp?.type !== 'hero') {
-    errors.push('First component must be type "hero"');
-  }
-
-  // Check component variety
-  if (typesUsed.size < 8) {
-    errors.push(`Only ${typesUsed.size} different component types used — aim for 15+`);
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-    stats: {
-      totalComponents,
-      totalImages,
-      sections: layout.sections?.length || 0,
-      typesUsed: typesUsed.size,
-      typeList: [...typesUsed].sort(),
-    },
-  };
-}
+// ─── Use shared validation ───────────────────────────────────────────
+const { validateLayout } = require('./lib/validate-layout');
 
 // ─── Assemble the subagent prompt ────────────────────────────────────
 function assemblePrompt() {
@@ -131,6 +58,11 @@ function assemblePrompt() {
   }
   const brandProfile = fs.readFileSync(BRAND_PATH, 'utf-8');
 
+  // Brand design brief (natural language — for voice calibration)
+  const brandDesign = fs.existsSync(BRAND_DESIGN_PATH)
+    ? fs.readFileSync(BRAND_DESIGN_PATH, 'utf-8')
+    : '';
+
   // Output schema
   const schema = fs.existsSync(SCHEMA_PATH)
     ? fs.readFileSync(SCHEMA_PATH, 'utf-8')
@@ -138,21 +70,19 @@ function assemblePrompt() {
 
   const userMessage = `## Your Task
 
-Design and write a complete course from the following knowledge base. Read ALL the research carefully, then create a premium deep-scroll web learning experience using the component library.
+Design and write a complete course from the following knowledge base. Read ALL the research carefully — especially the teachable moments. Then create a premium deep-scroll web learning experience that someone would WANT to scroll through.
 
-**Remember: content and component are one thought. Write content shaped for the component you chose.**
-
----
-
-## Knowledge Base (from research)
-
-\`\`\`json
-${knowledgeBase}
-\`\`\`
+**Read the brand brief FIRST to calibrate your writing voice. Then plan the emotional arc. Then design sections.**
 
 ---
 
-## Brand Profile (from brand URL)
+## Brand Brief (from brand URL — USE THIS TO CALIBRATE YOUR VOICE)
+
+${brandDesign || 'No brand brief available. Use a professional, modern tone.'}
+
+---
+
+## Brand Profile (metadata)
 
 \`\`\`json
 ${brandProfile}
@@ -160,7 +90,15 @@ ${brandProfile}
 
 ---
 
-## Component Library Reference
+## Knowledge Base (raw research — all facts, insights, teachable moments)
+
+\`\`\`json
+${knowledgeBase}
+\`\`\`
+
+---
+
+## Component Library (your creative palette — read learningMoment and creativeUses)
 
 \`\`\`json
 ${componentLib}
@@ -180,16 +118,17 @@ ${schema}
 
 ## Instructions
 
-1. Read all learning objectives and content areas
-2. Design 5-12 sections that build understanding progressively
-3. For each piece of content, choose the best component AND write content shaped for it
-4. Use statistics from the knowledge base as stat-callout components
-5. Use terminology as key-term components
-6. Include ALL quiz ideas as MCQ components with feedback
-7. Write imagePrompt for every component that shows an image
-8. Include brand colors in image prompts
-9. Follow ALL design rules from the system prompt
-10. Output ONLY valid JSON — no markdown fences, no explanation text
+1. Read the brand brief — infer voice (playful / corporate / technical / warm)
+2. Read all content areas, key points, and teachable moments
+3. Identify the 3-5 most compelling insights — these will anchor the course
+4. Plan the emotional arc: Hook → Foundation → Challenge → Insight → Application
+5. Plan the rhythm: which sections are breathers, standard, or deep dives
+6. Design 5-12 sections — NO two adjacent sections should follow the same structural pattern
+7. For each piece of content, choose the best component AND write content shaped for it
+8. Create ALL assessments yourself — the knowledge base has raw facts, not pre-built quizzes
+9. Write imagePrompt for every component that shows an image
+10. Follow ALL design rules and anti-patterns from the system prompt
+11. Output ONLY valid JSON — no markdown fences, no explanation text
 
 **Respond with the complete course-layout JSON object only.**`;
 

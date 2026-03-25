@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "knowledge-base.schema.json",
   "title": "Knowledge Base",
-  "description": "Structured knowledge gathered from research, documents, and user input. Used by generate-layout.js to create course content and structure in a single pass.",
+  "description": "Raw knowledge gathered from research — layout-agnostic. The research agent gathers facts, insights, and teachable moments. The generation agent decides how to present them.",
 
   "type": "object",
   "required": ["topic", "learningObjectives", "contentAreas"],
@@ -47,7 +47,7 @@
 
     "contentAreas": {
       "type": "array",
-      "description": "Major topic areas discovered through research. Each becomes a potential course section.",
+      "description": "Major topic areas discovered through research. Raw knowledge — no layout or component decisions.",
       "minItems": 2,
       "items": {
         "type": "object",
@@ -64,7 +64,7 @@
           },
           "keyPoints": {
             "type": "array",
-            "description": "Factual claims and key concepts with supporting detail",
+            "description": "All facts, statistics, definitions, claims, and concepts as uniform knowledge points. Every type of knowledge goes here — the generation agent decides how to present each one.",
             "minItems": 1,
             "items": {
               "type": "object",
@@ -73,11 +73,11 @@
               "properties": {
                 "point": {
                   "type": "string",
-                  "description": "A factual claim or key concept"
+                  "description": "A factual claim, statistic, definition, concept, or insight"
                 },
                 "detail": {
                   "type": "string",
-                  "description": "Supporting explanation or context"
+                  "description": "Supporting explanation, context, or evidence"
                 },
                 "citation": {
                   "type": "string",
@@ -86,73 +86,30 @@
               }
             }
           },
-          "statistics": {
+          "teachableMoments": {
             "type": "array",
-            "description": "Quantitative data points — maps to stat-callout components",
+            "description": "Surprising insights, case studies, analogies, contrasts, and decision frameworks that make knowledge stick. These are pedagogical hooks — not just facts.",
             "items": {
               "type": "object",
-              "required": ["value", "label"],
+              "required": ["type", "hook"],
               "additionalProperties": false,
               "properties": {
-                "value": {
+                "type": {
                   "type": "string",
-                  "description": "The number or percentage (e.g. '73%', '2.4M')"
+                  "enum": ["surprising-insight", "case-study", "analogy", "contrast", "decision-framework"],
+                  "description": "What kind of teachable moment this is"
                 },
-                "label": {
+                "hook": {
                   "type": "string",
-                  "description": "What the statistic measures"
+                  "description": "One-line attention grabber — the 'wait, really?' moment"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "Full explanation of the insight, story, or framework"
                 },
                 "citation": {
                   "type": "string",
-                  "description": "Source URL for this statistic"
-                }
-              }
-            }
-          },
-          "terminology": {
-            "type": "array",
-            "description": "Domain-specific terms — maps to key-term components",
-            "items": {
-              "type": "object",
-              "required": ["term", "definition"],
-              "additionalProperties": false,
-              "properties": {
-                "term": { "type": "string" },
-                "definition": { "type": "string" }
-              }
-            }
-          },
-          "commonMisconceptions": {
-            "type": "array",
-            "description": "Things learners commonly get wrong — useful for quiz distractors",
-            "items": { "type": "string" }
-          },
-          "quizIdeas": {
-            "type": "array",
-            "description": "Suggested quiz questions with verified correct answers — maps to MCQ components",
-            "items": {
-              "type": "object",
-              "required": ["question", "correctAnswer", "distractors"],
-              "additionalProperties": false,
-              "properties": {
-                "question": {
-                  "type": "string",
-                  "description": "The quiz question"
-                },
-                "correctAnswer": {
-                  "type": "string",
-                  "description": "The verified correct answer"
-                },
-                "distractors": {
-                  "type": "array",
-                  "description": "2-3 plausible but incorrect answers",
-                  "items": { "type": "string" },
-                  "minItems": 2,
-                  "maxItems": 3
-                },
-                "explanation": {
-                  "type": "string",
-                  "description": "Why the correct answer is right (used for quiz feedback)"
+                  "description": "Source URL or reference"
                 }
               }
             }

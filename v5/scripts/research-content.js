@@ -83,10 +83,9 @@ function validateKnowledgeBase(kb) {
   }
 
   let totalKeyPoints = 0;
-  let totalStats = 0;
-  let totalTerms = 0;
-  let totalQuizIdeas = 0;
+  let totalTeachableMoments = 0;
   let totalCitations = 0;
+  const momentTypes = {};
 
   for (const area of (kb.contentAreas || [])) {
     if (!area.title) errors.push('Content area missing title');
@@ -96,9 +95,14 @@ function validateKnowledgeBase(kb) {
       totalKeyPoints++;
       if (kp.citation) totalCitations++;
     }
-    totalStats += (area.statistics || []).length;
-    totalTerms += (area.terminology || []).length;
-    totalQuizIdeas += (area.quizIdeas || []).length;
+
+    for (const tm of (area.teachableMoments || [])) {
+      totalTeachableMoments++;
+      if (tm.type) {
+        momentTypes[tm.type] = (momentTypes[tm.type] || 0) + 1;
+      }
+      if (!tm.hook) errors.push(`Teachable moment in "${area.title}" missing hook`);
+    }
   }
 
   return {
@@ -108,9 +112,8 @@ function validateKnowledgeBase(kb) {
       contentAreas: (kb.contentAreas || []).length,
       learningObjectives: (kb.learningObjectives || []).length,
       keyPoints: totalKeyPoints,
-      statistics: totalStats,
-      terminology: totalTerms,
-      quizIdeas: totalQuizIdeas,
+      teachableMoments: totalTeachableMoments,
+      momentTypes,
       citations: totalCitations,
       sources: (kb.sources || []).length,
     },
@@ -225,14 +228,18 @@ function printValidation(validation) {
   }
 
   console.log('\n  Stats:');
-  console.log(`    Content areas:       ${validation.stats.contentAreas}`);
-  console.log(`    Learning objectives: ${validation.stats.learningObjectives}`);
-  console.log(`    Key points:          ${validation.stats.keyPoints}`);
-  console.log(`    Statistics:          ${validation.stats.statistics}`);
-  console.log(`    Terminology:         ${validation.stats.terminology}`);
-  console.log(`    Quiz ideas:          ${validation.stats.quizIdeas}`);
-  console.log(`    Citations:           ${validation.stats.citations}`);
-  console.log(`    Sources:             ${validation.stats.sources}`);
+  console.log(`    Content areas:         ${validation.stats.contentAreas}`);
+  console.log(`    Learning objectives:   ${validation.stats.learningObjectives}`);
+  console.log(`    Key points:            ${validation.stats.keyPoints}`);
+  console.log(`    Teachable moments:     ${validation.stats.teachableMoments}`);
+  if (Object.keys(validation.stats.momentTypes).length > 0) {
+    console.log(`    Moment types:`);
+    for (const [type, count] of Object.entries(validation.stats.momentTypes)) {
+      console.log(`      ${type}: ${count}`);
+    }
+  }
+  console.log(`    Citations:             ${validation.stats.citations}`);
+  console.log(`    Sources:               ${validation.stats.sources}`);
 
   if (validation.valid) {
     console.log('\n  Validation: PASSED');

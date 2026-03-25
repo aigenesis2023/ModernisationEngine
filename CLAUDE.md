@@ -11,7 +11,7 @@ Both paths produce the same `course-layout.json` → **Google Stitch designs a b
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring` (active development) | `Current-working-2` (V5 SCORM pipeline)
+**Branch:** `ai-first-authoring-2` (active development) | `ai-first-authoring` (V1, superseded) | `Current-working-2` (V5 SCORM pipeline)
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
@@ -23,14 +23,16 @@ Both paths produce the same `course-layout.json` → **Google Stitch designs a b
 ═══ AI-FIRST PATH (primary) ═══════════════════════════════════════════
 Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON)
                        (Claude Code subagent with web search)
+                       (Expert SME persona — gathers raw knowledge + teachable moments)
                                           │
                     ┌─────────────────────┘
                     ▼
          generate-layout.js (AI course generation)
-         ├─ Reads generation-engine.md (system prompt)
-         ├─ Reads knowledge-base.json + brand-profile.json
-         ├─ AI generates content + picks components in ONE pass
-         ├─ Content is born shaped for its component
+         ├─ Reads generation-engine.md (system prompt — emotional arc, archetypes, anti-patterns)
+         ├─ Reads knowledge-base.json + brand-design.md (voice calibration) + brand-profile.json
+         ├─ Reads component-library.json (learningMoment + creativeUses per component)
+         ├─ AI designs course with structural variety — content shaped for component
+         ├─ AI creates ALL assessments (KB has raw facts, not pre-built quizzes)
          └─→ course-layout.json
 
 ═══ SCORM IMPORT PATH (legacy/future premium) ═════════════════════════
@@ -121,15 +123,15 @@ v5/                                    ← ALL ACTIVE CODE
   STITCH-INTEGRATION.md                ← Stitch integration architecture
   BUILD-SYSTEM.md                      ← Build system architecture
   schemas/
-    knowledge-base.schema.json         ← AI-first research output format
+    knowledge-base.schema.json         ← Flat research output: keyPoints[] + teachableMoments[] (no component awareness)
     content-bucket.schema.json         ← SCORM extraction output format
     course-layout.schema.json          ← Layout engine output format (shared by both paths)
-    component-library.json             ← 26 components: type, props, usage, examples
+    component-library.json             ← 26 components: type, props, learningMoment, creativeUses, examples
   prompts/
-    research-agent.md                  ← Subagent task: research topic → knowledge-base.json
-    generation-engine.md               ← System prompt: AI-first course design rules
-    generation-agent.md                ← Subagent task: knowledge-base → course-layout.json
-    layout-engine.md                   ← System prompt for SCORM layout engine
+    research-agent.md                  ← Expert SME persona: topic → raw knowledge + teachable moments
+    generation-engine.md               ← Senior ID persona: emotional arc, archetypes, anti-patterns, voice calibration
+    generation-agent.md                ← Subagent task: reads brand-design.md + KB → course-layout.json
+    layout-engine.md                   ← System prompt for SCORM layout engine (legacy path)
     representative-course.md           ← All 26 component types for Stitch to design
   scripts/
     research-content.js                ← AI-first: topic → knowledge-base.json (subagent)
@@ -178,16 +180,16 @@ EV/                                    ← Test SCORM (64 slides, gitignored in 
 #### Step 1 — Research (`v5/scripts/research-content.js`)
 **Input:** Topic brief + optional URLs | **Output:** `knowledge-base.json`
 
-Claude Code subagent researches the topic using web search. Gathers facts with citations, statistics, terminology, quiz ideas. Run: `node v5/scripts/research-content.js --topic "Your Topic"`
+Claude Code subagent with expert SME persona researches the topic using web search. Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent. Run: `node v5/scripts/research-content.js --topic "Your Topic"`
 
 **⚠️ Subagent workflow:** The script writes a research prompt, then you spawn a subagent (Agent tool) to do the research. The subagent uses web search, reads the schema, and writes `v5/output/knowledge-base.json`. Validate after: `node v5/scripts/research-content.js --load v5/output/knowledge-base.json`.
 
 #### Step 2 — Generate Course (`v5/scripts/generate-layout.js`)
-**Input:** `knowledge-base.json` + `brand-profile.json` + `generation-engine.md` | **Output:** `course-layout.json`
+**Input:** `knowledge-base.json` + `brand-design.md` + `brand-profile.json` + `generation-engine.md` | **Output:** `course-layout.json`
 
-Claude Code subagent generates the complete course — content + component selection + layout in ONE pass. Content is born shaped for its component.
+Claude Code subagent with senior instructional designer persona generates the complete course. Reads the brand brief for voice calibration (playful/corporate/technical/warm). Designs with emotional arc (hook→foundation→challenge→insight→application), structural archetypes (6 patterns to remix), and density rhythm (breather/standard/deep-dive). Creates ALL assessments from raw facts (no pre-built quizzes in KB). Uses `component-library.json` as creative palette (reads `learningMoment` + `creativeUses` per component).
 
-**⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-engine.md`, `knowledge-base.json`, `brand-profile.json`, `component-library.json`, and `course-layout.schema.json`. Writes `v5/output/course-layout.json`. Validate after: `node v5/scripts/generate-layout.js --load v5/output/course-layout.json`.
+**⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `v5/output/course-layout.json`. Validate after: `node v5/scripts/generate-layout.js --load v5/output/course-layout.json`.
 
 ### SCORM Import Path (legacy/future premium)
 

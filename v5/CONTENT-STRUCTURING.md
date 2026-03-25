@@ -1,21 +1,60 @@
 # Content Structuring
 
-> **Status:** Implemented — logic-aware layout engine with path selection, showIf, and question bank mapping.
+> **Status:** Implemented — dual-path content structuring (AI-first + SCORM). AI-first V2 rework with emotional arc, structural archetypes, and brand voice calibration.
 > **Last updated:** 2026-03-25
 
-This document covers how extracted content (including logic, conditions, and variables) gets transformed by the AI layout engine into a structured course layout. This is the bridge between "what was in the SCORM" and "what the output course looks like."
+This document covers how content gets transformed into a structured course layout (`course-layout.json`). Two paths exist:
+
+1. **AI-First Path (primary):** Raw research → creative instructional design with emotional arc
+2. **SCORM Import Path (legacy):** Extracted SCORM content → logic-aware restructuring
+
+Both paths produce the same `course-layout.json` format for the shared build pipeline.
 
 ---
 
-## The Transformation Step
+## AI-First Path — Creative Course Design
+
+**Input:** `knowledge-base.json` (flat research) + `brand-design.md` (voice calibration) + `brand-profile.json`
+**Output:** `course-layout.json` (structured sections, components, assessments)
+
+The AI generation engine (`generation-engine.md`) acts as a senior instructional designer:
+
+1. **Reads the brand brief** to calibrate writing voice (playful/corporate/technical/warm)
+2. **Plans an emotional arc:** Hook (curiosity) → Foundation (context) → Challenge (struggle) → Insight (aha) → Application (ownership)
+3. **Plans density rhythm:** Breather sections (1-2 components), standard (3-4), deep dives (5-7)
+4. **Remixes structural archetypes** (The Deep Dive, The Challenge, The Overview, The Story, The Evidence, The Breather) so no two adjacent sections follow the same pattern
+5. **Creates ALL assessments** from raw research — scenario-based MCQs testing application, branching scenarios, reflective textinput. No pre-built quizzes in the knowledge base.
+6. **Treats components as creative palette** — reads `learningMoment` and `creativeUses` from `component-library.json`
+
+### Key Design Principles (AI-First)
+- Content and component are ONE thought — never prose first, format later
+- Research structure ≠ course structure — merge, split, resequence content areas for narrative flow
+- Anti-patterns enforced: no 1:1 content-area-to-section mapping, no key-term for every vocabulary word, no MCQ after every section, no uniform section density
+- 12+ component types required for variety (validation enforced)
+- Assessment clustered into 2-3 checkpoint moments, not scattered
+- Course ends with reflection/action (textinput, checklist), not a quiz
+
+### Knowledge Base Schema (Flat — Layout-Agnostic)
+```
+contentArea:
+  keyPoints[] — ALL facts, stats, definitions, concepts as uniform points with citations
+  teachableMoments[] — typed: surprising-insight, case-study, analogy, contrast, decision-framework
+                       each with a "hook" one-liner (attention grabber)
+```
+
+No `statistics`, `terminology`, `quizIdeas`, or `commonMisconceptions` arrays. The generation agent decides how to present every piece of knowledge.
+
+---
+
+## SCORM Import Path — Logic-Aware Restructuring
 
 **Input:** `content-bucket.json` (extracted content + logic metadata)
 **Output:** `course-layout.json` (structured sections, components, conditions)
 
-The AI layout engine reads raw extracted content and produces a structured course. This involves:
+The SCORM layout engine (`layout-engine.md`) reads raw extracted content and produces a structured course. This involves:
 1. Understanding the educational arc across all scenes/slides
 2. Grouping related content into sections (5-12 typically)
-3. Choosing the best component type for each piece of content (from 25 available)
+3. Choosing the best component type for each piece of content (from 26 available)
 4. Rewriting text for modern scannable format while preserving accuracy
 5. Specifying image prompts for visual components
 6. **Interpreting logic metadata and mapping it to modern interaction patterns**

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Component Library",
-  "description": "Complete reference for all 26 components available to the AI layout engine. Each entry defines the component type string, required/optional props, ideal use cases, and a valid JSON example. The layout engine MUST only use components defined here.",
-  "version": "2.0.0",
+  "description": "Creative palette of 26 components for designing premium deep-scroll learning experiences. Each entry describes the learning moment it creates, creative uses beyond the obvious, and technical props. The generation agent should treat this as an inspiration deck, not a checklist.",
+  "version": "3.0.0",
 
   "components": [
     {
@@ -10,8 +10,14 @@
       "component": "HeroSplash",
       "category": "structural",
       "status": "built",
-      "description": "Full-viewport opening section with animated title, optional background image, and scroll-down indicator. Sets the tone for the entire course.",
-      "when_to_use": "Always use as the FIRST component. Every course starts with a hero. Use the course title and a short subtitle that frames the learning journey.",
+      "description": "Full-viewport opening section with animated title, optional background image, and scroll-down indicator.",
+      "learningMoment": "The hero is the learner's first impression — it answers 'Why should I care about this?' in three seconds. A great hero creates anticipation. A boring one triggers the back button.",
+      "creativeUses": [
+        "Pose a provocative question as the subtitle instead of a description",
+        "Use a surprising statistic as the title itself ('80% of breaches start with one email')",
+        "Frame the course as a challenge: 'Can you spot a phishing email before it spots you?'"
+      ],
+      "when_to_use": "Always use as the FIRST component. Every course starts with a hero.",
       "when_not_to_use": "Never use more than once per course.",
       "image_dimensions": "1920x1080 (16:9)",
       "props": {
@@ -43,6 +49,12 @@
       "category": "content",
       "status": "built",
       "description": "Clean text block with heading and body. The workhorse component for explanatory content.",
+      "learningMoment": "Text sets the stage. It's where you build the narrative thread that connects everything else. The best text blocks make the learner nod and think 'tell me more' — not 'I know this already.'",
+      "creativeUses": [
+        "Open with a counterintuitive claim that the rest of the section will prove",
+        "Use it as a narrative bridge between interactive components — the connective tissue",
+        "Write a 'what if' scenario that sets up the next component"
+      ],
       "when_to_use": "For introductory paragraphs, explanations, context-setting text, or any content that is primarily prose. Works well as the first block in a section to set context before interactive components.",
       "when_not_to_use": "Don't use for content that would benefit from visual structure (lists → checklist, steps → timeline, definitions → key-term).",
       "props": {
@@ -67,6 +79,12 @@
       "category": "visual",
       "status": "built",
       "description": "Full-width image with hover zoom effect and optional caption. Provides visual breathing room between text-heavy sections.",
+      "learningMoment": "A well-placed image lets the brain process what it just read. It's not decoration — it's cognitive breathing room. The best standalone images make the learner pause and look closer.",
+      "creativeUses": [
+        "Use after a dense accordion or timeline as a visual reset",
+        "Pair with a provocative caption that reframes what the image shows",
+        "Place an infographic-style image that summarizes the preceding section"
+      ],
       "when_to_use": "For standalone images that deserve full attention — diagrams, photographs, infographics. Place between text sections to break up content rhythm.",
       "when_not_to_use": "Don't use for images paired with explanatory text (use graphic-text instead). Don't use for decorative images with no educational value.",
       "image_dimensions": "1920x1080 (16:9)",
@@ -99,7 +117,13 @@
       "category": "content",
       "status": "built",
       "description": "Side-by-side split layout with text on one side and image on the other. Alternates left/right for visual rhythm.",
-      "when_to_use": "For content that pairs an explanation with a supporting image. Ideal for concept introductions, feature descriptions, or any text that benefits from a visual anchor. Alternate _imageAlign between sections for visual variety.",
+      "learningMoment": "The human eye naturally moves between image and text, creating a visual dialogue. Each graphic-text is a mini-story: the image catches attention, the text delivers understanding.",
+      "creativeUses": [
+        "Use the image to show the 'before' and the text to explain the 'after'",
+        "Pair a real-world photo with an explanation of what's actually happening",
+        "Show a person/scenario and use the text to tell their story"
+      ],
+      "when_to_use": "For content that pairs an explanation with a supporting image. Alternate _imageAlign between sections for visual variety.",
       "when_not_to_use": "Don't use back-to-back more than twice. If the image isn't directly related to the text, use separate text + graphic components.",
       "image_dimensions": "800x600 (4:3)",
       "props": {
@@ -133,7 +157,14 @@
       "category": "interactive",
       "status": "built",
       "description": "Expandable panels with smooth animation and completion tracking. Each panel has a title and rich body content revealed on click.",
-      "when_to_use": "For content with 3-8 distinct topics of roughly equal weight that learners can explore in any order. Great for: detailed explanations, safety procedures, FAQ-style content, or when you want to reduce initial visual overwhelm.",
+      "learningMoment": "Accordions create curiosity gaps — the learner sees the titles and wonders what's inside. The act of clicking to reveal is a micro-commitment to learning. Use titles that make people WANT to click.",
+      "creativeUses": [
+        "Myth vs Reality: each panel title is a myth, the body reveals the truth",
+        "Role-based exploration: 'If you're a manager...', 'If you're an IC...'",
+        "Progressive complexity: panels go from basic to advanced, learner self-selects depth",
+        "FAQ format: real questions learners have, with thorough answers"
+      ],
+      "when_to_use": "For content with 3-8 distinct topics of roughly equal weight that learners can explore in any order.",
       "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for critical content that ALL learners must see (it's optional to expand).",
       "props": {
         "required": {
@@ -172,8 +203,15 @@
       "category": "assessment",
       "status": "built",
       "description": "Multiple-choice quiz with selection, submit, visual feedback, and retry. Supports single and multi-select modes.",
-      "when_to_use": "For knowledge checks after a teaching section. Place after 3-5 content components to reinforce learning. Use the question to test comprehension, not recall of trivia.",
-      "when_not_to_use": "Don't cluster multiple quizzes together. Space them throughout the course for better learning reinforcement.",
+      "learningMoment": "The best quiz questions create a moment of productive doubt — the learner thinks they know, commits to an answer, and then discovers whether their understanding holds up. That moment of uncertainty is where learning happens.",
+      "creativeUses": [
+        "Scenario-based: 'Your colleague clicks a suspicious link. What's your FIRST action?'",
+        "Myth-busting: present a common misconception as a plausible answer",
+        "Application: test whether learners can APPLY a framework, not just recall it",
+        "Prediction: 'What do you think happened next?' before revealing a case study outcome"
+      ],
+      "when_to_use": "For knowledge checks that test comprehension and application, not trivia recall. The generation agent creates ALL assessments — there are no pre-built quiz questions in the knowledge base.",
+      "when_not_to_use": "Don't cluster multiple quizzes together. Don't test trivial recall. Don't place before teaching the material.",
       "props": {
         "required": {
           "displayTitle": "string — Question heading (e.g. 'Knowledge Check')",
@@ -218,8 +256,15 @@
       "category": "interactive",
       "status": "built",
       "description": "Carousel slider with prev/next navigation, dot indicators, and optional images per slide. Content is presented sequentially.",
-      "when_to_use": "For sequential content that tells a story or walks through a process step by step. Works well for: guided walkthroughs, case studies with multiple stages, or when showing progression. Use 3-7 slides.",
-      "when_not_to_use": "Don't use for content that isn't sequential. Don't use for critical must-see content (users may skip slides). Don't use with fewer than 3 slides.",
+      "learningMoment": "Narratives create forward momentum — each slide builds on the last, pulling the learner through a story. The 'next' button is a promise: there's more to discover.",
+      "creativeUses": [
+        "Tell a real incident as a story: slide 1 = setup, slide 2 = what went wrong, slide 3 = consequences, slide 4 = lessons learned",
+        "Before/during/after sequence showing how something changes over time",
+        "Day-in-the-life walkthrough of a role or process",
+        "Progressive reveal: each slide adds a layer of complexity to a concept"
+      ],
+      "when_to_use": "For sequential content that tells a story or walks through a process step by step. Use 3-7 slides.",
+      "when_not_to_use": "Don't use for content that isn't sequential. Don't use with fewer than 3 slides.",
       "image_dimensions": "800x600 (4:3) per slide",
       "props": {
         "required": {
@@ -259,8 +304,15 @@
       "category": "content",
       "status": "built",
       "description": "Multi-card grid layout with optional image backgrounds. First card can span 2 columns for visual hierarchy. Cards have hover effects.",
-      "when_to_use": "For presenting 3-6 related concepts, features, or topics at a glance. Perfect for: feature overviews, key benefits, topic summaries, or any content where items are peers (not sequential).",
-      "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for long-form content that needs full reading.",
+      "learningMoment": "Bento grids let learners scan and choose what catches their eye first — it's non-linear exploration. The visual variety of cards with different content creates a sense of richness and discovery.",
+      "creativeUses": [
+        "Feature showcase: each card is a different capability or benefit",
+        "Tool kit: each card is a method, technique, or resource the learner can use",
+        "Warning signs: each card describes a red flag to watch for",
+        "Quick reference: each card is a self-contained micro-lesson"
+      ],
+      "when_to_use": "For presenting 3-6 related concepts, features, or topics at a glance. Perfect for peer items that aren't sequential.",
+      "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items.",
       "image_dimensions": "600x400 (3:2) per card",
       "props": {
         "required": {
@@ -299,8 +351,15 @@
       "component": "DataTable",
       "category": "content",
       "status": "built",
-      "description": "Auto-formatted data table with sticky header, alternating rows, and monospace number styling. Parses structured data from HTML.",
-      "when_to_use": "For comparative data, specifications, reference tables, or any structured information with consistent columns. Great for: specs comparison, schedules, reference data.",
+      "description": "Auto-formatted data table with sticky header, alternating rows, and monospace number styling.",
+      "learningMoment": "Tables turn scattered information into patterns. When a learner sees data organised in columns, they naturally start comparing and drawing conclusions — that's analytical thinking in action.",
+      "creativeUses": [
+        "Decision matrix: criteria in rows, options in columns, with scores or ratings",
+        "Quick-reference card: condensed facts learners might bookmark or screenshot",
+        "Severity/classification matrix: map categories to outcomes",
+        "Specification comparison: technical details side by side"
+      ],
+      "when_to_use": "For comparative data, specifications, reference tables, or any structured information with consistent columns.",
       "when_not_to_use": "Don't use for simple two-column comparisons (use comparison instead). Don't use for narrative content forced into table format.",
       "props": {
         "required": {
@@ -323,8 +382,14 @@
       "category": "visual",
       "status": "built",
       "description": "Video player with custom play/pause overlay, poster image, and hover controls bar.",
-      "when_to_use": "For video content extracted from the SCORM package. Only use when actual video files exist in the media inventory.",
-      "when_not_to_use": "Never fabricate video sources. Only reference videos that exist in the content bucket's media inventory.",
+      "learningMoment": "Video creates emotional connection that text can't — facial expressions, tone of voice, real environments. It's the closest to 'being there' a digital course can get.",
+      "creativeUses": [
+        "Expert interview that brings credibility to the topic",
+        "Demonstration of a procedure or technique",
+        "Real-world footage that grounds abstract concepts"
+      ],
+      "when_to_use": "Only when actual video files exist in the content bucket's media inventory.",
+      "when_not_to_use": "Never fabricate video sources. Only reference videos that exist.",
       "props": {
         "required": {
           "_media": {
@@ -354,7 +419,14 @@
       "category": "interactive",
       "status": "built",
       "description": "Multi-field form with labeled text inputs and submit button. Used for reflection prompts or data entry activities.",
-      "when_to_use": "For reflective exercises where learners type their own responses. Great for: personal action plans, reflection questions, note-taking activities.",
+      "learningMoment": "Writing forces thinking. When learners put their thoughts into words, they move from passive understanding to active ownership. The reflection is the learning — the form is just the container.",
+      "creativeUses": [
+        "Personal action plan: 'What will you do differently on Monday?'",
+        "Pre-mortem: 'What could go wrong if you ignore this?'",
+        "Application exercise: 'Describe how this applies to YOUR situation'",
+        "Commitment device: 'Write one thing you'll change this week'"
+      ],
+      "when_to_use": "For reflective exercises where learners type their own responses. Place near the end of sections or the course for consolidation.",
       "when_not_to_use": "Don't use for assessed content (use mcq). Don't use for simple yes/no questions.",
       "props": {
         "required": {
@@ -383,7 +455,14 @@
       "category": "interactive",
       "status": "built",
       "description": "Selectable option cards with letter labels (A, B, C...) and selection indicator. For scenario-based choices or self-assessment.",
-      "when_to_use": "For scenario-based learning where learners choose a path or option. Good for: decision-making exercises, self-assessment, preference selection.",
+      "learningMoment": "Branching forces the learner to commit to a decision before seeing the outcome. That moment of choice — 'What would I actually do?' — is more powerful than any amount of telling.",
+      "creativeUses": [
+        "Ethical dilemma: present a grey-area scenario with no perfect answer",
+        "'What would you do?' real-world scenario before revealing the expert recommendation",
+        "Self-assessment: 'Which of these best describes your current practice?'",
+        "Priority ranking: 'Which action should come FIRST?'"
+      ],
+      "when_to_use": "For scenario-based learning where learners choose an option. Good for decision-making exercises and self-assessment.",
       "when_not_to_use": "Don't use for graded questions (use mcq). Don't use with more than 5 options.",
       "props": {
         "required": {
@@ -404,7 +483,14 @@
       "category": "content",
       "status": "new",
       "description": "Numbered steps connected by a vertical line. Each step has a number badge, title, and body content. Scroll-triggered reveal animation.",
-      "when_to_use": "For sequential processes, historical timelines, or step-by-step procedures where ORDER matters. Use 3-8 steps. Each step should be a distinct phase or milestone.",
+      "learningMoment": "Timelines make sequence visible. When learners see steps connected by a line, they internalise the ORDER as part of the knowledge — not just what to do, but what comes first, second, third.",
+      "creativeUses": [
+        "Evolution of a concept: how something changed over time (history → present → future)",
+        "Escalation path: what happens when you go from level 1 to level 5",
+        "Workflow: the steps in a real process someone follows",
+        "Cause and effect chain: A leads to B leads to C"
+      ],
+      "when_to_use": "For sequential processes, historical timelines, or step-by-step procedures where ORDER matters. Use 3-8 steps.",
       "when_not_to_use": "Don't use for non-sequential content (use accordion or bento). Don't use for very short steps with just a title (use checklist).",
       "props": {
         "required": {
@@ -433,7 +519,14 @@
       "category": "content",
       "status": "new",
       "description": "Side-by-side comparison columns with check/cross icons for features. Clean, scannable format for comparing two or three options.",
-      "when_to_use": "For comparing 2-3 options, plans, approaches, or technologies across multiple criteria. Great for: pros/cons, feature comparisons, before/after.",
+      "learningMoment": "Comparison tables trigger analytical thinking — the learner's eye bounces between columns, spotting differences and forming judgements. The check/cross pattern makes conclusions feel self-discovered rather than told.",
+      "creativeUses": [
+        "Myth vs Reality: misconceptions on one side, truth on the other",
+        "Before/After: old way vs new way, showing improvement",
+        "Good/Bad practice: what to do vs what not to do",
+        "Role comparison: what's different for each role or context"
+      ],
+      "when_to_use": "For comparing 2-3 options, plans, approaches, or technologies across multiple criteria.",
       "when_not_to_use": "Don't use for data-heavy tables (use data-table). Don't compare more than 3 columns.",
       "props": {
         "required": {
@@ -468,8 +561,15 @@
       "category": "visual",
       "status": "new",
       "description": "Large prominent numbers or statistics with labels and optional context. Animated count-up on scroll. Displayed in a row of 2-4 stats.",
-      "when_to_use": "For impactful statistics, key metrics, or numbers that deserve emphasis. Place after introductory content to reinforce with data. Use 2-4 stats that tell a compelling story together.",
-      "when_not_to_use": "Don't use for non-numeric content. Don't use more than 4 stats (gets overwhelming).",
+      "learningMoment": "Big numbers create emotional impact before the brain even processes the words. The count-up animation forces the eye to watch the number grow — building tension and making the final value land harder.",
+      "creativeUses": [
+        "Shocking scale: numbers that make the problem feel real and urgent",
+        "Progress/achievement: numbers that show how far we've come",
+        "Cost of inaction: what happens when you DON'T do the right thing",
+        "Comparative surprise: put two numbers next to each other that seem contradictory"
+      ],
+      "when_to_use": "For impactful statistics or numbers that deserve emphasis. Use 2-4 stats that tell a story together.",
+      "when_not_to_use": "Don't use for non-numeric content. Don't use more than 4 stats. Don't use for numbers that aren't surprising or impactful.",
       "props": {
         "required": {
           "_items": "array — 2-4 stats: [{ value: string, label: string, suffix?: string, prefix?: string }]"
@@ -496,7 +596,14 @@
       "category": "visual",
       "status": "new",
       "description": "Emphasized text with a vertical accent bar and optional attribution. Draws attention to key messages or expert quotes.",
-      "when_to_use": "For highlighting a critical insight, expert quote, or key message that learners should remember. Use sparingly — 1-2 per course maximum. Place after the content it summarizes.",
+      "learningMoment": "A pullquote is a visual exclamation mark. It says: 'This is the one thing to remember from this section.' Used well, it becomes the line the learner quotes to their colleagues tomorrow.",
+      "creativeUses": [
+        "The key takeaway that summarises everything above in one sentence",
+        "An expert voice that adds credibility and authority",
+        "A provocative reframing that shifts perspective",
+        "The 'so what?' — why this matters to the learner personally"
+      ],
+      "when_to_use": "For highlighting a critical insight, expert quote, or key message. Use sparingly — 1-2 per course maximum.",
       "when_not_to_use": "Don't overuse. Don't use for generic text that doesn't deserve emphasis.",
       "props": {
         "required": {
@@ -521,8 +628,15 @@
       "category": "content",
       "status": "new",
       "description": "Highlighted vocabulary term with its definition. Styled with a distinctive background and icon to stand out from body text.",
-      "when_to_use": "For introducing domain-specific terminology that learners need to know. Place immediately before or after the content that uses the term. Can group 2-5 terms together.",
-      "when_not_to_use": "Don't use for common words. Don't use for full paragraphs of explanation (use text instead).",
+      "learningMoment": "Key terms are anchors — they give learners precise language to describe what they've learned. When someone learns the RIGHT word for a concept, they can search for it, discuss it, and build on it.",
+      "creativeUses": [
+        "Introduce jargon AFTER teaching the concept, not before — 'what you just learned is called...'",
+        "Group related terms to show how vocabulary connects",
+        "Use as a reference card near the end of a section for quick review",
+        "Pair with a flashcard component later for spaced retrieval"
+      ],
+      "when_to_use": "For introducing domain-specific terminology. Can group 2-5 terms together. Don't use for every new word — only for terms the learner needs to remember.",
+      "when_not_to_use": "Don't use for common words. Don't use for full paragraphs of explanation (use text instead). Consider weaving simple definitions into prose, comparisons, or flashcards instead.",
       "props": {
         "required": {
           "_items": "array — 1-5 terms: [{ term: string, definition: string }]"
@@ -548,7 +662,14 @@
       "category": "interactive",
       "status": "new",
       "description": "Checkable items with completion tracking and a progress indicator. Items can be ticked off by the learner.",
-      "when_to_use": "For action lists, pre-task checklists, safety procedures, or any content where learners should confirm they've understood each item. Good for: PPE requirements, pre-work checklists, compliance items.",
+      "learningMoment": "Checklists transform knowledge into action. Each checkbox is a commitment: 'I understand this, and I'll do it.' The progress indicator creates momentum — learners want to reach 100%.",
+      "creativeUses": [
+        "Pre-task checklist: everything to verify before starting a procedure",
+        "Self-assessment: 'Check each item you already do' to surface gaps",
+        "Action plan: concrete next steps the learner commits to",
+        "Readiness check: 'Can you tick all of these? If not, review the section above'"
+      ],
+      "when_to_use": "For action lists, pre-task checklists, safety procedures, or any content where learners should confirm understanding of each item.",
       "when_not_to_use": "Don't use for informational lists without actionable items (use text with <ul>). Don't use for sequential steps (use timeline).",
       "props": {
         "required": {
@@ -580,7 +701,14 @@
       "category": "interactive",
       "status": "new",
       "description": "Horizontal tabbed interface where each tab reveals different content. Only one tab visible at a time.",
-      "when_to_use": "For 2-6 categories of content that are alternatives (not sequential). Users choose which to view. Great for: role-based content, topic categories, different perspectives on the same subject.",
+      "learningMoment": "Tabs let learners choose their own path through parallel content. The act of switching tabs feels like exploration — 'What's behind this one?' Each tab is a different lens on the same topic.",
+      "creativeUses": [
+        "Perspectives: same situation viewed by different roles or stakeholders",
+        "Categories: types, levels, or classifications presented side by side",
+        "Before/During/After: temporal views of a process or change",
+        "Beginner/Intermediate/Advanced: same topic at different depths"
+      ],
+      "when_to_use": "For 2-6 categories of content that are alternatives (not sequential). Users choose which to view.",
       "when_not_to_use": "Don't use for sequential content (use narrative). Don't use with more than 6 tabs (use accordion). Don't nest tabs inside tabs.",
       "props": {
         "required": {
@@ -617,8 +745,15 @@
       "category": "interactive",
       "status": "new",
       "description": "Flip-card interaction showing a term or question on the front and the answer/definition on the back. Click to flip with 3D rotation animation.",
-      "when_to_use": "For vocabulary review, Q&A pairs, or any content where learners should try to recall before seeing the answer. Good for: term/definition drilling, review activities, memory reinforcement.",
-      "when_not_to_use": "Don't use for first-time content delivery (learners haven't learned the terms yet). Don't use for complex multi-paragraph content. Place after the teaching section.",
+      "learningMoment": "The moment before the flip is the learning. The learner tries to recall the answer, feels uncertainty, then flips to confirm or correct. That retrieval attempt strengthens memory more than re-reading ever could.",
+      "creativeUses": [
+        "Vocabulary review after a section that introduced several terms",
+        "Scenario fronts: 'What should you do if...' with expert answer on back",
+        "Myth-busting: common belief on front, truth on back",
+        "Quick recall: test yourself before moving to the next section"
+      ],
+      "when_to_use": "For vocabulary review, Q&A pairs, or any content where learners should try to recall before seeing the answer. Place AFTER the teaching section.",
+      "when_not_to_use": "Don't use for first-time content delivery. Don't use for complex multi-paragraph content.",
       "props": {
         "required": {
           "_items": "array — 3-8 cards: [{ front: string, back: string }]"
@@ -645,9 +780,16 @@
       "component": "LabeledImage",
       "category": "visual",
       "status": "new",
-      "description": "An image with numbered hotspot markers at specific positions. Clicking a marker reveals a tooltip or sidebar with information about that point.",
-      "when_to_use": "For diagrams, equipment photos, or illustrations where specific parts need identification. Great for: anatomy diagrams, equipment labels, spatial relationships.",
-      "when_not_to_use": "Don't use if the image is simple enough for a caption (use graphic). Don't fabricate hotspot positions — this component requires the AI to generate an appropriate image.",
+      "description": "An image with numbered hotspot markers at specific positions. Clicking a marker reveals a tooltip with information about that point.",
+      "learningMoment": "Labeled images connect abstract knowledge to physical reality. When a learner clicks a hotspot on a diagram and reads what's there, they're building a spatial mental model — understanding not just WHAT something is, but WHERE it is.",
+      "creativeUses": [
+        "Anatomy of a system: components labeled on a diagram",
+        "Spot the issues: markers highlight problems in a scenario image",
+        "Interactive infographic: key data points anchored to visual positions",
+        "Before/after overlay: markers explain what changed"
+      ],
+      "when_to_use": "For diagrams, equipment photos, or illustrations where specific parts need identification.",
+      "when_not_to_use": "Don't use if the image is simple enough for a caption (use graphic).",
       "image_dimensions": "1200x800 (3:2)",
       "props": {
         "required": {
@@ -685,8 +827,15 @@
       "category": "content",
       "status": "new",
       "description": "Connected workflow nodes showing a process from start to end. Each node has a title and description, connected by directional arrows.",
-      "when_to_use": "For workflows, decision trees, or any process where the flow and connections matter. Great for: troubleshooting flows, business processes, system architecture overviews.",
-      "when_not_to_use": "Don't use for simple linear steps (use timeline). Best for processes with 3-6 nodes.",
+      "learningMoment": "Process flows make decision logic visible. Unlike a timeline (which is linear), a process flow shows that choices lead to different outcomes — it teaches THINKING, not just doing.",
+      "creativeUses": [
+        "Decision tree: 'If X, do Y; if Z, do W'",
+        "Troubleshooting flow: systematic diagnosis path",
+        "Escalation process: when to handle vs when to escalate",
+        "System architecture: how components interact and data flows"
+      ],
+      "when_to_use": "For workflows, decision trees, or any process where the flow and connections matter. Use 3-6 nodes.",
+      "when_not_to_use": "Don't use for simple linear steps (use timeline).",
       "props": {
         "required": {
           "_nodes": "array — 3-6 process nodes: [{ title: string, body: string, type?: 'start' | 'process' | 'decision' | 'end' }]"
@@ -715,8 +864,15 @@
       "category": "visual",
       "status": "new",
       "description": "Grid or masonry layout of multiple images with lightbox zoom on click. Captions shown on hover.",
-      "when_to_use": "For showcasing multiple related images — equipment photos, examples, visual references. Use when images from the SCORM package deserve to be shown together. 3-8 images.",
-      "when_not_to_use": "Don't fabricate many images just to fill a gallery. Only use when the content genuinely benefits from showing multiple visuals.",
+      "learningMoment": "Galleries create a sense of abundance and variety. Multiple images together help learners see patterns, differences, and real-world diversity that a single image can't convey.",
+      "creativeUses": [
+        "Examples gallery: 'Here's what this looks like in practice' across different contexts",
+        "Equipment reference: visual identification guide",
+        "Before/after pairs: multiple transformations shown together",
+        "Warning signs gallery: visual examples of things to watch for"
+      ],
+      "when_to_use": "For showcasing multiple related images. Use when content genuinely benefits from showing multiple visuals. 3-8 images.",
+      "when_not_to_use": "Don't fabricate many images just to fill a gallery. Only use when the content genuinely benefits from multiple visuals.",
       "image_dimensions": "600x400 (3:2) per image",
       "props": {
         "required": {
@@ -745,8 +901,15 @@
       "category": "visual",
       "status": "new",
       "description": "Edge-to-edge full-width image with optional text overlay. Creates visual impact and section breaks. Parallax scroll effect.",
-      "when_to_use": "For dramatic visual section dividers between major topics. Use to create breathing room and visual impact. 1-3 per course maximum.",
-      "when_not_to_use": "Don't overuse. Don't use for images that need captions or detailed study (use graphic or labeled-image).",
+      "learningMoment": "Full-bleeds are emotional punctuation. They say: 'Pause. Feel this. The next section is different.' The best full-bleeds create a sense of transition — closing one chapter and opening another.",
+      "creativeUses": [
+        "Section transition with a provocative question or statement as overlay",
+        "Dramatic reveal after a dense teaching section — let the learner breathe",
+        "Scale/impact image that makes an abstract concept feel real",
+        "Aspirational image: 'This is what success looks like'"
+      ],
+      "when_to_use": "For dramatic visual section dividers between major topics. 1-3 per course maximum.",
+      "when_not_to_use": "Don't overuse. Don't use for images that need captions or detailed study.",
       "image_dimensions": "1920x800 (12:5 ultra-wide)",
       "props": {
         "required": {
@@ -779,7 +942,13 @@
       "category": "visual",
       "status": "new",
       "description": "Video player with an expandable transcript panel below. Combines media playback with accessible text content.",
-      "when_to_use": "Only when both a video file AND its transcript text are available in the content bucket. Enhances accessibility and allows learners to read along or search the content.",
+      "learningMoment": "Combining video with transcript respects different learning preferences — some people watch, some read, some do both. The transcript also makes content searchable and accessible.",
+      "creativeUses": [
+        "Expert interview with full text for reference",
+        "Demonstration video with step-by-step written procedure alongside",
+        "Real-world footage with analysis commentary in transcript"
+      ],
+      "when_to_use": "Only when both a video file AND its transcript text are available.",
       "when_not_to_use": "Don't use if there's no video (use text). Don't use if there's no transcript (use media).",
       "props": {
         "required": {
@@ -810,9 +979,15 @@
       "component": "PathSelector",
       "category": "structural",
       "status": "built",
-      "description": "Persistent course path selector. Learners choose their role/difficulty/audience, and subsequent sections show/hide based on the selection. Uses the state store in hydrate.js.",
-      "when_to_use": "When content-bucket.json contains pathGroups. Place immediately after the hero (or after a brief introduction). The selector sets a variable in the state store that controls which sections are visible via data-show-if attributes.",
-      "when_not_to_use": "Never use for educational branching scenarios (use branching component). Never use more than once per pathGroup. Only use when the SCORM extraction detected a path-selection pattern.",
+      "description": "Persistent course path selector. Learners choose their role/difficulty/audience, and subsequent sections show/hide based on the selection.",
+      "learningMoment": "Path selection gives learners ownership of their experience. Choosing a path is an act of self-identification — 'I am this kind of learner' — which increases engagement because the content now feels personally relevant.",
+      "creativeUses": [
+        "Role-based: 'I'm a manager' vs 'I'm a developer' vs 'I'm in compliance'",
+        "Experience-based: 'I'm new to this' vs 'I have some experience' vs 'I'm refreshing'",
+        "Context-based: 'I work in healthcare' vs 'I work in finance' vs 'I work in tech'"
+      ],
+      "when_to_use": "When content-bucket.json contains pathGroups (SCORM import path only). Place immediately after the hero.",
+      "when_not_to_use": "Never use for educational branching scenarios (use branching component). Only use when SCORM extraction detected a path-selection pattern.",
       "props": {
         "required": {
           "displayTitle": "string — Heading (e.g. 'Choose Your Learning Path')",
@@ -840,12 +1015,12 @@
 
   "design_rules": {
     "visual_variety": "Never place two consecutive components of the same type. Alternate between content-heavy and visual components.",
-    "section_rhythm": "Each section should follow a pattern: context (text/graphic-text) → detail (accordion/tabs/narrative) → reinforce (mcq/flashcard/checklist). Not every section needs all three.",
+    "section_rhythm": "Vary section density intentionally. Breather sections (1-2 components) give the learner space. Deep dive sections (5-7 components) go thorough. Standard sections (3-4 components) are the workhorse.",
     "image_alternation": "When using multiple graphic-text components, alternate _imageAlign between 'left' and 'right'.",
-    "assessment_spacing": "Space MCQ components at least 3-5 components apart. Place after teaching, not before.",
+    "assessment_spacing": "Don't scatter MCQs after every section. Cluster assessments into 2-3 checkpoint moments.",
     "hero_rule": "Every course starts with exactly one hero component.",
-    "max_components_per_section": "Keep sections to 3-6 components. If a section grows beyond 6, split it into two sections.",
-    "visual_breaks": "Use full-bleed, stat-callout, or pullquote between dense content sections to create breathing room."
+    "visual_breaks": "Use full-bleed, stat-callout, or pullquote between dense content sections to create breathing room.",
+    "scroll_test": "For every section, ask: 'Would a learner on their phone scroll past this at 11pm?' If yes, redesign it."
   },
 
   "component_categories": {
