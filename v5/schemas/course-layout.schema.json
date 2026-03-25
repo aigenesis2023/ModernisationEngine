@@ -41,7 +41,9 @@
       "description": "Generation metadata",
       "properties": {
         "generatedAt": { "type": "string", "format": "date-time" },
-        "sourceScorm": { "type": "string" },
+        "sourceScorm": { "type": "string", "description": "SCORM course title (SCORM import path)" },
+        "sourceTopic": { "type": "string", "description": "Topic brief (AI-first generation path)" },
+        "sourceType": { "type": "string", "enum": ["scorm", "ai-generated"], "description": "How this course was generated" },
         "brandSource": { "type": "string" },
         "componentCount": { "type": "integer" },
         "imageCount": { "type": "integer" }

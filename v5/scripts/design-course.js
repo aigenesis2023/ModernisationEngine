@@ -19,6 +19,7 @@
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
+const { validateLayout } = require('./lib/validate-layout');
 
 // ─── Paths ───────────────────────────────────────────────────────────
 const PROMPT_PATH = path.resolve('v5/prompts/layout-engine.md');
@@ -116,139 +117,7 @@ ${schema}
   return { systemPrompt, userMessage };
 }
 
-// ─── Validate the layout JSON ────────────────────────────────────────
-function validateLayout(layout) {
-  const errors = [];
-
-  if (!layout.course?.title) errors.push('Missing course.title');
-  if (!layout.sections || !Array.isArray(layout.sections)) errors.push('Missing sections array');
-  if (layout.sections?.length < 2) errors.push('Need at least 2 sections');
-
-  const componentIds = new Set();
-  const sectionIds = new Set();
-  let totalComponents = 0;
-  let totalImages = 0;
-
-  const validTypes = [
-    'hero', 'text', 'graphic', 'graphic-text', 'accordion', 'mcq',
-    'narrative', 'bento', 'data-table', 'media', 'textinput', 'branching',
-    'timeline', 'comparison', 'stat-callout', 'pullquote', 'key-term',
-    'checklist', 'tabs', 'flashcard', 'labeled-image', 'process-flow',
-    'image-gallery', 'full-bleed', 'video-transcript', 'path-selector',
-  ];
-
-  for (const section of (layout.sections || [])) {
-    if (!section.sectionId) errors.push('Section missing sectionId');
-    if (sectionIds.has(section.sectionId)) errors.push(`Duplicate sectionId: ${section.sectionId}`);
-    sectionIds.add(section.sectionId);
-
-    let prevType = null;
-    for (const comp of (section.components || [])) {
-      totalComponents++;
-
-      if (!comp.componentId) errors.push('Component missing componentId');
-      if (componentIds.has(comp.componentId)) errors.push(`Duplicate componentId: ${comp.componentId}`);
-      componentIds.add(comp.componentId);
-
-      if (!comp.type) errors.push(`Component ${comp.componentId} missing type`);
-      if (comp.type && !validTypes.includes(comp.type)) {
-        errors.push(`Unknown component type: ${comp.type}`);
-      }
-
-      // Check consecutive same types
-      if (comp.type === prevType) {
-        errors.push(`Consecutive same type "${comp.type}" in section ${section.sectionId}`);
-      }
-      prevType = comp.type;
-
-      if (comp.imagePrompt) totalImages++;
-      if (comp.imagePrompts) totalImages += comp.imagePrompts.length;
-    }
-  }
-
-  // Check hero exists as first component
-  const firstComp = layout.sections?.[0]?.components?.[0];
-  if (firstComp?.type !== 'hero') {
-    errors.push('First component must be type "hero"');
-  }
-
-  // ── Logic-aware validation ──────────────────────────────────────────
-  // Check if content-bucket has pathGroups — if so, validate logic fields
-  let contentBucket = null;
-  try {
-    const cbPath = path.resolve('v5/output/content-bucket.json');
-    if (fs.existsSync(cbPath)) {
-      contentBucket = JSON.parse(fs.readFileSync(cbPath, 'utf-8'));
-    }
-  } catch {}
-
-  if (contentBucket?.pathGroups?.length > 0) {
-    // Check path-selector component exists
-    const allComps = (layout.sections || []).flatMap(s => s.components || []);
-    const hasPathSelector = allComps.some(c => c.type === 'path-selector');
-    if (!hasPathSelector) {
-      errors.push('pathGroups detected in content-bucket but no path-selector component in layout');
-    }
-
-    // Collect valid path variable names
-    const validVars = new Set();
-    for (const pg of contentBucket.pathGroups) {
-      for (const opt of pg.options || []) {
-        if (opt.variable) validVars.add(opt.variable);
-      }
-    }
-
-    // Validate showIf references
-    for (const section of (layout.sections || [])) {
-      if (section.showIf) {
-        for (const varName of Object.keys(section.showIf)) {
-          if (!validVars.has(varName)) {
-            errors.push(`Section ${section.sectionId} showIf references unknown variable: ${varName}`);
-          }
-        }
-      }
-      for (const comp of (section.components || [])) {
-        if (comp.showIf) {
-          for (const varName of Object.keys(comp.showIf)) {
-            if (!validVars.has(varName)) {
-              errors.push(`Component ${comp.componentId} showIf references unknown variable: ${varName}`);
-            }
-          }
-        }
-      }
-    }
-
-    // Check each path has at least one section or component
-    for (const varName of validVars) {
-      const hasContent = (layout.sections || []).some(s =>
-        (s.showIf && varName in s.showIf) ||
-        (s.components || []).some(c => c.showIf && varName in c.showIf)
-      );
-      if (!hasContent) {
-        errors.push(`Path variable "${varName}" has no showIf content in the layout`);
-      }
-    }
-  }
-
-  // Count MCQ components vs question bank questions
-  // Compare against unique questions referenced by draws (not the raw pool, since draws may share questions)
-  if (contentBucket?.questionBanks?.questions?.length > 0) {
-    const allComps = (layout.sections || []).flatMap(s => s.components || []);
-    const mcqCount = allComps.filter(c => c.type === 'mcq').length;
-    const qbCount = contentBucket.questionBanks.questions.length;
-    // Warn if layout has significantly fewer MCQs than unique questions
-    // (some deduplication is expected when draws share the same bank slides)
-    if (mcqCount < Math.ceil(qbCount * 0.5)) {
-      errors.push(`Content bucket has ${qbCount} unique question bank questions but layout only has ${mcqCount} MCQ components — significant content loss`);
-    }
-  }
-
-  return {
-    valid: errors.length === 0,
-    errors,
-    stats: { totalComponents, totalImages, sections: layout.sections?.length || 0 },
-  };
-}
+// validateLayout is imported from ./lib/validate-layout.js
 
 // ─── Extract JSON from LLM response ─────────────────────────────────
 function extractJson(response) {

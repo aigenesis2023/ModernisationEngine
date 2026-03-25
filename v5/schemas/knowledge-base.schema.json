@@ -1,0 +1,212 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "knowledge-base.schema.json",
+  "title": "Knowledge Base",
+  "description": "Structured knowledge gathered from research, documents, and user input. Used by generate-layout.js to create course content and structure in a single pass.",
+
+  "type": "object",
+  "required": ["topic", "learningObjectives", "contentAreas"],
+  "additionalProperties": false,
+
+  "properties": {
+    "topic": {
+      "type": "object",
+      "required": ["title", "brief"],
+      "additionalProperties": false,
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "Short course title derived from the topic brief"
+        },
+        "brief": {
+          "type": "string",
+          "description": "The original topic brief from the user"
+        },
+        "targetAudience": {
+          "type": "string",
+          "description": "Inferred or stated target audience"
+        },
+        "difficultyLevel": {
+          "type": "string",
+          "enum": ["beginner", "intermediate", "advanced"],
+          "description": "Overall course difficulty"
+        },
+        "estimatedDuration": {
+          "type": "string",
+          "description": "Estimated learning time (e.g. '30 minutes', '1 hour')"
+        }
+      }
+    },
+
+    "learningObjectives": {
+      "type": "array",
+      "description": "3-8 specific, measurable learning objectives derived from research",
+      "items": { "type": "string" },
+      "minItems": 2
+    },
+
+    "contentAreas": {
+      "type": "array",
+      "description": "Major topic areas discovered through research. Each becomes a potential course section.",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "required": ["title", "keyPoints"],
+        "additionalProperties": false,
+        "properties": {
+          "title": {
+            "type": "string",
+            "description": "Content area heading"
+          },
+          "summary": {
+            "type": "string",
+            "description": "2-3 sentence overview of this area"
+          },
+          "keyPoints": {
+            "type": "array",
+            "description": "Factual claims and key concepts with supporting detail",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "required": ["point"],
+              "additionalProperties": false,
+              "properties": {
+                "point": {
+                  "type": "string",
+                  "description": "A factual claim or key concept"
+                },
+                "detail": {
+                  "type": "string",
+                  "description": "Supporting explanation or context"
+                },
+                "citation": {
+                  "type": "string",
+                  "description": "Source URL or reference for this claim"
+                }
+              }
+            }
+          },
+          "statistics": {
+            "type": "array",
+            "description": "Quantitative data points — maps to stat-callout components",
+            "items": {
+              "type": "object",
+              "required": ["value", "label"],
+              "additionalProperties": false,
+              "properties": {
+                "value": {
+                  "type": "string",
+                  "description": "The number or percentage (e.g. '73%', '2.4M')"
+                },
+                "label": {
+                  "type": "string",
+                  "description": "What the statistic measures"
+                },
+                "citation": {
+                  "type": "string",
+                  "description": "Source URL for this statistic"
+                }
+              }
+            }
+          },
+          "terminology": {
+            "type": "array",
+            "description": "Domain-specific terms — maps to key-term components",
+            "items": {
+              "type": "object",
+              "required": ["term", "definition"],
+              "additionalProperties": false,
+              "properties": {
+                "term": { "type": "string" },
+                "definition": { "type": "string" }
+              }
+            }
+          },
+          "commonMisconceptions": {
+            "type": "array",
+            "description": "Things learners commonly get wrong — useful for quiz distractors",
+            "items": { "type": "string" }
+          },
+          "quizIdeas": {
+            "type": "array",
+            "description": "Suggested quiz questions with verified correct answers — maps to MCQ components",
+            "items": {
+              "type": "object",
+              "required": ["question", "correctAnswer", "distractors"],
+              "additionalProperties": false,
+              "properties": {
+                "question": {
+                  "type": "string",
+                  "description": "The quiz question"
+                },
+                "correctAnswer": {
+                  "type": "string",
+                  "description": "The verified correct answer"
+                },
+                "distractors": {
+                  "type": "array",
+                  "description": "2-3 plausible but incorrect answers",
+                  "items": { "type": "string" },
+                  "minItems": 2,
+                  "maxItems": 3
+                },
+                "explanation": {
+                  "type": "string",
+                  "description": "Why the correct answer is right (used for quiz feedback)"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "description": "All sources used in research, for attribution and verification",
+      "items": {
+        "type": "object",
+        "required": ["title", "type"],
+        "additionalProperties": false,
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Source URL"
+          },
+          "title": {
+            "type": "string",
+            "description": "Source title or description"
+          },
+          "type": {
+            "type": "string",
+            "enum": ["web-research", "user-url", "uploaded-document"],
+            "description": "How this source was obtained"
+          }
+        }
+      }
+    },
+
+    "metadata": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "researchModel": {
+          "type": "string",
+          "description": "Which model/agent performed the research"
+        },
+        "inputTypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["topic-brief", "urls", "uploaded-document"]
+          },
+          "description": "What input types were used"
+        }
+      }
+    }
+  }
+}
