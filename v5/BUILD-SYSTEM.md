@@ -139,7 +139,44 @@ hydrate.js includes a minimal state store for conditional rendering:
 - `applyState()` shows/hides all `[data-show-if]` elements based on current state
 - `sessionStorage` persistence so path selection survives page reload
 
-This is NOT a Storyline trigger engine — it's a conditional renderer with ~80 lines of vanilla JS.
+This is NOT a Storyline trigger engine — it's a conditional renderer.
+
+### Course Gate (IMPLEMENTED)
+
+When a path-selector exists, the course enforces a "choose before continuing" pattern:
+- **build-course.js** wraps all content after the path-selector section in `<div data-course-gate class="gated">`
+- **hydrate.js** checks on load: if no path variable is true, keeps the `.gated` class which applies `filter: blur(6px); opacity: 0.3; pointer-events: none; max-height: 60vh; overflow: hidden` with a gradient fade-out
+- On path selection: removes `.gated`, smooth-scrolls to the unlocked content
+- On reload with `sessionStorage` state: gate is removed immediately (no re-selection needed)
+
+The blurred preview communicates "there's content here, choose your path first" — better UX than hiding everything or showing a blank page.
+
+### Section Progress Tracking (IMPLEMENTED)
+
+Tracks interactive component completion per section and shows progress in the nav:
+- **build-course.js** emits `data-section-track="{sectionId}" data-interactive-count="{N}"` on sections containing interactive components (MCQ, accordion, tabs, flashcard, narrative, checklist, textinput)
+- **build-course.js** injects `window.__SECTION_GATING__` from content-bucket's `sectionGating` array
+- **hydrate.js** `updateNavProgress()` counts completed interactives per section:
+  - Quizzes: answered (feedback visible)
+  - Accordions: all `<details>` opened at least once
+  - Tabs: all triggers clicked
+  - Checklists: all checkboxes checked
+- Nav links get progress indicators: `(2/5)` in progress, checkmark icon when complete
+- Uses MutationObserver on quizzes + event delegation on accordions/tabs for live updates
+
+### Required-Items Completion (IMPLEMENTED)
+
+Components tagged with `data-required-items="N"` by the layout engine get a completion counter:
+- Progress indicator shows `"X / N explored"` and updates as sub-items are interacted with
+- Completed state: checkmark icon + "All items explored" message
+- Feeds into section progress tracking via `data-items-complete="true"`
+
+### Draw Randomization (IMPLEMENTED)
+
+When question bank draws have `poolSize > drawCount`:
+- **build-course.js** emits `data-draw-count`, `data-draw-pool`, and `data-draw-shuffle` on MCQ sections
+- **hydrate.js** groups MCQs by nearest section/showIf wrapper, shuffles if flagged, hides extras via `display: none`
+- Runs at init time before quiz handlers, so hidden quizzes don't interfere with interaction
 
 ---
 

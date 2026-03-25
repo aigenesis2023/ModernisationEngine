@@ -398,8 +398,11 @@ The engine detects these patterns by analyzing **trigger behavior across slides*
 - Navigation triggers on later slides check these variables and either allow or block progression
 
 **Modern web equivalent:**
-- In a deep-scroll format, linear progression is natural (scroll order)
-- Section completion can be tracked via scroll position or explicit "mark complete" buttons
+- In a deep-scroll format, sections are NOT locked (scroll-locking is hostile UX)
+- `extract.js` emits a `sectionGating` array: `[{ variable, sceneId, sceneTitle, writtenOnSlide }]`
+- `build-course.js` tags sections with `data-section-track` and counts interactive components
+- `hydrate.js` tracks interactive engagement per section and updates nav with progress indicators
+- Preserves the SCORM's "ensure engagement in order" intent without fighting the scroll format
 
 ### Pattern: Question Banks (randomised quizzes)
 
@@ -548,6 +551,14 @@ The extractor outputs tagged content where every piece of logic metadata was dis
       ]
     }
   ],
+  "sectionGating": [
+    {
+      "variable": "{completionVarName}",
+      "sceneId": "{sceneId}",
+      "sceneTitle": "{sceneTitle}",
+      "writtenOnSlide": "{slideId}"
+    }
+  ],
   "questionBanks": {
     "draws": [
       {
@@ -612,9 +623,14 @@ The extractor outputs tagged content where every piece of logic metadata was dis
 
 **Phase 3 (AI layout engine):** Sees `pathGroups` and understands "this course has a user-choice selector with N paths." Sees `questionBanks` with conditions and knows which quizzes belong to which path. Sees layer content and maps it to tabs/accordion. Structures the output with appropriate components per path.
 
-**Phase 5 (build-course.js):** Reads `conditions` on components and adds `data-show-if` attributes. Adds the path-selector component.
+**Phase 5 (build-course.js):** Reads `conditions` on components and adds `data-show-if` attributes. Adds the path-selector component. Wraps post-selector content in a course gate (`data-course-gate`). Tags sections with `data-section-track` for progress tracking. Emits `data-draw-count`/`data-draw-pool` on MCQs with draw metadata.
 
-**Phase 5b (hydrate.js):** Minimal state store — `{ variable: value }` map. Path-selector sets the variable. Sections show/hide based on current state.
+**Phase 5b (hydrate.js):** State store + flow control:
+- Path-selector sets variables, `applyState()` shows/hides conditional content
+- Course gate: blurs/locks content until a path is selected
+- Section progress: tracks interactive completion per section, updates nav indicators
+- Required-items: completion counter on components tagged with `data-required-items`
+- Draw randomization: when `poolSize > drawCount`, randomly selects and hides MCQs
 
 **Future authoring tool:** Shows a path switcher UI with the discovered path names. Each section has a "visible in" property. Moving content between paths = changing a JSON property. No trigger wiring needed.
 

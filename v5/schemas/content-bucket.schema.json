@@ -6,7 +6,6 @@
 
   "type": "object",
   "required": ["courseTitle", "courseId", "scenes", "mediaInventory"],
-  "additionalProperties": false,
 
   "properties": {
     "courseTitle": {
@@ -59,6 +58,65 @@
       "type": "string",
       "format": "date-time",
       "description": "ISO timestamp of when extraction was performed"
+    },
+    "variables": {
+      "type": "array",
+      "description": "Custom author variables discovered by behavioral analysis (system vars filtered out)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["boolean", "number", "string"] },
+          "default": {}
+        }
+      }
+    },
+    "pathGroups": {
+      "type": "array",
+      "description": "Path selection groups detected by behavioral pattern (2+ boolean vars set on same slide, read downstream). Multiple groups possible (role + assessment depth).",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string", "enum": ["user-choice"] },
+          "selectorSlide": { "type": "string" },
+          "options": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "variable": { "type": "string" },
+                "label": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "sectionGating": {
+      "type": "array",
+      "description": "Section completion gating variables. Each maps a boolean completion var to the scene it marks as complete.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "variable": { "type": "string" },
+          "sceneId": { "type": "string" },
+          "sceneTitle": { "type": "string" },
+          "writtenOnSlide": { "type": "string" }
+        }
+      }
+    },
+    "questionBanks": {
+      "type": "object",
+      "description": "Question bank draws and their questions, with path conditions traced",
+      "properties": {
+        "draws": { "type": "array" },
+        "questions": { "type": "array" }
+      }
+    },
+    "complexity": {
+      "type": "object",
+      "description": "Complexity assessment: variable counts, trigger counts, detected patterns, out-of-scope items"
     }
   },
 

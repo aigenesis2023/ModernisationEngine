@@ -49,9 +49,19 @@ It produces:
 3. Shared sections with no `showIf` (visible to all paths)
 4. Path-specific quiz components drawing from the right question pool
 
+**Multiple path groups:** A course can have multiple pathGroups (e.g., one for role selection, one for assessment depth). Each produces a separate path-selector component. The extraction handles this generically — any slide that sets 2+ boolean vars read downstream is a pathGroup. Draws already have conditions, so question banks naturally associate with the right selector.
+
+**Course gate:** The path-selector enforces selection. Content below the selector is blurred and locked until a path is chosen. This translates the SCORM's "you must choose before advancing" intent into a scroll-native pattern. See BUILD-SYSTEM.md for implementation.
+
 ### Section Gating
 
-Content blocks tagged with section-completion conditions become naturally ordered sections. In a deep-scroll format, linear gating is handled by scroll order — no runtime logic needed. The layout engine can add progress markers between sections.
+Content blocks tagged with section-completion conditions map to tracked progress sections. In a deep-scroll format, sections are not locked (scroll-locking is hostile), but completion is tracked:
+- `extract.js` emits a `sectionGating` array mapping completion variables to their scenes
+- `build-course.js` tags sections with `data-section-track` and counts interactive components
+- `hydrate.js` tracks engagement (quizzes answered, accordions opened, tabs visited) and updates nav with progress indicators
+- The nav shows `(2/5)` in-progress or a checkmark when all interactives in a section are complete
+
+This preserves the SCORM's "ensure engagement in order" intent without fighting the scroll format.
 
 ### Layer Content (Click-to-Reveal)
 

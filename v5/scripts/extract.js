@@ -901,6 +901,7 @@ function extractQuestionBanks(globalData, scormDir) {
 function detectPatterns(variables, allTriggerData, draws, processedScenes) {
   const patterns = [];
   const pathGroups = [];
+  const sectionGating = [];
 
   // ── Path-selection detection (BEHAVIORAL, not name-based) ──
   // A path-selection group is: multiple boolean vars SET on the same slide,
@@ -969,6 +970,24 @@ function detectPatterns(variables, allTriggerData, draws, processedScenes) {
   });
   if (completionVars.length >= 2) {
     patterns.push('section-gating');
+    // Build sectionGating array: map each completion variable to the scene
+    // where it's written (that scene is the one it marks as complete)
+    for (const cv of completionVars) {
+      for (const scene of processedScenes) {
+        for (const slide of scene.slides) {
+          if (slide.logic?.varsWritten?.includes(cv.name)) {
+            sectionGating.push({
+              variable: cv.name,
+              sceneId: scene.sceneId,
+              sceneTitle: scene.title || '',
+              writtenOnSlide: slide.slideId,
+            });
+            break; // One scene per variable is enough
+          }
+        }
+        if (sectionGating.some(sg => sg.variable === cv.name)) break;
+      }
+    }
   }
 
   // ── Drag-drop detection (BEHAVIORAL) ──
@@ -1026,7 +1045,7 @@ function detectPatterns(variables, allTriggerData, draws, processedScenes) {
     patterns.push('lightbox');
   }
 
-  return { patterns: [...new Set(patterns)], pathGroups };
+  return { patterns: [...new Set(patterns)], pathGroups, sectionGating };
 }
 
 // Infer a group name from variable names (generic, not hardcoded to any naming convention)
@@ -1303,12 +1322,15 @@ function extract(scormDir) {
 
   // 8. Detect logic patterns (NEW)
   console.log('\n── Pattern Detection ──');
-  const { patterns, pathGroups } = detectPatterns(variables, allTriggerData, draws, processedScenes);
+  const { patterns, pathGroups, sectionGating } = detectPatterns(variables, allTriggerData, draws, processedScenes);
   console.log(`Patterns: ${patterns.length > 0 ? patterns.join(', ') : 'none detected'}`);
   if (pathGroups.length > 0) {
     for (const pg of pathGroups) {
       console.log(`  Path group "${pg.name}": ${pg.options.map(o => o.label).join(', ')}`);
     }
+  }
+  if (sectionGating.length > 0) {
+    console.log(`  Section gating: ${sectionGating.map(sg => `${sg.variable} → ${sg.sceneTitle}`).join(', ')}`);
   }
 
   // 9. Build media inventory
@@ -1568,6 +1590,7 @@ function extract(scormDir) {
     // Logic metadata — only variables actually referenced in slide triggers
     variables: usedCustomVars,
     pathGroups: pathGroups.length > 0 ? pathGroups : undefined,
+    sectionGating: sectionGating.length > 0 ? sectionGating : undefined,
     questionBanks: draws.length > 0 ? { draws, questions: banks } : undefined,
     complexity,
     // Existing

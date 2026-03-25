@@ -39,8 +39,8 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
                     │
                     ▼
-         generate-images.js (Pexels stock → Gemini AI → HF AI → SVG placeholder)
-         └─→ images/*.jpg (stock photos or AI-generated)
+         generate-images.js (SiliconFlow AI → Pexels stock → SVG placeholder)
+         └─→ images/*.jpg (AI-generated or stock photos)
                     │
                     ▼
          extract-contract.js (cheerio — design contract extraction)
@@ -53,8 +53,11 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
          ├─ Wraps showIf components/sections with data-show-if attributes
          ├─ Emits path-selector with data-path-selector/data-path-variable
-         ├─ Injects window.__PATH_GROUPS__ state config from content-bucket
-         ├─ Inlines hydrate.js for interactivity + conditional rendering
+         ├─ Wraps post-selector content in course gate (data-course-gate)
+         ├─ Tags sections with data-section-track for progress tracking
+         ├─ Emits draw metadata (data-draw-count/pool) on question bank MCQs
+         ├─ Injects window.__PATH_GROUPS__ + __SECTION_GATING__ state config
+         ├─ Inlines hydrate.js for interactivity + flow control
          └─→ course.html (single self-contained file)
 ```
 
@@ -73,7 +76,7 @@ Stitch's output (component patterns + design tokens) is extracted and stored. Th
 We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
 
 **5. Logic flows end-to-end.**
-Path selection, conditional content, and question bank associations extracted in Phase 1 flow through to the final HTML. The layout engine tags content with `showIf` conditions. The build step wraps tagged content with `data-show-if` attributes. `hydrate.js` manages a state store — path-selector clicks toggle variables, `applyState()` shows/hides sections. See `v5/CONTENT-STRUCTURING.md` and `v5/BUILD-SYSTEM.md`.
+Path selection, conditional content, and question bank associations extracted in Phase 1 flow through to the final HTML. The layout engine tags content with `showIf` conditions. The build step wraps tagged content with `data-show-if` attributes. `hydrate.js` manages a state store with flow control: course gate (must select path before continuing), section progress tracking (interactive completion per section with nav indicators), draw randomization (poolSize > drawCount), and required-items completion counters. See `v5/CONTENT-STRUCTURING.md` and `v5/BUILD-SYSTEM.md`.
 
 ---
 
@@ -113,7 +116,7 @@ v5/                                    ← ALL ACTIVE CODE
     design-course.js                   ← AI layout engine (manual + API + load modes)
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
     extract-contract.js                ← Cheerio: Stitch patterns → design-contract.json
-    generate-images.js                 ← Design-informed image generation (runs after Stitch)
+    generate-images.js                 ← Image generation: SiliconFlow AI → Pexels stock → SVG
     build-course.js                    ← Contract fill: design-contract.json + real content → course.html
     review-course.js                   ← Playwright screenshot capture (Phase 6 visual review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
@@ -163,7 +166,7 @@ See `v5/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the 
 
 ### Phase 4b — Image Generation (`v5/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
-**Runs AFTER Phase 4a.** Priority chain: Pexels stock (free) → Gemini AI → HuggingFace FLUX → SVG placeholders. Guarantees 100% asset coverage.
+**Runs AFTER Phase 4a.** Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
 
 ### Phase 5 — Build (`v5/scripts/build-course.js`)
 **Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
@@ -203,9 +206,8 @@ node v5/scripts/review-course.js           # Phase 6
 
 ### API Keys (stored in `.env`, gitignored)
 - `STITCH_API_KEY`: stitch.withgoogle.com → Settings → API Keys
-- `PEXELS_API_KEY`: pexels.com/api → free, instant, 200 req/hr (recommended)
-- `GEMINI_API_KEY`: (Optional) AI image generation, requires paid Google plan
-- `HF_TOKEN`: (Optional) HuggingFace FLUX
+- `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via FLUX.1-schnell (default)
+- `PEXELS_API_KEY`: pexels.com/api → free stock photo fallback, 200 req/hr
 - `ANTHROPIC_API_KEY`: (Optional) Enables API mode for Phase 2 + Phase 3
 
 ---

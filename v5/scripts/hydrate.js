@@ -95,6 +95,49 @@
       });
     });
 
+    // ── 1b. DRAW RANDOMIZATION ──────────────────────────────────────────
+    // When poolSize > drawCount, randomly select drawCount MCQs and hide the rest.
+    // Groups MCQs by parent section (drawId grouping via proximity).
+    var drawQuizzes = document.querySelectorAll('[data-quiz][data-draw-count]');
+    if (drawQuizzes.length > 0) {
+      // Group by closest section-track parent or by proximity
+      var drawGroups = {};
+      drawQuizzes.forEach(function (q) {
+        var count = parseInt(q.getAttribute('data-draw-count'), 10);
+        var pool = parseInt(q.getAttribute('data-draw-pool'), 10);
+        var shuffle = q.hasAttribute('data-draw-shuffle');
+        // Group key: find the nearest section wrapper
+        var parent = q.closest('[data-show-if]') || q.closest('[data-section-track]') || q.parentElement;
+        var key = parent ? (parent.id || parent.getAttribute('data-show-if') || 'default') : 'default';
+        if (!drawGroups[key]) drawGroups[key] = { quizzes: [], drawCount: count, shuffle: shuffle };
+        drawGroups[key].quizzes.push(q);
+      });
+
+      for (var gk in drawGroups) {
+        var group = drawGroups[gk];
+        if (group.quizzes.length <= group.drawCount) continue;
+        // Shuffle the array and hide extras
+        var indices = [];
+        for (var gi = 0; gi < group.quizzes.length; gi++) indices.push(gi);
+        if (group.shuffle) {
+          for (var si = indices.length - 1; si > 0; si--) {
+            var sj = Math.floor(Math.random() * (si + 1));
+            var tmp = indices[si]; indices[si] = indices[sj]; indices[sj] = tmp;
+          }
+        }
+        var visible = indices.slice(0, group.drawCount);
+        var visibleSet = {};
+        visible.forEach(function (vi) { visibleSet[vi] = true; });
+        group.quizzes.forEach(function (q, qi) {
+          if (!visibleSet[qi]) {
+            q.style.display = 'none';
+            q.setAttribute('data-draw-hidden', 'true');
+          }
+        });
+        console.log('Draw randomization: showing ' + group.drawCount + ' of ' + group.quizzes.length + ' quizzes in group ' + gk);
+      }
+    }
+
     // ── 2. TABS ─────────────────────────────────────────────────────────
     var tabContainers = document.querySelectorAll('[data-tabs]');
     tabContainers.forEach(function (container) {
@@ -379,6 +422,7 @@
 
           applyState();
           applyPathSelectorVisuals();
+          applyCourseGate();
         });
       });
     });
@@ -408,12 +452,207 @@
       });
     }
 
-    // If any path was previously selected, apply state on load
+    // ── 10. COURSE GATE — require path selection before continuing ─────
+    // If a path-selector exists and no path is selected, blur/lock the rest
+    // of the course. Gate is removed when any path variable becomes true.
+    var courseGates = document.querySelectorAll('[data-course-gate]');
+
+    function applyCourseGate() {
+      if (courseGates.length === 0) return;
+      var anySelected = false;
+      for (var k in state) { if (state[k] === true) anySelected = true; }
+      courseGates.forEach(function (gate) {
+        if (anySelected) {
+          var wasGated = gate.classList.contains('gated');
+          gate.classList.remove('gated');
+          // Smooth-scroll to the gated content on first unlock
+          if (wasGated) {
+            setTimeout(function () {
+              gate.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+          }
+        } else {
+          gate.classList.add('gated');
+        }
+      });
+    }
+
+    // On load: apply state + gate
     var hasSelection = false;
     for (var key in state) { if (state[key] === true) hasSelection = true; }
     if (hasSelection) {
       applyState();
       applyPathSelectorVisuals();
+    }
+    applyCourseGate();
+
+    // ── 11. SECTION PROGRESS TRACKING ────────────────────────────────────
+    // Track interactive component completion within each section and update
+    // nav links with progress indicators. Uses data-section-track attributes
+    // emitted by build-course.js on sections with interactive components.
+    var trackedSections = document.querySelectorAll('[data-section-track]');
+    var sectionProgress = {}; // sectionId → { total, completed }
+
+    function countSectionCompletion(sectionEl) {
+      var sectionId = sectionEl.getAttribute('data-section-track');
+      // Walk the DOM from this title bar to the next title bar (or end of main)
+      // to find all interactive components belonging to this section
+      var node = sectionEl;
+      var completed = 0;
+      var total = 0;
+
+      // Collect all siblings until the next section-track or end
+      while (node) {
+        node = node.nextElementSibling;
+        if (!node) break;
+        if (node.hasAttribute('data-section-track')) break;
+        // Count quizzes (completed = has feedback)
+        var sQuizzes = node.querySelectorAll('[data-quiz]');
+        total += sQuizzes.length;
+        sQuizzes.forEach(function (q) {
+          if (q.querySelector('.border-\\[\\#22c55e\\]') || q.getAttribute('data-answered') === 'true') completed++;
+        });
+        // Count accordions (completed = all opened at least once)
+        var sAccordions = node.querySelectorAll('details');
+        if (sAccordions.length > 0) {
+          total++;
+          var allOpened = true;
+          sAccordions.forEach(function (d) {
+            if (!d.hasAttribute('data-was-opened')) allOpened = false;
+          });
+          if (allOpened && sAccordions.length > 0) completed++;
+        }
+        // Count tab containers (completed = all tabs clicked)
+        var sTabs = node.querySelectorAll('[data-tabs]');
+        sTabs.forEach(function (tc) {
+          total++;
+          if (tc.getAttribute('data-all-visited') === 'true') completed++;
+        });
+        // Count checklists (completed = all checked)
+        var sChecklists = node.querySelectorAll('[data-checklist]');
+        sChecklists.forEach(function (cl) {
+          total++;
+          var cbs = cl.querySelectorAll('input[type="checkbox"]');
+          var allChecked = cbs.length > 0;
+          cbs.forEach(function (cb) { if (!cb.checked) allChecked = false; });
+          if (allChecked && cbs.length > 0) completed++;
+        });
+      }
+      sectionProgress[sectionId] = { total: total, completed: completed };
+      return { total: total, completed: completed };
+    }
+
+    function updateNavProgress() {
+      trackedSections.forEach(function (sec) {
+        var sectionId = sec.getAttribute('data-section-track');
+        var progress = countSectionCompletion(sec);
+        // Find matching nav link
+        var navLink = document.querySelector('a[href="#' + sectionId + '"]');
+        if (!navLink) return;
+        // Add or update progress indicator
+        var indicator = navLink.querySelector('.section-progress');
+        if (!indicator) {
+          indicator = document.createElement('span');
+          indicator.className = 'section-progress ml-1 text-xs';
+          navLink.appendChild(indicator);
+        }
+        if (progress.total === 0) {
+          indicator.textContent = '';
+        } else if (progress.completed >= progress.total) {
+          indicator.innerHTML = '<span class="material-symbols-outlined text-xs align-middle" style="font-size:14px;color:var(--color-primary,#0099ff)">check_circle</span>';
+          sec.classList.add('section-complete');
+        } else {
+          indicator.textContent = '(' + progress.completed + '/' + progress.total + ')';
+          indicator.style.opacity = '0.6';
+        }
+      });
+    }
+
+    // Track accordion opens
+    document.addEventListener('toggle', function (e) {
+      if (e.target.tagName === 'DETAILS' && e.target.open) {
+        e.target.setAttribute('data-was-opened', 'true');
+        updateNavProgress();
+      }
+    }, true);
+
+    // Track tab visits
+    tabContainers.forEach(function (container) {
+      var triggers = container.querySelectorAll('[data-tab-trigger]');
+      var visited = {};
+      triggers.forEach(function (trigger, i) {
+        trigger.addEventListener('click', function () {
+          visited[i] = true;
+          if (Object.keys(visited).length >= triggers.length) {
+            container.setAttribute('data-all-visited', 'true');
+          }
+          updateNavProgress();
+        });
+      });
+    });
+
+    // Track quiz completion — mark quiz as answered when feedback appears
+    quizzes.forEach(function (quiz) {
+      var observer = new MutationObserver(function () {
+        if (quiz.querySelector('.border-\\[\\#22c55e\\]') || quiz.querySelector('[style*="color: rgb(34, 197, 94)"]') || quiz.querySelector('[style*="#22c55e"]')) {
+          quiz.setAttribute('data-answered', 'true');
+          updateNavProgress();
+        }
+      });
+      observer.observe(quiz, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+    });
+
+    // ── 12. REQUIRED-ITEMS COMPLETION COUNTER ─────────────────────────
+    // Components tagged with data-required-items="N" show a progress counter
+    // and get a visual "complete" state when all sub-items are interacted with.
+    var requiredComps = document.querySelectorAll('[data-required-items]');
+    requiredComps.forEach(function (comp) {
+      var required = parseInt(comp.getAttribute('data-required-items'), 10);
+      if (isNaN(required) || required <= 0) return;
+
+      // Create progress indicator
+      var progressEl = document.createElement('div');
+      progressEl.className = 'text-xs text-outline-variant mt-2 mb-4 text-center';
+      progressEl.setAttribute('data-completion-progress', '');
+      comp.appendChild(progressEl);
+
+      function updateCompletionProgress() {
+        var interacted = 0;
+        // Count opened accordions
+        var details = comp.querySelectorAll('details');
+        details.forEach(function (d) { if (d.hasAttribute('data-was-opened')) interacted++; });
+        // Count visited tabs
+        var tabs = comp.querySelector('[data-tabs]');
+        if (tabs) {
+          var visited = tabs.querySelectorAll('[data-tab-trigger][data-visited]');
+          interacted += visited.length;
+        }
+        // Count answered quizzes
+        var answeredQuizzes = comp.querySelectorAll('[data-quiz][data-answered]');
+        interacted += answeredQuizzes.length;
+        // Count checked items
+        var checked = comp.querySelectorAll('input[type="checkbox"]:checked');
+        interacted += checked.length;
+
+        var current = Math.min(interacted, required);
+        progressEl.textContent = current + ' / ' + required + ' explored';
+        if (current >= required) {
+          progressEl.innerHTML = '<span class="material-symbols-outlined text-xs align-middle" style="font-size:14px;color:var(--color-primary,#0099ff)">check_circle</span> All items explored';
+          progressEl.style.color = 'var(--color-primary, #0099ff)';
+          comp.setAttribute('data-items-complete', 'true');
+          updateNavProgress();
+        }
+      }
+
+      // Observe changes within the component
+      var compObserver = new MutationObserver(updateCompletionProgress);
+      compObserver.observe(comp, { childList: true, subtree: true, attributes: true });
+      updateCompletionProgress();
+    });
+
+    // Initial progress check (for restored sessions)
+    if (trackedSections.length > 0) {
+      updateNavProgress();
     }
 
     // ── Summary log ─────────────────────────────────────────────────────
@@ -424,6 +663,8 @@
       flashcards.length + ' flashcards, ' +
       carousels.length + ' carousels, ' +
       pathSelectors.length + ' path-selectors, ' +
+      courseGates.length + ' course-gates, ' +
+      trackedSections.length + ' tracked-sections, ' +
       document.querySelectorAll('[data-show-if]').length + ' conditional sections'
     );
 
