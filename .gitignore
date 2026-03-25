@@ -7,8 +7,9 @@ EV/
 screenshots/
 .env
 
+# Pipeline output (regenerated every run — only root index.html is deployed)
+v5/output/
+
 # Dev screenshots (Playwright viewport/full-page captures)
-# Keep screenshots/ folder tracked, ignore loose images in root
 /*.jpeg
 /*.png
-screenshots/
