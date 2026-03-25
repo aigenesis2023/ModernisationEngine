@@ -30,6 +30,27 @@ Background: Full-viewport with gradient overlay, background image of a modern wo
 
 ---
 
+### SECTION 1b — Path Selection
+
+<div data-component-type="path-selector">
+
+**[PATH-SELECTOR]**
+Title: Choose Your Learning Path
+Body: Select your role to see content tailored to your responsibilities. You can change your selection at any time.
+Instruction: Click your role below.
+INTERACTIVE: Add `data-path-selector` on the container, `data-path-option` on each card, `data-path-variable="{variableName}"` on each card to identify which state variable it sets.
+
+Options:
+- Non-Technical (variable: Group1NonTechnical): Site logistics, car parking, valeting. You work around hazards but do not handle them directly.
+- Semi-Technical (variable: Group2SemiTechnical): Service advisor, supervisor. You coordinate work and need awareness of all risk categories.
+- Technical (variable: Group3Technical): Technician, mechanic. You work hands-on with hazardous systems and need the deepest knowledge.
+
+Visual: Cards laid out in a grid (like branching component). Selected card gets a highlighted border/background. Unselected cards dim slightly.
+
+</div>
+
+---
+
 ### SECTION 2 — Introduction
 
 <div data-component-type="text">
@@ -454,6 +475,7 @@ A clean footer with:
    - Checklists: `data-checklist` on container, native `<input type="checkbox">`
    - Carousels: `data-carousel` on container, `data-slide` on slides, `data-prev`/`data-next` on nav buttons
    - Text inputs: Native `<form>` with `<input>` elements
+   - Path selectors: `data-path-selector` on container, `data-path-option` on each card, `data-path-variable="{var}"` on each card
 6. **Every component wrapper must have `data-component-type="typename"`** for pattern extraction
 7. **Use Google Material Symbols** for icons: `<span class="material-symbols-outlined">icon_name</span>`
 8. **No placeholder or lorem ipsum content** — all text above is the real content to render

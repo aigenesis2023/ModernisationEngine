@@ -48,6 +48,7 @@ Use ONLY these component types. Each has specific use cases — follow them.
 | Type | Use For |
 |---|---|
 | `hero` | Course opening. Always first. Animated title + background image. |
+| `path-selector` | Persistent path/role selector. Place after hero when pathGroups exist. Sets state variables for conditional content. |
 
 ### Content Components
 | Type | Use For |
@@ -211,6 +212,82 @@ Output a single JSON object matching the `course-layout.schema.json` schema:
 
 ---
 
+## Logic-Aware Design
+
+When `content-bucket.json` includes logic metadata (`pathGroups`, `questionBanks`, per-slide `logic`, conditional `navigation`), the layout engine MUST handle it. This is not optional — ignoring the logic layer produces a flat dump of all content from all paths, which is useless.
+
+### Path Selection
+
+When `pathGroups` exists in the content bucket:
+
+1. **Add a `path-selector` component** immediately after the hero (or after a brief intro section). Map each `pathGroups[].options[]` entry to a selector card with `title`, `body` (from the original slide content), and `variable` (the exact variable name).
+
+2. **Tag path-specific content with `showIf`**. Any section or component that should only be visible to certain paths gets:
+   ```json
+   "showIf": { "Group1NonTechnical": true }
+   ```
+   For content visible to MULTIPLE paths (e.g., Semi-Technical AND Technical):
+   ```json
+   "showIf": { "Group2SemiTechnical": true, "Group3Technical": true }
+   ```
+   Multiple keys = OR logic (show if ANY match).
+
+3. **Shared content gets NO `showIf`** — it's visible to all paths. Most educational content is shared. Only tag sections that the SCORM genuinely gates behind a path variable.
+
+4. **Use `pathGroup` on sections** to indicate which path group they belong to (for the authoring tool UI). Example: `"pathGroup": "group"`.
+
+### Question Banks
+
+When `questionBanks` exists:
+
+1. **Include ALL question bank questions as MCQ components.** Every single one. Do NOT drop questions.
+
+2. **Questions with `conditions`** get `showIf` matching those conditions. Example: a question in a draw with `"conditions": {"var":"Group1NonTechnical","op":"eq","val":true}` gets `"showIf": {"Group1NonTechnical": true}`.
+
+3. **Questions in unconditional draws** (no conditions) go in a shared assessment section visible to all paths.
+
+4. **Questions in path-inferred draws** (inferredPathDependent but no explicit condition) should be placed in the section they naturally belong to, without `showIf`.
+
+5. **Add `drawMetadata`** to MCQ components sourced from question banks: `{ drawId, shuffle, drawCount, poolSize }`. This metadata is for the authoring layer.
+
+6. **Group questions logically** — don't scatter 41 MCQs randomly. Group them by draw/topic into assessment sections (e.g., "Section 1 Knowledge Check", "Final Assessment").
+
+### Section Gating
+
+Content blocks tagged with section-completion conditions become naturally ordered sections. In a deep-scroll format, linear gating is handled by scroll order — no runtime logic needed. You can add progress markers between sections but do not add `showIf` for section-gating variables.
+
+### Layer Content
+
+Slides with layers represent click-to-reveal content. Map each pattern:
+- Multiple layers on one slide → **accordion** or **tabs** (one item per layer)
+- Single layer popup → **expandable panel** or inline text
+- Layer with quiz content → **MCQ** component
+- Hover-reveal content → **flashcard** or **tooltip text**
+
+**CRITICAL:** Do NOT discard layer content. Every layer contains educational material that must appear in the output.
+
+---
+
+## Content Fidelity Rules (NON-NEGOTIABLE)
+
+These rules override all design preferences. A beautiful course with missing content is a failed course.
+
+1. **Every quiz question from the SCORM must appear as an MCQ component.** Count them. The content bucket lists them all in `questionBanks.questions[]` and in inline slide content. If the SCORM has 49 questions, the layout must have 49 MCQ components.
+
+2. **Every layer's educational content must be preserved.** Layers are not decoration — they contain definitions, explanations, advantages/disadvantages, and procedural steps. Map them to accordion items, tab panels, flashcard faces, or inline text.
+
+3. **Never invent facts, statistics, or technical claims.** Reword for clarity, restructure for scanability, but every factual claim must trace back to the SCORM content.
+
+4. **Preserve all glossary terms.** If the SCORM has a glossary, include a dedicated key-term section with every definition.
+
+5. **Preserve all safety disclaimers and warnings.** These have legal significance.
+
+6. **Preserve interactive exercises.** Drag-and-drop exercises should be mapped to comparison tables, matching MCQs, or data-tables — but the underlying knowledge content must appear. A 7-category drag-and-drop becomes a 7-row comparison table, not a 1-row summary.
+
+7. **Count your output.** Before finalizing, verify: quiz question count matches, all vehicle types mentioned in the SCORM appear, all glossary terms are present, all safety procedures have their full steps.
+
+---
+
 ## Quality Checklist
 
 Before finalizing your output, verify:
@@ -226,3 +303,10 @@ Before finalizing your output, verify:
 - [ ] No fabricated video/media sources
 - [ ] Text is clean and modern — no SCORM artifacts
 - [ ] Output is valid JSON matching course-layout.schema.json
+- [ ] If pathGroups exist: path-selector component is present after the hero
+- [ ] All showIf conditions reference valid path variable names
+- [ ] Every path has at least one section of content
+- [ ] ALL quiz questions from the SCORM are present as MCQ components
+- [ ] ALL glossary terms are present
+- [ ] Layer content is mapped to interactive components (accordion, tabs, flashcard)
+- [ ] No facts, statistics, or technical claims were invented
