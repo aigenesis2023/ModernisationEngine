@@ -158,6 +158,20 @@ Playwright screenshots the landing page. Description is written in natural langu
 
 AI redesigns the course from scratch. See `v5/CONTENT-STRUCTURING.md`. Three modes: manual (Claude Code), API (Claude Sonnet), load (replay saved response).
 
+**⚠️ Manual mode workflow (no ANTHROPIC_API_KEY):**
+`content-bucket.json` can be 400KB+ — too large to read in the main conversation context. **Do NOT try to read it directly.** Instead, spawn a subagent (Agent tool) to act as the layout engine. The subagent gets a fresh context window and can read the full file. Give it this task:
+
+> You are the AI layout engine for the Modernisation Engine. Read these files:
+> 1. `v5/prompts/layout-engine.md` (your system instructions — follow exactly)
+> 2. `v5/output/content-bucket.json` (the SCORM content)
+> 3. `v5/output/brand-profile.json` (the brand)
+> 4. `v5/schemas/component-library.json` (available components)
+> 5. `v5/schemas/course-layout.schema.json` (output format)
+>
+> Follow layout-engine.md exactly. Generate the complete course-layout.json and write it to `v5/output/course-layout.json`.
+
+After the agent finishes, validate with: `node v5/scripts/design-course.js --load v5/output/course-layout.json`. Then continue with Phase 4a.
+
 ### Phase 4a — Stitch Component Kit (`v5/scripts/generate-course-html.js`)
 **Input:** `brand-design.md` + `representative-course.md` | **Output:** `component-patterns/` + `design-tokens.json` + `design-contract.json`
 **Model:** GEMINI_3_1_PRO
