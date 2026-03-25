@@ -717,9 +717,25 @@ if (stillMissing.length > 0) {
 
 const finalCount = Object.keys(patterns).length;
 
+// ─── Extract design contract from patterns ───────────────────────────
+// This runs extract-contract.js (cheerio-based) to produce design-contract.json
+// from the component patterns. build-course.js reads ONLY the contract, never raw HTML.
+
+console.log('\n─── Extracting design contract... ───\n');
+
+const { execSync } = await import('child_process');
+try {
+  const contractOutput = execSync(`node "${join(__dirname, 'extract-contract.js')}"`, { encoding: 'utf8' });
+  console.log(contractOutput);
+} catch (err) {
+  console.error('WARNING: extract-contract.js failed:', err.message);
+  console.log('build-course.js will fail without design-contract.json');
+}
+
 console.log('\n=== Stitch Component Kit generation complete ===');
 console.log(`\nSummary:`);
 console.log(`  Component patterns: ${finalCount}/25 (${finalCount - patternTypes.length} from retry/fallback)`);
 console.log(`  Design tokens: ${Object.keys(tokens.colors).length} colors, ${Object.keys(tokens.fonts).length} fonts`);
 console.log(`  Page shell: nav + footer extracted`);
+console.log(`  Design contract: extracted via cheerio`);
 console.log(`  Model: GEMINI_3_1_PRO (Deep Think)`);

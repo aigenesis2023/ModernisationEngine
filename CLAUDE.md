@@ -42,11 +42,18 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          └─→ images/*.jpg (stock photos or AI-generated)
                     │
                     ▼
+         extract-contract.js (cheerio — design contract extraction)
+         ├─ Parses Stitch patterns with cheerio (proper HTML parser, not regex)
+         ├─ Extracts all visual properties per component type into JSON
+         ├─ Runs automatically at end of generate-course-html.js
+         └─→ design-contract.json (stable interface for build)
+                    │
+                    ▼
          build-course.js (content assembly — design/layout separation)
          ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
-         ├─ Extracts VISUAL classes from Stitch patterns (shadows, hovers, gradients)
+         ├─ Reads visual classes from design-contract.json (NEVER raw HTML)
          ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
-         ├─ For each component: our HTML structure + Stitch's visual styling
+         ├─ For each component: our HTML structure + contract's visual styling
          ├─ 100% content fidelity — every word from the SCORM
          ├─ Embeds images as base64
          ├─ Inlines hydrate.js for interactivity
@@ -56,7 +63,7 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
 ### Core Principles
 
 **1. Stitch designs the visual system. We control layout and content.**
-Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types). It designs the complete visual system — colours, fonts, shadows, gradients, hover effects. We extract **visual-only** classes from patterns (shadows, hovers, transitions, brand-specific card backgrounds) and apply them to our hardcoded layout structure. We build our own `<head>` from `design-tokens.json` — never copy Stitch's raw CSS. Different brand URL → different Stitch kit → different visual character, identical layout.
+Stitch receives a brand brief (DESIGN.md format) and a representative course (all 25 component types). It designs the complete visual system — colours, fonts, shadows, gradients, hover effects. `extract-contract.js` uses **cheerio** (proper HTML parser) to extract visual properties from Stitch patterns into `design-contract.json` — one extraction step, one stable interface. `build-course.js` reads **only** the contract JSON, never raw HTML patterns. We build our own `<head>` from `design-tokens.json` — never copy Stitch's raw CSS. Different brand URL → different Stitch kit → different visual character, identical layout.
 
 **2. Content fidelity is non-negotiable.**
 All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. Stitch never sees the real SCORM content — it designs the look, we guarantee the content. Enterprise clients require 100% accuracy.
@@ -111,8 +118,9 @@ v5/                                    ← ALL ACTIVE CODE
     scrape-brand.js                    ← Brand URL → screenshot + natural language description
     design-course.js                   ← AI layout engine (manual + API + load modes)
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
+    extract-contract.js                ← Cheerio: Stitch patterns → design-contract.json (auto-runs from 4a)
     generate-images.js                 ← Design-informed image generation (runs after Stitch)
-    build-course.js                    ← Pattern fill: Stitch patterns + real content → course.html
+    build-course.js                    ← Contract fill: design-contract.json + real content → course.html
     review-course.js                   ← Playwright screenshot capture (Phase 6 visual review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
   output/
@@ -125,6 +133,7 @@ v5/                                    ← ALL ACTIVE CODE
     stitch-course-meta.json            ← Stitch API response metadata
     stitch-course-screenshot.png       ← Stitch's design preview
     design-tokens.json                 ← Extracted design system tokens
+    design-contract.json               ← Visual contract: cheerio-extracted from patterns (build reads ONLY this)
     component-patterns/                ← Extracted HTML pattern per component type (25)
     images/                            ← HF-generated images
     course.html                        ← Final single-file output
@@ -206,6 +215,7 @@ We extract:
 - **Page shell** — navigation, section wrappers, footer
 - **Component patterns** — one HTML fragment per component type (all 25)
 - **Design tokens** — Tailwind config, colour system, fonts, spacing
+- **Design contract** — `extract-contract.js` (cheerio) parses all patterns into `design-contract.json`. This is the stable interface that `build-course.js` reads. It never touches raw HTML.
 
 This is a **reusable design asset**. The authoring layer can re-render courses with different content or swapped components without re-calling Stitch.
 
@@ -241,14 +251,14 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
 
 1. **`generateHead()`** builds the entire `<head>` from `design-tokens.json` — Tailwind config (colours + fonts), Google Fonts, Material Symbols, and our own CSS definitions for `glass-card`, `text-gradient`, `btn-primary`, `glass-nav`. **Never copies Stitch's raw `<head>`.**
 
-2. **Visual extraction utilities** (`extractVisuals`, `getClasses`, `visualOnly`, `bgOnly`, `mc`) parse Stitch patterns and extract **visual-only** classes: shadows, hovers, transitions, gradients, ring effects, border colours, brand-specific card backgrounds.
+2. **`design-contract.json`** is the single interface between Stitch's design and our build. It's produced by `extract-contract.js` (cheerio-based, runs automatically after Stitch). Contains per-component visual properties (shadows, backgrounds, borders, hover effects, button styles). `build-course.js` reads ONLY this JSON — never Stitch's raw HTML patterns.
 
 3. **Fill functions** own the HTML structure and layout classes. For each component:
    - Layout classes are hardcoded (grids, containment, spacing, typography scale)
-   - Visual classes come from Stitch patterns (shadows, hovers, gradients, brand colours)
+   - Visual classes come from `design-contract.json` (shadows, hovers, gradients, brand colours)
    - Content comes from course-layout.json (100% SCORM fidelity)
 
-4. **10 enhanced fill functions** extract visual richness: hero (gradient buttons, coloured shadows), pullquote (giant decorative quote watermark), timeline (numbered circles with glow rings), branching (hover borders, arrow animation), graphic-text (image glow wrapper), mcq (card shadow, choice hover, radio icons), flashcard (bold primary front vs glass-card), bento (per-card brand colour variety), checklist (label hover effects), stat-callout (per-stat alternating colours).
+4. **If Stitch changes its HTML output**, fix `extract-contract.js` (one file). The 25 fill functions in `build-course.js` don't change.
 
 **Result:** Different brand URL → different Stitch kit → different visual character, identical layout. Verified across 9+ brands.
 
@@ -402,7 +412,7 @@ When asked to "run it" or "test with a brand URL", follow this checklist exactly
 # Clear everything EXCEPT content-bucket.json (only if same SCORM file)
 rm -rf v5/output/component-patterns/ v5/output/images/
 rm -f v5/output/brand-profile.json v5/output/brand-design.md
-rm -f v5/output/course-layout.json v5/output/design-tokens.json
+rm -f v5/output/course-layout.json v5/output/design-tokens.json v5/output/design-contract.json
 rm -f v5/output/stitch-course-raw.html v5/output/stitch-course-meta.json
 rm -f v5/output/stitch-course-screenshot.png v5/output/course.html
 ```
