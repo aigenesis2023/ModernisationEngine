@@ -123,6 +123,13 @@ function generateHead(tokens, courseTitle) {
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 
+<!-- GSAP + ScrollTrigger (scroll animations) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+
+<!-- SplitType (text line reveals) -->
+<script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+
 <!-- Tailwind Config — colours + fonts from design-tokens.json -->
 <script>
     tailwind.config = {
@@ -202,10 +209,24 @@ ${colorEntries}
     .custom-scrollbar::-webkit-scrollbar-track { background: ${colors['surface-container-lowest'] || '#0e0e0e'}; }
     .custom-scrollbar::-webkit-scrollbar-thumb { background: ${colors['surface-variant'] || '#353535'}; border-radius: 10px; }
 
-    /* Layout: smooth scroll */
-    html { scroll-behavior: smooth; }
+    /* Scroll animation initial states — hidden until GSAP reveals */
+    [data-animate] { opacity: 0; }
+    [data-animate="fade-up"] { transform: translateY(80px); }
+    [data-animate="slide-in-left"] { transform: translateX(-120px); }
+    [data-animate="slide-in-right"] { transform: translateX(120px); }
+    [data-animate="scale-in"] { transform: scale(0.8); }
+    [data-animate="clip-up"] { clip-path: inset(100% 0% 0% 0%); opacity: 1; }
+    /* Hero is always visible (above fold) */
+    [data-component-type="hero"] { opacity: 1 !important; transform: none !important; }
+    [data-component-type="hero"] [data-animate] { opacity: 0; }
+    /* Reduced motion: show everything immediately */
+    @media (prefers-reduced-motion: reduce) {
+      [data-animate] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+    }
 
-    /* Layout: containment safety net */
+
+
+    /* Containment safety net */
     img, video, iframe { max-width: 100%; }
 
     /* Course gate — blurred preview until path selection is made */
@@ -280,12 +301,12 @@ function fillHero(comp) {
   const btn2Visual = btn2.visual || 'hover:bg-surface-variant transition-colors';
 
   return `<section class="${sectionClass}" data-component-type="hero">
-${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover ${imgVisuals}" src="${imgSrc}"/>` : ''}
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover ${imgVisuals}" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 ${overlayGradient}"></div>
 <div class="relative z-10 text-center max-w-6xl mx-auto px-8">
-<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8">${title}</h1>
-<p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12">${bodyText}</p>
-<div class="flex gap-4 justify-center flex-wrap">
+<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
+<div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
 <button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}">Begin Course</button>
 <button class="px-8 py-4 ${btn2Bg} ${btn2Round} font-bold ${btn2Visual}">Explore Modules</button>
 </div>
@@ -298,7 +319,7 @@ function fillText(comp) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly(c.section || 'py-24');
 
-  return `<section class="${secClass}" data-component-type="text">
+  return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
@@ -332,8 +353,8 @@ ${item.body || ''}
 
   return `<section class="${secClass}" data-component-type="accordion">
 <div class="max-w-6xl mx-auto px-8">
-<h3 class="font-headline text-2xl font-bold mb-12 text-center">${title}</h3>
-<div class="space-y-4">
+<h3 class="font-headline text-2xl font-bold mb-12 text-center" data-animate="fade-up">${title}</h3>
+<div class="space-y-4" data-animate-stagger="fade-up">
 ${newDetails}
 </div>
 </div>
@@ -395,7 +416,7 @@ ${hasCheckIcon ? '<span class="material-symbols-outlined opacity-0 group-hover:o
     ? ` data-draw-count="${dm.drawCount}" data-draw-pool="${dm.poolSize}"${dm.shuffle ? ' data-draw-shuffle' : ''}`
     : '';
 
-  return `<section class="${secClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
+  return `<section class="${secClass}" data-component-type="mcq" data-animate="fade-up" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
 <div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
 <span class="${labelClass}">${title}</span>
@@ -421,7 +442,7 @@ function fillGraphicText(comp, index) {
   const glowClass = c.glowClass || '';
   const imgShadow = c.imgShadow || '';
 
-  const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}">
+  const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
 <div class="relative group">
 ${glowClass ? `<div class="${glowClass}"></div>` : ''}
 <div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow}">
@@ -430,7 +451,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" 
 </div>
 </div>`;
 
-  const textDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center">
+  const textDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-6 leading-tight">${title}</h2>
 <div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
@@ -490,7 +511,7 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opaci
   return `<section class="${secClass}" data-component-type="bento">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto" data-animate-stagger="fade-up">
 ${newCards}
 </div>
 </div>
@@ -529,7 +550,7 @@ function fillDataTable(comp) {
     ).join('\n');
   }
 
-  return `<section class="${secClass}" data-component-type="data-table">
+  return `<section class="${secClass}" data-component-type="data-table" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 ${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
 <div class="overflow-hidden rounded-xl border border-on-surface/5 glass">
@@ -563,7 +584,7 @@ function fillTextInput(comp) {
 </div>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="textinput">
+  return `<section class="${secClass}" data-component-type="textinput" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
@@ -602,7 +623,7 @@ function fillPathSelector(comp) {
 <h3 class="font-headline text-2xl font-bold mb-4 text-center">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-4 text-center">${bodyText}</p>` : ''}
 <p class="text-sm text-on-surface-variant mb-10 text-center italic">${instruction}</p>
-<div class="grid grid-cols-1 md:grid-cols-${Math.min(items.length, 3)} gap-6">
+<div class="grid grid-cols-1 md:grid-cols-${Math.min(items.length, 3)} gap-6" data-animate-stagger="scale-in">
 ${newButtons}
 </div>
 </div>
@@ -636,7 +657,7 @@ ${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-o
 <div class="max-w-6xl mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-6 text-center">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-10 text-center italic">${bodyText}</p>` : ''}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-animate-stagger="fade-up">
 ${newButtons}
 </div>
 </div>
@@ -671,7 +692,7 @@ ${!isLast ? `<div class="${connectorClass}"></div>` : ''}
     return `<section class="${secClass}" data-component-type="timeline">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="space-y-0">
+<div class="space-y-0" data-animate-stagger="fade-up">
 ${newSteps}
 </div>
 </div>
@@ -696,7 +717,7 @@ ${newSteps}
   return `<section class="${secClass}" data-component-type="timeline">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-20 text-center">${title}</h2>
-<div class="relative border-l-2 border-outline-variant ml-4 space-y-16">
+<div class="relative border-l-2 border-outline-variant ml-4 space-y-16" data-animate-stagger="fade-up">
 ${newSteps}
 </div>
 </div>
@@ -725,7 +746,7 @@ function fillComparison(comp) {
     return `<tr class="hover:bg-on-surface/5 transition-colors"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="comparison">
+  return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)}</p>` : ''}
@@ -760,7 +781,7 @@ function fillStatCallout(comp) {
     const numColor = style.numColor || 'text-gradient';
     const numWeight = style.numWeight || 'font-extrabold';
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
-<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2">${esc(item.stat || item.value || '')}</div>
+<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(item.stat || item.value || '')}</div>
 ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
 <p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm uppercase tracking-widest font-bold'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
@@ -768,7 +789,7 @@ ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.
 
   return `<section class="${secClass}" data-component-type="stat-callout">
 <div class="max-w-6xl mx-auto px-8">
-<div class="grid ${gridCols} gap-8 text-center">
+<div class="grid ${gridCols} gap-8 text-center" data-animate-stagger="fade-up">
 ${newStats}
 </div>
 </div>
@@ -788,8 +809,8 @@ function fillPullquote(comp) {
     return `<section class="${secClass} relative" data-component-type="pullquote">
 ${c.decorativeSpanHtml}
 <div class="max-w-6xl mx-auto px-8 text-center relative z-10">
-<blockquote class="${mc('font-headline', bqStyle)}">${quote}</blockquote>
-${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}">— ${attribution}</cite>` : ''}
+<blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
+${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}</cite>` : ''}
 </div>
 </section>`;
   }
@@ -797,10 +818,10 @@ ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}">— ${a
   // Fallback: border-l accent bar layout
   return `<section class="${secClass}" data-component-type="pullquote">
 <div class="max-w-6xl mx-auto px-8">
-<div class="relative pl-8 border-l-4 border-primary">
+<div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
 <span class="material-symbols-outlined text-primary/30 text-6xl absolute -top-4 -left-2">format_quote</span>
-<blockquote class="${mc('font-headline', bqStyle)}">${quote}</blockquote>
-${attribution ? `<p class="mt-4 text-on-surface-variant">— ${attribution}</p>` : ''}
+<blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
+${attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}</p>` : ''}
 </div>
 </div>
 </section>`;
@@ -827,9 +848,9 @@ function fillChecklist(comp) {
 
   return `<section class="${secClass}" data-component-type="checklist">
 <div class="max-w-6xl mx-auto px-8">
-<div class="${cardClass}" data-checklist>
+<div class="${cardClass}" data-checklist data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
-<div class="space-y-2">
+<div class="space-y-2" data-animate-stagger="fade-up">
 ${newLabels}
 </div>
 <div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / ${items.length} complete</div>
@@ -859,7 +880,7 @@ function fillTabs(comp) {
 </div>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="tabs">
+  return `<section class="${secClass}" data-component-type="tabs" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
 <div data-tabs>
@@ -910,7 +931,7 @@ function fillFlashcard(comp) {
   return `<section class="${secClass}" data-component-type="flashcard">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-8" data-animate-stagger="scale-in">
 ${newCards}
 </div>
 </div>
@@ -934,7 +955,7 @@ function fillNarrative(comp) {
 </div>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="narrative" data-carousel>
+  return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-6 md:p-12 relative">
@@ -970,7 +991,7 @@ function fillKeyTerm(comp) {
   return `<section class="${secClass}" data-component-type="key-term">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 ${cols === 3 ? 'md:grid-cols-3' : ''} gap-10">
+<div class="grid grid-cols-1 sm:grid-cols-2 ${cols === 3 ? 'md:grid-cols-3' : ''} gap-10" data-animate-stagger="fade-up">
 ${newCards}
 </div>
 </div>
@@ -987,9 +1008,9 @@ function fillFullBleed(comp) {
   const alignClass = pos === 'left' ? 'text-left items-start' : pos === 'right' ? 'text-right items-end' : 'text-center items-center';
 
   return `<section class="${sectionClass}" data-component-type="full-bleed">
-${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : ''}
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/70 to-surface-dim/30"></div>
-<div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col ${alignClass}">
+<div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col ${alignClass}" data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-4">${title}</h2>
 ${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
 </div>
@@ -1006,7 +1027,7 @@ function fillGraphic(comp) {
   return `<section class="${secClass}" data-component-type="graphic">
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
-<div class="rounded-2xl overflow-hidden">
+<div class="rounded-2xl overflow-hidden" data-animate="clip-up">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto max-h-[60vh] object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container rounded-2xl"></div>'}
 </div>
 ${body ? `<div class="mt-4 text-on-surface-variant">${body}</div>` : ''}
@@ -1045,7 +1066,7 @@ ${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${st
   return `<section class="${secClass}" data-component-type="process-flow">
 <div class="max-w-6xl mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="flex ${flexDir} items-stretch gap-6">
+<div class="flex ${flexDir} items-stretch gap-6" data-animate-stagger="fade-up">
 ${withArrows}
 </div>
 </div>
@@ -1057,7 +1078,7 @@ function fillMedia(comp) {
   const secClass = sectionOnly((DC.media || {}).section || 'py-24');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
 
-  return `<section class="${secClass}" data-component-type="media">
+  return `<section class="${secClass}" data-component-type="media" data-animate="clip-up">
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
 <div class="relative bg-surface-container rounded-3xl overflow-hidden aspect-video flex items-center justify-center">
@@ -1071,7 +1092,7 @@ function fillVideoTranscript(comp) {
   const title = esc(comp.displayTitle || 'Transcript');
   const secClass = sectionOnly((DC['video-transcript'] || {}).section || 'py-24');
 
-  return `<section class="${secClass}" data-component-type="video-transcript">
+  return `<section class="${secClass}" data-component-type="video-transcript" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
 <div class="bg-surface-container rounded-3xl overflow-hidden aspect-video flex items-center justify-center mb-6">
 <span class="material-symbols-outlined text-6xl text-on-surface-variant">play_circle</span>
@@ -1103,7 +1124,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSr
   return `<section class="${secClass}" data-component-type="image-gallery">
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
-<div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-6" data-animate-stagger="scale-in">
 ${images}
 </div>
 </div>
@@ -1126,7 +1147,7 @@ function fillLabeledImage(comp) {
   return `<section class="${secClass}" data-component-type="labeled-image">
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
-<div class="relative bg-surface-container rounded-3xl overflow-hidden">
+<div class="relative bg-surface-container rounded-3xl overflow-hidden" data-animate="clip-up">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container"></div>'}
 ${markerHtml}
 </div>

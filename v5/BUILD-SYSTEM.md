@@ -178,6 +178,43 @@ When question bank draws have `poolSize > drawCount`:
 - **hydrate.js** groups MCQs by nearest section/showIf wrapper, shuffles if flagged, hides extras via `display: none`
 - Runs at init time before quiz handlers, so hidden quizzes don't interfere with interaction
 
+### Scroll Animations (IMPLEMENTED)
+
+GSAP ScrollTrigger + SplitType for premium scroll-triggered animations. ~50KB from CDN. NO Lenis or smooth scroll overrides (user rejected as unresponsive — native scroll only).
+
+**CDNs added to `generateHead()`:**
+- `gsap@3.12.7/dist/gsap.min.js` + `ScrollTrigger.min.js`
+- `split-type@0.3.4/umd/index.min.js`
+
+**Data attributes added by `build-course.js` fill functions:**
+- `data-animate="fade-up|slide-in-left|slide-in-right|scale-in|clip-up"` — per-element animation type
+- `data-animate-stagger="fade-up|scale-in"` — on containers; children animate with stagger delay
+- `data-parallax` — scroll-linked parallax (hero bg, full-bleed images)
+- `data-text-reveal` — SplitType line-by-line text reveal (hero title, pullquotes)
+- `data-counter` — stat number count-up animation
+- `data-accent-bar` — pullquote border-left grow animation
+
+**Per-component animation map:**
+| Component | Animation |
+|---|---|
+| hero | Title: text-reveal. BG: parallax. Subtitle/CTA: fade-up with staggered delay |
+| text | fade-up |
+| graphic-text | Image: slide-in from image side. Text: fade-up |
+| graphic, media, labeled-image | clip-up (clip-path reveal) |
+| bento, key-term, checklist, branching | Stagger fade-up on children |
+| flashcard, path-selector, image-gallery | Stagger scale-in on children |
+| accordion, timeline, process-flow | Stagger fade-up on children |
+| stat-callout | Stagger fade-up + counter animation on numbers |
+| pullquote | text-reveal + accent-bar grow |
+| comparison, data-table, textinput, mcq, tabs, narrative, video-transcript | fade-up |
+| full-bleed | BG: parallax. Text overlay: fade-up |
+
+**CSS initial states** hide animated elements (`opacity: 0` + transform). GSAP reveals on scroll trigger (`top 85%`, `once: true`). Hero elements animate immediately on page load (above fold).
+
+**Accessibility:** `@media (prefers-reduced-motion: reduce)` overrides all initial states to visible. If GSAP fails to load from CDN, fallback shows all elements immediately.
+
+**Deterministic:** Component type → animation recipe. No AI/LLM in the loop.
+
 ---
 
 ## Image Embedding
