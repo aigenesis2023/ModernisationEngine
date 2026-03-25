@@ -71,17 +71,17 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary — semanti
 
 This script is the bridge between "content extraction" and "course rendering". It operates in three modes:
 
-**Mode 1 — Manual (Claude Code / development):**
+**Mode 1 — Manual (default, no API key):**
 ```bash
-node v5/scripts/design-course.js --manual
+node v5/scripts/design-course.js
 ```
-Claude Code (or any LLM) acts as the layout engine — reads the content bucket and designs the course structure.
+Claude Code (or any LLM) acts as the layout engine — reads the content bucket and designs the course structure. No `--manual` flag needed — the script detects there's no API key and goes straight to manual mode.
 
-**Mode 2 — API (production):**
+**Mode 2 — API (when ANTHROPIC_API_KEY is set):**
 ```bash
-ANTHROPIC_API_KEY=sk-... node v5/scripts/design-course.js
+node v5/scripts/design-course.js
 ```
-Calls Claude API directly. Same prompt, same output.
+Calls Claude API directly. Same prompt, same output. Switches automatically when the key exists.
 
 **Mode 3 — Load (replay):**
 ```bash
@@ -421,9 +421,9 @@ Script reads URL from `brand/url.txt`, visits with Playwright, takes screenshot.
 
 ### Phase 3 — Layout engine
 ```bash
-node v5/scripts/design-course.js --manual
+node v5/scripts/design-course.js
 ```
-**Claude Code acts as the layout engine.** Read content-bucket.json + layout-engine.md, produce course-layout.json. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added to `.env`, this step runs automatically without `--manual`.
+**Claude Code acts as the layout engine.** Read content-bucket.json + layout-engine.md, produce course-layout.json. This is real work — do not skip it. When `ANTHROPIC_API_KEY` is added to `.env`, this step runs automatically via the API.
 
 ### Phase 4a — Stitch component kit
 ```bash
@@ -435,7 +435,7 @@ Must produce 25/25 patterns (retry + fallback logic handles Stitch truncation).
 ```bash
 node v5/scripts/generate-images.js
 ```
-Uses Pexels stock photos by default (free, fast). Falls back to Gemini AI → HuggingFace AI → SVG placeholders. Always run this step — the fallback chain guarantees 100% asset coverage.
+Uses Pexels stock photos by default (free, fast). Falls back to Gemini AI → HuggingFace AI → SVG placeholders. Image mood/treatment is read from `brand-design.md`. Always run this step — the fallback chain guarantees 100% asset coverage.
 
 ### Phase 5 — Build
 ```bash
@@ -452,7 +452,7 @@ Open `.env` directly in VS Code to set your keys — **never paste keys in the c
 - `PEXELS_API_KEY`: Get from pexels.com/api → free, instant, 200 req/hr (recommended for images)
 - `GEMINI_API_KEY`: (Optional) For AI image generation (requires paid Google plan for image models)
 - `HF_TOKEN`: (Optional) Get from huggingface.co → Settings → Access Tokens
-- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 2 brand description + Phase 3 layout engine both run automatically without `--manual`
+- `ANTHROPIC_API_KEY`: (Optional) When set, Phase 2 brand description + Phase 3 layout engine both switch to API mode automatically
 
 ---
 
