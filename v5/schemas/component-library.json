@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Component Library",
-  "description": "Complete reference for all 25 components available to the AI layout engine. Each entry defines the component type string, required/optional props, ideal use cases, and a valid JSON example. The layout engine MUST only use components defined here.",
+  "description": "Complete reference for all 26 components available to the AI layout engine. Each entry defines the component type string, required/optional props, ideal use cases, and a valid JSON example. The layout engine MUST only use components defined here.",
   "version": "2.0.0",
 
   "components": [
@@ -803,6 +803,38 @@
         },
         "transcript": "<p><strong>Interviewer:</strong> Can you explain the safety systems built into modern EV batteries?</p><p><strong>Dr. Chen:</strong> Absolutely. Modern battery packs have multiple layers of protection...</p>"
       }
+    },
+
+    {
+      "type": "path-selector",
+      "component": "PathSelector",
+      "category": "structural",
+      "status": "built",
+      "description": "Persistent course path selector. Learners choose their role/difficulty/audience, and subsequent sections show/hide based on the selection. Uses the state store in hydrate.js.",
+      "when_to_use": "When content-bucket.json contains pathGroups. Place immediately after the hero (or after a brief introduction). The selector sets a variable in the state store that controls which sections are visible via data-show-if attributes.",
+      "when_not_to_use": "Never use for educational branching scenarios (use branching component). Never use more than once per pathGroup. Only use when the SCORM extraction detected a path-selection pattern.",
+      "props": {
+        "required": {
+          "displayTitle": "string — Heading (e.g. 'Choose Your Learning Path')",
+          "_items": "array — One item per path option: { title: string, body: string, variable: string }"
+        },
+        "optional": {
+          "body": "string (HTML) — Intro text above the selector cards",
+          "instruction": "string — Helper text",
+          "pathGroup": "string — Name of the path group from content-bucket.json"
+        }
+      },
+      "example": {
+        "_component": "path-selector",
+        "displayTitle": "Choose Your Learning Path",
+        "body": "<p>Select your role to see content tailored to your responsibilities.</p>",
+        "pathGroup": "group",
+        "_items": [
+          { "title": "Non-Technical", "body": "Site logistics, car parking, valeting.", "variable": "Group1NonTechnical" },
+          { "title": "Semi-Technical", "body": "Service advisor, customer liaison.", "variable": "Group2SemiTechnical" },
+          { "title": "Technical", "body": "Workshop technician, mechanic.", "variable": "Group3Technical" }
+        ]
+      }
     }
   ],
 
@@ -817,7 +849,7 @@
   },
 
   "component_categories": {
-    "structural": ["hero"],
+    "structural": ["hero", "path-selector"],
     "content": ["text", "graphic-text", "bento", "data-table", "timeline", "comparison", "key-term", "process-flow"],
     "visual": ["graphic", "media", "stat-callout", "pullquote", "labeled-image", "image-gallery", "full-bleed", "video-transcript"],
     "interactive": ["accordion", "narrative", "textinput", "branching", "checklist", "tabs", "flashcard"],

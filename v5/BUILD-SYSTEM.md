@@ -130,15 +130,16 @@ Vanilla JS IIFE injected into the final HTML. Uses ES5 `var` declarations for ma
 - **Scroll progress bar**: Fixed bar at top showing read percentage
 - **Smooth scroll**: Anchor link navigation for nav links
 
-### Future: State Store for Conditional Content
+### State Store for Conditional Content (IMPLEMENTED)
 
-When logic extraction is implemented (see `LOGIC-EXTRACTION.md`), hydrate.js will gain a minimal state store for conditional rendering:
-- A `{ variable: value }` map for path/difficulty selection
-- `data-show-if` attribute handling on sections
-- Path-selector component that sets variables
-- Simple show/hide based on current state
+hydrate.js includes a minimal state store for conditional rendering:
+- A `var state = {}` map initialized from `window.__PATH_GROUPS__` (injected by build-course.js from content-bucket.json)
+- `data-show-if` attribute handling: parses `"VarA=true|VarB=true"` conditions with OR logic
+- `[data-path-selector]` click handler: sets the selected variable to true, others in the group to false, calls `applyState()`
+- `applyState()` shows/hides all `[data-show-if]` elements based on current state
+- `sessionStorage` persistence so path selection survives page reload
 
-This is NOT a Storyline trigger engine — it's a conditional renderer with ~20 lines of JS.
+This is NOT a Storyline trigger engine — it's a conditional renderer with ~80 lines of vanilla JS.
 
 ---
 

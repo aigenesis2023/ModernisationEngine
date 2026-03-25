@@ -538,6 +538,39 @@ ${newInputs}
 </section>`;
 }
 
+function fillPathSelector(comp) {
+  const items = comp._items || [];
+  if (items.length === 0) return '';
+  const title = esc(comp.displayTitle || 'Choose Your Learning Path');
+  const bodyText = stripTags(comp.body || '');
+  const instruction = esc(comp.instruction || 'Select your role below.');
+  const c = DC['path-selector'] || DC.branching || {};
+  const secClass = sectionOnly((c).section || 'py-32');
+
+  const btn = c.button || {};
+  const btnVisuals = btn.visual || 'hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30';
+  const btnBg = btn.bg || 'bg-surface-variant/30';
+  const btnRound = btn.rounded || 'rounded-2xl';
+
+  const newButtons = items.map(item =>
+    `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} transition-all duration-300" data-path-option data-path-variable="${esc(item.variable || '')}">
+<div class="font-bold text-lg mb-2">${esc(item.title || '')}</div>
+<div class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</div>
+</button>`
+  ).join('\n');
+
+  return `<section class="${secClass}" data-component-type="path-selector" data-path-selector>
+<div class="max-w-6xl mx-auto px-8">
+<h3 class="font-headline text-2xl font-bold mb-4 text-center">${title}</h3>
+${bodyText ? `<p class="text-lg text-on-surface-variant mb-4 text-center">${bodyText}</p>` : ''}
+<p class="text-sm text-on-surface-variant mb-10 text-center italic">${instruction}</p>
+<div class="grid grid-cols-1 md:grid-cols-${Math.min(items.length, 3)} gap-6">
+${newButtons}
+</div>
+</div>
+</section>`;
+}
+
 function fillBranching(comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
@@ -1075,6 +1108,7 @@ function fillComponent(comp, index) {
     case 'bento':           return fillBento(comp);
     case 'data-table':      return fillDataTable(comp);
     case 'textinput':       return fillTextInput(comp);
+    case 'path-selector':   return fillPathSelector(comp);
     case 'branching':       return fillBranching(comp);
     case 'timeline':        return fillTimeline(comp);
     case 'comparison':      return fillComparison(comp);
@@ -1205,8 +1239,16 @@ function build() {
     const componentHtmls = [];
     components.forEach((comp, compIndex) => {
       const type = (comp.type || 'text').toLowerCase();
-      const filled = fillComponent(comp, compIndex);
+      let filled = fillComponent(comp, compIndex);
       if (filled) {
+        // Wrap with data-show-if if the component has its OWN showIf condition
+        // (Section-level showIf is handled separately — wraps the entire section including title bar)
+        if (comp.showIf && Object.keys(comp.showIf).length > 0) {
+          const condition = Object.entries(comp.showIf)
+            .map(([k, v]) => `${k}=${v}`)
+            .join('|');
+          filled = `<div data-show-if="${esc(condition)}" style="display:none">\n${filled}\n</div>`;
+        }
         componentHtmls.push(filled);
         filledCount++;
       } else {
@@ -1228,8 +1270,12 @@ function build() {
         : '';
 
       const wrapped = componentHtmls.map((h, i) => {
-        if (h.trim().startsWith('<section')) {
+        if (h.trim().startsWith('<section') || h.trim().startsWith('<div data-show-if')) {
           if (i === 0 && !sectionTitle) {
+            // Add section id to the first element
+            if (h.trim().startsWith('<div data-show-if')) {
+              return h.replace(/<div data-show-if/, `<div id="${sectionId}" data-show-if`);
+            }
             return h.replace(/<section/, `<section id="${sectionId}"`);
           }
           return h;
@@ -1237,7 +1283,16 @@ function build() {
         return `<div class="py-12 max-w-6xl mx-auto px-8">\n${h}\n</div>`;
       }).join('\n\n');
 
-      sectionsHtml.push(titleBar + '\n' + wrapped);
+      // If section has showIf, wrap the entire section (title bar + components) together
+      let sectionBlock = titleBar + '\n' + wrapped;
+      if (section.showIf && Object.keys(section.showIf).length > 0) {
+        const condition = Object.entries(section.showIf)
+          .map(([k, v]) => `${k}=${v}`)
+          .join('|');
+        sectionBlock = `<div data-show-if="${esc(condition)}" style="display:none">\n${sectionBlock}\n</div>`;
+      }
+
+      sectionsHtml.push(sectionBlock);
     }
   });
 
@@ -1251,6 +1306,18 @@ function build() {
   let hydrateScript = '';
   if (fs.existsSync(HYDRATE_PATH)) {
     hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
+  }
+
+  // Build path state config from content-bucket if it exists
+  let pathStateScript = '';
+  const contentBucketPath = path.resolve(ROOT, 'v5/output/content-bucket.json');
+  if (fs.existsSync(contentBucketPath)) {
+    try {
+      const cb = JSON.parse(fs.readFileSync(contentBucketPath, 'utf-8'));
+      if (cb.pathGroups && cb.pathGroups.length > 0) {
+        pathStateScript = `\nwindow.__PATH_GROUPS__ = ${JSON.stringify(cb.pathGroups).replace(/<\//g, '<\\/')};\n`;
+      }
+    } catch {}
   }
 
   // Theme + course title
@@ -1289,7 +1356,7 @@ ${footerHtml}
 </main>
 
 <script>
-${hydrateScript}
+${pathStateScript}${hydrateScript}
 </script>
 </body>
 </html>`;

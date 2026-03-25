@@ -25,6 +25,9 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          ├─ Reads content-bucket.json + brand-profile.json
          ├─ AI structures content, picks best components
          ├─ Maps logic patterns to modern interactive components
+         ├─ Tags path-specific content with showIf conditions
+         ├─ Creates path-selector from pathGroups
+         ├─ Maps question bank draws to MCQ components with drawMetadata
          └─→ course-layout.json (all content + component types + conditions)
                     │
                     ▼
@@ -48,7 +51,10 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
          ├─ Reads visual classes from design-contract.json (NEVER raw HTML)
          ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
-         ├─ Inlines hydrate.js for interactivity
+         ├─ Wraps showIf components/sections with data-show-if attributes
+         ├─ Emits path-selector with data-path-selector/data-path-variable
+         ├─ Injects window.__PATH_GROUPS__ state config from content-bucket
+         ├─ Inlines hydrate.js for interactivity + conditional rendering
          └─→ course.html (single self-contained file)
 ```
 
@@ -65,6 +71,9 @@ Stitch's output (component patterns + design tokens) is extracted and stored. Th
 
 **4. Speak Stitch's language.**
 We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
+
+**5. Logic flows end-to-end.**
+Path selection, conditional content, and question bank associations extracted in Phase 1 flow through to the final HTML. The layout engine tags content with `showIf` conditions. The build step wraps tagged content with `data-show-if` attributes. `hydrate.js` manages a state store — path-selector clicks toggle variables, `applyState()` shows/hides sections. See `v5/CONTENT-STRUCTURING.md` and `v5/BUILD-SYSTEM.md`.
 
 ---
 
@@ -201,11 +210,12 @@ node v5/scripts/review-course.js           # Phase 6
 
 ---
 
-## Component Library (25 types)
+## Component Library (26 types)
 
 | Type | Purpose |
 |---|---|
 | `hero` | Full-viewport opening with background image, title, CTA |
+| `path-selector` | Persistent course path/role selector with state management |
 | `text` | Prose paragraphs, introductions, explanations |
 | `graphic` | Full-width image |
 | `graphic-text` | Side-by-side text + image (alternates left/right) |

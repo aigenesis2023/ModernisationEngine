@@ -1,6 +1,6 @@
 # Content Structuring
 
-> **Status:** Skeleton — will be expanded as logic extraction is implemented.
+> **Status:** Implemented — logic-aware layout engine with path selection, showIf, and question bank mapping.
 > **Last updated:** 2026-03-25
 
 This document covers how extracted content (including logic, conditions, and variables) gets transformed by the AI layout engine into a structured course layout. This is the bridge between "what was in the SCORM" and "what the output course looks like."
@@ -77,14 +77,15 @@ The system prompt at `v5/prompts/layout-engine.md` defines the AI's role, design
 - **Image Rules:** Write prompts for every image-bearing component
 - **Brand-Aware Design:** Use brand colours in image prompts, adjust tone to brand personality
 
-### Future Enhancement: Logic-Aware Instructions
+### Logic-Aware Instructions (IMPLEMENTED)
 
-When logic extraction is implemented, `layout-engine.md` will need additional instructions:
-- How to interpret `pathGroups` and create path-selector components
-- How to tag sections with `showIf` conditions
-- How to handle shared vs path-specific content
-- How to map layer content to interactive components
-- How to structure path-specific quizzes
+`layout-engine.md` includes a "Logic-Aware Design" section that instructs the AI to:
+- Interpret `pathGroups` and create `path-selector` components (26th component type)
+- Tag path-specific sections/components with `showIf` conditions
+- Handle shared vs path-specific content (no `showIf` = visible to all)
+- Map layer content to interactive components (accordion, tabs, flashcard)
+- Structure path-specific quizzes with `drawMetadata`
+- Enforce content fidelity rules (all questions, all glossary terms, all layers)
 
 ---
 
@@ -107,13 +108,13 @@ All modes produce the same output: validated `course-layout.json`.
 - All componentId and sectionId values are unique
 - All component types are from the valid 25-type set
 
-### Future Enhancement: Logic Validation
+### Logic Validation (IMPLEMENTED)
 
-When logic extraction is implemented, validation will also check:
-- Path-selector component exists when `pathGroups` are present
-- All path-specific sections have valid `showIf` references
-- Every path has at least one section of content
-- Quiz components are assigned to the correct paths
+`validateLayout()` in `design-course.js` now also checks:
+- Path-selector component exists when `pathGroups` are present in content-bucket.json
+- All `showIf` conditions reference valid path variable names
+- Every path has at least one section or component with matching `showIf`
+- MCQ count >= question bank question count (content fidelity check)
 
 ---
 
@@ -128,8 +129,9 @@ The schema defines sections containing components. Each component has:
 - `imagePrompt` / `imagePrompts` — instructions for image generation
 - Component-specific fields: `columns`, `rows`, `_markers`, `_nodes`, `transcript`, etc.
 
-### Future: Condition Fields
+### Condition Fields (IMPLEMENTED)
 
-When logic extraction is implemented, components will gain:
-- `showIf` — condition object (`{ "variable": "value" }`) for conditional rendering
-- `pathGroup` — which path group this component belongs to (for authoring tool UI)
+Components and sections can include:
+- `showIf` — condition object (`{ "VariableName": true }`) for conditional rendering. Multiple keys = OR logic.
+- `pathGroup` — which path group this section/component belongs to (for authoring tool UI)
+- `drawMetadata` — on MCQ components: `{ drawId, shuffle, drawCount, poolSize }` for authoring layer compatibility

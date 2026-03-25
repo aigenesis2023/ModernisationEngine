@@ -308,13 +308,123 @@
       }
     });
 
+    // ── 9. PATH SELECTOR & CONDITIONAL CONTENT ─────────────────────────
+    var pathGroups = window.__PATH_GROUPS__ || [];
+    var state = {};
+
+    // Initialize state from path group defaults
+    pathGroups.forEach(function (pg) {
+      (pg.options || []).forEach(function (opt) {
+        state[opt.variable] = false;
+      });
+    });
+
+    // Restore from sessionStorage
+    try {
+      var saved = sessionStorage.getItem('__path_state__');
+      if (saved) {
+        var parsed = JSON.parse(saved);
+        for (var k in parsed) {
+          if (state.hasOwnProperty(k)) state[k] = parsed[k];
+        }
+      }
+    } catch (e) {}
+
+    function applyState() {
+      var conditionals = document.querySelectorAll('[data-show-if]');
+      conditionals.forEach(function (el) {
+        var condition = el.getAttribute('data-show-if');
+        // Parse "VarA=true|VarB=true" → OR logic
+        var parts = condition.split('|');
+        var visible = parts.some(function (part) {
+          var kv = part.split('=');
+          var varName = kv[0];
+          var val = kv[1];
+          if (val === 'true') return state[varName] === true;
+          if (val === 'false') return state[varName] === false;
+          return String(state[varName]) === val;
+        });
+        el.style.display = visible ? '' : 'none';
+      });
+      // Persist to sessionStorage
+      try { sessionStorage.setItem('__path_state__', JSON.stringify(state)); } catch (e) {}
+    }
+
+    // Path selector click handler
+    var pathSelectors = document.querySelectorAll('[data-path-selector]');
+    pathSelectors.forEach(function (selector) {
+      var options = selector.querySelectorAll('[data-path-option]');
+      options.forEach(function (option) {
+        option.style.cursor = 'pointer';
+        option.addEventListener('click', function () {
+          var variable = option.getAttribute('data-path-variable');
+          if (!variable) return;
+
+          // Find which path group this variable belongs to
+          var group = null;
+          pathGroups.forEach(function (pg) {
+            (pg.options || []).forEach(function (opt) {
+              if (opt.variable === variable) group = pg;
+            });
+          });
+
+          // Set selected to true, all others in same group to false
+          if (group) {
+            (group.options || []).forEach(function (opt) {
+              state[opt.variable] = (opt.variable === variable);
+            });
+          } else {
+            state[variable] = true;
+          }
+
+          applyState();
+          applyPathSelectorVisuals();
+        });
+      });
+    });
+
+    // Update visual state of all path-selector cards to match current state
+    function applyPathSelectorVisuals() {
+      pathSelectors.forEach(function (selector) {
+        var options = selector.querySelectorAll('[data-path-option]');
+        var anySelected = false;
+        options.forEach(function (opt) {
+          var v = opt.getAttribute('data-path-variable');
+          if (state[v]) anySelected = true;
+        });
+        // Only dim cards if a selection has been made
+        if (anySelected) {
+          options.forEach(function (opt) {
+            var v = opt.getAttribute('data-path-variable');
+            if (state[v]) {
+              opt.classList.add('border-primary', 'ring-2', 'ring-primary/50');
+              opt.style.opacity = '1';
+            } else {
+              opt.classList.remove('border-primary', 'ring-2', 'ring-primary/50');
+              opt.style.opacity = '0.5';
+            }
+          });
+        }
+      });
+    }
+
+    // If any path was previously selected, apply state on load
+    var hasSelection = false;
+    for (var key in state) { if (state[key] === true) hasSelection = true; }
+    if (hasSelection) {
+      applyState();
+      applyPathSelectorVisuals();
+    }
+
     // ── Summary log ─────────────────────────────────────────────────────
     console.log(
       'Hydration complete: ' +
       quizzes.length + ' quizzes, ' +
       tabContainers.length + ' tabs, ' +
       flashcards.length + ' flashcards, ' +
-      carousels.length + ' carousels'
+      carousels.length + ' carousels, ' +
+      pathSelectors.length + ' path-selectors, ' +
+      document.querySelectorAll('[data-show-if]').length + ' conditional sections'
     );
 
   });

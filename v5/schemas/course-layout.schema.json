@@ -67,6 +67,14 @@
           "type": "string",
           "description": "Optional one-line section description"
         },
+        "showIf": {
+          "type": "object",
+          "description": "Condition for conditional rendering of the entire section. Same format as component showIf."
+        },
+        "pathGroup": {
+          "type": "string",
+          "description": "Which path group this section belongs to (for authoring tool UI)."
+        },
         "components": {
           "type": "array",
           "description": "Ordered components within this section. 1-6 components per section.",
@@ -94,7 +102,7 @@
             "narrative", "bento", "data-table", "media", "textinput", "branching",
             "timeline", "comparison", "stat-callout", "pullquote", "key-term",
             "checklist", "tabs", "flashcard", "labeled-image", "process-flow",
-            "image-gallery", "full-bleed", "video-transcript"
+            "image-gallery", "full-bleed", "video-transcript", "path-selector"
           ]
         },
         "displayTitle": { "type": "string" },
@@ -126,6 +134,24 @@
         "rows": {
           "type": "array",
           "items": { "$ref": "#/$defs/comparisonRow" }
+        },
+        "showIf": {
+          "type": "object",
+          "description": "Condition for conditional rendering. Keys are variable names, values are the required value. Multiple keys means OR logic. Example: { \"Group2SemiTechnical\": true, \"Group3Technical\": true } means show if EITHER is true."
+        },
+        "pathGroup": {
+          "type": "string",
+          "description": "Which path group this component belongs to (for authoring tool UI). Matches a pathGroup name from content-bucket.json."
+        },
+        "drawMetadata": {
+          "type": "object",
+          "description": "Question bank draw metadata for MCQ components sourced from SCORM question banks.",
+          "properties": {
+            "drawId": { "type": "string" },
+            "shuffle": { "type": "boolean" },
+            "drawCount": { "type": "integer" },
+            "poolSize": { "type": "integer" }
+          }
         },
         "transcript": { "type": "string" },
         "attribution": { "type": "string" },
@@ -180,7 +206,9 @@
         "caption": { "type": "string" },
         "value": { "type": "string" },
         "label": { "type": "string" },
-        "suffix": { "type": "string" }
+        "suffix": { "type": "string" },
+        "variable": { "type": "string", "description": "Path variable name (used by path-selector items)" },
+        "correct": { "type": "boolean", "description": "Whether this choice is the correct answer (used by MCQ items)" }
       }
     },
 
