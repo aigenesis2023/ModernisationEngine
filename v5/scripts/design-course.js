@@ -306,19 +306,12 @@ async function main() {
     response = fs.readFileSync(filePath, 'utf-8');
     console.log(`\nLoaded response from: ${filePath} (${response.length} chars)`);
 
-  } else if (isManual) {
-    // Manual mode: user pastes response
-    response = await readManualResponse();
-
-  } else if (apiKey) {
-    // API mode: call Claude
+  } else if (apiKey && !isManual) {
+    // API mode: call Claude (skip if --manual override)
     response = await callClaudeAPI(systemPrompt, userMessage, apiKey);
 
   } else {
-    // No mode specified — default to manual
-    console.log('\nNo API key found and --manual not specified.');
-    console.log('Defaulting to manual mode.\n');
-    console.log('Tip: Set ANTHROPIC_API_KEY env var for API mode, or use --manual.\n');
+    // Manual mode: Claude Code acts as layout engine
     response = await readManualResponse();
   }
 

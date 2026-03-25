@@ -39,9 +39,6 @@ const HF_TOKEN = process.env.HF_TOKEN || '';
 const OUTPUT_DIR = path.resolve('v5/output/images');
 const LAYOUT_PATH = path.resolve('v5/output/course-layout.json');
 const BRAND_DESIGN_PATH = path.resolve('v5/output/brand-design.md');
-const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
-const TOKENS_PATH = path.resolve('v5/output/design-tokens.json');
-const STITCH_PATH = path.resolve('v5/output/stitch-course-raw.html');
 
 const DELAY_MS = 3000;
 const RETRY_DELAY_MS = 8000;
@@ -63,135 +60,6 @@ const DIMENSIONS = {
 
 function getDimensions(componentType) {
   return DIMENSIONS[componentType] || DIMENSIONS.default;
-}
-
-// ─── Design Token Analysis (V5) ──────────────────────────────────────
-// Reads from extracted design-tokens.json for cleaner, more reliable analysis
-function analyseDesignTokens(tokens) {
-  const design = {
-    colourTemperature: 'neutral',
-    lightingMood: 'balanced',
-    styleRegister: 'professional',
-    dominantTones: [],
-    isDark: tokens.isDark || false,
-  };
-
-  // Theme-based lighting
-  if (tokens.isDark) {
-    const bgColor = tokens.colors?.background || '';
-    const lum = bgColor ? perceivedLuminance(bgColor) : 0.1;
-    design.lightingMood = lum < 0.15 ? 'moody' : 'balanced';
-  } else {
-    design.lightingMood = 'bright';
-  }
-
-  // Colour temperature from primary/secondary
-  const primary = tokens.colors?.primary;
-  const secondary = tokens.colors?.secondary;
-  const tones = [];
-  if (primary) { tones.push(primary); design.colourTemperature = getColourTemperature(primary); }
-  if (secondary) {
-    tones.push(secondary);
-    const temp2 = getColourTemperature(secondary);
-    if (design.colourTemperature !== temp2 && temp2 !== 'neutral') {
-      design.colourTemperature = temp2;
-    }
-  }
-  design.dominantTones = tones;
-
-  // Style register from border radius and glass effects
-  const hasSmallRadius = tokens.borderRadius?.DEFAULT && parseFloat(tokens.borderRadius.DEFAULT) < 0.2;
-  const hasGlass = tokens.tailwindConfig && /glass|blur|backdrop/i.test(tokens.tailwindConfig);
-
-  if (hasGlass) design.styleRegister = 'creative';
-  else if (hasSmallRadius) design.styleRegister = 'editorial';
-  else design.styleRegister = 'professional';
-
-  return design;
-}
-
-// ─── Stitch Design Analysis ──────────────────────────────────────────
-// Extracts design treatment from Stitch's actual HTML output (V4 fallback)
-function analyseStitchDesign(stitchHtml) {
-  const design = {
-    colourTemperature: 'neutral',  // warm, cool, neutral
-    lightingMood: 'moody',         // moody, bright, balanced
-    styleRegister: 'professional', // professional, creative, technical, editorial
-    dominantTones: [],             // hex colours that dominate the design
-    isDark: true,
-  };
-
-  // Extract Tailwind config colours from Stitch output
-  const configMatch = stitchHtml.match(/tailwind\.config\s*=\s*(\{[\s\S]*?\})\s*<\/script>/);
-  if (!configMatch) return design;
-
-  // Extract background colour
-  const bgMatch = stitchHtml.match(/"background"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
-  if (bgMatch) {
-    const lum = perceivedLuminance(bgMatch[1]);
-    design.isDark = lum < 0.4;
-    design.lightingMood = lum < 0.15 ? 'moody' : lum < 0.4 ? 'balanced' : 'bright';
-  }
-
-  // Extract primary and secondary colours to determine temperature
-  const primaryMatch = stitchHtml.match(/"primary"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
-  const secondaryMatch = stitchHtml.match(/"secondary"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
-  const surfaceMatch = stitchHtml.match(/"surface"\s*:\s*"(#[0-9a-fA-F]{3,8})"/);
-
-  const tones = [];
-  if (primaryMatch) tones.push(primaryMatch[1]);
-  if (secondaryMatch) tones.push(secondaryMatch[1]);
-  if (surfaceMatch) tones.push(surfaceMatch[1]);
-  design.dominantTones = tones;
-
-  // Determine colour temperature from primary/secondary
-  if (primaryMatch) {
-    const temp = getColourTemperature(primaryMatch[1]);
-    if (secondaryMatch) {
-      const temp2 = getColourTemperature(secondaryMatch[1]);
-      // Average the two
-      design.colourTemperature = (temp === temp2) ? temp :
-        (temp === 'neutral' || temp2 === 'neutral') ? (temp === 'neutral' ? temp2 : temp) : 'neutral';
-    } else {
-      design.colourTemperature = temp;
-    }
-  }
-
-  // Determine style register from CSS patterns
-  const hasGlass = /glass|backdrop-filter|blur/i.test(stitchHtml);
-  const hasGradients = (stitchHtml.match(/gradient/gi) || []).length > 5;
-  const hasSharpCorners = /"borderRadius".*?"DEFAULT"\s*:\s*"0\.(0|1)/i.test(stitchHtml);
-
-  if (hasGlass && hasGradients) {
-    design.styleRegister = 'creative';
-  } else if (hasSharpCorners) {
-    design.styleRegister = 'editorial';
-  } else {
-    design.styleRegister = 'professional';
-  }
-
-  return design;
-}
-
-function getColourTemperature(hex) {
-  if (!hex || !hex.startsWith('#') || hex.length < 7) return 'neutral';
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-
-  // Warm = red/orange/yellow dominant, Cool = blue/purple dominant
-  const warmth = (r * 1.2 + g * 0.5) - (b * 1.5 + g * 0.3);
-  if (warmth > 60) return 'warm';
-  if (warmth < -60) return 'cool';
-  return 'neutral';
-}
-
-function perceivedLuminance(hex) {
-  if (!hex || !hex.startsWith('#') || hex.length < 7) return 0.5;
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
 }
 
 // ─── Extract Image Treatment from Brand Description ─────────────────
@@ -232,41 +100,6 @@ function extractTreatmentFromDescription(description) {
     parts.push('refined professional photography');
   } else if (lower.includes('creative') || lower.includes('bold') || lower.includes('dynamic') || lower.includes('vibrant')) {
     parts.push('dynamic artistic composition');
-  } else {
-    parts.push('professional photography, clean composition');
-  }
-
-  return parts.join(', ');
-}
-
-// ─── Design-Informed Prompt Enhancement ──────────────────────────────
-// Combines the content subject (from layout) with visual treatment (from Stitch)
-function buildDesignTreatment(design) {
-  const parts = [];
-
-  // Lighting mood
-  if (design.lightingMood === 'moody') {
-    parts.push('dramatic low-key lighting, deep shadows, selective highlights');
-  } else if (design.lightingMood === 'bright') {
-    parts.push('clean bright natural lighting, soft even illumination');
-  } else {
-    parts.push('balanced professional lighting');
-  }
-
-  // Colour temperature
-  if (design.colourTemperature === 'warm') {
-    parts.push('warm colour tones in highlights and ambient light');
-  } else if (design.colourTemperature === 'cool') {
-    parts.push('cool blue-toned shadows and ambient light');
-  }
-
-  // Style register
-  if (design.styleRegister === 'creative') {
-    parts.push('artistic composition, dynamic angles');
-  } else if (design.styleRegister === 'editorial') {
-    parts.push('editorial photography style, precise composition');
-  } else if (design.styleRegister === 'technical') {
-    parts.push('technical precision, clean detailed rendering');
   } else {
     parts.push('professional photography, clean composition');
   }
@@ -573,50 +406,16 @@ async function main() {
   }
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
 
-  // Determine image treatment
-  // Priority: brand-design.md (natural language) → brand-profile.json (imageTreatment field)
-  //         → design-tokens.json (legacy fallback) → stitch-course-raw.html (legacy fallback)
+  // Determine image treatment from brand description (written by Phase 2)
   let treatment;
 
   if (fs.existsSync(BRAND_DESIGN_PATH)) {
     const brandDescription = fs.readFileSync(BRAND_DESIGN_PATH, 'utf-8');
-    console.log('Using brand-design.md for image treatment:');
     treatment = extractTreatmentFromDescription(brandDescription);
-    console.log(`  Treatment: ${treatment}\n`);
-  } else if (fs.existsSync(BRAND_PATH)) {
-    try {
-      const brandProfile = JSON.parse(fs.readFileSync(BRAND_PATH, 'utf-8'));
-      if (brandProfile.imageTreatment) {
-        console.log('Using brand-profile.json imageTreatment:');
-        treatment = brandProfile.imageTreatment;
-        console.log(`  Treatment: ${treatment}\n`);
-      }
-    } catch {}
-  }
-
-  if (!treatment) {
-    // Legacy fallback: design-tokens.json or stitch-course-raw.html
-    let design;
-    if (fs.existsSync(TOKENS_PATH)) {
-      const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
-      console.log('Using design-tokens.json for image treatment (legacy fallback):');
-      design = analyseDesignTokens(tokens);
-    } else if (fs.existsSync(STITCH_PATH)) {
-      const stitchHtml = fs.readFileSync(STITCH_PATH, 'utf-8');
-      console.log('Using stitch-course-raw.html for image treatment (legacy fallback):');
-      design = analyseStitchDesign(stitchHtml);
-    } else {
-      console.log('No design source found — using default treatment.');
-      design = {
-        colourTemperature: 'neutral',
-        lightingMood: 'balanced',
-        styleRegister: 'professional',
-        dominantTones: [],
-        isDark: false,
-      };
-    }
-    treatment = buildDesignTreatment(design);
-    console.log(`  Treatment: ${treatment}\n`);
+    console.log(`Image treatment: ${treatment}\n`);
+  } else {
+    treatment = 'balanced professional lighting, clean composition';
+    console.log(`brand-design.md not found — using default treatment: ${treatment}\n`);
   }
 
   // Clear existing images — always regenerate
