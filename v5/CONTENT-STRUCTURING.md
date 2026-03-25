@@ -32,12 +32,12 @@ The layout engine sees:
 ```json
 {
   "pathGroups": [{
-    "name": "difficulty",
+    "name": "{inferred from variable names}",
     "type": "user-choice",
     "options": [
-      { "variable": "Group1NonTechnical", "label": "Non-Technical" },
-      { "variable": "Group2SemiTechnical", "label": "Semi-Technical" },
-      { "variable": "Group3Technical", "label": "Technical" }
+      { "variable": "{authorVar1}", "label": "{derived label}" },
+      { "variable": "{authorVar2}", "label": "{derived label}" },
+      { "variable": "{authorVar3}", "label": "{derived label}" }
     ]
   }]
 }
@@ -45,13 +45,13 @@ The layout engine sees:
 
 It produces:
 1. A **path-selector component** early in the course (after the hero)
-2. Sections tagged with `"showIf": { "difficulty": "technical" }`
+2. Sections tagged with `"showIf"` referencing the discovered path variable
 3. Shared sections with no `showIf` (visible to all paths)
 4. Path-specific quiz components drawing from the right question pool
 
 ### Section Gating
 
-Content blocks tagged with `Section1complete` conditions become naturally ordered sections. In a deep-scroll format, linear gating is handled by scroll order — no runtime logic needed. The layout engine can add progress markers between sections.
+Content blocks tagged with section-completion conditions become naturally ordered sections. In a deep-scroll format, linear gating is handled by scroll order — no runtime logic needed. The layout engine can add progress markers between sections.
 
 ### Layer Content (Click-to-Reveal)
 
