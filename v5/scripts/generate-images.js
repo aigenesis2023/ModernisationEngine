@@ -1,20 +1,19 @@
 #!/usr/bin/env node
 /**
- * V5 Image Generator — Stock Photos + AI Fallback
+ * V5 Image Generator — AI Generation + Stock Fallback
  *
- * Priority chain: Pexels stock (free) → Gemini AI → HuggingFace AI → SVG placeholder
+ * Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholder
  *
  * Reads course-layout.json for content subjects. Image prompts describe
- * WHAT to show — these are converted to search queries for stock photos.
- * For AI generation, brand-design.md provides photographic treatment.
+ * WHAT to show — for AI generation, brand-design.md provides photographic treatment.
+ * For stock photos, prompts are converted to search queries.
  *
  * Usage:
  *   node v5/scripts/generate-images.js
  *
  * API Keys (in .env):
- *   PEXELS_API_KEY  — Free stock photos (recommended default, 200 req/hr)
- *   GEMINI_API_KEY  — AI image generation (requires paid plan)
- *   HF_TOKEN        — HuggingFace FLUX (may have credit limits)
+ *   SILICONFLOW_API_KEY — AI image generation via FLUX.1-schnell (default)
+ *   PEXELS_API_KEY      — Free stock photos fallback (200 req/hr)
  *
  * Output: v5/output/images/*.jpg + updated course-layout.json
  */
@@ -24,17 +23,13 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Config ──────────────────────────────────────────────────────────
-// Priority: Pexels stock (default, free) → Gemini AI → HuggingFace AI → SVG placeholder
+// Priority: SiliconFlow AI (default) → Pexels stock → SVG placeholder
+const SILICONFLOW_API_KEY = process.env.SILICONFLOW_API_KEY || '';
+const SILICONFLOW_MODEL = 'black-forest-labs/FLUX.1-schnell';
+const SILICONFLOW_API_URL = 'https://api.siliconflow.com/v1/images/generations';
+
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
 const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
-
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = 'gemini-2.5-flash-image';
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
-const HF_MODEL = 'black-forest-labs/FLUX.1-schnell';
-const HF_API_URL = `https://router.huggingface.co/hf-inference/models/${HF_MODEL}`;
-const HF_TOKEN = process.env.HF_TOKEN || '';
 
 const OUTPUT_DIR = path.resolve('v5/output/images');
 const LAYOUT_PATH = path.resolve('v5/output/course-layout.json');
@@ -198,32 +193,34 @@ async function fetchStockPhoto(prompt, dimensions, outputFilename) {
   return null;
 }
 
-// ─── Image generation via Gemini ─────────────────────────────────────
-async function generateImageGemini(prompt, dimensions, outputFilename) {
-  const outputPath = path.join(OUTPUT_DIR, outputFilename);
-  const enhancedPrompt = `Generate a photographic image: ${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
+// ─── Image generation via SiliconFlow (FLUX.1-schnell) ───────────────
+async function generateImageSiliconFlow(prompt, dimensions, outputFilename) {
+  const { width, height } = dimensions;
+  const enhancedPrompt = `${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
+
+  // SiliconFlow accepts specific image sizes — snap to nearest valid size
+  const imageSize = `${width}x${height}`;
 
   for (let attempt = 1; attempt <= 3; attempt++) {
     try {
-      console.log(`  Generating via Gemini: ${outputFilename} (attempt ${attempt})...`);
+      console.log(`  Generating via SiliconFlow: ${outputFilename} (attempt ${attempt})...`);
 
-      const resp = await fetch(`${GEMINI_API_URL}?key=${GEMINI_API_KEY}`, {
+      const resp = await fetch(SILICONFLOW_API_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${SILICONFLOW_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          contents: [{ parts: [{ text: enhancedPrompt }] }],
-          generationConfig: {
-            responseModalities: ['TEXT', 'IMAGE'],
-          },
+          model: SILICONFLOW_MODEL,
+          prompt: enhancedPrompt,
+          image_size: imageSize,
+          num_inference_steps: 4,
         }),
         signal: AbortSignal.timeout(60000),
       });
 
       if (resp.status === 429) {
-        const errBody = await resp.text().catch(() => '');
-        if (errBody.includes('quota') && errBody.includes('limit: 0')) {
-          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
-        }
         console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
         await sleep(RETRY_DELAY_MS);
         continue;
@@ -231,32 +228,39 @@ async function generateImageGemini(prompt, dimensions, outputFilename) {
 
       if (!resp.ok) {
         const errText = await resp.text().catch(() => '');
-        if (errText.includes('paid plan') || errText.includes('quota') && errText.includes('limit: 0')) {
-          throw new Error('Gemini image generation requires a paid plan. Falling back to placeholders.');
-        }
         throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 300)}`);
       }
 
       const data = await resp.json();
 
-      // Extract image from response — Gemini returns inline_data with base64
-      const parts = data.candidates?.[0]?.content?.parts || [];
-      const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-
-      if (!imagePart) {
-        const textParts = parts.filter(p => p.text).map(p => p.text).join(' ');
-        throw new Error(`No image in response. Text: ${textParts.substring(0, 200)}`);
+      // SiliconFlow returns { images: [{ url: "..." }] } or { data: [{ url: "..." }] }
+      const images = data.images || data.data || [];
+      if (images.length === 0) {
+        throw new Error('No images in response');
       }
 
-      const buffer = Buffer.from(imagePart.inlineData.data, 'base64');
+      const imageData = images[0];
+
+      let buffer;
+      if (imageData.url) {
+        // Download from URL
+        const imgResp = await fetch(imageData.url, { signal: AbortSignal.timeout(30000) });
+        if (!imgResp.ok) throw new Error(`Image download failed: HTTP ${imgResp.status}`);
+        buffer = Buffer.from(await imgResp.arrayBuffer());
+      } else if (imageData.b64_json) {
+        // Base64 encoded
+        buffer = Buffer.from(imageData.b64_json, 'base64');
+      } else {
+        throw new Error('No url or b64_json in response');
+      }
 
       if (buffer.length < 500) {
         throw new Error(`Image too small (${buffer.length} bytes)`);
       }
 
-      // Determine extension from mime type
-      const mime = imagePart.inlineData.mimeType;
-      const ext = mime.includes('png') ? '.png' : '.jpg';
+      // Detect format from buffer magic bytes, default to jpg
+      const isPng = buffer[0] === 0x89 && buffer[1] === 0x50;
+      const ext = isPng ? '.png' : '.jpg';
       const finalFilename = outputFilename.replace(/\.\w+$/, ext);
       const finalPath = path.join(OUTPUT_DIR, finalFilename);
 
@@ -272,79 +276,13 @@ async function generateImageGemini(prompt, dimensions, outputFilename) {
     }
   }
 
-  console.log(`  FAILED via Gemini: ${outputFilename}`);
-  return null;
-}
-
-// ─── Image generation via Hugging Face (fallback) ────────────────────
-async function generateImage(prompt, dimensions, outputFilename) {
-  const { width, height } = dimensions;
-  const outputPath = path.join(OUTPUT_DIR, outputFilename);
-
-  const enhancedPrompt = `${prompt}, high resolution, sharp details, no text, no watermarks`;
-
-  for (let attempt = 1; attempt <= 3; attempt++) {
-    try {
-      console.log(`  Generating: ${outputFilename} (attempt ${attempt})...`);
-
-      const resp = await fetch(HF_API_URL, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${HF_TOKEN}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          inputs: enhancedPrompt,
-          parameters: { width, height },
-        }),
-        signal: AbortSignal.timeout(120000),
-      });
-
-      if (resp.status === 503) {
-        const body = await resp.json().catch(() => ({}));
-        const waitTime = (body.estimated_time || 20) * 1000;
-        console.log(`  Model loading, waiting ${Math.round(waitTime / 1000)}s...`);
-        await sleep(Math.min(waitTime, 30000));
-        continue;
-      }
-
-      if (resp.status === 429) {
-        console.log(`  Rate limited, waiting ${RETRY_DELAY_MS / 1000}s...`);
-        await sleep(RETRY_DELAY_MS);
-        continue;
-      }
-
-      if (!resp.ok) {
-        const errText = await resp.text().catch(() => '');
-        throw new Error(`HTTP ${resp.status}: ${errText.substring(0, 200)}`);
-      }
-
-      const buffer = Buffer.from(await resp.arrayBuffer());
-
-      if (buffer.length < 1000) {
-        const text = buffer.toString('utf-8');
-        if (text.includes('"error"')) throw new Error(`API error: ${text.substring(0, 200)}`);
-      }
-
-      fs.writeFileSync(outputPath, buffer);
-      console.log(`  Saved: ${outputFilename} (${Math.round(buffer.length / 1024)}KB)`);
-      return outputPath;
-
-    } catch (err) {
-      console.log(`  Failed (attempt ${attempt}): ${err.message}`);
-      if (attempt < 3) {
-        await sleep(RETRY_DELAY_MS);
-      }
-    }
-  }
-
-  console.log(`  FAILED: ${outputFilename} — will use placeholder`);
+  console.log(`  FAILED via SiliconFlow: ${outputFilename}`);
   return null;
 }
 
 // ─── SVG Placeholder Generator ──────────────────────────────────────
 // Creates a brand-tinted placeholder SVG that respects the component's
-// aspect ratio. Used when HuggingFace fails after all retries.
+// aspect ratio. Used when all image providers fail after retries.
 // Universal: works for any brand (reads design tokens for tinting).
 function generatePlaceholder(dimensions, outputFilename, treatment) {
   const { width, height } = dimensions;
@@ -387,17 +325,15 @@ function sleep(ms) {
 
 // ─── Main ────────────────────────────────────────────────────────────
 async function main() {
+  const useSiliconFlow = !!SILICONFLOW_API_KEY;
   const usePexels = !!PEXELS_API_KEY;
-  const useGemini = !!GEMINI_API_KEY;
-  const useHF = !!HF_TOKEN;
 
-  if (!usePexels && !useGemini && !useHF) {
-    console.error('Error: No image API key found.');
-    console.error('Set PEXELS_API_KEY (free, recommended), GEMINI_API_KEY, or HF_TOKEN in .env');
-    process.exit(1);
+  if (!useSiliconFlow && !usePexels) {
+    console.warn('Warning: No image API key found (SILICONFLOW_API_KEY or PEXELS_API_KEY).');
+    console.warn('All images will be SVG placeholders.\n');
   }
 
-  const provider = usePexels ? 'Pexels (stock)' : useGemini ? `Gemini (${GEMINI_MODEL})` : `HuggingFace (${HF_MODEL})`;
+  const provider = useSiliconFlow ? `SiliconFlow (${SILICONFLOW_MODEL})` : usePexels ? 'Pexels (stock)' : 'SVG placeholders only';
   console.log(`Image provider: ${provider}\n`);
 
   if (!fs.existsSync(LAYOUT_PATH)) {
@@ -478,17 +414,18 @@ async function main() {
     console.log(`[${i + 1}/${totalImages}] ${task.filename}`);
 
     let result = null;
-    if (usePexels) {
+    // Priority: SiliconFlow → Pexels → (SVG in pass 3)
+    if (useSiliconFlow) {
+      result = await generateImageSiliconFlow(task.prompt, task.dimensions, task.filename);
+    }
+    if (!result && usePexels) {
+      console.log(`  Falling back to Pexels...`);
       result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
-    } else if (useGemini) {
-      result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
-    } else {
-      result = await generateImage(task.prompt, task.dimensions, task.filename);
     }
 
     if (result) {
       successImages++;
-      const fn = result.filename || result.path ? result.filename : task.filename;
+      const fn = result.filename || task.filename;
       updateLayout(task, `images/${fn}`);
     } else {
       failedTasks.push(task);
@@ -496,7 +433,7 @@ async function main() {
 
     // Rate limit (skip delay on last item)
     if (i < queue.length - 1) {
-      await sleep(usePexels ? 500 : useGemini ? 1500 : DELAY_MS);
+      await sleep(useSiliconFlow ? 1500 : usePexels ? 500 : 0);
     }
   }
 
@@ -511,12 +448,12 @@ async function main() {
       console.log(`[retry ${i + 1}/${failedTasks.length}] ${task.filename}`);
 
       let result = null;
-      if (usePexels) {
+      // Retry with same priority chain
+      if (useSiliconFlow) {
+        result = await generateImageSiliconFlow(task.prompt, task.dimensions, task.filename);
+      }
+      if (!result && usePexels) {
         result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
-      } else if (useGemini) {
-        result = await generateImageGemini(task.prompt, task.dimensions, task.filename);
-      } else {
-        result = await generateImage(task.prompt, task.dimensions, task.filename);
       }
 
       if (result) {

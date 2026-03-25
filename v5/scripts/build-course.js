@@ -207,6 +207,37 @@ ${colorEntries}
 
     /* Layout: containment safety net */
     img, video, iframe { max-width: 100%; }
+
+    /* Course gate — blurred preview until path selection is made */
+    [data-course-gate].gated {
+        position: relative;
+        max-height: 60vh;
+        overflow: hidden;
+        pointer-events: none;
+        filter: blur(6px) saturate(0.5);
+        opacity: 0.3;
+        transition: filter 0.6s ease, opacity 0.6s ease, max-height 0.6s ease;
+    }
+    [data-course-gate].gated::after {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 200px;
+        background: linear-gradient(to bottom, transparent, ${bg});
+        pointer-events: none;
+    }
+    [data-course-gate]:not(.gated) {
+        transition: filter 0.6s ease, opacity 0.6s ease, max-height 0.6s ease;
+        max-height: none;
+        filter: none;
+        opacity: 1;
+    }
+
+    /* Section progress tracker */
+    [data-section-gate] .section-lock-icon { display: inline; }
+    [data-section-gate].section-complete .section-lock-icon { display: none; }
+    [data-section-gate].section-complete .section-check-icon { display: inline; }
+    [data-section-gate]:not(.section-complete) .section-check-icon { display: none; }
 </style>`;
 }
 
@@ -357,7 +388,14 @@ ${hasCheckIcon ? '<span class="material-symbols-outlined opacity-0 group-hover:o
 </${tag}>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}">
+  // Draw metadata: if this MCQ is part of a question bank draw, emit attributes
+  // for hydrate.js to handle randomized draw counts (poolSize > drawCount)
+  const dm = comp.drawMetadata || {};
+  const drawAttrs = dm.drawCount && dm.poolSize
+    ? ` data-draw-count="${dm.drawCount}" data-draw-pool="${dm.poolSize}"${dm.shuffle ? ' data-draw-shuffle' : ''}`
+    : '';
+
+  return `<section class="${secClass}" data-component-type="mcq" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
 <div class="max-w-6xl mx-auto px-8">
 <div class="${cardClass}">
 <span class="${labelClass}">${title}</span>
@@ -1237,10 +1275,20 @@ function build() {
     const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
 
     const componentHtmls = [];
+    const interactiveTypes = new Set(['mcq', 'accordion', 'tabs', 'flashcard', 'narrative', 'checklist', 'textinput']);
+    let interactiveCount = 0;
     components.forEach((comp, compIndex) => {
       const type = (comp.type || 'text').toLowerCase();
+      if (interactiveTypes.has(type)) interactiveCount++;
       let filled = fillComponent(comp, compIndex);
       if (filled) {
+        // Add required-items tracking if the layout engine tagged this component
+        if (comp.requiredItems && interactiveTypes.has(type)) {
+          filled = filled.replace(
+            /data-component-type="/,
+            `data-required-items="${comp.requiredItems}" data-component-type="`
+          );
+        }
         // Wrap with data-show-if if the component has its OWN showIf condition
         // (Section-level showIf is handled separately — wraps the entire section including title bar)
         if (comp.showIf && Object.keys(comp.showIf).length > 0) {
@@ -1259,8 +1307,10 @@ function build() {
 
     if (componentHtmls.length > 0) {
       const sectionTitle = section.title || '';
+      // Track sections with interactive components for progress
+      const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-6" id="${sectionId}">
+        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-6" id="${sectionId}"${trackAttr}>
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
 <h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
@@ -1298,6 +1348,18 @@ function build() {
 
   console.log(`[ok] Filled ${filledCount} components (${fallbackCount} fallbacks)\n`);
 
+  // Course gate: if any section contains a path-selector, wrap everything after it
+  // in a gate wrapper so hydrate.js can enforce "choose before continuing"
+  const gateIndex = sectionsHtml.findIndex(h => h.includes('data-path-selector'));
+  if (gateIndex >= 0 && gateIndex < sectionsHtml.length - 1) {
+    const before = sectionsHtml.slice(0, gateIndex + 1);
+    const after = sectionsHtml.slice(gateIndex + 1);
+    const gatedBlock = `<div data-course-gate class="gated">\n${after.join('\n\n')}\n</div>`;
+    sectionsHtml.length = 0;
+    sectionsHtml.push(...before, gatedBlock);
+    console.log(`[ok] Course gate: content after section ${gateIndex} wrapped in gate (${after.length} sections gated)`);
+  }
+
   // Build nav and footer from contract
   const navHtml = buildNav(layout);
   const footerHtml = buildFooter(layout);
@@ -1308,14 +1370,19 @@ function build() {
     hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
   }
 
-  // Build path state config from content-bucket if it exists
+  // Build state config from content-bucket if it exists
   let pathStateScript = '';
+  let sectionGatingScript = '';
   const contentBucketPath = path.resolve(ROOT, 'v5/output/content-bucket.json');
   if (fs.existsSync(contentBucketPath)) {
     try {
       const cb = JSON.parse(fs.readFileSync(contentBucketPath, 'utf-8'));
       if (cb.pathGroups && cb.pathGroups.length > 0) {
         pathStateScript = `\nwindow.__PATH_GROUPS__ = ${JSON.stringify(cb.pathGroups).replace(/<\//g, '<\\/')};\n`;
+      }
+      if (cb.sectionGating && cb.sectionGating.length > 0) {
+        sectionGatingScript = `\nwindow.__SECTION_GATING__ = ${JSON.stringify(cb.sectionGating).replace(/<\//g, '<\\/')};\n`;
+        console.log(`[ok] Section gating: ${cb.sectionGating.length} gated sections`);
       }
     } catch {}
   }
@@ -1356,7 +1423,7 @@ ${footerHtml}
 </main>
 
 <script>
-${pathStateScript}${hydrateScript}
+${pathStateScript}${sectionGatingScript}${hydrateScript}
 </script>
 </body>
 </html>`;
