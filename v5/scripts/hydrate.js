@@ -12,7 +12,6 @@
       'details[open] summary ~ * { animation: slideDown 0.3s ease forwards; }' +
       'details summary { list-style: none; cursor: pointer; }' +
       'details summary::-webkit-details-marker { display: none; }' +
-      'html { scroll-behavior: smooth; }' +
       '#hydrate-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-primary, #0099ff); z-index: 9999; transition: width 0.15s linear; pointer-events: none; }';
     document.head.appendChild(style);
 
@@ -654,6 +653,272 @@
     if (trackedSections.length > 0) {
       updateNavProgress();
     }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // SCROLL ANIMATIONS — GSAP ScrollTrigger + Lenis + SplitType
+    // Deterministic per-component animations. No AI/LLM in the loop.
+    // ══════════════════════════════════════════════════════════════════════
+    (function initScrollAnimations() {
+      // Bail if reduced motion preferred or libraries not loaded
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        // Show all elements that were hidden for animation
+        document.querySelectorAll('[data-animate]').forEach(function(el) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.style.clipPath = 'none';
+        });
+        console.log('Scroll animations: skipped (prefers-reduced-motion)');
+        return;
+      }
+
+      if (typeof gsap === 'undefined' || typeof ScrollTrigger === 'undefined') {
+        // Fallback: show all elements if GSAP failed to load
+        document.querySelectorAll('[data-animate]').forEach(function(el) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+          el.style.clipPath = 'none';
+        });
+        console.log('Scroll animations: skipped (GSAP not loaded)');
+        return;
+      }
+
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Native scroll — no Lenis override
+
+      // ── Helper: default ScrollTrigger config ─────────────────────────
+      var triggerDefaults = { start: 'top 85%', once: true };
+
+      // ── 1. FADE-UP animations ────────────────────────────────────────
+      gsap.utils.toArray('[data-animate="fade-up"]').forEach(function(el) {
+        // Skip hero inner elements — they get special timing below
+        if (el.closest('[data-component-type="hero"]')) return;
+        gsap.fromTo(el,
+          { y: 80, opacity: 0 },
+          {
+            y: 0, opacity: 1,
+            duration: 1.1,
+            ease: 'power4.out',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      // ── 2. SLIDE-IN animations (graphic-text) ────────────────────────
+      gsap.utils.toArray('[data-animate="slide-in-left"]').forEach(function(el) {
+        gsap.fromTo(el,
+          { x: -120, opacity: 0 },
+          {
+            x: 0, opacity: 1,
+            duration: 1.2,
+            ease: 'power4.out',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+      gsap.utils.toArray('[data-animate="slide-in-right"]').forEach(function(el) {
+        gsap.fromTo(el,
+          { x: 120, opacity: 0 },
+          {
+            x: 0, opacity: 1,
+            duration: 1.2,
+            ease: 'power4.out',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      // ── 3. SCALE-IN animations ───────────────────────────────────────
+      gsap.utils.toArray('[data-animate="scale-in"]').forEach(function(el) {
+        gsap.fromTo(el,
+          { scale: 0.8, opacity: 0 },
+          {
+            scale: 1, opacity: 1,
+            duration: 1,
+            ease: 'back.out(1.4)',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      // ── 4. CLIP-PATH reveals (images, media) ────────────────────────
+      gsap.utils.toArray('[data-animate="clip-up"]').forEach(function(el) {
+        gsap.fromTo(el,
+          { clipPath: 'inset(100% 0% 0% 0%)' },
+          {
+            clipPath: 'inset(0% 0% 0% 0%)',
+            duration: 1.4,
+            ease: 'power4.inOut',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      // ── 5. STAGGER animations (card grids, lists, timelines) ─────────
+      gsap.utils.toArray('[data-animate-stagger]').forEach(function(container) {
+        var type = container.getAttribute('data-animate-stagger');
+        var children = container.children;
+        if (children.length === 0) return;
+
+        var fromVars, toVars, easing;
+        if (type === 'scale-in') {
+          fromVars = { scale: 0.75, opacity: 0, y: 30 };
+          toVars = { scale: 1, opacity: 1, y: 0 };
+          easing = 'back.out(1.4)';
+        } else {
+          // Default: fade-up
+          fromVars = { y: 80, opacity: 0 };
+          toVars = { y: 0, opacity: 1 };
+          easing = 'power4.out';
+        }
+
+        gsap.fromTo(children, fromVars,
+          Object.assign({}, toVars, {
+            stagger: 0.12,
+            duration: 0.9,
+            ease: easing,
+            scrollTrigger: Object.assign({ trigger: container }, triggerDefaults)
+          })
+        );
+      });
+
+      // ── 6. PARALLAX (hero bg, full-bleed bg) ────────────────────────
+      gsap.utils.toArray('[data-parallax]').forEach(function(el) {
+        gsap.to(el, {
+          y: -120,
+          scale: 1.08,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: el.parentElement || el,
+            start: 'top top',
+            end: 'bottom top',
+            scrub: 0.6
+          }
+        });
+      });
+
+      // ── 7. TEXT REVEALS (hero title, pullquotes, headings) ───────────
+      if (typeof SplitType !== 'undefined') {
+        gsap.utils.toArray('[data-text-reveal]').forEach(function(el) {
+          try {
+            var split = new SplitType(el, { types: 'lines' });
+            if (!split.lines || split.lines.length === 0) return;
+
+            // Wrap each line in overflow-hidden container
+            split.lines.forEach(function(line) {
+              var wrapper = document.createElement('div');
+              wrapper.style.overflow = 'hidden';
+              wrapper.style.display = 'block';
+              line.parentNode.insertBefore(wrapper, line);
+              wrapper.appendChild(line);
+            });
+
+            gsap.from(split.lines, {
+              y: '120%',
+              rotateX: 8,
+              stagger: 0.1,
+              duration: 1,
+              ease: 'power4.out',
+              scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+            });
+          } catch(e) {
+            // SplitType failed on this element — make it visible
+            el.style.opacity = '1';
+          }
+        });
+        console.log('SplitType text reveals: active');
+      }
+
+      // ── 8. STAT COUNTER animations ───────────────────────────────────
+      gsap.utils.toArray('[data-counter]').forEach(function(el) {
+        var text = el.textContent.trim();
+        // Extract number and any prefix/suffix (e.g., "95%", "$2.5M", "10,000+")
+        var match = text.match(/^([^0-9]*?)([0-9][0-9,.]*)(.*)$/);
+        if (!match) return; // Not a countable number
+
+        var prefix = match[1];
+        var numStr = match[2];
+        var suffix = match[3];
+        var targetNum = parseFloat(numStr.replace(/,/g, ''));
+        if (isNaN(targetNum)) return;
+
+        var hasDecimal = numStr.indexOf('.') !== -1;
+        var decimalPlaces = hasDecimal ? (numStr.split('.')[1] || '').length : 0;
+        var hasComma = numStr.indexOf(',') !== -1;
+
+        // Store original text for later
+        el.textContent = prefix + '0' + suffix;
+
+        var obj = { val: 0 };
+        gsap.to(obj, {
+          val: targetNum,
+          duration: 2,
+          ease: 'power2.out',
+          scrollTrigger: Object.assign({ trigger: el }, triggerDefaults),
+          onUpdate: function() {
+            var n = obj.val;
+            var formatted;
+            if (hasDecimal) {
+              formatted = n.toFixed(decimalPlaces);
+            } else {
+              formatted = Math.round(n).toString();
+            }
+            if (hasComma) {
+              formatted = formatted.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+            }
+            el.textContent = prefix + formatted + suffix;
+          }
+        });
+      });
+
+      // ── 9. ACCENT BAR grow (pullquote border-l) ─────────────────────
+      gsap.utils.toArray('[data-accent-bar]').forEach(function(el) {
+        gsap.fromTo(el,
+          { borderLeftWidth: '0px' },
+          {
+            borderLeftWidth: '4px',
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      // ── 10. HERO-SPECIFIC timing ────────────────────────────────────
+      // Hero elements animate immediately (above the fold), not on scroll
+      var heroEl = document.querySelector('[data-component-type="hero"]');
+      if (heroEl) {
+        var heroAnimates = heroEl.querySelectorAll('[data-animate]');
+        heroAnimates.forEach(function(el, i) {
+          gsap.fromTo(el,
+            { y: 60, opacity: 0 },
+            {
+              y: 0, opacity: 1,
+              duration: 1.3,
+              delay: 0.4 + (i * 0.2),
+              ease: 'power4.out'
+            }
+          );
+        });
+      }
+
+      // ── 11. SECTION TITLE BAR animation ──────────────────────────────
+      // The gradient divider lines that separate sections
+      gsap.utils.toArray('[data-section-track]').forEach(function(el) {
+        gsap.fromTo(el,
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1, y: 0,
+            duration: 0.6,
+            ease: 'power2.out',
+            scrollTrigger: Object.assign({ trigger: el }, triggerDefaults)
+          }
+        );
+      });
+
+      var animCount = document.querySelectorAll('[data-animate], [data-animate-stagger], [data-parallax], [data-text-reveal], [data-counter]').length;
+      console.log('Scroll animations: ' + animCount + ' elements animated');
+    })();
 
     // ── Summary log ─────────────────────────────────────────────────────
     console.log(
