@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * V4 Design Course — AI Layout Engine Script
+ * V5 Design Course — AI Layout Engine Script
  *
  * Orchestrates the AI layout step of the pipeline.
  * Reads the system prompt, content bucket, and brand profile,

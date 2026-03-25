@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * V4 SCORM Extractor
+ * V5 SCORM Extractor
  *
  * Reads a Storyline SCORM package from disk and produces content-bucket.json.
  * Extracts raw educational content — no layout, no coordinates, no interaction logic.

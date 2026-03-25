@@ -621,7 +621,7 @@ async function main() {
 
   // Clear existing images — always regenerate
   if (fs.existsSync(OUTPUT_DIR)) {
-    const existing = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.jpg') || f.endsWith('.png'));
+    const existing = fs.readdirSync(OUTPUT_DIR).filter(f => f.endsWith('.jpg') || f.endsWith('.png') || f.endsWith('.svg'));
     if (existing.length > 0) {
       console.log(`Clearing ${existing.length} existing images...\n`);
       for (const file of existing) {
