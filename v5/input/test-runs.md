@@ -1,10 +1,17 @@
 # Test Run Configuration
 
-Fill in the fields below, or tell Claude what to fill in chat.
+Fill in the fields below, or just tell Claude what you want in chat.
 
-- **"Run it"** → single run using BRAND 1 + TOPIC 1
-- **"Matrix run"** → run all filled brand/topic combinations
-- You can also just say what you want in chat: "matrix run with Sprig, Ailyx, and Najaf on cybersecurity" and Claude will fill in the fields
+## Keywords
+
+- **"Run"** → build the course, give the output. No QA, no bug fixing.
+- **"Test"** → build the course, then run all QA gates and fix any issues found.
+- **"Matrix test"** → test all filled brand/topic combinations, classify and fix bugs.
+
+Examples:
+- "Run it with sales and fin-ai" → just builds
+- "Test it with Sprig on cybersecurity" → builds + QA + fixes
+- "Matrix test with Sprig, Ailyx, and Najaf" → tests all three, groups bugs
 
 ---
 
@@ -30,9 +37,7 @@ TOPIC 3:
 
 ## Settings
 
-```
-QA LEVEL: full              [structural + interactive + visual]
-```
+QA is automatic based on keyword: "run" = no QA, "test" = full QA.
 
 ---
 
@@ -58,12 +63,12 @@ Tested brands you can copy into the slots above.
 ### Running
 
 1. Read this file before every run
-2. If a topic is short (1-3 words), expand it into a full brief before writing to `topic-brief.txt`. Include: subject scope, what it covers (5-7 subtopics), target audience, difficulty level, estimated duration (~45 minutes). Use the research agent's needs as the guide.
-3. If only BRAND 1 and TOPIC 1 are filled → single run (update `brand/url.txt` and `v5/input/topic-brief.txt`, run full pipeline)
-3. If multiple brands/topics are filled → run each combination, pairing for maximum contrast (dark+light, technical+narrative) to catch the most issues in the fewest runs
-4. Run ALL combinations before fixing anything — collect the full picture first
-5. After each run, report: which brand + topic was used, QA results (structural + interactive + visual)
-6. After all runs complete:
+2. Detect mode from user's keyword: "run" = build only, "test" = build + QA, "matrix test" = multi-combination + QA
+3. If a topic is short (1-3 words), expand it into a full brief before writing to `topic-brief.txt`. Include: subject scope, what it covers (5-7 subtopics), target audience, difficulty level, estimated duration (~45 minutes)
+4. Update `brand/url.txt` and `v5/input/topic-brief.txt` with the chosen brand and topic
+5. For **"run"**: execute full pipeline (Steps 1-5), deliver the output. No QA scripts. Done.
+6. For **"test"**: execute full pipeline (Steps 1-5), then run all QA gates (6a, 6b, 6c). Fix any failures.
+7. For **"matrix test"**: run each brand/topic combination, pairing for maximum contrast. Run ALL combinations before fixing. Then:
    - List all failures grouped by type (universal, theme-specific, content-specific, component-specific)
    - Fix universal bugs first (one fix covers all), then specific bugs
    - Re-run the full matrix to verify fixes didn't break other combinations
