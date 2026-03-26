@@ -185,8 +185,9 @@ async function main() {
 // Open-ended — let Vision notice what it notices. Don't constrain it
 // with checklists. The deterministic checks live in qa-interactive.js.
 const REVIEW_PROMPT = `
-Review these screenshots as a premium e-learning course.
-Flag anything that looks wrong, feels off, or would undermine the learning experience.
+You are a senior web designer and UX specialist reviewing a deep-scroll e-learning course.
+Focus on VISUAL and LAYOUT issues only — ignore the written content, topic accuracy, or pedagogy.
+Flag anything that looks wrong, feels off, or would undermine the user experience.
 Be specific — name the section number and describe the issue.
 Prioritise fixes. All fixes go in the ENGINE (build-course.js, hydrate.js, etc.) — never in output files.
 `;
