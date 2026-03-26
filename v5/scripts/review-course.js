@@ -5,14 +5,11 @@
  * Captures Playwright screenshots of every section (desktop + mobile),
  * then outputs them for Claude Code Vision review with structured prompts.
  *
- * This is the SUBJECTIVE quality gate — it catches things computed checks can't:
- *   - Visual rhythm and monotony (three identical layouts in a row)
- *   - Gradient-on-gradient readability
- *   - Whether interactive elements look clickable
- *   - Mobile layout feeling intentional vs squashed desktop
- *   - Emotional arc — does the density build and breathe
+ * This is the SUBJECTIVE quality gate — Vision reviews the screenshots open-ended
+ * and flags anything that looks wrong or feels off. No checklist, no categories.
+ * Let it notice what it notices.
  *
- * Deterministic checks (contrast ratios, spacing, overlap) live in qa-interactive.js.
+ * Deterministic checks (spacing, collapsed sections, z-index) live in qa-interactive.js.
  *
  * Usage: node v5/scripts/review-course.js
  *
@@ -184,47 +181,14 @@ async function main() {
   console.log(REVIEW_PROMPT);
 }
 
-// ─── Structured Vision Review Prompt ─────────────────────────────────
-// This prompt guides Claude Code Vision to evaluate subjective quality.
-// Deterministic checks (contrast, spacing, overflow) are in qa-interactive.js.
+// ─── Vision Review Prompt ────────────────────────────────────────────
+// Open-ended — let Vision notice what it notices. Don't constrain it
+// with checklists. The deterministic checks live in qa-interactive.js.
 const REVIEW_PROMPT = `
-For each screenshot, evaluate these 5 categories. Give a PASS/WARN/FAIL verdict
-with a one-line reason. Only flag genuine issues — do not nitpick.
-
-## 1. VISUAL RHYTHM
-Does the section sequence feel varied or monotonous?
-- FAIL: Three or more consecutive sections with identical visual structure
-- WARN: Two similar layouts in a row, or a section that feels flat/empty
-- PASS: Good variation in density, width, and component types between sections
-
-## 2. READABILITY
-Can all text be read comfortably?
-- FAIL: Text lost in a busy background, gradient-on-gradient that's unreadable
-- WARN: Text that requires squinting, overly thin fonts on complex backgrounds
-- PASS: All text is clear and legible
-(Note: solid-background contrast is checked computationally — focus on gradients,
-overlays, and complex visual situations only)
-
-## 3. COMPONENT QUALITY
-Do interactive elements look like interactive elements?
-- FAIL: Buttons that don't look clickable, cards with no visual affordance
-- WARN: Quiz choices that blend into the background, tabs that look like plain text
-- PASS: Clear visual affordances — buttons look tappable, cards look interactive
-
-## 4. MOBILE COHERENCE
-Does the mobile layout feel intentional?
-- FAIL: Content clearly cut off, overlapping elements, unreadable text
-- WARN: Layout that works but feels like squashed desktop rather than designed for mobile
-- PASS: Mobile layout feels considered — appropriate stacking, readable text, usable targets
-
-Output format — one line per category, per section group:
-  [RHYTHM]     PASS/WARN/FAIL — reason
-  [READABILITY] PASS/WARN/FAIL — reason
-  [COMPONENTS] PASS/WARN/FAIL — reason
-  [MOBILE]     PASS/WARN/FAIL — reason
-
-End with an overall verdict and a prioritised list of fixes (if any).
-Fixes go in the ENGINE (build-course.js, hydrate.js, generation-engine.md, etc.) — never in output files.
+Review these screenshots as a premium e-learning course.
+Flag anything that looks wrong, feels off, or would undermine the learning experience.
+Be specific — name the section number and describe the issue.
+Prioritise fixes. All fixes go in the ENGINE (build-course.js, hydrate.js, etc.) — never in output files.
 `;
 
 main().catch(err => {

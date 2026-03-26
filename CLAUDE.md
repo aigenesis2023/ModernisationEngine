@@ -198,7 +198,7 @@ See `v5/BUILD-SYSTEM.md`.
 
 **6b — Interactive QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser, tests every interactive component: clicks quiz choices (submit → feedback → retry), switches all tabs, flips flashcards, navigates carousels, expands accordions, checks checklists with progress counter. Also validates content overflow (desktop + mobile), font size minimums, tap target sizes, heading hierarchy, invisible content, section spacing, collapsed sections, and nav z-index stacking. **If it fails, fix before proceeding.**
 
-**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews with structured Vision prompts across 4 categories: visual rhythm, readability (gradient/overlay situations), component quality (interactive affordances), and mobile coherence. Outputs PASS/WARN/FAIL verdicts per category. Fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light). **Only run after 6a and 6b pass.**
+**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews open-ended via Vision — flags anything that looks wrong, feels off, or undermines the learning experience. No checklist — let Vision notice what it notices. Fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light). **Only run after 6a and 6b pass.**
 
 ---
 
