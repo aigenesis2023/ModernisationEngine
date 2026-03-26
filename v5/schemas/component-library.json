@@ -19,6 +19,11 @@
       ],
       "when_to_use": "Always use as the FIRST component. Every course starts with a hero.",
       "when_not_to_use": "Never use more than once per course.",
+      "variants": [
+        { "name": "centered-overlay", "when_to_use": "Default. Strong hero image, punchy title. Works for any topic.", "when_not_to_use": "Never wrong, but predictable if used every time." },
+        { "name": "split-screen", "when_to_use": "When the hero image is strong and specific (not abstract). Creates a magazine feel. Text left, image right, 50/50 grid.", "when_not_to_use": "Weak without a real image. Don't use if the image would be generic." },
+        { "name": "minimal-text", "when_to_use": "Abstract or conceptual topics. When typography IS the design. No image, border-left accent, bold typography only. Creates sophistication.", "when_not_to_use": "Don't use if you have a great hero image — it would be wasted." }
+      ],
       "image_dimensions": "1920x1080 (16:9)",
       "props": {
         "required": {
@@ -125,6 +130,11 @@
       ],
       "when_to_use": "For content that pairs an explanation with a supporting image. Alternate _imageAlign between sections for visual variety.",
       "when_not_to_use": "Don't use back-to-back more than twice. If the image isn't directly related to the text, use separate text + graphic components.",
+      "variants": [
+        { "name": "split", "when_to_use": "Default 50/50 side-by-side with glow effect on image. Works for any paired content.", "when_not_to_use": "Predictable if every graphic-text uses this." },
+        { "name": "overlap", "when_to_use": "60% image with text card overlapping from the right. Elevated, premium feel. Great for feature highlights or case studies.", "when_not_to_use": "Don't use without a strong image — the overlap draws attention to the image." },
+        { "name": "full-overlay", "when_to_use": "Full-width image with gradient overlay, text positioned on one side. Image is the star. Best when the image tells half the story.", "when_not_to_use": "Don't use for long body text — the overlay limits reading space." }
+      ],
       "image_dimensions": "800x600 (4:3)",
       "props": {
         "required": {
@@ -166,6 +176,10 @@
       ],
       "when_to_use": "For content with 3-8 distinct topics of roughly equal weight that learners can explore in any order.",
       "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for critical content that ALL learners must see (it's optional to expand).",
+      "variants": [
+        { "name": "standard", "when_to_use": "Default. Clean panels with border and chevron icon. Works for any accordion content.", "when_not_to_use": "Predictable if every accordion uses this." },
+        { "name": "accent-border", "when_to_use": "Left border accent alternating primary/secondary colours with Material Symbols icons in summary. More visual distinction between panels. Great for myths vs reality, categorised content.", "when_not_to_use": "Don't use if the accordion items don't have a natural icon mapping." }
+      ],
       "props": {
         "required": {
           "_items": "array — 3-8 accordion panels, each with { title: string, body: string (HTML) }"
@@ -212,6 +226,10 @@
       ],
       "when_to_use": "For knowledge checks that test comprehension and application, not trivia recall. The generation agent creates ALL assessments — there are no pre-built quiz questions in the knowledge base.",
       "when_not_to_use": "Don't cluster multiple quizzes together. Don't test trivial recall. Don't place before teaching the material.",
+      "variants": [
+        { "name": "stacked", "when_to_use": "Default. Vertical list of choices in a card. Better for long answer text or detailed scenarios.", "when_not_to_use": "Can feel monotonous if every quiz uses this." },
+        { "name": "grid", "when_to_use": "2x2 grid with large letter labels (A/B/C/D), question centered above. Better for short answer text (under 15 words each). Creates a more visual, game-like feel.", "when_not_to_use": "Don't use with long answer text — cards will overflow. Don't use with more than 4 choices." }
+      ],
       "props": {
         "required": {
           "displayTitle": "string — Question heading (e.g. 'Knowledge Check')",
@@ -313,6 +331,11 @@
       ],
       "when_to_use": "For presenting 3-6 related concepts, features, or topics at a glance. Perfect for peer items that aren't sequential.",
       "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items.",
+      "variants": [
+        { "name": "grid-4", "when_to_use": "Default. 4-column grid with featured first card spanning 2 cols. Works for 4-6 items of mixed importance.", "when_not_to_use": "Can feel cramped with very long card text." },
+        { "name": "wide-2", "when_to_use": "2-column layout with icon circles and more text space. Better for 3-4 items with detailed descriptions.", "when_not_to_use": "Don't use with 5+ items — too many rows." },
+        { "name": "featured", "when_to_use": "One large featured card (gradient background, col-span-2, row-span-2) plus smaller cards. Use when one item is clearly more important than the others.", "when_not_to_use": "Don't use if all items are equally important." }
+      ],
       "image_dimensions": "600x400 (3:2) per card",
       "props": {
         "required": {
@@ -492,6 +515,10 @@
       ],
       "when_to_use": "For sequential processes, historical timelines, or step-by-step procedures where ORDER matters. Use 3-8 steps.",
       "when_not_to_use": "Don't use for non-sequential content (use accordion or bento). Don't use for very short steps with just a title (use checklist).",
+      "variants": [
+        { "name": "vertical", "when_to_use": "Default. Left-border with glowing dots. Works for any number of steps (3-8). Best for 5+ items.", "when_not_to_use": "Can feel long with 7+ items." },
+        { "name": "centered-alternating", "when_to_use": "Center line, items alternate left/right with numbered circles. More visual, magazine-like feel. Best for 3-5 items.", "when_not_to_use": "Don't use with 6+ items — becomes very tall. Don't use on mobile-heavy audiences (falls back to vertical)." }
+      ],
       "props": {
         "required": {
           "_items": "array — 3-8 steps: [{ title: string, body: string (HTML) }]"
@@ -528,6 +555,10 @@
       ],
       "when_to_use": "For comparing 2-3 options, plans, approaches, or technologies across multiple criteria.",
       "when_not_to_use": "Don't use for data-heavy tables (use data-table). Don't compare more than 3 columns.",
+      "variants": [
+        { "name": "columns", "when_to_use": "Default. Side-by-side table with check/cross icons. Classic comparison format.", "when_not_to_use": "Can look plain if used repeatedly." },
+        { "name": "stacked-rows", "when_to_use": "Horizontal rows with category label in center, options on each side. More compact, scannable. Better for 2-column comparisons.", "when_not_to_use": "Don't use with 3 columns — only works for 2-column comparisons." }
+      ],
       "props": {
         "required": {
           "columns": "array — 2-3 column definitions: [{ title: string, subtitle?: string }]",
@@ -570,6 +601,10 @@
       ],
       "when_to_use": "For impactful statistics or numbers that deserve emphasis. Use 2-4 stats that tell a story together.",
       "when_not_to_use": "Don't use for non-numeric content. Don't use more than 4 stats. Don't use for numbers that aren't surprising or impactful.",
+      "variants": [
+        { "name": "centered", "when_to_use": "Default. Large centered numbers in a grid. Clean and impactful.", "when_not_to_use": "Predictable if used every time." },
+        { "name": "card-row", "when_to_use": "Individual glass cards with progress bars underneath each stat. More visual weight and structure. Better when stats represent completion or progress.", "when_not_to_use": "Don't use for simple percentages where the bar adds no meaning." }
+      ],
       "props": {
         "required": {
           "_items": "array — 2-4 stats: [{ value: string, label: string, suffix?: string, prefix?: string }]"
@@ -710,6 +745,10 @@
       ],
       "when_to_use": "For 2-6 categories of content that are alternatives (not sequential). Users choose which to view.",
       "when_not_to_use": "Don't use for sequential content (use narrative). Don't use with more than 6 tabs (use accordion). Don't nest tabs inside tabs.",
+      "variants": [
+        { "name": "horizontal", "when_to_use": "Default. Centered pill buttons above content panel. Clean, familiar pattern.", "when_not_to_use": "Can feel crowded with 5+ tabs or long tab labels." },
+        { "name": "vertical", "when_to_use": "Sidebar buttons on left, content panel on right. Better for longer tab labels, many tabs (4-6), or when tab names are descriptive phrases.", "when_not_to_use": "Don't use with only 2 tabs — looks unbalanced." }
+      ],
       "props": {
         "required": {
           "_items": "array — 2-6 tabs: [{ title: string, body: string (HTML), _graphic?: { large: string, alt: string } }]"

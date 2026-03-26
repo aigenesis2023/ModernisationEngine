@@ -10,7 +10,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring-3` (active development) | `Current-working-2` (GitHub Pages deploy target)
+**Branch:** `ai-first-authoring-4` (active development) | `Current-working-2` (GitHub Pages deploy target)
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
@@ -30,7 +30,9 @@ Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON
          ├─ Reads generation-engine.md (system prompt — emotional arc, archetypes, anti-patterns)
          ├─ Reads knowledge-base.json + brand-design.md (voice calibration) + brand-profile.json
          ├─ Reads component-library.json (learningMoment + creativeUses per component)
+         ├─ AI classifies topic → selects course archetype (journey/case-file/builder/debate/explorer)
          ├─ AI designs course with structural variety — content shaped for component
+         ├─ AI selects layout variants per component + section widths for visual rhythm
          ├─ AI creates ALL assessments (KB has raw facts, not pre-built quizzes)
          └─→ course-layout.json
 
@@ -57,7 +59,8 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          build-course.js (content assembly — design/layout separation)
          ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
          ├─ Reads visual classes from design-contract.json (NEVER raw HTML)
-         ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
+         ├─ Selects layout variant per component (variant field from course-layout.json)
+         ├─ Applies sectionWidth per section (narrow/standard/wide/full)
          ├─ Tags sections with data-section-track for progress tracking
          ├─ Inlines hydrate.js for interactivity + flow control
          └─→ course.html (single self-contained file)
@@ -289,6 +292,42 @@ node v5/scripts/review-course.js                           # Step 6c (visual rev
 | `image-gallery` | Grid of images with lightbox |
 | `full-bleed` | Edge-to-edge image with text overlay |
 | `video-transcript` | Video with expandable transcript |
+
+### Course Archetypes
+
+The generation engine classifies each topic and selects a **course archetype** that shapes the entire narrative arc, density pattern, and assessment placement. Set in `metadata.archetype` in course-layout.json.
+
+| Archetype | Structure | Best For |
+|---|---|---|
+| `the-journey` | Hook → Foundation → Challenge → Insight → Application | General awareness, introductory topics |
+| `the-case-file` | Incident → Investigation → Evidence → Framework → Prevention | Security, compliance, risk management |
+| `the-builder` | Goal → Foundations → Build → Test → Refine → Deploy | Technical skills, procedural how-to |
+| `the-debate` | Assumption → Counter-evidence → Perspectives → Synthesis → Position | Leadership, strategy, ethics |
+| `the-explorer` | Landscape → Deep Dives → Connections → Patterns → Implications | Market analysis, emerging tech, surveys |
+
+### Layout Variants
+
+9 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default. Variants are purely layout changes in build-course.js — no changes needed to Stitch, extract-contract.js, or hydrate.js.
+
+| Component | Variants |
+|---|---|
+| `hero` | `centered-overlay` (default), `split-screen`, `minimal-text` |
+| `graphic-text` | `split` (default), `overlap`, `full-overlay` |
+| `bento` | `grid-4` (default), `wide-2`, `featured` |
+| `accordion` | `standard` (default), `accent-border` |
+| `mcq` | `stacked` (default), `grid` |
+| `stat-callout` | `centered` (default), `card-row` |
+| `timeline` | `vertical` (default), `centered-alternating` |
+| `comparison` | `columns` (default), `stacked-rows` |
+| `tabs` | `horizontal` (default), `vertical` |
+
+### Section Width
+
+Sections can set `"sectionWidth"` to vary page-level content width:
+- `standard` — `max-w-6xl` (default)
+- `narrow` — `max-w-3xl` (focused reading: text, pullquote)
+- `wide` — `max-w-7xl` (visual components: bento, comparison, gallery)
+- `full` — edge-to-edge background with contained inner content
 
 ---
 

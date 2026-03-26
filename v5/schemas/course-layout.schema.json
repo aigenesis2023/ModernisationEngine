@@ -44,6 +44,11 @@
         "sourceScorm": { "type": "string", "description": "SCORM course title (SCORM import path)" },
         "sourceTopic": { "type": "string", "description": "Topic brief (AI-first generation path)" },
         "sourceType": { "type": "string", "enum": ["scorm", "ai-generated"], "description": "How this course was generated" },
+        "archetype": {
+          "type": "string",
+          "enum": ["the-journey", "the-case-file", "the-builder", "the-debate", "the-explorer"],
+          "description": "Course structure archetype chosen by the generation engine. Shapes the narrative arc, density pattern, and assessment placement."
+        },
         "brandSource": { "type": "string" },
         "componentCount": { "type": "integer" },
         "imageCount": { "type": "integer" }
@@ -76,6 +81,11 @@
         "pathGroup": {
           "type": "string",
           "description": "Which path group this section belongs to (for authoring tool UI)."
+        },
+        "sectionWidth": {
+          "type": "string",
+          "enum": ["standard", "narrow", "wide", "full"],
+          "description": "Controls the max-width of this section's content. standard=max-w-6xl (default), narrow=max-w-3xl (focused reading), wide=max-w-7xl (visual components), full=edge-to-edge background with contained inner content."
         },
         "components": {
           "type": "array",
@@ -155,6 +165,11 @@
             "poolSize": { "type": "integer" }
           }
         },
+        "variant": {
+          "type": "string",
+          "description": "Layout variant for this component. Each component type has named variants that change the visual layout without changing the design contract. When absent, the default (first) variant is used. See component-library.json for available variants per type."
+        },
+
         "transcript": { "type": "string" },
         "attribution": { "type": "string" },
         "role": { "type": "string" },

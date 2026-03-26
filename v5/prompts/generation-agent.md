@@ -18,11 +18,11 @@ Follow generation-engine.md exactly. Generate the complete course-layout.json an
 
 2. **Read the knowledge base.** Find the 3-5 most surprising or compelling insights. These will anchor your course.
 
-3. **Plan the emotional arc.** Map Hook → Foundation → Challenge → Insight → Application to rough section groupings.
+3. **Choose the course archetype.** Classify the topic — is the primary goal awareness, incident-learning, skill-building, critical thinking, or landscape understanding? Select the matching archetype from generation-engine.md. Declare it in metadata: `"archetype": "the-builder"`. **Don't default to The Journey every time.**
 
-4. **Plan the rhythm.** Decide which sections are breathers (1-2 components), standard (3-4), or deep dives (5-7). Plan 5-12 sections with intentional variety.
+4. **Plan the arc and rhythm.** Follow the chosen archetype's structure, density pattern, and assessment placement. Decide which sections are breathers (1-2 components), standard (3-4), or deep dives (5-7). Plan 5-12 sections with intentional variety.
 
-5. **Design and write.** For each section, choose a structural archetype and write content shaped for each component. Draw from multiple content areas per section — don't mirror the research structure.
+5. **Design and write.** For each section, choose a section pattern and write content shaped for each component. Draw from multiple content areas per section — don't mirror the research structure.
 
 ## Key Reminders
 
@@ -37,3 +37,20 @@ Follow generation-engine.md exactly. Generate the complete course-layout.json an
 - **Don't map content areas 1:1 to sections** — merge, split, and resequence for narrative flow
 - Set metadata.sourceType to "ai-generated"
 - Set metadata.sourceTopic to the topic brief from knowledge-base.json
+
+## Layout Variants and Section Width
+
+**CRITICAL for visual variety — read the `variants` array in component-library.json for each component type.**
+
+- When a component type has variants, set `"variant": "variant-name"` in the component JSON
+- Choose the variant that best fits the content (read `when_to_use` and `when_not_to_use` guidance)
+- **Don't use the same variant of a component type more than twice** in one course
+- If a component type has NO variants array, omit the `variant` field entirely
+- For `graphic-text` (used multiple times per course): deliberately vary between `split`, `overlap`, and `full-overlay`
+
+**Section width creates page-level visual rhythm:**
+- Set `"sectionWidth"` on each section: `standard` (default), `narrow`, `wide`, or `full`
+- Text-heavy sections → `narrow`. Visual sections (bento, gallery, comparison) → `wide`. Full-bleed/hero → `full`.
+- **Use at least 3 different sectionWidth values** across the course. All `standard` = missed opportunity.
+
+**These two features are what prevent every course from looking identical. Use them deliberately.**

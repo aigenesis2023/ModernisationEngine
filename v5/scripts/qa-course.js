@@ -321,6 +321,88 @@ function checkComponentCoverage(html, layout) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
+//  CHECK 3b: Variant validation — correct values + variety warnings
+// ═══════════════════════════════════════════════════════════════════════
+function checkVariants(layout) {
+  if (!layout) { return; }
+
+  // Known variants per component type
+  const KNOWN_VARIANTS = {
+    'hero': ['centered-overlay', 'split-screen', 'minimal-text'],
+    'graphic-text': ['split', 'overlap', 'full-overlay'],
+    'bento': ['grid-4', 'wide-2', 'featured'],
+    'accordion': ['standard', 'accent-border'],
+    'mcq': ['stacked', 'grid'],
+    'stat-callout': ['centered', 'card-row'],
+    'timeline': ['vertical', 'centered-alternating'],
+    'comparison': ['columns', 'stacked-rows'],
+    'tabs': ['horizontal', 'vertical']
+  };
+
+  const allComponents = (layout.sections || []).flatMap(s => s.components || []);
+
+  // Track variant usage per component type
+  const variantUsage = {}; // type -> { variant: count }
+
+  for (const comp of allComponents) {
+    const type = comp.type;
+    const variant = comp.variant;
+
+    if (variant) {
+      const known = KNOWN_VARIANTS[type];
+      if (known) {
+        if (!known.includes(variant)) {
+          fail('VARIANT', `${comp.componentId}: unknown variant "${variant}" for ${type}. Valid: ${known.join(', ')}`);
+        } else {
+          pass('VARIANT', `${comp.componentId}: ${type} variant "${variant}" is valid`);
+        }
+      } else {
+        warn('VARIANT', `${comp.componentId}: variant "${variant}" set on ${type} which has no variants defined — will be ignored`);
+      }
+
+      if (!variantUsage[type]) variantUsage[type] = {};
+      variantUsage[type][variant] = (variantUsage[type][variant] || 0) + 1;
+    } else if (KNOWN_VARIANTS[type]) {
+      // No variant set — will use default. Track it.
+      const defaultVariant = KNOWN_VARIANTS[type][0];
+      if (!variantUsage[type]) variantUsage[type] = {};
+      variantUsage[type][defaultVariant] = (variantUsage[type][defaultVariant] || 0) + 1;
+    }
+  }
+
+  // Warn if same variant used 3+ times for same component type
+  for (const [type, variants] of Object.entries(variantUsage)) {
+    for (const [variant, count] of Object.entries(variants)) {
+      if (count >= 3) {
+        warn('VARIANT', `${type}: variant "${variant}" used ${count} times — consider more variety`);
+      }
+    }
+  }
+
+  // Check sectionWidth variety
+  const sectionWidths = (layout.sections || []).map(s => s.sectionWidth || 'standard');
+  const uniqueWidths = new Set(sectionWidths);
+  if (uniqueWidths.size === 1 && sectionWidths.length > 3) {
+    warn('VARIANT', `All ${sectionWidths.length} sections use "${[...uniqueWidths][0]}" width — vary with narrow/wide/full for visual rhythm`);
+  } else if (uniqueWidths.size >= 3) {
+    pass('VARIANT', `Section widths: ${[...uniqueWidths].join(', ')} — good visual rhythm`);
+  }
+
+  // Check course archetype
+  const VALID_ARCHETYPES = ['the-journey', 'the-case-file', 'the-builder', 'the-debate', 'the-explorer'];
+  const archetype = layout.metadata?.archetype;
+  if (archetype) {
+    if (VALID_ARCHETYPES.includes(archetype)) {
+      pass('ARCHETYPE', `Course archetype: "${archetype}"`);
+    } else {
+      fail('ARCHETYPE', `Unknown archetype "${archetype}". Valid: ${VALID_ARCHETYPES.join(', ')}`);
+    }
+  } else if (layout.metadata?.sourceType === 'ai-generated') {
+    warn('ARCHETYPE', 'No archetype declared in metadata — generation engine should set metadata.archetype');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
 //  CHECK 4: Interactive component wiring (data attributes)
 // ═══════════════════════════════════════════════════════════════════════
 function checkInteractiveWiring(html) {
@@ -892,6 +974,7 @@ function run() {
   checkFileExistence();
   checkHTMLStructure(html);
   checkComponentCoverage(html, layout);
+  checkVariants(layout);
   checkInteractiveWiring(html);
   checkImageIntegrity(html, layout);
   checkTypography(html);

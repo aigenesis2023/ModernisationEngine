@@ -24,37 +24,160 @@ The brand brief is your voice compass. When in doubt, re-read it and ask: "How w
 
 ---
 
-## The Emotional Arc
+## Step 0: Choose a Course Archetype
 
-The best courses have emotional rhythm. Plan your sections around these phases — not rigidly, but as a guiding arc:
+**Before designing sections or selecting components, classify the topic and choose a course archetype.** The archetype shapes the entire course structure — its narrative arc, density pattern, and assessment placement. Different topics demand different shapes. A cybersecurity awareness course and a pivot tables how-to course should NOT follow the same structure.
 
-### 1. HOOK (Curiosity)
-*"Why should I care about this?"*
-Open with something that challenges assumptions or creates urgency. A surprising statistic. A provocative question. A "what if" scenario. The learner should feel: "I didn't know that. Tell me more."
+Read the topic brief and knowledge base, then ask: **what is the primary learning goal?**
 
-### 2. FOUNDATION (Context)
-*"What do I need to know?"*
-Build the core concepts. Establish shared vocabulary. Give the learner the mental models they need for what comes next. The learner should feel: "Okay, I'm getting oriented."
+- "Understand why this matters" → **The Journey**
+- "Learn from what went wrong" → **The Case File**
+- "Learn how to do something" → **The Builder**
+- "Form a nuanced opinion" → **The Debate**
+- "Understand a broad landscape" → **The Explorer**
 
-### 3. CHALLENGE (Productive Struggle)
-*"Can I apply this?"*
-Test understanding. Present scenarios. Force decisions. This is where MCQs, branching, and "what would you do?" moments live. The learner should feel: "Let me think about this..."
+If the topic could fit multiple archetypes, prefer the one that best matches the target audience:
+- Non-technical audience → The Journey or The Explorer
+- Technical audience → The Builder or The Case File
+- Leadership audience → The Debate or The Explorer
 
-### 4. INSIGHT (Aha Moment)
-*"Oh, THAT'S why this matters."*
-Reveal the deeper connection. Show a case study, a comparison, or a before/after that reframes everything. The learner should feel: "Now I see the bigger picture."
+**Declare the chosen archetype in metadata:** `"archetype": "the-case-file"`
 
-### 5. APPLICATION (Ownership)
-*"Now I'll do this."*
-Move from understanding to action. Checklists, action plans, commitment devices. The learner should feel: "I know what to do on Monday."
-
-Not every section maps to one phase. A deep-dive section might span Foundation → Challenge. A transition section might be just an Insight moment. But the OVERALL arc should move from curiosity to confidence.
+### Anti-patterns for archetype selection:
+- **Don't always default to The Journey** — it's safe but predictable. If the topic has incidents, use The Case File. If it's procedural, use The Builder.
+- Don't use The Builder for topics that don't have a progressive skill build
+- Don't use The Debate for topics that have clear right/wrong answers
+- Don't use The Case File if the knowledge base has no real incidents or case studies
+- The archetype shapes the course but doesn't override quality rules — you still need 12+ component types, no consecutive same types, all content areas covered
 
 ---
 
-## Structural Archetypes
+## The 5 Course Archetypes
 
-Don't repeat the same section structure. Mix and remix these patterns:
+### 1. The Journey
+**Structure:** Hook → Foundation → Challenge → Insight → Application
+**Best for:** General awareness, introductory topics, broad audiences, topics where the learner doesn't yet know why they should care.
+**Not for:** Procedural skills (learner already knows why), compliance (consequences matter more than curiosity).
+
+**Density pattern:** Light opener → builds progressively → deep middle → reflective end.
+**Assessment placement:** Checkpoint quiz after foundation sections. Reflective application at the end. Never open with assessment.
+
+**Section flow example:**
+```
+Hero (hook — provocative stat or question)
+Stat-callout + graphic-text (foundation — scale of the problem)
+Accordion + tabs (building knowledge)
+MCQ (checkpoint)
+Full-bleed + narrative (deeper insight)
+Branching or textinput (application — what will you do?)
+```
+
+**Example topics:** Introduction to Cybersecurity, Climate Change Awareness, Diversity & Inclusion Fundamentals
+
+---
+
+### 2. The Case File
+**Structure:** Incident → Investigation → Evidence → Framework → Prevention
+**Best for:** Security, compliance, risk management, anything where real-world failures teach the lesson. Topics where "what went wrong" is more compelling than "what you should know."
+**Not for:** Abstract conceptual topics, creative/design topics, topics without concrete incidents.
+
+**Density pattern:** Dense dramatic opener (the incident) → investigative middle → structured framework → practical prevention end.
+**Assessment placement:** "What would you do?" scenarios placed after evidence sections. Myth-busting MCQs after the investigation. No quiz before teaching the framework.
+
+**Section flow example:**
+```
+Hero (the incident — "190 million records exposed")
+Narrative (the story — step by step what happened)
+Graphic-text + timeline (investigation — how it unfolded)
+Comparison (what they did vs what they should have done)
+Accordion (the framework — controls, policies, processes)
+MCQ (scenario-based — "you receive this email, what do you do?")
+Checklist (prevention — your action plan)
+```
+
+**Example topics:** Data Breach Response, Workplace Safety Incidents, Financial Fraud Prevention, GDPR Compliance
+
+---
+
+### 3. The Builder
+**Structure:** Goal → Foundations → Build → Test → Refine → Deploy
+**Best for:** Technical skills, procedural how-to, tool training, anything where the learner constructs knowledge progressively. Each section adds a layer on top of the previous one.
+**Not for:** Awareness topics (nothing to "build"), survey/landscape topics (too broad for progressive construction).
+
+**Density pattern:** Steady progression — no breather sections. Learner is in flow state. Each section builds on the last. Shorter, more focused sections.
+**Assessment placement:** Practical check after each "build" step — can you do this before we add the next layer? Quick MCQs testing application, not recall. Final assessment is a capstone scenario.
+
+**Section flow example:**
+```
+Hero (the goal — "by the end, you'll have built X")
+Graphic-text (foundations — what you need before starting)
+Process-flow + accordion (step 1 — first layer)
+MCQ (quick check — can you do step 1?)
+Graphic-text + tabs (step 2 — building on step 1)
+MCQ (quick check)
+Bento (step 3 — adding complexity)
+Branching (capstone — full scenario applying all steps)
+Textinput (reflection — how will you apply this?)
+```
+
+**Example topics:** Excel Pivot Tables, Setting Up CI/CD, Project Management with Agile, Financial Modelling Basics
+
+---
+
+### 4. The Debate
+**Structure:** Assumption → Counter-evidence → Perspectives → Synthesis → Position
+**Best for:** Leadership, strategy, ethics, change management, topics where there are legitimate competing viewpoints. Topics where the goal is critical thinking, not knowledge transfer.
+**Not for:** Factual/technical topics (there IS a right answer), compliance (you can't "debate" the regulation), procedural skills.
+
+**Density pattern:** Provocative opener → alternating challenge/reflection → multiple deep dives into different perspectives → synthesising conclusion. More text-heavy, more pullquotes, more comparison components.
+**Assessment placement:** "Which approach would you choose?" branching scenarios. Comparison-based MCQs ("which statement best represents X perspective?"). End with textinput reflection, never a quiz.
+
+**Section flow example:**
+```
+Hero (the assumption — "everyone knows that X")
+Stat-callout + graphic-text (counter-evidence — "actually, the data shows...")
+Full-bleed (provocative question)
+Tabs or narrative (perspective 1 vs perspective 2 vs perspective 3)
+Comparison (side-by-side analysis)
+Pullquote (expert voice)
+Branching (which approach fits your context?)
+MCQ (nuanced scenario — no obvious right answer)
+Textinput (your position — what do you believe and why?)
+```
+
+**Example topics:** Remote vs Office Work, AI Ethics, Leadership Styles, Change Management Approaches, Startup vs Enterprise Culture
+
+---
+
+### 5. The Explorer
+**Structure:** Landscape → Deep Dives → Connections → Patterns → Implications
+**Best for:** Market analysis, emerging technology, survey-style topics, anything where the learner needs to understand a broad landscape before zooming in. Topics with many sub-domains that connect.
+**Not for:** Single-skill topics (too narrow), compliance (too structured), topics with one clear narrative thread.
+
+**Density pattern:** Wide panoramic opener → 3-4 focused deep dives (each as a mini-section) → connecting tissue → implications. Bento and comparison components heavily used.
+**Assessment placement:** Pattern recognition MCQs ("which of these trends connects to X?"). Comparison-based assessments. End with application — "which area should your organisation prioritise?"
+
+**Section flow example:**
+```
+Hero (the landscape — "the $XX trillion transformation")
+Bento (map the territory — 4-6 key areas at a glance)
+Graphic-text + accordion (deep dive 1)
+Graphic-text + tabs (deep dive 2)
+Graphic-text + timeline (deep dive 3)
+MCQ (pattern recognition — connecting the deep dives)
+Stat-callout + comparison (emerging patterns across areas)
+Flashcard (key terms across the landscape)
+Full-bleed (the big implication)
+Textinput (which area matters most for your context?)
+```
+
+**Example topics:** Introduction to FinTech, The AI Landscape, Digital Transformation, Renewable Energy Technologies, Healthcare Innovation
+
+---
+
+## Section Patterns
+
+Within any archetype, don't repeat the same section structure. Mix and remix these patterns:
 
 ### The Deep Dive
 `graphic-text → accordion → process-flow → textinput`
@@ -80,33 +203,7 @@ Don't repeat the same section structure. Mix and remix these patterns:
 `full-bleed → text`
 *A visual reset. Two components max. Let the learner breathe between dense sections.*
 
-**These are starting points, not templates.** Combine elements from different archetypes. Invent new patterns. The goal is that NO two sections in your course follow the same structure.
-
----
-
-## Exemplar Section Sequences
-
-See how different course styles produce different structures:
-
-**Technical course (e.g., cloud architecture):**
-```
-Section: "How Data Flows"
-graphic-text (system diagram + explanation) → tabs (by protocol/layer) → process-flow (request lifecycle) → mcq (identify the bottleneck)
-```
-
-**Soft skills course (e.g., feedback conversations):**
-```
-Section: "The Difficult Conversation"
-narrative (real scenario, 5 slides) → pullquote (expert insight) → branching ("what would you say?") → textinput (write your own script)
-```
-
-**Compliance course (e.g., data privacy):**
-```
-Section: "When Things Go Wrong"
-stat-callout (breach costs) → comparison (compliant vs non-compliant) → flashcard (regulation terms) → checklist (your obligations)
-```
-
-These are real patterns that work. Study them, then design something better for YOUR topic.
+**These are starting points, not templates.** Combine elements from different section patterns. Invent new patterns. The goal is that NO two sections in your course follow the same structure.
 
 ---
 
@@ -121,6 +218,50 @@ Not every section should be the same size. Plan the RHYTHM before filling conten
 A good course rhythm might be: `deep dive → breather → standard → standard → deep dive → breather → standard → deep dive`
 
 If all your sections are 3-4 components, you've designed a flat experience. Vary intentionally.
+
+---
+
+## Layout Variants — Visual Variety Without Changing Design
+
+Many components have **layout variants** — different visual arrangements using the same design contract. When you select a component, also select the best **variant** for the content you're writing. Set `"variant": "variant-name"` in the component JSON.
+
+**Components with variants:**
+| Component | Variants | Default |
+|---|---|---|
+| `hero` | `centered-overlay`, `split-screen`, `minimal-text` | `centered-overlay` |
+| `graphic-text` | `split`, `overlap`, `full-overlay` | `split` |
+| `bento` | `grid-4`, `wide-2`, `featured` | `grid-4` |
+| `accordion` | `standard`, `accent-border` | `standard` |
+| `mcq` | `stacked`, `grid` | `stacked` |
+| `stat-callout` | `centered`, `card-row` | `centered` |
+| `timeline` | `vertical`, `centered-alternating` | `vertical` |
+| `comparison` | `columns`, `stacked-rows` | `columns` |
+| `tabs` | `horizontal`, `vertical` | `horizontal` |
+
+Read the `variants` array in `component-library.json` for each component. Each variant has `when_to_use` and `when_not_to_use` guidance — follow it.
+
+**Variant selection is content-driven:**
+- A hero with a strong, specific image → `split-screen`. An abstract topic → `minimal-text`.
+- A graphic-text where the image tells half the story → `full-overlay`. A feature highlight → `overlap`.
+- Short quiz answers (under 15 words) → MCQ `grid`. Long scenario answers → MCQ `stacked`.
+- 3-4 timeline items → `centered-alternating`. 5+ items → `vertical`.
+
+**If a component type has no variants array, omit the `variant` field entirely.**
+
+---
+
+## Section Width — Visual Rhythm at Page Level
+
+Not every section should use the same content width. Set `"sectionWidth"` on each section in the JSON:
+
+| Width | Class | When to Use |
+|---|---|---|
+| `standard` | `max-w-6xl` | Default. Most sections. |
+| `narrow` | `max-w-3xl` | Focused reading: text-heavy sections, pullquotes, reflective textinput. |
+| `wide` | `max-w-7xl` | Visual components: bento, comparison, image-gallery, data-table. |
+| `full` | edge-to-edge | Full-bleed sections, hero. Content still contained inside. |
+
+**The goal is visual breathing:** a narrow text section followed by a wide bento grid followed by a standard section creates rhythm that a uniform width cannot. If every section is `standard`, you've missed this opportunity.
 
 ---
 
@@ -147,6 +288,12 @@ These are the hallmarks of mediocre AI-generated courses. Avoid them:
 9. **DON'T start every section with text.** Open with a graphic-text, a stat-callout, a full-bleed question, or a narrative. Vary the opening component.
 
 10. **DON'T write generic headings.** "Key Concepts" and "Important Information" are wasted words. Write headings that make someone curious: "Why Most Security Training Fails" beats "Security Overview".
+
+11. **DON'T use the same variant of a component type more than twice in one course.** If you have 3 graphic-text components, use at least 2 different variants (e.g., split, overlap, full-overlay). If every graphic-text is `split`, the course looks templated.
+
+12. **DON'T use the default variant for everything.** If every component uses its default variant, the variant system adds zero value. Deliberately choose non-default variants where the content fits.
+
+13. **DON'T make every section `standard` width.** Vary section widths to create visual rhythm. A course with all `standard` widths looks as uniform as one without variants.
 
 ---
 
@@ -210,18 +357,23 @@ Read the `learningMoment` and `creativeUses` fields in the component library. Th
 - Read the brand brief — infer voice and emotional tone
 - Identify the 3-5 most surprising or compelling insights in the research (these will anchor your course)
 
-### Step 2: Plan the Emotional Arc
-- Map the 5 phases (Hook → Foundation → Challenge → Insight → Application) to rough section groupings
-- Decide where the 2-3 assessment checkpoints will fall
-- Identify which teachable moments will drive the hook, the challenge, and the insight phases
+### Step 2: Choose the Course Archetype
+- Classify the topic: awareness, incident-learning, skill-building, critical thinking, or landscape understanding?
+- Select the archetype that fits (see "Step 0" and "The 5 Course Archetypes" above)
+- Declare it in metadata: `"archetype": "the-builder"`
+- Follow that archetype's structure, density pattern, and assessment placement
 
-### Step 3: Plan the Rhythm
+### Step 3: Plan the Arc and Rhythm
+- Map the chosen archetype's phases to rough section groupings
+- Decide where assessment checkpoints will fall (following the archetype's guidance)
 - Decide section densities: which are breathers, which are deep dives, which are standard
 - Plan 5-12 sections with intentional variety
 - No two adjacent sections should follow the same structural pattern
 
 ### Step 4: Design Sections and Write Content
-- For each section, choose a structural archetype (or create a new one) and select components
+- For each section, choose a section pattern (or create a new one) and select components
+- Select the best layout variant for each component (see Layout Variants section)
+- Set sectionWidth per section for visual rhythm (see Section Width section)
 - Write content shaped for each component — component and content are ONE thought
 - Draw from multiple content areas per section as needed — don't mirror the research structure
 - Write image prompts for every visual component
@@ -282,10 +434,12 @@ Output a single JSON object matching the `course-layout.schema.json` schema:
     {
       "sectionId": "section-00",
       "title": "",
+      "sectionWidth": "full",
       "components": [
         {
           "componentId": "comp-000",
           "type": "hero",
+          "variant": "split-screen",
           "displayTitle": "Course Title Here",
           "body": "<p>Subtitle text</p>",
           "imagePrompt": "description of hero background image...",
@@ -301,6 +455,7 @@ Output a single JSON object matching the `course-layout.schema.json` schema:
     "generatedAt": "2026-03-25T12:00:00Z",
     "sourceTopic": "Original topic brief",
     "sourceType": "ai-generated",
+    "archetype": "the-case-file",
     "componentCount": 42,
     "imageCount": 18
   }
@@ -323,12 +478,17 @@ Output a single JSON object matching the `course-layout.schema.json` schema:
 Before finalizing your output, verify:
 
 **Structure:**
+- [ ] Course archetype declared in metadata.archetype (one of: the-journey, the-case-file, the-builder, the-debate, the-explorer)
+- [ ] Course structure follows the chosen archetype's arc and assessment placement
 - [ ] Course starts with exactly one hero component
 - [ ] No two consecutive components have the same type
 - [ ] 5-12 sections with intentional density variation (not all the same size)
 - [ ] No two adjacent sections follow the same structural pattern
 - [ ] 12+ different component types used
 - [ ] Assessment clustered into 2-4 checkpoint moments, not scattered after every section
+- [ ] Components with variants use at least 2 different variants per type (no same variant 3+ times)
+- [ ] At least 3 different sectionWidth values used across the course (not all standard)
+- [ ] Variant choices match content (read when_to_use guidance in component-library.json)
 
 **Content:**
 - [ ] Every content area from the knowledge base is represented
