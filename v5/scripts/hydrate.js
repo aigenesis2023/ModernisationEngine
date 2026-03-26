@@ -350,6 +350,28 @@
       }
     });
 
+    // ── 8b. HERO CTA BUTTONS ─────────────────────────────────────────
+    // "Begin Course" and "Explore Modules" scroll to the first section
+    var heroCTAs = document.querySelectorAll('[data-hero-cta]');
+    heroCTAs.forEach(function (btn) {
+      btn.style.cursor = 'pointer';
+      btn.addEventListener('click', function () {
+        // Find the first section after the hero
+        var hero = document.querySelector('[data-component-type="hero"]');
+        var target = hero ? hero.nextElementSibling : null;
+        // Walk past non-element nodes to find the first real section/div
+        while (target && target.nodeType !== 1) target = target.nextElementSibling;
+        if (!target) {
+          // Fallback: scroll to the first id-anchored element
+          var firstSection = document.querySelector('[id^="section-"]');
+          if (firstSection) target = firstSection;
+        }
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
+    });
+
     // ── 9. PATH SELECTOR & CONDITIONAL CONTENT ─────────────────────────
     var pathGroups = window.__PATH_GROUPS__ || [];
     var state = {};

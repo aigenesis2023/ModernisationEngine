@@ -227,7 +227,9 @@ ${colorEntries}
 
 
     /* Containment safety net */
+    html, body { overflow-x: hidden; }
     img, video, iframe { max-width: 100%; }
+    .line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
 
     /* Course gate — blurred preview until path selection is made */
     [data-course-gate].gated {
@@ -307,8 +309,8 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
 <h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
 <div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
-<button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}">Begin Course</button>
-<button class="px-8 py-4 ${btn2Bg} ${btn2Round} font-bold ${btn2Visual}">Explore Modules</button>
+<button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
+<button class="px-8 py-4 ${btn2Bg} ${btn2Round} font-bold ${btn2Visual}" data-hero-cta="explore">Explore Modules</button>
 </div>
 </div>
 </section>`;
@@ -317,12 +319,12 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
 function fillText(comp) {
   const c = DC.text || {};
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly(c.section || 'py-24');
+  const secClass = sectionOnly(c.section || 'py-16');
 
   return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
-<div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
-<div class="space-y-6 text-lg text-on-surface-variant leading-relaxed">
+<div class="max-w-4xl mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-6">${title}</h2>
+<div class="space-y-4 text-lg text-on-surface-variant leading-relaxed">
 ${comp.body || ''}
 </div>
 </div>
@@ -335,7 +337,7 @@ function fillAccordion(comp) {
   const c = DC.accordion || {};
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC.accordion || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.accordion || {}).section || 'py-16');
   const detailsClass = c.detailsClass || 'group glass-card rounded-2xl transition-all duration-300';
   const bodyClass = c.bodyClass || 'mt-4 text-on-surface-variant leading-relaxed';
 
@@ -353,8 +355,8 @@ ${item.body || ''}
 
   return `<section class="${secClass}" data-component-type="accordion">
 <div class="max-w-6xl mx-auto px-8">
-<h3 class="font-headline text-2xl font-bold mb-12 text-center" data-animate="fade-up">${title}</h3>
-<div class="space-y-6" data-animate-stagger="fade-up">
+<h3 class="font-headline text-2xl font-bold mb-8" data-animate="fade-up">${title}</h3>
+<div class="space-y-4" data-animate-stagger="fade-up">
 ${newDetails}
 </div>
 </div>
@@ -374,7 +376,7 @@ function fillMCQ(comp) {
   const questionText = stripTags(comp.instruction || comp.body || '');
   const title = esc(comp.displayTitle || 'Knowledge Check');
 
-  const secClass = sectionOnly(c.section || 'py-32');
+  const secClass = sectionOnly(c.section || 'py-20');
 
   // Card styling from contract
   const card = c.card || {};
@@ -432,7 +434,7 @@ function fillGraphicText(comp, index) {
   const c = DC['graphic-text'] || {};
   const title = esc(comp.displayTitle || '');
   const bodyText = comp.body || '';
-  const secClass = sectionOnly(c.section || 'py-24');
+  const secClass = sectionOnly(c.section || 'py-16');
   const align = comp._imageAlign || (index % 2 === 0 ? 'right' : 'left');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
@@ -468,7 +470,7 @@ function fillBento(comp) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
   const c = DC.bento || {};
-  const secClass = sectionOnly((DC.bento || {}).section || 'py-32');
+  const secClass = sectionOnly((DC.bento || {}).section || 'py-16');
 
   const icons = ['bolt', 'speed', 'shield', 'memory', 'hub', 'star', 'lightbulb', 'science'];
   const cardBgs = c.cardBgs || [];
@@ -478,38 +480,38 @@ function fillBento(comp) {
     if (i === 0) {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       const bg0 = cardBgs[0] || 'glass-card';
-      return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]">
+      return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
-<span class="material-symbols-outlined text-secondary text-4xl mb-4">${icons[0]}</span>
+<span class="material-symbols-outlined text-secondary text-4xl mb-3">${icons[0]}</span>
 <h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+<p class="text-on-surface-variant text-sm leading-relaxed">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
     if (i <= 2 && items.length > 3) {
       const bgI = cardBgs[i] || 'glass-card';
-      return `<div class="md:col-span-1 ${bgI} rounded-3xl p-8 flex flex-col justify-between min-h-[100px]">
-<span class="material-symbols-outlined text-primary text-4xl mb-4">${icons[i % icons.length]}</span>
+      return `<div class="md:col-span-1 ${bgI} rounded-3xl p-6 flex flex-col justify-between min-h-[100px] overflow-hidden">
+<span class="material-symbols-outlined text-primary text-3xl mb-3">${icons[i % icons.length]}</span>
 <div class="min-w-0">
-<h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed line-clamp-4">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
     const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
     const bgShadow = (c.cardShadows || [])[i] || '';
-    return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-8 flex flex-col justify-center min-h-[100px] ${bgShadow}">
-<span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-xl font-bold mb-1">${esc(item.title || '')}</h4>
-<p class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</p>
+    return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-6 flex flex-col justify-center min-h-[100px] overflow-hidden ${bgShadow}">
+<span class="material-symbols-outlined text-secondary text-3xl mb-3">${icons[i % icons.length]}</span>
+<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="bento">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
-<div class="grid grid-cols-1 md:grid-cols-4 gap-6 auto-rows-auto" data-animate-stagger="fade-up">
+<h2 class="font-headline text-3xl font-bold mb-10">${title}</h2>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-5 auto-rows-auto" data-animate-stagger="fade-up">
 ${newCards}
 </div>
 </div>
@@ -518,11 +520,12 @@ ${newCards}
 
 function fillDataTable(comp) {
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC['data-table'] || {}).section || 'py-24');
+  const secClass = sectionOnly((DC['data-table'] || {}).section || 'py-16');
   const body = comp.body || '';
 
   let columns = comp.columns || [];
   let rows = comp.rows || comp._rows || [];
+  let bodyUsedForTable = false;
 
   // Fallback: parse pipe-separated data from body <li> elements
   if (columns.length === 0 && rows.length === 0 && body) {
@@ -532,6 +535,7 @@ function fillDataTable(comp) {
       // First row = headers
       if (parsedRows.length > 0 && parsedRows[0].length >= 2) {
         rows = parsedRows;
+        bodyUsedForTable = true; // Don't render body HTML above the table
       }
     }
   }
@@ -562,7 +566,7 @@ function fillDataTable(comp) {
 
   return `<section class="${secClass}" data-component-type="data-table" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
-${body ? `<div class="mb-8 text-on-surface-variant">${body}</div>` : ''}
+${body && !bodyUsedForTable ? `<div class="mb-6 text-on-surface-variant">${body}</div>` : ''}
 <div class="overflow-hidden rounded-xl border border-on-surface/5 glass">
 <div class="px-8 py-6 border-b border-on-surface/5">
 <h3 class="text-2xl font-bold tracking-tight">${title}</h3>
@@ -582,7 +586,7 @@ function fillTextInput(comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const c = DC.textinput || {};
-  const secClass = sectionOnly((DC.textinput || {}).section || 'py-24 bg-surface-container-low');
+  const secClass = sectionOnly((DC.textinput || {}).section || 'py-16 bg-surface-container-low');
 
   const cardClass = (c.cardClass || 'glass-card p-12 rounded-[2rem]').replace(/\bp-12\b/, 'p-6 md:p-12');
   const inputClass = c.inputClass || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
@@ -614,7 +618,7 @@ function fillPathSelector(comp) {
   const bodyText = stripTags(comp.body || '');
   const instruction = esc(comp.instruction || 'Select your role below.');
   const c = DC['path-selector'] || DC.branching || {};
-  const secClass = sectionOnly((c).section || 'py-32');
+  const secClass = sectionOnly((c).section || 'py-16');
 
   const btn = c.button || {};
   const btnVisuals = btn.visual || 'hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30';
@@ -652,20 +656,20 @@ function fillBranching(comp) {
   const title = esc(comp.displayTitle || '');
   const bodyText = items.length > 0 ? '' : stripTags(comp.body || '');
   const c = DC.branching || {};
-  const secClass = sectionOnly((DC.branching || {}).section || 'py-32');
+  const secClass = sectionOnly((DC.branching || {}).section || 'py-16');
 
   const btn = c.button || {};
-  const btnVisuals = btn.visual || 'hover:bg-surface-variant transition-all border border-transparent hover:border-secondary/30';
-  const btnBg = btn.bg || 'bg-surface-variant/30';
+  const btnVisuals = btn.visual || 'hover:bg-surface-container-high transition-all border border-outline-variant/20 hover:border-secondary/30';
+  const btnBg = btn.bg || 'glass-card';
   const btnRound = btn.rounded || 'rounded-2xl';
 
   const hasArrow = c.hasArrow || false;
-  const arrowClass = c.arrowClass || 'mt-6 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform';
+  const arrowClass = c.arrowClass || 'mt-4 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform';
 
   const newButtons = items.map(item =>
     `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals}">
-<div class="font-bold mb-1">${esc(item.title || '')}</div>
-<div class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</div>
+<div class="font-bold text-on-surface mb-2">${esc(item.title || '')}</div>
+<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</div>
 ${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-outlined">arrow_forward</span></span>` : ''}
 </button>`
   ).join('\n');
@@ -673,8 +677,8 @@ ${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-o
   return `<section class="${secClass}" data-component-type="branching">
 <div class="max-w-6xl mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-6 text-center">${title}</h3>
-${bodyText ? `<p class="text-lg text-on-surface-variant mb-10 text-center italic">${bodyText}</p>` : ''}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6" data-animate-stagger="fade-up">
+${bodyText ? `<p class="text-lg text-on-surface-variant mb-8 text-center italic">${bodyText}</p>` : ''}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-5" data-animate-stagger="fade-up">
 ${newButtons}
 </div>
 </div>
@@ -687,7 +691,7 @@ function fillTimeline(comp) {
   const c = DC.timeline || {};
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC.timeline || {}).section || 'py-32');
+  const secClass = sectionOnly((DC.timeline || {}).section || 'py-16');
 
   if (c.hasNumberedCircles && c.circleClass) {
     const connectorClass = c.connectorClass || 'w-0.5 h-full bg-outline-variant/20 mt-4';
@@ -708,7 +712,7 @@ ${!isLast ? `<div class="${connectorClass}"></div>` : ''}
 
     return `<section class="${secClass}" data-component-type="timeline">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
 <div class="space-y-0" data-animate-stagger="fade-up">
 ${newSteps}
 </div>
@@ -733,8 +737,8 @@ ${newSteps}
 
   return `<section class="${secClass}" data-component-type="timeline">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-20 text-center">${title}</h2>
-<div class="relative border-l-2 border-outline-variant ml-4 space-y-16" data-animate-stagger="fade-up">
+<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
+<div class="relative border-l-2 border-outline-variant ml-4 space-y-10" data-animate-stagger="fade-up">
 ${newSteps}
 </div>
 </div>
@@ -744,7 +748,7 @@ ${newSteps}
 function fillComparison(comp) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const secClass = sectionOnly((DC.comparison || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.comparison || {}).section || 'py-16');
 
   const columns = comp.columns || comp._columns || [];
   const rows = comp.rows || [];
@@ -781,7 +785,7 @@ function fillStatCallout(comp) {
   const items = comp._items || [];
   if (items.length === 0) return '';
   const c = DC['stat-callout'] || {};
-  const secClass = sectionOnly((DC['stat-callout'] || {}).section || 'py-24 bg-surface-container-low');
+  const secClass = sectionOnly((DC['stat-callout'] || {}).section || 'py-16 bg-surface-container-low');
 
   const statStyles = c.stats || [];
   const hasSublabel = c.hasSublabel || false;
@@ -802,7 +806,7 @@ function fillStatCallout(comp) {
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
 <div class="text-5xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(displayValue)}</div>
 ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
-<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm uppercase tracking-widest font-bold'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
+<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-xs leading-snug font-medium mt-1'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -819,7 +823,7 @@ function fillPullquote(comp) {
   const quote = stripTags(comp.body || '');
   const attribution = esc(comp.attribution || '');
   const c = DC.pullquote || {};
-  const secClass = sectionOnly((DC.pullquote || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.pullquote || {}).section || 'py-16');
 
   const bqStyle = c.blockquoteStyle || 'text-2xl font-headline font-bold leading-relaxed';
   const citeStyle = c.citeClass || 'text-on-surface-variant';
@@ -850,7 +854,7 @@ function fillChecklist(comp) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const c = DC.checklist || {};
-  const secClass = sectionOnly((DC.checklist || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.checklist || {}).section || 'py-16');
 
   const card = c.card || {};
   const cardClass = mc(card.bg || 'glass-card', 'p-6 md:p-12', card.rounded || 'rounded-3xl', card.shadow || '');
@@ -884,9 +888,9 @@ function fillTabs(comp) {
   const c = DC.tabs || {};
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly(c.section || 'py-32 bg-surface-container-low');
-  const activeBtn = c.activeBtn || 'px-8 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm uppercase tracking-wider';
-  const inactiveBtn = c.inactiveBtn || 'px-8 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm uppercase tracking-wider';
+  const secClass = sectionOnly(c.section || 'py-16 bg-surface-container-low');
+  const activeBtn = c.activeBtn || 'px-6 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm tracking-wide';
+  const inactiveBtn = c.inactiveBtn || 'px-6 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm tracking-wide';
 
   const triggers = items.map((item, i) =>
     `<button class="${i === 0 ? activeBtn : inactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
@@ -901,9 +905,9 @@ function fillTabs(comp) {
 
   return `<section class="${secClass}" data-component-type="tabs" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
+<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
 <div data-tabs>
-<div class="flex flex-wrap justify-center gap-4 mb-12">
+<div class="flex flex-wrap justify-center gap-3 mb-8">
 ${triggers}
 </div>
 ${panels}
@@ -918,7 +922,7 @@ function fillFlashcard(comp) {
   const c = DC.flashcard || {};
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC.flashcard || {}).section || 'py-24 bg-surface-container-low overflow-hidden');
+  const secClass = sectionOnly((DC.flashcard || {}).section || 'py-16 bg-surface-container-low overflow-hidden');
   const icons = ['info', 'local_fire_department', 'pan_tool', 'bolt', 'shield', 'warning', 'speed', 'memory'];
 
   const front = c.front || {};
@@ -932,16 +936,16 @@ function fillFlashcard(comp) {
       ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'p-6 md:p-8')
       : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10 p-6 md:p-8');
     const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', 'p-6 md:p-8 text-center');
-    return `<div class="h-48 group cursor-pointer" style="perspective:1000px" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+    return `<div class="min-h-[220px] group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d;min-height:inherit">
 <div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
-<div class="text-center">
-<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-4xl mb-4">${icons[i % icons.length]}</div>
-<div class="font-headline font-bold text-xl">${frontText}</div>
+<div class="text-center px-4">
+<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-3xl mb-3">${icons[i % icons.length]}</div>
+<div class="font-headline font-bold text-lg leading-snug">${frontText}</div>
 </div>
 </div>
-<div class="absolute inset-0 flex items-center justify-center ${backFaceClass}" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium">${backText}</p>
+<div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
+<p class="text-on-secondary-container font-medium text-sm leading-relaxed px-2">${backText}</p>
 </div>
 </div>
 </div>`;
@@ -949,8 +953,8 @@ function fillFlashcard(comp) {
 
   return `<section class="${secClass}" data-component-type="flashcard">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16 text-center">${title}</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-8" data-animate-stagger="scale-in">
+<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-6" data-animate-stagger="scale-in">
 ${newCards}
 </div>
 </div>
@@ -963,7 +967,7 @@ function fillNarrative(comp) {
 
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const secClass = sectionOnly((DC.narrative || {}).section || 'py-32');
+  const secClass = sectionOnly((DC.narrative || {}).section || 'py-16');
 
   const newSlides = items.map((item, i) => {
     const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
@@ -997,20 +1001,20 @@ function fillKeyTerm(comp) {
   if (items.length === 0) return '';
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC['key-term'] || {}).section || 'py-24');
+  const secClass = sectionOnly((DC['key-term'] || {}).section || 'py-16');
 
   const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
   const newCards = items.map(item =>
-    `<div class="glass-card p-8 rounded-2xl overflow-hidden">
-<div class="text-secondary font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant">${esc(item.definition || item.body || '')}</p>
+    `<div class="glass-card p-6 rounded-2xl overflow-hidden border-l-4 border-secondary">
+<div class="text-secondary font-headline font-bold text-lg mb-2">${esc(item.term || item.title || '')}</div>
+<p class="text-on-surface-variant text-sm leading-relaxed">${esc(item.definition || item.body || '')}</p>
 </div>`
   ).join('\n');
 
   return `<section class="${secClass}" data-component-type="key-term">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-16">${title}</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 ${cols === 3 ? 'md:grid-cols-3' : ''} gap-10" data-animate-stagger="fade-up">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="grid grid-cols-1 sm:grid-cols-2 ${cols === 3 ? 'md:grid-cols-3' : ''} gap-6" data-animate-stagger="fade-up">
 ${newCards}
 </div>
 </div>
@@ -1020,7 +1024,7 @@ ${newCards}
 function fillFullBleed(comp) {
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  const sectionClass = (DC['full-bleed'] || {}).section || 'relative h-[60vh] flex items-center justify-center overflow-hidden';
+  const sectionClass = (DC['full-bleed'] || {}).section || 'relative h-[50vh] flex items-center justify-center overflow-hidden';
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
   const pos = comp.overlayPosition || 'center';
@@ -1039,7 +1043,7 @@ ${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
 function fillGraphic(comp) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const secClass = sectionOnly((DC.graphic || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.graphic || {}).section || 'py-12');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
@@ -1059,7 +1063,7 @@ function fillProcessFlow(comp) {
   if (items.length === 0) return '';
 
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC['process-flow'] || {}).section || 'py-24 bg-surface-container-low');
+  const secClass = sectionOnly((DC['process-flow'] || {}).section || 'py-16 bg-surface-container-low');
 
   const newNodes = items.map((item, i) => {
     const isFirst = i === 0;
@@ -1093,7 +1097,7 @@ ${withArrows}
 
 function fillMedia(comp) {
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC.media || {}).section || 'py-24');
+  const secClass = sectionOnly((DC.media || {}).section || 'py-16');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
 
   return `<section class="${secClass}" data-component-type="media" data-animate="clip-up">
@@ -1108,7 +1112,7 @@ ${imgSrc ? `<img alt="" class="w-full h-full object-cover" src="${imgSrc}"/>` : 
 
 function fillVideoTranscript(comp) {
   const title = esc(comp.displayTitle || 'Transcript');
-  const secClass = sectionOnly((DC['video-transcript'] || {}).section || 'py-24');
+  const secClass = sectionOnly((DC['video-transcript'] || {}).section || 'py-16');
 
   return `<section class="${secClass}" data-component-type="video-transcript" data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
@@ -1129,7 +1133,7 @@ function fillVideoTranscript(comp) {
 function fillImageGallery(comp) {
   const title = esc(comp.displayTitle || '');
   const items = comp._items || [];
-  const secClass = sectionOnly((DC['image-gallery'] || {}).section || 'py-24');
+  const secClass = sectionOnly((DC['image-gallery'] || {}).section || 'py-16');
 
   const images = items.map(item => {
     const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
@@ -1151,7 +1155,7 @@ ${images}
 
 function fillLabeledImage(comp) {
   const title = esc(comp.displayTitle || '');
-  const secClass = sectionOnly((DC['labeled-image'] || {}).section || 'py-24');
+  const secClass = sectionOnly((DC['labeled-image'] || {}).section || 'py-16');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
   const markers = comp._markers || [];
@@ -1349,11 +1353,11 @@ function build() {
       // Track sections with interactive components for progress
       const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-6xl mx-auto px-8 pt-12 pb-8" id="${sectionId}"${trackAttr}>
+        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-4" id="${sectionId}"${trackAttr}>
 <div class="flex items-center gap-6">
-<div class="h-px flex-1 bg-gradient-to-r from-primary/50 to-transparent"></div>
-<h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
-<div class="h-px flex-1 bg-gradient-to-l from-primary/50 to-transparent"></div>
+<div class="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent"></div>
+<h2 class="font-headline text-xs font-bold uppercase tracking-[0.3em] text-primary/80">${esc(sectionTitle)}</h2>
+<div class="h-px flex-1 bg-gradient-to-l from-primary/40 to-transparent"></div>
 </div>
 </div>`
         : '';
@@ -1447,14 +1451,16 @@ ${navHtml}
 ${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
-<section class="py-20 text-center">
-<div class="max-w-6xl mx-auto px-8">
-  <span class="material-symbols-outlined text-6xl text-secondary mb-8">verified_user</span>
-  <h2 class="font-headline text-3xl font-bold mb-8">Course Complete</h2>
-  <p class="text-on-surface-variant text-xl leading-relaxed mb-12">
+<section class="py-24 text-center">
+<div class="max-w-2xl mx-auto px-8">
+  <div class="w-20 h-20 mx-auto mb-8 rounded-full bg-secondary/10 flex items-center justify-center">
+    <span class="material-symbols-outlined text-4xl text-secondary">verified_user</span>
+  </div>
+  <h2 class="font-headline text-3xl font-bold mb-4">Course Complete</h2>
+  <p class="text-on-surface-variant text-lg leading-relaxed mb-10">
     You have completed ${esc(courseTitle)}. Review any sections as needed.
   </p>
-  <button class="btn-primary px-12 py-5 rounded-full font-bold text-lg" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
+  <button class="btn-primary px-10 py-4 rounded-full font-bold" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
 </div>
 </section>
 

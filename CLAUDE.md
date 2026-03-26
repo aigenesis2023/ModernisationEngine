@@ -11,7 +11,7 @@ Both paths produce the same `course-layout.json` → **Google Stitch designs a b
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring-2` (active development) | `ai-first-authoring` (V1, superseded) | `Current-working-2` (V5 SCORM pipeline)
+**Branch:** `ai-first-authoring-3` (active development) | `ai-first-authoring-2` (V2, superseded) | `ai-first-authoring` (V1, superseded) | `Current-working-2` (V5 SCORM pipeline)
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
