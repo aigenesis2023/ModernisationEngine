@@ -339,7 +339,7 @@ function fillText(comp) {
 
   return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
 <div class="max-w-4xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-6">${title}</h2>
+${title ? `<h2 class="font-headline text-3xl font-bold mb-6">${title}</h2>` : ''}
 <div class="space-y-4 text-lg text-on-surface-variant leading-relaxed">
 ${comp.body || ''}
 </div>
