@@ -1,26 +1,25 @@
 # CLAUDE.md — Modernisation Engine
 
 ## What This Is
-An AI-powered tool that creates modern, branded, premium deep-scroll web learning experiences. Two input paths:
+An AI-powered tool that creates modern, branded, premium deep-scroll web learning experiences.
 
-1. **AI-First (primary):** User provides a topic brief → AI researches and generates a complete course
-2. **SCORM Import (legacy/future premium):** Upload a SCORM 1.2 file → content and logic are extracted and restructured
+**Active pipeline: AI-First only.** User provides a topic brief → AI researches and generates a complete course → Google Stitch designs a branded component kit → we assemble the final course with full interactivity via a hydration script.
 
-Both paths produce the same `course-layout.json` → **Google Stitch designs a branded component kit** → we assemble the final course with full interactivity via a hydration script.
+> **⚠️ SCORM Import is ARCHIVED.** The SCORM extraction path (extract.js, design-course.js, layout-engine.md, content-bucket.json) is dormant code preserved for potential future reactivation. It is NOT part of the active pipeline. Do not run it, do not include it in "end-to-end" runs, do not write QA checks for it. When the user says "run it" or "full pipeline", they mean the AI-first path ONLY.
 
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring-3` (active development) | `ai-first-authoring-2` (V2, superseded) | `ai-first-authoring` (V1, superseded) | `Current-working-2` (V5 SCORM pipeline)
+**Branch:** `ai-first-authoring-3` (active development) | `Current-working-2` (GitHub Pages deploy target)
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
 ---
 
-## Architecture (V5 — Dual Input, Stitch Component Kit)
+## Architecture (V5 — AI-First Pipeline)
 
 ```
-═══ AI-FIRST PATH (primary) ═══════════════════════════════════════════
+═══ AI-FIRST PIPELINE ═════════════════════════════════════════════════
 Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON)
                        (Claude Code subagent with web search)
                        (Expert SME persona — gathers raw knowledge + teachable moments)
@@ -35,18 +34,7 @@ Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON
          ├─ AI creates ALL assessments (KB has raw facts, not pre-built quizzes)
          └─→ course-layout.json
 
-═══ SCORM IMPORT PATH (legacy/future premium) ═════════════════════════
-SCORM File ──→ extract.js        ──→ Content Bucket (JSON) + Logic Metadata
-                                          │
-                    ┌─────────────────────┘
-                    ▼
-         design-course.js (AI layout engine)
-         ├─ Reads layout-engine.md (system prompt)
-         ├─ Reads content-bucket.json + brand-profile.json
-         ├─ AI restructures content, picks best components
-         └─→ course-layout.json
-
-═══ SHARED PIPELINE (both paths) ══════════════════════════════════════
+═══ BUILD PIPELINE ════════════════════════════════════════════════════
 Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand Design (DESIGN.md)
                     │
                     ▼
@@ -70,12 +58,7 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
          ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
          ├─ Reads visual classes from design-contract.json (NEVER raw HTML)
          ├─ Hardcodes LAYOUT classes (grids, containment, spacing)
-         ├─ Wraps showIf components/sections with data-show-if attributes
-         ├─ Emits path-selector with data-path-selector/data-path-variable
-         ├─ Wraps post-selector content in course gate (data-course-gate)
          ├─ Tags sections with data-section-track for progress tracking
-         ├─ Emits draw metadata (data-draw-count/pool) on question bank MCQs
-         ├─ Injects window.__PATH_GROUPS__ + __SECTION_GATING__ state config
          ├─ Inlines hydrate.js for interactivity + flow control
          └─→ course.html (single self-contained file)
 ```
@@ -85,8 +68,8 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
 **1. Stitch designs the visual system. We control layout and content.**
 Different brand URL → different Stitch kit → different visual character, identical layout. See `v5/STITCH-INTEGRATION.md` for full details.
 
-**2. Content and logic fidelity is non-negotiable.**
-All educational content from the SCORM must be preserved. The learning design intent — branching, difficulty levels, conditional content — must be captured and mapped to modern patterns. See `v5/LOGIC-EXTRACTION.md` for the extraction architecture.
+**2. Content quality is non-negotiable.**
+The AI generation agent creates rich, accurate educational content. Every assessment tests application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm to produce courses worth scrolling.
 
 **3. The design system is a reusable asset.**
 Stitch's output (component patterns + design tokens) is extracted and stored. The future authoring layer can re-render with different content or swapped components without re-calling Stitch.
@@ -94,19 +77,19 @@ Stitch's output (component patterns + design tokens) is extracted and stored. Th
 **4. Speak Stitch's language.**
 We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
 
-**5. Logic flows end-to-end.**
-Path selection, conditional content, and question bank associations extracted in Phase 1 flow through to the final HTML. The layout engine tags content with `showIf` conditions. The build step wraps tagged content with `data-show-if` attributes. `hydrate.js` manages a state store with flow control: course gate (must select path before continuing), section progress tracking (interactive completion per section with nav indicators), draw randomization (poolSize > drawCount), and required-items completion counters. See `v5/CONTENT-STRUCTURING.md` and `v5/BUILD-SYSTEM.md`.
+**5. Interactivity is hydration-driven.**
+`hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `v5/BUILD-SYSTEM.md`.
 
 ---
 
 ## Architecture Deep-Dive Documents
 
-| Document | Covers |
-|---|---|
-| **`v5/LOGIC-EXTRACTION.md`** | How we extract triggers, variables, conditions, and interactive logic from Storyline SCORM exports. Storyline data schema, logic patterns, tagged content model. **Product differentiator.** |
-| **`v5/CONTENT-STRUCTURING.md`** | How extracted data gets transformed by the AI layout engine into a structured course. Logic-to-component mapping, layout engine prompt, validation. |
-| **`v5/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. |
-| **`v5/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. |
+| Document | Covers | Status |
+|---|---|---|
+| **`v5/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **Active** |
+| **`v5/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
+| **`v5/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
+| **`v5/LOGIC-EXTRACTION.md`** | How we extract triggers, variables, conditions, and interactive logic from Storyline SCORM exports. | **ARCHIVED** — SCORM path only |
 
 ---
 
@@ -124,40 +107,41 @@ v5/                                    ← ALL ACTIVE CODE
   BUILD-SYSTEM.md                      ← Build system architecture
   schemas/
     knowledge-base.schema.json         ← Flat research output: keyPoints[] + teachableMoments[] (no component awareness)
-    content-bucket.schema.json         ← SCORM extraction output format
-    course-layout.schema.json          ← Layout engine output format (shared by both paths)
+    course-layout.schema.json          ← Layout engine output format
     component-library.json             ← 26 components: type, props, learningMoment, creativeUses, examples
+    content-bucket.schema.json         ← ⚠️ ARCHIVED — SCORM extraction output format
   prompts/
     research-agent.md                  ← Expert SME persona: topic → raw knowledge + teachable moments
     generation-engine.md               ← Senior ID persona: emotional arc, archetypes, anti-patterns, voice calibration
     generation-agent.md                ← Subagent task: reads brand-design.md + KB → course-layout.json
-    layout-engine.md                   ← System prompt for SCORM layout engine (legacy path)
     representative-course.md           ← All 26 component types for Stitch to design
+    layout-engine.md                   ← ⚠️ ARCHIVED — SCORM layout engine prompt
   scripts/
     research-content.js                ← AI-first: topic → knowledge-base.json (subagent)
     generate-layout.js                 ← AI-first: knowledge-base → course-layout.json (subagent)
-    extract.js                         ← SCORM: folder → content-bucket.json
-    design-course.js                   ← SCORM: content-bucket → course-layout.json
     scrape-brand.js                    ← Brand URL → screenshot + natural language description
     generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
     extract-contract.js                ← Cheerio: Stitch patterns → design-contract.json
     generate-images.js                 ← Image generation: SiliconFlow AI → Pexels stock → SVG
     build-course.js                    ← Contract fill: design-contract.json + real content → course.html
-    review-course.js                   ← Playwright screenshot capture (Phase 6 visual review)
+    qa-course.js                       ← Programmatic QA checks on built course.html
+    review-course.js                   ← Playwright screenshot capture (visual review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
+    serve.js                           ← Live preview server for Codespace
     lib/
       validate-layout.js               ← Shared validation for course-layout.json
+    extract.js                         ← ⚠️ ARCHIVED — SCORM: folder → content-bucket.json
+    design-course.js                   ← ⚠️ ARCHIVED — SCORM: content-bucket → course-layout.json
   input/                               ← AI-first inputs
     topic-brief.txt                    ← Plain text topic description
     urls.txt                           ← One URL per line (optional)
     docs/                              ← Drop PDFs/PPTXs here (future)
   output/
     knowledge-base.json                ← AI-first research output
-    content-bucket.json                ← SCORM extraction output
     brand-profile.json                 ← Scraped from brand URL (raw data)
     brand-screenshot.png               ← Playwright screenshot of brand landing page
     brand-design.md                    ← Natural language brand description for Stitch
-    course-layout.json                 ← Structured course (from either path)
+    course-layout.json                 ← Structured course (AI-generated)
     stitch-course-raw.html             ← Stitch's complete designed page
     stitch-course-meta.json            ← Stitch API response metadata
     stitch-course-screenshot.png       ← Stitch's design preview
@@ -175,59 +159,45 @@ EV/                                    ← Test SCORM (64 slides, gitignored in 
 
 ## The Pipeline
 
-### AI-First Path (primary)
-
-#### Step 1 — Research (`v5/scripts/research-content.js`)
+### Step 1 — Research (`v5/scripts/research-content.js`)
 **Input:** Topic brief + optional URLs | **Output:** `knowledge-base.json`
 
 Claude Code subagent with expert SME persona researches the topic using web search. Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent. Run: `node v5/scripts/research-content.js --topic "Your Topic"`
 
 **⚠️ Subagent workflow:** The script writes a research prompt, then you spawn a subagent (Agent tool) to do the research. The subagent uses web search, reads the schema, and writes `v5/output/knowledge-base.json`. Validate after: `node v5/scripts/research-content.js --load v5/output/knowledge-base.json`.
 
-#### Step 2 — Generate Course (`v5/scripts/generate-layout.js`)
+### Step 2 — Generate Course (`v5/scripts/generate-layout.js`)
 **Input:** `knowledge-base.json` + `brand-design.md` + `brand-profile.json` + `generation-engine.md` | **Output:** `course-layout.json`
 
 Claude Code subagent with senior instructional designer persona generates the complete course. Reads the brand brief for voice calibration (playful/corporate/technical/warm). Designs with emotional arc (hook→foundation→challenge→insight→application), structural archetypes (6 patterns to remix), and density rhythm (breather/standard/deep-dive). Creates ALL assessments from raw facts (no pre-built quizzes in KB). Uses `component-library.json` as creative palette (reads `learningMoment` + `creativeUses` per component).
 
 **⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `v5/output/course-layout.json`. Validate after: `node v5/scripts/generate-layout.js --load v5/output/course-layout.json`.
 
-### SCORM Import Path (legacy/future premium)
-
-#### Phase 1 — Extraction (`v5/scripts/extract.js`)
-**Input:** SCORM folder | **Output:** `content-bucket.json`
-
-Extracts content + logic from Storyline HTML5 exports. See `v5/LOGIC-EXTRACTION.md`.
-
-#### Phase 3 — AI Layout Engine (`v5/scripts/design-course.js`)
-**Input:** `content-bucket.json` + `brand-profile.json` + `layout-engine.md` | **Output:** `course-layout.json`
-
-AI restructures SCORM content. Uses shared `validateLayout()` from `v5/scripts/lib/validate-layout.js`.
-
-### Shared Pipeline (both paths)
-
-### Phase 4a — Stitch Component Kit (`v5/scripts/generate-course-html.js`)
+### Step 3 — Stitch Component Kit (`v5/scripts/generate-course-html.js`)
 **Input:** `brand-design.md` + `representative-course.md` | **Output:** `component-patterns/` + `design-tokens.json` + `design-contract.json`
 **Model:** GEMINI_3_1_PRO
 
 See `v5/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the end.
 
-### Phase 4b — Image Generation (`v5/scripts/generate-images.js`)
+### Step 4 — Image Generation (`v5/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
-**Runs AFTER Phase 4a.** Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
+**Runs AFTER Step 3.** Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
 
-### Phase 5 — Build (`v5/scripts/build-course.js`)
+### Step 5 — Build (`v5/scripts/build-course.js`)
 **Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
 
 See `v5/BUILD-SYSTEM.md`.
 
-### Phase 6 — Visual Review (`v5/scripts/review-course.js`)
-**Mandatory after every pipeline run.** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews visually, fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light).
+### Step 6 — QA + Review
+**6a — Programmatic QA (`v5/scripts/qa-course.js`):** Structural checks on built HTML — section coverage, component integrity, quiz validity, image integrity, heading hierarchy, duplicate IDs. Run BEFORE visual review. If it fails, fix before proceeding.
+
+**6b — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews visually, fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light).
 
 ---
 
 ## ⛔ Full Pipeline — MANDATORY CHECKLIST
 
-**Every test run MUST execute ALL phases. No skipping. No reusing stale outputs.**
+**Every test run MUST execute ALL steps. No skipping. No reusing stale outputs.**
 
 ### Pre-run: Clear stale outputs
 ```bash
@@ -238,26 +208,16 @@ rm -f v5/output/stitch-course-raw.html v5/output/stitch-course-meta.json
 rm -f v5/output/stitch-course-screenshot.png v5/output/course.html
 ```
 
-### AI-First path (run in order)
+### Run in order
 ```bash
 node v5/scripts/research-content.js --topic "Your Topic"  # Step 1 (subagent researches)
 node v5/scripts/scrape-brand.js                            # Brand analysis
 node v5/scripts/generate-layout.js                         # Step 2 (subagent generates course)
-node v5/scripts/generate-course-html.js                    # Stitch component kit
-node v5/scripts/generate-images.js                         # Image generation
-node v5/scripts/build-course.js                            # Build final HTML
-node v5/scripts/review-course.js                           # Visual review
-```
-
-### SCORM import path (run in order)
-```bash
-node v5/scripts/extract.js EV              # Phase 1 (skip ONLY if same SCORM)
-node v5/scripts/scrape-brand.js            # Phase 2
-node v5/scripts/design-course.js           # Phase 3
-node v5/scripts/generate-course-html.js    # Phase 4a
-node v5/scripts/generate-images.js         # Phase 4b
-node v5/scripts/build-course.js            # Phase 5
-node v5/scripts/review-course.js           # Phase 6
+node v5/scripts/generate-course-html.js                    # Step 3 (Stitch component kit)
+node v5/scripts/generate-images.js                         # Step 4 (image generation)
+node v5/scripts/build-course.js                            # Step 5 (build final HTML)
+node v5/scripts/qa-course.js                               # Step 6a (programmatic QA — fix if fails)
+node v5/scripts/review-course.js                           # Step 6b (visual review)
 ```
 
 **If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**
@@ -266,7 +226,7 @@ node v5/scripts/review-course.js           # Phase 6
 - `STITCH_API_KEY`: stitch.withgoogle.com → Settings → API Keys
 - `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via FLUX.1-schnell (default)
 - `PEXELS_API_KEY`: pexels.com/api → free stock photo fallback, 200 req/hr
-- `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis + SCORM layout engine
+- `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis
 
 ---
 
@@ -275,7 +235,6 @@ node v5/scripts/review-course.js           # Phase 6
 | Type | Purpose |
 |---|---|
 | `hero` | Full-viewport opening with background image, title, CTA |
-| `path-selector` | Persistent course path/role selector with state management |
 | `text` | Prose paragraphs, introductions, explanations |
 | `graphic` | Full-width image |
 | `graphic-text` | Side-by-side text + image (alternates left/right) |
@@ -304,9 +263,9 @@ node v5/scripts/review-course.js           # Phase 6
 ---
 
 ## Test Data
-- **SCORM:** `EV/` — 64-slide EV Awareness & Safety course (gitignored, in Codespace)
 - **Brand URL:** stored in `brand/url.txt` — currently `https://sprig.framer.website/`
 - **Previously tested brands:** sprig (dark, cyan), fluence (light, amethyst), ailyx (light, blue), fitflow (light, pink-blue gradient), landio (dark, sleek SaaS), crimzon (dark, crimson), aigents (light, purple), najaf (dark, green)
+- **SCORM (archived):** `EV/` — 64-slide EV Awareness & Safety course (gitignored, for future SCORM path reactivation only)
 
 ---
 
@@ -317,19 +276,19 @@ GitHub Pages serves from root `index.html` on `Current-working-2`. `build-course
 
 ## ⛔ ABSOLUTE RULES
 
+### AI-FIRST ONLY
+The active pipeline is AI-first. SCORM import code (extract.js, design-course.js, layout-engine.md, content-bucket) is **archived** — do not run it, do not include it in pipeline runs, do not write checks for it. When the user says "run it" or "full pipeline", they mean the AI-first steps above.
+
 ### UNIVERSAL ENGINE
-The purpose of every conversation is to improve the **engine** — the scripts, prompts, schemas, and templates that power the pipeline. The test SCORM file and brand URL are diagnostic tools only. Every change must work for ANY Storyline SCORM file and ANY brand URL.
+The purpose of every conversation is to improve the **engine** — the scripts, prompts, schemas, and templates that power the pipeline. The brand URL is a diagnostic tool only. Every change must work for ANY topic and ANY brand URL.
 
 **ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
 
 ### STITCH DESIGNS THE COMPONENT KIT
 Stitch designs the visual system. We don't hardcode design decisions. Different brand URL → different Stitch kit → different visual output.
 
-### CONTENT FIDELITY
-All educational content from the SCORM must be preserved. Every quiz question, every text block, every learning objective. The AI layout engine rewords for clarity but never invents facts or drops content.
-
-### LOGIC FIDELITY
-The learning design intent — branching, difficulty levels, conditional content paths — must be extracted from the SCORM and mapped to modern interactive patterns. See `v5/LOGIC-EXTRACTION.md`.
+### CONTENT QUALITY
+The AI generation agent creates rich, accurate educational content. Assessments test application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm. No invented facts.
 
 ### AUTHORING LAYER COMPATIBILITY
-The design system and course structure are reusable assets. The future authoring layer must be able to: re-render with edited content, swap component types, move content between paths, and customise without re-running the pipeline.
+The design system and course structure are reusable assets. The future authoring layer must be able to: re-render with edited content, swap component types, and customise without re-running the pipeline.
