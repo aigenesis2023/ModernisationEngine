@@ -1,24 +1,31 @@
 #!/usr/bin/env node
 /**
- * V5 Course Reviewer — Automated Screenshot Capture
+ * V5 Course Reviewer — Vision-Based Quality Audit
  *
- * Takes Playwright screenshots of every section in the generated course,
- * plus the brand screenshot for visual comparison. Outputs to screenshots/
- * with consistent naming for easy before/after comparison.
+ * Captures Playwright screenshots of every section (desktop + mobile),
+ * then outputs them for Claude Code Vision review with structured prompts.
+ *
+ * This is the SUBJECTIVE quality gate — it catches things computed checks can't:
+ *   - Visual rhythm and monotony (three identical layouts in a row)
+ *   - Gradient-on-gradient readability
+ *   - Whether interactive elements look clickable
+ *   - Mobile layout feeling intentional vs squashed desktop
+ *   - Emotional arc — does the density build and breathe
+ *
+ * Deterministic checks (contrast ratios, spacing, overlap) live in qa-interactive.js.
  *
  * Usage: node v5/scripts/review-course.js
  *
  * Output:
- *   screenshots/brand.jpeg          — Brand URL reference
  *   screenshots/section-00.jpeg     — Hero section
  *   screenshots/section-01.jpeg     — First content section
  *   screenshots/section-NN.jpeg     — Each subsequent section
- *   screenshots/footer.jpeg         — Footer / course complete
+ *   screenshots/completion.jpeg     — Course completion block
  *   screenshots/mobile-hero.jpeg    — Mobile viewport hero
  *   screenshots/mobile-mid.jpeg     — Mobile viewport mid-page
+ *   screenshots/mobile-end.jpeg     — Mobile viewport end
  *
- * These screenshots are reviewed by Claude Code (vision) to identify
- * layout issues, spacing problems, and visual quality gaps. Fixes go
+ * These screenshots are reviewed by Claude Code (vision). Fixes go
  * into the engine (build-course.js, hydrate.js, etc.), never into output.
  */
 
@@ -30,11 +37,10 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const SCREENSHOTS_DIR = path.resolve(ROOT, 'screenshots');
 const COURSE_PATH = path.resolve(ROOT, 'v5/output/course.html');
 const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
-const BRAND_SCREENSHOT = path.resolve(ROOT, 'v5/output/brand-screenshot.png');
 
 async function main() {
-  console.log('V5 Course Reviewer — Screenshot Capture');
-  console.log('========================================\n');
+  console.log('V5 Course Reviewer — Vision-Based Quality Audit');
+  console.log('================================================\n');
 
   // Validate inputs
   if (!fs.existsSync(COURSE_PATH)) {
@@ -49,16 +55,13 @@ async function main() {
   // Ensure screenshots directory exists
   fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
 
-  // Copy brand screenshot for reference
-  if (fs.existsSync(BRAND_SCREENSHOT)) {
-    fs.copyFileSync(BRAND_SCREENSHOT, path.join(SCREENSHOTS_DIR, 'brand.jpeg'));
-    console.log('[ok] Copied brand screenshot for reference');
-  }
-
-  // Read layout to get section IDs
+  // Read layout to get section info
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
   const sections = layout.sections || [];
-  console.log(`[ok] Found ${sections.length} sections to capture\n`);
+  const courseTitle = layout.course?.title || 'Course';
+  const archetype = layout.metadata?.archetype || 'unknown';
+  console.log(`Course: "${courseTitle}" (archetype: ${archetype})`);
+  console.log(`Sections: ${sections.length}\n`);
 
   // Launch browser
   const browser = await chromium.launch({ headless: true });
@@ -67,10 +70,7 @@ async function main() {
   console.log('--- Desktop (1440x900) ---');
   const desktopPage = await browser.newPage();
   await desktopPage.setViewportSize({ width: 1440, height: 900 });
-
-  // Load via file:// protocol (no server needed)
   await desktopPage.goto(`file://${COURSE_PATH}`, { waitUntil: 'networkidle' });
-  // Wait for fonts and images to load
   await desktopPage.waitForTimeout(2000);
 
   // Screenshot each section
@@ -79,14 +79,9 @@ async function main() {
     const sectionId = section.sectionId || `section-${String(i).padStart(2, '0')}`;
     const filename = `section-${String(i).padStart(2, '0')}.jpeg`;
 
-    // Scroll to section
     const found = await desktopPage.evaluate((id) => {
-      // Try finding by ID
       let el = document.getElementById(id);
-      if (!el) {
-        // Try finding section with matching ID in any attribute
-        el = document.querySelector(`[id="${id}"]`);
-      }
+      if (!el) el = document.querySelector(`[id="${id}"]`);
       if (el) {
         el.scrollIntoView({ behavior: 'instant', block: 'start' });
         return true;
@@ -95,7 +90,6 @@ async function main() {
     }, sectionId);
 
     if (!found) {
-      // Fallback: scroll by percentage
       await desktopPage.evaluate((pct) => {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         window.scrollTo(0, maxScroll * pct);
@@ -103,7 +97,6 @@ async function main() {
     }
 
     await desktopPage.waitForTimeout(300);
-
     await desktopPage.screenshot({
       path: path.join(SCREENSHOTS_DIR, filename),
       type: 'jpeg',
@@ -112,15 +105,15 @@ async function main() {
     console.log(`  [ok] ${filename} — ${section.title || '(hero)'}`);
   }
 
-  // Footer / completion section
+  // Completion section (scroll to bottom)
   await desktopPage.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
   await desktopPage.waitForTimeout(300);
   await desktopPage.screenshot({
-    path: path.join(SCREENSHOTS_DIR, 'footer.jpeg'),
+    path: path.join(SCREENSHOTS_DIR, 'completion.jpeg'),
     type: 'jpeg',
     quality: 90,
   });
-  console.log('  [ok] footer.jpeg — Course complete + footer');
+  console.log('  [ok] completion.jpeg — Course completion block');
 
   await desktopPage.close();
 
@@ -141,7 +134,7 @@ async function main() {
   });
   console.log('  [ok] mobile-hero.jpeg');
 
-  // Mobile mid-page (scroll to ~40%)
+  // Mobile mid-page (40%)
   await mobilePage.evaluate(() => {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo(0, maxScroll * 0.4);
@@ -154,17 +147,85 @@ async function main() {
   });
   console.log('  [ok] mobile-mid.jpeg');
 
+  // Mobile end (90%)
+  await mobilePage.evaluate(() => {
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    window.scrollTo(0, maxScroll * 0.9);
+  });
+  await mobilePage.waitForTimeout(300);
+  await mobilePage.screenshot({
+    path: path.join(SCREENSHOTS_DIR, 'mobile-end.jpeg'),
+    type: 'jpeg',
+    quality: 90,
+  });
+  console.log('  [ok] mobile-end.jpeg');
+
   await mobilePage.close();
   await browser.close();
 
-  // ─── Summary ───────────────────────────────────────────────────────
+  // ─── Summary + Vision review instructions ──────────────────────────
   const files = fs.readdirSync(SCREENSHOTS_DIR).filter(f => f.endsWith('.jpeg'));
-  console.log(`\n========================================`);
-  console.log(`Review complete: ${files.length} screenshots saved to screenshots/`);
-  console.log(`\nFiles:`);
+  console.log(`\n================================================`);
+  console.log(`Screenshots captured: ${files.length} files in screenshots/\n`);
   files.sort().forEach(f => console.log(`  ${f}`));
-  console.log(`\nReview these screenshots, identify issues, fix the engine, rebuild.`);
+
+  // Build section map for review context
+  const sectionMap = sections.map((s, i) => {
+    const types = (s.components || []).map(c => c.type).join(', ');
+    const width = s.sectionWidth || 'standard';
+    return `  ${String(i).padStart(2, '0')}: "${s.title || '(hero)'}" [${types}] (${width})`;
+  }).join('\n');
+
+  console.log(`\n================================================`);
+  console.log(`VISION REVIEW PROMPT`);
+  console.log(`================================================\n`);
+  console.log(`Review the screenshots above for "${courseTitle}" (archetype: ${archetype}).`);
+  console.log(`\nSection map:\n${sectionMap}\n`);
+  console.log(REVIEW_PROMPT);
 }
+
+// ─── Structured Vision Review Prompt ─────────────────────────────────
+// This prompt guides Claude Code Vision to evaluate subjective quality.
+// Deterministic checks (contrast, spacing, overflow) are in qa-interactive.js.
+const REVIEW_PROMPT = `
+For each screenshot, evaluate these 5 categories. Give a PASS/WARN/FAIL verdict
+with a one-line reason. Only flag genuine issues — do not nitpick.
+
+## 1. VISUAL RHYTHM
+Does the section sequence feel varied or monotonous?
+- FAIL: Three or more consecutive sections with identical visual structure
+- WARN: Two similar layouts in a row, or a section that feels flat/empty
+- PASS: Good variation in density, width, and component types between sections
+
+## 2. READABILITY
+Can all text be read comfortably?
+- FAIL: Text lost in a busy background, gradient-on-gradient that's unreadable
+- WARN: Text that requires squinting, overly thin fonts on complex backgrounds
+- PASS: All text is clear and legible
+(Note: solid-background contrast is checked computationally — focus on gradients,
+overlays, and complex visual situations only)
+
+## 3. COMPONENT QUALITY
+Do interactive elements look like interactive elements?
+- FAIL: Buttons that don't look clickable, cards with no visual affordance
+- WARN: Quiz choices that blend into the background, tabs that look like plain text
+- PASS: Clear visual affordances — buttons look tappable, cards look interactive
+
+## 4. MOBILE COHERENCE
+Does the mobile layout feel intentional?
+- FAIL: Content clearly cut off, overlapping elements, unreadable text
+- WARN: Layout that works but feels like squashed desktop rather than designed for mobile
+- PASS: Mobile layout feels considered — appropriate stacking, readable text, usable targets
+
+Output format — one line per category, per section group:
+  [RHYTHM]     PASS/WARN/FAIL — reason
+  [READABILITY] PASS/WARN/FAIL — reason
+  [COMPONENTS] PASS/WARN/FAIL — reason
+  [MOBILE]     PASS/WARN/FAIL — reason
+
+End with an overall verdict and a prioritised list of fixes (if any).
+Fixes go in the ENGINE (build-course.js, hydrate.js, generation-engine.md, etc.) — never in output files.
+`;
 
 main().catch(err => {
   console.error('Review failed:', err.message);

@@ -822,6 +822,140 @@ async function run() {
     }
   }
 
+  // NOTE: Text-on-image overlap and color contrast checks intentionally omitted.
+  // Text over images is a deliberate design technique (hero, full-bleed, overlays).
+  // Contrast is inherently visual and context-dependent — Stitch's colour choices,
+  // gradients, and overlays all need human/Vision judgement, not computed thresholds.
+  // Both are handled by Vision in review-course.js (readability category).
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 14: Section spacing violations
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing section spacing...');
+  const spacingIssues = await page.evaluate(() => {
+    var issues = [];
+    var MIN_SECTION_PADDING = 40; // px — sections should have breathing room
+    var components = document.querySelectorAll('[data-component-type]');
+
+    components.forEach(function (comp) {
+      var type = comp.getAttribute('data-component-type');
+      if (type === 'navigation' || type === 'hero') return;
+
+      var cs = window.getComputedStyle(comp);
+      var pt = parseFloat(cs.paddingTop);
+      var pb = parseFloat(cs.paddingBottom);
+
+      // Check if the component or its parent section wrapper has enough vertical padding
+      var parent = comp.parentElement;
+      if (parent) {
+        var parentCs = window.getComputedStyle(parent);
+        pt = Math.max(pt, parseFloat(parentCs.paddingTop));
+        pb = Math.max(pb, parseFloat(parentCs.paddingBottom));
+      }
+
+      if (pt < MIN_SECTION_PADDING && pb < MIN_SECTION_PADDING) {
+        issues.push({
+          type: type,
+          paddingTop: Math.round(pt),
+          paddingBottom: Math.round(pb)
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (spacingIssues.length === 0) {
+    pass('SPACING', 'All sections have adequate vertical spacing ✓');
+  } else {
+    for (const issue of spacingIssues) {
+      warn('SPACING', `${issue.type}: tight spacing (top: ${issue.paddingTop}px, bottom: ${issue.paddingBottom}px — min ${40}px)`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 15: Collapsed/empty sections
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing for collapsed sections...');
+  const collapsedIssues = await page.evaluate(() => {
+    var issues = [];
+    var MIN_SECTION_HEIGHT = 60; // px — anything smaller is likely broken
+    var sectionTracks = document.querySelectorAll('[data-section-track]');
+
+    sectionTracks.forEach(function (sec) {
+      var sectionId = sec.getAttribute('data-section-track') || sec.id;
+      // Measure from this title bar to the next
+      var totalHeight = sec.getBoundingClientRect().height;
+      var node = sec.nextElementSibling;
+      while (node) {
+        if (node.hasAttribute('data-section-track')) break;
+        totalHeight += node.getBoundingClientRect().height;
+        node = node.nextElementSibling;
+      }
+
+      if (totalHeight < MIN_SECTION_HEIGHT) {
+        issues.push({
+          sectionId: sectionId,
+          height: Math.round(totalHeight)
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (collapsedIssues.length === 0) {
+    pass('COLLAPSED', 'No collapsed or empty sections ✓');
+  } else {
+    for (const issue of collapsedIssues) {
+      fail('COLLAPSED', `Section "${issue.sectionId}" is only ${issue.height}px tall — likely broken`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 16: Z-index stacking (nav visibility)
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing z-index stacking...');
+  // Scroll to mid-page and check nav is still on top
+  await page.evaluate(() => {
+    window.scrollTo(0, document.documentElement.scrollHeight * 0.3);
+  });
+  await page.waitForTimeout(300);
+
+  const zIndexIssues = await page.evaluate(() => {
+    var issues = [];
+    var nav = document.querySelector('[data-component-type="navigation"]');
+    if (!nav) return issues;
+
+    var navRect = nav.getBoundingClientRect();
+    // Sample a point at the center of the nav bar
+    var centerX = navRect.left + navRect.width / 2;
+    var centerY = navRect.top + navRect.height / 2;
+    var topEl = document.elementFromPoint(centerX, centerY);
+
+    // The top element should be the nav or a child of the nav
+    if (topEl && !nav.contains(topEl)) {
+      issues.push({
+        issue: 'Navigation bar is obscured by another element',
+        obscuredBy: topEl.tagName.toLowerCase() + (topEl.className ? '.' + topEl.className.split(' ')[0] : '')
+      });
+    }
+
+    return issues;
+  });
+
+  if (zIndexIssues.length === 0) {
+    pass('ZINDEX', 'Navigation stays on top when scrolled ✓');
+  } else {
+    for (const issue of zIndexIssues) {
+      fail('ZINDEX', `${issue.issue} (by ${issue.obscuredBy})`);
+    }
+  }
+
+  // Scroll back to top for consistent state
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.waitForTimeout(200);
+
   // ─── Cleanup ───────────────────────────────────────────────────────
   await browser.close();
 

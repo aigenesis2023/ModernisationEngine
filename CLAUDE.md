@@ -10,7 +10,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring-4` (active development) | `Current-working-2` (GitHub Pages deploy target)
+**Branch:** `ai-first-authoring-5` (active development) | `Current-working-2` (GitHub Pages deploy target)
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
@@ -129,7 +129,7 @@ v5/                                    ← ALL ACTIVE CODE
     build-course.js                    ← Contract fill: design-contract.json + real content → course.html
     qa-course.js                       ← Structural QA: HTML integrity, component coverage, content coverage
     qa-interactive.js                  ← Interactive QA: Playwright tests all clickable components + layout
-    review-course.js                   ← Playwright screenshot capture (visual review)
+    review-course.js                   ← Vision-based quality audit (subjective review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
     serve.js                           ← Live preview server for Codespace
     lib/
@@ -196,9 +196,9 @@ See `v5/BUILD-SYSTEM.md`.
 ### Step 6 — QA + Review (three gates, in order)
 **6a — Structural QA (`v5/scripts/qa-course.js`):** Validates built HTML without a browser — section coverage, component integrity, quiz wiring, image integrity, heading hierarchy, duplicate IDs, content coverage vs knowledge base, design token/contract integrity, accessibility basics. **If it fails, fix before proceeding.**
 
-**6b — Interactive QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser, tests every interactive component: clicks quiz choices (submit → feedback → retry), switches all tabs, flips flashcards, navigates carousels, expands accordions, checks checklists with progress counter. Also validates content overflow (desktop + mobile), font size minimums, tap target sizes, heading hierarchy, and invisible content. **If it fails, fix before proceeding.**
+**6b — Interactive QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser, tests every interactive component: clicks quiz choices (submit → feedback → retry), switches all tabs, flips flashcards, navigates carousels, expands accordions, checks checklists with progress counter. Also validates content overflow (desktop + mobile), font size minimums, tap target sizes, heading hierarchy, invisible content, section spacing, collapsed sections, and nav z-index stacking. **If it fails, fix before proceeding.**
 
-**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews visually, fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light). **Only run after 6a and 6b pass.**
+**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews with structured Vision prompts across 4 categories: visual rhythm, readability (gradient/overlay situations), component quality (interactive affordances), and mobile coherence. Outputs PASS/WARN/FAIL verdicts per category. Fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light). **Only run after 6a and 6b pass.**
 
 ---
 

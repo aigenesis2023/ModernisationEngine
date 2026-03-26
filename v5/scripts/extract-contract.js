@@ -488,38 +488,14 @@ function extractTextInput(html) {
 }
 
 function extractNav(shellJson) {
+  // Nav is now fully built by build-course.js (slim header + drawer).
+  // We only extract the navClass for background/blur styling reference.
   if (!shellJson || !shellJson.nav) return {};
   const $ = cheerio.load(shellJson.nav);
-  const contract = {};
-
-  const nav = $('nav').first();
-  contract.navClass = nav.attr('class') || '';
-
-  // Active link
-  const activeLink = $('a').filter((_, el) => {
-    const cls = $(el).attr('class') || '';
-    return cls.includes('border-b');
-  }).first();
-  contract.activeLinkClass = activeLink.attr('class') || 'text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm uppercase';
-
-  // Inactive link
-  const inactiveLink = $('a').filter((_, el) => {
-    const cls = $(el).attr('class') || '';
-    return cls.includes('hover:text') && !cls.includes('border-b');
-  }).first();
-  contract.inactiveLinkClass = inactiveLink.attr('class') || 'text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase';
-
-  return contract;
+  return { navClass: $('nav').first().attr('class') || '' };
 }
 
-function extractFooter(shellJson) {
-  if (!shellJson || !shellJson.footer) return {};
-  const $ = cheerio.load(shellJson.footer);
-
-  return {
-    footerClass: $('footer').attr('class') || 'bg-surface-dim w-full py-12 border-t border-on-surface/5'
-  };
-}
+// Footer removed — e-learning courses don't need a website-style footer.
 
 // ─── Main extraction ─────────────────────────────────────────────────
 
@@ -585,13 +561,11 @@ function extractAll() {
     }
   }
 
-  // Extract nav and footer from page shell
+  // Extract nav from page shell (footer removed — not needed for e-learning)
   if (fs.existsSync(SHELL_PATH)) {
     const shell = JSON.parse(fs.readFileSync(SHELL_PATH, 'utf-8'));
     contract._nav = extractNav(shell);
-    contract._footer = extractFooter(shell);
     console.log(`  [ok] nav — ${Object.keys(contract._nav).length} properties`);
-    console.log(`  [ok] footer — ${Object.keys(contract._footer).length} properties`);
   }
 
   // Write contract

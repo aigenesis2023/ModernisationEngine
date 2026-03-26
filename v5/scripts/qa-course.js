@@ -312,11 +312,11 @@ function checkComponentCoverage(html, layout) {
     warn('COVERAGE', 'No navigation component');
   }
 
-  // Footer present
-  if (html.includes('data-component-type="footer"')) {
-    pass('COVERAGE', 'Footer component present');
+  // Drawer nav present (section navigation)
+  if (html.includes('data-drawer-link')) {
+    pass('COVERAGE', 'Section drawer navigation present');
   } else {
-    warn('COVERAGE', 'No footer component');
+    warn('COVERAGE', 'No section drawer navigation');
   }
 }
 
@@ -871,15 +871,12 @@ function checkAccessibility(html) {
     warn('A11Y', 'Missing prefers-reduced-motion support');
   }
 
-  // Check nav has links
-  const navBlocks = extractComponentBlocks(html, 'navigation');
-  if (navBlocks.length > 0) {
-    const navLinks = (navBlocks[0].match(/<a[\s>]/g) || []).length;
-    if (navLinks > 0) {
-      pass('A11Y', `Navigation has ${navLinks} links`);
-    } else {
-      warn('A11Y', 'Navigation component has no <a> links');
-    }
+  // Check section drawer has links
+  const drawerLinks = (html.match(/data-drawer-link/g) || []).length;
+  if (drawerLinks > 0) {
+    pass('A11Y', `Section drawer has ${drawerLinks} navigation links`);
+  } else {
+    warn('A11Y', 'Section drawer has no navigation links');
   }
 }
 

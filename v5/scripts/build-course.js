@@ -194,12 +194,14 @@ ${colorEntries}
     }
     .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
 
-    /* Scroll progress bar */
-    #scroll-progress {
-        position: fixed; top: 0; left: 0; height: 3px; z-index: 9999;
-        background: linear-gradient(90deg, ${secondary}, ${primary});
-        transition: width 0.1s;
+    /* Scroll progress bar (injected by hydrate.js as #hydrate-progress) */
+    #hydrate-progress {
+        background: linear-gradient(90deg, ${secondary}, ${primary}) !important;
     }
+
+    /* Nav drawer */
+    .nav-drawer { scrollbar-width: thin; }
+    .drawer-link-active .drawer-index { color: ${primary}; }
 
     /* Utility: hide details marker */
     details summary::-webkit-details-marker { display: none; }
@@ -1581,63 +1583,58 @@ function fillComponent(comp, index, sectionWidth) {
 // ═══════════════════════════════════════════════════════════════════════
 
 function buildNav(layout) {
-  const nav = DC._nav || {};
-  if (!nav.navClass) return '';
-
   const courseTitle = esc(layout.course.title || 'Course');
-  const sections = layout.sections.filter(s => s.title).slice(0, 5);
+  const sections = layout.sections.filter(s => s.title);
 
-  let navClass = nav.navClass || '';
-  // Ensure critical nav layout classes are always present
-  const requiredNav = ['fixed', 'top-0', 'w-full', 'z-50', 'flex', 'justify-between', 'items-center'];
-  requiredNav.forEach(cls => { if (!navClass.includes(cls)) navClass += ` ${cls}`; });
-  if (!/h-\d+/.test(navClass)) navClass += ' h-20';
-  if (!/px-\d+/.test(navClass)) navClass += ' px-8';
-  if (!navClass.includes('bg-')) navClass += ' bg-surface-container/60 backdrop-blur-xl';
-  navClass = navClass.trim();
-
-  const activeLinkClass = nav.activeLinkClass || 'text-primary border-b-2 border-primary pb-1 font-bold tracking-tight text-sm uppercase';
-  const inactiveLinkClass = nav.inactiveLinkClass || 'text-on-surface-variant hover:text-white transition-colors font-bold tracking-tight text-sm uppercase';
-
-  const navLinks = sections.map((s, i) => {
-    const cls = i === 0 ? activeLinkClass : inactiveLinkClass;
+  // Build section list for the slide-out drawer
+  const drawerLinks = sections.map((s, i) => {
     const sId = s.sectionId || `section-${i}`;
-    return `<a class="${cls} whitespace-nowrap" href="#${sId}" data-nav-link="${sId}">${esc(s.title)}</a>`;
+    return `<a class="drawer-link flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-on-surface-variant hover:text-on-surface hover:bg-surface-container-high transition-all" href="#${sId}" data-drawer-link="${sId}">
+<span class="drawer-index text-xs font-bold text-outline-variant w-5 text-center">${String(i + 1).padStart(2, '0')}</span>
+<span class="flex-1 truncate">${esc(s.title)}</span>
+<span class="drawer-status material-symbols-outlined text-base text-outline-variant" style="font-size:16px"></span>
+</a>`;
   }).join('\n');
 
-  return `<nav class="${navClass}" data-component-type="navigation">
-<div class="flex items-center gap-4">
-<span class="text-xl font-black tracking-tighter text-primary italic">${courseTitle}</span>
+  return `<!-- Slim sticky header -->
+<nav class="fixed top-0 w-full z-50 h-14 px-4 md:px-8 flex items-center justify-between glass-nav bg-background/80 backdrop-blur-xl" data-component-type="navigation">
+<button class="nav-hamburger p-2 -ml-2 rounded-lg hover:bg-on-surface/5 transition-colors" aria-label="Open section menu" data-nav-toggle>
+<span class="material-symbols-outlined text-on-surface">menu</span>
+</button>
+<span class="text-sm font-bold tracking-tight text-on-surface truncate max-w-[60vw] md:max-w-none">${courseTitle}</span>
+<div class="flex items-center gap-2">
+<span class="text-xs font-medium text-on-surface-variant tabular-nums" data-progress-text>0%</span>
 </div>
-<div class="hidden md:flex gap-6 items-center overflow-hidden">
-${navLinks}
+</nav>
+
+<!-- Section drawer overlay -->
+<div class="nav-drawer-overlay fixed inset-0 z-[60] bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300" data-drawer-overlay></div>
+
+<!-- Section drawer -->
+<aside class="nav-drawer fixed top-0 left-0 z-[70] h-full w-80 max-w-[85vw] bg-surface-container shadow-2xl transform -translate-x-full transition-transform duration-300 ease-out flex flex-col" data-drawer>
+<div class="flex items-center justify-between px-4 h-14 border-b border-outline-variant/20 shrink-0">
+<span class="text-sm font-bold text-on-surface">Sections</span>
+<button class="p-2 rounded-lg hover:bg-on-surface/5 transition-colors" data-drawer-close aria-label="Close menu">
+<span class="material-symbols-outlined text-on-surface-variant">close</span>
+</button>
 </div>
-<div class="flex items-center gap-4">
-<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">notifications</span></button>
-<button class="hover:bg-on-surface/5 p-2 rounded-full transition-all"><span class="material-symbols-outlined text-on-surface-variant">account_circle</span></button>
+<div class="flex-1 overflow-y-auto py-3 px-2 custom-scrollbar flex flex-col gap-0.5">
+${drawerLinks}
 </div>
-</nav>`;
+<div class="shrink-0 px-4 py-3 border-t border-outline-variant/20">
+<div class="flex items-center justify-between text-xs text-on-surface-variant mb-2">
+<span>Progress</span>
+<span data-drawer-progress-text>0%</span>
+</div>
+<div class="w-full h-1.5 rounded-full bg-surface-container-high overflow-hidden">
+<div class="h-full rounded-full bg-primary transition-all duration-300" data-drawer-progress-bar style="width:0%"></div>
+</div>
+</div>
+</aside>`;
 }
 
-function buildFooter(layout) {
-  const footer = DC._footer || {};
-  const courseTitle = esc(layout.course.title || 'Course');
-  const year = new Date().getFullYear();
-  const footerClass = footer.footerClass || 'bg-surface-dim w-full py-10 border-t border-on-surface/10';
-
-  return `<footer class="${footerClass}" data-component-type="footer">
-<div class="max-w-6xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
-<div class="flex flex-col gap-2 items-center md:items-start">
-<span class="text-lg font-bold text-on-surface">${courseTitle}</span>
-<span class="text-xs text-on-surface-variant">&copy; ${year} ${courseTitle}. All rights reserved.</span>
-</div>
-<div class="flex gap-8">
-<a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
-<a class="text-xs text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
-</div>
-</div>
-</footer>`;
-}
+// Footer removed — e-learning courses end with their final section + completion block.
+// No generic website footer needed. Future platform-level footer handled by authoring layer.
 
 // ═══════════════════════════════════════════════════════════════════════
 // MAIN BUILD
@@ -1769,9 +1766,8 @@ function build() {
     console.log(`[ok] Course gate: content after section ${gateIndex} wrapped in gate (${after.length} sections gated)`);
   }
 
-  // Build nav and footer from contract
+  // Build nav (slim header + drawer)
   const navHtml = buildNav(layout);
-  const footerHtml = buildFooter(layout);
 
   // Get hydration script
   let hydrateScript = '';
@@ -1813,7 +1809,7 @@ ${finalHead}
 
 ${navHtml}
 
-<main class="min-h-screen bg-background overflow-x-hidden pt-20">
+<main class="min-h-screen bg-background overflow-x-hidden pt-14">
 ${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
@@ -1829,8 +1825,6 @@ ${sectionsHtml.join('\n\n')}
   <button class="btn-primary px-8 py-3 rounded-full font-bold text-sm" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
 </div>
 </section>
-
-${footerHtml}
 </main>
 
 <script>

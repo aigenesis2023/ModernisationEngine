@@ -9,10 +9,11 @@ IMPORTANT: Wrap every component in a container with a `data-component-type` attr
 ## PAGE STRUCTURE
 
 ### Navigation
-A fixed top navigation bar with:
-- Course logo/title on the left
-- Section links in the center (hidden on mobile, hamburger menu)
-- A "Back to Top" button on the right
+A slim fixed top navigation bar (48–56px height) with:
+- Hamburger menu icon on the left (opens a slide-out section drawer)
+- Course title centered
+- Progress percentage on the right
+Keep it minimal — no section links in the header, no notification/profile icons. The section drawer (slide-in panel from left) is built by the hydration script, not by Stitch.
 
 ---
 
@@ -453,15 +454,9 @@ Body: You have completed Workplace Safety Fundamentals. Remember — safety is n
 
 </div>
 
-### Footer
-A clean footer with:
-- Copyright notice
-- Links (Privacy, Terms)
-- Subtle branding
-
----
-
 ## DESIGN REQUIREMENTS
+
+NOTE: No footer is needed — the course ends with its final section and a completion block. Do NOT design a website-style footer.
 
 1. **Deep-scroll single page** — every section flows naturally into the next with rhythm and breathing room
 2. **Responsive** — must work beautifully on both desktop and mobile

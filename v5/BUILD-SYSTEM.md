@@ -41,7 +41,7 @@ Every fill function enforces these rules. They are hardcoded in `build-course.js
 
 4. **Theme-safe colours:** All semi-transparent overlays use `on-surface/5` (not `white/5`) — adapts to both light and dark themes. `on-surface` resolves to black on light, white on dark.
 
-5. **Nav enforcement:** `buildNav()` injects required layout classes (`fixed`, `flex`, `justify-between`, `items-center`, `h-20`) if Stitch's nav pattern omits them. Max 5 nav links with `whitespace-nowrap`.
+5. **Slim nav + drawer:** `buildNav()` generates a slim 56px sticky header (hamburger, course title, progress %) and a slide-out section drawer. Nav is fully self-contained — does not read from design contract. `hydrate.js` wires drawer open/close, active section tracking, and scroll-based progress.
 
 6. **Graphic max-height:** Standalone images get `max-h-[60vh]` to prevent viewport domination.
 
@@ -109,8 +109,7 @@ Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place tha
    - Render section title bar with accent lines
    - For each component: call the appropriate fill function
 5. Add "Course Complete" section
-6. Build footer from contract via `buildFooter()`
-7. Inline `hydrate.js` as a `<script>` block
+6. Inline `hydrate.js` as a `<script>` block
 8. Write to `v5/output/course.html` AND root `index.html` (identical copies)
 
 The output is a **single self-contained HTML file** — all images are base64-embedded, all JS is inlined, all CSS is via Tailwind CDN + inline `<style>` blocks.

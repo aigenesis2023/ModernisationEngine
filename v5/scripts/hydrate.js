@@ -12,7 +12,8 @@
       'details[open] summary ~ * { animation: slideDown 0.3s ease forwards; }' +
       'details summary { list-style: none; cursor: pointer; }' +
       'details summary::-webkit-details-marker { display: none; }' +
-      '#hydrate-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-primary, #0099ff); z-index: 9999; transition: width 0.15s linear; pointer-events: none; }';
+      '#hydrate-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-primary, #0099ff); z-index: 9999; transition: width 0.15s linear; pointer-events: none; }' +
+      '.drawer-link-active .drawer-index { color: var(--color-primary, #0099ff); }';
     document.head.appendChild(style);
 
     // ── 1. QUIZ ─────────────────────────────────────────────────────────
@@ -324,18 +325,110 @@
     // ── 6. ACCORDION (details/summary) — CSS handles animation ────────
     // Already handled via injected CSS above. Nothing extra needed.
 
-    // ── 7. SCROLL PROGRESS BAR ──────────────────────────────────────────
+    // ── 7. SCROLL PROGRESS + NAV DRAWER ──────────────────────────────────
+    // Progress bar lives inside the sticky header (built by build-course.js)
     var progressBar = document.createElement('div');
     progressBar.id = 'hydrate-progress';
     progressBar.style.width = '0%';
     document.body.appendChild(progressBar);
 
+    var progressText = document.querySelector('[data-progress-text]');
+    var drawerProgressText = document.querySelector('[data-drawer-progress-text]');
+    var drawerProgressBar = document.querySelector('[data-drawer-progress-bar]');
+
     window.addEventListener('scroll', function () {
       var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
       var docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      var pct = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+      var pct = docHeight > 0 ? Math.round((scrollTop / docHeight) * 100) : 0;
       progressBar.style.width = pct + '%';
+      if (progressText) progressText.textContent = pct + '%';
+      if (drawerProgressText) drawerProgressText.textContent = pct + '%';
+      if (drawerProgressBar) drawerProgressBar.style.width = pct + '%';
+      // Update active section in drawer
+      updateActiveDrawerLink();
     }, { passive: true });
+
+    // ── 7b. NAV DRAWER TOGGLE ──────────────────────────────────────────
+    var drawer = document.querySelector('[data-drawer]');
+    var drawerOverlay = document.querySelector('[data-drawer-overlay]');
+    var drawerToggle = document.querySelector('[data-nav-toggle]');
+    var drawerClose = document.querySelector('[data-drawer-close]');
+
+    function openDrawer() {
+      if (!drawer) return;
+      drawer.style.transform = 'translateX(0)';
+      if (drawerOverlay) {
+        drawerOverlay.style.opacity = '1';
+        drawerOverlay.style.pointerEvents = 'auto';
+      }
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      if (!drawer) return;
+      drawer.style.transform = 'translateX(-100%)';
+      if (drawerOverlay) {
+        drawerOverlay.style.opacity = '0';
+        drawerOverlay.style.pointerEvents = 'none';
+      }
+      document.body.style.overflow = '';
+    }
+
+    if (drawerToggle) drawerToggle.addEventListener('click', openDrawer);
+    if (drawerClose) drawerClose.addEventListener('click', closeDrawer);
+    if (drawerOverlay) drawerOverlay.addEventListener('click', closeDrawer);
+
+    // Close drawer on Escape
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDrawer();
+    });
+
+    // Drawer links: scroll to section and close
+    var drawerLinks = document.querySelectorAll('[data-drawer-link]');
+    drawerLinks.forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        e.preventDefault();
+        var targetId = link.getAttribute('data-drawer-link');
+        var target = document.getElementById(targetId);
+        if (target) {
+          closeDrawer();
+          setTimeout(function () {
+            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 150);
+        }
+      });
+    });
+
+    // ── 7c. ACTIVE SECTION TRACKING IN DRAWER ──────────────────────────
+    // Highlights the current section in the drawer based on scroll position
+    var sectionAnchors = [];
+    drawerLinks.forEach(function (link) {
+      var id = link.getAttribute('data-drawer-link');
+      var el = document.getElementById(id);
+      if (el) sectionAnchors.push({ id: id, el: el, link: link });
+    });
+
+    function updateActiveDrawerLink() {
+      if (sectionAnchors.length === 0) return;
+      var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      var activeId = sectionAnchors[0].id;
+      for (var i = 0; i < sectionAnchors.length; i++) {
+        if (sectionAnchors[i].el.offsetTop - 100 <= scrollTop) {
+          activeId = sectionAnchors[i].id;
+        }
+      }
+      drawerLinks.forEach(function (link) {
+        var linkId = link.getAttribute('data-drawer-link');
+        if (linkId === activeId) {
+          link.classList.add('drawer-link-active');
+          link.classList.remove('text-on-surface-variant');
+          link.classList.add('text-on-surface', 'bg-primary/10');
+        } else {
+          link.classList.remove('drawer-link-active', 'text-on-surface', 'bg-primary/10');
+          link.classList.add('text-on-surface-variant');
+        }
+      });
+    }
 
     // ── 8. SMOOTH SCROLL for anchor links ───────────────────────────────
     document.addEventListener('click', function (e) {
@@ -567,24 +660,29 @@
       trackedSections.forEach(function (sec) {
         var sectionId = sec.getAttribute('data-section-track');
         var progress = countSectionCompletion(sec);
-        // Find matching nav link
-        var navLink = document.querySelector('a[href="#' + sectionId + '"]');
-        if (!navLink) return;
-        // Add or update progress indicator
-        var indicator = navLink.querySelector('.section-progress');
-        if (!indicator) {
-          indicator = document.createElement('span');
-          indicator.className = 'section-progress ml-1 text-xs';
-          navLink.appendChild(indicator);
-        }
+        // Find matching drawer link
+        var drawerLink = document.querySelector('[data-drawer-link="' + sectionId + '"]');
+        if (!drawerLink) return;
+        // Update the status icon in the drawer
+        var statusIcon = drawerLink.querySelector('.drawer-status');
+        if (!statusIcon) return;
         if (progress.total === 0) {
-          indicator.textContent = '';
+          statusIcon.textContent = '';
         } else if (progress.completed >= progress.total) {
-          indicator.innerHTML = '<span class="material-symbols-outlined text-xs align-middle" style="font-size:14px;color:var(--color-primary,#0099ff)">check_circle</span>';
+          statusIcon.textContent = 'check_circle';
+          statusIcon.style.color = 'var(--color-primary, #0099ff)';
+          statusIcon.style.fontVariationSettings = "'FILL' 1";
           sec.classList.add('section-complete');
         } else {
-          indicator.textContent = '(' + progress.completed + '/' + progress.total + ')';
-          indicator.style.opacity = '0.6';
+          statusIcon.textContent = '';
+          // Show fraction as text next to the link
+          var fracEl = drawerLink.querySelector('.drawer-frac');
+          if (!fracEl) {
+            fracEl = document.createElement('span');
+            fracEl.className = 'drawer-frac text-xs text-outline-variant tabular-nums';
+            drawerLink.insertBefore(fracEl, statusIcon);
+          }
+          fracEl.textContent = progress.completed + '/' + progress.total;
         }
       });
     }
