@@ -136,6 +136,7 @@ v5/                                    ← ALL ACTIVE CODE
   input/                               ← AI-first inputs
     topic-brief.txt                    ← Plain text topic description
     urls.txt                           ← One URL per line (optional)
+    test-runs.md                       ← Test run config: brands, topics, matrix settings
     docs/                              ← Drop PDFs/PPTXs here (future)
   output/
     knowledge-base.json                ← AI-first research output
