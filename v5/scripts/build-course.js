@@ -261,6 +261,22 @@ ${colorEntries}
     [data-section-gate].section-complete .section-lock-icon { display: none; }
     [data-section-gate].section-complete .section-check-icon { display: inline; }
     [data-section-gate]:not(.section-complete) .section-check-icon { display: none; }
+
+    /* Smooth card hover lift */
+    .hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-2px); }
+
+    /* Data table improved styling */
+    table th { text-align: left; }
+
+    /* Textarea focus glow */
+    textarea:focus { box-shadow: 0 0 0 3px ${secondary}20; }
+
+    /* Smooth section transitions */
+    section { transition: opacity 0.3s ease; }
+
+    /* Better form checkboxes */
+    input[type="checkbox"]:checked { background-color: ${secondary}; border-color: ${secondary}; }
 </style>`;
 }
 
@@ -343,11 +359,11 @@ function fillAccordion(comp) {
 
   const newDetails = items.map(item =>
     `<details class="${detailsClass}">
-<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg px-8 py-5">
+<summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
 ${esc(item.title || '')}
-<span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4">expand_more</span>
+<span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-secondary">expand_more</span>
 </summary>
-<div class="${bodyClass} px-8 pb-6">
+<div class="${bodyClass} px-8 pb-8">
 ${item.body || ''}
 </div>
 </details>`
@@ -398,14 +414,15 @@ function fillMCQ(comp) {
   const hasCheckIcon = c.hasCheckIcon || false;
   const hasRadioIcon = c.hasRadioIcon || false;
 
+  const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
   const newChoices = items.map((item, i) => {
     return `<button class="${mc(
-      'w-full text-left flex items-center gap-4 p-5', choiceRound,
+      'w-full text-left flex items-center gap-5 p-5 md:p-6', choiceRound,
       'bg-surface-container/60 border border-outline-variant/20',
-      'hover:bg-surface-container hover:border-secondary/50 transition-all cursor-pointer group'
+      'hover:bg-surface-container hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/5 transition-all cursor-pointer group'
     )}" data-choice="${i}">
-<span class="material-symbols-outlined text-outline-variant/50 group-hover:text-secondary transition-colors flex-shrink-0">radio_button_unchecked</span>
-<span class="text-on-surface">${esc(item.text || '')}</span>
+<span class="w-10 h-10 rounded-full border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10 flex items-center justify-center text-sm font-bold text-on-surface-variant group-hover:text-secondary transition-all flex-shrink-0">${optionLetters[i] || ''}</span>
+<span class="text-on-surface leading-relaxed">${esc(item.text || '')}</span>
 </button>`;
   }).join('\n');
 
@@ -445,7 +462,7 @@ function fillGraphicText(comp, index) {
   const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
 <div class="relative group">
 ${glowClass ? `<div class="${glowClass}"></div>` : ''}
-<div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow}">
+<div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow} bg-surface-container">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container rounded-2xl"></div>'}
 </div>
 </div>
@@ -491,19 +508,19 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opaci
     }
     if (i <= 2 && items.length > 3) {
       const bgI = cardBgs[i] || 'glass-card';
-      return `<div class="md:col-span-1 ${bgI} rounded-3xl p-6 flex flex-col justify-between min-h-[100px] overflow-hidden">
-<span class="material-symbols-outlined text-primary text-3xl mb-3">${icons[i % icons.length]}</span>
-<div class="min-w-0">
-<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+      return `<div class="md:col-span-1 ${bgI} rounded-3xl p-6 md:p-8 flex flex-col min-h-[180px] overflow-hidden">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
+<div class="min-w-0 flex-1">
+<h4 class="font-headline text-lg font-bold mb-2">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant text-sm leading-relaxed line-clamp-4">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
     const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
     const bgShadow = (c.cardShadows || [])[i] || '';
-    return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-6 flex flex-col justify-center min-h-[100px] overflow-hidden ${bgShadow}">
-<span class="material-symbols-outlined text-secondary text-3xl mb-3">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-1">${esc(item.title || '')}</h4>
+    return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-6 md:p-8 flex flex-col min-h-[160px] overflow-hidden ${bgShadow}">
+<span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
+<h4 class="font-headline text-lg font-bold mb-2">${esc(item.title || '')}</h4>
 <p class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
@@ -545,7 +562,7 @@ function fillDataTable(comp) {
 
   if (columns.length > 0) {
     headerHtml = columns.map(c => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(c.title || '')}</th>`).join('');
-    bodyHtml = rows.map(row => {
+    bodyHtml = rows.map((row, ri) => {
       const label = row.label || '';
       const vals = row.values || [];
       const cells = vals.map(v => {
@@ -553,14 +570,14 @@ function fillDataTable(comp) {
         if (v === false || v === 'false') return '<td class="px-8 py-4 text-error">&#10007;</td>';
         return `<td class="px-8 py-4 text-on-surface-variant">${esc(String(v))}</td>`;
       }).join('');
-      return `<tr class="hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
+      return `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
     }).join('\n');
     headerHtml = `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
   } else if (rows.length > 0 && Array.isArray(rows[0])) {
     const headers = rows[0];
     headerHtml = headers.map(h => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
-    bodyHtml = rows.slice(1).map(row =>
-      `<tr class="hover:bg-on-surface/5 transition-colors">${row.map(cell => `<td class="px-8 py-4">${esc(cell)}</td>`).join('')}</tr>`
+    bodyHtml = rows.slice(1).map((row, ri) =>
+      `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors">${row.map((cell, ci) => `<td class="px-8 py-4${ci === 0 ? ' font-medium' : ' text-on-surface-variant'}">${esc(cell)}</td>`).join('')}</tr>`
     ).join('\n');
   }
 
@@ -593,8 +610,8 @@ function fillTextInput(comp) {
 
   const newInputs = items.map(item =>
     `<div>
-<label class="block text-sm font-bold text-on-surface-variant mb-3 uppercase tracking-wider">${esc(item.prefix || item.label || '')}</label>
-<input class="${inputClass}" placeholder="${esc(item.placeholder || '')}" type="text"/>
+<label class="block text-sm font-bold text-on-surface mb-3 uppercase tracking-widest">${esc(item.prefix || item.label || '')}</label>
+<textarea class="${inputClass} min-h-[80px] resize-y" placeholder="${esc(item.placeholder || '')}" rows="2"></textarea>
 </div>`
   ).join('\n');
 
@@ -666,17 +683,20 @@ function fillBranching(comp) {
   const hasArrow = c.hasArrow || false;
   const arrowClass = c.arrowClass || 'mt-4 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform';
 
-  const newButtons = items.map(item =>
-    `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals}">
-<div class="font-bold text-on-surface mb-2">${esc(item.title || '')}</div>
+  const newButtons = items.map((item, i) =>
+    `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden">
+<span class="absolute top-4 right-4 text-5xl font-headline font-black text-primary/10 group-hover:text-secondary/20 transition-colors select-none">${String.fromCharCode(65 + i)}</span>
+<div class="relative z-10">
+<div class="font-bold text-on-surface text-lg mb-2">${esc(item.title || '')}</div>
 <div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</div>
 ${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-outlined">arrow_forward</span></span>` : ''}
+</div>
 </button>`
   ).join('\n');
 
   return `<section class="${secClass}" data-component-type="branching">
 <div class="max-w-6xl mx-auto px-8">
-<h3 class="font-headline text-2xl font-bold mb-6 text-center">${title}</h3>
+<h3 class="font-headline text-2xl font-bold mb-8 text-center">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-8 text-center italic">${bodyText}</p>` : ''}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-5" data-animate-stagger="fade-up">
 ${newButtons}
@@ -728,10 +748,11 @@ ${newSteps}
     const num = String(i + 1).padStart(2, '0');
     const dotClass = i === 0 ? activeDotClass : inactiveDotClass;
     const titleClass = i === 0 ? 'font-headline text-xl font-bold text-secondary mb-2' : 'font-headline text-xl font-bold mb-2';
-    return `<div class="relative pl-12">
+    return `<div class="relative pl-14">
 <div class="${dotClass}"></div>
-<div class="${titleClass}">${num}. ${esc(item.title || '')}</div>
-<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+<div class="text-primary/30 font-headline font-black text-xs uppercase tracking-widest mb-1">${num}</div>
+<div class="${titleClass}">${esc(item.title || '')}</div>
+<p class="text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -757,14 +778,14 @@ function fillComparison(comp) {
   const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th>` +
     columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">${esc(c.title || '')}</th>`).join('');
 
-  const rowsHtml = rows.map(row => {
+  const rowsHtml = rows.map((row, ri) => {
     const label = row.label || '';
     const vals = (row.values || []).map(v => {
-      if (v === true || v === 'true') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-secondary">check_circle</span></td>';
-      if (v === false || v === 'false') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-error/60">cancel</span></td>';
+      if (v === true || v === 'true') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-secondary text-2xl">check_circle</span></td>';
+      if (v === false || v === 'false') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-error/60 text-2xl">cancel</span></td>';
       return `<td class="p-6 text-on-surface-variant">${esc(String(v))}</td>`;
     }).join('');
-    return `<tr class="hover:bg-on-surface/5 transition-colors border-b border-on-surface/5 last:border-0"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
+    return `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors border-b border-on-surface/5 last:border-0"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
@@ -801,12 +822,12 @@ function fillStatCallout(comp) {
     const cardBorder = style.cardBorder || '';
     const numColor = style.numColor || 'text-gradient';
     const numWeight = style.numWeight || 'font-extrabold';
-    // Combine value + suffix so the counter animation can parse "60%", "$10.5T", etc.
-    const displayValue = (item.stat || item.value || '') + (item.suffix || '');
+    // Combine prefix + value + suffix so the counter animation can parse "$10.5T", "60%", etc.
+    const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
-<div class="text-5xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(displayValue)}</div>
+<div class="text-4xl md:text-5xl font-headline ${numWeight} ${numColor} mb-3" data-counter>${esc(displayValue)}</div>
 ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
-<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-xs leading-snug font-medium mt-1'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
+<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm leading-snug font-medium mt-2'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -825,13 +846,13 @@ function fillPullquote(comp) {
   const c = DC.pullquote || {};
   const secClass = sectionOnly((DC.pullquote || {}).section || 'py-16');
 
-  const bqStyle = c.blockquoteStyle || 'text-2xl font-headline font-bold leading-relaxed';
+  const bqStyle = c.blockquoteStyle || 'text-xl md:text-2xl font-headline font-bold leading-relaxed';
   const citeStyle = c.citeClass || 'text-on-surface-variant';
 
   if (c.hasDecorativeQuote && c.decorativeSpanHtml) {
     return `<section class="${secClass} relative" data-component-type="pullquote">
 ${c.decorativeSpanHtml}
-<div class="max-w-6xl mx-auto px-8 text-center relative z-10">
+<div class="max-w-4xl mx-auto px-8 text-center relative z-10">
 <blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
 ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}</cite>` : ''}
 </div>
@@ -863,9 +884,9 @@ function fillChecklist(comp) {
   const spanHover = c.spanHover || '';
 
   const newLabels = items.map(item =>
-    `<label class="flex items-center gap-4 p-4 rounded-xl cursor-pointer group ${labelHover}">
+    `<label class="flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}">
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface-variant ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
 </label>`
   ).join('\n');
 
@@ -936,16 +957,17 @@ function fillFlashcard(comp) {
       ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'p-6 md:p-8')
       : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10 p-6 md:p-8');
     const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', 'p-6 md:p-8 text-center');
-    return `<div class="min-h-[220px] group cursor-pointer" style="perspective:1000px" data-flashcard>
+    return `<div class="min-h-[240px] group cursor-pointer" style="perspective:1000px" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d;min-height:inherit">
 <div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
-<div class="text-center px-4">
-<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-3xl mb-3">${icons[i % icons.length]}</div>
-<div class="font-headline font-bold text-lg leading-snug">${frontText}</div>
+<div class="text-center px-6">
+<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-4xl mb-4">${icons[i % icons.length]}</div>
+<div class="font-headline font-bold text-base md:text-lg leading-snug">${frontText}</div>
+<div class="mt-3 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium text-sm leading-relaxed px-2">${backText}</p>
+<p class="text-on-secondary-container font-medium text-sm leading-relaxed px-4">${backText}</p>
 </div>
 </div>
 </div>`;
@@ -980,14 +1002,14 @@ function fillNarrative(comp) {
 
   return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
 <div class="max-w-6xl mx-auto px-8">
-<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>
-<div class="glass-card rounded-[2.5rem] p-6 md:p-12 relative">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="glass-card rounded-[2.5rem] p-6 md:p-10 relative">
 ${newSlides}
-<div class="flex gap-4 mt-8">
-<button class="w-12 h-12 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
+<div class="flex gap-3 mt-6">
+<button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
 <span class="material-symbols-outlined">chevron_left</span>
 </button>
-<button class="w-12 h-12 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
+<button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
 <span class="material-symbols-outlined">chevron_right</span>
 </button>
 </div>
@@ -1005,8 +1027,8 @@ function fillKeyTerm(comp) {
 
   const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
   const newCards = items.map(item =>
-    `<div class="glass-card p-6 rounded-2xl overflow-hidden border-l-4 border-secondary">
-<div class="text-secondary font-headline font-bold text-lg mb-2">${esc(item.term || item.title || '')}</div>
+    `<div class="glass-card p-6 md:p-8 rounded-2xl overflow-hidden border-l-4 border-secondary">
+<div class="text-secondary font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
 <p class="text-on-surface-variant text-sm leading-relaxed">${esc(item.definition || item.body || '')}</p>
 </div>`
   ).join('\n');
@@ -1024,7 +1046,7 @@ ${newCards}
 function fillFullBleed(comp) {
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  const sectionClass = (DC['full-bleed'] || {}).section || 'relative h-[50vh] flex items-center justify-center overflow-hidden';
+  const sectionClass = (DC['full-bleed'] || {}).section || 'relative h-[60vh] flex items-center justify-center overflow-hidden';
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
   const pos = comp.overlayPosition || 'center';
@@ -1032,10 +1054,10 @@ function fillFullBleed(comp) {
 
   return `<section class="${sectionClass}" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
-<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/70 to-surface-dim/30"></div>
-<div class="relative z-10 max-w-6xl mx-auto px-8 flex flex-col ${alignClass}" data-animate="fade-up">
-<h2 class="font-headline text-3xl font-bold tracking-tight mb-4">${title}</h2>
-${bodyText ? `<p class="text-xl text-on-surface-variant">${bodyText}</p>` : ''}
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
+<div class="relative z-10 max-w-4xl mx-auto px-8 flex flex-col ${alignClass}" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-4xl font-bold tracking-tight mb-4">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl">${bodyText}</p>` : ''}
 </div>
 </section>`;
 }
@@ -1068,12 +1090,13 @@ function fillProcessFlow(comp) {
   const newNodes = items.map((item, i) => {
     const isFirst = i === 0;
     const isLast = i === items.length - 1;
-    const borderClass = isFirst ? 'border-l-4 border-secondary' : isLast ? 'border-l-4 border-primary' : '';
+    const borderClass = isFirst ? 'border-l-4 border-secondary' : isLast ? 'border-l-4 border-primary' : 'border-l-4 border-outline-variant/30';
     const stepNum = String(i + 1).padStart(2, '0');
-    return `<div class="glass-card px-6 py-4 rounded-xl ${borderClass} flex items-start gap-4">
-<span class="text-primary/40 font-headline font-bold text-sm mt-1 flex-shrink-0">${stepNum}</span>
+    const numColor = isFirst ? 'text-secondary' : isLast ? 'text-primary' : 'text-primary/40';
+    return `<div class="glass-card px-6 md:px-8 py-5 md:py-6 rounded-xl ${borderClass} flex items-start gap-5">
+<span class="${numColor} font-headline font-black text-2xl mt-0.5 flex-shrink-0">${stepNum}</span>
 <div class="min-w-0">
-<div class="font-headline font-bold mb-1">${esc(item.title || '')}</div>
+<div class="font-headline font-bold text-lg mb-1">${esc(item.title || '')}</div>
 ${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
 </div>
 </div>`;
@@ -1160,19 +1183,33 @@ function fillLabeledImage(comp) {
   const imgAlt = esc(comp._graphic?.alt || '');
   const markers = comp._markers || [];
 
-  const markerHtml = markers.map(m =>
-    `<div class="absolute" style="left:${m.x}%;top:${m.y}%">
-<div class="w-6 h-6 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-125 transition-transform" title="${esc(m.label || '')}"></div>
+  // If we have markers with labels, render interactive hotspot markers with tooltips
+  const markerHtml = markers.map((m, i) =>
+    `<div class="absolute group z-10" style="left:${m.x}%;top:${m.y}%">
+<div class="w-8 h-8 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-125 transition-transform flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
+<div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2 glass-card rounded-xl text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">${esc(m.label || '')}</div>
 </div>`
   ).join('\n');
+
+  // If no image, render markers as a labeled list below the image placeholder
+  const hasImage = !!imgSrc;
+  const fallbackMarkerList = !hasImage && markers.length > 0
+    ? `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">${markers.map((m, i) =>
+        `<div class="glass-card rounded-xl p-4 flex items-center gap-3 border border-outline-variant/20">
+<div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
+<span class="text-sm font-medium">${esc(m.label || '')}</span>
+</div>`
+      ).join('\n')}</div>`
+    : '';
 
   return `<section class="${secClass}" data-component-type="labeled-image">
 <div class="max-w-6xl mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
-<div class="relative bg-surface-container rounded-3xl overflow-hidden" data-animate="clip-up">
-${imgSrc ? `<img alt="${imgAlt}" class="w-full rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container"></div>'}
-${markerHtml}
+<div class="relative bg-surface-container rounded-3xl overflow-hidden min-h-[300px]" data-animate="clip-up">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>'}
+${hasImage ? markerHtml : ''}
 </div>
+${fallbackMarkerList}
 </div>
 </section>`;
 }
@@ -1238,7 +1275,8 @@ function buildNav(layout) {
 
   const navLinks = sections.map((s, i) => {
     const cls = i === 0 ? activeLinkClass : inactiveLinkClass;
-    return `<a class="${cls} whitespace-nowrap" href="#${s.sectionId || `section-${i}`}">${esc(s.title)}</a>`;
+    const sId = s.sectionId || `section-${i}`;
+    return `<a class="${cls} whitespace-nowrap" href="#${sId}" data-nav-link="${sId}">${esc(s.title)}</a>`;
   }).join('\n');
 
   return `<nav class="${navClass}" data-component-type="navigation">
@@ -1259,7 +1297,7 @@ function buildFooter(layout) {
   const footer = DC._footer || {};
   const courseTitle = esc(layout.course.title || 'Course');
   const year = new Date().getFullYear();
-  const footerClass = footer.footerClass || 'bg-surface-dim w-full py-12 border-t border-on-surface/5';
+  const footerClass = footer.footerClass || 'bg-surface-dim w-full py-10 border-t border-on-surface/10';
 
   return `<footer class="${footerClass}" data-component-type="footer">
 <div class="max-w-6xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-6">
@@ -1353,11 +1391,11 @@ function build() {
       // Track sections with interactive components for progress
       const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
       const titleBar = sectionTitle
-        ? `<div class="max-w-6xl mx-auto px-8 pt-16 pb-4" id="${sectionId}"${trackAttr}>
+        ? `<div class="max-w-6xl mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr}>
 <div class="flex items-center gap-6">
-<div class="h-px flex-1 bg-gradient-to-r from-primary/40 to-transparent"></div>
-<h2 class="font-headline text-xs font-bold uppercase tracking-[0.3em] text-primary/80">${esc(sectionTitle)}</h2>
-<div class="h-px flex-1 bg-gradient-to-l from-primary/40 to-transparent"></div>
+<div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
+<h2 class="font-headline text-sm font-bold uppercase tracking-[0.25em] text-primary">${esc(sectionTitle)}</h2>
+<div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
 </div>
 </div>`
         : '';
@@ -1451,16 +1489,16 @@ ${navHtml}
 ${sectionsHtml.join('\n\n')}
 
 <!-- Course Completion -->
-<section class="py-24 text-center">
-<div class="max-w-2xl mx-auto px-8">
-  <div class="w-20 h-20 mx-auto mb-8 rounded-full bg-secondary/10 flex items-center justify-center">
-    <span class="material-symbols-outlined text-4xl text-secondary">verified_user</span>
+<section class="py-16 text-center">
+<div class="max-w-xl mx-auto px-8">
+  <div class="w-16 h-16 mx-auto mb-6 rounded-full bg-secondary/10 flex items-center justify-center">
+    <span class="material-symbols-outlined text-3xl text-secondary">verified_user</span>
   </div>
-  <h2 class="font-headline text-3xl font-bold mb-4">Course Complete</h2>
-  <p class="text-on-surface-variant text-lg leading-relaxed mb-10">
+  <h2 class="font-headline text-2xl font-bold mb-3">Course Complete</h2>
+  <p class="text-on-surface-variant leading-relaxed mb-8">
     You have completed ${esc(courseTitle)}. Review any sections as needed.
   </p>
-  <button class="btn-primary px-10 py-4 rounded-full font-bold" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
+  <button class="btn-primary px-8 py-3 rounded-full font-bold text-sm" onclick="window.scrollTo({top:0,behavior:'smooth'})">Return to Top</button>
 </div>
 </section>
 
