@@ -104,13 +104,13 @@ Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place tha
 
 1. Load `course-layout.json`, `design-contract.json`, `design-tokens.json`
 2. Generate `<head>` from tokens via `generateHead()`
-3. Build nav from contract via `buildNav()`
+3. Build nav via `buildNav()` — slim sticky header + section drawer (self-contained, no contract needed)
 4. For each section in course-layout.json:
    - Render section title bar with accent lines
    - For each component: call the appropriate fill function
 5. Add "Course Complete" section
 6. Inline `hydrate.js` as a `<script>` block
-8. Write to `v5/output/course.html` AND root `index.html` (identical copies)
+7. Write to `v5/output/course.html` AND root `index.html` (identical copies)
 
 The output is a **single self-contained HTML file** — all images are base64-embedded, all JS is inlined, all CSS is via Tailwind CDN + inline `<style>` blocks.
 
@@ -126,8 +126,9 @@ Vanilla JS IIFE injected into the final HTML. Uses ES5 `var` declarations for ma
 - **Flashcards**: Click to flip via inline `style.transform = 'rotateY(180deg)'` (not Tailwind class toggle)
 - **Carousels/Narratives**: Prev/next navigation with dot indicators, disabled state on boundaries
 - **Checklists**: Check/uncheck with progress tracking. Build-course.js writes a static counter with `data-checklist-progress` attr — hydrate.js finds and reuses it instead of creating a duplicate
-- **Scroll progress bar**: Fixed bar at top showing read percentage
-- **Smooth scroll**: Anchor link navigation for nav links
+- **Scroll progress bar**: Fixed bar at top showing read percentage, synced to header and drawer
+- **Nav drawer**: Hamburger open/close, section links with smooth scroll, active section highlighting on scroll, completion status icons per section
+- **Smooth scroll**: Anchor link navigation
 
 ### State Store for Conditional Content (IMPLEMENTED)
 
