@@ -743,6 +743,13 @@ async function run() {
           const parent = el.closest('[data-tab-panel], [data-slide]');
           if (parent && parent.style.display === 'none') return;
 
+          // Skip responsive-hidden elements (e.g. md:hidden for mobile-only duplicates)
+          let ancestor = el;
+          while (ancestor && ancestor !== comp) {
+            if (window.getComputedStyle(ancestor).display === 'none') return;
+            ancestor = ancestor.parentElement;
+          }
+
           issues.push({
             type,
             issue: 'zero-height element',

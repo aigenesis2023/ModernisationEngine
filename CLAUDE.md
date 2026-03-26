@@ -186,7 +186,7 @@ See `v5/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the 
 
 ### Step 4 — Image Generation (`v5/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
-**Runs AFTER Step 3.** Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
+**Runs AFTER Step 3.** Priority chain: SiliconFlow AI (Tongyi Z-Image-Turbo) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
 
 ### Step 5 — Build (`v5/scripts/build-course.js`)
 **Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
@@ -257,7 +257,7 @@ node v5/scripts/review-course.js                           # Step 6c (visual rev
 
 ### API Keys (stored in `.env`, gitignored)
 - `STITCH_API_KEY`: stitch.withgoogle.com → Settings → API Keys
-- `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via FLUX.1-schnell (default)
+- `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via Tongyi Z-Image-Turbo (default)
 - `PEXELS_API_KEY`: pexels.com/api → free stock photo fallback, 200 req/hr
 - `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis
 
@@ -332,8 +332,8 @@ Sections can set `"sectionWidth"` to vary page-level content width:
 ---
 
 ## Test Data
-- **Brand URL:** stored in `brand/url.txt` — currently `https://sprig.framer.website/`
-- **Previously tested brands:** sprig (dark, cyan), fluence (light, amethyst), ailyx (light, blue), fitflow (light, pink-blue gradient), landio (dark, sleek SaaS), crimzon (dark, crimson), aigents (light, purple), najaf (dark, green)
+- **Brand URL:** stored in `brand/url.txt` — currently `https://coursesite.framer.website/`
+- **Previously tested brands:** sprig (dark, cyan), fluence (light, amethyst), ailyx (light, blue), fitflow (light, pink-blue gradient), landio (dark, sleek SaaS), crimzon (dark, crimson), aigents (light, purple), najaf (dark, green), coursesite (light, lavender-purple gradient)
 - **SCORM (archived):** `EV/` — 64-slide EV Awareness & Safety course (gitignored, for future SCORM path reactivation only)
 
 ---

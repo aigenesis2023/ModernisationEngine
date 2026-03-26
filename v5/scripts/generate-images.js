@@ -2,7 +2,7 @@
 /**
  * V5 Image Generator — AI Generation + Stock Fallback
  *
- * Priority chain: SiliconFlow AI (FLUX.1-schnell) → Pexels stock → SVG placeholder
+ * Priority chain: SiliconFlow AI (Tongyi Z-Image-Turbo) → Pexels stock → SVG placeholder
  *
  * Reads course-layout.json for content subjects. Image prompts describe
  * WHAT to show — for AI generation, brand-design.md provides photographic treatment.
@@ -12,7 +12,7 @@
  *   node v5/scripts/generate-images.js
  *
  * API Keys (in .env):
- *   SILICONFLOW_API_KEY — AI image generation via FLUX.1-schnell (default)
+ *   SILICONFLOW_API_KEY — AI image generation via Tongyi Z-Image-Turbo (default)
  *   PEXELS_API_KEY      — Free stock photos fallback (200 req/hr)
  *
  * Output: v5/output/images/*.jpg + updated course-layout.json
@@ -23,9 +23,9 @@ const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Config ──────────────────────────────────────────────────────────
-// Priority: SiliconFlow AI (default) → Pexels stock → SVG placeholder
+// Priority: SiliconFlow AI (Tongyi Z-Image-Turbo) → Pexels stock → SVG placeholder
 const SILICONFLOW_API_KEY = process.env.SILICONFLOW_API_KEY || '';
-const SILICONFLOW_MODEL = 'black-forest-labs/FLUX.1-schnell';
+const SILICONFLOW_MODEL = 'Tongyi-MAI/Z-Image-Turbo';
 const SILICONFLOW_API_URL = 'https://api.siliconflow.com/v1/images/generations';
 
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
@@ -193,7 +193,7 @@ async function fetchStockPhoto(prompt, dimensions, outputFilename) {
   return null;
 }
 
-// ─── Image generation via SiliconFlow (FLUX.1-schnell) ───────────────
+// ─── Image generation via SiliconFlow (Tongyi Z-Image-Turbo) ─────────
 async function generateImageSiliconFlow(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
   const enhancedPrompt = `${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
