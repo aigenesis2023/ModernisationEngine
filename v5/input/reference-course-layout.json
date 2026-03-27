@@ -1,0 +1,435 @@
+{
+  "course": {
+    "title": "The Future of Work",
+    "subtitle": "How digital transformation is reshaping organisations, roles, and the skills that matter most.",
+    "totalSections": 10
+  },
+
+  "metadata": {
+    "generatedAt": "2026-03-27T00:00:00Z",
+    "sourceTopic": "Digital transformation in the modern workplace",
+    "sourceType": "ai-generated",
+    "archetype": "the-journey",
+    "componentCount": 23,
+    "imageCount": 14
+  },
+
+  "sections": [
+    {
+      "sectionId": "section-01",
+      "title": "Welcome",
+      "sectionWidth": "full",
+      "components": [
+        {
+          "componentId": "comp-01",
+          "type": "hero",
+          "variant": "centered-overlay",
+          "displayTitle": "The Future of Work",
+          "body": "<p>How digital transformation is reshaping organisations, roles, and the skills that matter most.</p>",
+          "_graphic": {
+            "large": "images/hero.jpg",
+            "alt": "Modern open-plan office with collaborative digital workspaces and large interactive screens"
+          },
+          "imagePrompt": "Modern open-plan office space with floor-to-ceiling windows, people collaborating around large interactive digital screens, warm natural lighting, contemporary furniture, aerial perspective, professional corporate photography style, 16:9 aspect ratio"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-02",
+      "title": "The Digital Landscape",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-02",
+          "type": "text",
+          "displayTitle": "Why This Matters Now",
+          "body": "<p>Digital transformation is no longer a competitive advantage — it's a baseline expectation. Organisations that haven't adapted their workflows, tools, and culture to a digital-first reality are already falling behind.</p><p>But transformation isn't about technology alone. The most successful shifts happen when organisations rethink how people work, not just what tools they use.</p>"
+        },
+        {
+          "componentId": "comp-03",
+          "type": "stat-callout",
+          "variant": "card-row",
+          "displayTitle": "The Transformation in Numbers",
+          "_items": [
+            { "value": "89", "suffix": "%", "label": "of companies have adopted a digital-first strategy" },
+            { "value": "3.2", "suffix": "x", "label": "productivity gain from integrated digital tools" },
+            { "value": "67", "suffix": "%", "label": "of employees say digital skills are essential to their role" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-03",
+      "title": "What's Changing",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-04",
+          "type": "graphic-text",
+          "variant": "split",
+          "displayTitle": "From Linear to Networked",
+          "body": "<p>Traditional organisations operated in hierarchies: information flowed up, decisions flowed down. Digital transformation flattens this. Teams now work across functions, geographies, and time zones — connected by shared platforms rather than shared offices.</p><p>This shift demands new skills: asynchronous communication, digital collaboration, and comfort with ambiguity.</p>",
+          "_graphic": {
+            "large": "images/networked-teams.jpg",
+            "alt": "Interconnected team nodes showing a networked organisational structure"
+          },
+          "_imageAlign": "right",
+          "imagePrompt": "Abstract visualization of interconnected team nodes forming a network structure, glowing connection lines between diverse groups of people icons, modern flat design with depth, professional blue and teal colour palette, 4:3 aspect ratio"
+        },
+        {
+          "componentId": "comp-05",
+          "type": "bento",
+          "variant": "grid-4",
+          "displayTitle": "Four Pillars of Digital Transformation",
+          "_items": [
+            {
+              "title": "Technology Infrastructure",
+              "body": "<p>Cloud computing, APIs, and integrated platforms form the backbone. Without reliable infrastructure, every other initiative stalls.</p>"
+            },
+            {
+              "title": "Data & Analytics",
+              "body": "<p>Decisions powered by real-time data rather than intuition. From customer insights to operational efficiency, data is the differentiator.</p>"
+            },
+            {
+              "title": "Process Automation",
+              "body": "<p>Repetitive tasks handled by software, freeing people for creative and strategic work. RPA, workflow automation, and AI-assisted processes.</p>"
+            },
+            {
+              "title": "Culture & Skills",
+              "body": "<p>Technology is only as effective as the people using it. Digital fluency, growth mindset, and adaptive leadership are non-negotiable.</p>"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-04",
+      "title": "A Transformation Story",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-06",
+          "type": "narrative",
+          "displayTitle": "Case Study: Meridian Financial Group",
+          "body": "<p>How a mid-sized financial services firm transformed its operations in 18 months.</p>",
+          "_items": [
+            {
+              "title": "The Starting Point",
+              "body": "<p>In early 2024, Meridian Financial Group was running on systems built in the 2010s. Client onboarding took 14 days. Staff spent 30% of their time on data entry that could have been automated.</p>",
+              "_graphic": { "large": "images/narrative-1.jpg", "alt": "Cluttered office with outdated computer systems" }
+            },
+            {
+              "title": "The Decision",
+              "body": "<p>Rather than a wholesale replacement, Meridian chose a phased approach. They started with the highest-friction process — client onboarding — and built outward.</p>",
+              "_graphic": { "large": "images/narrative-2.jpg", "alt": "Team mapping out a transformation strategy" }
+            },
+            {
+              "title": "The Challenges",
+              "body": "<p>Resistance was real. The breakthrough came when the pilot team demonstrated that automated compliance checks actually caught more errors than manual review — and in one-tenth the time.</p>",
+              "_graphic": { "large": "images/narrative-3.jpg", "alt": "Team in discussion around a conference table" }
+            },
+            {
+              "title": "The Results",
+              "body": "<p>After 18 months: client onboarding dropped from 14 days to 3. Employee satisfaction scores rose 22 points. Client retention hit an all-time high of 94%.</p>",
+              "_graphic": { "large": "images/narrative-4.jpg", "alt": "Modern office with digital dashboards showing metrics" }
+            }
+          ],
+          "imagePrompts": [
+            { "key": "item-0", "prompt": "Cluttered traditional office with outdated desktop computers, paper files stacked on desks, fluorescent lighting, realistic corporate photography, 4:3 aspect ratio", "dimensions": "800x600" },
+            { "key": "item-1", "prompt": "Diverse team of professionals gathered around a whiteboard covered in sticky notes and strategy diagrams, modern meeting room, 4:3 aspect ratio", "dimensions": "800x600" },
+            { "key": "item-2", "prompt": "Diverse group of professionals in an animated discussion around a conference table, modern office, candid photography, 4:3 aspect ratio", "dimensions": "800x600" },
+            { "key": "item-3", "prompt": "Modern bright office with large digital dashboards on walls showing upward-trending graphs, people at clean desks, 4:3 aspect ratio", "dimensions": "800x600" }
+          ]
+        },
+        {
+          "componentId": "comp-07",
+          "type": "pullquote",
+          "body": "The technology was the easy part. The real transformation happened when people stopped protecting their old workflows.",
+          "attribution": "Sarah Chen",
+          "role": "CTO, Meridian Financial Group"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-05",
+      "title": "Comparing Approaches",
+      "sectionWidth": "wide",
+      "components": [
+        {
+          "componentId": "comp-08",
+          "type": "comparison",
+          "variant": "columns",
+          "displayTitle": "Traditional vs Digital Approach",
+          "columns": [
+            { "title": "Traditional", "subtitle": "Legacy operations" },
+            { "title": "Digital-First", "subtitle": "Transformed operations" }
+          ],
+          "rows": [
+            { "label": "Real-time data dashboards", "values": [false, true] },
+            { "label": "Automated compliance reporting", "values": [false, true] },
+            { "label": "Manual approval workflows", "values": [true, false] },
+            { "label": "Cross-functional collaboration tools", "values": [false, true] },
+            { "label": "Predictive analytics", "values": [false, true] }
+          ]
+        },
+        {
+          "componentId": "comp-09",
+          "type": "tabs",
+          "variant": "horizontal",
+          "displayTitle": "Tools by Function",
+          "_items": [
+            {
+              "title": "Communication",
+              "body": "<p>Real-time messaging, video conferencing, and asynchronous updates. The shift from email-first to platform-first communication reduces information silos.</p><p><strong>Key tools:</strong> Slack, Microsoft Teams, Zoom, Loom.</p>"
+            },
+            {
+              "title": "Collaboration",
+              "body": "<p>Shared documents, digital whiteboards, and co-editing replace the email attachment workflow. Version control becomes automatic.</p><p><strong>Key tools:</strong> Google Docs, Notion, Miro, Figma.</p>"
+            },
+            {
+              "title": "Analytics",
+              "body": "<p>Self-service dashboards and embedded analytics put data in the hands of decision-makers. No more waiting for the BI team.</p><p><strong>Key tools:</strong> Power BI, Tableau, Looker, Amplitude.</p>"
+            }
+          ]
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-06",
+      "title": "Pause and Reflect",
+      "sectionWidth": "full",
+      "components": [
+        {
+          "componentId": "comp-10",
+          "type": "full-bleed",
+          "displayTitle": "Are You Ready for What's Next?",
+          "body": "<p>The first half covered the landscape and the tools. Now we turn to the human skills and decisions that determine whether transformation sticks.</p>",
+          "_graphic": {
+            "large": "images/full-bleed.jpg",
+            "alt": "Person standing at the edge of a modern building looking out at a city skyline"
+          },
+          "overlayPosition": "center",
+          "imagePrompt": "Person standing at the edge of a modern glass building rooftop looking out over a city skyline at golden hour, contemplative mood, cinematic lighting, ultra-wide 12:5 aspect ratio"
+        },
+        {
+          "componentId": "comp-11",
+          "type": "mcq",
+          "variant": "stacked",
+          "displayTitle": "Knowledge Check",
+          "body": "<p>A company has migrated to cloud infrastructure. Employee adoption is at 40% after three months. What should they prioritise next?</p>",
+          "instruction": "Choose the best answer.",
+          "_selectable": 1,
+          "_items": [
+            { "text": "Add more features to increase the platform's value", "_shouldBeSelected": false },
+            { "text": "Mandate usage and remove access to legacy systems", "_shouldBeSelected": false },
+            { "text": "Identify adoption barriers through employee feedback and fix the top friction points", "_shouldBeSelected": true },
+            { "text": "Hire consultants to redesign the cloud strategy from scratch", "_shouldBeSelected": false }
+          ],
+          "_feedback": {
+            "correct": "<p>Exactly right. Low adoption is almost always a friction problem, not a feature problem. Understanding why people aren't using the tools is the fastest path to improvement.</p>",
+            "_incorrect": {
+              "final": "<p>Not quite. When adoption stalls, the answer is to understand WHY people aren't using the tools. Employee feedback reveals the friction points that matter.</p>"
+            }
+          }
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-07",
+      "title": "The Human Element",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-12",
+          "type": "accordion",
+          "variant": "standard",
+          "displayTitle": "Why People Resist Change",
+          "instruction": "Select each panel to explore common resistance factors.",
+          "_items": [
+            {
+              "title": "Loss of Expertise",
+              "body": "<p>People who've mastered existing systems feel their expertise is being devalued. Acknowledge this loss explicitly and reframe their deep knowledge as an asset for guiding the transition.</p>"
+            },
+            {
+              "title": "Fear of Redundancy",
+              "body": "<p>When automation enters the conversation, people hear 'your job is at risk.' Be transparent about what automation will and won't replace, and show how roles evolve rather than disappear.</p>"
+            },
+            {
+              "title": "Change Fatigue",
+              "body": "<p>If your organisation has been through three transformations in five years, people are tired. Combat this by delivering visible wins early and often.</p>"
+            },
+            {
+              "title": "Unclear Personal Benefit",
+              "body": "<p>People adopt change when they can answer: 'What's in it for me?' Translate every change into personal impact: less tedious work, faster results, more autonomy.</p>"
+            }
+          ]
+        },
+        {
+          "componentId": "comp-13",
+          "type": "timeline",
+          "variant": "vertical",
+          "displayTitle": "The Change Adoption Curve",
+          "_items": [
+            { "title": "Awareness", "body": "<p>People learn that change is coming. Communication should focus on the WHY — the business context and the problem being solved.</p>" },
+            { "title": "Understanding", "body": "<p>People grasp what will change for them personally. This is where resistance typically peaks.</p>" },
+            { "title": "Acceptance", "body": "<p>People move from 'I have to' to 'I'm willing to try.' This happens through peer influence and early wins.</p>" },
+            { "title": "Adoption", "body": "<p>People begin using the new tools in their daily work. Support must be readily available.</p>" },
+            { "title": "Advocacy", "body": "<p>People become champions of the change, helping others adopt. These advocates have credibility that leadership can't match.</p>" }
+          ]
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-08",
+      "title": "Building Your Roadmap",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-14",
+          "type": "process-flow",
+          "displayTitle": "Choosing Your Transformation Approach",
+          "_nodes": [
+            { "title": "Assess Current State", "body": "Evaluate your existing digital maturity across technology, processes, skills, and culture.", "type": "start" },
+            { "title": "Critical Gaps?", "body": "Are there urgent issues that demand immediate attention, or is this a strategic improvement?", "type": "decision" },
+            { "title": "Quick Wins First", "body": "Start with high-impact, low-effort changes that build momentum within 30 days.", "type": "process" },
+            { "title": "Strategic Redesign", "body": "Redesign core workflows, invest in platform consolidation, and upskill systematically.", "type": "process" },
+            { "title": "Continuous Improvement", "body": "Build feedback loops, measure outcomes, and iterate quarterly.", "type": "end" }
+          ]
+        },
+        {
+          "componentId": "comp-15",
+          "type": "data-table",
+          "displayTitle": "Digital Adoption by Industry",
+          "body": "<ul><li>Industry | Adoption Rate | Primary Focus</li><li>Financial Services | 94% | Customer experience & compliance</li><li>Healthcare | 87% | Telehealth & electronic records</li><li>Manufacturing | 78% | IoT sensors & predictive maintenance</li><li>Education | 72% | Learning platforms & virtual classrooms</li><li>Retail | 91% | Omnichannel & inventory optimisation</li></ul>"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-08b",
+      "title": "Decision Point",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-16",
+          "type": "branching",
+          "displayTitle": "What Would You Do?",
+          "body": "<ul><li>Your team's adoption of the new project management tool has stalled at 35%. A survey reveals most people find it overwhelming.</li><li>A. Simplify the setup — hide advanced features and create a starter template</li><li>B. Run comprehensive training covering all features</li><li>C. Set a deadline for adoption and escalate non-compliance</li><li>D. Switch to a simpler tool with fewer features</li></ul>"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-09",
+      "title": "Visual Reference",
+      "sectionWidth": "wide",
+      "components": [
+        {
+          "componentId": "comp-17",
+          "type": "labeled-image",
+          "displayTitle": "Digital Workplace Architecture",
+          "instruction": "Click each marker to explore the components.",
+          "_graphic": {
+            "large": "images/labeled-architecture.jpg",
+            "alt": "Architectural diagram of a digital workplace showing integration layers"
+          },
+          "_markers": [
+            { "x": 50, "y": 12, "label": "User Experience Layer", "body": "Intranet portals, mobile apps, and unified dashboards that bring together information from multiple systems." },
+            { "x": 20, "y": 40, "label": "Collaboration Platform", "body": "Shared workspaces, real-time messaging, and document management." },
+            { "x": 80, "y": 40, "label": "Analytics Engine", "body": "Business intelligence tools that process raw data into visualisations and automated alerts." },
+            { "x": 50, "y": 70, "label": "Integration Middleware", "body": "APIs and connectors that allow different systems to share data seamlessly." },
+            { "x": 50, "y": 92, "label": "Security & Compliance", "body": "Identity management, encryption, access controls, and audit logging." }
+          ],
+          "imagePrompt": "Clean architectural diagram showing layered digital workplace infrastructure, horizontal layers with icons, blueprint style with modern colours, 3:2 aspect ratio"
+        },
+        {
+          "componentId": "comp-18",
+          "type": "image-gallery",
+          "displayTitle": "Digital Workplaces in Practice",
+          "_items": [
+            { "_graphic": { "large": "images/gallery-1.jpg", "alt": "Tech startup open plan office" }, "caption": "Tech startup — open collaboration" },
+            { "_graphic": { "large": "images/gallery-2.jpg", "alt": "Financial services trading floor" }, "caption": "Financial services — data-intensive" },
+            { "_graphic": { "large": "images/gallery-3.jpg", "alt": "Healthcare facility with tablets" }, "caption": "Healthcare — mobile-first" }
+          ],
+          "imagePrompts": [
+            { "key": "item-0", "prompt": "Modern tech startup open-plan office with standing desks, large monitors, natural lighting, plants, 3:2 aspect ratio", "dimensions": "600x400" },
+            { "key": "item-1", "prompt": "Financial services trading floor with multiple monitors per workstation, real-time dashboards, 3:2 aspect ratio", "dimensions": "600x400" },
+            { "key": "item-2", "prompt": "Healthcare professional using tablet at patient bedside in modern hospital, 3:2 aspect ratio", "dimensions": "600x400" }
+          ]
+        },
+        {
+          "componentId": "comp-19",
+          "type": "graphic",
+          "displayTitle": "The Digital Workplace Ecosystem",
+          "_graphic": {
+            "large": "images/ecosystem.jpg",
+            "alt": "Infographic showing the interconnected components of a modern digital workplace"
+          },
+          "body": "<p>A modern digital workplace integrates communication, collaboration, analytics, and automation into a seamless ecosystem.</p>",
+          "imagePrompt": "Clean infographic-style illustration showing a modern digital workplace ecosystem, interconnected icons for communication collaboration analytics and automation, minimal design, professional blue and grey scheme, 16:9 aspect ratio"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-10",
+      "title": "Taking Action",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-20",
+          "type": "flashcard",
+          "displayTitle": "Key Concepts Review",
+          "instruction": "Click each card to test your recall.",
+          "_items": [
+            { "front": "What is digital maturity?", "back": "An organisation's ability to effectively leverage digital technology across strategy, culture, processes, and customer experience." },
+            { "front": "What does 'change fatigue' mean?", "back": "Exhaustion and cynicism from too many changes in rapid succession without seeing lasting results." },
+            { "front": "What is RPA?", "back": "Robotic Process Automation — software that mimics human actions to perform repetitive digital tasks without human intervention." },
+            { "front": "What is asynchronous communication?", "back": "Communication that doesn't require all parties present at the same time. Essential for distributed teams across time zones." }
+          ]
+        },
+        {
+          "componentId": "comp-21",
+          "type": "key-term",
+          "displayTitle": "Essential Vocabulary",
+          "_items": [
+            { "term": "Digital Maturity", "definition": "An organisation's ability to effectively leverage digital technology across strategy, culture, processes, and customer experience." },
+            { "term": "Change Management", "definition": "The structured approach to transitioning individuals, teams, and organisations from a current state to a desired future state." },
+            { "term": "Shadow IT", "definition": "Technology tools used by employees without formal IT approval, often adopted because official tools don't meet their needs." }
+          ]
+        },
+        {
+          "componentId": "comp-22",
+          "type": "checklist",
+          "displayTitle": "Your Digital Readiness Check",
+          "instruction": "Check each item you can confidently say yes to.",
+          "_items": [
+            { "text": "I understand our organisation's current digital maturity level", "detail": "Can you describe where your organisation sits on the transformation spectrum?" },
+            { "text": "I can identify three processes that could benefit from digital tools", "detail": "Think about the tasks that consume the most time for the least value." },
+            { "text": "I know who the key stakeholders are for transformation", "detail": "Leaders, IT, affected teams, and change champions." },
+            { "text": "I'm comfortable learning new digital tools and workflows", "detail": "Not expertise — willingness. The skill is adaptability." },
+            { "text": "I can articulate the business case for a specific improvement", "detail": "Tie it to a metric leadership cares about." }
+          ]
+        },
+        {
+          "componentId": "comp-23",
+          "type": "textinput",
+          "displayTitle": "Your Personal Action Plan",
+          "body": "<p>Based on everything you've explored, capture your key commitments.</p>",
+          "_items": [
+            { "prefix": "One thing I will do differently starting this week", "placeholder": "Be specific — what action will you take?" },
+            { "prefix": "The biggest barrier I need to address", "placeholder": "What's standing between you and progress?" },
+            { "prefix": "Someone I will share this with", "placeholder": "Who needs to hear what you've learned?" }
+          ]
+        }
+      ]
+    }
+  ]
+}

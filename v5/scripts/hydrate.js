@@ -16,9 +16,8 @@
       '.drawer-link-active .drawer-index { color: var(--color-primary, #0099ff); }';
     document.head.appendChild(style);
 
-    // ── 1. QUIZ ─────────────────────────────────────────────────────────
-    var quizzes = document.querySelectorAll('[data-quiz]');
-    quizzes.forEach(function (quiz) {
+    // ── Per-component hydration functions (reusable for variant swaps) ──
+    function hydrateQuiz(quiz) {
       var choices = quiz.querySelectorAll('[data-choice]');
       // Resolve correct answer by index from quiz container attribute
       var correctIdx = parseInt(quiz.getAttribute('data-correct'), 10);
@@ -94,7 +93,11 @@
           }
         });
       });
-    });
+    }
+
+    // ── 1. QUIZ — init all ────────────────────────────────────────────
+    var quizzes = document.querySelectorAll('[data-quiz]');
+    quizzes.forEach(hydrateQuiz);
 
     // ── 1b. DRAW RANDOMIZATION ──────────────────────────────────────────
     // When poolSize > drawCount, randomly select drawCount MCQs and hide the rest.
@@ -140,12 +143,10 @@
     }
 
     // ── 2. TABS ─────────────────────────────────────────────────────────
-    var tabContainers = document.querySelectorAll('[data-tabs]');
-    tabContainers.forEach(function (container) {
+    function hydrateTabs(container) {
       var triggers = container.querySelectorAll('[data-tab-trigger]');
       var panels = container.querySelectorAll('[data-tab-panel]');
 
-      // Capture the initial active/inactive class strings from Stitch's design
       var activeClasses = triggers.length > 0 ? triggers[0].className : '';
       var inactiveClasses = triggers.length > 1 ? triggers[1].className : activeClasses;
 
@@ -164,11 +165,12 @@
       });
 
       if (triggers.length > 0) activateTab(0);
-    });
+    }
+    var tabContainers = document.querySelectorAll('[data-tabs]');
+    tabContainers.forEach(hydrateTabs);
 
     // ── 3. FLASHCARDS ───────────────────────────────────────────────────
-    var flashcards = document.querySelectorAll('[data-flashcard]');
-    flashcards.forEach(function (card) {
+    function hydrateFlashcard(card) {
       card.style.cursor = 'pointer';
       var inner = card.firstElementChild;
       if (!inner) return;
@@ -181,16 +183,16 @@
       }
       card.addEventListener('click', toggle);
       card.addEventListener('touchend', function (e) {
-        // Prevent double-fire on touch devices
         e.preventDefault();
         flipped = !flipped;
         inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       });
-    });
+    }
+    var flashcards = document.querySelectorAll('[data-flashcard]');
+    flashcards.forEach(hydrateFlashcard);
 
     // ── 4. CAROUSEL / NARRATIVE ─────────────────────────────────────────
-    var carousels = document.querySelectorAll('[data-carousel]');
-    carousels.forEach(function (container) {
+    function hydrateCarousel(container) {
       var slides = container.querySelectorAll('[data-slide]');
       var prevBtn = container.querySelector('[data-prev]');
       var nextBtn = container.querySelector('[data-next]');
@@ -256,11 +258,12 @@
         });
       }
       showSlide();
-    });
+    }
+    var carousels = document.querySelectorAll('[data-carousel]');
+    carousels.forEach(hydrateCarousel);
 
     // ── 5. CHECKLIST ────────────────────────────────────────────────────
-    var checklists = document.querySelectorAll('[data-checklist]');
-    checklists.forEach(function (container) {
+    function hydrateChecklist(container) {
       // Handle native checkboxes
       var checkboxes = container.querySelectorAll('input[type="checkbox"]');
 
@@ -321,7 +324,9 @@
       });
 
       updateProgress();
-    });
+    }
+    var checklists = document.querySelectorAll('[data-checklist]');
+    checklists.forEach(hydrateChecklist);
 
     // ── 6. ACCORDION (details/summary) — CSS handles animation ────────
     // Already handled via injected CSS above. Nothing extra needed.
@@ -1039,6 +1044,238 @@
 
       var animCount = document.querySelectorAll('[data-animate], [data-animate-stagger], [data-parallax], [data-text-reveal], [data-counter]').length;
       console.log('Scroll animations: ' + animCount + ' elements animated');
+    })();
+
+    // ── HYDRATE COMPONENT — re-initialize a single component after variant swap ─
+    function hydrateComponent(rootEl) {
+      // Quiz
+      rootEl.querySelectorAll('[data-quiz]').forEach(hydrateQuiz);
+      // Tabs
+      rootEl.querySelectorAll('[data-tabs]').forEach(hydrateTabs);
+      // Flashcards
+      rootEl.querySelectorAll('[data-flashcard]').forEach(hydrateFlashcard);
+      // Carousel / Narrative
+      rootEl.querySelectorAll('[data-carousel]').forEach(hydrateCarousel);
+      // Checklist
+      rootEl.querySelectorAll('[data-checklist]').forEach(hydrateChecklist);
+      // Accordion: CSS-only, no JS init needed
+      // GSAP animations for the new content
+      if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
+        rootEl.querySelectorAll('[data-animate]').forEach(function(el) {
+          el.style.opacity = '1';
+          el.style.transform = 'none';
+        });
+        rootEl.querySelectorAll('[data-counter]').forEach(function(el) {
+          // Reset counter to show final value immediately (no animation on swap)
+          // The value is already in the HTML from build-course.js
+        });
+      }
+    }
+
+    // ══════════════════════════════════════════════════════════════════════
+    // DEV MODE — Variant Toggle System
+    // Stores cloned DOM nodes (not HTML strings) for reliable swapping.
+    // ══════════════════════════════════════════════════════════════════════
+    (function initDevMode() {
+      var hasTemplates = document.querySelector('template[data-variant-alt]');
+      if (!hasTemplates) return;
+
+      var devActive = false;
+      var entries = [];
+
+      var variantLabels = {
+        'centered-overlay': 'Image + centred text',
+        'split-screen': 'Text left, image right',
+        'minimal-text': 'Typography only',
+        'split': '50/50 side-by-side',
+        'overlap': 'Overlapping card',
+        'full-overlay': 'Full image + gradient',
+        'grid-4': '4-column grid',
+        'wide-2': '2-column wide',
+        'featured': 'Featured + smaller',
+        'accent-border': 'Coloured border + icons',
+        'stacked': 'Vertical list',
+        'grid': '2x2 grid',
+        'centered': 'Centred',
+        'card-row': 'Cards with bars',
+        'centered-alternating': 'Left/right alternating',
+        'columns': 'Table columns',
+        'stacked-rows': 'Side-by-side rows',
+        'horizontal': 'Tabs above',
+        'vertical': 'Tabs on left / Top-to-bottom',
+        'accent-bar': 'Accent bar + quote',
+        'minimal': 'Clean minimal',
+        'center': 'Centred overlay',
+        'left': 'Text left, fade right',
+        'right': 'Text right, fade left',
+        'standard': 'Default',
+        'captioned-card': 'Card with caption',
+        'horizontal': 'Left to right'
+      };
+
+      // ── DEV button ────────────────────────────────────────────────────
+      var devBtn = document.createElement('button');
+      devBtn.textContent = 'DEV';
+      devBtn.setAttribute('style',
+        'position:fixed;top:12px;right:12px;z-index:10000;' +
+        'background:#f59e0b;color:#000;border:none;' +
+        'padding:5px 14px;border-radius:4px;font:bold 11px/1.4 monospace;' +
+        'cursor:pointer;opacity:0.7;'
+      );
+      devBtn.addEventListener('mouseenter', function() { devBtn.style.opacity = '1'; });
+      devBtn.addEventListener('mouseleave', function() { if (!devActive) devBtn.style.opacity = '0.7'; });
+      document.body.appendChild(devBtn);
+
+      // ── Init: extract DOM nodes from templates ────────────────────────
+      var initialized = false;
+      function initEntries() {
+        if (initialized) return;
+        initialized = true;
+
+        document.querySelectorAll('section[data-component-type]').forEach(function(section) {
+          var templates = section.querySelectorAll('template[data-variant-alt]');
+          if (templates.length === 0) return;
+
+          var compType = section.getAttribute('data-component-type');
+          var activeVariant = section.getAttribute('data-variant') || 'default';
+
+          // Store cloned DOM nodes — NOT HTML strings
+          var variantNodes = {};
+
+          // Extract alternate variants from templates as DOM nodes
+          templates.forEach(function(t) {
+            var varName = t.getAttribute('data-variant-alt');
+            var frag = t.content;
+            // Find the section element inside the fragment
+            var node = frag.querySelector('section') || frag.firstElementChild;
+            if (node) {
+              variantNodes[varName] = node.cloneNode(true);
+            }
+          });
+
+          // Remove templates from live DOM
+          templates.forEach(function(t) { t.remove(); });
+
+          // Store current active section as a cloned node
+          variantNodes[activeVariant] = section.cloneNode(true);
+
+          // Wrap section in a stable container
+          var wrapper = document.createElement('div');
+          wrapper.setAttribute('data-dev-wrapper', compType);
+          wrapper.style.position = 'relative';
+          section.parentElement.insertBefore(wrapper, section);
+          wrapper.appendChild(section);
+
+          // Build toolbar
+          var toolbar = document.createElement('div');
+          toolbar.setAttribute('style',
+            'display:none;background:#f59e0b;color:#000;padding:6px 14px;' +
+            'font:bold 11px/1.4 monospace;align-items:center;gap:6px;' +
+            'border-radius:6px 6px 0 0;margin:0 8px;'
+          );
+
+          var label = document.createElement('span');
+          label.textContent = compType;
+          label.style.cssText = 'opacity:0.6;margin-right:6px;text-transform:uppercase;font-size:10px;letter-spacing:0.05em;';
+          toolbar.appendChild(label);
+
+          var variantNames = Object.keys(variantNodes);
+          variantNames.forEach(function(v) {
+            var btn = document.createElement('button');
+            btn.textContent = variantLabels[v] || v;
+            btn.setAttribute('data-dev-variant', v);
+            btn.title = v;
+            var isActive = v === activeVariant;
+            btn.style.cssText =
+              'background:' + (isActive ? '#000' : 'transparent') +
+              ';color:' + (isActive ? '#f59e0b' : '#000') +
+              ';border:1px solid ' + (isActive ? '#000' : 'rgba(0,0,0,0.3)') +
+              ';padding:2px 10px;border-radius:3px;font:bold 11px/1.4 monospace;cursor:pointer;';
+            toolbar.appendChild(btn);
+          });
+
+          wrapper.insertBefore(toolbar, section);
+
+          var entry = {
+            wrapper: wrapper,
+            toolbar: toolbar,
+            activeVariant: activeVariant,
+            compType: compType,
+            variantNodes: variantNodes
+          };
+          entries.push(entry);
+
+          toolbar.addEventListener('click', function(e) {
+            var btn = e.target.closest('[data-dev-variant]');
+            if (!btn) return;
+            var target = btn.getAttribute('data-dev-variant');
+            if (target === entry.activeVariant) return;
+            swapVariant(entry, target);
+          });
+        });
+      }
+
+      // ── Swap using cloned DOM nodes ───────────────────────────────────
+      function swapVariant(entry, targetVariant) {
+        var targetNode = entry.variantNodes[targetVariant];
+        if (!targetNode) { console.warn('DEV: No node for', targetVariant); return; }
+
+        // Find current live section
+        var currentSection = entry.wrapper.querySelector('section[data-component-type]');
+        if (!currentSection) { console.warn('DEV: No current section found'); return; }
+
+        // Save current state back (in case user modified it)
+        entry.variantNodes[entry.activeVariant] = currentSection.cloneNode(true);
+
+        // Clone the target and insert
+        var newSection = targetNode.cloneNode(true);
+        currentSection.parentNode.replaceChild(newSection, currentSection);
+
+        // Re-hydrate interactivity
+        hydrateComponent(newSection);
+
+        // Make animated elements visible immediately
+        newSection.querySelectorAll('[data-animate]').forEach(function(el) {
+          el.style.opacity = '1'; el.style.transform = 'none'; el.style.clipPath = 'none';
+        });
+        newSection.querySelectorAll('[data-animate-stagger]').forEach(function(c) {
+          Array.from(c.children).forEach(function(ch) { ch.style.opacity = '1'; ch.style.transform = 'none'; });
+        });
+
+        entry.activeVariant = targetVariant;
+
+        // Update button styles
+        entry.toolbar.querySelectorAll('[data-dev-variant]').forEach(function(btn) {
+          var isActive = btn.getAttribute('data-dev-variant') === targetVariant;
+          btn.style.background = isActive ? '#000' : 'transparent';
+          btn.style.color = isActive ? '#f59e0b' : '#000';
+          btn.style.borderColor = isActive ? '#000' : 'rgba(0,0,0,0.3)';
+        });
+
+        console.log('DEV: ' + entry.compType + ' → ' + targetVariant);
+      }
+
+      // ── Toggle DEV mode ───────────────────────────────────────────────
+      devBtn.addEventListener('click', function() {
+        devActive = !devActive;
+        devBtn.textContent = devActive ? 'DEV ✓' : 'DEV';
+        devBtn.style.opacity = devActive ? '1' : '0.7';
+
+        if (devActive) {
+          initEntries();
+          entries.forEach(function(e) {
+            e.toolbar.style.display = 'flex';
+            e.wrapper.style.outline = '2px dashed #f59e0b';
+            e.wrapper.style.outlineOffset = '-2px';
+            e.wrapper.style.borderRadius = '8px';
+          });
+        } else {
+          entries.forEach(function(e) {
+            e.toolbar.style.display = 'none';
+            e.wrapper.style.outline = 'none';
+          });
+        }
+      });
     })();
 
     // ── Summary log ─────────────────────────────────────────────────────

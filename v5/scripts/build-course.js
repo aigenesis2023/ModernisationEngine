@@ -921,7 +921,7 @@ function fillBranching(comp, maxW) {
 
   const newButtons = items.map((item, i) =>
     `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden">
-<span class="absolute top-4 right-4 text-5xl font-headline font-black text-primary/10 group-hover:text-secondary/20 transition-colors select-none">${String.fromCharCode(65 + i)}</span>
+<span class="absolute bottom-2 right-3 text-4xl font-headline font-black text-primary/8 group-hover:text-secondary/15 transition-colors select-none leading-none">${String.fromCharCode(65 + i)}</span>
 <div class="relative z-10">
 <div class="font-bold text-on-surface text-lg mb-2">${esc(item.title || '')}</div>
 <div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</div>
@@ -1175,17 +1175,17 @@ ${newStats}
 </section>`;
 }
 
-function fillPullquote(comp, maxW) {
+function fillPullquote(comp, variant, maxW) {
   const quote = stripTags(comp.body || '');
   const attribution = esc(comp.attribution || '');
+  const role = esc(comp.role || '');
   const c = DC.pullquote || {};
   const secClass = sectionOnly((DC.pullquote || {}).section || 'py-16');
 
   const bqStyle = c.blockquoteStyle || 'text-xl md:text-2xl font-headline font-bold leading-relaxed';
   const citeStyle = c.citeClass || 'text-on-surface-variant';
 
-  // Scale down font for long quotes — Stitch designs blockquoteStyle for 3-5 word punchy quotes.
-  // A 37-word research finding at text-6xl overflows the viewport.
+  // Scale down font for long quotes
   let quoteBqStyle = bqStyle;
   if (quote.length > 120) {
     quoteBqStyle = bqStyle
@@ -1197,23 +1197,36 @@ function fillPullquote(comp, maxW) {
       .replace(/\bmd:text-[6-9]xl\b/g, 'md:text-5xl');
   }
 
-  if (c.hasDecorativeQuote && c.decorativeSpanHtml) {
+  const attrHtml = attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}${role ? `<span class="block text-sm mt-1 text-on-surface-variant/60">${role}</span>` : ''}</p>` : '';
+
+  if (variant === 'centered') {
+    // Centered with decorative quotes — large impact
     return `<section class="${secClass} relative" data-component-type="pullquote">
-${c.decorativeSpanHtml}
+${c.decorativeSpanHtml || '<span class="absolute top-8 left-1/2 -translate-x-1/2 text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
 <div class="max-w-4xl mx-auto px-8 text-center relative z-10">
 <blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
-${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}</cite>` : ''}
+${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
 </div>
 </section>`;
   }
 
-  // Fallback: border-l accent bar layout
+  if (variant === 'minimal') {
+    // Minimal — no decoration, just bold text on surface-container
+    return `<section class="${sectionOnly('py-20 bg-surface-container-low')}" data-component-type="pullquote">
+<div class="max-w-3xl mx-auto px-8 text-center">
+<blockquote class="font-headline text-2xl md:text-3xl font-bold leading-relaxed text-on-surface" data-animate="fade-up">${quote}</blockquote>
+${attribution ? `<p class="mt-6 text-sm text-on-surface-variant uppercase tracking-widest" data-animate="fade-up">— ${attribution}${role ? ` · ${role}` : ''}</p>` : ''}
+</div>
+</section>`;
+  }
+
+  // Default: accent-bar — border-l with quote mark
   return `<section class="${secClass}" data-component-type="pullquote">
 <div class="${maxW} mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
 <span class="text-primary/20 text-7xl font-serif absolute -top-6 -left-1 leading-none select-none" aria-hidden="true">&ldquo;</span>
 <blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
-${attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}</p>` : ''}
+${attrHtml}
 </div>
 </div>
 </section>`;
@@ -1339,7 +1352,7 @@ function fillFlashcard(comp, maxW) {
       ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'p-6 md:p-8')
       : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10 p-6 md:p-8');
     const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', 'p-6 md:p-8 text-center');
-    return `<div class="min-h-[240px] group cursor-pointer" style="perspective:1000px" data-flashcard>
+    return `<div class="min-h-[180px] group cursor-pointer" style="perspective:1000px" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d;min-height:inherit">
 <div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
 <div class="text-center px-6">
@@ -1427,48 +1440,71 @@ ${newCards}
 </section>`;
 }
 
-function fillFullBleed(comp) {
+function fillFullBleed(comp, variant) {
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
-  const pos = comp.overlayPosition || 'bottom';
-  const hAlign = pos === 'left' ? 'text-left' : pos === 'right' ? 'text-right' : 'text-center';
 
-  // Gradient direction follows text position — overlay is darkest where text sits
-  let gradientClass, flexAlign, padding;
-  if (pos === 'top') {
-    gradientClass = 'bg-gradient-to-b from-black/90 via-black/50 to-transparent';
-    flexAlign = 'items-start';
-    padding = 'pt-16';
-  } else if (pos === 'center') {
-    gradientClass = 'bg-black/60';
-    flexAlign = 'items-center';
-    padding = 'py-16';
-  } else {
-    // bottom (default) — safest, text sits where overlay is strongest
-    gradientClass = 'bg-gradient-to-t from-black/90 via-black/50 to-transparent';
-    flexAlign = 'items-end';
-    padding = 'pb-16';
+  // Variant determines text position and gradient direction
+  const pos = variant || comp.overlayPosition || 'center';
+
+  if (pos === 'left') {
+    return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
+<div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
+<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-left" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</p>` : ''}
+</div>
+</section>`;
   }
 
-  return `<section class="relative h-[60vh] flex ${flexAlign} overflow-hidden" data-component-type="full-bleed">
+  if (pos === 'right') {
+    return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
-<div class="absolute inset-0 ${gradientClass}"></div>
-<div class="relative z-10 w-full max-w-4xl mx-auto px-8 ${padding} ${hAlign}" data-animate="fade-up">
+<div class="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent"></div>
+<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</p>` : ''}
+</div>
+</section>`;
+  }
+
+  // Default: center — full overlay, centered text
+  return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
+${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
+<div class="absolute inset-0 bg-black/60"></div>
+<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-center" data-animate="fade-up">
 <h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl ${pos === 'center' ? 'mx-auto' : ''}">${bodyText}</p>` : ''}
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">${bodyText}</p>` : ''}
 </div>
 </section>`;
 }
 
-function fillGraphic(comp, maxW) {
+function fillGraphic(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
   const secClass = sectionOnly((DC.graphic || {}).section || 'py-12');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
+  if (variant === 'captioned-card') {
+    // Image inside a glass card with title overlay and caption below
+    return `<section class="${secClass}" data-component-type="graphic">
+<div class="${maxW} mx-auto px-8">
+<div class="glass-card rounded-2xl overflow-hidden" data-animate="fade-up">
+<div class="relative">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-auto max-h-[50vh] object-cover" src="${imgSrc}"/>` : '<div class="w-full h-64 bg-surface-container"></div>'}
+${title ? `<div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-8 pb-6 pt-16"><h2 class="font-headline text-2xl font-bold text-white">${title}</h2></div>` : ''}
+</div>
+${body ? `<div class="px-8 py-5 text-on-surface-variant">${body}</div>` : ''}
+</div>
+</div>
+</section>`;
+  }
+
+  // Default: standard — clean image with optional title above and caption below
   return `<section class="${secClass}" data-component-type="graphic">
 <div class="${maxW} mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
@@ -1480,13 +1516,42 @@ ${body ? `<div class="mt-4 text-on-surface-variant">${body}</div>` : ''}
 </section>`;
 }
 
-function fillProcessFlow(comp, maxW) {
+function fillProcessFlow(comp, variant, maxW) {
   const items = comp._items || comp._nodes || [];
   if (items.length === 0) return '';
 
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC['process-flow'] || {}).section || 'py-16 bg-surface-container-low');
 
+  if (variant === 'horizontal') {
+    // Compact horizontal layout — nodes in a row with arrows between
+    const hNodes = items.map((item, i) => {
+      const isFirst = i === 0;
+      const isLast = i === items.length - 1;
+      const borderColor = isFirst ? 'border-secondary' : isLast ? 'border-primary' : 'border-outline-variant/30';
+      return `<div class="glass-card px-4 py-4 rounded-xl border-t-4 ${borderColor} flex-1 min-w-0 text-center">
+<div class="font-headline font-bold text-sm mb-1">${esc(item.title || '')}</div>
+${item.body ? `<div class="text-xs text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
+</div>`;
+    });
+
+    const hArrow = `<div class="flex items-center flex-shrink-0 px-1"><span class="material-symbols-outlined text-outline-variant/50 text-lg">arrow_forward</span></div>`;
+
+    const withHArrows = hNodes.flatMap((n, i) =>
+      i < hNodes.length - 1 ? [n, hArrow] : [n]
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="process-flow">
+<div class="${maxW} mx-auto px-8">
+${title ? `<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>` : ''}
+<div class="flex flex-col md:flex-row gap-2 items-stretch" data-animate="fade-up">
+${withHArrows}
+</div>
+</div>
+</section>`;
+  }
+
+  // Default: vertical — stacked cards with down arrows
   const newNodes = items.map((item, i) => {
     const isFirst = i === 0;
     const isLast = i === items.length - 1;
@@ -1561,15 +1626,17 @@ function fillImageGallery(comp, maxW) {
   const images = items.map(item => {
     const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
     const imgAlt = esc(item._graphic?.alt || item.caption || '');
-    return `<div class="bg-surface-container rounded-2xl overflow-hidden aspect-square">
-${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSrc}"/>` : '<div class="w-full h-full flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">image</span></div>'}
+    const caption = esc(item.caption || '');
+    return `<div class="bg-surface-container rounded-2xl overflow-hidden">
+${imgSrc ? `<div class="aspect-square"><img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSrc}"/></div>` : '<div class="aspect-square flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">image</span></div>'}
+${caption ? `<p class="px-4 py-3 text-sm text-on-surface-variant">${caption}</p>` : ''}
 </div>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="image-gallery">
 <div class="${maxW} mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
-<div class="grid grid-cols-2 md:grid-cols-3 gap-6" data-animate-stagger="scale-in">
+<div class="grid grid-cols-2 md:grid-cols-3 gap-6 ${items.length % 3 === 1 ? '[&>:last-child]:md:col-start-2' : items.length % 3 === 2 ? '' : ''}" data-animate-stagger="scale-in">
 ${images}
 </div>
 </div>
@@ -1606,7 +1673,7 @@ function fillLabeledImage(comp, maxW) {
 <div class="${maxW} mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
 <div class="relative bg-surface-container rounded-3xl overflow-hidden min-h-[300px]" data-animate="clip-up">
-${imgSrc ? `<img alt="${imgAlt}" class="w-full rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>'}
+${imgSrc ? `<img alt="${imgAlt}" class="w-full max-h-[65vh] object-cover rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>'}
 ${hasImage ? markerHtml : ''}
 </div>
 ${fallbackMarkerList}
@@ -1627,11 +1694,29 @@ function getSectionMaxW(sectionWidth) {
   return SECTION_WIDTHS[sectionWidth] || SECTION_WIDTHS.standard;
 }
 
-// ─── Component dispatcher ─────────────────────────────────────────────
-function fillComponent(comp, index, sectionWidth) {
+// ─── Variant map: component types that have layout variants ───────────
+const VARIANT_MAP = {
+  'hero':         ['centered-overlay', 'split-screen', 'minimal-text'],
+  'graphic-text': ['split', 'overlap', 'full-overlay'],
+  'bento':        ['grid-4', 'wide-2', 'featured'],
+  'accordion':    ['standard', 'accent-border'],
+  'mcq':          ['stacked', 'grid'],
+  'stat-callout': ['centered', 'card-row'],
+  'timeline':     ['vertical', 'centered-alternating'],
+  'comparison':   ['columns', 'stacked-rows'],
+  'tabs':         ['horizontal', 'vertical'],
+  'pullquote':    ['accent-bar', 'centered', 'minimal'],
+  'full-bleed':   ['center', 'left', 'right'],
+  'process-flow': ['vertical', 'horizontal'],
+  'graphic':      ['standard', 'captioned-card']
+};
+
+// ─── Single-variant renderer (used internally) ───────────────────────
+function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
   const type = (comp.type || 'text').toLowerCase();
-  const variant = comp.variant || '';
+  const variant = variantOverride !== undefined ? variantOverride : (comp.variant || '');
   const maxW = getSectionMaxW(sectionWidth);
+  let html;
   switch (type) {
     case 'hero':            html = fillHero(comp, variant); break;
     case 'text':            html = fillText(comp, maxW); break;
@@ -1646,15 +1731,15 @@ function fillComponent(comp, index, sectionWidth) {
     case 'timeline':        html = fillTimeline(comp, variant, maxW); break;
     case 'comparison':      html = fillComparison(comp, variant, maxW); break;
     case 'stat-callout':    html = fillStatCallout(comp, variant, maxW); break;
-    case 'pullquote':       html = fillPullquote(comp, maxW); break;
+    case 'pullquote':       html = fillPullquote(comp, variant, maxW); break;
     case 'checklist':       html = fillChecklist(comp, maxW); break;
     case 'tabs':            html = fillTabs(comp, variant, maxW); break;
     case 'flashcard':       html = fillFlashcard(comp, maxW); break;
     case 'narrative':       html = fillNarrative(comp, maxW); break;
     case 'key-term':        html = fillKeyTerm(comp, maxW); break;
-    case 'full-bleed':      html = fillFullBleed(comp); break;
-    case 'graphic':         html = fillGraphic(comp, maxW); break;
-    case 'process-flow':    html = fillProcessFlow(comp, maxW); break;
+    case 'full-bleed':      html = fillFullBleed(comp, variant); break;
+    case 'graphic':         html = fillGraphic(comp, variant, maxW); break;
+    case 'process-flow':    html = fillProcessFlow(comp, variant, maxW); break;
     case 'media':           html = fillMedia(comp, maxW); break;
     case 'video-transcript':html = fillVideoTranscript(comp, maxW); break;
     case 'image-gallery':   html = fillImageGallery(comp, maxW); break;
@@ -1663,10 +1748,44 @@ function fillComponent(comp, index, sectionWidth) {
       console.log(`  [warn] Unknown component type: ${type}`);
       return null;
   }
-  // Inject data-variant so QA can find the right instance of each component type
+  // Inject data-variant so QA and DEV toggle can find the right instance
   if (html && variant) {
     html = html.replace(/^(<section\b[^>]*)>/, `$1 data-variant="${variant}">`);
   }
+  return html;
+}
+
+// ─── Component dispatcher (renders active variant + alt templates) ────
+function fillComponent(comp, index, sectionWidth) {
+  const type = (comp.type || 'text').toLowerCase();
+  const variant = comp.variant || '';
+
+  // Render the active variant
+  let html = fillComponentVariant(comp, index, sectionWidth);
+  if (!html) return null;
+
+  // Pre-render alternate variants as <template> tags for DEV mode switching
+  const allVariants = VARIANT_MAP[type];
+  if (allVariants && allVariants.length > 1) {
+    const activeVariant = variant || allVariants[0];
+    const altTemplates = [];
+    for (const v of allVariants) {
+      if (v === activeVariant) continue;
+      const altHtml = fillComponentVariant(comp, index, sectionWidth, v);
+      if (altHtml) {
+        altTemplates.push(`<template data-variant-alt="${esc(v)}">${altHtml}</template>`);
+      }
+    }
+    if (altTemplates.length > 0) {
+      // Inject templates before the closing </section> tag (or at end if no section wrapper)
+      if (html.includes('</section>')) {
+        html = html.replace(/<\/section>\s*$/, `${altTemplates.join('\n')}\n</section>`);
+      } else {
+        html += '\n' + altTemplates.join('\n');
+      }
+    }
+  }
+
   return html;
 }
 

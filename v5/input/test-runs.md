@@ -5,11 +5,14 @@
 - **"Run"** → full pipeline (Steps 1-5), deliver the output. No QA, no bug fixing.
 - **"Test"** → full pipeline (Steps 1-5), then all QA gates (6a, 6b, 6c). Fix any failures.
 - **"Matrix test"** → run the default 3-combination matrix below. Fully autonomous — no user input needed.
+- **"Reference test"** → use pre-built reference course (all 25 components, 19 variants). User provides 1 or 2 brand URLs. Runs Steps 3-5 per URL. No QA — user reviews manually.
 
 Examples:
 - "Run it with sales and fin-ai" → just builds
 - "Test it with Sprig on cybersecurity" → builds + QA + fixes
 - "Matrix test" → runs the default 3 combinations, QA, classify bugs, fix, verify
+- "Reference test with https://sprig.framer.website/" → builds reference course with Sprig brand
+- "Reference test with https://sprig.framer.website/ and https://ailyx.framer.website/" → builds two courses (dark + light)
 
 ---
 
@@ -320,3 +323,72 @@ During matrix testing, pay extra attention to:
 - Topics that produce lots of statistics vs topics that are mostly narrative
 - Dark themes: text readability on all background variants (surface, surface-variant, primary-container)
 - Light themes: sufficient contrast on pale backgrounds, subtle borders visible
+
+---
+
+## Reference Test
+
+### Purpose
+
+Fast engine QA using a pre-built course that exercises all 25 component types and 19/21 layout variants. Skips the most time-consuming steps (research + layout generation) and runs everything else fresh. The user reviews the output manually instead of automated QA.
+
+**Use when:** You've changed build-course.js, hydrate.js, extract-contract.js, generate-course-html.js, generate-images.js, or any engine script and want to verify the output visually.
+
+**Do NOT use when:** You've changed prompts (generation-engine.md, research-agent.md) or schemas — use a full "run" or "test" for those since the reference course bypasses content generation.
+
+### Reference course file
+
+`v5/input/reference-course-layout.json`
+
+- 10 sections, 25 component instances (one per component type)
+- All 25 active component types (excludes path-selector which is SCORM-only)
+- All 21 layout variants accessible via the **DEV toggle** (see below)
+- Topic: "The Future of Work: Navigating Digital Transformation"
+- Realistic content, normal lengths
+
+### DEV toggle — variant switching
+
+Every built course includes a **DEV** button (top-right corner, sticky). Click it to enter DEV mode:
+
+- Each component that has layout variants shows a dark toolbar above it
+- The toolbar displays the component type and buttons for each variant
+- Click a variant button to swap the layout live — content stays the same, layout changes
+- Interactive components (tabs, quizzes, etc.) re-initialize automatically after swap
+
+This means one component per type in the reference course covers ALL 21 variants. No duplicate components needed.
+
+The DEV toggle is always present in every built course — not just reference tests. It's invisible until clicked (no impact on end users). This is the foundation for the future authoring tool.
+
+### How it works
+
+User says: **"reference test"** + 1 or 2 brand URLs.
+
+**With 1 URL:**
+```
+1. Write URL to brand/url.txt
+2. Copy v5/input/reference-course-layout.json → v5/output/course-layout.json
+3. Run: node v5/scripts/scrape-brand.js
+4. Run: node v5/scripts/generate-course-html.js
+5. Run: node v5/scripts/generate-images.js
+6. Run: node v5/scripts/build-course.js
+7. Output preview link to v5/output/course.html
+```
+
+**With 2 URLs (dark + light):**
+Run the above sequence for each URL. Save first output before starting second:
+```
+1. Run steps 1-6 for URL 1
+2. Copy v5/output/course.html → v5/output/reference-test-1.html
+3. Run steps 1-6 for URL 2
+4. Copy v5/output/course.html → v5/output/reference-test-2.html
+5. Output both preview links
+```
+
+**What does NOT run:**
+- research-content.js (skipped — using reference content)
+- generate-layout.js (skipped — using reference layout)
+- qa-course.js, qa-interactive.js, review-course.js (skipped — user reviews manually)
+
+### After the reference test
+
+The user scrolls through the output and tells Claude what to fix. Claude fixes the engine (never the output), rebuilds, and gives a new preview link. Repeat until the user is satisfied.
