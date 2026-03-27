@@ -27,8 +27,8 @@ const SCREENSHOT_PATH = path.join(OUTPUT_DIR, 'brand-screenshot.png');
 const DESIGN_MD_PATH = path.join(OUTPUT_DIR, 'brand-design.md');
 const PROFILE_PATH = path.join(OUTPUT_DIR, 'brand-profile.json');
 
-// ─── Take screenshot with Playwright ─────────────────────────────────
-async function takeScreenshot(url) {
+// ─── Take screenshot + detect dominant theme with Playwright ─────────
+async function takeScreenshotAndDetectTheme(url) {
   const { chromium } = require('playwright');
 
   console.log('Launching browser...');
@@ -42,11 +42,141 @@ async function takeScreenshot(url) {
 
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  await page.screenshot({ path: SCREENSHOT_PATH, fullPage: false });
-  console.log(`Screenshot saved: ${SCREENSHOT_PATH}`);
+  // Take full-page screenshot so the whole brand is visible (not just the hero)
+  await page.screenshot({ path: SCREENSHOT_PATH, fullPage: true });
+  console.log(`Screenshot saved: ${SCREENSHOT_PATH} (full page)`);
+
+  // ─── Detect dominant background colour ─────────────────────────────
+  // Sample background colours at multiple scroll positions to determine
+  // if the brand is truly light or dark. The hero alone can be misleading
+  // (e.g. fitflow has a dark hero but is a light brand).
+  const detectedTheme = await page.evaluate(() => {
+    const pageHeight = document.documentElement.scrollHeight;
+    const viewportHeight = window.innerHeight;
+    // Sample at 5 evenly-spaced vertical positions (skipping the hero at 0)
+    const samplePoints = [];
+    for (let i = 1; i <= 5; i++) {
+      samplePoints.push(Math.min(Math.floor((pageHeight * i) / 6), pageHeight - 1));
+    }
+
+    let lightCount = 0;
+    let darkCount = 0;
+
+    for (const y of samplePoints) {
+      // Find the element at the center of the viewport at this Y position
+      const el = document.elementFromPoint(640, Math.min(y, viewportHeight - 1));
+      if (!el) continue;
+
+      // Walk up the DOM to find the nearest element with a background colour
+      let current = el;
+      let bgColor = null;
+      while (current && current !== document.documentElement) {
+        const style = window.getComputedStyle(current);
+        const bg = style.backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          bgColor = bg;
+          break;
+        }
+        current = current.parentElement;
+      }
+
+      // Fall back to body/html background
+      if (!bgColor) {
+        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+        const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
+        bgColor = (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)') ? bodyBg : htmlBg;
+      }
+
+      if (!bgColor) continue;
+
+      // Parse rgb/rgba
+      const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) continue;
+
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+      if (luminance < 0.4) darkCount++;
+      else lightCount++;
+    }
+
+    return {
+      isDark: darkCount > lightCount,
+      samples: { light: lightCount, dark: darkCount },
+    };
+  });
+
+  // We need to scroll to each sample point to get accurate elementFromPoint results
+  // since elementFromPoint only works within the visible viewport.
+  // Re-do with scrolling:
+  const scrolledTheme = await page.evaluate(async () => {
+    const pageHeight = document.documentElement.scrollHeight;
+    const viewportHeight = window.innerHeight;
+    const sampleCount = 6;
+    let lightCount = 0;
+    let darkCount = 0;
+
+    for (let i = 0; i < sampleCount; i++) {
+      // Scroll to evenly-spaced positions, skipping the very top (hero)
+      const scrollY = Math.floor((pageHeight * (i + 1)) / (sampleCount + 1));
+      window.scrollTo(0, scrollY);
+      // Small delay for rendering
+      await new Promise(r => setTimeout(r, 100));
+
+      // Sample at center of viewport
+      const el = document.elementFromPoint(640, viewportHeight / 2);
+      if (!el) continue;
+
+      let current = el;
+      let bgColor = null;
+      while (current && current !== document.documentElement) {
+        const style = window.getComputedStyle(current);
+        const bg = style.backgroundColor;
+        if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+          bgColor = bg;
+          break;
+        }
+        current = current.parentElement;
+      }
+
+      if (!bgColor) {
+        const bodyBg = window.getComputedStyle(document.body).backgroundColor;
+        const htmlBg = window.getComputedStyle(document.documentElement).backgroundColor;
+        bgColor = (bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)') ? bodyBg : htmlBg;
+      }
+
+      if (!bgColor) continue;
+
+      const match = bgColor.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) continue;
+
+      const r = parseInt(match[1]);
+      const g = parseInt(match[2]);
+      const b = parseInt(match[3]);
+      const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+      if (luminance < 0.4) darkCount++;
+      else lightCount++;
+    }
+
+    // Scroll back to top
+    window.scrollTo(0, 0);
+
+    return {
+      isDark: darkCount > lightCount,
+      samples: { light: lightCount, dark: darkCount },
+    };
+  });
+
+  const theme = scrolledTheme.samples.light + scrolledTheme.samples.dark > 0
+    ? scrolledTheme : detectedTheme;
+
+  console.log(`Theme detection: ${theme.samples.light} light samples, ${theme.samples.dark} dark samples → ${theme.isDark ? 'DARK' : 'LIGHT'}`);
 
   await browser.close();
-  return SCREENSHOT_PATH;
+  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark };
 }
 
 // ─── Manual mode: read description from stdin ────────────────────────
@@ -180,19 +310,20 @@ function extractImageTreatment(description) {
 }
 
 // ─── Save outputs ────────────────────────────────────────────────────
-function saveOutputs(url, description) {
+function saveOutputs(url, description, detectedIsDark) {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   // Save brand-design.md
   fs.writeFileSync(DESIGN_MD_PATH, description);
   console.log(`\nOutput: ${DESIGN_MD_PATH}`);
 
-  // Save minimal brand-profile.json
+  // Save brand-profile.json with detected theme
   const imageTreatment = extractImageTreatment(description);
   const profile = {
     sourceUrl: url,
     scrapedAt: new Date().toISOString(),
     imageTreatment,
+    detectedTheme: detectedIsDark ? 'dark' : 'light',
   };
   fs.writeFileSync(PROFILE_PATH, JSON.stringify(profile, null, 2));
   console.log(`Output: ${PROFILE_PATH}`);
@@ -225,9 +356,11 @@ async function main() {
   console.log(`\nBrand Scraper — Screenshot + Description\n`);
   console.log(`URL: ${url}\n`);
 
-  // Step 1: Take screenshot
+  // Step 1: Take screenshot + detect dominant theme
+  let detectedIsDark = false; // safe default: light
   try {
-    await takeScreenshot(url);
+    const result = await takeScreenshotAndDetectTheme(url);
+    detectedIsDark = result.isDark;
   } catch (err) {
     console.error(`Screenshot failed: ${err.message}`);
     console.error('Continuing without screenshot — you can describe the brand from memory.\n');
@@ -255,8 +388,8 @@ async function main() {
     description = await readManualDescription();
   }
 
-  // Step 3: Save outputs
-  saveOutputs(url, description);
+  // Step 3: Save outputs (includes detected theme)
+  saveOutputs(url, description, detectedIsDark);
 
   console.log('Done.');
 }

@@ -51,19 +51,32 @@ if (!API_KEY) {
 
 /** Detect colorMode from brand brief text — prevents Stitch from guessing wrong */
 function detectColorMode(designMd) {
+  // Primary: read the detected theme from brand-profile.json (set by scrape-brand.js
+  // which scrolls the actual page and samples background colours at multiple positions).
+  // This is far more reliable than keyword-matching a natural language description,
+  // which can be misleading (e.g. a light brand with a dark hero).
+  try {
+    const profilePath = join(ROOT, 'v5/output/brand-profile.json');
+    if (existsSync(profilePath)) {
+      const profile = JSON.parse(readFileSync(profilePath, 'utf-8'));
+      if (profile.detectedTheme) {
+        console.log(`  ColorMode: ${profile.detectedTheme.toUpperCase()} (from brand-profile.json page sampling)`);
+        return profile.detectedTheme.toUpperCase();
+      }
+    }
+  } catch (e) { /* fall through to text-based detection */ }
+
+  // Fallback: keyword-match the brand-design.md text
   const lower = designMd.toLowerCase();
-  // Count dark vs light indicators
   const darkSignals = ['dark background', 'deep black', 'near-black', 'dark surface', 'dark charcoal',
     'dark theme', 'dark aesthetic', 'moody', 'dark, sleek', 'dark and '].filter(s => lower.includes(s)).length;
   const lightSignals = ['light background', 'white background', 'cream background', 'light theme',
     'airy', 'bright background', 'warm pink', 'light, clean', 'light and '].filter(s => lower.includes(s)).length;
-  // Also check the explicit Background description for dark terms
   const bgSection = lower.match(/background[:\s]+(.*?)(?:\n|$)/);
   if (bgSection && /deep|black|dark|charcoal|midnight/.test(bgSection[1])) return 'DARK';
   if (bgSection && /white|cream|light|bright|pale/.test(bgSection[1])) return 'LIGHT';
   if (darkSignals > lightSignals) return 'DARK';
   if (lightSignals > darkSignals) return 'LIGHT';
-  // Default: check if gradient-based (typically light)
   if (lower.includes('gradient') && !lower.includes('dark')) return 'LIGHT';
   return 'LIGHT'; // safe default
 }

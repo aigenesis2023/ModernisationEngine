@@ -63,7 +63,9 @@ When describing brands, use Stitch's native terms:
 
 ## ColorMode Detection
 
-`detectColorMode()` in `generate-course-html.js` analyses the brand brief text for light/dark keywords and injects an explicit `colorMode` directive into the Stitch prompt. This prevents Stitch from guessing wrong — e.g., choosing dark for a clearly light gradient brand like FitFlow. Detection defaults to LIGHT if ambiguous. The directive is prompt-only — it doesn't affect downstream processing. `design-tokens.json` `isDark` is always extracted from Stitch's actual CSS output.
+**Primary method:** `scrape-brand.js` scrolls the actual brand page and samples background colours at 6 evenly-spaced positions (skipping the hero). It counts light vs dark samples and writes `detectedTheme: "light"` or `"dark"` to `brand-profile.json`. This is reliable because it measures the dominant page theme, not just the hero — many brands (e.g. FitFlow) have a dark hero but light content sections.
+
+`detectColorMode()` in `generate-course-html.js` reads `brand-profile.json.detectedTheme` first. If unavailable (e.g. manual brand setup), it falls back to keyword-matching the brand-design.md text. The detected mode is injected as an explicit `colorMode` directive into the Stitch prompt. `design-tokens.json` `isDark` is always extracted from Stitch's actual CSS output.
 
 ---
 
