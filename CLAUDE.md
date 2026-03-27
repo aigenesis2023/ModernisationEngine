@@ -233,6 +233,12 @@ Claude Code automatically selects the correct run level based on what changed. T
 - The fix is clearly limited to HTML output / styling / interactivity
 - All upstream outputs (KB, layout, contract, tokens, images) are unchanged
 
+**MATRIX TEST** — autonomous multi-combination testing. Required when:
+- User says "matrix test" (with or without specifying brands/topics)
+- **Read `v5/input/test-runs.md` FIRST** — it contains the complete autonomous protocol: brand/topic pools, selection rules, 5-phase workflow, bug classification, variant coverage tracking, and summary template
+- If the user provides no brands or topics, auto-select from the pools in test-runs.md
+- If the user specifies brands or topics, use those as overrides
+
 **When in doubt, do a FULL RUN.** Announce which run level you're using and why.
 
 ### Full Run: Clear stale outputs
