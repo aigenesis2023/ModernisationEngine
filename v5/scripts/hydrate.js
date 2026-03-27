@@ -1234,12 +1234,17 @@
         // Re-hydrate interactivity
         hydrateComponent(newSection);
 
-        // Make animated elements visible immediately
-        newSection.querySelectorAll('[data-animate]').forEach(function(el) {
-          el.style.opacity = '1'; el.style.transform = 'none'; el.style.clipPath = 'none';
-        });
-        newSection.querySelectorAll('[data-animate-stagger]').forEach(function(c) {
-          Array.from(c.children).forEach(function(ch) { ch.style.opacity = '1'; ch.style.transform = 'none'; });
+        // Strip animation attributes so CSS [data-animate]{opacity:0} doesn't hide swapped variants
+        newSection.removeAttribute('data-animate');
+        newSection.removeAttribute('data-animate-stagger');
+        newSection.removeAttribute('data-parallax');
+        newSection.removeAttribute('data-text-reveal');
+        newSection.querySelectorAll('[data-animate]').forEach(function(el) { el.removeAttribute('data-animate'); });
+        newSection.querySelectorAll('[data-animate-stagger]').forEach(function(el) { el.removeAttribute('data-animate-stagger'); });
+        // Force visible in case inline styles were set by GSAP before cloning
+        newSection.style.opacity = '1'; newSection.style.transform = 'none'; newSection.style.clipPath = 'none';
+        newSection.querySelectorAll('*').forEach(function(el) {
+          if (el.style.opacity === '0') { el.style.opacity = '1'; el.style.transform = 'none'; }
         });
 
         entry.activeVariant = targetVariant;
