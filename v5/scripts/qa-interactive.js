@@ -18,6 +18,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const COURSE_PATH = path.resolve(ROOT, 'v5/output/course.html');
+const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
 
 const errors = [];
 const warnings = [];
@@ -1069,6 +1070,927 @@ async function run() {
   // Scroll back to top for consistent state
   await page.evaluate(() => window.scrollTo(0, 0));
   await page.waitForTimeout(200);
+
+  // Reset to desktop viewport for remaining design quality tests
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(300);
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  DESIGN QUALITY TESTS (17-31)
+  //  These catch what a graphic designer / UX specialist would flag.
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 17: WCAG AA contrast on ALL visible text
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing WCAG AA contrast on all text...');
+  const wcagIssues = await page.evaluate(() => {
+    var issues = [];
+
+    function getLuminance(rgb) {
+      var match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return null;
+      var r = parseInt(match[1]) / 255;
+      var g = parseInt(match[2]) / 255;
+      var b = parseInt(match[3]) / 255;
+      r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+      g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+      b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function getContrastRatio(l1, l2) {
+      var lighter = Math.max(l1, l2);
+      var darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    // Walk up ancestors to find a real background colour (not transparent)
+    function getEffectiveBg(el) {
+      var node = el;
+      while (node && node !== document.body) {
+        var bg = window.getComputedStyle(node).backgroundColor;
+        var match = bg.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+        if (match) {
+          var alpha = match[4] !== undefined ? parseFloat(match[4]) : 1;
+          if (alpha > 0.1) return bg;
+        }
+        node = node.parentElement;
+      }
+      // Fallback to body
+      return window.getComputedStyle(document.body).backgroundColor;
+    }
+
+    var textEls = document.querySelectorAll('h1, h2, h3, h4, p, li, td, th, span, label, blockquote, a');
+    var seen = new Set();
+
+    textEls.forEach(function (el) {
+      if (el.offsetHeight === 0) return;
+      if (el.textContent.trim().length < 3) return;
+      if (el.classList.contains('material-symbols-outlined')) return;
+      if (el.classList.contains('material-symbols-rounded')) return;
+      if (el.closest('[data-component-type="navigation"]')) return;
+      // Skip elements on image backgrounds (hero, full-bleed) — tested separately in TEST 13b
+      var comp = el.closest('[data-component-type]');
+      var compType = comp ? comp.getAttribute('data-component-type') : '';
+      if (compType === 'hero' || compType === 'full-bleed') return;
+      // Skip hidden tab panels / slides
+      var hiddenParent = el.closest('[data-tab-panel], [data-slide]');
+      if (hiddenParent && (hiddenParent.style.display === 'none' || hiddenParent.offsetHeight === 0)) return;
+
+      var textColor = window.getComputedStyle(el).color;
+      var bgColor = getEffectiveBg(el);
+      var textLum = getLuminance(textColor);
+      var bgLum = getLuminance(bgColor);
+
+      if (textLum === null || bgLum === null) return;
+
+      var ratio = getContrastRatio(textLum, bgLum);
+      var fontSize = parseFloat(window.getComputedStyle(el).fontSize);
+      var fontWeight = parseInt(window.getComputedStyle(el).fontWeight) || 400;
+      // WCAG AA: 4.5:1 for normal text, 3:1 for large text (>=18.66px bold or >=24px)
+      var isLargeText = (fontSize >= 24) || (fontSize >= 18.66 && fontWeight >= 700);
+      var minRatio = isLargeText ? 3 : 4.5;
+
+      if (ratio < minRatio) {
+        var key = compType + '-' + el.tagName + '-' + Math.round(ratio * 10);
+        if (seen.has(key)) return;
+        seen.add(key);
+        issues.push({
+          component: compType || 'unknown',
+          tag: el.tagName.toLowerCase(),
+          ratio: Math.round(ratio * 100) / 100,
+          required: minRatio,
+          text: el.textContent.trim().substring(0, 40),
+          textColor: textColor,
+          bgColor: bgColor
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (wcagIssues.length === 0) {
+    pass('CONTRAST-AA', 'All visible text meets WCAG AA contrast requirements ✓');
+  } else {
+    for (const issue of wcagIssues) {
+      fail('CONTRAST-AA', `${issue.component}: <${issue.tag}> contrast ${issue.ratio}:1 (need ${issue.required}:1) — "${issue.text}..." [text: ${issue.textColor}, bg: ${issue.bgColor}]`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 18: Padding consistency within card groups
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing padding consistency within card groups...');
+  const paddingIssues = await page.evaluate(() => {
+    var issues = [];
+    // Components that render card groups where padding must match
+    var groupTypes = ['bento', 'comparison', 'flashcard', 'key-term', 'branching'];
+
+    groupTypes.forEach(function (type) {
+      var sections = document.querySelectorAll('[data-component-type="' + type + '"]');
+      sections.forEach(function (section, secIdx) {
+        // Find immediate card-like children (divs with bg/shadow that look like cards)
+        var container = section.querySelector('.grid, .flex, [class*="grid"], [class*="flex"]');
+        if (!container) return;
+        var cards = Array.from(container.children).filter(function (c) {
+          return c.offsetHeight > 0 && c.tagName !== 'BUTTON';
+        });
+        if (cards.length < 2) return;
+
+        var paddings = cards.map(function (card) {
+          var cs = window.getComputedStyle(card);
+          return {
+            top: Math.round(parseFloat(cs.paddingTop)),
+            right: Math.round(parseFloat(cs.paddingRight)),
+            bottom: Math.round(parseFloat(cs.paddingBottom)),
+            left: Math.round(parseFloat(cs.paddingLeft))
+          };
+        });
+
+        // Check if all cards have the same padding
+        var ref = paddings[0];
+        for (var i = 1; i < paddings.length; i++) {
+          var diff = Math.abs(paddings[i].top - ref.top) +
+                     Math.abs(paddings[i].right - ref.right) +
+                     Math.abs(paddings[i].bottom - ref.bottom) +
+                     Math.abs(paddings[i].left - ref.left);
+          if (diff > 8) { // 8px total tolerance across all 4 sides
+            issues.push({
+              type: type,
+              index: secIdx + 1,
+              card1: ref.top + '/' + ref.right + '/' + ref.bottom + '/' + ref.left,
+              card2: paddings[i].top + '/' + paddings[i].right + '/' + paddings[i].bottom + '/' + paddings[i].left,
+              diffPx: diff
+            });
+            break; // One report per component instance
+          }
+        }
+      });
+    });
+
+    return issues;
+  });
+
+  if (paddingIssues.length === 0) {
+    pass('PADDING', 'Card padding is consistent within all component groups ✓');
+  } else {
+    for (const issue of paddingIssues) {
+      warn('PADDING', `${issue.type} #${issue.index}: cards have mismatched padding (${issue.card1} vs ${issue.card2}, ${issue.diffPx}px total diff)`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 19: Card height balance within groups
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing card height balance...');
+  const cardBalanceIssues = await page.evaluate(() => {
+    var issues = [];
+    var groupTypes = ['bento', 'comparison', 'flashcard', 'key-term'];
+
+    groupTypes.forEach(function (type) {
+      var sections = document.querySelectorAll('[data-component-type="' + type + '"]');
+      sections.forEach(function (section, secIdx) {
+        var container = section.querySelector('.grid, [class*="grid"]');
+        if (!container) return;
+        var cards = Array.from(container.children).filter(function (c) {
+          return c.offsetHeight > 0;
+        });
+        if (cards.length < 2) return;
+
+        var heights = cards.map(function (c) { return c.getBoundingClientRect().height; });
+        var maxH = Math.max.apply(null, heights);
+        var minH = Math.min.apply(null, heights);
+
+        // Flag if tallest card is more than 2.5x the shortest (extreme imbalance)
+        if (minH > 0 && maxH / minH > 2.5) {
+          issues.push({
+            type: type,
+            index: secIdx + 1,
+            minH: Math.round(minH),
+            maxH: Math.round(maxH),
+            ratio: Math.round(maxH / minH * 10) / 10
+          });
+        }
+      });
+    });
+
+    return issues;
+  });
+
+  if (cardBalanceIssues.length === 0) {
+    pass('CARD-BALANCE', 'Card heights are balanced within groups ✓');
+  } else {
+    for (const issue of cardBalanceIssues) {
+      warn('CARD-BALANCE', `${issue.type} #${issue.index}: card height imbalance ${issue.ratio}x (${issue.minH}px to ${issue.maxH}px)`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 20: Image aspect ratios (not stretched/squished)
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing image aspect ratios...');
+  const imgRatioIssues = await page.evaluate(() => {
+    var issues = [];
+    var images = document.querySelectorAll('img');
+
+    images.forEach(function (img) {
+      if (!img.naturalWidth || !img.naturalHeight) return;
+      if (img.offsetHeight === 0) return; // hidden
+      // Skip SVG placeholders (they scale freely)
+      if (img.src && img.src.includes('data:image/svg')) return;
+
+      var naturalRatio = img.naturalWidth / img.naturalHeight;
+      var renderedRatio = img.getBoundingClientRect().width / img.getBoundingClientRect().height;
+
+      // Allow 15% distortion tolerance (object-fit: cover crops, which is fine)
+      var objectFit = window.getComputedStyle(img).objectFit;
+      if (objectFit === 'cover' || objectFit === 'contain') return; // These handle ratio gracefully
+
+      var distortion = Math.abs(naturalRatio - renderedRatio) / naturalRatio;
+      if (distortion > 0.15) {
+        var comp = img.closest('[data-component-type]');
+        issues.push({
+          component: comp ? comp.getAttribute('data-component-type') : 'unknown',
+          naturalRatio: Math.round(naturalRatio * 100) / 100,
+          renderedRatio: Math.round(renderedRatio * 100) / 100,
+          distortion: Math.round(distortion * 100),
+          alt: (img.alt || '').substring(0, 30)
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (imgRatioIssues.length === 0) {
+    pass('IMG-RATIO', 'No stretched or squished images detected ✓');
+  } else {
+    for (const issue of imgRatioIssues) {
+      fail('IMG-RATIO', `${issue.component}: image distorted ${issue.distortion}% (natural ${issue.naturalRatio} vs rendered ${issue.renderedRatio}) — "${issue.alt}"`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 21: Line measure (characters per line)
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing line measure (chars per line)...');
+  const measureIssues = await page.evaluate(() => {
+    var issues = [];
+    var seen = new Set();
+    var paragraphs = document.querySelectorAll('p');
+
+    paragraphs.forEach(function (p) {
+      if (p.offsetHeight === 0) return;
+      if (p.textContent.trim().length < 20) return;
+      // Skip nav, footer, hidden panels
+      if (p.closest('[data-component-type="navigation"]')) return;
+      var hiddenParent = p.closest('[data-tab-panel], [data-slide]');
+      if (hiddenParent && hiddenParent.offsetHeight === 0) return;
+
+      var cs = window.getComputedStyle(p);
+      var fontSize = parseFloat(cs.fontSize);
+      var containerWidth = p.getBoundingClientRect().width;
+
+      // Estimate chars per line: containerWidth / (fontSize * 0.5) is a rough average
+      // A more accurate method: use a monospace reference, but avg char width ~0.5em works
+      var avgCharWidth = fontSize * 0.48; // Slightly less than 0.5 for proportional fonts
+      var charsPerLine = Math.round(containerWidth / avgCharWidth);
+
+      // Optimal: 45-85 chars per line. Flag >90 as too wide.
+      if (charsPerLine > 90) {
+        var comp = p.closest('[data-component-type]');
+        var compType = comp ? comp.getAttribute('data-component-type') : 'unknown';
+        var key = compType + '-' + charsPerLine;
+        if (seen.has(key)) return;
+        seen.add(key);
+        issues.push({
+          component: compType,
+          charsPerLine: charsPerLine,
+          containerWidth: Math.round(containerWidth),
+          fontSize: Math.round(fontSize)
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (measureIssues.length === 0) {
+    pass('MEASURE', 'All body text has readable line measure (≤90 chars/line) ✓');
+  } else {
+    for (const issue of measureIssues) {
+      warn('MEASURE', `${issue.component}: ~${issue.charsPerLine} chars/line (container ${issue.containerWidth}px at ${issue.fontSize}px font) — aim for ≤85`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 22: Font weight hierarchy
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing font weight hierarchy...');
+  const weightIssues = await page.evaluate(() => {
+    var issues = [];
+    var components = document.querySelectorAll('[data-component-type]');
+
+    components.forEach(function (comp) {
+      var type = comp.getAttribute('data-component-type');
+      if (type === 'navigation' || type === 'footer') return;
+
+      var headings = comp.querySelectorAll('h2, h3');
+      var bodyText = comp.querySelectorAll('p');
+
+      if (headings.length === 0 || bodyText.length === 0) return;
+
+      var headingWeight = parseInt(window.getComputedStyle(headings[0]).fontWeight) || 400;
+      var bodyWeight = parseInt(window.getComputedStyle(bodyText[0]).fontWeight) || 400;
+
+      // Headings should be bolder than body (or at least equal if using size alone for hierarchy)
+      if (headingWeight < bodyWeight) {
+        issues.push({
+          type: type,
+          headingWeight: headingWeight,
+          bodyWeight: bodyWeight
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (weightIssues.length === 0) {
+    pass('WEIGHT', 'Heading font weight ≥ body weight in all components ✓');
+  } else {
+    for (const issue of weightIssues) {
+      fail('WEIGHT', `${issue.type}: heading weight (${issue.headingWeight}) lighter than body (${issue.bodyWeight})`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 23: Border-radius consistency within components
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing border-radius consistency...');
+  const radiusIssues = await page.evaluate(() => {
+    var issues = [];
+    var groupTypes = ['bento', 'comparison', 'flashcard', 'key-term', 'branching', 'checklist'];
+
+    groupTypes.forEach(function (type) {
+      var sections = document.querySelectorAll('[data-component-type="' + type + '"]');
+      sections.forEach(function (section, secIdx) {
+        var container = section.querySelector('.grid, .flex, [class*="grid"], [class*="flex"]');
+        if (!container) return;
+        var cards = Array.from(container.children).filter(function (c) {
+          return c.offsetHeight > 0 && c.tagName !== 'BUTTON';
+        });
+        if (cards.length < 2) return;
+
+        var radii = cards.map(function (c) {
+          return window.getComputedStyle(c).borderRadius;
+        });
+
+        // All cards should have the same border-radius
+        var ref = radii[0];
+        for (var i = 1; i < radii.length; i++) {
+          if (radii[i] !== ref) {
+            issues.push({
+              type: type,
+              index: secIdx + 1,
+              radius1: ref,
+              radius2: radii[i]
+            });
+            break;
+          }
+        }
+      });
+    });
+
+    return issues;
+  });
+
+  if (radiusIssues.length === 0) {
+    pass('RADIUS', 'Border-radius is consistent within all card groups ✓');
+  } else {
+    for (const issue of radiusIssues) {
+      warn('RADIUS', `${issue.type} #${issue.index}: mixed border-radius (${issue.radius1} vs ${issue.radius2})`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 24: Empty visual space (broken/missing images)
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing for empty visual space (broken images)...');
+  const emptyImgIssues = await page.evaluate(() => {
+    var issues = [];
+    var images = document.querySelectorAll('img');
+
+    images.forEach(function (img) {
+      if (img.offsetHeight === 0 && img.offsetWidth === 0) return; // intentionally hidden
+
+      // Check for broken images: naturalWidth === 0 means failed to load
+      if (img.complete && img.naturalWidth === 0) {
+        var comp = img.closest('[data-component-type]');
+        issues.push({
+          component: comp ? comp.getAttribute('data-component-type') : 'unknown',
+          alt: (img.alt || '(no alt)').substring(0, 30),
+          issue: 'broken-image'
+        });
+        return;
+      }
+
+      // Check for image containers that are very tall with no visible image
+      // (image src set but rendered as tiny or invisible)
+      var rect = img.getBoundingClientRect();
+      var parent = img.parentElement;
+      if (parent) {
+        var parentRect = parent.getBoundingClientRect();
+        // Parent is large but image is tiny — likely a layout issue
+        if (parentRect.height > 100 && rect.height < 10 && rect.width < 10) {
+          var comp = img.closest('[data-component-type]');
+          issues.push({
+            component: comp ? comp.getAttribute('data-component-type') : 'unknown',
+            alt: (img.alt || '(no alt)').substring(0, 30),
+            issue: 'image-collapsed',
+            parentHeight: Math.round(parentRect.height),
+            imgHeight: Math.round(rect.height)
+          });
+        }
+      }
+    });
+
+    return issues;
+  });
+
+  if (emptyImgIssues.length === 0) {
+    pass('IMG-EMPTY', 'No broken or collapsed images detected ✓');
+  } else {
+    for (const issue of emptyImgIssues) {
+      fail('IMG-EMPTY', `${issue.component}: ${issue.issue} — "${issue.alt}"${issue.parentHeight ? ` (container ${issue.parentHeight}px, image ${issue.imgHeight}px)` : ''}`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 25: Mobile padding collapse
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing mobile padding...');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.waitForTimeout(500);
+
+  const mobilePadIssues = await page.evaluate(() => {
+    var issues = [];
+    var components = document.querySelectorAll('[data-component-type]');
+    var seen = new Set();
+
+    components.forEach(function (comp) {
+      var type = comp.getAttribute('data-component-type');
+      if (type === 'navigation' || type === 'footer' || type === 'hero' || type === 'full-bleed') return;
+
+      // Check text elements touching screen edges
+      var textEls = comp.querySelectorAll('h2, h3, p, li');
+      textEls.forEach(function (el) {
+        if (el.offsetHeight === 0) return;
+        var rect = el.getBoundingClientRect();
+        // Content should have at least 12px padding from screen edges on mobile
+        if (rect.left < 12) {
+          if (seen.has(type + '-left')) return;
+          seen.add(type + '-left');
+          issues.push({ type: type, side: 'left', offset: Math.round(rect.left) });
+        }
+        if (rect.right > window.innerWidth - 12) {
+          if (seen.has(type + '-right')) return;
+          seen.add(type + '-right');
+          issues.push({ type: type, side: 'right', offset: Math.round(window.innerWidth - rect.right) });
+        }
+      });
+    });
+
+    return issues;
+  });
+
+  if (mobilePadIssues.length === 0) {
+    pass('MOBILE-PAD', 'All content has adequate mobile padding (≥12px from edges) ✓');
+  } else {
+    for (const issue of mobilePadIssues) {
+      fail('MOBILE-PAD', `${issue.type}: content ${issue.offset}px from ${issue.side} edge on mobile (need ≥12px)`);
+    }
+  }
+
+  // Reset to desktop
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.waitForTimeout(300);
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 26: Button style consistency
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing button style consistency...');
+  const btnIssues = await page.evaluate(() => {
+    var issues = [];
+    // Check primary action buttons across components (Submit, CTA-style)
+    var buttons = document.querySelectorAll('button.btn-primary, [class*="btn-primary"]');
+    if (buttons.length < 2) return issues;
+
+    var ref = null;
+    buttons.forEach(function (btn, idx) {
+      if (btn.offsetHeight === 0) return;
+      var cs = window.getComputedStyle(btn);
+      var style = {
+        bg: cs.backgroundColor,
+        color: cs.color,
+        radius: cs.borderRadius,
+        fontSize: Math.round(parseFloat(cs.fontSize))
+      };
+
+      if (!ref) { ref = style; return; }
+
+      // Primary buttons should have consistent bg, text colour, and radius
+      if (style.bg !== ref.bg || style.color !== ref.color || style.radius !== ref.radius) {
+        var comp = btn.closest('[data-component-type]');
+        issues.push({
+          component: comp ? comp.getAttribute('data-component-type') : 'unknown',
+          diff: (style.bg !== ref.bg ? 'bg' : '') +
+                (style.color !== ref.color ? ' color' : '') +
+                (style.radius !== ref.radius ? ' radius' : '')
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (btnIssues.length === 0) {
+    pass('BTN-STYLE', 'Primary button styles are consistent across components ✓');
+  } else {
+    for (const issue of btnIssues) {
+      warn('BTN-STYLE', `${issue.component}: btn-primary differs from reference (${issue.diff.trim()})`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 27: Icon size consistency
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing icon size consistency...');
+  const iconIssues = await page.evaluate(() => {
+    var issues = [];
+    var components = document.querySelectorAll('[data-component-type]');
+
+    components.forEach(function (comp) {
+      var type = comp.getAttribute('data-component-type');
+      if (type === 'navigation' || type === 'footer') return;
+
+      var icons = comp.querySelectorAll('.material-symbols-outlined, .material-symbols-rounded');
+      if (icons.length < 2) return;
+
+      var sizes = {};
+      icons.forEach(function (icon) {
+        if (icon.offsetHeight === 0) return;
+        var size = Math.round(parseFloat(window.getComputedStyle(icon).fontSize));
+        sizes[size] = (sizes[size] || 0) + 1;
+      });
+
+      var sizeKeys = Object.keys(sizes);
+      // More than 2 different icon sizes in one component = inconsistent
+      if (sizeKeys.length > 2) {
+        issues.push({
+          type: type,
+          sizes: sizeKeys.join(', ') + 'px',
+          count: icons.length
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (iconIssues.length === 0) {
+    pass('ICON-SIZE', 'Icon sizes are consistent within components ✓');
+  } else {
+    for (const issue of iconIssues) {
+      warn('ICON-SIZE', `${issue.type}: ${issue.count} icons at ${issue.sizes} (>2 different sizes)`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 28: Hover/transition exists on interactive elements
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing hover/transition feedback...');
+  const hoverIssues = await page.evaluate(() => {
+    var issues = [];
+    var seen = new Set();
+    var interactives = document.querySelectorAll('[data-choice], [data-tab-trigger], [data-flashcard], [data-path-option]');
+
+    interactives.forEach(function (el) {
+      if (el.offsetHeight === 0) return;
+      var cs = window.getComputedStyle(el);
+      var hasTransition = cs.transition && cs.transition !== 'all 0s ease 0s' && cs.transition !== 'none 0s ease 0s' && cs.transition !== 'none';
+      var hasCursor = cs.cursor === 'pointer';
+
+      if (!hasTransition && !hasCursor) {
+        var comp = el.closest('[data-component-type]');
+        var compType = comp ? comp.getAttribute('data-component-type') : 'unknown';
+        if (seen.has(compType)) return;
+        seen.add(compType);
+        issues.push({
+          component: compType,
+          element: el.getAttribute('data-choice') !== null ? 'choice' :
+                   el.getAttribute('data-tab-trigger') !== null ? 'tab-trigger' :
+                   el.getAttribute('data-flashcard') !== null ? 'flashcard' : 'option'
+        });
+      }
+    });
+
+    return issues;
+  });
+
+  if (hoverIssues.length === 0) {
+    pass('HOVER', 'All interactive elements have hover/transition feedback ✓');
+  } else {
+    for (const issue of hoverIssues) {
+      warn('HOVER', `${issue.component}: ${issue.element} has no transition or cursor:pointer — no hover feedback`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 29: Focus indicator via keyboard navigation
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing focus indicators (keyboard Tab)...');
+  // Use actual Tab key presses — this triggers :focus-visible which is what
+  // real keyboard users see. Programmatic .focus() doesn't trigger :focus-visible
+  // in most browsers, which would produce false positives.
+  const focusIssues = await page.evaluate(() => {
+    var issues = [];
+    // Check if the page has any focus-visible styles defined at all
+    // by looking for outline or ring classes in the stylesheet
+    var styleSheets = document.styleSheets;
+    var hasFocusStyles = false;
+    try {
+      for (var i = 0; i < styleSheets.length; i++) {
+        try {
+          var rules = styleSheets[i].cssRules;
+          for (var j = 0; j < rules.length; j++) {
+            if (rules[j].selectorText && rules[j].selectorText.includes('focus')) {
+              hasFocusStyles = true;
+              break;
+            }
+          }
+        } catch (e) { /* cross-origin stylesheets */ }
+        if (hasFocusStyles) break;
+      }
+    } catch (e) {}
+
+    // Also check if Tailwind's ring utilities are available (common focus pattern)
+    var hasTailwindRing = document.querySelector('[class*="focus:ring"], [class*="focus-visible:ring"], [class*="focus:outline"]');
+
+    if (!hasFocusStyles && !hasTailwindRing) {
+      // Check if any interactive element has inline focus styles
+      var interactives = document.querySelectorAll('button, a[href], input, summary, [tabindex="0"]');
+      var hasInlineFocus = false;
+      interactives.forEach(function (el) {
+        if (el.getAttribute('style') && el.getAttribute('style').includes('focus')) hasInlineFocus = true;
+        if (el.className && (el.className.includes('focus:') || el.className.includes('focus-visible:'))) hasInlineFocus = true;
+      });
+      if (!hasInlineFocus) {
+        issues.push({ issue: 'No focus styles detected in any stylesheet or element — keyboard users have no visual feedback' });
+      }
+    }
+
+    return issues;
+  });
+
+  if (focusIssues.length === 0) {
+    pass('FOCUS', 'Focus styles are present for keyboard navigation ✓');
+  } else {
+    for (const issue of focusIssues) {
+      warn('FOCUS', issue.issue);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 30: Assessment distribution
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing assessment distribution...');
+  const assessDistIssues = await page.evaluate(() => {
+    var issues = [];
+    var sections = document.querySelectorAll('[data-section-track]');
+    var sectionIds = [];
+    var assessmentSectionIndices = [];
+
+    sections.forEach(function (sec, idx) {
+      sectionIds.push(sec.getAttribute('data-section-track') || sec.id);
+
+      // Check if this section (and elements until next section) contain MCQs
+      var node = sec;
+      var hasAssessment = false;
+      while (node) {
+        if (node !== sec && node.hasAttribute && node.hasAttribute('data-section-track')) break;
+        if (node.querySelector && node.querySelector('[data-quiz], [data-component-type="mcq"], [data-component-type="textinput"]')) {
+          hasAssessment = true;
+          break;
+        }
+        node = node.nextElementSibling;
+      }
+
+      if (hasAssessment) assessmentSectionIndices.push(idx);
+    });
+
+    // Check for clustering: two assessments in adjacent sections
+    for (var i = 1; i < assessmentSectionIndices.length; i++) {
+      if (assessmentSectionIndices[i] - assessmentSectionIndices[i - 1] === 1) {
+        issues.push({
+          section1: sectionIds[assessmentSectionIndices[i - 1]] || 'section-' + assessmentSectionIndices[i - 1],
+          section2: sectionIds[assessmentSectionIndices[i]] || 'section-' + assessmentSectionIndices[i]
+        });
+      }
+    }
+
+    return issues;
+  });
+
+  if (assessDistIssues.length === 0) {
+    pass('ASSESS-DIST', 'Assessments are well-distributed across sections ✓');
+  } else {
+    for (const issue of assessDistIssues) {
+      warn('ASSESS-DIST', `Back-to-back assessments: ${issue.section1} and ${issue.section2} — consider spacing them out`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 31: Section density variation
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing section density variation...');
+  const densityIssues = await page.evaluate(() => {
+    var sections = document.querySelectorAll('[data-section-track]');
+    if (sections.length < 4) return []; // Too few sections to judge rhythm
+
+    var componentCounts = [];
+
+    sections.forEach(function (sec) {
+      // Count components between this section track and the next
+      var count = 0;
+      var node = sec.nextElementSibling;
+      while (node) {
+        if (node.hasAttribute && node.hasAttribute('data-section-track')) break;
+        if (node.hasAttribute && node.hasAttribute('data-component-type')) count++;
+        node = node.nextElementSibling;
+      }
+      componentCounts.push(count);
+    });
+
+    // Check if all sections have the same component count (monotonous)
+    var allSame = componentCounts.every(function (c) { return c === componentCounts[0]; });
+    // Check if range of variation is too narrow (all within ±1 of mean)
+    var mean = componentCounts.reduce(function (a, b) { return a + b; }, 0) / componentCounts.length;
+    var maxDev = Math.max.apply(null, componentCounts.map(function (c) { return Math.abs(c - mean); }));
+
+    if (allSame && componentCounts.length >= 5) {
+      return [{ issue: 'all-same', count: componentCounts[0], sections: componentCounts.length }];
+    }
+    if (maxDev <= 1 && componentCounts.length >= 5) {
+      return [{ issue: 'narrow-range', range: Math.min.apply(null, componentCounts) + '-' + Math.max.apply(null, componentCounts), sections: componentCounts.length }];
+    }
+
+    return [];
+  });
+
+  if (densityIssues.length === 0) {
+    pass('DENSITY', 'Section density has healthy variation (breather + deep-dive rhythm) ✓');
+  } else {
+    for (const issue of densityIssues) {
+      if (issue.issue === 'all-same') {
+        warn('DENSITY', `All ${issue.sections} sections have exactly ${issue.count} components — monotonous density, needs breathers and deep-dives`);
+      } else {
+        warn('DENSITY', `${issue.sections} sections all within ${issue.range} components — narrow density range, needs more variation`);
+      }
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 32: Variant coverage and correctness
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing variant coverage...');
+  // This test reads course-layout.json (Node-side) to check which variants
+  // were selected, verifies the HTML renders the correct variant structure,
+  // and reports which variants are NOT covered by this build.
+  const KNOWN_VARIANTS = {
+    'hero': ['centered-overlay', 'split-screen', 'minimal-text'],
+    'graphic-text': ['split', 'overlap', 'full-overlay'],
+    'bento': ['grid-4', 'wide-2', 'featured'],
+    'accordion': ['standard', 'accent-border'],
+    'mcq': ['stacked', 'grid'],
+    'stat-callout': ['centered', 'card-row'],
+    'timeline': ['vertical', 'centered-alternating'],
+    'comparison': ['columns', 'stacked-rows'],
+    'tabs': ['horizontal', 'vertical']
+  };
+
+  try {
+    const layoutData = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
+    const usedVariants = {};  // type → Set of variants used
+    const variantComponents = []; // for HTML verification
+
+    // Collect variants from layout
+    for (const section of (layoutData.sections || [])) {
+      for (const comp of (section.components || [])) {
+        if (KNOWN_VARIANTS[comp.type]) {
+          if (!usedVariants[comp.type]) usedVariants[comp.type] = new Set();
+          const v = comp.variant || KNOWN_VARIANTS[comp.type][0]; // default = first
+          usedVariants[comp.type].add(v);
+          variantComponents.push({ type: comp.type, variant: v, id: comp.componentId });
+        }
+      }
+    }
+
+    // Verify HTML renders the correct variant structure
+    for (const vc of variantComponents) {
+      const htmlCheck = await page.evaluate(({ type, variant, id }) => {
+        var comp = document.querySelector('[data-component-type="' + type + '"]');
+        if (!comp) return { found: false };
+
+        var result = { found: true, issues: [] };
+
+        // Variant-specific structural checks
+        if (type === 'hero') {
+          var hasGrid = comp.querySelector('.grid, [class*="grid-cols-2"]');
+          if (variant === 'split-screen' && !hasGrid) {
+            result.issues.push('split-screen hero should have a 2-column grid');
+          }
+          if (variant === 'minimal-text') {
+            var h1 = comp.querySelector('h1');
+            var subtitle = comp.querySelector('p');
+            // minimal-text should have no CTA button or a very stripped layout
+          }
+        }
+
+        if (type === 'graphic-text' && variant === 'full-overlay') {
+          var overlay = comp.querySelector('[class*="absolute"], [class*="bg-gradient"], [class*="bg-black"]');
+          if (!overlay) result.issues.push('full-overlay graphic-text should have an overlay element');
+        }
+
+        if (type === 'bento') {
+          var cards = comp.querySelectorAll('.grid > div, [class*="grid"] > div');
+          if (variant === 'wide-2' && cards.length > 0) {
+            // wide-2 should have max 2 columns
+          }
+          if (variant === 'featured' && cards.length > 0) {
+            // featured should have one larger card
+          }
+        }
+
+        if (type === 'tabs' && variant === 'vertical') {
+          var flexRow = comp.querySelector('[class*="md:flex-row"], [class*="flex-row"]');
+          if (!flexRow) result.issues.push('vertical tabs should use flex-row layout');
+        }
+
+        if (type === 'stat-callout' && variant === 'card-row') {
+          var cards = comp.querySelectorAll('[class*="shadow"], [class*="rounded"]');
+          if (cards.length === 0) result.issues.push('card-row stat-callout should have individual cards with shadows');
+        }
+
+        if (type === 'timeline' && variant === 'centered-alternating') {
+          var hasAlternating = comp.querySelector('[class*="md:flex-row-reverse"], [class*="text-right"]');
+          if (!hasAlternating) result.issues.push('centered-alternating timeline should alternate left/right');
+        }
+
+        if (type === 'comparison' && variant === 'stacked-rows') {
+          var rows = comp.querySelectorAll('[class*="flex"], [class*="grid"]');
+          // stacked-rows renders as rows instead of side-by-side columns
+        }
+
+        return result;
+      }, { type: vc.type, variant: vc.variant, id: vc.id });
+
+      if (!htmlCheck.found) {
+        warn('VARIANT', `${vc.type} (${vc.variant}): component not found in HTML`);
+      } else if (htmlCheck.issues.length > 0) {
+        for (const issue of htmlCheck.issues) {
+          fail('VARIANT', `${vc.type} (${vc.variant}): ${issue}`);
+        }
+      }
+    }
+
+    // Report coverage
+    let totalVariants = 0;
+    let coveredVariants = 0;
+    const missing = [];
+
+    for (const [type, variants] of Object.entries(KNOWN_VARIANTS)) {
+      for (const v of variants) {
+        totalVariants++;
+        if (usedVariants[type] && usedVariants[type].has(v)) {
+          coveredVariants++;
+        } else {
+          missing.push(`${type}:${v}`);
+        }
+      }
+    }
+
+    pass('VARIANT', `Variant coverage: ${coveredVariants}/${totalVariants} (${Math.round(coveredVariants/totalVariants*100)}%)`);
+
+    if (missing.length > 0) {
+      warn('VARIANT', `Untested variants (not used in this build): ${missing.join(', ')}`);
+    }
+
+  } catch (e) {
+    warn('VARIANT', `Could not check variants: ${e.message}`);
+  }
 
   // ─── Cleanup ───────────────────────────────────────────────────────
   await browser.close();

@@ -196,9 +196,13 @@ See `v5/BUILD-SYSTEM.md`.
 ### Step 6 — QA + Review (three gates, in order)
 **6a — Structural QA (`v5/scripts/qa-course.js`):** Validates built HTML without a browser — section coverage, component integrity, quiz wiring, image integrity, heading hierarchy, duplicate IDs, content coverage vs knowledge base, design token/contract integrity, accessibility basics. **If it fails, fix before proceeding.**
 
-**6b — Interactive QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser, tests every interactive component: clicks quiz choices (submit → feedback → retry), switches all tabs, flips flashcards, navigates carousels, expands accordions, checks checklists with progress counter. Also validates content overflow (desktop + mobile), font size minimums, tap target sizes, heading hierarchy, invisible content, section spacing, collapsed sections, and nav z-index stacking. **If it fails, fix before proceeding.**
+**6b — Interactive + Design Quality QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser. Tests 31 checks in two tiers:
+- **Functional (Tests 1-16):** Clicks quiz choices (submit → feedback → retry), switches tabs, flips flashcards, navigates carousels, expands accordions, checks checklists. Validates overflow (desktop + mobile), font sizes, tap targets, heading hierarchy, invisible content, section spacing, collapsed sections, nav z-index.
+- **Design quality (Tests 17-31):** WCAG AA contrast on ALL text, padding consistency within card groups, card height balance, image aspect ratios, line measure (chars/line), font weight hierarchy, border-radius consistency, broken/collapsed images, mobile padding collapse, button style consistency, icon size consistency, hover/transition feedback, focus indicators, assessment distribution, section density variation.
+- **Variant coverage (Test 32):** Checks which layout variants were used, verifies HTML renders the correct variant structure, reports untested variants.
+**If it fails, fix before proceeding.**
 
-**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code reviews open-ended via Vision — flags anything that looks wrong, feels off, or undermines the learning experience. No checklist — let Vision notice what it notices. Fixes go in the engine. Alternate brands between `najaf.framer.ai` (dark) and `ailyx.framer.website` (light). **Only run after 6a and 6b pass.**
+**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code **MUST read each screenshot file** with the Read tool and review using the structured criteria the script outputs (graphic design, UX, UI, instructional design). The script captures screenshots but does NOT review them — you must do the visual review yourself. Fixes go in the engine. **Only run after 6a and 6b pass.**
 
 ---
 
