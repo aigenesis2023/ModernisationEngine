@@ -13,55 +13,63 @@ Examples:
 
 ---
 
-## Brands
+## Brand Pool
 
-```
-BRAND 1: https://crimzon.framer.website/
-BRAND 2: https://fitflow.framer.website/
-BRAND 3: https://sprig.framer.website/
-```
+Auto-selected for matrix runs. No manual input needed.
 
-## Topics
+| Brand | Theme | URL | Role |
+|-------|-------|-----|------|
+| Sprig | dark, cyan | `https://sprig.framer.website/` | Dark pool |
+| Najaf | dark, green | `https://najaf.framer.ai/` | Dark pool |
+| Crimzon | dark, crimson | `https://crimzon.framer.website/` | Dark pool |
+| Landio | dark, neutral | `https://landio.framer.website/` | Dark pool |
+| Ailyx | light, blue | `https://ailyx.framer.website/` | Light pool |
+| Fluence | light, amethyst | `https://fluence.framer.website/` | Light pool |
+| FitFlow | light, pink-blue | `https://fitflow.framer.website/` | Light pool |
+| Aigents | light, purple | `https://aigents.framer.website/` | Light pool |
+| CourSite | light, lavender-purple | `https://coursesite.framer.website/` | Light pool |
 
-Short is fine — even just "Cybersecurity" works. Claude will expand it into a full brief with audience, level, duration, and scope before running the research agent.
+## Topic Pool
 
-```
-TOPIC 1: Cloud Infrastructure Security
+Pre-written topics grouped by content shape. Auto-selected for matrix runs.
 
-TOPIC 2: Soft Skill: Mastering High-Stakes Negotiation
+**Data-heavy** (stats, tables, comparisons — stresses stat callouts, data tables, number typography):
+1. Cloud Infrastructure Security
+2. Data Privacy and GDPR Compliance
+3. Financial Risk Management Fundamentals
 
-TOPIC 3: Compliance: Emergency First Aid for Remote Teams
-```
+**Narrative** (case studies, quotes, reflection — stresses pullquotes, graphic-text, whitespace, emotional arc):
+1. Mastering High-Stakes Negotiation
+2. Emotional Intelligence in Leadership
+3. Building a Culture of Innovation
 
-## Brand Reference
-
-Tested brands you can copy into the slots above.
-
-| Brand | Theme | URL |
-|-------|-------|-----|
-| Sprig | dark, cyan | `https://sprig.framer.website/` |
-| Ailyx | light, blue | `https://ailyx.framer.website/` |
-| Najaf | dark, green | `https://najaf.framer.ai/` |
-| Fluence | light, amethyst | `https://fluence.framer.website/` |
-| FitFlow | light, pink-blue | `https://fitflow.framer.website/` |
-| Landio | dark, neutral | `https://landio.framer.website/` |
-| Crimzon | dark, crimson | `https://crimzon.framer.website/` |
-| Aigents | light, purple | `https://aigents.framer.website/` |
-| CourSite | light, lavender-purple | `https://coursesite.framer.website/` |
+**Procedural** (steps, checklists, processes — stresses timelines, process-flows, checklists, accordions):
+1. Emergency First Aid for Remote Teams
+2. Incident Response and Crisis Management
+3. Onboarding New Team Members Effectively
 
 ---
 
 ## Default Matrix (3 Combinations)
 
-The matrix is designed for maximum bug coverage with minimum runs. Each combination stresses different parts of the engine.
+**Fully automatic.** When the user says "matrix test" with no other input, pick one combination from each content shape. Rotate brands and topics so consecutive matrix runs don't repeat the same combinations.
 
-| Run | Brand | Theme | Topic | Content shape | What it stresses |
-|-----|-------|-------|-------|---------------|------------------|
-| **1** | Crimzon | dark, crimson | Cloud Infrastructure Security | Data-heavy (stats, tables, comparisons) | Contrast on dark bg, stat callouts, data tables, number typography |
-| **2** | FitFlow | light, pink-blue | Mastering High-Stakes Negotiation | Narrative (case studies, quotes, reflection) | Long prose, pullquotes, graphic-text, whitespace rhythm, emotional arc |
-| **3** | Sprig | dark, cyan | Emergency First Aid for Remote Teams | Procedural (steps, checklists, processes) | Timelines, process-flows, checklists, accordions, dense sections |
+**Selection rules:**
+1. **Run 1 (dark brand + data-heavy topic):** Pick one dark brand and one data-heavy topic
+2. **Run 2 (light brand + narrative topic):** Pick one light brand and one narrative topic
+3. **Run 3 (random brand + procedural topic):** Pick any brand NOT already used (dark or light) and one procedural topic
 
-**Why 3, not 9:** Most bugs are universal (caught by any run), theme-specific (caught by dark vs light), or content-shape-specific (caught by varying topic type). 3 deliberate pairings give near-complete coverage. A 3x3 grid would find the same bugs 3x each.
+Avoid repeating the same brand or topic from the user's most recent matrix run if possible. If the user specifies brands or topics in chat, use those instead.
+
+**Example matrix (auto-selected):**
+
+| Run | Brand | Theme | Topic | Content shape |
+|-----|-------|-------|-------|---------------|
+| **1** | Crimzon | dark, crimson | Cloud Infrastructure Security | Data-heavy |
+| **2** | FitFlow | light, pink-blue | Mastering High-Stakes Negotiation | Narrative |
+| **3** | Najaf | dark, green | Emergency First Aid for Remote Teams | Procedural |
+
+**Why 3, not 9:** Most bugs are universal (caught by any run), theme-specific (caught by dark vs light), or content-shape-specific (caught by varying topic type). 3 deliberate pairings give near-complete coverage.
 
 ---
 
@@ -71,8 +79,9 @@ The matrix is designed for maximum bug coverage with minimum runs. Each combinat
 
 1. Read this file AND `CLAUDE.md` fully before acting
 2. Detect mode from user's keyword: "run" / "test" / "matrix test"
-3. If a topic is short (1-3 words), expand it into a full brief before writing to `topic-brief.txt`. Include: subject scope, what it covers (5-7 subtopics), target audience, difficulty level, estimated duration (~45 minutes)
-4. Update `brand/url.txt` and `v5/input/topic-brief.txt` with the chosen brand and topic
+3. **Topic selection:** If the user specifies a topic, use it. If they say "matrix test" with no topic, auto-select from the topic pool above. If a topic is short (1-3 words), expand it into a full brief before writing to `topic-brief.txt`. Include: subject scope, what it covers (5-7 subtopics), target audience, difficulty level, estimated duration (~45 minutes)
+4. **Brand selection:** If the user specifies a brand, use it. If they say "matrix test" with no brand, auto-select from the brand pool above per the selection rules.
+5. Update `brand/url.txt` and `v5/input/topic-brief.txt` with the chosen brand and topic
 
 ### Mode: Run
 
