@@ -139,7 +139,8 @@ v5/                                    ← ALL ACTIVE CODE
   input/                               ← AI-first inputs
     topic-brief.txt                    ← Plain text topic description
     urls.txt                           ← One URL per line (optional)
-    test-runs.md                       ← Test run config: brands, topics, matrix settings
+    test-runs.md                       ← Test run config: brands, topics, matrix settings, reference test
+    reference-course-layout.json       ← Pre-built course (23 components) for reference test mode
     docs/                              ← Drop PDFs/PPTXs here (future)
   output/
     knowledge-base.json                ← AI-first research output
@@ -318,7 +319,9 @@ The generation engine classifies each topic and selects a **course archetype** t
 
 ### Layout Variants
 
-9 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default. Variants are purely layout changes in build-course.js — no changes needed to Stitch, extract-contract.js, or hydrate.js.
+13 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
+
+**All variants are pre-rendered into every built course** as `<template>` tags. The **DEV toggle** (amber button, top-right of every course) lets you switch variants live without rebuilding. This is the foundation for the future authoring tool.
 
 | Component | Variants |
 |---|---|
@@ -331,6 +334,10 @@ The generation engine classifies each topic and selects a **course archetype** t
 | `timeline` | `vertical` (default), `centered-alternating` |
 | `comparison` | `columns` (default), `stacked-rows` |
 | `tabs` | `horizontal` (default), `vertical` |
+| `pullquote` | `accent-bar` (default), `centered`, `minimal` |
+| `full-bleed` | `center` (default), `left`, `right` |
+| `process-flow` | `vertical` (default), `horizontal` |
+| `graphic` | `standard` (default), `captioned-card` |
 
 ### Section Width
 
