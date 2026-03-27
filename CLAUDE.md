@@ -235,9 +235,10 @@ Claude Code automatically selects the correct run level based on what changed. T
 
 **MATRIX TEST** — autonomous multi-combination testing. Required when:
 - User says "matrix test" (with or without specifying brands/topics)
-- **Read `v5/input/test-runs.md` FIRST** — it contains the complete autonomous protocol: brand/topic pools, selection rules, 5-phase workflow, bug classification, variant coverage tracking, and summary template
+- **Read `v5/input/test-runs.md` FIRST** — it contains the complete protocol: brand/topic pools, auto-selection rules, 6-phase workflow (generate → QA → classify → approve → fix → verify), bug classification, variant coverage tracking, and summary template
 - If the user provides no brands or topics, auto-select from the pools in test-runs.md
 - If the user specifies brands or topics, use those as overrides
+- **Approval workflow:** Objective bugs (6a/6b failures) are auto-fixed. Subjective bugs (6c vision findings) are listed for user approval before fixing. See test-runs.md Phase 4.
 
 **When in doubt, do a FULL RUN.** Announce which run level you're using and why.
 

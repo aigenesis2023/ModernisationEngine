@@ -135,9 +135,9 @@ For each combination in the matrix (sequentially):
 
 **Do NOT fix bugs during Phase 2.** Log everything, fix nothing. The goal is to see the full picture before touching any code.
 
-#### Phase 3: Classify and fix bugs
+#### Phase 3: Classify bugs and auto-fix objective issues
 
-After all 3 combinations are complete, compile the bug report:
+After all 3 combinations are complete, compile the full bug report.
 
 **Bug classification (mandatory for every bug):**
 
@@ -148,7 +148,24 @@ After all 3 combinations are complete, compile the bug report:
 | **Content-specific** | Appears only with certain content shapes (data-heavy, narrative, procedural) | Fix in the relevant fill function or generation-engine.md |
 | **Component-specific** | Appears only for one component type regardless of brand/topic | Fix in that component's fill function |
 
-**Fix priority order:**
+**Split bugs into two categories:**
+
+**Objective bugs (from 6a + 6b) — fix these automatically, no approval needed:**
+- Contrast ratios below WCAG AA thresholds
+- Padding/border-radius/card-height inconsistencies
+- Broken images, overflow, collapsed sections
+- Font size/weight hierarchy violations
+- Interactive components not functioning
+- Any measurable, deterministic failure
+
+**Subjective bugs (from 6c vision review) — list these for user approval:**
+- "Whitespace feels cramped in section 4"
+- "Visual weight is front-loaded"
+- "Colour harmony feels off"
+- "Component transitions are abrupt"
+- Any design judgement call where the fix could affect other things
+
+**Fix priority order (for objective bugs):**
 1. Universal bugs first (highest ROI — one fix, all combinations benefit)
 2. Theme-specific bugs (affects 2 of 3 runs)
 3. Component-specific bugs
@@ -160,39 +177,75 @@ After all 3 combinations are complete, compile the bug report:
 - Suggested next step
 Then move on. Do not burn time on stubborn bugs.
 
-#### Phase 4: Verify fixes
+#### Phase 4: Present report and wait for approval
 
-After all fixes are applied:
-1. Re-run Phase 2 for ALL 3 combinations (not just the one that had the bug)
-2. A fix for dark brands could break light brands — always verify the full matrix
-3. If new bugs appear, classify and fix them (repeat Phase 3-4)
-4. Stop when all 3 combinations pass all 3 QA gates with no errors
-
-#### Phase 5: Summary report
-
-Output a structured summary:
+After auto-fixing objective bugs, present the full report to the user:
 
 ```
-## Matrix Test Results
+## Matrix Test Report
 
 ### Combinations tested
-1. Crimzon (dark) x Cloud Infrastructure Security — PASS/FAIL
-2. FitFlow (light) x High-Stakes Negotiation — PASS/FAIL
-3. Sprig (dark) x Emergency First Aid — PASS/FAIL
+1. {Brand} (theme) x {Topic} — 6a: PASS/FAIL, 6b: PASS/FAIL, 6c: N issues
+2. ...
+3. ...
 
-### Bugs found: N total
-- Universal: N (fixed: N, skipped: N)
-- Theme-specific: N (fixed: N, skipped: N)
-- Component-specific: N (fixed: N, skipped: N)
-- Content-specific: N (fixed: N, skipped: N)
-
-### Bugs fixed (with classification)
+### Objective bugs (already fixed)
 1. [Universal] Description — fixed in {file}:{line}
 2. [Theme-dark] Description — fixed in {file}:{line}
 ...
 
-### Bugs skipped (with reason)
+### Objective bugs (skipped — couldn't fix)
 1. [Component-specific] Description — skipped because: {reason}
+...
+
+### Subjective bugs (from vision review — AWAITING YOUR APPROVAL)
+1. [Section 3] "Whitespace between stat callout and next section feels cramped"
+   → Suggested fix: increase py-24 to py-32 in fillStatCallout (build-course.js)
+2. [Section 7] "Cards have uneven visual weight — first card dominates"
+   → Suggested fix: adjust bento featured variant grid proportions
+...
+Reply with which subjective bugs to fix, skip, or adjust.
+
+### Variant coverage
+- Covered: {N}/21 variants across 3 runs
+- Missing: {list}
+
+### Files modified so far
+- v5/scripts/build-course.js: {what changed}
+- v5/scripts/hydrate.js: {what changed}
+...
+```
+
+**── STOP AND WAIT for user response. ──**
+
+The user will reply with which subjective bugs to fix. Apply those fixes.
+
+#### Phase 5: Verify all fixes
+
+After all fixes (objective + approved subjective) are applied:
+1. Re-run Phase 2 for ALL 3 combinations (not just the one that had the bug)
+2. A fix for dark brands could break light brands — always verify the full matrix
+3. If new bugs appear, classify and fix them (repeat Phase 3-5)
+4. Stop when all 3 combinations pass all 3 QA gates with no errors
+
+#### Phase 6: Final summary
+
+Output a final structured summary:
+
+```
+## Matrix Test Results — FINAL
+
+### Combinations tested
+1. {Brand} x {Topic} — PASS/FAIL
+2. {Brand} x {Topic} — PASS/FAIL
+3. {Brand} x {Topic} — PASS/FAIL
+
+### Bugs found: N total
+- Objective: N (auto-fixed: N, skipped: N)
+- Subjective: N (user-approved fixes: N, user-skipped: N)
+
+### All fixes applied
+1. [Type] Description — fixed in {file}:{line}
 ...
 
 ### Files modified
