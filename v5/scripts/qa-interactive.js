@@ -848,29 +848,18 @@ async function run() {
       return (lighter + 0.05) / (darker + 0.05);
     }
 
-    // Check hero heading and body text
+    // Check hero heading — must be light text (heroes always have dark/image backgrounds)
     var heroSection = document.querySelector('[data-component-type="hero"]');
     if (heroSection) {
       var h1 = heroSection.querySelector('h1');
       if (h1) {
         var textColor = window.getComputedStyle(h1).color;
         var textLum = getLuminance(textColor);
-        // Walk up from h1 to find nearest bg
-        var bgEl = h1.parentElement;
-        var bgLum = null;
-        while (bgEl && bgEl !== document) {
-          var bg = window.getComputedStyle(bgEl).backgroundColor;
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
-            bgLum = getLuminance(bg);
-            break;
-          }
-          bgEl = bgEl.parentElement;
-        }
-        if (textLum !== null && bgLum !== null) {
-          var ratio = getContrastRatio(textLum, bgLum);
-          if (ratio < 3) {
-            issues.push({ component: 'hero', element: 'h1', ratio: ratio.toFixed(1), textColor: textColor });
-          }
+        // Hero text must be light (white/near-white) — dark text on hero is always wrong
+        // We don't check computed bg because hero backgrounds come from images/gradients
+        // which getComputedStyle can't resolve
+        if (textLum !== null && textLum < 0.5) {
+          issues.push({ component: 'hero', element: 'h1', ratio: 'dark text on hero (should be white)', textColor: textColor });
         }
       }
     }
