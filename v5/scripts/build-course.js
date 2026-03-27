@@ -53,9 +53,10 @@ function embedImage(imagePath) {
   return `data:${mimeMap[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
 }
 
-/** Strip containment/grid classes from a section class string.
- *  Section handles spacing (py-*) and background (bg-*).
- *  Containment (max-w, mx-auto, px-*) goes in an inner div. */
+/** Strip containment/grid/flex classes from a section class string.
+ *  Section handles spacing (py-*) and background (bg-*) only.
+ *  Containment (max-w, mx-auto, px-*) and layout (flex, grid, gap)
+ *  go in inner divs — never on the section element itself. */
 function sectionOnly(cls) {
   return cls
     .replace(/max-w-\S+/g, '')
@@ -63,7 +64,11 @@ function sectionOnly(cls) {
     .replace(/\bpx-\d+\b/g, '')
     .replace(/\bgrid\b/g, '')
     .replace(/md:grid-cols-\d+/g, '')
-    .replace(/gap-\d+/g, '')
+    .replace(/\bgap-\S+/g, '')
+    .replace(/\bflex\b/g, '')
+    .replace(/\bflex-\S+/g, '')
+    .replace(/\bjustify-\S+/g, '')
+    .replace(/\bitems-\S+/g, '')
     .replace(/\s+/g, ' ')
     .trim() || 'py-24';
 }
@@ -329,8 +334,8 @@ function fillHero(comp, variant) {
     return `<section class="${sectionClass}" data-component-type="hero">
 <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 min-h-screen">
 <div class="flex flex-col justify-center px-8 md:px-16 py-20 md:py-0">
-<h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl text-white/80 max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
+<h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl text-on-surface-variant max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 <div class="relative hidden md:block">
@@ -346,8 +351,8 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
     return `<section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
 <div class="relative z-10 max-w-6xl mx-auto px-8 md:px-16 py-20">
 <div class="border-l-4 border-primary pl-8 md:pl-12">
-<h1 class="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl md:text-2xl text-white/80 max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
+<h1 class="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 </div>
@@ -475,7 +480,9 @@ function fillMCQ(comp, variant, maxW) {
     card.border || ''
   );
 
-  const labelClass = c.labelClass || 'text-secondary font-bold text-sm uppercase tracking-widest';
+  // Always include text-on-surface so label is readable inside a glass card
+  // (Stitch sometimes sets section text-white for dark section backgrounds; glass card is lighter)
+  const labelClass = (c.labelClass || 'font-bold text-sm uppercase tracking-widest') + ' text-on-surface-variant';
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   // Draw metadata
@@ -501,7 +508,7 @@ function fillMCQ(comp, variant, maxW) {
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}">
 <span class="${labelClass}">${title}</span>
-<h3 class="font-headline text-2xl font-bold mt-2 mb-10 text-center">${questionText}</h3>
+<h3 class="font-headline text-2xl font-bold mt-2 mb-10 text-center text-on-surface">${questionText}</h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 ${gridChoices}
 </div>
@@ -527,7 +534,7 @@ ${gridChoices}
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}">
 <span class="${labelClass}">${title}</span>
-<h3 class="font-headline text-2xl font-bold mt-2 mb-8">${questionText}</h3>
+<h3 class="font-headline text-2xl font-bold mt-2 mb-8 text-on-surface">${questionText}</h3>
 <div class="space-y-4">
 ${newChoices}
 </div>
@@ -605,6 +612,44 @@ ${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
 </section>`;
 }
 
+// Returns the right heading text class based on card background class name.
+// Covers MD3 semantic pairs and inverse patterns Stitch sometimes uses.
+function bentoCardTextClass(bgClass) {
+  if (!bgClass) return 'text-on-surface';
+  const b = bgClass.toLowerCase();
+  // Container variants (lighter tones) — use on-*-container
+  if (b.includes('primary-container'))   return 'text-on-primary-container';
+  if (b.includes('secondary-container')) return 'text-on-secondary-container';
+  if (b.includes('tertiary-container'))  return 'text-on-tertiary-container';
+  if (b.includes('error-container'))     return 'text-on-error-container';
+  // Saturated accent backgrounds — use on-* (white/light)
+  if (b.includes('primary'))   return 'text-on-primary';
+  if (b.includes('secondary')) return 'text-on-secondary';
+  if (b.includes('tertiary'))  return 'text-on-tertiary';
+  if (b.includes('error'))     return 'text-on-error';
+  // Inverse: Stitch uses on-background/on-surface as a dark card bg — pair with surface colour
+  if (b.includes('on-background') || b.includes('on-surface') || b.includes('inverse-surface')) {
+    return 'text-inverse-on-surface';
+  }
+  return 'text-on-surface';
+}
+function bentoCardSubtextClass(bgClass) {
+  if (!bgClass) return 'text-on-surface-variant';
+  const b = bgClass.toLowerCase();
+  if (b.includes('primary-container'))   return 'text-on-primary-container/80';
+  if (b.includes('secondary-container')) return 'text-on-secondary-container/80';
+  if (b.includes('tertiary-container'))  return 'text-on-tertiary-container/80';
+  if (b.includes('error-container'))     return 'text-on-error-container/80';
+  if (b.includes('primary'))   return 'text-on-primary/80';
+  if (b.includes('secondary')) return 'text-on-secondary/80';
+  if (b.includes('tertiary'))  return 'text-on-tertiary/80';
+  if (b.includes('error'))     return 'text-on-error/80';
+  if (b.includes('on-background') || b.includes('on-surface') || b.includes('inverse-surface')) {
+    return 'text-inverse-on-surface/80';
+  }
+  return 'text-on-surface-variant';
+}
+
 function fillBento(comp, variant, maxW) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
@@ -620,13 +665,15 @@ function fillBento(comp, variant, maxW) {
   if (variant === 'wide-2') {
     const wideCards = items.map((item, i) => {
       const bg = cardBgs[i] || cardBgs[0] || 'glass-card';
+      const headCls = bentoCardTextClass(bg);
+      const subtextCls = bentoCardSubtextClass(bg);
       return `<div class="${bg} rounded-3xl p-8 md:p-10 flex items-start gap-6 min-h-[140px] overflow-hidden">
 <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
 <span class="material-symbols-outlined text-secondary text-2xl">${icons[i % icons.length]}</span>
 </div>
 <div class="min-w-0 flex-1">
-<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2 ${headCls}">${esc(item.title || '')}</h4>
+<p class="${subtextCls} text-sm leading-relaxed">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }).join('\n');
@@ -646,21 +693,22 @@ ${wideCards}
     const featuredCards = items.map((item, i) => {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       if (i === 0) {
-        const bg0 = cardBgs[0] || '';
         return `<div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 md:p-12 flex flex-col justify-end relative overflow-hidden group min-h-[320px] bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent glass-card">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-15 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-primary text-5xl mb-4">${icons[0]}</span>
-<h4 class="font-headline text-2xl font-bold mb-3">${esc(item.title || '')}</h4>
+<h4 class="font-headline text-2xl font-bold mb-3 text-on-surface">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
       }
       const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
+      const headCls = bentoCardTextClass(bgN);
+      const subtextCls = bentoCardSubtextClass(bgN);
       return `<div class="${bgN} rounded-3xl p-6 md:p-8 flex flex-col min-h-[160px] overflow-hidden">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headCls}">${esc(item.title || '')}</h4>
+<p class="text-sm ${subtextCls} leading-relaxed">${stripTags(item.body || '')}</p>
 </div>`;
     }).join('\n');
 
@@ -679,31 +727,37 @@ ${featuredCards}
     if (i === 0) {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       const bg0 = cardBgs[0] || 'glass-card';
+      const headCls0 = bentoCardTextClass(bg0);
+      const subtextCls0 = bentoCardSubtextClass(bg0);
       return `<div class="md:col-span-2 md:row-span-2 ${bg0} rounded-3xl p-6 md:p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-secondary text-4xl mb-3">${icons[0]}</span>
-<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2 ${headCls0}">${esc(item.title || '')}</h4>
+<p class="${subtextCls0} text-sm leading-relaxed">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
     if (i <= 2 && items.length > 3) {
       const bgI = cardBgs[i] || 'glass-card';
+      const headClsI = bentoCardTextClass(bgI);
+      const subtextClsI = bentoCardSubtextClass(bgI);
       return `<div class="md:col-span-1 ${bgI} rounded-3xl p-6 md:p-8 flex flex-col min-h-[180px] overflow-hidden">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
 <div class="min-w-0 flex-1">
-<h4 class="font-headline text-lg font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed line-clamp-4">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headClsI}">${esc(item.title || '')}</h4>
+<p class="${subtextClsI} text-sm leading-relaxed line-clamp-4">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
     const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
     const bgShadow = (c.cardShadows || [])[i] || '';
+    const headClsN = bentoCardTextClass(bgN);
+    const subtextClsN = bentoCardSubtextClass(bgN);
     return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-6 md:p-8 flex flex-col min-h-[160px] overflow-hidden ${bgShadow}">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headClsN}">${esc(item.title || '')}</h4>
+<p class="text-sm ${subtextClsN} leading-relaxed">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -803,7 +857,7 @@ function fillTextInput(comp, maxW) {
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="space-y-8">
 ${newInputs}
-<button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary-container w-full">Submit</button>
+<button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary w-full">Submit</button>
 </div>
 </div>
 </div>
@@ -1130,11 +1184,24 @@ function fillPullquote(comp, maxW) {
   const bqStyle = c.blockquoteStyle || 'text-xl md:text-2xl font-headline font-bold leading-relaxed';
   const citeStyle = c.citeClass || 'text-on-surface-variant';
 
+  // Scale down font for long quotes — Stitch designs blockquoteStyle for 3-5 word punchy quotes.
+  // A 37-word research finding at text-6xl overflows the viewport.
+  let quoteBqStyle = bqStyle;
+  if (quote.length > 120) {
+    quoteBqStyle = bqStyle
+      .replace(/\btext-[5-9]xl\b/g, 'text-3xl')
+      .replace(/\bmd:text-[5-9]xl\b/g, 'md:text-4xl');
+  } else if (quote.length > 60) {
+    quoteBqStyle = bqStyle
+      .replace(/\btext-[6-9]xl\b/g, 'text-4xl')
+      .replace(/\bmd:text-[6-9]xl\b/g, 'md:text-5xl');
+  }
+
   if (c.hasDecorativeQuote && c.decorativeSpanHtml) {
     return `<section class="${secClass} relative" data-component-type="pullquote">
 ${c.decorativeSpanHtml}
 <div class="max-w-4xl mx-auto px-8 text-center relative z-10">
-<blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
+<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
 ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}</cite>` : ''}
 </div>
 </section>`;
@@ -1145,7 +1212,7 @@ ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-an
 <div class="${maxW} mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
 <span class="text-primary/20 text-7xl font-serif absolute -top-6 -left-1 leading-none select-none" aria-hidden="true">&ldquo;</span>
-<blockquote class="${mc('font-headline', bqStyle)}" data-text-reveal>${quote}</blockquote>
+<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
 ${attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}</p>` : ''}
 </div>
 </div>
@@ -1175,7 +1242,7 @@ function fillChecklist(comp, maxW) {
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}" data-checklist data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
-<div class="space-y-2" data-animate-stagger="fade-up">
+<div class="space-y-2">
 ${newLabels}
 </div>
 <div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / ${items.length} complete</div>
@@ -1199,21 +1266,23 @@ function fillTabs(comp, variant, maxW) {
     const vActiveBtn = activeBtn.replace('rounded-full', 'rounded-xl').replace('text-sm', 'text-sm text-left');
     const vInactiveBtn = inactiveBtn.replace('rounded-full', 'rounded-xl').replace('text-sm', 'text-sm text-left');
 
+    // On mobile: flex-row (scrollable), so no w-full — use flex-shrink-0 whitespace-nowrap
+    // On desktop (md:): flex-col, so w-full is needed
     const vTriggers = items.map((item, i) =>
-      `<button class="w-full ${i === 0 ? vActiveBtn : vInactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
+      `<button class="flex-shrink-0 md:w-full whitespace-nowrap md:whitespace-normal ${i === 0 ? vActiveBtn : vInactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
     ).join('\n');
 
     const vPanels = items.map((item, i) =>
-      `<div class="glass-card rounded-3xl p-6 md:p-10 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+      `<div class="glass-card rounded-3xl p-6 md:p-10 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
 <h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
-<div class="text-on-surface-variant leading-relaxed">${item.body || ''}</div>
+<div class="text-on-surface-variant leading-relaxed overflow-hidden">${item.body || ''}</div>
 </div>`
     ).join('\n');
 
-    return `<section class="${secClass}" data-component-type="tabs" data-animate="fade-up">
-<div class="${maxW} mx-auto px-8">
+    return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-animate="fade-up">
+<div class="${maxW} mx-auto px-4 md:px-8">
 <h2 class="font-headline text-3xl font-bold mb-10">${title}</h2>
-<div class="flex flex-col md:flex-row gap-6" data-tabs>
+<div class="flex flex-col md:flex-row gap-6 min-w-0" data-tabs>
 <div class="flex flex-row md:flex-col gap-2 md:w-64 flex-shrink-0 overflow-x-auto md:overflow-visible">
 ${vTriggers}
 </div>
@@ -1231,16 +1300,16 @@ ${vPanels}
   ).join('\n');
 
   const panels = items.map((item, i) =>
-    `<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px]" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+    `<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
 <h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
-<div class="text-on-surface-variant leading-relaxed">${item.body || ''}</div>
+<div class="text-on-surface-variant leading-relaxed overflow-hidden">${item.body || ''}</div>
 </div>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="tabs" data-animate="fade-up">
-<div class="${maxW} mx-auto px-8">
+  return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-animate="fade-up">
+<div class="${maxW} mx-auto px-4 md:px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
-<div data-tabs>
+<div data-tabs class="min-w-0">
 <div class="flex flex-wrap justify-center gap-3 mb-8">
 ${triggers}
 </div>
@@ -1302,13 +1371,15 @@ function fillNarrative(comp, maxW) {
 
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const secClass = sectionOnly((DC.narrative || {}).section || 'py-16');
+  // Cap narrative py to py-16 — large Stitch py values create a dead zone above the carousel
+  const secClass = sectionOnly((DC.narrative || {}).section || 'py-16')
+    .replace(/\bpy-(\d+)\b/g, (m, n) => parseInt(n) > 16 ? 'py-16' : m);
 
   const newSlides = items.map((item, i) => {
     const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
     return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
-<div class="text-secondary font-bold mb-4">${counter}</div>
-<h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant font-bold mb-4">${counter}</div>
+<h4 class="font-headline text-xl font-bold mb-4 text-on-surface">${esc(item.title || '')}</h4>
 <p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
@@ -1562,36 +1633,41 @@ function fillComponent(comp, index, sectionWidth) {
   const variant = comp.variant || '';
   const maxW = getSectionMaxW(sectionWidth);
   switch (type) {
-    case 'hero':            return fillHero(comp, variant);
-    case 'text':            return fillText(comp, maxW);
-    case 'accordion':       return fillAccordion(comp, variant, maxW);
-    case 'mcq':             return fillMCQ(comp, variant, maxW);
-    case 'graphic-text':    return fillGraphicText(comp, index, variant, maxW);
-    case 'bento':           return fillBento(comp, variant, maxW);
-    case 'data-table':      return fillDataTable(comp, maxW);
-    case 'textinput':       return fillTextInput(comp, maxW);
-    case 'path-selector':   return fillPathSelector(comp, maxW);
-    case 'branching':       return fillBranching(comp, maxW);
-    case 'timeline':        return fillTimeline(comp, variant, maxW);
-    case 'comparison':      return fillComparison(comp, variant, maxW);
-    case 'stat-callout':    return fillStatCallout(comp, variant, maxW);
-    case 'pullquote':       return fillPullquote(comp, maxW);
-    case 'checklist':       return fillChecklist(comp, maxW);
-    case 'tabs':            return fillTabs(comp, variant, maxW);
-    case 'flashcard':       return fillFlashcard(comp, maxW);
-    case 'narrative':       return fillNarrative(comp, maxW);
-    case 'key-term':        return fillKeyTerm(comp, maxW);
-    case 'full-bleed':      return fillFullBleed(comp);
-    case 'graphic':         return fillGraphic(comp, maxW);
-    case 'process-flow':    return fillProcessFlow(comp, maxW);
-    case 'media':           return fillMedia(comp, maxW);
-    case 'video-transcript':return fillVideoTranscript(comp, maxW);
-    case 'image-gallery':   return fillImageGallery(comp, maxW);
-    case 'labeled-image':   return fillLabeledImage(comp, maxW);
+    case 'hero':            html = fillHero(comp, variant); break;
+    case 'text':            html = fillText(comp, maxW); break;
+    case 'accordion':       html = fillAccordion(comp, variant, maxW); break;
+    case 'mcq':             html = fillMCQ(comp, variant, maxW); break;
+    case 'graphic-text':    html = fillGraphicText(comp, index, variant, maxW); break;
+    case 'bento':           html = fillBento(comp, variant, maxW); break;
+    case 'data-table':      html = fillDataTable(comp, maxW); break;
+    case 'textinput':       html = fillTextInput(comp, maxW); break;
+    case 'path-selector':   html = fillPathSelector(comp, maxW); break;
+    case 'branching':       html = fillBranching(comp, maxW); break;
+    case 'timeline':        html = fillTimeline(comp, variant, maxW); break;
+    case 'comparison':      html = fillComparison(comp, variant, maxW); break;
+    case 'stat-callout':    html = fillStatCallout(comp, variant, maxW); break;
+    case 'pullquote':       html = fillPullquote(comp, maxW); break;
+    case 'checklist':       html = fillChecklist(comp, maxW); break;
+    case 'tabs':            html = fillTabs(comp, variant, maxW); break;
+    case 'flashcard':       html = fillFlashcard(comp, maxW); break;
+    case 'narrative':       html = fillNarrative(comp, maxW); break;
+    case 'key-term':        html = fillKeyTerm(comp, maxW); break;
+    case 'full-bleed':      html = fillFullBleed(comp); break;
+    case 'graphic':         html = fillGraphic(comp, maxW); break;
+    case 'process-flow':    html = fillProcessFlow(comp, maxW); break;
+    case 'media':           html = fillMedia(comp, maxW); break;
+    case 'video-transcript':html = fillVideoTranscript(comp, maxW); break;
+    case 'image-gallery':   html = fillImageGallery(comp, maxW); break;
+    case 'labeled-image':   html = fillLabeledImage(comp, maxW); break;
     default:
       console.log(`  [warn] Unknown component type: ${type}`);
       return null;
   }
+  // Inject data-variant so QA can find the right instance of each component type
+  if (html && variant) {
+    html = html.replace(/^(<section\b[^>]*)>/, `$1 data-variant="${variant}">`);
+  }
+  return html;
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -1816,7 +1892,7 @@ function build() {
   const finalHead = generateHead(tokens, courseTitle);
   console.log(`[ok] Generated <head> from design-tokens.json (${finalHead.length} chars)`);
 
-  const finalHtml = `<!DOCTYPE html>
+  let finalHtml = `<!DOCTYPE html>
 <html class="${isDark ? 'dark' : ''}" lang="en">
 <head>
 ${finalHead}
@@ -1848,6 +1924,9 @@ ${pathStateScript}${sectionGatingScript}${hydrateScript}
 </script>
 </body>
 </html>`;
+
+  // Strip empty heading tags (defensive: AI content may omit displayTitle)
+  finalHtml = finalHtml.replace(/<h([1-6])([^>]*)>\s*<\/h\1>/g, '');
 
   // Write outputs
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });

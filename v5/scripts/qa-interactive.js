@@ -853,7 +853,11 @@ async function run() {
     var heroSection = document.querySelector('[data-component-type="hero"]');
     if (heroSection) {
       var h1 = heroSection.querySelector('h1');
-      if (h1) {
+      var heroVariant = heroSection.getAttribute('data-variant') || 'centered-overlay';
+      // Only require light text for centered-overlay — text always sits on dark image.
+      // split-screen: text is on page background (adapts to theme colour).
+      // minimal-text: gradient fades to page background — dark text correct on light themes.
+      if (h1 && heroVariant === 'centered-overlay') {
         var textColor = window.getComputedStyle(h1).color;
         var textLum = getLuminance(textColor);
         // Hero text must be light (white/near-white) — dark text on hero is always wrong
@@ -1901,7 +1905,9 @@ async function run() {
     // Verify HTML renders the correct variant structure
     for (const vc of variantComponents) {
       const htmlCheck = await page.evaluate(({ type, variant, id }) => {
-        var comp = document.querySelector('[data-component-type="' + type + '"]');
+        // Prefer data-variant selector to find the right instance; fall back to first
+        var comp = document.querySelector('[data-component-type="' + type + '"][data-variant="' + variant + '"]')
+                || document.querySelector('[data-component-type="' + type + '"]');
         if (!comp) return { found: false };
 
         var result = { found: true, issues: [] };

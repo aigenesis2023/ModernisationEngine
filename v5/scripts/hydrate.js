@@ -680,7 +680,7 @@
           var fracEl = drawerLink.querySelector('.drawer-frac');
           if (!fracEl) {
             fracEl = document.createElement('span');
-            fracEl.className = 'drawer-frac text-xs text-outline-variant tabular-nums';
+            fracEl.className = 'drawer-frac text-xs text-on-surface-variant tabular-nums';
             drawerLink.insertBefore(fracEl, statusIcon);
           }
           fracEl.textContent = progress.completed + '/' + progress.total;
