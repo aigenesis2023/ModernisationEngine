@@ -27,8 +27,9 @@
       var submitBtn = null;
       var feedbackEl = null;
       // Find the best container for injecting submit/feedback (inside the card, not the section)
-      var choiceContainer = quiz.querySelector('.space-y-4') || quiz.querySelector('.space-y-3');
-      var injectTarget = choiceContainer ? choiceContainer.parentElement : quiz;
+      // Supports both stacked (.space-y-4) and grid (.grid) MCQ variants
+      var choiceContainer = quiz.querySelector('.space-y-4') || quiz.querySelector('.space-y-3') || quiz.querySelector('.grid');
+      var injectTarget = choiceContainer ? choiceContainer.parentElement : quiz.querySelector('[data-quiz-feedback]')?.parentElement || quiz;
 
       function resetQuiz() {
         selected = null;

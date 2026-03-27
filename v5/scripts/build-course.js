@@ -321,7 +321,6 @@ function fillHero(comp, variant) {
 
   const buttons = `<div class="flex gap-4 flex-wrap" data-animate="fade-up">
 <button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
-<button class="px-8 py-4 ${btn2Bg} ${btn2Round} font-bold ${btn2Visual}" data-hero-cta="explore">Explore Modules</button>
 </div>`;
 
   // ── Variant: split-screen ──
@@ -330,8 +329,8 @@ function fillHero(comp, variant) {
     return `<section class="${sectionClass}" data-component-type="hero">
 <div class="relative z-10 grid grid-cols-1 md:grid-cols-2 min-h-screen">
 <div class="flex flex-col justify-center px-8 md:px-16 py-20 md:py-0">
-<h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl text-on-surface-variant max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
+<h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl text-white/80 max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 <div class="relative hidden md:block">
@@ -347,8 +346,8 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
     return `<section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
 <div class="relative z-10 max-w-6xl mx-auto px-8 md:px-16 py-20">
 <div class="border-l-4 border-primary pl-8 md:pl-12">
-<h1 class="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-8" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
+<h1 class="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl md:text-2xl text-white/80 max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 </div>
@@ -361,11 +360,10 @@ ${buttons}
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover ${imgVisuals}" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 ${overlayGradient}"></div>
 <div class="relative z-10 text-center max-w-6xl mx-auto px-8">
-<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl text-on-surface-variant max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
+<h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
+<p class="text-xl text-white/80 max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
 <div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
 <button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
-<button class="px-8 py-4 ${btn2Bg} ${btn2Round} font-bold ${btn2Visual}" data-hero-cta="explore">Explore Modules</button>
 </div>
 </div>
 </section>`;
@@ -401,12 +399,14 @@ function fillAccordion(comp, variant, maxW) {
 
   // ── Variant: accent-border ──
   if (variant === 'accent-border') {
+    // Use border from Stitch contract if available, otherwise consistent primary border
+    const stitchBorder = c.borderClass || '';
+    const borderStyle = stitchBorder || 'border-l-4 border-primary';
     const accentDetails = items.map((item, i) => {
-      const borderColor = i % 2 === 0 ? 'border-l-4 border-primary' : 'border-l-4 border-secondary';
       const icon = accentIcons[i % accentIcons.length];
-      return `<details class="group glass-card rounded-2xl ${borderColor} transition-all duration-300">
+      return `<details class="group glass-card rounded-2xl ${borderStyle} transition-all duration-300">
 <summary class="flex items-center gap-4 cursor-pointer font-headline font-bold text-lg px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
-<span class="material-symbols-outlined ${i % 2 === 0 ? 'text-primary' : 'text-secondary'} flex-shrink-0">${icon}</span>
+<span class="material-symbols-outlined text-primary flex-shrink-0">${icon}</span>
 <span class="flex-1">${esc(item.title || '')}</span>
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-on-surface-variant/50">expand_more</span>
 </summary>
@@ -1340,8 +1340,8 @@ function fillKeyTerm(comp, maxW) {
 
   const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
   const newCards = items.map(item =>
-    `<div class="glass-card p-6 md:p-8 rounded-2xl overflow-hidden border-l-4 border-secondary">
-<div class="text-secondary font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
+    `<div class="glass-card p-6 md:p-8 rounded-2xl overflow-hidden border-l-4 border-primary">
+<div class="text-on-surface font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
 <p class="text-on-surface-variant text-sm leading-relaxed">${esc(item.definition || item.body || '')}</p>
 </div>`
   ).join('\n');
@@ -1359,18 +1359,34 @@ ${newCards}
 function fillFullBleed(comp) {
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
-  const sectionClass = (DC['full-bleed'] || {}).section || 'relative h-[60vh] flex items-center justify-center overflow-hidden';
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
-  const pos = comp.overlayPosition || 'center';
-  const alignClass = pos === 'left' ? 'text-left items-start' : pos === 'right' ? 'text-right items-end' : 'text-center items-center';
+  const pos = comp.overlayPosition || 'bottom';
+  const hAlign = pos === 'left' ? 'text-left' : pos === 'right' ? 'text-right' : 'text-center';
 
-  return `<section class="${sectionClass}" data-component-type="full-bleed">
+  // Gradient direction follows text position — overlay is darkest where text sits
+  let gradientClass, flexAlign, padding;
+  if (pos === 'top') {
+    gradientClass = 'bg-gradient-to-b from-black/90 via-black/50 to-transparent';
+    flexAlign = 'items-start';
+    padding = 'pt-16';
+  } else if (pos === 'center') {
+    gradientClass = 'bg-black/60';
+    flexAlign = 'items-center';
+    padding = 'py-16';
+  } else {
+    // bottom (default) — safest, text sits where overlay is strongest
+    gradientClass = 'bg-gradient-to-t from-black/90 via-black/50 to-transparent';
+    flexAlign = 'items-end';
+    padding = 'pb-16';
+  }
+
+  return `<section class="relative h-[60vh] flex ${flexAlign} overflow-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
-<div class="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40"></div>
-<div class="relative z-10 max-w-4xl mx-auto px-8 flex flex-col ${alignClass}" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-4xl font-bold tracking-tight mb-4">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-on-surface-variant max-w-2xl">${bodyText}</p>` : ''}
+<div class="absolute inset-0 ${gradientClass}"></div>
+<div class="relative z-10 w-full max-w-4xl mx-auto px-8 ${padding} ${hAlign}" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl ${pos === 'center' ? 'mx-auto' : ''}">${bodyText}</p>` : ''}
 </div>
 </section>`;
 }

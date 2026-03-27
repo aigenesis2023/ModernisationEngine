@@ -822,11 +822,136 @@ async function run() {
     }
   }
 
-  // NOTE: Text-on-image overlap and color contrast checks intentionally omitted.
-  // Text over images is a deliberate design technique (hero, full-bleed, overlays).
-  // Contrast is inherently visual and context-dependent — Stitch's colour choices,
-  // gradients, and overlays all need human/Vision judgement, not computed thresholds.
-  // Both are handled by Vision in review-course.js (readability category).
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 13b: Text-on-background contrast for key components
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing text contrast on hero/full-bleed...');
+  const contrastIssues = await page.evaluate(() => {
+    var issues = [];
+
+    function getLuminance(rgb) {
+      var match = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!match) return null;
+      var r = parseInt(match[1]) / 255;
+      var g = parseInt(match[2]) / 255;
+      var b = parseInt(match[3]) / 255;
+      // sRGB linearization
+      r = r <= 0.03928 ? r / 12.92 : Math.pow((r + 0.055) / 1.055, 2.4);
+      g = g <= 0.03928 ? g / 12.92 : Math.pow((g + 0.055) / 1.055, 2.4);
+      b = b <= 0.03928 ? b / 12.92 : Math.pow((b + 0.055) / 1.055, 2.4);
+      return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    function getContrastRatio(l1, l2) {
+      var lighter = Math.max(l1, l2);
+      var darker = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    // Check hero heading and body text
+    var heroSection = document.querySelector('[data-component-type="hero"]');
+    if (heroSection) {
+      var h1 = heroSection.querySelector('h1');
+      if (h1) {
+        var textColor = window.getComputedStyle(h1).color;
+        var textLum = getLuminance(textColor);
+        // Walk up from h1 to find nearest bg
+        var bgEl = h1.parentElement;
+        var bgLum = null;
+        while (bgEl && bgEl !== document) {
+          var bg = window.getComputedStyle(bgEl).backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') {
+            bgLum = getLuminance(bg);
+            break;
+          }
+          bgEl = bgEl.parentElement;
+        }
+        if (textLum !== null && bgLum !== null) {
+          var ratio = getContrastRatio(textLum, bgLum);
+          if (ratio < 3) {
+            issues.push({ component: 'hero', element: 'h1', ratio: ratio.toFixed(1), textColor: textColor });
+          }
+        }
+      }
+    }
+
+    // Check full-bleed heading and body text
+    var fullBleeds = document.querySelectorAll('[data-component-type="full-bleed"]');
+    fullBleeds.forEach(function (fb, idx) {
+      var heading = fb.querySelector('h2');
+      if (heading) {
+        var textColor = window.getComputedStyle(heading).color;
+        var textLum = getLuminance(textColor);
+        // Full-bleed should always have light text on dark overlay
+        if (textLum !== null && textLum < 0.5) {
+          issues.push({ component: 'full-bleed #' + (idx + 1), element: 'h2', ratio: 'dark text on image', textColor: textColor });
+        }
+        // Check text position vs overlay gradient direction — text should sit where overlay is darkest
+        var fbRect = fb.getBoundingClientRect();
+        var textRect = heading.getBoundingClientRect();
+        var textPosRatio = (textRect.top - fbRect.top) / fbRect.height;
+        // Find the overlay div and check its gradient direction
+        var overlayDiv = fb.querySelector('[class*="bg-gradient"], [class*="bg-black"]');
+        var overlayClass = overlayDiv ? overlayDiv.className : '';
+        var gradientToTop = overlayClass.includes('gradient-to-t');
+        var gradientToBottom = overlayClass.includes('gradient-to-b');
+        var evenOverlay = overlayClass.includes('bg-black/');
+        // Flag if text is in the transparent zone of the gradient
+        if (gradientToTop && textPosRatio < 0.3) {
+          issues.push({ component: 'full-bleed #' + (idx + 1), element: 'h2', ratio: 'text at top but gradient darkens at bottom', textColor: 'position: top ' + Math.round(textPosRatio * 100) + '%' });
+        } else if (gradientToBottom && textPosRatio > 0.7) {
+          issues.push({ component: 'full-bleed #' + (idx + 1), element: 'h2', ratio: 'text at bottom but gradient darkens at top', textColor: 'position: bottom ' + Math.round(textPosRatio * 100) + '%' });
+        }
+      }
+    });
+
+    return issues;
+  });
+
+  if (contrastIssues.length === 0) {
+    pass('CONTRAST', 'Hero and full-bleed text has sufficient contrast ✓');
+  } else {
+    for (const issue of contrastIssues) {
+      fail('CONTRAST', `${issue.component}: ${issue.element} has poor contrast (${issue.ratio}, color: ${issue.textColor})`);
+    }
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 13c: MCQ submit button alignment
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing MCQ submit button alignment...');
+  // Click a choice to trigger submit button, then check it's inside the card
+  const mcqAlignIssues = await page.evaluate(() => {
+    var issues = [];
+    var quizzes = document.querySelectorAll('[data-quiz]');
+    quizzes.forEach(function (quiz, idx) {
+      var firstChoice = quiz.querySelector('[data-choice]');
+      if (firstChoice) {
+        firstChoice.click();
+        // Check if submit button ended up inside a card container (not directly in the section)
+        var submitBtn = quiz.querySelector('button:not([data-choice])');
+        if (submitBtn) {
+          var parent = submitBtn.parentElement;
+          // Submit should be inside a styled card, not directly in the section
+          if (parent === quiz) {
+            issues.push({ quiz: idx + 1, issue: 'Submit button appended to section, not inside card' });
+          }
+          // Clean up — remove the submit and reset
+          submitBtn.remove();
+          firstChoice.click();
+        }
+      }
+    });
+    return issues;
+  });
+
+  if (mcqAlignIssues.length === 0) {
+    pass('MCQ-ALIGN', 'MCQ submit buttons render inside card containers ✓');
+  } else {
+    for (const issue of mcqAlignIssues) {
+      fail('MCQ-ALIGN', `MCQ #${issue.quiz}: ${issue.issue}`);
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   //  TEST 14: Section spacing violations

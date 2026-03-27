@@ -143,10 +143,14 @@ function extractAccordion(html) {
   // Summary hover
   const summaryCls = details.find('summary').first().attr('class') || '';
 
+  // Extract border styling from Stitch (border-l, border-t, border colour, etc.)
+  const borderClasses = detailsCls.split(/\s+/).filter(c => /^border-/.test(c)).join(' ');
+
   return {
     detailsClass: detailsCls,
     bodyClass: bodyCls,
-    summaryClass: summaryCls
+    summaryClass: summaryCls,
+    borderClass: borderClasses || ''
   };
 }
 
