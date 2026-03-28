@@ -993,11 +993,12 @@
         var decimalPlaces = hasDecimal ? (numStr.split('.')[1] || '').length : 0;
         var hasComma = numStr.indexOf(',') !== -1;
 
-        // Store original text for later
+        // Store original text so we can restore if editing starts before animation
+        el.setAttribute('data-counter-final', text);
         el.textContent = prefix + '0' + suffix;
 
         var obj = { val: 0 };
-        gsap.to(obj, {
+        var tween = gsap.to(obj, {
           val: targetNum,
           duration: 2,
           ease: 'power2.out',
@@ -1016,6 +1017,9 @@
             el.textContent = prefix + formatted + suffix;
           }
         });
+        // Store tween ref so editing mode can kill it (killTweensOf(el) won't
+        // find it because the tween target is obj, not el)
+        el._counterTween = tween;
       });
 
       // ── 9. ACCENT BAR grow (pullquote border-l) ─────────────────────
@@ -1068,17 +1072,26 @@
     })();
 
     // ── HYDRATE COMPONENT — re-initialize a single component after variant swap ─
+    // querySelectorAll only searches descendants, not the root itself.
+    // Many interactive attrs (data-quiz, data-carousel) live on the <section>,
+    // which IS the rootEl after a variant swap. This helper matches both.
+    function qsaIncludingSelf(root, sel) {
+      var list = Array.prototype.slice.call(root.querySelectorAll(sel));
+      if (root.matches && root.matches(sel)) list.unshift(root);
+      return list;
+    }
+
     function hydrateComponent(rootEl) {
       // Quiz
-      rootEl.querySelectorAll('[data-quiz]').forEach(hydrateQuiz);
+      qsaIncludingSelf(rootEl, '[data-quiz]').forEach(hydrateQuiz);
       // Tabs
-      rootEl.querySelectorAll('[data-tabs]').forEach(hydrateTabs);
+      qsaIncludingSelf(rootEl, '[data-tabs]').forEach(hydrateTabs);
       // Flashcards
-      rootEl.querySelectorAll('[data-flashcard]').forEach(hydrateFlashcard);
+      qsaIncludingSelf(rootEl, '[data-flashcard]').forEach(hydrateFlashcard);
       // Carousel / Narrative
-      rootEl.querySelectorAll('[data-carousel]').forEach(hydrateCarousel);
+      qsaIncludingSelf(rootEl, '[data-carousel]').forEach(hydrateCarousel);
       // Checklist
-      rootEl.querySelectorAll('[data-checklist]').forEach(hydrateChecklist);
+      qsaIncludingSelf(rootEl, '[data-checklist]').forEach(hydrateChecklist);
       // Accordion: CSS-only, no JS init needed
       // GSAP animations for the new content
       if (typeof gsap !== 'undefined' && typeof ScrollTrigger !== 'undefined') {
@@ -1435,16 +1448,12 @@
                 editToggleBtn.style.borderColor = 'rgba(59,130,246,0.9)';
                 // Kill any GSAP counters for stat-callout so values stay as edited
                 sec.querySelectorAll('[data-counter]').forEach(function(el) {
-                  if (typeof gsap !== 'undefined') gsap.killTweensOf(el);
+                  if (el._counterTween) { el._counterTween.kill(); el._counterTween = null; }
                 });
                 console.log('Authoring: ' + entry.compType + ' → preview mode (interactivity resumed)');
               } else {
                 // Switch to edit mode
                 sec.setAttribute('data-editing', '');
-                // Kill GSAP counter animations so they don't overwrite edits
-                sec.querySelectorAll('[data-counter]').forEach(function(el) {
-                  if (typeof gsap !== 'undefined') gsap.killTweensOf(el);
-                });
                 enableInlineEditingForSection(sec);
                 editToggleBtn.textContent = '▶ Done';
                 editToggleBtn.title = 'Resume interactivity';
@@ -1621,6 +1630,19 @@
         // (data-editing attribute). Non-interactive sections edit immediately.
         if (isInteractive && !section.hasAttribute('data-editing')) return;
 
+        // Kill GSAP counter animations so they don't overwrite editable text
+        section.querySelectorAll('[data-counter]').forEach(function(el) {
+          if (el._counterTween) {
+            el._counterTween.kill();
+            el._counterTween = null;
+          }
+          // If animation hasn't played yet, restore the final value
+          var finalText = el.getAttribute('data-counter-final');
+          if (finalText && el.textContent.match(/^[^0-9]*0[^0-9]*$/)) {
+            el.textContent = finalText;
+          }
+        });
+
         // displayTitle — first heading in the section
         if (compData.displayTitle !== undefined) {
           var heading = section.querySelector('h1,h2,h3,h4,h5,h6');
@@ -1752,6 +1774,9 @@
         '[data-editable]:hover { outline: 2px dashed rgba(59,130,246,0.5); }' +
         '[data-editable]:focus { outline: 2px solid rgba(59,130,246,0.8); background: rgba(59,130,246,0.05); }' +
         '[data-editable]::before { content: none; }' +
+        // Disable gradient-text effect on editable elements — -webkit-text-fill-color:transparent
+        // makes text invisible when contenteditable is active
+        '[data-editable].text-gradient { -webkit-text-fill-color: currentColor; background: none; }' +
         // When a section is in editing mode, disable pointer events on checkboxes
         // so label clicks don't toggle them while editing text
         'section[data-editing] input[type="checkbox"] { pointer-events: none; }' +

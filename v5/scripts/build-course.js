@@ -1225,7 +1225,7 @@ function fillStatCallout(comp, variant, maxW) {
     }).join('\n');
 
     const colCount = Math.min(items.length, 4);
-    return `<section class="${secClass}" data-component-type="stat-callout" data-interactive>
+    return `<section class="${secClass}" data-component-type="stat-callout">
 <div class="${maxW} mx-auto px-8">
 <div class="grid grid-cols-1 sm:grid-cols-2 ${colCount > 2 ? `md:grid-cols-${colCount}` : ''} gap-6" data-animate-stagger="fade-up">
 ${cardStats}
@@ -1254,7 +1254,7 @@ ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1" data-edit-p
 </div>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="stat-callout" data-interactive>
+  return `<section class="${secClass}" data-component-type="stat-callout">
 <div class="${maxW} mx-auto px-8">
 <div class="grid ${gridCols} gap-8 text-center" data-animate-stagger="fade-up">
 ${newStats}

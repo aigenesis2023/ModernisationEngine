@@ -531,7 +531,7 @@ These were identified in research as valuable but too complex for the current ph
 - No code changes — documentation and planning only
 
 ### 2026-03-28 — Interactive component editing (Edit/Preview toggle)
-- build-course.js: Added `data-interactive` marker to all interactive component sections (MCQ, tabs, flashcard, checklist, branching, path-selector, stat-callout, narrative)
+- build-course.js: Added `data-interactive` marker to all interactive component sections (MCQ, tabs, flashcard, checklist, branching, path-selector, narrative)
 - build-course.js: Added `data-edit-path` to all components missing them (MCQ, tabs triggers, branching, path-selector, labeled-image, textinput, full-bleed, image-gallery, video-transcript, comparison)
 - hydrate.js: Per-section `✏️ Edit text` / `▶ Done` toggle on interactive component toolbars — suppresses interactivity while editing
 - hydrate.js: `isSectionEditing()` guard on all interactive handlers (quiz choice, tab switch, flashcard flip, checklist toggle, path-selector click)
@@ -541,6 +541,12 @@ These were identified in research as valuable but too complex for the current ph
 - Non-interactive components (text, callout, accordion, etc.) unaffected — still auto-editable in authoring mode
 - Architecture: generic `data-interactive` marker = future-proof (new interactive components auto-detected)
 - QA: 110/0 structural, 43/0 interactive
+
+### 2026-03-28 — Bug Fix: Authoring hydration fixes (3 bugs)
+- hydrate.js: `hydrateComponent()` now uses `qsaIncludingSelf()` — fixes variant swap breaking interactivity on MCQ, flashcard (single-large), and narrative (all variants) where `data-quiz`/`data-carousel` live on the `<section>` itself
+- hydrate.js: CSS override for `[data-editable].text-gradient` — `-webkit-text-fill-color: transparent` made stat values invisible when contenteditable was active
+- build-course.js: Removed `data-interactive` from stat-callout (both variants) — no click interactions, toggle was unnecessary; stat-callout now auto-editable like other Content components
+- hydrate.js: Fixed GSAP counter tween kill — `killTweensOf(el)` was a no-op (tween target is `obj`); now stores tween ref as `el._counterTween` and restores final value if editing starts before scroll-triggered animation
 
 ### 2026-03-28 — Bug Fix: Variant swap text carry-over
 - hydrate.js: swapVariant() now applies JSON model (displayTitle + body) to new variant DOM after cloning template
