@@ -63,6 +63,8 @@ Phase 6: Full Authoring              Blank course creation + complex       PLANN
 
 ### Phase 3 Architecture Note (critical — read before starting Phase 3)
 
+> **⚠️ COMPLEXITY WARNING:** This is the hardest phase. `contenteditable` is notoriously buggy across browsers, and keeping a JSON data model in sync with live DOM edits produces edge cases. Plan for multiple debug iterations. Break into small testable pieces — don't try to build it all at once. Phase 3 should probably be split into sub-phases (3a: embed JSON + text editing only, 3b: component type swap, 3c: save/export).
+
 Phase 3 is the most architecturally significant phase. It introduces a **live JSON data model** in the browser.
 
 **Approach:** build-course.js embeds `course-layout.json` inside the built HTML as a `<script type="application/json" id="course-data">` tag. The authoring layer reads this JSON and keeps it in sync with DOM edits.
