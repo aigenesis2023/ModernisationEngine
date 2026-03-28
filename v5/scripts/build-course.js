@@ -525,15 +525,15 @@ function fillMCQ(comp, variant, maxW) {
         'hover:bg-surface-container hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/5 transition-all cursor-pointer group text-center'
       )}" data-choice="${i}">
 <span class="w-12 h-12 rounded-full border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10 flex items-center justify-center text-lg font-bold text-on-surface-variant group-hover:text-secondary transition-all">${optionLetters[i] || ''}</span>
-<span class="text-on-surface font-medium leading-snug">${esc(item.text || '')}</span>
+<span class="text-on-surface font-medium leading-snug" data-edit-path="_items.${i}.text">${esc(item.text || '')}</span>
 </button>`;
     }).join('\n');
 
-    return `<section class="${secClass}" data-component-type="mcq" data-animate="fade-up" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
+    return `<section class="${secClass}" data-component-type="mcq" data-interactive data-animate="fade-up" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}">
-<span class="${labelClass}">${title}</span>
-<h3 class="font-headline text-2xl font-bold mt-2 mb-10 text-center text-on-surface">${questionText}</h3>
+<span class="${labelClass}" data-edit-path="displayTitle">${title}</span>
+<h3 class="font-headline text-2xl font-bold mt-2 mb-10 text-center text-on-surface" data-edit-path="instruction">${questionText}</h3>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 ${gridChoices}
 </div>
@@ -551,15 +551,15 @@ ${gridChoices}
       'hover:bg-surface-container hover:border-secondary/50 hover:shadow-lg hover:shadow-secondary/5 transition-all cursor-pointer group'
     )}" data-choice="${i}">
 <span class="w-10 h-10 rounded-full border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10 flex items-center justify-center text-sm font-bold text-on-surface-variant group-hover:text-secondary transition-all flex-shrink-0">${optionLetters[i] || ''}</span>
-<span class="text-on-surface leading-relaxed">${esc(item.text || '')}</span>
+<span class="text-on-surface leading-relaxed" data-edit-path="_items.${i}.text">${esc(item.text || '')}</span>
 </button>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="mcq" data-animate="fade-up" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
+  return `<section class="${secClass}" data-component-type="mcq" data-interactive data-animate="fade-up" data-quiz data-correct="${correctIdx}" data-feedback-correct="${esc(correctFeedback)}" data-feedback-incorrect="${esc(incorrectFeedback)}"${drawAttrs}>
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}">
-<span class="${labelClass}">${title}</span>
-<h3 class="font-headline text-2xl font-bold mt-2 mb-8 text-on-surface">${questionText}</h3>
+<span class="${labelClass}" data-edit-path="displayTitle">${title}</span>
+<h3 class="font-headline text-2xl font-bold mt-2 mb-8 text-on-surface" data-edit-path="instruction">${questionText}</h3>
 <div class="space-y-4">
 ${newChoices}
 </div>
@@ -890,9 +890,9 @@ function fillTextInput(comp, maxW) {
   const cardClass = (c.cardClass || 'glass-card p-12 rounded-[2rem]').replace(/\bp-12\b/, 'p-6 md:p-12');
   const inputClass = c.inputClass || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
 
-  const newInputs = items.map(item =>
+  const newInputs = items.map((item, i) =>
     `<div>
-<label class="block text-sm font-bold text-on-surface mb-3 uppercase tracking-widest">${esc(item.prefix || item.label || '')}</label>
+<label class="block text-sm font-bold text-on-surface mb-3 uppercase tracking-widest" data-edit-path="_items.${i}.label">${esc(item.prefix || item.label || '')}</label>
 <textarea class="${inputClass} min-h-[80px] resize-y" placeholder="${esc(item.placeholder || '')}" rows="2"></textarea>
 </div>`
   ).join('\n');
@@ -924,14 +924,14 @@ function fillPathSelector(comp, maxW) {
   const btnBg = btn.bg || 'bg-surface-variant/30';
   const btnRound = btn.rounded || 'rounded-2xl';
 
-  const newButtons = items.map(item =>
+  const newButtons = items.map((item, i) =>
     `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} transition-all duration-300" data-path-option data-path-variable="${esc(item.variable || '')}">
-<div class="font-bold text-lg mb-2">${esc(item.title || '')}</div>
-<div class="text-sm text-on-surface-variant">${stripTags(item.body || '')}</div>
+<div class="font-bold text-lg mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+<div class="text-sm text-on-surface-variant" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>
 </button>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="path-selector" data-path-selector>
+  return `<section class="${secClass}" data-component-type="path-selector" data-interactive data-path-selector>
 <div class="${maxW} mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-4 text-center">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-4 text-center">${bodyText}</p>` : ''}
@@ -988,14 +988,14 @@ function fillBranching(comp, variant, maxW) {
       `<button class="group flex items-start gap-5 p-5 md:p-6 ${btnBg} rounded-xl text-left ${btnVisuals} w-full">
 <div class="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold">${String.fromCharCode(65 + i)}</div>
 <div class="flex-1 min-w-0">
-<div class="font-bold text-on-surface text-lg">${esc(item.title || '')}</div>
-${(item.body || '') ? `<div class="text-sm text-on-surface-variant leading-relaxed mt-1">${stripTags(item.body || '')}</div>` : ''}
+<div class="font-bold text-on-surface text-lg" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+${(item.body || '') ? `<div class="text-sm text-on-surface-variant leading-relaxed mt-1" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>` : ''}
 </div>
 <span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-secondary transition-colors self-center">chevron_right</span>
 </button>`
     ).join('\n');
 
-    return `<section class="${secClass}" data-component-type="branching">
+    return `<section class="${secClass}" data-component-type="branching" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-8">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-8 italic">${bodyText}</p>` : ''}
@@ -1011,14 +1011,14 @@ ${listItems}
     `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden">
 <span class="absolute bottom-2 right-3 text-4xl font-headline font-black text-primary/8 group-hover:text-secondary/15 transition-colors select-none leading-none">${String.fromCharCode(65 + i)}</span>
 <div class="relative z-10">
-<div class="font-bold text-on-surface text-lg mb-2">${esc(item.title || '')}</div>
-<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</div>
+<div class="font-bold text-on-surface text-lg mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+<div class="text-sm text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>
 ${hasArrow ? `<span class="${arrowClass}">Choose <span class="material-symbols-outlined">arrow_forward</span></span>` : ''}
 </div>
 </button>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="branching">
+  return `<section class="${secClass}" data-component-type="branching" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <h3 class="font-headline text-2xl font-bold mb-8 text-center">${title}</h3>
 ${bodyText ? `<p class="text-lg text-on-surface-variant mb-8 text-center italic">${bodyText}</p>` : ''}
@@ -1148,7 +1148,7 @@ function fillComparison(comp, variant, maxW) {
       };
       return `<div class="glass-card rounded-xl p-5 flex items-center gap-4">
 <div class="flex-1 text-right">${renderVal(vals[0])}</div>
-<div class="flex-shrink-0 px-4 py-2 bg-surface-container rounded-full text-xs font-bold uppercase tracking-widest text-on-surface">${esc(label)}</div>
+<div class="flex-shrink-0 px-4 py-2 bg-surface-container rounded-full text-xs font-bold uppercase tracking-widest text-on-surface" data-edit-path="rows.${ri}.label">${esc(label)}</div>
 <div class="flex-1 text-left">${renderVal(vals[1])}</div>
 </div>`;
     }).join('\n');
@@ -1158,8 +1158,8 @@ function fillComparison(comp, variant, maxW) {
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-8">${stripTags(body)}</p>` : ''}
 <div class="flex justify-between mb-6 px-4">
-<span class="font-headline font-bold text-lg text-primary">${esc(columns[0].title || '')}</span>
-<span class="font-headline font-bold text-lg text-secondary">${esc(columns[1].title || '')}</span>
+<span class="font-headline font-bold text-lg text-primary" data-edit-path="columns.0.title">${esc(columns[0].title || '')}</span>
+<span class="font-headline font-bold text-lg text-secondary" data-edit-path="columns.1.title">${esc(columns[1].title || '')}</span>
 </div>
 <div class="space-y-3" data-animate-stagger="fade-up">
 ${stackedRows}
@@ -1225,7 +1225,7 @@ function fillStatCallout(comp, variant, maxW) {
     }).join('\n');
 
     const colCount = Math.min(items.length, 4);
-    return `<section class="${secClass}" data-component-type="stat-callout">
+    return `<section class="${secClass}" data-component-type="stat-callout" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <div class="grid grid-cols-1 sm:grid-cols-2 ${colCount > 2 ? `md:grid-cols-${colCount}` : ''} gap-6" data-animate-stagger="fade-up">
 ${cardStats}
@@ -1254,7 +1254,7 @@ ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1" data-edit-p
 </div>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="stat-callout">
+  return `<section class="${secClass}" data-component-type="stat-callout" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <div class="grid ${gridCols} gap-8 text-center" data-animate-stagger="fade-up">
 ${newStats}
@@ -1341,7 +1341,7 @@ function fillChecklist(comp, variant, maxW) {
 </label>`
     ).join('\n');
 
-    return `<section class="${secClass}" data-component-type="checklist">
+    return `<section class="${secClass}" data-component-type="checklist" data-interactive>
 <div class="${maxW} mx-auto px-8" data-checklist data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1362,7 +1362,7 @@ ${cardItems}
 </label>`
     ).join('\n');
 
-    return `<section class="${secClass}" data-component-type="checklist">
+    return `<section class="${secClass}" data-component-type="checklist" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}" data-checklist data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
@@ -1383,7 +1383,7 @@ ${numberedItems}
 </label>`
   ).join('\n');
 
-  return `<section class="${secClass}" data-component-type="checklist">
+  return `<section class="${secClass}" data-component-type="checklist" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <div class="${cardClass}" data-checklist data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
@@ -1418,7 +1418,7 @@ function fillTabs(comp, variant, maxW) {
     // On mobile: flex-row (scrollable), so no w-full — use flex-shrink-0 whitespace-nowrap
     // On desktop (md:): flex-col, so w-full is needed
     const vTriggers = items.map((item, i) =>
-      `<button class="flex-shrink-0 md:w-full whitespace-nowrap md:whitespace-normal ${i === 0 ? vActiveBtn : vInactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
+      `<button class="flex-shrink-0 md:w-full whitespace-nowrap md:whitespace-normal ${i === 0 ? vActiveBtn : vInactiveBtn}" data-tab-trigger="${i}"><span data-edit-path="_items.${i}.title">${esc(item.title || `Tab ${i + 1}`)}</span></button>`
     ).join('\n');
 
     const vPanels = items.map((item, i) =>
@@ -1428,7 +1428,7 @@ function fillTabs(comp, variant, maxW) {
 </div>`
     ).join('\n');
 
-    return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-animate="fade-up">
+    return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-interactive data-animate="fade-up">
 <div class="${maxW} mx-auto px-4 md:px-8">
 <h2 class="font-headline text-3xl font-bold mb-10">${title}</h2>
 <div class="flex flex-col md:flex-row gap-6 min-w-0" data-tabs>
@@ -1445,7 +1445,7 @@ ${vPanels}
 
   // ── Default variant: horizontal ──
   const triggers = items.map((item, i) =>
-    `<button class="${i === 0 ? activeBtn : inactiveBtn}" data-tab-trigger="${i}">${esc(item.title || `Tab ${i + 1}`)}</button>`
+    `<button class="${i === 0 ? activeBtn : inactiveBtn}" data-tab-trigger="${i}"><span data-edit-path="_items.${i}.title">${esc(item.title || `Tab ${i + 1}`)}</span></button>`
   ).join('\n');
 
   const panels = items.map((item, i) =>
@@ -1455,7 +1455,7 @@ ${vPanels}
 </div>`
   ).join('\n');
 
-  return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-animate="fade-up">
+  return `<section class="${secClass} overflow-x-hidden" data-component-type="tabs" data-interactive data-animate="fade-up">
 <div class="${maxW} mx-auto px-4 md:px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
 <div data-tabs class="min-w-0">
@@ -1511,7 +1511,7 @@ function fillFlashcard(comp, variant, maxW) {
       return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>${cardHtml}</div>`;
     }).join('\n');
 
-    return `<section class="${secClass}" data-component-type="flashcard" data-carousel>
+    return `<section class="${secClass}" data-component-type="flashcard" data-interactive data-carousel>
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
 <div class="max-w-2xl mx-auto">
@@ -1533,7 +1533,7 @@ ${largeCards}
   // ── Default variant: grid ──
   const newCards = items.map((item, i) => makeCard(item, i, false)).join('\n');
 
-  return `<section class="${secClass}" data-component-type="flashcard">
+  return `<section class="${secClass}" data-component-type="flashcard" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
 <div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-6" data-animate-stagger="scale-in">
@@ -1576,7 +1576,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-[400px] object-cover rounded-2x
 </div>`;
     }).join('\n');
 
-    return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
+    return `<section class="${secClass}" data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-4 md:p-6 relative overflow-hidden">
@@ -1598,7 +1598,7 @@ ${navButtons}
 </div>`;
     }).join('\n');
 
-    return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
+    return `<section class="${secClass}" data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-8 md:p-12 relative">
@@ -1619,7 +1619,7 @@ ${navButtons}
 </div>`;
   }).join('\n');
 
-  return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
+  return `<section class="${secClass}" data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-6 md:p-10 relative">
@@ -1689,8 +1689,8 @@ function fillFullBleed(comp, variant) {
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
 <div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-left" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</p>` : ''}
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg" data-edit-path="displayTitle">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
   }
@@ -1700,8 +1700,8 @@ ${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent"></div>
 <div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</p>` : ''}
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg" data-edit-path="displayTitle">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
   }
@@ -1711,8 +1711,8 @@ ${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md">${bodyText}</
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-black/60"></div>
 <div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-center" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto">${bodyText}</p>` : ''}
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white" data-edit-path="displayTitle">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
 }
@@ -1847,7 +1847,7 @@ function fillVideoTranscript(comp, maxW) {
 <span>${title}</span>
 <span class="material-symbols-outlined">expand_more</span>
 </summary>
-<div class="p-8 text-on-surface-variant">${comp.body || ''}</div>
+<div class="p-8 text-on-surface-variant" data-edit-path="body" data-edit-html>${comp.body || ''}</div>
 </details>
 </div>
 </section>`;
@@ -1858,13 +1858,13 @@ function fillImageGallery(comp, maxW) {
   const items = comp._items || [];
   const secClass = sectionOnly((DC['image-gallery'] || {}).section || 'py-16');
 
-  const images = items.map(item => {
+  const images = items.map((item, i) => {
     const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
     const imgAlt = esc(item._graphic?.alt || item.caption || '');
     const caption = esc(item.caption || '');
     return `<div class="bg-surface-container rounded-2xl overflow-hidden">
 ${imgSrc ? `<div class="aspect-square"><img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSrc}"/></div>` : '<div class="aspect-square flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">image</span></div>'}
-${caption ? `<p class="px-4 py-3 text-sm text-on-surface-variant">${caption}</p>` : ''}
+${caption ? `<p class="px-4 py-3 text-sm text-on-surface-variant" data-edit-path="_items.${i}.caption">${caption}</p>` : ''}
 </div>`;
   }).join('\n');
 
@@ -1891,8 +1891,8 @@ function fillLabeledImage(comp, variant, maxW) {
       `<div class="flex items-start gap-4 p-4 rounded-xl hover:bg-surface-container/50 transition-colors">
 <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
 <div>
-<div class="font-bold text-on-surface text-sm">${esc(m.label || '')}</div>
-${m.description ? `<p class="text-xs text-on-surface-variant mt-1">${esc(m.description || '')}</p>` : ''}
+<div class="font-bold text-on-surface text-sm" data-edit-path="_markers.${i}.label">${esc(m.label || '')}</div>
+${m.description ? `<p class="text-xs text-on-surface-variant mt-1" data-edit-path="_markers.${i}.description">${esc(m.description || '')}</p>` : ''}
 </div>
 </div>`
     ).join('\n');
@@ -1925,7 +1925,7 @@ ${panelItems}
     ? `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">${markers.map((m, i) =>
         `<div class="glass-card rounded-xl p-4 flex items-center gap-3 border border-outline-variant/20">
 <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
-<span class="text-sm font-medium">${esc(m.label || '')}</span>
+<span class="text-sm font-medium" data-edit-path="_markers.${i}.label">${esc(m.label || '')}</span>
 </div>`
       ).join('\n')}</div>`
     : '';

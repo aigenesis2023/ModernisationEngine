@@ -530,6 +530,18 @@ These were identified in research as valuable but too complex for the current ph
 - Restructured Phase 4 into 5 sub-phases (3.5 → 4a → 4b → 4c → 4d → 4e)
 - No code changes — documentation and planning only
 
+### 2026-03-28 — Interactive component editing (Edit/Preview toggle)
+- build-course.js: Added `data-interactive` marker to all interactive component sections (MCQ, tabs, flashcard, checklist, branching, path-selector, stat-callout, narrative)
+- build-course.js: Added `data-edit-path` to all components missing them (MCQ, tabs triggers, branching, path-selector, labeled-image, textinput, full-bleed, image-gallery, video-transcript, comparison)
+- hydrate.js: Per-section `✏️ Edit text` / `▶ Done` toggle on interactive component toolbars — suppresses interactivity while editing
+- hydrate.js: `isSectionEditing()` guard on all interactive handlers (quiz choice, tab switch, flashcard flip, checklist toggle, path-selector click)
+- hydrate.js: `data-editing` attribute on section controls editing state; `data-edit-bound` prevents zombie event listeners
+- hydrate.js: GSAP counter animations killed when entering edit mode (stat-callout)
+- hydrate.js: CSS disables pointer-events on checkboxes and sets cursor:text on interactive elements in edit mode
+- Non-interactive components (text, callout, accordion, etc.) unaffected — still auto-editable in authoring mode
+- Architecture: generic `data-interactive` marker = future-proof (new interactive components auto-detected)
+- QA: 110/0 structural, 43/0 interactive
+
 ### 2026-03-28 — Bug Fix: Variant swap text carry-over
 - hydrate.js: swapVariant() now applies JSON model (displayTitle + body) to new variant DOM after cloning template
 - hydrate.js: Variant selection also persisted to JSON model (cd.variant = targetVariant)

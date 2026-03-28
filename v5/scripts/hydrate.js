@@ -16,6 +16,12 @@
       '.drawer-link-active .drawer-index { color: var(--color-primary, #0099ff); }';
     document.head.appendChild(style);
 
+    // ── Editing guard: check if the section is in edit mode ───────────
+    function isSectionEditing(el) {
+      var section = el.closest('section[data-component-type]');
+      return section && section.hasAttribute('data-editing');
+    }
+
     // ── Per-component hydration functions (reusable for variant swaps) ──
     function hydrateQuiz(quiz) {
       var choices = quiz.querySelectorAll('[data-choice]');
@@ -45,6 +51,7 @@
       choices.forEach(function (choice) {
         choice.style.cursor = 'pointer';
         choice.addEventListener('click', function () {
+          if (isSectionEditing(quiz)) return; // editing mode — suppress selection
           if (feedbackEl) return; // already submitted
           choices.forEach(function (c) {
             c.classList.remove('border-primary-container');
@@ -161,7 +168,10 @@
 
       triggers.forEach(function (trigger, i) {
         trigger.style.cursor = 'pointer';
-        trigger.addEventListener('click', function () { activateTab(i); });
+        trigger.addEventListener('click', function () {
+          if (isSectionEditing(container)) return; // editing mode — suppress tab switch
+          activateTab(i);
+        });
       });
 
       if (triggers.length > 0) activateTab(0);
@@ -177,12 +187,14 @@
       var flipped = false;
 
       function toggle(e) {
+        if (isSectionEditing(card)) return; // editing mode — suppress flip
         e.preventDefault();
         flipped = !flipped;
         inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
       }
       card.addEventListener('click', toggle);
       card.addEventListener('touchend', function (e) {
+        if (isSectionEditing(card)) return; // editing mode — suppress flip
         e.preventDefault();
         flipped = !flipped;
         inner.style.transform = flipped ? 'rotateY(180deg)' : 'rotateY(0deg)';
@@ -298,6 +310,9 @@
       }
 
       checkboxes.forEach(function (cb) {
+        cb.addEventListener('click', function(e) {
+          if (isSectionEditing(container)) { e.preventDefault(); return; }
+        });
         cb.addEventListener('change', updateProgress);
       });
 
@@ -310,6 +325,7 @@
         item.style.cursor = 'pointer';
 
         item.addEventListener('click', function (e) {
+          if (isSectionEditing(container)) return; // editing mode — suppress toggle
           if (e.target.tagName === 'INPUT') return; // let native checkboxes handle themselves
           var isChecked = item.getAttribute('data-checked') === 'true';
           if (isChecked) {
@@ -524,6 +540,7 @@
       options.forEach(function (option) {
         option.style.cursor = 'pointer';
         option.addEventListener('click', function () {
+          if (isSectionEditing(selector)) return; // editing mode — suppress selection
           var variable = option.getAttribute('data-path-variable');
           if (!variable) return;
 
@@ -1298,6 +1315,22 @@
           spacer.style.cssText = 'flex:1;';
           toolbar.appendChild(spacer);
 
+          // Edit text toggle (only for interactive components)
+          var editToggleBtn = null;
+          if (section.hasAttribute('data-interactive')) {
+            editToggleBtn = document.createElement('button');
+            editToggleBtn.textContent = '✏️ Edit text';
+            editToggleBtn.title = 'Pause interactivity to edit text';
+            editToggleBtn.setAttribute('data-authoring-edit-toggle', 'preview');
+            editToggleBtn.style.cssText = 'background:rgba(59,130,246,0.8);color:#fff;border:1px solid rgba(59,130,246,0.9);padding:2px 10px;border-radius:3px;font:bold 10px/1.4 monospace;cursor:pointer;';
+            editToggleBtn.addEventListener('mouseenter', function() { editToggleBtn.style.background = 'rgba(59,130,246,1)'; });
+            editToggleBtn.addEventListener('mouseleave', function() {
+              var isEdit = editToggleBtn.getAttribute('data-authoring-edit-toggle') === 'editing';
+              editToggleBtn.style.background = isEdit ? 'rgba(34,197,94,0.8)' : 'rgba(59,130,246,0.8)';
+            });
+            toolbar.appendChild(editToggleBtn);
+          }
+
           // Delete button (right-aligned)
           var deleteBtn = document.createElement('button');
           deleteBtn.textContent = '✕ Delete';
@@ -1384,6 +1417,45 @@
             console.log('Authoring: deleted ' + entry.compType + ' section');
           });
 
+          // Edit text toggle handler (interactive components only)
+          if (editToggleBtn) {
+            editToggleBtn.addEventListener('click', function() {
+              var sec = entry.wrapper.querySelector('section[data-component-type]');
+              if (!sec) return;
+              var isEditing = sec.hasAttribute('data-editing');
+
+              if (isEditing) {
+                // Switch to preview mode
+                sec.removeAttribute('data-editing');
+                disableInlineEditingForSection(sec);
+                editToggleBtn.textContent = '✏️ Edit text';
+                editToggleBtn.title = 'Pause interactivity to edit text';
+                editToggleBtn.setAttribute('data-authoring-edit-toggle', 'preview');
+                editToggleBtn.style.background = 'rgba(59,130,246,0.8)';
+                editToggleBtn.style.borderColor = 'rgba(59,130,246,0.9)';
+                // Kill any GSAP counters for stat-callout so values stay as edited
+                sec.querySelectorAll('[data-counter]').forEach(function(el) {
+                  if (typeof gsap !== 'undefined') gsap.killTweensOf(el);
+                });
+                console.log('Authoring: ' + entry.compType + ' → preview mode (interactivity resumed)');
+              } else {
+                // Switch to edit mode
+                sec.setAttribute('data-editing', '');
+                // Kill GSAP counter animations so they don't overwrite edits
+                sec.querySelectorAll('[data-counter]').forEach(function(el) {
+                  if (typeof gsap !== 'undefined') gsap.killTweensOf(el);
+                });
+                enableInlineEditingForSection(sec);
+                editToggleBtn.textContent = '▶ Done';
+                editToggleBtn.title = 'Resume interactivity';
+                editToggleBtn.setAttribute('data-authoring-edit-toggle', 'editing');
+                editToggleBtn.style.background = 'rgba(34,197,94,0.8)';
+                editToggleBtn.style.borderColor = 'rgba(34,197,94,0.9)';
+                console.log('Authoring: ' + entry.compType + ' → editing mode (interactivity paused)');
+              }
+            });
+          }
+
         });
       }
 
@@ -1397,7 +1469,13 @@
         if (!currentSection) { console.warn('Authoring: No current section found'); return; }
 
         // Save current state back (in case user modified it)
-        entry.variantNodes[entry.activeVariant] = currentSection.cloneNode(true);
+        var savedClone = currentSection.cloneNode(true);
+        // Strip data-edit-bound so listeners are re-bound when this variant is restored
+        // (cloneNode does not preserve event listeners, only attributes)
+        savedClone.querySelectorAll('[data-edit-bound]').forEach(function(el) {
+          el.removeAttribute('data-edit-bound');
+        });
+        entry.variantNodes[entry.activeVariant] = savedClone;
 
         // Clone the target and insert
         var newSection = targetNode.cloneNode(true);
@@ -1415,12 +1493,13 @@
               var heading = newSection.querySelector('h1,h2,h3,h4,h5,h6');
               if (heading) heading.textContent = cd.displayTitle;
             }
-            // Apply body to paragraphs (skip interactive element paragraphs)
+            // Apply body to paragraphs (skip those with data-edit-path and carousel nav)
             if (cd.body !== undefined) {
               var bodyParts = cd.body.split('\n\n');
               var paras = [];
               newSection.querySelectorAll('p').forEach(function(p) {
-                if (p.closest('[data-quiz], [data-tabs] [role="tablist"], [data-carousel] nav, [data-checklist] label')) return;
+                if (p.closest('[data-carousel] nav')) return;
+                if (p.hasAttribute('data-edit-path')) return;
                 paras.push(p);
               });
               paras.forEach(function(p, i) {
@@ -1451,6 +1530,11 @@
 
         // Re-enable inline editing on swapped variant if authoring is active
         if (authoringActive && courseData) {
+          // If the old section was in edit mode, carry it over to the new variant
+          var wasEditing = currentSection.hasAttribute('data-editing');
+          if (wasEditing) {
+            newSection.setAttribute('data-editing', '');
+          }
           enableInlineEditingForSection(newSection);
         }
 
@@ -1531,24 +1615,33 @@
       function enableInlineEditingForSection(section) {
         var compData = getCompData(section);
         if (!compData) return;
+        var isInteractive = section.hasAttribute('data-interactive');
+
+        // For interactive sections, editing is gated by the per-section toggle
+        // (data-editing attribute). Non-interactive sections edit immediately.
+        if (isInteractive && !section.hasAttribute('data-editing')) return;
 
         // displayTitle — first heading in the section
         if (compData.displayTitle !== undefined) {
           var heading = section.querySelector('h1,h2,h3,h4,h5,h6');
-          if (heading && !heading.hasAttribute('data-editable')) {
+          if (heading && !heading.hasAttribute('data-editable') && !heading.hasAttribute('data-edit-path')) {
             heading.setAttribute('contenteditable', 'true');
             heading.setAttribute('data-editable', 'displayTitle');
             heading.setAttribute('spellcheck', 'true');
             editableElements.push(heading);
 
-            heading.addEventListener('input', function() {
-              var cd = getCompData(section);
-              if (cd) { cd.displayTitle = heading.textContent; saveCourseData(); }
-            });
+            // Only add listeners once (prevent zombie listeners on toggle cycles)
+            if (!heading.hasAttribute('data-edit-bound')) {
+              heading.setAttribute('data-edit-bound', '');
+              heading.addEventListener('input', function() {
+                var cd = getCompData(section);
+                if (cd) { cd.displayTitle = heading.textContent; saveCourseData(); }
+              });
 
-            heading.addEventListener('keydown', function(e) {
-              if (e.key === 'Enter') { e.preventDefault(); heading.blur(); }
-            });
+              heading.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') { e.preventDefault(); heading.blur(); }
+              });
+            }
           }
         }
 
@@ -1556,38 +1649,39 @@
         if (compData.body !== undefined) {
           var paras = section.querySelectorAll('p');
           paras.forEach(function(p) {
-            // Skip paragraphs inside interactive elements (quiz choices, tab labels, etc.)
-            if (p.closest('[data-quiz], [data-tabs] [role="tablist"], [data-carousel] nav, [data-checklist] label')) return;
+            // Skip paragraphs inside carousel nav (prev/next buttons contain no editable text)
+            if (p.closest('[data-carousel] nav')) return;
             if (p.hasAttribute('data-editable')) return;
+            // Skip paragraphs that already have a data-edit-path (handled below)
+            if (p.hasAttribute('data-edit-path')) return;
 
             p.setAttribute('contenteditable', 'true');
             p.setAttribute('data-editable', 'body');
             p.setAttribute('spellcheck', 'true');
             editableElements.push(p);
 
-            p.addEventListener('input', function() {
-              var cd = getCompData(section);
-              if (!cd) return;
-              // Collect all editable paragraphs in this section and join
-              var allParas = section.querySelectorAll('p[data-editable="body"]');
-              var texts = [];
-              allParas.forEach(function(pp) { texts.push(pp.innerHTML); });
-              cd.body = texts.join('\n\n');
-              saveCourseData();
-            });
+            if (!p.hasAttribute('data-edit-bound')) {
+              p.setAttribute('data-edit-bound', '');
+              p.addEventListener('input', function() {
+                var cd = getCompData(section);
+                if (!cd) return;
+                var allParas = section.querySelectorAll('p[data-editable="body"]');
+                var texts = [];
+                allParas.forEach(function(pp) { texts.push(pp.innerHTML); });
+                cd.body = texts.join('\n\n');
+                saveCourseData();
+              });
 
-            p.addEventListener('keydown', function(e) {
-              // Allow Shift+Enter for line breaks within a paragraph
-              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); }
-            });
+              p.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); }
+              });
+            }
           });
         }
 
         // Structured content — elements with data-edit-path (items, stats, nodes, etc.)
         section.querySelectorAll('[data-edit-path]').forEach(function(el) {
           if (el.hasAttribute('data-editable')) return;
-          // Skip elements inside interactive containers that shouldn't be edited
-          if (el.closest('[data-quiz] [data-choice]')) return;
 
           var path = el.getAttribute('data-edit-path');
           var useHtml = el.hasAttribute('data-edit-html');
@@ -1597,18 +1691,38 @@
           el.setAttribute('spellcheck', 'true');
           editableElements.push(el);
 
-          el.addEventListener('input', function() {
-            var cd = getCompData(section);
-            if (!cd) return;
-            var value = useHtml ? el.innerHTML : el.textContent;
-            setNestedValue(cd, path, value);
-            saveCourseData();
-          });
+          if (!el.hasAttribute('data-edit-bound')) {
+            el.setAttribute('data-edit-bound', '');
+            el.addEventListener('input', function() {
+              var cd = getCompData(section);
+              if (!cd) return;
+              var value = useHtml ? el.innerHTML : el.textContent;
+              setNestedValue(cd, path, value);
+              saveCourseData();
+            });
 
-          el.addEventListener('keydown', function(e) {
-            // Block Enter on single-line fields (titles, labels, values)
-            if (!useHtml && e.key === 'Enter') { e.preventDefault(); el.blur(); }
-          });
+            el.addEventListener('keydown', function(e) {
+              if (!useHtml && e.key === 'Enter') { e.preventDefault(); el.blur(); }
+            });
+          }
+        });
+      }
+
+      // Disable inline editing for a single section (used by edit toggle)
+      function disableInlineEditingForSection(section) {
+        var toRemove = [];
+        editableElements.forEach(function(el) {
+          if (section.contains(el)) {
+            el.removeAttribute('contenteditable');
+            el.removeAttribute('data-editable');
+            el.removeAttribute('spellcheck');
+            el.removeAttribute('data-edit-bound');
+            toRemove.push(el);
+          }
+        });
+        toRemove.forEach(function(el) {
+          var idx = editableElements.indexOf(el);
+          if (idx > -1) editableElements.splice(idx, 1);
         });
       }
 
@@ -1626,6 +1740,7 @@
           el.removeAttribute('contenteditable');
           el.removeAttribute('data-editable');
           el.removeAttribute('spellcheck');
+          el.removeAttribute('data-edit-bound');
         });
         editableElements = [];
       }
@@ -1636,7 +1751,16 @@
         '[data-editable] { cursor: text; transition: outline 0.15s ease, background 0.15s ease; outline: 2px solid transparent; outline-offset: 2px; border-radius: 4px; }' +
         '[data-editable]:hover { outline: 2px dashed rgba(59,130,246,0.5); }' +
         '[data-editable]:focus { outline: 2px solid rgba(59,130,246,0.8); background: rgba(59,130,246,0.05); }' +
-        '[data-editable]::before { content: none; }';
+        '[data-editable]::before { content: none; }' +
+        // When a section is in editing mode, disable pointer events on checkboxes
+        // so label clicks don't toggle them while editing text
+        'section[data-editing] input[type="checkbox"] { pointer-events: none; }' +
+        // Disable cursor:pointer on flashcards in edit mode
+        'section[data-editing] [data-flashcard] { cursor: text !important; }' +
+        // Disable cursor:pointer on interactive buttons in edit mode
+        'section[data-editing] [data-choice] { cursor: text !important; }' +
+        'section[data-editing] [data-tab-trigger] { cursor: text !important; }' +
+        'section[data-editing] [data-path-option] { cursor: text !important; }';
       document.head.appendChild(editingStyleEl);
       editingStyleEl.disabled = true;
 
@@ -1661,6 +1785,17 @@
           entries.forEach(function(e) {
             e.toolbar.style.display = 'none';
             e.wrapper.style.outline = 'none';
+          });
+          // Clear all data-editing states on interactive sections
+          document.querySelectorAll('section[data-editing]').forEach(function(sec) {
+            sec.removeAttribute('data-editing');
+          });
+          // Reset edit toggle buttons
+          document.querySelectorAll('[data-authoring-edit-toggle="editing"]').forEach(function(btn) {
+            btn.textContent = '✏️ Edit text';
+            btn.setAttribute('data-authoring-edit-toggle', 'preview');
+            btn.style.background = 'rgba(59,130,246,0.8)';
+            btn.style.borderColor = 'rgba(59,130,246,0.9)';
           });
           disableInlineEditing();
           editingStyleEl.disabled = true;
