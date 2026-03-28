@@ -719,7 +719,8 @@ ${wideCards}
     const featuredCards = items.map((item, i) => {
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       if (i === 0) {
-        return `<div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 md:p-12 flex flex-col justify-end relative overflow-hidden group min-h-[320px] bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent glass-card">
+        const featBg = cardBgs[0] || 'bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent glass-card';
+        return `<div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 md:p-12 flex flex-col justify-end relative overflow-hidden group min-h-[320px] ${featBg}">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-15 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-primary text-5xl mb-4">${icons[0]}</span>
