@@ -246,6 +246,7 @@ Compile all issues into one table:
 | `ACCESSIBILITY` | Missing focus indicators, insufficient tap targets, skipped headings |
 | `NAV-BROKEN` | Nav bar, progress bar, section drawer, or hero CTA broken |
 | `ANIMATION` | GSAP animation interferes with editing or leaves content invisible |
+| `SWAP-CORRUPTION` | Variant swap produces different DOM than initial render — content duplication, dimension change, or state accumulation |
 
 **Severity levels:**
 
@@ -386,9 +387,9 @@ This checklist is used in Phases 1 and 2 for each component during the desktop s
 
 ### 2. Variant cycle
 
-**Components WITH variants:** click each variant button one at a time. For each variant: save a screenshot to `screenshots/audit/[type]-[variant].png` (do NOT read it into context), then run checks A–D via JS evaluation. After all variants, evaluate E.
+**Components WITH variants:** click each variant button one at a time. For each variant: save a screenshot to `screenshots/audit/[type]-[variant].png` (do NOT read it into context), then run checks A–D via JS evaluation. After all variants, evaluate E and F.
 
-**Components WITHOUT variants:** run A–C on the single rendered state. If interactive, also run D. Skip E.
+**Components WITHOUT variants:** run A–C on the single rendered state. If interactive, also run D. Skip E and F.
 
 **Consult the component-specific criteria reference** (at the bottom of this file) to know what "correct" looks like for each variant.
 
@@ -459,6 +460,41 @@ This checklist is used in Phases 1 and 2 for each component during the desktop s
 | Functional distinction | Different use cases or cosmetic nudge? |
 | Label-to-visual match | Label describes what you see? |
 | Author would choose? | Would a non-technical user understand the choice? |
+
+**F. Swap stability (after ALL variants for this component — components WITH variants only)**
+
+Tests that variant swap produces identical results regardless of which variant you came from. Catches DOM corruption, content duplication, image dimension changes, and state accumulation bugs.
+
+**How to run:** all via `browser_evaluate`. Record baseline, swap, compare, report mismatches.
+
+**Step 1 — Record baselines.** For each variant, record a DOM fingerprint via JS:
+```js
+// Run on each variant after initial click
+{
+  innerHTML_length: section.innerHTML.length,
+  paragraphCount: section.querySelectorAll('p').length,
+  imageCount: section.querySelectorAll('img').length,
+  imageDimensions: [...section.querySelectorAll('img')].map(i => i.offsetWidth + 'x' + i.offsetHeight),
+  scrollWidth: section.scrollWidth,
+  scrollHeight: section.scrollHeight,
+  headingText: (section.querySelector('h1,h2,h3,h4,h5,h6') || {}).textContent || '',
+  overflow: section.scrollWidth > section.clientWidth
+}
+```
+
+**Step 2 — Test all transition pairs.** For a component with variants A, B, C, test every pair:
+- A→B→A: compare A to A's baseline
+- A→C→A: compare A to A's baseline
+- B→C→B: compare B to B's baseline
+- A→B→C→A: compare A to A's baseline (full cycle)
+
+For each comparison, check: `innerHTML_length` matches (±5%), `paragraphCount` matches exactly, `imageCount` matches exactly, `imageDimensions` match, `scrollHeight` within 10%, no new overflow.
+
+**Step 3 — Edit toggle + swap test.** On one interactive component per phase:
+- Toggle edit ON → toggle edit OFF → swap to B → swap back to A → compare to A's baseline
+- Toggle edit ON → swap to B (while still editing) → swap back to A → compare to A's baseline
+
+**Fail criteria:** Any mismatch in paragraph count, image count, or innerHTML length differing by more than 5% = `SWAP-CORRUPTION` issue, severity P1-HIGH.
 
 ---
 

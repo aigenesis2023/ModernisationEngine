@@ -212,11 +212,12 @@
       if (slides.length === 0) return;
       var current = 0;
 
-      // Create dot indicators
-      var dotsWrap = null;
-      if (slides.length > 1) {
+      // Create dot indicators (idempotent — skip if already present from a previous hydration)
+      var dotsWrap = container.querySelector('[data-carousel-dots]');
+      if (!dotsWrap && slides.length > 1) {
         dotsWrap = document.createElement('div');
         dotsWrap.className = 'flex justify-center gap-2 mt-4';
+        dotsWrap.setAttribute('data-carousel-dots', '');
         for (var d = 0; d < slides.length; d++) {
           var dot = document.createElement('button');
           dot.className = 'w-2 h-2 rounded-full bg-outline-variant/30 transition-colors';
@@ -289,11 +290,12 @@
       var totalItems = checkboxes.length;
       var checked = 0;
 
-      // Find or create progress counter
+      // Find or create progress counter (idempotent — skip if already present)
       var counter = container.querySelector('[data-checklist-progress]');
       if (!counter && (totalItems > 1 || iconItems.length > 1)) {
         counter = document.createElement('div');
         counter.className = 'text-xs text-outline mt-3';
+        counter.setAttribute('data-checklist-progress', '');
         container.appendChild(counter);
       }
 
@@ -1531,14 +1533,11 @@
         var currentSection = entry.wrapper.querySelector('section[data-component-type]');
         if (!currentSection) { console.warn('Authoring: No current section found'); return; }
 
-        // Save current state back (in case user modified it)
-        var savedClone = currentSection.cloneNode(true);
-        // Strip data-edit-bound so listeners are re-bound when this variant is restored
-        // (cloneNode does not preserve event listeners, only attributes)
-        savedClone.querySelectorAll('[data-edit-bound]').forEach(function(el) {
-          el.removeAttribute('data-edit-bound');
-        });
-        entry.variantNodes[entry.activeVariant] = savedClone;
+        // Always clone from original pristine templates — never save dirty DOM back.
+        // User edits are persisted in the JSON data model (courseData) and re-applied
+        // to the fresh template below. Saving mutated DOM causes: duplicated content
+        // from double-hydration, GSAP inline style accumulation, carousel dot duplication,
+        // contenteditable artifact carry-over, and image dimension corruption.
 
         // Clone the target and insert
         var newSection = targetNode.cloneNode(true);
@@ -1556,8 +1555,13 @@
               var heading = newSection.querySelector('h1,h2,h3,h4,h5,h6');
               if (heading) heading.textContent = cd.displayTitle;
             }
-            // Apply body to paragraphs (skip those with data-edit-path and carousel nav)
-            if (cd.body !== undefined) {
+            // Apply body to paragraphs ONLY if the user has edited the text.
+            // Original AI body contains HTML <p> tags — the template already has this content.
+            // The edit handler converts body to \n\n-separated plain text (no <p> tags).
+            // If body still contains <p> tags, it's unedited — skip to avoid content duplication
+            // (setting <p>-containing HTML as innerHTML of a <p> creates nested <p> → browser
+            // auto-closes → duplicated paragraphs).
+            if (cd.body !== undefined && !cd.body.includes('<p>') && !cd.body.includes('<p ')) {
               var bodyParts = cd.body.split('\n\n');
               var paras = [];
               newSection.querySelectorAll('p').forEach(function(p) {
