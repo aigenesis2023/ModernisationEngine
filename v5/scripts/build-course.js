@@ -1403,8 +1403,12 @@ function fillTabs(comp, variant, maxW) {
 
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly(c.section || 'py-16 bg-surface-container-low');
-  const activeBtn = c.activeBtn || 'px-6 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm tracking-wide';
-  const inactiveBtn = c.inactiveBtn || 'px-6 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm tracking-wide';
+  // Validate tab button classes — Stitch sometimes extracts the tab-list container
+  // instead of individual button styles (no padding/bg = bad extraction)
+  const activeFallback = 'px-6 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm tracking-wide';
+  const inactiveFallback = 'px-6 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm tracking-wide';
+  const activeBtn = (c.activeBtn && /\bp[xy]?-\d/.test(c.activeBtn)) ? c.activeBtn : activeFallback;
+  const inactiveBtn = (c.inactiveBtn && /\bp[xy]?-\d/.test(c.inactiveBtn)) ? c.inactiveBtn : inactiveFallback;
 
   // ── Variant: vertical ──
   if (variant === 'vertical') {
@@ -2223,6 +2227,33 @@ function build() {
   }
   const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
   console.log(`[ok] Loaded design-tokens.json (${Object.keys(tokens.colors || {}).length} colours, fonts: ${tokens.fonts?.headline}/${tokens.fonts?.body}, isDark: ${tokens.isDark})`);
+
+  // ── Dark-mode contract fixes ──────────────────────────────────────────
+  // Stitch sometimes hardcodes bg-white into card/section/panel classes.
+  // On dark themes these create white blocks. Fix only the specific keys
+  // that are card/section backgrounds — leave button accents (hero CTA) alone.
+  if (tokens.isDark !== false) {
+    const stripBgWhite = (s) => typeof s === 'string' ? s.replace(/\bbg-white\b/g, 'glass-card') : s;
+    const stripHoverBgWhite = (s) => typeof s === 'string' ? s.replace(/\bhover:bg-white\b/g, 'hover:bg-surface-container') : s;
+    const stripBorderBlack = (s) => typeof s === 'string' ? s.replace(/\bborder-black(\/\d+)?\b/g, (m, frac) => 'border-outline-variant' + (frac || '/20')) : s;
+
+    // Section backgrounds: bg-white → remove (let page bg show through)
+    const stripSectionBgWhite = (s) => typeof s === 'string' ? s.replace(/\bbg-white\b/g, '') : s;
+    for (const key of ['comparison', 'tabs', 'image-gallery']) {
+      if (DC[key]?.section) DC[key].section = stripSectionBgWhite(DC[key].section);
+    }
+    // Card backgrounds: bg-white → glass-card (rounded frosted panels)
+    if (DC.mcq?.card?.bg) DC.mcq.card.bg = stripBgWhite(DC.mcq.card.bg);
+    if (DC.branching?.button?.bg) DC.branching.button.bg = stripBgWhite(DC.branching.button.bg);
+    if (DC.flashcard?.front?.bg) DC.flashcard.front.bg = stripBgWhite(DC.flashcard.front.bg);
+    // Flat panels: bg-white → bg-surface-container (no frosted glass, no extra borders)
+    const stripBgWhiteFlat = (s) => typeof s === 'string' ? s.replace(/\bbg-white\b/g, 'bg-surface-container') : s;
+    if (DC.accordion?.detailsClass) DC.accordion.detailsClass = stripBgWhiteFlat(stripBorderBlack(DC.accordion.detailsClass));
+    // Hover/interaction states
+    if (DC.checklist?.labelHover) DC.checklist.labelHover = stripHoverBgWhite(DC.checklist.labelHover);
+    if (DC.checklist?.labelClass) DC.checklist.labelClass = stripHoverBgWhite(stripBorderBlack(DC.checklist.labelClass));
+    console.log('[ok] Fixed dark-mode contract overrides (bg-white in cards/sections/panels)');
+  }
 
   // Build all sections
   let filledCount = 0;
