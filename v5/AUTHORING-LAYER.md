@@ -152,6 +152,18 @@ Phase 6: Full Authoring              Blank course creation + complex       PLANN
 | **Media** | Video and audio | "I have video/audio content" | media, video-transcript |
 | **Structure** | Course-level elements | "I need course framing or visual breaks" | hero, path-selector, **divider** |
 
+### Design Decisions Behind Categories
+
+**Why "Explore" not "Interactive"?** — "Interactive" is vague; MCQ is interactive too, but it's assessment. "Explore" clearly signals: content the learner reveals at their own pace. Every component in this category hides content behind a click (accordion panels, tab switches, carousel slides, flashcard flips, hotspot markers). The shared pattern is *discovery*.
+
+**Why checklist is "Assess" not "Explore"?** — Checklists don't reveal hidden content. They prompt the learner to *commit* to actions and self-assess completion. The interaction pattern is closer to textinput (reflection) than accordion (discovery).
+
+**Why branching is "Assess" not "Explore"?** — Branching asks "what would you do?" — it tests decision-making. The learner makes a judgement call, not a discovery. It's ungraded assessment.
+
+**Why bento/timeline/process-flow are "Layout" not "Content" or "Explore"?** — These components arrange multiple items in a visual structure (grid, sequence, flow). The *arrangement* is the value, not the text content or an interaction pattern. A user asking "I have 5 related things to show" reaches for Layout.
+
+**Why "Content" includes both text-only and image components?** — All deliver information directly. Graphic, full-bleed, pullquote, stat-callout — they present content to be consumed, not explored or assessed. The user question is always "I want to show/tell something."
+
 ### Category Migration Map (current → new)
 
 | Component | Current Category | New Category | Reason for Change |
@@ -213,10 +225,11 @@ Phase 6: Full Authoring              Blank course creation + complex       PLANN
 | data-table | Layout | **standard**, **striped-card** |
 | timeline | Layout | vertical, centered-alternating |
 | process-flow | Layout | vertical, horizontal |
+| key-term | Content | **list**, **card-grid** |
+| divider | Structure | **line**, **spacing**, **icon** |
+| graphic | Content | standard, captioned-card |
 
-Components WITHOUT variants (7): key-term, graphic (wait — has 2), image-gallery, media, video-transcript, path-selector, divider (has 3)
-
-**Correction:** key-term gets card-grid variant. Updated count: 22 components with variants.
+Components WITHOUT variants (5): image-gallery, media, video-transcript, path-selector, textinput
 
 ---
 
