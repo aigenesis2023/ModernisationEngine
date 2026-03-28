@@ -368,7 +368,6 @@ async function main() {
 
   // Step 2: Get description (API or manual)
   const apiKey = process.env.ANTHROPIC_API_KEY;
-  const isInteractive = process.stdin.isTTY;
   let description;
 
   if (apiKey) {
@@ -381,32 +380,11 @@ async function main() {
       description = await describeWithVision(SCREENSHOT_PATH, apiKey);
     } catch (err) {
       console.error(`Vision API failed: ${err.message}`);
-      if (!isInteractive) {
-        // Non-interactive (pipeline) — check for existing brand-design.md
-        if (fs.existsSync(DESIGN_MD_PATH)) {
-          console.log('Non-interactive mode: reusing existing brand-design.md\n');
-          console.log('Done.');
-          process.exit(0);
-        }
-        console.error('Non-interactive mode: no fallback available. Set ANTHROPIC_API_KEY in .env and retry.');
-        process.exit(1);
-      }
       console.error('Falling back to manual mode.\n');
       description = await readManualDescription();
     }
-  } else if (!isInteractive) {
-    // Non-interactive pipeline with no API key — reuse existing or fail cleanly
-    if (fs.existsSync(DESIGN_MD_PATH)) {
-      console.log('No ANTHROPIC_API_KEY — reusing existing brand-design.md (set key in .env to re-scrape)\n');
-      console.log('Done.');
-      process.exit(0);
-    }
-    console.error('Error: ANTHROPIC_API_KEY not set in .env and no existing brand-design.md found.');
-    console.error('Either add ANTHROPIC_API_KEY to .env for automatic Vision analysis,');
-    console.error('or run interactively: node v5/scripts/scrape-brand.js');
-    process.exit(1);
   } else {
-    // Interactive terminal with no API key — manual mode
+    // Manual mode: wait for user to paste description
     description = await readManualDescription();
   }
 
