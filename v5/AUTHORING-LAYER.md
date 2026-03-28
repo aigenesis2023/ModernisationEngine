@@ -2,9 +2,9 @@
 
 > **Living document.** Updated after every commit/push. Tracks what's done, what's next, what was skipped, and knock-on effects.
 
-**Branch:** `authoring-layer-v1`
+**Branch:** `authoring-layer-v2`
 **Started:** 2026-03-28
-**Last updated:** 2026-03-28
+**Last updated:** 2026-03-28 (Phase 2a complete)
 
 ---
 
@@ -90,46 +90,47 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 
 ## Phase 2: Component Taxonomy + Expanded Palette
 
-### 2a — Data Layer (no pipeline run needed)
+### 2a — Data Layer (no pipeline run needed) ✅ DONE
 
-- [ ] **Fix component categories in component-library.json**
-  - [ ] Rename/reassign all 26 components to 6 new categories
-  - [ ] Add `categoryLabel` and `categoryDescription` metadata
-  - [ ] Validate every component's category assignment makes sense
+- [x] **Fix component categories in component-library.json**
+  - [x] Rename/reassign all 26 components to 6 new categories
+  - [x] Add `categoryLabel` and `categoryDescription` metadata (in `component_categories` object)
+  - [x] Validate every component's category assignment makes sense
 
-- [ ] **Add new component: `divider`** (Structure category)
-  - [ ] Add to component-library.json (type, category, props, variants, learningMoment, creativeUses)
-  - [ ] Add to course-layout.schema.json type enum
+- [x] **Add new component: `divider`** (Structure category)
+  - [x] Add to component-library.json (type, category, props, variants, learningMoment, creativeUses)
+  - [x] Add to course-layout.schema.json type enum + `style`/`icon` props
   - Variants: `line` (default), `spacing` (whitespace only), `icon` (centered icon break)
   - Props: `style` (line/spacing/icon), optional `icon` name
   - Zero interactivity — pure visual
 
-- [ ] **Add new component: `callout`** (Content category)
-  - [ ] Add to component-library.json
-  - [ ] Add to course-layout.schema.json type enum
+- [x] **Add new component: `callout`** (Content category)
+  - [x] Add to component-library.json
+  - [x] Add to course-layout.schema.json type enum + `calloutType` prop
   - Variants: `info` (default), `warning`, `tip`, `success`
   - Props: `displayTitle`, `body`, `calloutType` (info/warning/tip/success)
   - Zero interactivity — pure styled HTML
 
-- [ ] **Add new variants to existing components** (17 new variants across 8 components)
-  - [ ] `text`: `standard` (default), `two-column`, `highlight-box`
-  - [ ] `narrative`: `image-focused`, `text-focused`
-  - [ ] `flashcard`: `grid`, `single-large`
-  - [ ] `checklist`: `standard` (default), `card-style`, `numbered`
-  - [ ] `key-term`: `list` (default), `card-grid`
-  - [ ] `labeled-image`: `numbered-dots` (default), `side-panel`
-  - [ ] `data-table`: `standard` (default), `striped-card`
-  - [ ] `branching`: `cards` (default), `list`
+- [x] **Add new variants to existing components** (17 new variants across 8 components)
+  - [x] `text`: `standard` (default), `two-column`, `highlight-box`
+  - [x] `narrative`: `image-focused`, `text-focused`
+  - [x] `flashcard`: `grid`, `single-large`
+  - [x] `checklist`: `standard` (default), `card-style`, `numbered`
+  - [x] `key-term`: `list` (default), `card-grid`
+  - [x] `labeled-image`: `numbered-dots` (default), `side-panel`
+  - [x] `data-table`: `standard` (default), `striped-card`
+  - [x] `branching`: `cards` (default), `list`
 
-- [ ] **Update generation-engine.md** — rewrite component selection guidance using new categories
-- [ ] **Update generation-agent.md** — reference categories in task prompt
+- [x] **Update generation-engine.md** — added category table, component selection guidance, new variant table, callout/divider usage rules, quality checklist updates
+- [x] **Update generation-agent.md** — reference categories, callout/divider, 28 components
 
 ### 2b — Stitch Layer (requires Design Run)
 
-- [ ] **Update representative-course.md** — add HTML examples for:
-  - [ ] `divider` (all 3 variants)
-  - [ ] `callout` (all 4 variants)
-  - [ ] All 17 new variants of existing components
+- [x] **Update representative-course.md** — added HTML examples for:
+  - [x] `divider` (all 3 variants: line, spacing, icon)
+  - [x] `callout` (all 4 variants: info, warning, tip, success)
+  - [x] All 17 new variants of existing components (text ×3, narrative ×2, flashcard ×2, checklist ×3, key-term ×2, labeled-image ×2, data-table ×2, branching ×2)
+  - [x] Added `data-variant` attribute requirement to design requirements
 - [ ] **Run Stitch** (Step 3) to design new components + variants
 - [ ] **Run extract-contract.js** to extract new patterns
 
@@ -224,8 +225,8 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 
 ## Variant Inventory (after Phase 2)
 
-### Current: 13 components, ~22 variants
-### Target: 21 components with variants, ~39 variants
+### Current (after Phase 2a+audit): 23 components with variants, 56 variants total
+### (was: 13 components, ~22 variants before Phase 2)
 
 | Component | Category | Variants (new in **bold**) |
 |---|---|---|
@@ -343,6 +344,27 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-28 — Phase 2a/2b Audit Fixes
+- Added missing variant arrays to 4 pre-existing components: graphic (standard, captioned-card), pullquote (accent-bar, centered, minimal), full-bleed (center, left, right), process-flow (vertical, horizontal) — were in build-course.js but not component-library.json
+- Added callout vs text/highlight-box distinction guidance to generation-engine.md
+- Added 2 new section patterns (Guided Path, Transition) using callout and divider
+- Added 7 new variant selection examples for newly-varianted components
+- Replaced 3 empty "no new design needed" stubs in representative-course.md with full content (labeled-image/numbered-dots, data-table/standard, branching/cards)
+- Added `required: {}` to divider props + expanded example with componentId
+- Updated variant counts: 23 components with variants, 56 total variants
+- Component library remains v4.0.0 (28 components)
+
+### 2026-03-28 — Phase 2a Complete (Data Layer)
+- Reassigned all 26 components from 5 old categories to 6 new categories (Content, Explore, Assess, Layout, Media, Structure)
+- Added `categoryLabel`, `description`, `question` metadata per category in `component_categories`
+- Added `divider` component (Structure): 3 variants (line, spacing, icon)
+- Added `callout` component (Content): 4 variants (info, warning, tip, success)
+- Added `calloutType`, `style`, `icon` props to course-layout.schema.json
+- Added 17 new variants across 8 existing components (text, narrative, flashcard, checklist, key-term, labeled-image, data-table, branching)
+- Updated generation-engine.md: category table, component selection guidance, expanded variant table, quality checklist
+- Updated generation-agent.md: category references, new component guidance
+- Component library bumped to v4.0.0 (28 components, 46 variants)
 
 ### 2026-03-28 — Document Created
 - Created authoring layer architecture document

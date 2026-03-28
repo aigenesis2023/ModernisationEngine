@@ -114,7 +114,8 @@
             "narrative", "bento", "data-table", "media", "textinput", "branching",
             "timeline", "comparison", "stat-callout", "pullquote", "key-term",
             "checklist", "tabs", "flashcard", "labeled-image", "process-flow",
-            "image-gallery", "full-bleed", "video-transcript", "path-selector"
+            "image-gallery", "full-bleed", "video-transcript", "path-selector",
+            "divider", "callout"
           ]
         },
         "displayTitle": { "type": "string" },
@@ -168,6 +169,21 @@
         "variant": {
           "type": "string",
           "description": "Layout variant for this component. Each component type has named variants that change the visual layout without changing the design contract. When absent, the default (first) variant is used. See component-library.json for available variants per type."
+        },
+
+        "calloutType": {
+          "type": "string",
+          "enum": ["info", "warning", "tip", "success"],
+          "description": "Callout component: determines icon and colour accent. Defaults to 'info'."
+        },
+        "style": {
+          "type": "string",
+          "enum": ["line", "spacing", "icon"],
+          "description": "Divider component: visual style. Defaults to 'line'."
+        },
+        "icon": {
+          "type": "string",
+          "description": "Divider component (icon style only): Material Symbols icon name."
         },
 
         "transcript": { "type": "string" },

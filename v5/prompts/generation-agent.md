@@ -7,8 +7,8 @@ Read these files:
 2. `v5/output/knowledge-base.json` (the raw research — facts, insights, teachable moments)
 3. `v5/output/brand-design.md` (the brand's visual identity and personality — use this to calibrate your writing voice)
 4. `v5/output/brand-profile.json` (brand metadata)
-5. `v5/schemas/component-library.json` (your creative palette — read the learningMoment and creativeUses fields)
-6. `v5/schemas/course-layout.schema.json` (output format)
+5. `v5/schemas/component-library.json` (your creative palette — 28 components across 6 categories. Read the learningMoment, creativeUses, and variants fields)
+6. `v5/schemas/course-layout.schema.json` (output format ��� includes divider and callout types)
 
 Follow generation-engine.md exactly. Generate the complete course-layout.json and write it to `v5/output/course-layout.json`.
 
@@ -27,11 +27,14 @@ Follow generation-engine.md exactly. Generate the complete course-layout.json an
 ## Key Reminders
 
 - Content and component are ONE thought — write content shaped for the component you chose
+- **Use the 6 component categories** (Content, Explore, Assess, Layout, Media, Structure) to guide selection — ask "what is the learning intent of this section?" and pick from the matching category
 - Start with hero, never two consecutive same component types
 - **You create ALL assessments** — the knowledge base has raw facts, not pre-built quizzes. Design MCQs that test application, not recall.
 - Read the `learningMoment` field for each component — it tells you what the component is FOR as a learning tool
 - Write imagePrompt for every visual component. Reflect the brand brief's visual mood.
-- Use 12+ different component types for structural variety
+- Use 12+ different component types for structural variety, from at least 4 of 6 categories
+- Use `callout` (2-5 per course) for tips, warnings, notes — set `calloutType` and `variant`
+- Use `divider` (0-4 per course) at natural topic transitions — set `style` and `variant`
 - No two adjacent sections should follow the same structural pattern
 - Vary section density intentionally (breather / standard / deep dive)
 - **Don't map content areas 1:1 to sections** — merge, split, and resequence for narrative flow

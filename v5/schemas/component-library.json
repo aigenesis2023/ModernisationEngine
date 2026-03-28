@@ -1,14 +1,14 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "Component Library",
-  "description": "Creative palette of 26 components for designing premium deep-scroll learning experiences. Each entry describes the learning moment it creates, creative uses beyond the obvious, and technical props. The generation agent should treat this as an inspiration deck, not a checklist.",
-  "version": "3.0.0",
+  "description": "Creative palette of 28 components across 6 categories (Content, Explore, Assess, Layout, Media, Structure) for designing premium deep-scroll learning experiences. Each entry describes the learning moment it creates, creative uses beyond the obvious, and technical props. The generation agent should treat this as an inspiration deck, not a checklist.",
+  "version": "4.0.0",
 
   "components": [
     {
       "type": "hero",
       "component": "HeroSplash",
-      "category": "structural",
+      "category": "Structure",
       "status": "built",
       "description": "Full-viewport opening section with animated title, optional background image, and scroll-down indicator.",
       "learningMoment": "The hero is the learner's first impression — it answers 'Why should I care about this?' in three seconds. A great hero creates anticipation. A boring one triggers the back button.",
@@ -51,7 +51,7 @@
     {
       "type": "text",
       "component": "TextBlock",
-      "category": "content",
+      "category": "Content",
       "status": "built",
       "description": "Clean text block with heading and body. The workhorse component for explanatory content.",
       "learningMoment": "Text sets the stage. It's where you build the narrative thread that connects everything else. The best text blocks make the learner nod and think 'tell me more' — not 'I know this already.'",
@@ -62,6 +62,11 @@
       ],
       "when_to_use": "For introductory paragraphs, explanations, context-setting text, or any content that is primarily prose. Works well as the first block in a section to set context before interactive components.",
       "when_not_to_use": "Don't use for content that would benefit from visual structure (lists → checklist, steps → timeline, definitions → key-term).",
+      "variants": [
+        { "name": "standard", "when_to_use": "Default. Single-column prose with heading. Clean, readable, works everywhere.", "when_not_to_use": "Can feel monotonous if every text block uses this." },
+        { "name": "two-column", "when_to_use": "Split body text into two columns for scannable content — comparisons, parallel points, or dense reference material. Creates a magazine feel.", "when_not_to_use": "Don't use for narrative prose that flows linearly. Don't use for short text (needs enough content to fill both columns)." },
+        { "name": "highlight-box", "when_to_use": "Subtle background card with left accent border. Elevates the text visually — good for key takeaways, summary paragraphs, or important context.", "when_not_to_use": "Don't use for every text block — loses impact. Reserve for 1-2 per course that deserve emphasis." }
+      ],
       "props": {
         "required": {
           "body": "string (HTML) — Main content. Can include <p>, <ul>, <ol>, <h3>, <strong>, <em> tags."
@@ -81,7 +86,7 @@
     {
       "type": "graphic",
       "component": "GraphicBlock",
-      "category": "visual",
+      "category": "Content",
       "status": "built",
       "description": "Full-width image with hover zoom effect and optional caption. Provides visual breathing room between text-heavy sections.",
       "learningMoment": "A well-placed image lets the brain process what it just read. It's not decoration — it's cognitive breathing room. The best standalone images make the learner pause and look closer.",
@@ -92,6 +97,10 @@
       ],
       "when_to_use": "For standalone images that deserve full attention — diagrams, photographs, infographics. Place between text sections to break up content rhythm.",
       "when_not_to_use": "Don't use for images paired with explanatory text (use graphic-text instead). Don't use for decorative images with no educational value.",
+      "variants": [
+        { "name": "standard", "when_to_use": "Default. Full-width image with hover zoom. Clean, simple presentation.", "when_not_to_use": "If the image needs a prominent caption, use captioned-card." },
+        { "name": "captioned-card", "when_to_use": "Image presented inside a card with rounded corners, shadow, and a visible caption area below. Better for diagrams or infographics that need context.", "when_not_to_use": "Don't use for atmospheric or background-style images — the card frame reduces impact." }
+      ],
       "image_dimensions": "1920x1080 (16:9)",
       "props": {
         "required": {
@@ -119,7 +128,7 @@
     {
       "type": "graphic-text",
       "component": "GraphicText",
-      "category": "content",
+      "category": "Content",
       "status": "built",
       "description": "Side-by-side split layout with text on one side and image on the other. Alternates left/right for visual rhythm.",
       "learningMoment": "The human eye naturally moves between image and text, creating a visual dialogue. Each graphic-text is a mini-story: the image catches attention, the text delivers understanding.",
@@ -164,7 +173,7 @@
     {
       "type": "accordion",
       "component": "SilkyAccordion",
-      "category": "interactive",
+      "category": "Explore",
       "status": "built",
       "description": "Expandable panels with smooth animation and completion tracking. Each panel has a title and rich body content revealed on click.",
       "learningMoment": "Accordions create curiosity gaps — the learner sees the titles and wonders what's inside. The act of clicking to reveal is a micro-commitment to learning. Use titles that make people WANT to click.",
@@ -214,7 +223,7 @@
     {
       "type": "mcq",
       "component": "MCQPro",
-      "category": "assessment",
+      "category": "Assess",
       "status": "built",
       "description": "Multiple-choice quiz with selection, submit, visual feedback, and retry. Supports single and multi-select modes.",
       "learningMoment": "The best quiz questions create a moment of productive doubt — the learner thinks they know, commits to an answer, and then discovers whether their understanding holds up. That moment of uncertainty is where learning happens.",
@@ -271,7 +280,7 @@
     {
       "type": "narrative",
       "component": "NarrativeSlider",
-      "category": "interactive",
+      "category": "Explore",
       "status": "built",
       "description": "Carousel slider with prev/next navigation, dot indicators, and optional images per slide. Content is presented sequentially.",
       "learningMoment": "Narratives create forward momentum — each slide builds on the last, pulling the learner through a story. The 'next' button is a promise: there's more to discover.",
@@ -283,6 +292,10 @@
       ],
       "when_to_use": "For sequential content that tells a story or walks through a process step by step. Use 3-7 slides.",
       "when_not_to_use": "Don't use for content that isn't sequential. Don't use with fewer than 3 slides.",
+      "variants": [
+        { "name": "image-focused", "when_to_use": "Default. Large image area (60%+) with text overlay or sidebar. Best when slides have strong visuals that tell the story.", "when_not_to_use": "Don't use if slides lack images or have generic stock photos." },
+        { "name": "text-focused", "when_to_use": "Larger text area with optional small image. Best for story-driven narratives where the writing carries the content — case studies, incident walkthroughs.", "when_not_to_use": "Don't use if you have strong images that should be the focus." }
+      ],
       "image_dimensions": "800x600 (4:3) per slide",
       "props": {
         "required": {
@@ -319,7 +332,7 @@
     {
       "type": "bento",
       "component": "BentoGrid",
-      "category": "content",
+      "category": "Layout",
       "status": "built",
       "description": "Multi-card grid layout with optional image backgrounds. First card can span 2 columns for visual hierarchy. Cards have hover effects.",
       "learningMoment": "Bento grids let learners scan and choose what catches their eye first — it's non-linear exploration. The visual variety of cards with different content creates a sense of richness and discovery.",
@@ -372,7 +385,7 @@
     {
       "type": "data-table",
       "component": "DataTable",
-      "category": "content",
+      "category": "Layout",
       "status": "built",
       "description": "Auto-formatted data table with sticky header, alternating rows, and monospace number styling.",
       "learningMoment": "Tables turn scattered information into patterns. When a learner sees data organised in columns, they naturally start comparing and drawing conclusions — that's analytical thinking in action.",
@@ -384,6 +397,10 @@
       ],
       "when_to_use": "For comparative data, specifications, reference tables, or any structured information with consistent columns.",
       "when_not_to_use": "Don't use for simple two-column comparisons (use comparison instead). Don't use for narrative content forced into table format.",
+      "variants": [
+        { "name": "standard", "when_to_use": "Default. Clean table with sticky header and alternating row shading. Works for any tabular data.", "when_not_to_use": "Can feel utilitarian for premium courses." },
+        { "name": "striped-card", "when_to_use": "Table rendered as a card with stronger visual styling — rounded corners, elevated shadow, bold header row. Better for specification tables or reference cards the learner might screenshot.", "when_not_to_use": "Don't use for very wide tables with many columns — card padding reduces available width." }
+      ],
       "props": {
         "required": {
           "body": "string (HTML) — Table data as <ul>/<li> items or <p> lines, with columns separated by ' - ', ' : ', or ' | '"
@@ -402,7 +419,7 @@
     {
       "type": "media",
       "component": "MediaBlock",
-      "category": "visual",
+      "category": "Media",
       "status": "built",
       "description": "Video player with custom play/pause overlay, poster image, and hover controls bar.",
       "learningMoment": "Video creates emotional connection that text can't — facial expressions, tone of voice, real environments. It's the closest to 'being there' a digital course can get.",
@@ -439,7 +456,7 @@
     {
       "type": "textinput",
       "component": "TextInputBlock",
-      "category": "interactive",
+      "category": "Assess",
       "status": "built",
       "description": "Multi-field form with labeled text inputs and submit button. Used for reflection prompts or data entry activities.",
       "learningMoment": "Writing forces thinking. When learners put their thoughts into words, they move from passive understanding to active ownership. The reflection is the learning — the form is just the container.",
@@ -475,7 +492,7 @@
     {
       "type": "branching",
       "component": "BranchingCards",
-      "category": "interactive",
+      "category": "Assess",
       "status": "built",
       "description": "Selectable option cards with letter labels (A, B, C...) and selection indicator. For scenario-based choices or self-assessment.",
       "learningMoment": "Branching forces the learner to commit to a decision before seeing the outcome. That moment of choice — 'What would I actually do?' — is more powerful than any amount of telling.",
@@ -487,6 +504,10 @@
       ],
       "when_to_use": "For scenario-based learning where learners choose an option. Good for decision-making exercises and self-assessment.",
       "when_not_to_use": "Don't use for graded questions (use mcq). Don't use with more than 5 options.",
+      "variants": [
+        { "name": "cards", "when_to_use": "Default. Large selectable cards with letter labels (A, B, C). Visual, engaging, game-like feel.", "when_not_to_use": "Can feel heavy with 5 options." },
+        { "name": "list", "when_to_use": "Compact list format with radio-button style selection. Better for longer option text or when space is tight.", "when_not_to_use": "Less visually engaging — don't use when you want impact." }
+      ],
       "props": {
         "required": {
           "displayTitle": "string — The scenario or question heading",
@@ -503,7 +524,7 @@
     {
       "type": "timeline",
       "component": "TimelineStepper",
-      "category": "content",
+      "category": "Layout",
       "status": "new",
       "description": "Numbered steps connected by a vertical line. Each step has a number badge, title, and body content. Scroll-triggered reveal animation.",
       "learningMoment": "Timelines make sequence visible. When learners see steps connected by a line, they internalise the ORDER as part of the knowledge — not just what to do, but what comes first, second, third.",
@@ -543,7 +564,7 @@
     {
       "type": "comparison",
       "component": "ComparisonTable",
-      "category": "content",
+      "category": "Layout",
       "status": "new",
       "description": "Side-by-side comparison columns with check/cross icons for features. Clean, scannable format for comparing two or three options.",
       "learningMoment": "Comparison tables trigger analytical thinking — the learner's eye bounces between columns, spotting differences and forming judgements. The check/cross pattern makes conclusions feel self-discovered rather than told.",
@@ -589,7 +610,7 @@
     {
       "type": "stat-callout",
       "component": "StatCallout",
-      "category": "visual",
+      "category": "Content",
       "status": "new",
       "description": "Large prominent numbers or statistics with labels and optional context. Animated count-up on scroll. Displayed in a row of 2-4 stats.",
       "learningMoment": "Big numbers create emotional impact before the brain even processes the words. The count-up animation forces the eye to watch the number grow — building tension and making the final value land harder.",
@@ -628,7 +649,7 @@
     {
       "type": "pullquote",
       "component": "PullQuote",
-      "category": "visual",
+      "category": "Content",
       "status": "new",
       "description": "Emphasized text with a vertical accent bar and optional attribution. Draws attention to key messages or expert quotes.",
       "learningMoment": "A pullquote is a visual exclamation mark. It says: 'This is the one thing to remember from this section.' Used well, it becomes the line the learner quotes to their colleagues tomorrow.",
@@ -640,6 +661,11 @@
       ],
       "when_to_use": "For highlighting a critical insight, expert quote, or key message. Use sparingly — 1-2 per course maximum.",
       "when_not_to_use": "Don't overuse. Don't use for generic text that doesn't deserve emphasis.",
+      "variants": [
+        { "name": "accent-bar", "when_to_use": "Default. Vertical accent bar on the left with large italic quote text. Classic editorial look.", "when_not_to_use": "Predictable if every pullquote uses this." },
+        { "name": "centered", "when_to_use": "Centered text with decorative quotation marks above and below. More dramatic, statement-like. Better for provocative or aspirational quotes.", "when_not_to_use": "Don't use for long quotes — centered text is harder to read at length." },
+        { "name": "minimal", "when_to_use": "Clean text with no decorative elements — just larger font size and extra whitespace. Sophisticated, understated. Best when the words speak for themselves.", "when_not_to_use": "Can look like a regular text block if the font size difference isn't clear enough. Don't use if you need visual emphasis." }
+      ],
       "props": {
         "required": {
           "body": "string — The quote or key message text (plain text, not HTML)"
@@ -660,7 +686,7 @@
     {
       "type": "key-term",
       "component": "KeyTerm",
-      "category": "content",
+      "category": "Content",
       "status": "new",
       "description": "Highlighted vocabulary term with its definition. Styled with a distinctive background and icon to stand out from body text.",
       "learningMoment": "Key terms are anchors — they give learners precise language to describe what they've learned. When someone learns the RIGHT word for a concept, they can search for it, discuss it, and build on it.",
@@ -672,6 +698,10 @@
       ],
       "when_to_use": "For introducing domain-specific terminology. Can group 2-5 terms together. Don't use for every new word — only for terms the learner needs to remember.",
       "when_not_to_use": "Don't use for common words. Don't use for full paragraphs of explanation (use text instead). Consider weaving simple definitions into prose, comparisons, or flashcards instead.",
+      "variants": [
+        { "name": "list", "when_to_use": "Default. Vertical list with term highlighted and definition below. Clean, scannable, works for 1-5 terms.", "when_not_to_use": "Can feel long with 5+ terms." },
+        { "name": "card-grid", "when_to_use": "Terms displayed as cards in a responsive grid. More visual, each term gets equal weight. Better for 3-5 terms of similar importance.", "when_not_to_use": "Don't use for single terms. Don't use with very long definitions — cards need concise text." }
+      ],
       "props": {
         "required": {
           "_items": "array — 1-5 terms: [{ term: string, definition: string }]"
@@ -694,7 +724,7 @@
     {
       "type": "checklist",
       "component": "Checklist",
-      "category": "interactive",
+      "category": "Assess",
       "status": "new",
       "description": "Checkable items with completion tracking and a progress indicator. Items can be ticked off by the learner.",
       "learningMoment": "Checklists transform knowledge into action. Each checkbox is a commitment: 'I understand this, and I'll do it.' The progress indicator creates momentum — learners want to reach 100%.",
@@ -706,6 +736,11 @@
       ],
       "when_to_use": "For action lists, pre-task checklists, safety procedures, or any content where learners should confirm understanding of each item.",
       "when_not_to_use": "Don't use for informational lists without actionable items (use text with <ul>). Don't use for sequential steps (use timeline).",
+      "variants": [
+        { "name": "standard", "when_to_use": "Default. Simple checkbox list with progress bar. Clean, functional, works everywhere.", "when_not_to_use": "Can feel plain for high-stakes or premium courses." },
+        { "name": "card-style", "when_to_use": "Each item is a visual card with checkbox. More visual weight, premium feel. Better for action plans or commitment lists where each item deserves attention.", "when_not_to_use": "Don't use for long lists (8+) — too many cards." },
+        { "name": "numbered", "when_to_use": "Numbered badges instead of checkboxes. Items must be completed in order. Best for sequential procedures or priority-ranked lists.", "when_not_to_use": "Don't use for non-sequential items where order doesn't matter." }
+      ],
       "props": {
         "required": {
           "_items": "array — 3-10 items: [{ text: string, detail?: string }]"
@@ -733,7 +768,7 @@
     {
       "type": "tabs",
       "component": "TabPanel",
-      "category": "interactive",
+      "category": "Explore",
       "status": "new",
       "description": "Horizontal tabbed interface where each tab reveals different content. Only one tab visible at a time.",
       "learningMoment": "Tabs let learners choose their own path through parallel content. The act of switching tabs feels like exploration — 'What's behind this one?' Each tab is a different lens on the same topic.",
@@ -781,7 +816,7 @@
     {
       "type": "flashcard",
       "component": "Flashcard",
-      "category": "interactive",
+      "category": "Explore",
       "status": "new",
       "description": "Flip-card interaction showing a term or question on the front and the answer/definition on the back. Click to flip with 3D rotation animation.",
       "learningMoment": "The moment before the flip is the learning. The learner tries to recall the answer, feels uncertainty, then flips to confirm or correct. That retrieval attempt strengthens memory more than re-reading ever could.",
@@ -793,6 +828,10 @@
       ],
       "when_to_use": "For vocabulary review, Q&A pairs, or any content where learners should try to recall before seeing the answer. Place AFTER the teaching section.",
       "when_not_to_use": "Don't use for first-time content delivery. Don't use for complex multi-paragraph content.",
+      "variants": [
+        { "name": "grid", "when_to_use": "Default. Cards displayed in a responsive grid (2-3 columns). Best for 4-8 cards — creates a visual overview the learner can scan.", "when_not_to_use": "Can feel crowded with very long front/back text." },
+        { "name": "single-large", "when_to_use": "One large card at a time with prev/next navigation. Better for longer content on each card or when you want focused attention on each flip.", "when_not_to_use": "Don't use with 3 or fewer cards — not enough to justify navigation." }
+      ],
       "props": {
         "required": {
           "_items": "array — 3-8 cards: [{ front: string, back: string }]"
@@ -817,7 +856,7 @@
     {
       "type": "labeled-image",
       "component": "LabeledImage",
-      "category": "visual",
+      "category": "Explore",
       "status": "new",
       "description": "An image with numbered hotspot markers at specific positions. Clicking a marker reveals a tooltip with information about that point.",
       "learningMoment": "Labeled images connect abstract knowledge to physical reality. When a learner clicks a hotspot on a diagram and reads what's there, they're building a spatial mental model — understanding not just WHAT something is, but WHERE it is.",
@@ -829,6 +868,10 @@
       ],
       "when_to_use": "For diagrams, equipment photos, or illustrations where specific parts need identification.",
       "when_not_to_use": "Don't use if the image is simple enough for a caption (use graphic).",
+      "variants": [
+        { "name": "numbered-dots", "when_to_use": "Default. Numbered circular markers on the image, clicking reveals a tooltip. Classic hotspot pattern.", "when_not_to_use": "Can feel cluttered with 8+ markers." },
+        { "name": "side-panel", "when_to_use": "Image on left with a scrollable list panel on right. Clicking a list item highlights the corresponding area on the image. Better for detailed descriptions per marker.", "when_not_to_use": "Don't use for images where spatial position matters more than description detail." }
+      ],
       "image_dimensions": "1200x800 (3:2)",
       "props": {
         "required": {
@@ -863,7 +906,7 @@
     {
       "type": "process-flow",
       "component": "ProcessFlow",
-      "category": "content",
+      "category": "Layout",
       "status": "new",
       "description": "Connected workflow nodes showing a process from start to end. Each node has a title and description, connected by directional arrows.",
       "learningMoment": "Process flows make decision logic visible. Unlike a timeline (which is linear), a process flow shows that choices lead to different outcomes — it teaches THINKING, not just doing.",
@@ -875,6 +918,10 @@
       ],
       "when_to_use": "For workflows, decision trees, or any process where the flow and connections matter. Use 3-6 nodes.",
       "when_not_to_use": "Don't use for simple linear steps (use timeline).",
+      "variants": [
+        { "name": "vertical", "when_to_use": "Default. Nodes stacked vertically with downward arrows. Works for any number of nodes (3-6). Clear top-to-bottom flow.", "when_not_to_use": "Can feel like a timeline if nodes don't have decision branching." },
+        { "name": "horizontal", "when_to_use": "Nodes arranged left-to-right with horizontal arrows. Better for 3-4 nodes on desktop. Creates a pipeline/workflow feel.", "when_not_to_use": "Don't use with 5+ nodes — overflows on smaller screens. Falls back to vertical on mobile." }
+      ],
       "props": {
         "required": {
           "_nodes": "array — 3-6 process nodes: [{ title: string, body: string, type?: 'start' | 'process' | 'decision' | 'end' }]"
@@ -900,7 +947,7 @@
     {
       "type": "image-gallery",
       "component": "ImageGallery",
-      "category": "visual",
+      "category": "Layout",
       "status": "new",
       "description": "Grid or masonry layout of multiple images with lightbox zoom on click. Captions shown on hover.",
       "learningMoment": "Galleries create a sense of abundance and variety. Multiple images together help learners see patterns, differences, and real-world diversity that a single image can't convey.",
@@ -937,7 +984,7 @@
     {
       "type": "full-bleed",
       "component": "FullBleedImage",
-      "category": "visual",
+      "category": "Content",
       "status": "new",
       "description": "Edge-to-edge full-width image with optional text overlay. Creates visual impact and section breaks. Parallax scroll effect.",
       "learningMoment": "Full-bleeds are emotional punctuation. They say: 'Pause. Feel this. The next section is different.' The best full-bleeds create a sense of transition — closing one chapter and opening another.",
@@ -949,6 +996,11 @@
       ],
       "when_to_use": "For dramatic visual section dividers between major topics. 1-3 per course maximum.",
       "when_not_to_use": "Don't overuse. Don't use for images that need captions or detailed study.",
+      "variants": [
+        { "name": "center", "when_to_use": "Default. Text overlay centered on the image. Balanced, works for any message.", "when_not_to_use": "If the image has a strong focal point on one side, the centered text may compete with it." },
+        { "name": "left", "when_to_use": "Text positioned on the left third with gradient from left. Better when the image's focal point is on the right side.", "when_not_to_use": "Don't use if the left side of the image contains the important visual content." },
+        { "name": "right", "when_to_use": "Text positioned on the right third with gradient from right. Mirror of left variant.", "when_not_to_use": "Don't use if the right side of the image contains the important visual content." }
+      ],
       "image_dimensions": "1920x800 (12:5 ultra-wide)",
       "props": {
         "required": {
@@ -978,7 +1030,7 @@
     {
       "type": "video-transcript",
       "component": "VideoTranscript",
-      "category": "visual",
+      "category": "Media",
       "status": "new",
       "description": "Video player with an expandable transcript panel below. Combines media playback with accessible text content.",
       "learningMoment": "Combining video with transcript respects different learning preferences — some people watch, some read, some do both. The transcript also makes content searchable and accessible.",
@@ -1016,7 +1068,7 @@
     {
       "type": "path-selector",
       "component": "PathSelector",
-      "category": "structural",
+      "category": "Structure",
       "status": "built",
       "description": "Persistent course path selector. Learners choose their role/difficulty/audience, and subsequent sections show/hide based on the selection.",
       "learningMoment": "Path selection gives learners ownership of their experience. Choosing a path is an act of self-identification — 'I am this kind of learner' — which increases engagement because the content now feels personally relevant.",
@@ -1049,6 +1101,88 @@
           { "title": "Technical", "body": "Workshop technician, mechanic.", "variable": "Group3Technical" }
         ]
       }
+    },
+
+    {
+      "type": "divider",
+      "component": "Divider",
+      "category": "Structure",
+      "status": "new",
+      "description": "Visual break between sections or content groups. Can be a horizontal line, whitespace, or a centered icon.",
+      "learningMoment": "Dividers are invisible architecture. They tell the learner's brain: 'That topic is done. Something new is coming.' Without them, dense courses blur together.",
+      "creativeUses": [
+        "Use a spacing divider between two dense sections for cognitive breathing room",
+        "Use an icon divider to signal a topic shift (lightbulb for insight, warning for caution)",
+        "Use a line divider inside a section to separate sub-topics without starting a new section"
+      ],
+      "when_to_use": "Between sections or content groups that need visual separation. Use sparingly — 2-4 per course maximum. The AI generation engine should place dividers at natural topic transitions.",
+      "when_not_to_use": "Don't use between every section — sections already have spacing. Don't use inside interactive components. Don't use as decoration.",
+      "variants": [
+        { "name": "line", "when_to_use": "Default. Subtle horizontal rule with opacity. Clean, minimal separation.", "when_not_to_use": "Can feel clinical if overused." },
+        { "name": "spacing", "when_to_use": "Extra whitespace only — no visible element. For cognitive breathing room between heavy sections.", "when_not_to_use": "Invisible, so don't use where the learner needs a clear signal of topic change." },
+        { "name": "icon", "when_to_use": "Centered icon (from Material Symbols) with thin lines on either side. Signals a topic shift with personality.", "when_not_to_use": "Don't use if there's no natural icon for the transition. Don't use more than once per course." }
+      ],
+      "props": {
+        "required": {},
+        "optional": {
+          "style": "string — 'line' (default), 'spacing', or 'icon'. Must match the variant name.",
+          "icon": "string — Material Symbols icon name (only for icon style, e.g. 'lightbulb', 'warning', 'rocket_launch')"
+        }
+      },
+      "example_line": {
+        "_component": "divider",
+        "componentId": "comp-divider-01",
+        "type": "divider",
+        "variant": "line",
+        "style": "line"
+      },
+      "example": {
+        "_component": "divider",
+        "componentId": "comp-divider-02",
+        "type": "divider",
+        "variant": "icon",
+        "style": "icon",
+        "icon": "lightbulb"
+      }
+    },
+
+    {
+      "type": "callout",
+      "component": "Callout",
+      "category": "Content",
+      "status": "new",
+      "description": "Styled notification box with icon, title, and body. Used for tips, warnings, important notes, or success messages.",
+      "learningMoment": "Callouts are attention anchors — they break the reading flow intentionally to say 'This is important enough to highlight.' The icon and colour create an instant emotional signal before the text is even read.",
+      "creativeUses": [
+        "Tip callout after a complex section: 'Pro tip: the shortcut most people miss is...'",
+        "Warning callout before a common mistake: 'Watch out: this is where 80% of errors happen'",
+        "Success callout to celebrate progress: 'You've just learned the hardest concept in this course'",
+        "Info callout for supplementary context that enriches but isn't essential"
+      ],
+      "when_to_use": "For content that deserves visual emphasis — tips, warnings, important notes, or success celebrations. Use 2-5 per course.",
+      "when_not_to_use": "Don't use for regular content that doesn't need highlighting. Don't cluster multiple callouts together. Don't use as a substitute for good heading hierarchy.",
+      "variants": [
+        { "name": "info", "when_to_use": "Default. Blue/neutral accent. For supplementary context, additional detail, or 'good to know' notes.", "when_not_to_use": "Don't use for warnings or critical information." },
+        { "name": "warning", "when_to_use": "Amber/orange accent with warning icon. For common mistakes, pitfalls, or 'watch out' moments.", "when_not_to_use": "Don't overuse — if everything is a warning, nothing is." },
+        { "name": "tip", "when_to_use": "Green accent with lightbulb icon. For pro tips, shortcuts, best practices, or insider knowledge.", "when_not_to_use": "Don't use for basic information that isn't actually a tip." },
+        { "name": "success", "when_to_use": "Green/positive accent with check icon. For celebrating milestones, confirming understanding, or positive reinforcement.", "when_not_to_use": "Don't use at the start of a course — save for after the learner has achieved something." }
+      ],
+      "props": {
+        "required": {
+          "body": "string (HTML) — The callout message content"
+        },
+        "optional": {
+          "displayTitle": "string — Callout heading (e.g. 'Pro Tip', 'Watch Out', 'Important')",
+          "calloutType": "string — 'info' (default), 'warning', 'tip', 'success' — determines icon and colour accent"
+        }
+      },
+      "example": {
+        "_component": "callout",
+        "variant": "warning",
+        "displayTitle": "Common Mistake",
+        "body": "<p>Never attempt to disconnect the high-voltage battery without first verifying the vehicle is fully powered down. The 'Ready' indicator light on the dashboard must be off.</p>",
+        "calloutType": "warning"
+      }
     }
   ],
 
@@ -1063,10 +1197,41 @@
   },
 
   "component_categories": {
-    "structural": ["hero", "path-selector"],
-    "content": ["text", "graphic-text", "bento", "data-table", "timeline", "comparison", "key-term", "process-flow"],
-    "visual": ["graphic", "media", "stat-callout", "pullquote", "labeled-image", "image-gallery", "full-bleed", "video-transcript"],
-    "interactive": ["accordion", "narrative", "textinput", "branching", "checklist", "tabs", "flashcard"],
-    "assessment": ["mcq"]
+    "Content": {
+      "label": "Content",
+      "description": "Deliver information — text, images, key messages, and visual emphasis",
+      "question": "I want to present text, images, or key messages",
+      "components": ["text", "graphic", "graphic-text", "full-bleed", "pullquote", "stat-callout", "key-term", "callout"]
+    },
+    "Explore": {
+      "label": "Explore",
+      "description": "Learner discovers by clicking — reveal content at their own pace",
+      "question": "I want the learner to reveal content at their own pace",
+      "components": ["accordion", "tabs", "narrative", "flashcard", "labeled-image"]
+    },
+    "Assess": {
+      "label": "Assess",
+      "description": "Test, reflect, or commit — check understanding or prompt action",
+      "question": "I want to check understanding or prompt action",
+      "components": ["mcq", "branching", "textinput", "checklist"]
+    },
+    "Layout": {
+      "label": "Layout",
+      "description": "Arrange multiple items visually — grids, tables, sequences, flows",
+      "question": "I have several related items to display together",
+      "components": ["bento", "comparison", "data-table", "timeline", "process-flow", "image-gallery"]
+    },
+    "Media": {
+      "label": "Media",
+      "description": "Video and audio content",
+      "question": "I have video/audio content",
+      "components": ["media", "video-transcript"]
+    },
+    "Structure": {
+      "label": "Structure",
+      "description": "Course-level elements — framing and visual breaks",
+      "question": "I need course framing or visual breaks",
+      "components": ["hero", "path-selector", "divider"]
+    }
   }
 }
