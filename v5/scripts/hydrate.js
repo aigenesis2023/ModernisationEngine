@@ -1077,14 +1077,24 @@
     }
 
     // ══════════════════════════════════════════════════════════════════════
-    // DEV MODE — Variant Toggle System
+    // AUTHORING LAYER — Variant Toggle System
     // Stores cloned DOM nodes (not HTML strings) for reliable swapping.
     // ══════════════════════════════════════════════════════════════════════
-    (function initDevMode() {
+    (function initAuthoringMode() {
       var hasTemplates = document.querySelector('template[data-variant-alt]');
       if (!hasTemplates) return;
 
-      var devActive = false;
+      // Read category metadata from embedded JSON
+      var categoryMeta = { map: {}, colors: {}, labels: {} };
+      var catMetaEl = document.getElementById('category-meta');
+      if (catMetaEl) {
+        try { categoryMeta = JSON.parse(catMetaEl.textContent); } catch(e) {}
+      }
+      var catMap = categoryMeta.map || {};
+      var catColors = categoryMeta.colors || {};
+      var catLabels = categoryMeta.labels || {};
+
+      var authoringActive = false;
       var entries = [];
 
       var variantLabels = {
@@ -1136,18 +1146,18 @@
         'success': 'Success callout'
       };
 
-      // ── DEV button ────────────────────────────────────────────────────
-      var devBtn = document.createElement('button');
-      devBtn.textContent = 'DEV';
-      devBtn.setAttribute('style',
+      // ── Authoring button ─────────────────────────────────────────────
+      var authoringBtn = document.createElement('button');
+      authoringBtn.textContent = '✎ Edit';
+      authoringBtn.setAttribute('style',
         'position:fixed;top:12px;right:12px;z-index:10000;' +
         'background:#f59e0b;color:#000;border:none;' +
         'padding:5px 14px;border-radius:4px;font:bold 11px/1.4 monospace;' +
         'cursor:pointer;opacity:0.7;'
       );
-      devBtn.addEventListener('mouseenter', function() { devBtn.style.opacity = '1'; });
-      devBtn.addEventListener('mouseleave', function() { if (!devActive) devBtn.style.opacity = '0.7'; });
-      document.body.appendChild(devBtn);
+      authoringBtn.addEventListener('mouseenter', function() { authoringBtn.style.opacity = '1'; });
+      authoringBtn.addEventListener('mouseleave', function() { if (!authoringActive) authoringBtn.style.opacity = '0.7'; });
+      document.body.appendChild(authoringBtn);
 
       // ── Init: extract DOM nodes from templates ────────────────────────
       var initialized = false;
@@ -1184,35 +1194,46 @@
 
           // Wrap section in a stable container
           var wrapper = document.createElement('div');
-          wrapper.setAttribute('data-dev-wrapper', compType);
+          wrapper.setAttribute('data-authoring-wrapper', compType);
           wrapper.style.position = 'relative';
           section.parentElement.insertBefore(wrapper, section);
           wrapper.appendChild(section);
 
-          // Build toolbar
+          // Build toolbar with category colour
+          var category = catMap[compType] || 'Structure';
+          var catColor = catColors[category] || '#f59e0b';
+          var catLabel = catLabels[category] || category;
+
           var toolbar = document.createElement('div');
+          toolbar.setAttribute('data-authoring-category', category);
           toolbar.setAttribute('style',
-            'display:none;background:#f59e0b;color:#000;padding:6px 14px;' +
+            'display:none;background:' + catColor + ';color:#fff;padding:6px 14px;' +
             'font:bold 11px/1.4 monospace;align-items:center;gap:6px;' +
-            'border-radius:6px 6px 0 0;margin:0 8px;'
+            'border-radius:6px 6px 0 0;margin:0 8px;flex-wrap:wrap;'
           );
+
+          // Category badge
+          var catBadge = document.createElement('span');
+          catBadge.textContent = catLabel;
+          catBadge.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;padding:1px 8px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;';
+          toolbar.appendChild(catBadge);
 
           var label = document.createElement('span');
           label.textContent = compType;
-          label.style.cssText = 'opacity:0.6;margin-right:6px;text-transform:uppercase;font-size:10px;letter-spacing:0.05em;';
+          label.style.cssText = 'opacity:0.7;margin-right:6px;text-transform:uppercase;font-size:10px;letter-spacing:0.05em;';
           toolbar.appendChild(label);
 
           var variantNames = Object.keys(variantNodes);
           variantNames.forEach(function(v) {
             var btn = document.createElement('button');
             btn.textContent = variantLabels[v] || v;
-            btn.setAttribute('data-dev-variant', v);
+            btn.setAttribute('data-authoring-variant', v);
             btn.title = v;
             var isActive = v === activeVariant;
             btn.style.cssText =
-              'background:' + (isActive ? '#000' : 'transparent') +
-              ';color:' + (isActive ? '#f59e0b' : '#000') +
-              ';border:1px solid ' + (isActive ? '#000' : 'rgba(0,0,0,0.3)') +
+              'background:' + (isActive ? 'rgba(0,0,0,0.4)' : 'transparent') +
+              ';color:#fff' +
+              ';border:1px solid ' + (isActive ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)') +
               ';padding:2px 10px;border-radius:3px;font:bold 11px/1.4 monospace;cursor:pointer;';
             toolbar.appendChild(btn);
           });
@@ -1224,14 +1245,15 @@
             toolbar: toolbar,
             activeVariant: activeVariant,
             compType: compType,
-            variantNodes: variantNodes
+            variantNodes: variantNodes,
+            catColor: catColor
           };
           entries.push(entry);
 
           toolbar.addEventListener('click', function(e) {
-            var btn = e.target.closest('[data-dev-variant]');
+            var btn = e.target.closest('[data-authoring-variant]');
             if (!btn) return;
-            var target = btn.getAttribute('data-dev-variant');
+            var target = btn.getAttribute('data-authoring-variant');
             if (target === entry.activeVariant) return;
             swapVariant(entry, target);
           });
@@ -1241,11 +1263,11 @@
       // ── Swap using cloned DOM nodes ───────────────────────────────────
       function swapVariant(entry, targetVariant) {
         var targetNode = entry.variantNodes[targetVariant];
-        if (!targetNode) { console.warn('DEV: No node for', targetVariant); return; }
+        if (!targetNode) { console.warn('Authoring: No node for', targetVariant); return; }
 
         // Find current live section
         var currentSection = entry.wrapper.querySelector('section[data-component-type]');
-        if (!currentSection) { console.warn('DEV: No current section found'); return; }
+        if (!currentSection) { console.warn('Authoring: No current section found'); return; }
 
         // Save current state back (in case user modified it)
         entry.variantNodes[entry.activeVariant] = currentSection.cloneNode(true);
@@ -1273,27 +1295,27 @@
         entry.activeVariant = targetVariant;
 
         // Update button styles
-        entry.toolbar.querySelectorAll('[data-dev-variant]').forEach(function(btn) {
-          var isActive = btn.getAttribute('data-dev-variant') === targetVariant;
-          btn.style.background = isActive ? '#000' : 'transparent';
-          btn.style.color = isActive ? '#f59e0b' : '#000';
-          btn.style.borderColor = isActive ? '#000' : 'rgba(0,0,0,0.3)';
+        entry.toolbar.querySelectorAll('[data-authoring-variant]').forEach(function(btn) {
+          var isActive = btn.getAttribute('data-authoring-variant') === targetVariant;
+          btn.style.background = isActive ? 'rgba(0,0,0,0.4)' : 'transparent';
+          btn.style.color = '#fff';
+          btn.style.borderColor = isActive ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)';
         });
 
-        console.log('DEV: ' + entry.compType + ' → ' + targetVariant);
+        console.log('Authoring: ' + entry.compType + ' → ' + targetVariant);
       }
 
-      // ── Toggle DEV mode ───────────────────────────────────────────────
-      devBtn.addEventListener('click', function() {
-        devActive = !devActive;
-        devBtn.textContent = devActive ? 'DEV ✓' : 'DEV';
-        devBtn.style.opacity = devActive ? '1' : '0.7';
+      // ── Toggle authoring mode ──────────────────────────────────────────
+      authoringBtn.addEventListener('click', function() {
+        authoringActive = !authoringActive;
+        authoringBtn.textContent = authoringActive ? '✎ Edit ✓' : '✎ Edit';
+        authoringBtn.style.opacity = authoringActive ? '1' : '0.7';
 
-        if (devActive) {
+        if (authoringActive) {
           initEntries();
           entries.forEach(function(e) {
             e.toolbar.style.display = 'flex';
-            e.wrapper.style.outline = '2px dashed #f59e0b';
+            e.wrapper.style.outline = '2px dashed ' + (e.catColor || '#f59e0b');
             e.wrapper.style.outlineOffset = '-2px';
             e.wrapper.style.borderRadius = '8px';
           });

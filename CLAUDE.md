@@ -327,7 +327,7 @@ The generation engine classifies each topic and selects a **course archetype** t
 
 23 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
 
-**All variants are pre-rendered into every built course** as `<template>` tags. The **DEV toggle** (amber button, top-right of every course) lets you switch variants live without rebuilding. This is the foundation for the future authoring tool.
+**All variants are pre-rendered into every built course** as `<template>` tags. The **authoring panel** (amber "✎ Edit" button, top-right of every course) lets you switch variants live without rebuilding. This IS the authoring layer — it evolves phase by phase (variant swapping → category browsing → text editing → section management → AI assist).
 
 | Component | Variants |
 |---|---|

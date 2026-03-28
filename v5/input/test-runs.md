@@ -342,22 +342,22 @@ Fast engine QA using a pre-built course that exercises all 25 component types an
 
 - 10 sections, 25 component instances (one per component type)
 - All 25 active component types (excludes path-selector which is SCORM-only)
-- All 21 layout variants accessible via the **DEV toggle** (see below)
+- All 21 layout variants accessible via the **authoring panel** (see below)
 - Topic: "The Future of Work: Navigating Digital Transformation"
 - Realistic content, normal lengths
 
-### DEV toggle — variant switching
+### Authoring panel — variant switching
 
-Every built course includes a **DEV** button (top-right corner, sticky). Click it to enter DEV mode:
+Every built course includes a **"✎ Edit"** button (top-right corner, sticky). Click it to enter authoring mode:
 
-- Each component that has layout variants shows a dark toolbar above it
-- The toolbar displays the component type and buttons for each variant
+- Each component that has layout variants shows a colour-coded toolbar above it (colour = category)
+- The toolbar displays the category badge, component type, and buttons for each variant
 - Click a variant button to swap the layout live — content stays the same, layout changes
 - Interactive components (tabs, quizzes, etc.) re-initialize automatically after swap
 
 This means one component per type in the reference course covers ALL 21 variants. No duplicate components needed.
 
-The DEV toggle is always present in every built course — not just reference tests. It's invisible until clicked (no impact on end users). This is the foundation for the future authoring tool.
+The authoring panel is always present in every built course — not just reference tests. It's subtle until clicked (no impact on end users). This IS the authoring layer — it evolves phase by phase.
 
 ### How it works
 

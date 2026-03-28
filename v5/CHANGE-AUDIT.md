@@ -62,7 +62,7 @@ If build-course.js output structure changed:
 
 - [ ] Any new `data-*` attribute has a matching handler in hydrate.js
 - [ ] Any new interactive element (counter, progress, navigation) gets updated by hydrate.js
-- [ ] `hydrateComponent()` covers the new component type for DEV mode re-hydration
+- [ ] `hydrateComponent()` covers the new component type for authoring mode re-hydration
 - [ ] No hardcoded selectors that assume a specific variant's DOM structure
 
 ---

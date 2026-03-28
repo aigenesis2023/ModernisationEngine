@@ -423,7 +423,7 @@ function fillAccordion(comp, variant, maxW) {
 
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC.accordion || {}).section || 'py-16');
-  const bodyClass = c.bodyClass || 'mt-4 text-on-surface-variant leading-relaxed';
+  const bodyClass = c.bodyClass || 'mt-4 text-on-surface/80 leading-relaxed';
 
   const accentIcons = ['lightbulb', 'warning', 'verified', 'psychology', 'explore', 'tips_and_updates', 'auto_awesome', 'school'];
 
@@ -2009,6 +2009,20 @@ function getSectionMaxW(sectionWidth) {
   return SECTION_WIDTHS[sectionWidth] || SECTION_WIDTHS.standard;
 }
 
+// ─── Category map: component type → category (for authoring panel) ────
+const CATEGORY_MAP = {
+  'hero': 'Structure', 'path-selector': 'Structure', 'divider': 'Structure',
+  'text': 'Content', 'graphic': 'Content', 'graphic-text': 'Content',
+  'full-bleed': 'Content', 'pullquote': 'Content', 'stat-callout': 'Content',
+  'key-term': 'Content', 'callout': 'Content',
+  'accordion': 'Explore', 'tabs': 'Explore', 'narrative': 'Explore',
+  'flashcard': 'Explore', 'labeled-image': 'Explore',
+  'mcq': 'Assess', 'branching': 'Assess', 'textinput': 'Assess', 'checklist': 'Assess',
+  'bento': 'Layout', 'comparison': 'Layout', 'data-table': 'Layout',
+  'timeline': 'Layout', 'process-flow': 'Layout', 'image-gallery': 'Layout',
+  'media': 'Media', 'video-transcript': 'Media'
+};
+
 // ─── Variant map: component types that have layout variants ───────────
 const VARIANT_MAP = {
   'hero':         ['centered-overlay', 'split-screen', 'minimal-text'],
@@ -2075,9 +2089,14 @@ function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
       console.log(`  [warn] Unknown component type: ${type}`);
       return null;
   }
-  // Inject data-variant so QA and DEV toggle can find the right instance
+  // Inject data-variant so QA and authoring layer can find the right instance
   if (html && variant) {
     html = html.replace(/^(<section\b[^>]*)>/, `$1 data-variant="${variant}">`);
+  }
+  // Inject data-category for authoring panel category grouping
+  const category = CATEGORY_MAP[type];
+  if (html && category) {
+    html = html.replace(/^(<section\b[^>]*)>/, `$1 data-category="${category}">`);
   }
   return html;
 }
@@ -2091,7 +2110,7 @@ function fillComponent(comp, index, sectionWidth) {
   let html = fillComponentVariant(comp, index, sectionWidth);
   if (!html) return null;
 
-  // Pre-render alternate variants as <template> tags for DEV mode switching
+  // Pre-render alternate variants as <template> tags for authoring layer switching
   const allVariants = VARIANT_MAP[type];
   if (allVariants && allVariants.length > 1) {
     const activeVariant = variant || allVariants[0];
@@ -2365,6 +2384,17 @@ ${sectionsHtml.join('\n\n')}
 </section>
 </main>
 
+<script type="application/json" id="category-meta">${JSON.stringify({
+  map: CATEGORY_MAP,
+  colors: {
+    Content: '#3b82f6', Explore: '#8b5cf6', Assess: '#ef4444',
+    Layout: '#22c55e', Media: '#06b6d4', Structure: '#f59e0b'
+  },
+  labels: {
+    Content: 'Content', Explore: 'Explore', Assess: 'Assess',
+    Layout: 'Layout', Media: 'Media', Structure: 'Structure'
+  }
+}).replace(/<\//g, '<\\/')}</script>
 <script>
 ${pathStateScript}${sectionGatingScript}${hydrateScript}
 </script>
