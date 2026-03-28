@@ -1354,6 +1354,33 @@
         // Re-hydrate interactivity
         hydrateComponent(newSection);
 
+        // Apply edited text from JSON model to the new variant's DOM
+        if (courseData) {
+          var cd = getCompData(newSection);
+          if (cd) {
+            // Apply displayTitle to first heading
+            if (cd.displayTitle !== undefined) {
+              var heading = newSection.querySelector('h1,h2,h3,h4,h5,h6');
+              if (heading) heading.textContent = cd.displayTitle;
+            }
+            // Apply body to paragraphs (skip interactive element paragraphs)
+            if (cd.body !== undefined) {
+              var bodyParts = cd.body.split('\n\n');
+              var paras = [];
+              newSection.querySelectorAll('p').forEach(function(p) {
+                if (p.closest('[data-quiz], [data-tabs] [role="tablist"], [data-carousel] nav, [data-checklist] label')) return;
+                paras.push(p);
+              });
+              paras.forEach(function(p, i) {
+                if (i < bodyParts.length) p.innerHTML = bodyParts[i];
+              });
+            }
+            // Update variant in JSON model
+            cd.variant = targetVariant;
+            saveCourseData();
+          }
+        }
+
         // Re-enable inline editing on swapped variant if authoring is active
         if (authoringActive && courseData) {
           enableInlineEditingForSection(newSection);
