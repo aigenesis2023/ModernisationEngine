@@ -1944,7 +1944,8 @@ ${fallbackMarkerList}
 
 // ─── Divider ──────────────────────────────────────────────────────────
 function fillDivider(comp, variant) {
-  const style = comp.style || variant || 'line';
+  // variant takes precedence — template pre-rendering passes variant override
+  const style = variant || comp.style || 'line';
   const icon = esc(comp.icon || 'more_horiz');
 
   if (style === 'spacing') {
@@ -1975,7 +1976,9 @@ function fillDivider(comp, variant) {
 function fillCallout(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
-  const calloutType = comp.calloutType || variant || 'info';
+  // variant takes precedence — template pre-rendering passes variant override
+  // so each alternate (info/warning/tip/success) gets its own style
+  const calloutType = variant || comp.calloutType || 'info';
 
   const typeConfig = {
     info:    { icon: 'info',          border: 'border-primary',      bg: 'bg-primary/5',   iconColor: 'text-primary' },

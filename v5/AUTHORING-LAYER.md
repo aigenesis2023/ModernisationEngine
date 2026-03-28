@@ -542,6 +542,11 @@ These were identified in research as valuable but too complex for the current ph
 - Architecture: generic `data-interactive` marker = future-proof (new interactive components auto-detected)
 - QA: 110/0 structural, 43/0 interactive
 
+### 2026-03-28 — Bug Fix: Callout/divider variant templates all identical
+- build-course.js: `comp.calloutType` / `comp.style` was overriding the variant parameter, so all pre-rendered `<template>` alternates had the same style
+- Fix: variant param takes precedence over JSON field — template pre-rendering passes variant override for each alternate
+- Affected: callout (info/warning/tip/success) and divider (line/spacing/icon)
+
 ### 2026-03-28 — Bug Fix: Variant swap strips HTML tags from text values
 - hydrate.js: swapVariant() data-edit-path handler now strips HTML tags (e.g. `<p>`) from JSON values before setting textContent — matches build-course.js stripTags() behavior at build time
 - Affected: pullquote body (all variants), full-bleed body, any data-edit-path="body" where AI-generated content contains HTML wrappers
