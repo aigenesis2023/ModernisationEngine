@@ -92,6 +92,7 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/ST
 | **`v5/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **Active** |
 | **`v5/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
 | **`v5/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
+| **`v5/AUTHORING-LAYER.md`** | Authoring layer architecture, component taxonomy, phase plan, progress tracker, skipped-for-later items. | **Active** — living document |
 | **`v5/LOGIC-EXTRACTION.md`** | How we extract triggers, variables, conditions, and interactive logic from Storyline SCORM exports. | **ARCHIVED** — SCORM path only |
 
 ---
