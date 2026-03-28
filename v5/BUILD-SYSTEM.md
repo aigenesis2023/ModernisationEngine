@@ -103,6 +103,7 @@ Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place tha
 `build()` in `build-course.js` assembles the final HTML:
 
 1. Load `course-layout.json`, `design-contract.json`, `design-tokens.json`
+1b. **Dark-mode contract sanitizer:** If `isDark` is true, fix Stitch's hardcoded light-mode classes — `bg-white` in card/panel backgrounds → `glass-card` or `bg-surface-container`, `hover:bg-white` → `hover:bg-surface-container`, section `bg-white` stripped. Hero button accents preserved. Also validates tab button contract values have padding (falls back to styled defaults if Stitch extracted container layout instead of button styles).
 2. Generate `<head>` from tokens via `generateHead()`
 3. Build nav via `buildNav()` — slim sticky header + section drawer (self-contained, no contract needed)
 4. For each section in course-layout.json:

@@ -192,7 +192,7 @@ See `v5/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the 
 ### Step 5 — Build (`v5/scripts/build-course.js`)
 **Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
 
-See `v5/BUILD-SYSTEM.md`.
+See `v5/BUILD-SYSTEM.md`. On dark themes (`isDark: true`), the builder sanitizes Stitch's contract values — replacing hardcoded `bg-white` in card/section/panel backgrounds with theme-adaptive classes (`glass-card` for cards, `bg-surface-container` for flat panels). Hero CTA button accents are preserved.
 
 ### Step 6 — QA + Review (three gates, in order)
 **6a — Structural QA (`v5/scripts/qa-course.js`):** Validates built HTML without a browser — section coverage, component integrity, quiz wiring, image integrity, heading hierarchy, duplicate IDs, content coverage vs knowledge base, design token/contract integrity, accessibility basics. **If it fails, fix before proceeding.**
