@@ -79,6 +79,120 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 
 **Why this works:** The authoring panel (Phase 1) already proves the pattern — pre-rendered templates, DOM swap, re-hydration. Phase 3 extends it from "swap variant" to "swap component type" and "edit text in place."
 
+### Phase 3 Post-Implementation Findings (critical — read before Phase 4)
+
+> **Added 2026-03-28 after user testing of Phase 3. These findings reshape Phase 4+.**
+
+#### Finding 1: Type swap dropdown is broken UX — REMOVE BEFORE PHASE 4
+
+The Phase 3b component type `<select>` dropdown has three compounding problems:
+1. Only allows swapping within the same category (can't change text → accordion)
+2. Nothing visual happens — just a "⟳ Rebuild needed" badge
+3. The category names and component names are developer labels, not user-friendly
+
+**Action:** Remove the type swap dropdown from hydrate.js. Type swapping needs client-side rendering (see Finding 4) before it can deliver value.
+
+#### Finding 2: Categories and component names are developer language
+
+Current categories (Content, Explore, Assess, Layout, Media, Structure) were designed for the AI generation engine, not end users. "Explore" means nothing to a user. Component names like "narrative", "bento", "graphic-text", "stat-callout" are internal developer labels.
+
+**User-friendly category labels (display only — internal names stay unchanged):**
+
+| Internal (keep everywhere) | User-facing (toolbar display only) |
+|---|---|
+| Content | Text & Images |
+| Explore | Interactive |
+| Assess | Quiz & Activities |
+| Layout | Data & Layout |
+| Media | Media |
+| Structure | Page Structure |
+
+**User-friendly component labels (display only — add `typeLabels` map in hydrate.js):**
+
+| Internal | User-facing |
+|---|---|
+| hero | Hero Banner |
+| text | Text Block |
+| graphic | Image |
+| graphic-text | Image & Text |
+| full-bleed | Full-Width Image |
+| pullquote | Featured Quote |
+| stat-callout | Key Statistics |
+| key-term | Glossary |
+| callout | Callout |
+| accordion | Expandable List |
+| tabs | Tabs |
+| narrative | Slideshow |
+| flashcard | Flashcards |
+| labeled-image | Labelled Image |
+| mcq | Quiz |
+| branching | Scenario |
+| textinput | Free Text |
+| checklist | Checklist |
+| bento | Card Grid |
+| comparison | Comparison |
+| data-table | Table |
+| timeline | Timeline |
+| process-flow | Process Flow |
+| image-gallery | Gallery |
+| media | Video |
+| video-transcript | Video + Transcript |
+| divider | Divider |
+| path-selector | Path Selector |
+
+Same pattern as `variantLabels` — internal names stay in JSON, schemas, fill functions, prompts. Friendly names are display-only in hydrate.js.
+
+#### Finding 3: Variant swapping is safe, type swapping is not
+
+Variant swapping works perfectly because all variants of the same component type share the same data structure (same props). Renaming categories or component labels doesn't affect variant swapping at all — it's purely display.
+
+Type swapping is fundamentally different — different types have different data structures (`text` has `{displayTitle, body}`, `process-flow` has `{displayTitle, steps[]}`). Type swap requires re-rendering, which currently only exists server-side (build-course.js fill functions).
+
+#### Finding 4: Client-side type template library (proposed approach for Phase 4)
+
+To enable type swap + add section WITHOUT a server:
+
+1. **build-course.js pre-renders a "type template library"** — one `<template data-type-template="TYPE">` per component type with placeholder content, embedded in every course
+2. When user swaps type or adds a section, hydrate.js clones the template, fills JSON data into the DOM (heading → displayTitle, paragraphs → body, list items → items), inserts into DOM, re-hydrates
+3. Lightweight client-side fill functions — much simpler than full build-course.js since styled HTML already exists in template. Just set text content.
+4. Won't be pixel-perfect vs server rebuild, but good enough for authoring preview. Server rebuild replaces it with production quality later.
+
+#### Finding 5: "Add section" has open UX/content questions
+
+Adding a new section raises questions that need design decisions:
+- **Content generation:** A new "Image & Text" component needs an image (SiliconFlow/Pexels) and body text (AI-generated). Where does this content come from without a server?
+- **User input model:** Does the user specify content manually? Or use a prompt like "new block about X topic"? Or get empty placeholder content to fill in?
+- **Simplest viable approach:** Pre-filled placeholder content ("Your heading here", placeholder image) that the user edits with contenteditable. AI-assisted content generation waits for Phase 5.
+- **This is a big UX decision** that should be resolved before building add-section functionality.
+
+#### Finding 6: Delete section works client-side — ship it now
+
+Delete is the one section management feature that works without a server. Remove from DOM + remove from JSON + confirm dialog. Ship with the UX fixes (Findings 1-2), before tackling type swap and add.
+
+#### ⚠️ CRITICAL: Do not implement type swap, add section, or delete without reading this
+
+These three features (swap component type, add new section, delete section) affect the course structure and content in ways that are hard to undo and have cascading implications:
+
+- **Type swap** changes data structure — a `text` component has `{displayTitle, body}` but an `accordion` has `{displayTitle, items[]}`. Swapping types means content may not map. Needs client-side template library (Finding 4) AND a strategy for what happens to content that doesn't fit the new type.
+- **Add section** requires content — where does the text, images, quiz data come from? AI generation needs a server. Manual entry needs a content editing UI beyond basic contenteditable. Placeholder content is the simplest option but may confuse users. **This must be designed before building.**
+- **Delete section** is the simplest (just remove DOM + JSON) but is destructive and irreversible in the current architecture (no undo). Confirm dialog is minimum. Consider: should deleted sections be recoverable?
+
+**Do not build any of these as quick features. Each needs a UX design decision first.** The revised phase plan below reflects this.
+
+#### Revised Phase 4 Plan
+
+Based on these findings, Phase 4 should be restructured:
+
+```
+Phase 3.5: Authoring UX Polish           Friendly labels, remove broken     NEXT
+                                          type dropdown, add delete button
+Phase 4a: Client-side type templates      Pre-render type template library   PLANNED
+Phase 4b: Type swap (client-side)         Clone template + fill from JSON    PLANNED
+Phase 4c: Add section                     Component picker + placeholder     PLANNED  ⚠️ UX DECISIONS NEEDED
+Phase 4d: Reorder sections                Move up/down + JSON reorder        PLANNED
+Phase 4e: Section width control           narrow/standard/wide/full toggle   PLANNED
+```
+
 ### SCORM & Accessibility Notes
 
 **SCORM:** No architectural debt. hydrate.js already tracks quiz answers, completion, and progress via `data-*` attributes. SCORM is a future output format wrapper (`--output scorm` flag on build-course.js + imsmanifest.xml template + scorm-wrapper.js). Zero changes to current architecture needed.
@@ -384,6 +498,15 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-28 — Post-Implementation UX Review (Phase 3)
+- User testing revealed Phase 3b type swap dropdown is broken UX — removal recommended
+- Categories and component names are developer language, need user-friendly display labels
+- Documented user-friendly category labels (6) and component type labels (28)
+- Identified client-side type template library as approach for type swap without server
+- Identified open UX questions for "add section" (content generation, user input model)
+- Restructured Phase 4 into 5 sub-phases (3.5 → 4a → 4b → 4c → 4d → 4e)
+- No code changes — documentation and planning only
 
 ### 2026-03-28 — Bug Fix: Variant swap text carry-over
 - hydrate.js: swapVariant() now applies JSON model (displayTitle + body) to new variant DOM after cloning template
