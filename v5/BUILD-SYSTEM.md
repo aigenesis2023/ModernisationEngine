@@ -1,7 +1,7 @@
 # Build System
 
 > **Status:** Implemented and working. Verified across 9+ brands.
-> **Last updated:** 2026-03-25
+> **Last updated:** 2026-03-28
 
 This document covers how the Modernisation Engine assembles the final course HTML from the design contract, design tokens, course layout, and images. It includes the layout rules, fill function conventions, head generation, and hydration system.
 

@@ -1,7 +1,7 @@
 # Content Structuring
 
 > **Status:** Implemented — dual-path content structuring (AI-first + SCORM). AI-first V2 rework with emotional arc, structural archetypes, and brand voice calibration.
-> **Last updated:** 2026-03-25
+> **Last updated:** 2026-03-28
 
 This document covers how content gets transformed into a structured course layout (`course-layout.json`). Two paths exist:
 

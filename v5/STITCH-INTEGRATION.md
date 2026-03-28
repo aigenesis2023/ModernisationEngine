@@ -1,7 +1,7 @@
 # Stitch Integration
 
 > **Status:** Implemented and working. Verified across 9+ brands.
-> **Last updated:** 2026-03-25
+> **Last updated:** 2026-03-28
 
 This document covers how the Modernisation Engine uses Google Stitch to generate branded visual systems. Stitch designs the look — we control layout, content, and interactivity.
 
@@ -14,7 +14,7 @@ Stitch receives two things:
 2. **representative-course.md** — all 28 component types arranged in a realistic e-learning flow
 
 Stitch designs a complete branded page experience. We then extract:
-- **Component patterns** — one HTML fragment per component type (25 files)
+- **Component patterns** — one HTML fragment per component type (28 files)
 - **Design tokens** — Tailwind config, colour system, fonts, spacing
 - **Page shell** — navigation, section wrappers, footer
 - **Design contract** — `extract-contract.js` (cheerio) parses patterns into `design-contract.json`
@@ -89,8 +89,8 @@ After Stitch returns the full HTML page, `generate-course-html.js` extracts indi
 - Extraction parses the returned HTML by `data-component-type` attributes (regex tag matching)
 - Each fragment is stored in `component-patterns/{type}.html`
 - The page shell (nav, footer, head content) is extracted separately to `_page-shell.json`
-- If <25 patterns found: retry Stitch with a focused prompt for missing types, then fallback to semantic-token-based defaults
-- Confirmed working: 25/25 patterns extracted, 39 components filled with 0 fallbacks (EV test course)
+- If <28 patterns found: retry Stitch with a focused prompt for missing types, then fallback to semantic-token-based defaults
+- Confirmed working: 28/28 patterns extracted across 9+ brands
 
 ---
 
@@ -106,7 +106,7 @@ The design contract is the **stable interface** between Stitch's design output a
 
 **Why this matters:**
 - If Stitch changes its HTML output → fix `extract-contract.js` (one file)
-- The 25 fill functions in `build-course.js` don't change
+- The 28 fill functions in `build-course.js` don't change
 - Different brand URL → different contract values → different visual character, identical layout
 
 ---

@@ -12,7 +12,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Branch:** Check `git branch` for current branch. `main` exists but is not actively used.
 
-**Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
+**Authoring Layer:** Live (Phases 1–3 complete). Users can swap variants, edit text inline, change component types, and export modified JSON — all without re-running the pipeline. Phase 4 (Section Management) is next. See `v5/AUTHORING-LAYER.md`.
 
 ---
 
@@ -132,7 +132,6 @@ v5/                                    ← ALL ACTIVE CODE
     qa-interactive.js                  ← Interactive QA: Playwright tests all clickable components + layout
     review-course.js                   ← Vision-based quality audit (subjective review)
     hydrate.js                         ← Vanilla JS interactivity (injected into course.html)
-    serve.js                           ← Live preview server for Codespace
     lib/
       validate-layout.js               ← Shared validation for course-layout.json
     extract.js                         ← ⚠️ ARCHIVED — SCORM: folder → content-bucket.json
@@ -310,6 +309,7 @@ node v5/scripts/review-course.js                           # Step 6c (visual rev
 | `video-transcript` | Video with expandable transcript |
 | `divider` | Visual break between topics (line, spacing, or icon) |
 | `callout` | Styled info/warning/tip/success box |
+| `path-selector` | Course path selection (branching entry point) |
 
 ### Course Archetypes
 
@@ -373,7 +373,7 @@ Sections can set `"sectionWidth"` to vary page-level content width:
 ---
 
 ## Deployment
-`build-course.js` writes directly to root `index.html`. Preview via local port (Codespace / `node v5/scripts/serve.js`). GitHub Pages is configured on `main` but not actively used during development. Branch snapshots (e.g., `authoring-layer-v3` → `v4`) serve as backups before big changes.
+`build-course.js` writes directly to root `index.html`. Preview via local port (Codespace). GitHub Pages is configured on `main` but not actively used during development. Branch snapshots (e.g., `authoring-layer-v3` → `v4`) serve as backups before big changes.
 
 ---
 
