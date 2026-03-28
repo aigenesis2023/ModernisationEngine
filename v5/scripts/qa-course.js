@@ -329,14 +329,28 @@ function checkVariants(layout) {
   // Known variants per component type
   const KNOWN_VARIANTS = {
     'hero': ['centered-overlay', 'split-screen', 'minimal-text'],
+    'text': ['standard', 'two-column', 'highlight-box'],
+    'graphic': ['standard', 'captioned-card'],
     'graphic-text': ['split', 'overlap', 'full-overlay'],
-    'bento': ['grid-4', 'wide-2', 'featured'],
-    'accordion': ['standard', 'accent-border'],
-    'mcq': ['stacked', 'grid'],
+    'full-bleed': ['center', 'left', 'right'],
+    'pullquote': ['accent-bar', 'centered', 'minimal'],
     'stat-callout': ['centered', 'card-row'],
-    'timeline': ['vertical', 'centered-alternating'],
+    'callout': ['info', 'warning', 'tip', 'success'],
+    'key-term': ['list', 'card-grid'],
+    'accordion': ['standard', 'accent-border'],
+    'tabs': ['horizontal', 'vertical'],
+    'narrative': ['image-focused', 'text-focused'],
+    'flashcard': ['grid', 'single-large'],
+    'labeled-image': ['numbered-dots', 'side-panel'],
+    'mcq': ['stacked', 'grid'],
+    'branching': ['cards', 'list'],
+    'checklist': ['standard', 'card-style', 'numbered'],
+    'bento': ['grid-4', 'wide-2', 'featured'],
     'comparison': ['columns', 'stacked-rows'],
-    'tabs': ['horizontal', 'vertical']
+    'data-table': ['standard', 'striped-card'],
+    'timeline': ['vertical', 'centered-alternating'],
+    'process-flow': ['vertical', 'horizontal'],
+    'divider': ['line', 'spacing', 'icon']
   };
 
   const allComponents = (layout.sections || []).flatMap(s => s.components || []);

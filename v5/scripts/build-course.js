@@ -374,13 +374,38 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
 </section>`;
 }
 
-function fillText(comp, maxW) {
+function fillText(comp, variant, maxW) {
   const c = DC.text || {};
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly(c.section || 'py-16');
   // Text always uses narrower width for readability, but respects section width if narrow
   const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-4xl';
 
+  if (variant === 'two-column') {
+    return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
+<div class="${maxW} mx-auto px-8">
+${title ? `<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>` : ''}
+<div class="columns-1 md:columns-2 gap-12 text-lg text-on-surface-variant leading-relaxed">
+${comp.body || ''}
+</div>
+</div>
+</section>`;
+  }
+
+  if (variant === 'highlight-box') {
+    return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
+<div class="${textW} mx-auto px-8">
+<div class="border-l-4 border-primary bg-surface-container/50 rounded-r-2xl p-8 md:p-10">
+${title ? `<h2 class="font-headline text-2xl font-bold mb-4">${title}</h2>` : ''}
+<div class="space-y-4 text-lg text-on-surface-variant leading-relaxed">
+${comp.body || ''}
+</div>
+</div>
+</div>
+</section>`;
+  }
+
+  // Default: standard
   return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
 <div class="${textW} mx-auto px-8">
 ${title ? `<h2 class="font-headline text-3xl font-bold mb-6">${title}</h2>` : ''}
@@ -1804,7 +1829,7 @@ function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
   let html;
   switch (type) {
     case 'hero':            html = fillHero(comp, variant); break;
-    case 'text':            html = fillText(comp, maxW); break;
+    case 'text':            html = fillText(comp, variant, maxW); break;
     case 'accordion':       html = fillAccordion(comp, variant, maxW); break;
     case 'mcq':             html = fillMCQ(comp, variant, maxW); break;
     case 'graphic-text':    html = fillGraphicText(comp, index, variant, maxW); break;
