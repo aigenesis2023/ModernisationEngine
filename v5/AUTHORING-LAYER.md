@@ -53,13 +53,36 @@ Researched **8 leading scroll-based authoring tools** (2026-03-28):
 Phase 1: Authoring Layer v1          DEV variant toggle                    DONE
 Phase 2: Component Taxonomy          Categories + new components +         IN PROGRESS
          + Expanded Palette          new variants + AI guidance
-Phase 3: Inline Editing              Edit text + swap component type       PLANNED
+Phase 3: Inline Editing              Edit text + swap component type       PLANNED  ⚠️ KEY PHASE
 Phase 4: Section Management          Reorder + add/remove + width control  PLANNED
 Phase 5: AI-Assisted Editing         "Regenerate section" + category       PLANNED
                                      browser for manual add
 Phase 6: Full Authoring              Blank course creation + complex       PLANNED
                                      assessment types (matching, etc.)
 ```
+
+### Phase 3 Architecture Note (critical — read before starting Phase 3)
+
+Phase 3 is the most architecturally significant phase. It introduces a **live JSON data model** in the browser.
+
+**Approach:** build-course.js embeds `course-layout.json` inside the built HTML as a `<script type="application/json" id="course-data">` tag. The authoring layer reads this JSON and keeps it in sync with DOM edits.
+
+- **Text editing:** `contenteditable` on text elements → updates both DOM and embedded JSON
+- **Component type swap:** Same `<template>` + DOM-swap mechanism the DEV variant toggle already uses
+- **Variant swap:** Already works (Phase 1)
+- **Save/Export:** Download modified JSON or send to server endpoint
+
+This is NOT a full client-side rendering engine. The heavy rendering stays in Node.js (build-course.js). The browser only needs to: (a) keep JSON in sync with edits, (b) swap pre-rendered templates for structural changes, (c) re-hydrate after swaps (already implemented in Phase 1).
+
+**Why this works:** The variant toggle (Phase 1) already proves the pattern — pre-rendered templates, DOM swap, re-hydration. Phase 3 extends it from "swap variant" to "swap component type" and "edit text in place."
+
+### SCORM & Accessibility Notes
+
+**SCORM:** No architectural debt. hydrate.js already tracks quiz answers, completion, and progress via `data-*` attributes. SCORM is a future output format wrapper (`--output scorm` flag on build-course.js + imsmanifest.xml template + scorm-wrapper.js). Zero changes to current architecture needed.
+
+**Accessibility of course output:** Native HTML elements (`<details>`, `<input>`, `<form>`) provide a strong foundation. ARIA attributes (`role`, `aria-selected`, `aria-expanded`, `aria-live`) and keyboard navigation for custom widgets (tabs, carousel, flashcards) should be added in a dedicated session. Not blocking for Phase 2, but should be done before production use.
+
+**Accessibility of authoring tool:** Phase 6+ concern. Standard for v1 of any authoring tool.
 
 ---
 
