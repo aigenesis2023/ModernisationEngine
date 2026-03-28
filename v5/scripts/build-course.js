@@ -796,7 +796,7 @@ ${newCards}
 </section>`;
 }
 
-function fillDataTable(comp, maxW) {
+function fillDataTable(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC['data-table'] || {}).section || 'py-16');
   const body = comp.body || '';
@@ -842,6 +842,27 @@ function fillDataTable(comp, maxW) {
     ).join('\n');
   }
 
+  // ── Variant: striped-card — table inside a prominent card with stronger striping ──
+  if (variant === 'striped-card') {
+    return `<section class="${secClass}" data-component-type="data-table" data-animate="fade-up">
+<div class="${maxW} mx-auto px-8">
+${body && !bodyUsedForTable ? `<div class="mb-6 text-on-surface-variant">${body}</div>` : ''}
+<div class="overflow-hidden rounded-2xl glass-card shadow-lg">
+<div class="px-8 py-6 bg-surface-container border-b border-on-surface/10">
+<h3 class="text-2xl font-bold tracking-tight">${title}</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead><tr class="bg-primary/10">${headerHtml.replace(/text-on-surface-variant/g, 'text-on-surface')}</tr></thead>
+<tbody class="divide-y divide-on-surface/5">${bodyHtml.replace(/bg-on-surface\/\[0\.02\]/g, 'bg-surface-container/50')}</tbody>
+</table>
+</div>
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: standard ──
   return `<section class="${secClass}" data-component-type="data-table" data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 ${body && !bodyUsedForTable ? `<div class="mb-6 text-on-surface-variant">${body}</div>` : ''}
@@ -922,7 +943,7 @@ ${newButtons}
 </section>`;
 }
 
-function fillBranching(comp, maxW) {
+function fillBranching(comp, variant, maxW) {
   let items = comp._items || [];
   // Fallback: if no _items but body has <li> elements, extract them as options
   let scenarioText = '';
@@ -961,6 +982,31 @@ function fillBranching(comp, maxW) {
   const hasArrow = c.hasArrow || false;
   const arrowClass = c.arrowClass || 'mt-4 inline-flex items-center gap-2 text-primary font-bold group-hover:translate-x-2 transition-transform';
 
+  // ── Variant: list — vertical stacked list with numbered indicators ──
+  if (variant === 'list') {
+    const listItems = items.map((item, i) =>
+      `<button class="group flex items-start gap-5 p-5 md:p-6 ${btnBg} rounded-xl text-left ${btnVisuals} w-full">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold">${String.fromCharCode(65 + i)}</div>
+<div class="flex-1 min-w-0">
+<div class="font-bold text-on-surface text-lg">${esc(item.title || '')}</div>
+${(item.body || '') ? `<div class="text-sm text-on-surface-variant leading-relaxed mt-1">${stripTags(item.body || '')}</div>` : ''}
+</div>
+<span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-secondary transition-colors self-center">chevron_right</span>
+</button>`
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="branching">
+<div class="${maxW} mx-auto px-8">
+<h3 class="font-headline text-2xl font-bold mb-8">${title}</h3>
+${bodyText ? `<p class="text-lg text-on-surface-variant mb-8 italic">${bodyText}</p>` : ''}
+<div class="flex flex-col gap-3" data-animate-stagger="fade-up">
+${listItems}
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: cards — grid of option cards ──
   const newButtons = items.map((item, i) =>
     `<button class="group p-6 md:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden">
 <span class="absolute bottom-2 right-3 text-4xl font-headline font-black text-primary/8 group-hover:text-secondary/15 transition-colors select-none leading-none">${String.fromCharCode(65 + i)}</span>
@@ -1274,7 +1320,7 @@ ${attrHtml}
 </section>`;
 }
 
-function fillChecklist(comp, maxW) {
+function fillChecklist(comp, variant, maxW) {
   const items = comp._items || [];
   const title = esc(comp.displayTitle || '');
   const c = DC.checklist || {};
@@ -1286,6 +1332,50 @@ function fillChecklist(comp, maxW) {
   const labelHover = c.labelHover || 'hover:bg-surface-variant/50 transition-colors';
   const spanHover = c.spanHover || '';
 
+  // ── Variant: card-style — each item as a separate card ──
+  if (variant === 'card-style') {
+    const cardItems = items.map(item =>
+      `<label class="flex items-center gap-5 p-6 glass-card rounded-2xl cursor-pointer group border border-outline-variant/10 ${labelHover}">
+<input class="${inputClass}" type="checkbox"/>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+</label>`
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="checklist">
+<div class="${maxW} mx-auto px-8" data-checklist data-animate="fade-up">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+${cardItems}
+</div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / ${items.length} complete</div>
+</div>
+</section>`;
+  }
+
+  // ── Variant: numbered — numbered list with checkboxes ──
+  if (variant === 'numbered') {
+    const numberedItems = items.map((item, i) =>
+      `<label class="flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}">
+<div class="w-8 h-8 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold text-sm">${i + 1}</div>
+<input class="${inputClass}" type="checkbox"/>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+</label>`
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="checklist">
+<div class="${maxW} mx-auto px-8">
+<div class="${cardClass}" data-checklist data-animate="fade-up">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="space-y-2">
+${numberedItems}
+</div>
+<div class="mt-6 text-sm text-on-surface-variant font-bold" data-checklist-progress>0 / ${items.length} complete</div>
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: standard ──
   const newLabels = items.map(item =>
     `<label class="flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}">
 <input class="${inputClass}" type="checkbox"/>
@@ -1374,7 +1464,7 @@ ${panels}
 </section>`;
 }
 
-function fillFlashcard(comp, maxW) {
+function fillFlashcard(comp, variant, maxW) {
   const items = comp._items || [];
   if (items.length === 0) return '';
   const c = DC.flashcard || {};
@@ -1387,28 +1477,57 @@ function fillFlashcard(comp, maxW) {
   const back = c.back || {};
   const useBoldFront = front.useBoldPrimary || false;
 
-  const newCards = items.map((item, i) => {
+  const makeCard = (item, i, large) => {
     const frontText = esc(item.front || item.title || item.term || '');
     const backText = item.back || item.definition || item.body || '';
     const frontFaceClass = useBoldFront
-      ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'p-6 md:p-8')
-      : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10 p-6 md:p-8');
-    const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', 'p-6 md:p-8 text-center');
-    return `<div class="min-h-[180px] group cursor-pointer" style="perspective:1000px" data-flashcard>
+      ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', large ? 'p-10 md:p-14' : 'p-6 md:p-8')
+      : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10', large ? 'p-10 md:p-14' : 'p-6 md:p-8');
+    const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', large ? 'p-10 md:p-14 text-center' : 'p-6 md:p-8 text-center');
+    return `<div class="min-h-[${large ? '280' : '180'}px] group cursor-pointer" style="perspective:1000px" data-flashcard>
 <div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d;min-height:inherit">
 <div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
 <div class="text-center px-6">
-<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-4xl mb-4">${icons[i % icons.length]}</div>
-<div class="font-headline font-bold text-base md:text-lg leading-snug">${frontText}</div>
+<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '5' : '4'}xl mb-4">${icons[i % icons.length]}</div>
+<div class="font-headline font-bold text-${large ? 'xl md:text-2xl' : 'base md:text-lg'} leading-snug">${frontText}</div>
 <div class="mt-3 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium text-sm leading-relaxed px-4">${backText}</p>
+<p class="text-on-secondary-container font-medium text-${large ? 'base' : 'sm'} leading-relaxed px-4">${backText}</p>
 </div>
 </div>
 </div>`;
-  }).join('\n');
+  };
+
+  // ── Variant: single-large — one card at a time, carousel-style ──
+  if (variant === 'single-large') {
+    const largeCards = items.map((item, i) => {
+      const cardHtml = makeCard(item, i, true);
+      return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>${cardHtml}</div>`;
+    }).join('\n');
+
+    return `<section class="${secClass}" data-component-type="flashcard" data-carousel>
+<div class="${maxW} mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
+<div class="max-w-2xl mx-auto">
+${largeCards}
+</div>
+<div class="flex justify-center gap-3 mt-8">
+<button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="flex items-center text-sm text-on-surface-variant font-bold" data-slide-counter>1 / ${items.length}</span>
+<button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: grid ──
+  const newCards = items.map((item, i) => makeCard(item, i, false)).join('\n');
 
   return `<section class="${secClass}" data-component-type="flashcard">
 <div class="${maxW} mx-auto px-8">
@@ -1420,7 +1539,7 @@ ${newCards}
 </section>`;
 }
 
-function fillNarrative(comp, maxW) {
+function fillNarrative(comp, variant, maxW) {
   const items = comp._items || [];
   if (items.length === 0) return '';
 
@@ -1430,6 +1549,63 @@ function fillNarrative(comp, maxW) {
   const secClass = sectionOnly((DC.narrative || {}).section || 'py-16')
     .replace(/\bpy-(\d+)\b/g, (m, n) => parseInt(n) > 16 ? 'py-16' : m);
 
+  const navButtons = `<div class="flex gap-3 mt-6">
+<button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>`;
+
+  // ── Variant: image-focused — large image with smaller text below ──
+  if (variant === 'image-focused') {
+    const imgSlides = items.map((item, i) => {
+      const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
+      const imgAlt = esc(item._graphic?.alt || item.title || '');
+      const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+      return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-[400px] object-cover rounded-2xl mb-6" src="${imgSrc}"/>` : ''}
+<div class="text-on-surface-variant font-bold mb-2">${counter}</div>
+<h4 class="font-headline text-xl font-bold mb-2 text-on-surface">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant text-sm">${stripTags(item.body || '')}</p>
+</div>`;
+    }).join('\n');
+
+    return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
+<div class="${maxW} mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="glass-card rounded-[2.5rem] p-4 md:p-6 relative overflow-hidden">
+${imgSlides}
+${navButtons}
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Variant: text-focused — text-dominant, compact cards ──
+  if (variant === 'text-focused') {
+    const textSlides = items.map((item, i) => {
+      const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
+      return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
+<div class="text-on-surface-variant font-bold mb-4">${counter}</div>
+<h4 class="font-headline text-2xl font-bold mb-4 text-on-surface">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant leading-relaxed text-lg">${stripTags(item.body || '')}</div>
+</div>`;
+    }).join('\n');
+
+    return `<section class="${secClass}" data-component-type="narrative" data-carousel data-animate="fade-up">
+<div class="${maxW} mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="glass-card rounded-[2.5rem] p-8 md:p-12 relative">
+${textSlides}
+${navButtons}
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant (image-focused is default per component-library) ──
   const newSlides = items.map((item, i) => {
     const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
     return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
@@ -1444,26 +1620,39 @@ function fillNarrative(comp, maxW) {
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
 <div class="glass-card rounded-[2.5rem] p-6 md:p-10 relative">
 ${newSlides}
-<div class="flex gap-3 mt-6">
-<button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
-<span class="material-symbols-outlined">chevron_left</span>
-</button>
-<button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next>
-<span class="material-symbols-outlined">chevron_right</span>
-</button>
-</div>
+${navButtons}
 </div>
 </div>
 </section>`;
 }
 
-function fillKeyTerm(comp, maxW) {
+function fillKeyTerm(comp, variant, maxW) {
   const items = comp._items || [];
   if (items.length === 0) return '';
 
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC['key-term'] || {}).section || 'py-16');
 
+  // ── Variant: list — vertical definition list ──
+  if (variant === 'list') {
+    const listItems = items.map(item =>
+      `<div class="flex gap-6 p-5 border-b border-on-surface/5 last:border-0">
+<div class="text-on-surface font-headline font-bold text-lg w-48 flex-shrink-0">${esc(item.term || item.title || '')}</div>
+<p class="text-on-surface-variant text-sm leading-relaxed flex-1">${esc(item.definition || item.body || '')}</p>
+</div>`
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="key-term">
+<div class="${maxW} mx-auto px-8">
+<h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
+<div class="glass-card rounded-2xl overflow-hidden" data-animate="fade-up">
+${listItems}
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: card-grid ──
   const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
   const newCards = items.map(item =>
     `<div class="glass-card p-6 md:p-8 rounded-2xl overflow-hidden border-l-4 border-primary">
@@ -1685,14 +1874,41 @@ ${images}
 </section>`;
 }
 
-function fillLabeledImage(comp, maxW) {
+function fillLabeledImage(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly((DC['labeled-image'] || {}).section || 'py-16');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
   const markers = comp._markers || [];
 
-  // If we have markers with labels, render interactive hotspot markers with tooltips
+  // ── Variant: side-panel — image on left, marker list on right ──
+  if (variant === 'side-panel') {
+    const panelItems = markers.map((m, i) =>
+      `<div class="flex items-start gap-4 p-4 rounded-xl hover:bg-surface-container/50 transition-colors">
+<div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
+<div>
+<div class="font-bold text-on-surface text-sm">${esc(m.label || '')}</div>
+${m.description ? `<p class="text-xs text-on-surface-variant mt-1">${esc(m.description || '')}</p>` : ''}
+</div>
+</div>`
+    ).join('\n');
+
+    return `<section class="${secClass}" data-component-type="labeled-image">
+<div class="${maxW} mx-auto px-8">
+${title ? `<h2 class="font-headline text-3xl font-bold mb-12">${title}</h2>` : ''}
+<div class="flex flex-col md:flex-row gap-8" data-animate="fade-up">
+<div class="flex-1 relative bg-surface-container rounded-3xl overflow-hidden min-h-[300px]">
+${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-3xl" src="${imgSrc}"/>` : '<div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>'}
+</div>
+<div class="md:w-80 flex-shrink-0 glass-card rounded-2xl p-4 space-y-1 self-start">
+${panelItems}
+</div>
+</div>
+</div>
+</section>`;
+  }
+
+  // ── Default variant: numbered-dots — markers overlaid on image ──
   const markerHtml = markers.map((m, i) =>
     `<div class="absolute group z-10" style="left:${m.x}%;top:${m.y}%">
 <div class="w-8 h-8 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-125 transition-transform flex items-center justify-center text-on-primary text-xs font-bold">${i + 1}</div>
@@ -1700,7 +1916,6 @@ function fillLabeledImage(comp, maxW) {
 </div>`
   ).join('\n');
 
-  // If no image, render markers as a labeled list below the image placeholder
   const hasImage = !!imgSrc;
   const fallbackMarkerList = !hasImage && markers.length > 0
     ? `<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mt-8">${markers.map((m, i) =>
@@ -1834,26 +2049,26 @@ function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
     case 'mcq':             html = fillMCQ(comp, variant, maxW); break;
     case 'graphic-text':    html = fillGraphicText(comp, index, variant, maxW); break;
     case 'bento':           html = fillBento(comp, variant, maxW); break;
-    case 'data-table':      html = fillDataTable(comp, maxW); break;
+    case 'data-table':      html = fillDataTable(comp, variant, maxW); break;
     case 'textinput':       html = fillTextInput(comp, maxW); break;
     case 'path-selector':   html = fillPathSelector(comp, maxW); break;
-    case 'branching':       html = fillBranching(comp, maxW); break;
+    case 'branching':       html = fillBranching(comp, variant, maxW); break;
     case 'timeline':        html = fillTimeline(comp, variant, maxW); break;
     case 'comparison':      html = fillComparison(comp, variant, maxW); break;
     case 'stat-callout':    html = fillStatCallout(comp, variant, maxW); break;
     case 'pullquote':       html = fillPullquote(comp, variant, maxW); break;
-    case 'checklist':       html = fillChecklist(comp, maxW); break;
+    case 'checklist':       html = fillChecklist(comp, variant, maxW); break;
     case 'tabs':            html = fillTabs(comp, variant, maxW); break;
-    case 'flashcard':       html = fillFlashcard(comp, maxW); break;
-    case 'narrative':       html = fillNarrative(comp, maxW); break;
-    case 'key-term':        html = fillKeyTerm(comp, maxW); break;
+    case 'flashcard':       html = fillFlashcard(comp, variant, maxW); break;
+    case 'narrative':       html = fillNarrative(comp, variant, maxW); break;
+    case 'key-term':        html = fillKeyTerm(comp, variant, maxW); break;
     case 'full-bleed':      html = fillFullBleed(comp, variant); break;
     case 'graphic':         html = fillGraphic(comp, variant, maxW); break;
     case 'process-flow':    html = fillProcessFlow(comp, variant, maxW); break;
     case 'media':           html = fillMedia(comp, maxW); break;
     case 'video-transcript':html = fillVideoTranscript(comp, maxW); break;
     case 'image-gallery':   html = fillImageGallery(comp, maxW); break;
-    case 'labeled-image':   html = fillLabeledImage(comp, maxW); break;
+    case 'labeled-image':   html = fillLabeledImage(comp, variant, maxW); break;
     case 'divider':         html = fillDivider(comp, variant); break;
     case 'callout':         html = fillCallout(comp, variant, maxW); break;
     default:

@@ -10,7 +10,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 **Preview URL:** https://aigenesis2023.github.io/ModernisationEngine/
 (Currently serves the generated course directly — no upload UI during proof-of-concept phase)
 
-**Branch:** `ai-first-authoring-5` (active development) | `Current-working-2` (GitHub Pages deploy target)
+**Branch:** Check `git branch` for current branch. `main` exists but is not actively used.
 
 **Future:** An authoring layer will sit on top of the output, allowing end users to edit content, swap components, and customise the course without re-running the pipeline.
 
@@ -42,7 +42,7 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
                     ▼
          generate-course-html.js (Google Stitch — GEMINI_3_1_PRO)
          ├─ Sends brand-design.md (DESIGN.md format brief)
-         ├─ Sends representative-course.md (all 25 component types)
+         ├─ Sends representative-course.md (all 28 component types)
          ├─ Stitch designs complete branded page experience
          ├─ Extracts: page shell, component patterns, design tokens
          └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
@@ -112,13 +112,13 @@ v5/                                    ← ALL ACTIVE CODE
   schemas/
     knowledge-base.schema.json         ← Flat research output: keyPoints[] + teachableMoments[] (no component awareness)
     course-layout.schema.json          ← Layout engine output format
-    component-library.json             ← 26 components: type, props, learningMoment, creativeUses, examples
+    component-library.json             ← 28 components: type, props, learningMoment, creativeUses, examples
     content-bucket.schema.json         ← ⚠️ ARCHIVED — SCORM extraction output format
   prompts/
     research-agent.md                  ← Expert SME persona: topic → raw knowledge + teachable moments
     generation-engine.md               ← Senior ID persona: emotional arc, archetypes, anti-patterns, voice calibration
     generation-agent.md                ← Subagent task: reads brand-design.md + KB → course-layout.json
-    representative-course.md           ← All 26 component types for Stitch to design
+    representative-course.md           ← All 28 component types for Stitch to design
     layout-engine.md                   ← ⚠️ ARCHIVED — SCORM layout engine prompt
   scripts/
     research-content.js                ← AI-first: topic → knowledge-base.json (subagent)
@@ -154,7 +154,7 @@ v5/                                    ← ALL ACTIVE CODE
     stitch-course-screenshot.png       ← Stitch's design preview
     design-tokens.json                 ← Extracted design system tokens
     design-contract.json               ← Visual contract: cheerio-extracted from patterns
-    component-patterns/                ← Extracted HTML pattern per component type (26)
+    component-patterns/                ← Extracted HTML pattern per component type (28)
     images/                            ← Generated images
     course.html                        ← Final single-file output
 
@@ -244,6 +244,9 @@ Claude Code automatically selects the correct run level based on what changed. T
 
 **When in doubt, do a FULL RUN.** Announce which run level you're using and why.
 
+### Post-Change Audit (MANDATORY)
+After completing any significant code change (new components, new variants, fill function changes, schema changes), **run the change audit checklist** in `v5/CHANGE-AUDIT.md`. This catches stale counts, missing variant labels, doc drift, and memory staleness that QA gates do not test. Do not skip this. Do not self-assess — execute every check in the file.
+
 ### Full Run: Clear stale outputs
 ```bash
 rm -rf v5/output/component-patterns/ v5/output/images/
@@ -276,7 +279,7 @@ node v5/scripts/review-course.js                           # Step 6c (visual rev
 
 ---
 
-## Component Library (26 types)
+## Component Library (28 types)
 
 | Type | Purpose |
 |---|---|
@@ -305,6 +308,8 @@ node v5/scripts/review-course.js                           # Step 6c (visual rev
 | `image-gallery` | Grid of images with lightbox |
 | `full-bleed` | Edge-to-edge image with text overlay |
 | `video-transcript` | Video with expandable transcript |
+| `divider` | Visual break between topics (line, spacing, or icon) |
+| `callout` | Styled info/warning/tip/success box |
 
 ### Course Archetypes
 
@@ -320,25 +325,35 @@ The generation engine classifies each topic and selects a **course archetype** t
 
 ### Layout Variants
 
-13 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
+23 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
 
 **All variants are pre-rendered into every built course** as `<template>` tags. The **DEV toggle** (amber button, top-right of every course) lets you switch variants live without rebuilding. This is the foundation for the future authoring tool.
 
 | Component | Variants |
 |---|---|
 | `hero` | `centered-overlay` (default), `split-screen`, `minimal-text` |
-| `graphic-text` | `split` (default), `overlap`, `full-overlay` |
-| `bento` | `grid-4` (default), `wide-2`, `featured` |
-| `accordion` | `standard` (default), `accent-border` |
-| `mcq` | `stacked` (default), `grid` |
-| `stat-callout` | `centered` (default), `card-row` |
-| `timeline` | `vertical` (default), `centered-alternating` |
-| `comparison` | `columns` (default), `stacked-rows` |
-| `tabs` | `horizontal` (default), `vertical` |
-| `pullquote` | `accent-bar` (default), `centered`, `minimal` |
-| `full-bleed` | `center` (default), `left`, `right` |
-| `process-flow` | `vertical` (default), `horizontal` |
+| `text` | `standard` (default), `two-column`, `highlight-box` |
 | `graphic` | `standard` (default), `captioned-card` |
+| `graphic-text` | `split` (default), `overlap`, `full-overlay` |
+| `pullquote` | `accent-bar` (default), `centered`, `minimal` |
+| `stat-callout` | `centered` (default), `card-row` |
+| `callout` | `info` (default), `warning`, `tip`, `success` |
+| `accordion` | `standard` (default), `accent-border` |
+| `tabs` | `horizontal` (default), `vertical` |
+| `narrative` | `image-focused` (default), `text-focused` |
+| `flashcard` | `grid` (default), `single-large` |
+| `labeled-image` | `numbered-dots` (default), `side-panel` |
+| `mcq` | `stacked` (default), `grid` |
+| `branching` | `cards` (default), `list` |
+| `checklist` | `standard` (default), `card-style`, `numbered` |
+| `bento` | `grid-4` (default), `wide-2`, `featured` |
+| `comparison` | `columns` (default), `stacked-rows` |
+| `data-table` | `standard` (default), `striped-card` |
+| `timeline` | `vertical` (default), `centered-alternating` |
+| `process-flow` | `vertical` (default), `horizontal` |
+| `key-term` | `list` (default), `card-grid` |
+| `divider` | `line` (default), `spacing`, `icon` |
+| `full-bleed` | `center` (default), `left`, `right` |
 
 ### Section Width
 
@@ -358,7 +373,7 @@ Sections can set `"sectionWidth"` to vary page-level content width:
 ---
 
 ## Deployment
-GitHub Pages serves from root `index.html` on `Current-working-2`. `build-course.js` writes directly to root `index.html`. Commit and push to `Current-working-2` to deploy. **Never commit to or push to `main`.**
+`build-course.js` writes directly to root `index.html`. Preview via local port (Codespace / `node v5/scripts/serve.js`). GitHub Pages is configured on `main` but not actively used during development. Branch snapshots (e.g., `authoring-layer-v3` → `v4`) serve as backups before big changes.
 
 ---
 

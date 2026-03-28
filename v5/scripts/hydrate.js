@@ -243,6 +243,10 @@
               (i === current ? 'bg-primary' : 'bg-outline-variant/30');
           });
         }
+        var slideCounter = container.querySelector('[data-slide-counter]');
+        if (slideCounter) {
+          slideCounter.textContent = (current + 1) + ' / ' + slides.length;
+        }
       }
 
       if (prevBtn) {
@@ -1101,7 +1105,7 @@
         'centered-alternating': 'Left/right alternating',
         'columns': 'Table columns',
         'stacked-rows': 'Side-by-side rows',
-        'horizontal': 'Tabs above',
+        'horizontal': 'Tabs above / Left to right',
         'vertical': 'Tabs on left / Top-to-bottom',
         'accent-bar': 'Accent bar + quote',
         'minimal': 'Clean minimal',
@@ -1110,7 +1114,26 @@
         'right': 'Text right, fade left',
         'standard': 'Default',
         'captioned-card': 'Card with caption',
-        'horizontal': 'Left to right'
+        'two-column': 'Two columns',
+        'highlight-box': 'Highlighted card',
+        'image-focused': 'Large image + text',
+        'text-focused': 'Text-dominant',
+        'single-large': 'One card at a time',
+        'card-style': 'Separate cards',
+        'numbered': 'Numbered list',
+        'list': 'Vertical list',
+        'card-grid': 'Card grid',
+        'side-panel': 'Image + sidebar',
+        'numbered-dots': 'Numbered markers',
+        'striped-card': 'Striped card table',
+        'cards': 'Option cards',
+        'line': 'Horizontal line',
+        'spacing': 'Whitespace only',
+        'icon': 'Icon break',
+        'info': 'Info callout',
+        'warning': 'Warning callout',
+        'tip': 'Tip callout',
+        'success': 'Success callout'
       };
 
       // ── DEV button ────────────────────────────────────────────────────

@@ -54,7 +54,7 @@ No `statistics`, `terminology`, `quizIdeas`, or `commonMisconceptions` arrays. T
 The SCORM layout engine (`layout-engine.md`) reads raw extracted content and produces a structured course. This involves:
 1. Understanding the educational arc across all scenes/slides
 2. Grouping related content into sections (5-12 typically)
-3. Choosing the best component type for each piece of content (from 26 available)
+3. Choosing the best component type for each piece of content (from 28 available)
 4. Rewriting text for modern scannable format while preserving accuracy
 5. Specifying image prompts for visual components
 6. **Interpreting logic metadata and mapping it to modern interaction patterns**
@@ -120,7 +120,7 @@ Questions tagged with path conditions get grouped into path-specific quiz sectio
 The system prompt at `v5/prompts/layout-engine.md` defines the AI's role, design rules, and output format. Key sections:
 
 - **Design Process:** Understand content → plan structure → choose components → write content
-- **Component Reference:** When to use each of the 25 types
+- **Component Reference:** When to use each of the 28 types
 - **Design Rules:** Hero first, no consecutive same types, 2-6 components per section, alternate image alignment, space MCQs apart
 - **Content Rules:** Rewrite for modern tone, preserve accuracy, real headings, structure content appropriately
 - **Image Rules:** Write prompts for every image-bearing component
@@ -155,7 +155,7 @@ All modes produce the same output: validated `course-layout.json`.
 - Hero is the first component
 - No consecutive same component types
 - All componentId and sectionId values are unique
-- All component types are from the valid 25-type set
+- All component types are from the valid 28-type set
 
 ### Logic Validation (IMPLEMENTED)
 
@@ -171,7 +171,7 @@ All modes produce the same output: validated `course-layout.json`.
 
 The schema defines sections containing components. Each component has:
 - `componentId` — unique identifier
-- `type` — one of 25 component types
+- `type` — one of 28 component types
 - `displayTitle`, `body`, `instruction` — content fields
 - `_items[]` — for list-based components (accordion, tabs, quiz choices, etc.)
 - `_graphic` — image reference (populated by image generation step)

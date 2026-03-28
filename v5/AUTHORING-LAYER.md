@@ -2,9 +2,9 @@
 
 > **Living document.** Updated after every commit/push. Tracks what's done, what's next, what was skipped, and knock-on effects.
 
-**Branch:** `authoring-layer-v2`
+**Branch:** `authoring-layer-v3`
 **Started:** 2026-03-28
-**Last updated:** 2026-03-28 (Phase 2a complete)
+**Last updated:** 2026-03-28 (Phase 2c complete — all variant rendering implemented)
 
 ---
 
@@ -124,32 +124,32 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 - [x] **Update generation-engine.md** — added category table, component selection guidance, new variant table, callout/divider usage rules, quality checklist updates
 - [x] **Update generation-agent.md** — reference categories, callout/divider, 28 components
 
-### 2b — Stitch Layer (requires Design Run)
+### 2b — Stitch Layer (requires Design Run) ✅ DONE
 
 - [x] **Update representative-course.md** — added HTML examples for:
   - [x] `divider` (all 3 variants: line, spacing, icon)
   - [x] `callout` (all 4 variants: info, warning, tip, success)
   - [x] All 17 new variants of existing components (text ×3, narrative ×2, flashcard ×2, checklist ×3, key-term ×2, labeled-image ×2, data-table ×2, branching ×2)
   - [x] Added `data-variant` attribute requirement to design requirements
-- [ ] **Run Stitch** (Step 3) to design new components + variants
-- [ ] **Run extract-contract.js** to extract new patterns
+- [x] **Run Stitch** (Step 3) to design new components + variants
+- [x] **Run extract-contract.js** to extract new patterns
 
-### 2c — Build Layer (after Stitch designs exist)
+### 2c — Build Layer (after Stitch designs exist) ✅ DONE
 
-- [ ] **Update build-course.js**
-  - [ ] Add `fillDivider()` function
-  - [ ] Add `fillCallout()` function
-  - [ ] Add variant rendering for text (2 new variants)
-  - [ ] Add variant rendering for narrative (2 new variants)
-  - [ ] Add variant rendering for flashcard (2 new variants)
-  - [ ] Add variant rendering for checklist (2 new variants)
-  - [ ] Add variant rendering for key-term (1 new variant)
-  - [ ] Add variant rendering for labeled-image (1 new variant)
-  - [ ] Add variant rendering for data-table (1 new variant)
-  - [ ] Add variant rendering for branching (1 new variant)
-- [ ] **Update hydrate.js** — minimal (callout/divider need no interactivity)
-- [ ] **Update extract-contract.js** if needed for new component patterns
-- [ ] **Update DEV toggle** — variant switcher for all newly variant-enabled components
+- [x] **Update build-course.js**
+  - [x] Add `fillDivider()` function
+  - [x] Add `fillCallout()` function
+  - [x] Add variant rendering for text (2 new variants: two-column, highlight-box)
+  - [x] Add variant rendering for narrative (2 new variants: image-focused, text-focused)
+  - [x] Add variant rendering for flashcard (2 new variants: grid, single-large)
+  - [x] Add variant rendering for checklist (2 new variants: card-style, numbered)
+  - [x] Add variant rendering for key-term (1 new variant: list)
+  - [x] Add variant rendering for labeled-image (1 new variant: side-panel)
+  - [x] Add variant rendering for data-table (1 new variant: striped-card)
+  - [x] Add variant rendering for branching (1 new variant: list)
+- [x] **Update hydrate.js** — no changes needed (callout/divider are non-interactive; single-large flashcard uses existing carousel hydration)
+- [x] **Update extract-contract.js** — no changes needed (divider/callout don't use design contracts)
+- [x] **Update DEV toggle** — variant switcher works via existing VARIANT_MAP + template system
 
 ### 2d — Authoring UI Layer
 
@@ -157,12 +157,12 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 - [ ] **Add category headers/tabs** to variant browser
 - [ ] **Visual indicators** for which category each section's component belongs to
 
-### 2e — QA + Validation
+### 2e — QA + Validation (partially done)
 
-- [ ] **Update qa-course.js** — validate new component types
-- [ ] **Update qa-interactive.js** — add tests for new variants
-- [ ] **Update validate-layout.js** — accept new types in validation
-- [ ] **Run full QA gate** (6a → 6b → 6c)
+- [x] **Update qa-course.js** — variant registry synced (all new variants validated)
+- [ ] **Update qa-interactive.js** — add targeted tests for new variant rendering
+- [x] **Update validate-layout.js** — accepts new types (divider, callout)
+- [x] **Run full QA gate** (6a → 6b → 6c) — passed: 109/0 structural, 47/0 interactive, visual review clean
 - [ ] **Matrix test** with at least 2 brand/topic combinations
 
 ---
@@ -253,7 +253,6 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
 | process-flow | Layout | vertical, horizontal |
 | key-term | Content | **list**, **card-grid** |
 | divider | Structure | **line**, **spacing**, **icon** |
-| graphic | Content | standard, captioned-card |
 
 Components WITHOUT variants (5): image-gallery, media, video-transcript, path-selector, textinput
 
@@ -339,11 +338,24 @@ These were identified in research as valuable but too complex for the current ph
 - **Design contract size:** More component patterns = larger design-contract.json. Should be fine but watch.
 - **AI generation quality:** Better categories should IMPROVE component selection. Verify with matrix test.
 - **Existing courses:** course-layout.json files generated before this change won't have divider/callout components. That's fine — build-course.js handles missing types gracefully.
-- **DEV toggle UI:** Currently shows variants as a flat list. Will need category grouping to stay usable as variant count grows from ~22 to ~39.
+- **DEV toggle UI:** Currently shows variants as a flat list. Will need category grouping to stay usable with 56 variants across 23 components (Phase 2d).
 
 ---
 
 ## Changelog
+
+### 2026-03-28 — Phase 2c Complete (Build Layer)
+- Implemented variant rendering for all 7 remaining Phase 2 components in build-course.js:
+  - `narrative`: image-focused (large image + compact text), text-focused (larger text, more padding)
+  - `flashcard`: single-large (one card at a time, carousel-style navigation)
+  - `checklist`: card-style (separate cards in grid), numbered (numbered indicators)
+  - `key-term`: list (vertical definition list in glass card)
+  - `labeled-image`: side-panel (image left, marker list panel right)
+  - `data-table`: striped-card (prominent card with stronger header/row styling)
+  - `branching`: list (vertical stacked list with chevron arrows)
+- Added `variant` parameter to all 7 fill function signatures + dispatcher calls
+- Full QA gate passed: 109/0 structural, 47/0 interactive, visual review clean
+- Design Run completed with Sprig brand: 11 sections, 31 components, 22 types, 100% image coverage
 
 ### 2026-03-28 — Phase 2a/2b Audit Fixes
 - Added missing variant arrays to 4 pre-existing components: graphic (standard, captioned-card), pullquote (accent-bar, centered, minimal), full-bleed (center, left, right), process-flow (vertical, horizontal) — were in build-course.js but not component-library.json

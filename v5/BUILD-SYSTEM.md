@@ -23,7 +23,7 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
    - Visual classes come from `design-contract.json` (shadows, hovers, gradients, brand colours)
    - Content comes from course-layout.json (100% SCORM fidelity)
 
-4. **If Stitch changes its HTML output**, fix `extract-contract.js` (one file). The 25 fill functions in `build-course.js` don't change.
+4. **If Stitch changes its HTML output**, fix `extract-contract.js` (one file). The 28 fill functions in `build-course.js` don't change.
 
 **Result:** Different brand URL → different Stitch kit → different visual character, identical layout. Verified across 9+ brands.
 
@@ -57,7 +57,7 @@ Every fill function enforces these rules. They are hardcoded in `build-course.js
 
 ## Fill Function Conventions
 
-Each of the 25 component types has a `fill{Type}(comp, index)` function in `build-course.js`. Every fill function follows the same pattern:
+Each of the 28 component types has a `fill{Type}(comp, index)` function in `build-course.js`. Every fill function follows the same pattern:
 
 ```
 1. Read visual properties from DC (design-contract.json) with safe fallbacks

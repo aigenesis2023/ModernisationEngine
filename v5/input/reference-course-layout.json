@@ -2,7 +2,7 @@
   "course": {
     "title": "The Future of Work",
     "subtitle": "How digital transformation is reshaping organisations, roles, and the skills that matter most.",
-    "totalSections": 10
+    "totalSections": 13
   },
 
   "metadata": {
@@ -10,8 +10,8 @@
     "sourceTopic": "Digital transformation in the modern workplace",
     "sourceType": "ai-generated",
     "archetype": "the-journey",
-    "componentCount": 23,
-    "imageCount": 14
+    "componentCount": 28,
+    "imageCount": 15
   },
 
   "sections": [
@@ -31,6 +31,27 @@
             "alt": "Modern open-plan office with collaborative digital workspaces and large interactive screens"
           },
           "imagePrompt": "Modern open-plan office space with floor-to-ceiling windows, people collaborating around large interactive digital screens, warm natural lighting, contemporary furniture, aerial perspective, professional corporate photography style, 16:9 aspect ratio"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-01b",
+      "title": "Choose Your Path",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-24",
+          "type": "path-selector",
+          "displayTitle": "Choose Your Learning Path",
+          "body": "<p>Select your focus area to see content tailored to your role.</p>",
+          "instruction": "Pick the path that best describes you.",
+          "pathGroup": "role",
+          "_items": [
+            { "title": "Leadership", "body": "Strategy, change management, and organisational design.", "variable": "RoleLeadership" },
+            { "title": "Operations", "body": "Process improvement, automation, and day-to-day efficiency.", "variable": "RoleOperations" },
+            { "title": "Technology", "body": "Platforms, integrations, and digital infrastructure.", "variable": "RoleTechnology" }
+          ]
         }
       ]
     },
@@ -106,6 +127,22 @@
     },
 
     {
+      "sectionId": "section-03b",
+      "title": "Important Note",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-25",
+          "type": "callout",
+          "variant": "tip",
+          "displayTitle": "Pro Tip",
+          "body": "<p>The most successful digital transformations start with the process, not the platform. Map your current workflows before shopping for tools — otherwise you'll automate inefficiency.</p>",
+          "calloutType": "tip"
+        }
+      ]
+    },
+
+    {
       "sectionId": "section-04",
       "title": "A Transformation Story",
       "sectionWidth": "standard",
@@ -150,6 +187,21 @@
           "body": "The technology was the easy part. The real transformation happened when people stopped protecting their old workflows.",
           "attribution": "Sarah Chen",
           "role": "CTO, Meridian Financial Group"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-04b",
+      "title": "",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-26",
+          "type": "divider",
+          "variant": "icon",
+          "style": "icon",
+          "icon": "lightbulb"
         }
       ]
     },
@@ -374,6 +426,45 @@
           },
           "body": "<p>A modern digital workplace integrates communication, collaboration, analytics, and automation into a seamless ecosystem.</p>",
           "imagePrompt": "Clean infographic-style illustration showing a modern digital workplace ecosystem, interconnected icons for communication collaboration analytics and automation, minimal design, professional blue and grey scheme, 16:9 aspect ratio"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-09b",
+      "title": "Expert Perspectives",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-27",
+          "type": "media",
+          "displayTitle": "The Human Side of Digital Change",
+          "body": "<p>Watch how leading organisations balance technology adoption with employee wellbeing.</p>",
+          "_media": {
+            "mp4": "media/digital-change.mp4",
+            "poster": "images/media-poster.jpg"
+          },
+          "imagePrompt": "Professional corporate video thumbnail showing a diverse panel discussion in a modern conference setting, warm lighting, 16:9 aspect ratio"
+        }
+      ]
+    },
+
+    {
+      "sectionId": "section-09c",
+      "title": "Deep Dive Interview",
+      "sectionWidth": "standard",
+      "components": [
+        {
+          "componentId": "comp-28",
+          "type": "video-transcript",
+          "displayTitle": "Interview: Leading Through Transformation",
+          "body": "<p>Dr. James Okafor shares lessons from guiding three organisations through digital transformation.</p>",
+          "_media": {
+            "mp4": "media/transformation-interview.mp4",
+            "poster": "images/interview-poster.jpg"
+          },
+          "transcript": "<p><strong>Interviewer:</strong> What's the single biggest mistake organisations make during digital transformation?</p><p><strong>Dr. Okafor:</strong> They treat it as an IT project. Transformation is a people project that happens to involve technology. The organisations that succeed are the ones where leadership models the change they're asking for — using the new tools themselves, being transparent about what's hard, and celebrating small wins publicly.</p><p><strong>Interviewer:</strong> How do you handle resistance from long-tenured employees?</p><p><strong>Dr. Okafor:</strong> You don't handle it — you listen to it. Resistance is data. If your most experienced people are pushing back, they're usually seeing something you've missed. The best approach is to make them part of the design process, not the audience for it.</p>",
+          "imagePrompt": "Professional headshot-style photo of a confident business executive in a modern office, warm natural lighting, shallow depth of field, 16:9 aspect ratio"
         }
       ]
     },

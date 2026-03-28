@@ -11,7 +11,7 @@ This document covers how the Modernisation Engine uses Google Stitch to generate
 
 Stitch receives two things:
 1. **brand-design.md** — a DESIGN.md format brief describing how the course should look
-2. **representative-course.md** — all 25 component types arranged in a realistic e-learning flow
+2. **representative-course.md** — all 28 component types arranged in a realistic e-learning flow
 
 Stitch designs a complete branded page experience. We then extract:
 - **Component patterns** — one HTML fragment per component type (25 files)
@@ -114,7 +114,7 @@ The design contract is the **stable interface** between Stitch's design output a
 ## representative-course.md Requirements
 
 This file must:
-- Include ALL 25 component types (no gaps — the authoring layer needs every type designed)
+- Include ALL 28 component types (no gaps — the authoring layer needs every type designed)
 - Arrange them in a realistic e-learning flow (hero → intro text → content → quiz → etc.)
 - Use generic but realistic example content (not tied to any specific SCORM)
 - Request `data-component-type` attributes on each component wrapper for extraction
