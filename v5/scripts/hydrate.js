@@ -1527,7 +1527,14 @@
                 val = val[key];
               }
               if (val !== undefined && val !== null) {
-                if (useHtml) { el.innerHTML = val; } else { el.textContent = val; }
+                if (useHtml) {
+                  el.innerHTML = val;
+                } else {
+                  // Strip HTML tags — JSON body values may contain <p> etc. from AI generation;
+                  // build-course.js strips at build time but variant swap must do the same
+                  var clean = typeof val === 'string' ? val.replace(/<[^>]*>/g, '') : val;
+                  el.textContent = clean;
+                }
               }
             });
 

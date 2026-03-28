@@ -542,6 +542,10 @@ These were identified in research as valuable but too complex for the current ph
 - Architecture: generic `data-interactive` marker = future-proof (new interactive components auto-detected)
 - QA: 110/0 structural, 43/0 interactive
 
+### 2026-03-28 — Bug Fix: Variant swap strips HTML tags from text values
+- hydrate.js: swapVariant() data-edit-path handler now strips HTML tags (e.g. `<p>`) from JSON values before setting textContent — matches build-course.js stripTags() behavior at build time
+- Affected: pullquote body (all variants), full-bleed body, any data-edit-path="body" where AI-generated content contains HTML wrappers
+
 ### 2026-03-28 — Bug Fix: Authoring hydration fixes (3 bugs)
 - hydrate.js: `hydrateComponent()` now uses `qsaIncludingSelf()` — fixes variant swap breaking interactivity on MCQ, flashcard (single-large), and narrative (all variants) where `data-quiz`/`data-carousel` live on the `<section>` itself
 - hydrate.js: CSS override for `[data-editable].text-gradient` — `-webkit-text-fill-color: transparent` made stat values invisible when contenteditable was active
