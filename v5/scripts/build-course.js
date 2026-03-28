@@ -900,14 +900,31 @@ ${newButtons}
 function fillBranching(comp, maxW) {
   let items = comp._items || [];
   // Fallback: if no _items but body has <li> elements, extract them as options
+  let scenarioText = '';
   if (items.length === 0 && comp.body) {
     const liMatches = comp.body.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
     if (liMatches.length > 0) {
       items = liMatches.map(li => ({ title: stripTags(li) }));
+      // Detect scenario pattern: first item is a long description (no letter prefix),
+      // remaining items are options. Extract first item as scenario body text.
+      if (items.length > 2) {
+        const first = items[0].title || '';
+        const hasLetterPrefix = /^[A-D][\.\):\s—–-]/.test(first.trim());
+        const isLong = first.length > 80;
+        if (!hasLetterPrefix && isLong) {
+          scenarioText = first;
+          items = items.slice(1);
+        }
+      }
+      // Strip letter prefixes (A., B., C.) from option text
+      items = items.map(item => ({
+        ...item,
+        title: (item.title || '').replace(/^[A-Z][\.\):\s—–-]\s*/i, '')
+      }));
     }
   }
   const title = esc(comp.displayTitle || '');
-  const bodyText = items.length > 0 ? '' : stripTags(comp.body || '');
+  const bodyText = scenarioText || (items.length > 0 ? '' : stripTags(comp.body || ''));
   const c = DC.branching || {};
   const secClass = sectionOnly((DC.branching || {}).section || 'py-16');
 
@@ -1681,6 +1698,64 @@ ${fallbackMarkerList}
 </section>`;
 }
 
+// ─── Divider ──────────────────────────────────────────────────────────
+function fillDivider(comp, variant) {
+  const style = comp.style || variant || 'line';
+  const icon = esc(comp.icon || 'more_horiz');
+
+  if (style === 'spacing') {
+    return `<section class="py-12" data-component-type="divider">
+<div class="h-8"></div>
+</section>`;
+  }
+
+  if (style === 'icon') {
+    return `<section class="py-8" data-component-type="divider">
+<div class="max-w-6xl mx-auto px-8 flex items-center gap-4">
+<div class="flex-1 h-px bg-outline-variant/20"></div>
+<span class="material-symbols-outlined text-on-surface-variant/40 text-xl">${icon}</span>
+<div class="flex-1 h-px bg-outline-variant/20"></div>
+</div>
+</section>`;
+  }
+
+  // Default: line
+  return `<section class="py-8" data-component-type="divider">
+<div class="max-w-4xl mx-auto px-8">
+<hr class="border-0 h-px bg-outline-variant/20"/>
+</div>
+</section>`;
+}
+
+// ─── Callout ──────────────────────────────────────────────────────────
+function fillCallout(comp, variant, maxW) {
+  const title = esc(comp.displayTitle || '');
+  const body = comp.body || '';
+  const calloutType = comp.calloutType || variant || 'info';
+
+  const typeConfig = {
+    info:    { icon: 'info',          border: 'border-primary',      bg: 'bg-primary/5',   iconColor: 'text-primary' },
+    warning: { icon: 'warning',       border: 'border-amber-500',    bg: 'bg-amber-500/5', iconColor: 'text-amber-500' },
+    tip:     { icon: 'tips_and_updates', border: 'border-emerald-500', bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' },
+    success: { icon: 'check_circle',  border: 'border-emerald-500',  bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' }
+  };
+  const cfg = typeConfig[calloutType] || typeConfig.info;
+
+  return `<section class="py-6" data-component-type="callout">
+<div class="${maxW} mx-auto px-8">
+<div class="border-l-4 ${cfg.border} ${cfg.bg} rounded-r-xl p-6 md:p-8" data-animate="fade-up">
+<div class="flex items-start gap-4">
+<span class="material-symbols-outlined ${cfg.iconColor} text-2xl flex-shrink-0 mt-0.5">${cfg.icon}</span>
+<div>
+${title ? `<h4 class="font-headline font-bold text-on-surface mb-2">${title}</h4>` : ''}
+<div class="text-on-surface-variant leading-relaxed">${body}</div>
+</div>
+</div>
+</div>
+</div>
+</section>`;
+}
+
 // ─── Section width helper ─────────────────────────────────────────────
 // Converts sectionWidth enum to Tailwind containment class.
 // Used by section assembly to vary content width per section.
@@ -1708,7 +1783,17 @@ const VARIANT_MAP = {
   'pullquote':    ['accent-bar', 'centered', 'minimal'],
   'full-bleed':   ['center', 'left', 'right'],
   'process-flow': ['vertical', 'horizontal'],
-  'graphic':      ['standard', 'captioned-card']
+  'graphic':      ['standard', 'captioned-card'],
+  'divider':      ['line', 'spacing', 'icon'],
+  'callout':      ['info', 'warning', 'tip', 'success'],
+  'text':         ['standard', 'two-column', 'highlight-box'],
+  'narrative':    ['image-focused', 'text-focused'],
+  'flashcard':    ['grid', 'single-large'],
+  'checklist':    ['standard', 'card-style', 'numbered'],
+  'key-term':     ['list', 'card-grid'],
+  'labeled-image':['numbered-dots', 'side-panel'],
+  'data-table':   ['standard', 'striped-card'],
+  'branching':    ['cards', 'list']
 };
 
 // ─── Single-variant renderer (used internally) ───────────────────────
@@ -1744,6 +1829,8 @@ function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
     case 'video-transcript':html = fillVideoTranscript(comp, maxW); break;
     case 'image-gallery':   html = fillImageGallery(comp, maxW); break;
     case 'labeled-image':   html = fillLabeledImage(comp, maxW); break;
+    case 'divider':         html = fillDivider(comp, variant); break;
+    case 'callout':         html = fillCallout(comp, variant, maxW); break;
     default:
       console.log(`  [warn] Unknown component type: ${type}`);
       return null;

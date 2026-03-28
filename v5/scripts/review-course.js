@@ -93,7 +93,7 @@ async function main() {
       }, i / sections.length);
     }
 
-    await desktopPage.waitForTimeout(300);
+    await desktopPage.waitForTimeout(1800);
     await desktopPage.screenshot({
       path: path.join(SCREENSHOTS_DIR, filename),
       type: 'jpeg',
@@ -123,7 +123,7 @@ async function main() {
 
   // Mobile hero
   await mobilePage.evaluate(() => window.scrollTo(0, 0));
-  await mobilePage.waitForTimeout(300);
+  await mobilePage.waitForTimeout(1800);
   await mobilePage.screenshot({
     path: path.join(SCREENSHOTS_DIR, 'mobile-hero.jpeg'),
     type: 'jpeg',
@@ -136,7 +136,7 @@ async function main() {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo(0, maxScroll * 0.4);
   });
-  await mobilePage.waitForTimeout(300);
+  await mobilePage.waitForTimeout(1800);
   await mobilePage.screenshot({
     path: path.join(SCREENSHOTS_DIR, 'mobile-mid.jpeg'),
     type: 'jpeg',
@@ -149,7 +149,7 @@ async function main() {
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
     window.scrollTo(0, maxScroll * 0.9);
   });
-  await mobilePage.waitForTimeout(300);
+  await mobilePage.waitForTimeout(1800);
   await mobilePage.screenshot({
     path: path.join(SCREENSHOTS_DIR, 'mobile-end.jpeg'),
     type: 'jpeg',

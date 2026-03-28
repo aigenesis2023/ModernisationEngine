@@ -15,6 +15,7 @@ const VALID_TYPES = [
   'timeline', 'comparison', 'stat-callout', 'pullquote', 'key-term',
   'checklist', 'tabs', 'flashcard', 'labeled-image', 'process-flow',
   'image-gallery', 'full-bleed', 'video-transcript', 'path-selector',
+  'divider', 'callout',
 ];
 
 /**
