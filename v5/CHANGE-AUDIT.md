@@ -35,12 +35,12 @@ If any variant was added, removed, or renamed:
 - [ ] `v5/scripts/build-course.js` — `VARIANT_MAP` includes the variant
 - [ ] `v5/scripts/build-course.js` — fill function has rendering logic (not just registered)
 - [ ] `v5/scripts/build-course.js` — dispatcher passes `variant` param to fill function
-- [ ] `v5/scripts/hydrate.js` — `variantLabels` has a human-friendly label
+- [ ] `v5/scripts/hydrate.js` — `variantLabels[componentType]` has a human-friendly label for the variant
 - [ ] `v5/scripts/qa-course.js` — variant registry includes it
 - [ ] `v5/schemas/component-library.json` — variant listed in component's `variants` array
 - [ ] `v5/prompts/representative-course.md` — HTML example for the variant exists
 
-**How to check:** Compare VARIANT_MAP keys in build-course.js against variantLabels keys in hydrate.js. They should match.
+**How to check:** Compare VARIANT_MAP keys in build-course.js against variantLabels[componentType] keys in hydrate.js. Every VARIANT_MAP entry must have a matching nested label.
 
 ---
 

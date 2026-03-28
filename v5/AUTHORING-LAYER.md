@@ -94,53 +94,9 @@ The Phase 3b component type `<select>` dropdown has three compounding problems:
 
 #### Finding 2: Categories and component names are developer language
 
-Current categories (Content, Explore, Assess, Layout, Media, Structure) were designed for the AI generation engine, not end users. "Explore" means nothing to a user. Component names like "narrative", "bento", "graphic-text", "stat-callout" are internal developer labels.
+> **SUPERSEDED:** The category and label system below was the initial Phase 3.5 implementation. It has been replaced by the **Authoring Display Reference** table (see below) which uses 7 picker categories, updated type labels, and per-component variant labels. Category badges have been removed from per-section toolbars entirely.
 
-**User-friendly category labels (display only — internal names stay unchanged):**
-
-| Internal (keep everywhere) | User-facing (toolbar display only) |
-|---|---|
-| Content | Text & Images |
-| Explore | Interactive |
-| Assess | Quiz & Activities |
-| Layout | Data & Layout |
-| Media | Media |
-| Structure | Page Structure |
-
-**User-friendly component labels (display only — add `typeLabels` map in hydrate.js):**
-
-| Internal | User-facing |
-|---|---|
-| hero | Hero Banner |
-| text | Text Block |
-| graphic | Image |
-| graphic-text | Image & Text |
-| full-bleed | Full-Width Image |
-| pullquote | Featured Quote |
-| stat-callout | Key Statistics |
-| key-term | Glossary |
-| callout | Callout |
-| accordion | Expandable List |
-| tabs | Tabs |
-| narrative | Slideshow |
-| flashcard | Flashcards |
-| labeled-image | Labelled Image |
-| mcq | Quiz |
-| branching | Scenario |
-| textinput | Free Text |
-| checklist | Checklist |
-| bento | Card Grid |
-| comparison | Comparison |
-| data-table | Table |
-| timeline | Timeline |
-| process-flow | Process Flow |
-| image-gallery | Gallery |
-| media | Video |
-| video-transcript | Video + Transcript |
-| divider | Divider |
-| path-selector | Path Selector |
-
-Same pattern as `variantLabels` — internal names stay in JSON, schemas, fill functions, prompts. Friendly names are display-only in hydrate.js.
+Internal names (Content, Explore, Assess, Layout, Media, Structure) remain unchanged in JSON, schemas, and generation engine. User-facing labels exist only in `typeLabels` and `variantLabels` in hydrate.js. See the **Authoring Display Reference** section for the current source of truth.
 
 #### Finding 3: Variant swapping is safe, type swapping is not
 
@@ -378,38 +334,110 @@ Phase 4e: Section width control           narrow/standard/wide/full toggle   PLA
 
 ---
 
-## Variant Inventory (after Phase 2)
+## Authoring Display Reference (Source of Truth)
 
-### Current (after Phase 2a+audit): 23 components with variants, 56 variants total
-### (was: 13 components, ~22 variants before Phase 2)
+This table defines every user-facing label in the authoring tool. Internal names (used in JSON/code) never change — only the display labels shown to the user.
 
-| Component | Category | Variants (new in **bold**) |
-|---|---|---|
-| hero | Structure | centered-overlay, split-screen, minimal-text |
-| text | Content | **standard**, **two-column**, **highlight-box** |
-| graphic | Content | standard, captioned-card |
-| graphic-text | Content | split, overlap, full-overlay |
-| full-bleed | Content | center, left, right |
-| pullquote | Content | accent-bar, centered, minimal |
-| stat-callout | Content | centered, card-row |
-| callout | Content | **info**, **warning**, **tip**, **success** |
-| accordion | Explore | standard, accent-border |
-| tabs | Explore | horizontal, vertical |
-| narrative | Explore | **image-focused**, **text-focused** |
-| flashcard | Explore | **grid**, **single-large** |
-| labeled-image | Explore | **numbered-dots**, **side-panel** |
-| mcq | Assess | stacked, grid |
-| branching | Assess | **cards**, **list** |
-| checklist | Assess | **standard**, **card-style**, **numbered** |
-| bento | Layout | grid-4, wide-2, featured |
-| comparison | Layout | columns, stacked-rows |
-| data-table | Layout | **standard**, **striped-card** |
-| timeline | Layout | vertical, centered-alternating |
-| process-flow | Layout | vertical, horizontal |
-| key-term | Content | **list**, **card-grid** |
-| divider | Structure | **line**, **spacing**, **icon** |
+- **7 picker categories** (for future block picker — NOT shown on per-section toolbars)
+- **28 components** with user-facing type labels
+- **56 variants** across 23 components, with per-component labels
+- **5 components without variants:** image-gallery, media, video-transcript, path-selector, textinput
 
-Components WITHOUT variants (5): image-gallery, media, video-transcript, path-selector, textinput
+### Text (4 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `text` | Text Block | `standard` | Single column |
+| | | `two-column` | Two columns |
+| | | `highlight-box` | Highlight box |
+| `pullquote` | Quote | `accent-bar` | Side accent |
+| | | `centered` | Centred |
+| | | `minimal` | Minimal |
+| `callout` | Callout | `info` | Info |
+| | | `warning` | Warning |
+| | | `tip` | Tip |
+| | | `success` | Success |
+| `key-term` | Glossary | `list` | List |
+| | | `card-grid` | Cards |
+
+### Image (4 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `graphic` | Image | `standard` | Simple |
+| | | `captioned-card` | Card with caption |
+| `graphic-text` | Image & Text | `split` | Side by side |
+| | | `overlap` | Overlapping |
+| | | `full-overlay` | Full background |
+| `full-bleed` | Full-Width Image | `center` | Text centred |
+| | | `left` | Text left |
+| | | `right` | Text right |
+| `image-gallery` | Gallery | *(no variants)* | |
+
+### Layout (4 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `stat-callout` | Key Statistics | `centered` | Grid |
+| | | `card-row` | Cards with bars |
+| `data-table` | Table | `standard` | Simple |
+| | | `striped-card` | Card with stripes |
+| `comparison` | Comparison | `columns` | Side by side |
+| | | `stacked-rows` | Stacked rows |
+| `bento` | Cards | `grid-4` | Grid |
+| | | `wide-2` | Two columns |
+| | | `featured` | Featured card |
+
+### Interactive (8 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `accordion` | Accordion | `standard` | Simple |
+| | | `accent-border` | Icons and border |
+| `tabs` | Tabs | `horizontal` | Tabs on top |
+| | | `vertical` | Tabs on side |
+| `narrative` | Slideshow | `image-focused` | Image emphasis |
+| | | `text-focused` | Text emphasis |
+| `flashcard` | Flashcards | `grid` | Show all |
+| | | `single-large` | One at a time |
+| `labeled-image` | Labelled Image | `numbered-dots` | Numbered on image |
+| | | `side-panel` | Side panel |
+| `checklist` | Checklist | `standard` | Simple list |
+| | | `card-style` | Cards |
+| | | `numbered` | Numbered |
+| `timeline` | Timeline | `vertical` | Stacked |
+| | | `centered-alternating` | Alternating sides |
+| `process-flow` | Process | `vertical` | Top to bottom |
+| | | `horizontal` | Left to right |
+
+### Quiz (3 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `mcq` | Quiz | `stacked` | Stacked |
+| | | `grid` | Grid |
+| `branching` | Scenario | `cards` | Cards |
+| | | `list` | List |
+| `textinput` | Open Response | *(no variants)* | |
+
+### Media (2 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `media` | Video | *(no variants)* | |
+| `video-transcript` | Video + Transcript | *(no variants)* | |
+
+### Structure (3 components)
+
+| Internal Name | User Label | Variant (internal) | Variant Label |
+|---|---|---|---|
+| `hero` | Hero Banner | `centered-overlay` | Centred overlay |
+| | | `split-screen` | Split screen |
+| | | `minimal-text` | Text only |
+| `divider` | Divider | `line` | Line |
+| | | `spacing` | Space only |
+| | | `icon` | Icon |
+| `path-selector` | Course Paths | *(no variants)* | |
 
 ---
 
@@ -498,6 +526,14 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-28 — Authoring Label Overhaul (UX clarity)
+- hydrate.js: Removed `USER_CATEGORY_LABELS` — category badges no longer shown on per-section toolbars (categories reserved for future block picker, Phase 4c)
+- hydrate.js: Replaced flat global `variantLabels` object with per-component nested `variantLabels[componentType][variantName]` structure — fixes labels like "Tabs on left / Top-to-bottom" appearing on process-flow and timeline
+- hydrate.js: Updated 6 `typeLabels`: pullquote→Quote, accordion→Accordion, textinput→Open Response, bento→Cards, process-flow→Process, path-selector→Course Paths
+- hydrate.js: All 56 variant labels now describe layout/arrangement, not content (e.g., "Image emphasis" not "Large image + text")
+- AUTHORING-LAYER.md: Replaced old Variant Inventory with comprehensive Authoring Display Reference table — 7 categories, 28 components, 56 variants with all user-facing labels
+- Designed 7 picker categories for Phase 4c: Text, Image, Layout, Interactive, Quiz, Media, Structure
 
 ### 2026-03-28 — Deep Inline Editing (structured content)
 - build-course.js: Added `data-edit-path` attributes to text elements inside structured items across 12 components:

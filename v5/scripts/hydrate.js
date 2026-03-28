@@ -1134,88 +1134,136 @@
         'graphic': 'Image',
         'graphic-text': 'Image & Text',
         'full-bleed': 'Full-Width Image',
-        'pullquote': 'Featured Quote',
+        'pullquote': 'Quote',
         'stat-callout': 'Key Statistics',
         'key-term': 'Glossary',
         'callout': 'Callout',
-        'accordion': 'Expandable List',
+        'accordion': 'Accordion',
         'tabs': 'Tabs',
         'narrative': 'Slideshow',
         'flashcard': 'Flashcards',
         'labeled-image': 'Labelled Image',
         'mcq': 'Quiz',
         'branching': 'Scenario',
-        'textinput': 'Free Text',
+        'textinput': 'Open Response',
         'checklist': 'Checklist',
-        'bento': 'Card Grid',
+        'bento': 'Cards',
         'comparison': 'Comparison',
         'data-table': 'Table',
         'timeline': 'Timeline',
-        'process-flow': 'Process Flow',
+        'process-flow': 'Process',
         'image-gallery': 'Gallery',
         'media': 'Video',
         'video-transcript': 'Video + Transcript',
         'divider': 'Divider',
-        'path-selector': 'Path Selector'
+        'path-selector': 'Course Paths'
       };
 
-      // User-friendly category labels (display only — internal names unchanged)
-      var USER_CATEGORY_LABELS = {
-        'Content': 'Text & Images',
-        'Explore': 'Interactive',
-        'Assess': 'Quiz & Activities',
-        'Layout': 'Data & Layout',
-        'Media': 'Media',
-        'Structure': 'Page Structure'
-      };
-
+      // Per-component variant labels — each component gets its own descriptions
+      // that accurately describe what changes between its variants
       var variantLabels = {
-        'centered-overlay': 'Image + centred text',
-        'split-screen': 'Text left, image right',
-        'minimal-text': 'Typography only',
-        'split': '50/50 side-by-side',
-        'overlap': 'Overlapping card',
-        'full-overlay': 'Full image + gradient',
-        'grid-4': '4-column grid',
-        'wide-2': '2-column wide',
-        'featured': 'Featured + smaller',
-        'accent-border': 'Coloured border + icons',
-        'stacked': 'Vertical list',
-        'grid': '2x2 grid',
-        'centered': 'Centred',
-        'card-row': 'Cards with bars',
-        'centered-alternating': 'Left/right alternating',
-        'columns': 'Table columns',
-        'stacked-rows': 'Side-by-side rows',
-        'horizontal': 'Tabs above / Left to right',
-        'vertical': 'Tabs on left / Top-to-bottom',
-        'accent-bar': 'Accent bar + quote',
-        'minimal': 'Clean minimal',
-        'center': 'Centred overlay',
-        'left': 'Text left, fade right',
-        'right': 'Text right, fade left',
-        'standard': 'Default',
-        'captioned-card': 'Card with caption',
-        'two-column': 'Two columns',
-        'highlight-box': 'Highlighted card',
-        'image-focused': 'Large image + text',
-        'text-focused': 'Text-dominant',
-        'single-large': 'One card at a time',
-        'card-style': 'Separate cards',
-        'numbered': 'Numbered list',
-        'list': 'Vertical list',
-        'card-grid': 'Card grid',
-        'side-panel': 'Image + sidebar',
-        'numbered-dots': 'Numbered markers',
-        'striped-card': 'Striped card table',
-        'cards': 'Option cards',
-        'line': 'Horizontal line',
-        'spacing': 'Whitespace only',
-        'icon': 'Icon break',
-        'info': 'Info callout',
-        'warning': 'Warning callout',
-        'tip': 'Tip callout',
-        'success': 'Success callout'
+        'hero': {
+          'centered-overlay': 'Centred overlay',
+          'split-screen': 'Split screen',
+          'minimal-text': 'Text only'
+        },
+        'text': {
+          'standard': 'Single column',
+          'two-column': 'Two columns',
+          'highlight-box': 'Highlight box'
+        },
+        'graphic': {
+          'standard': 'Simple',
+          'captioned-card': 'Card with caption'
+        },
+        'graphic-text': {
+          'split': 'Side by side',
+          'overlap': 'Overlapping',
+          'full-overlay': 'Full background'
+        },
+        'pullquote': {
+          'accent-bar': 'Side accent',
+          'centered': 'Centred',
+          'minimal': 'Minimal'
+        },
+        'stat-callout': {
+          'centered': 'Grid',
+          'card-row': 'Cards with bars'
+        },
+        'callout': {
+          'info': 'Info',
+          'warning': 'Warning',
+          'tip': 'Tip',
+          'success': 'Success'
+        },
+        'accordion': {
+          'standard': 'Simple',
+          'accent-border': 'Icons and border'
+        },
+        'tabs': {
+          'horizontal': 'Tabs on top',
+          'vertical': 'Tabs on side'
+        },
+        'narrative': {
+          'image-focused': 'Image emphasis',
+          'text-focused': 'Text emphasis'
+        },
+        'flashcard': {
+          'grid': 'Show all',
+          'single-large': 'One at a time'
+        },
+        'labeled-image': {
+          'numbered-dots': 'Numbered on image',
+          'side-panel': 'Side panel'
+        },
+        'mcq': {
+          'stacked': 'Stacked',
+          'grid': 'Grid'
+        },
+        'branching': {
+          'cards': 'Cards',
+          'list': 'List'
+        },
+        'checklist': {
+          'standard': 'Simple list',
+          'card-style': 'Cards',
+          'numbered': 'Numbered'
+        },
+        'bento': {
+          'grid-4': 'Grid',
+          'wide-2': 'Two columns',
+          'featured': 'Featured card'
+        },
+        'comparison': {
+          'columns': 'Side by side',
+          'stacked-rows': 'Stacked rows'
+        },
+        'data-table': {
+          'standard': 'Simple',
+          'striped-card': 'Card with stripes'
+        },
+        'timeline': {
+          'vertical': 'Stacked',
+          'centered-alternating': 'Alternating sides'
+        },
+        'process-flow': {
+          'vertical': 'Top to bottom',
+          'horizontal': 'Left to right'
+        },
+        'key-term': {
+          'list': 'List',
+          'card-grid': 'Cards'
+        },
+        'divider': {
+          'line': 'Line',
+          'spacing': 'Space only',
+          'icon': 'Icon'
+        },
+        'full-bleed': {
+          'center': 'Text centred',
+          'left': 'Text left',
+          'right': 'Text right'
+        }
       };
 
       // ── Authoring button ─────────────────────────────────────────────
@@ -1311,12 +1359,6 @@
             'border-radius:6px 6px 0 0;margin:0 8px;flex-wrap:wrap;'
           );
 
-          // Category badge (user-friendly label)
-          var catBadge = document.createElement('span');
-          catBadge.textContent = USER_CATEGORY_LABELS[category] || catLabel;
-          catBadge.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;padding:1px 8px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;';
-          toolbar.appendChild(catBadge);
-
           // Component type label (user-friendly display name)
           var typeLabel = document.createElement('span');
           typeLabel.textContent = typeLabels[compType] || compType;
@@ -1361,7 +1403,7 @@
           var variantNames = Object.keys(variantNodes);
           variantNames.forEach(function(v) {
             var btn = document.createElement('button');
-            btn.textContent = variantLabels[v] || v;
+            btn.textContent = (variantLabels[compType] && variantLabels[compType][v]) || v;
             btn.setAttribute('data-authoring-variant', v);
             btn.title = v;
             var isActive = v === activeVariant;
