@@ -2,9 +2,9 @@
 
 > **Living document.** Updated after every commit/push. Tracks what's done, what's next, what was skipped, and knock-on effects.
 
-**Branch:** `authoring-layer-v4`
+**Branch:** `authoring-layer-v5`
 **Started:** 2026-03-28
-**Last updated:** 2026-03-28 (Phase 2d complete — authoring panel with category grouping)
+**Last updated:** 2026-03-28 (Phase 3 COMPLETE — inline editing, type swap, export)
 
 ---
 
@@ -53,7 +53,8 @@ Researched **8 leading scroll-based authoring tools** (2026-03-28):
 Phase 1: Authoring Panel v1           Variant toggle (✎ Edit button)        DONE
 Phase 2: Component Taxonomy          Categories + new components +         DONE
          + Expanded Palette          new variants + AI guidance
-Phase 3: Inline Editing              Edit text + swap component type       PLANNED  ⚠️ KEY PHASE
+Phase 3: Inline Editing              Edit text + swap component type       DONE  ⚠️ KEY PHASE
+         3a: JSON + text edit ✅   3b: Type swap ✅   3c: Export ✅
 Phase 4: Section Management          Reorder + add/remove + width control  PLANNED
 Phase 5: AI-Assisted Editing         "Regenerate section" + category       PLANNED
                                      browser for manual add
@@ -169,6 +170,41 @@ This is NOT a full client-side rendering engine. The heavy rendering stays in No
   - Landio (dark) + Data Privacy & GDPR: 113/0 structural, 43/1→0 interactive (fixed accordion contrast)
   - Fluence (light) + Emotional Intelligence: 109/0 structural, 43/0 interactive
   - 1 bug found and fixed: accordion body text contrast on dark themes (`text-on-surface-variant` → `text-on-surface/80`)
+
+---
+
+## Phase 3: Inline Editing
+
+### 3a — Embed JSON + Text Editing ✅ DONE
+
+- [x] **build-course.js: Embed course-layout.json** as `<script type="application/json" id="course-data">` in built HTML
+- [x] **build-course.js: Add data-section-index + data-component-index** to all component sections (including template variants) for JSON↔DOM mapping
+- [x] **hydrate.js: loadCourseData() / saveCourseData()** — parse embedded JSON on demand, write back on every edit
+- [x] **hydrate.js: enableInlineEditingForSection()** — makes `displayTitle` (first heading) and `body` (paragraphs) contenteditable
+  - Skips paragraphs inside interactive elements (quiz choices, tab labels, carousel nav, checklist labels)
+  - Enter key on headings blurs (prevents line breaks in titles)
+  - Enter key on paragraphs prevented (Shift+Enter allowed for line breaks)
+  - Input events sync text back to JSON model + save immediately
+- [x] **hydrate.js: enableInlineEditing() / disableInlineEditing()** — toggle all contenteditable on/off with authoring mode
+- [x] **hydrate.js: Visual indicators** — CSS for editable elements: blue dashed outline on hover, solid blue on focus, subtle blue tint background on focus
+- [x] **hydrate.js: Variant swap integration** — re-enables inline editing on new section after variant swap
+- [x] **hydrate.js: Editing stylesheet** — disabled when authoring mode is off, enabled when on
+- [x] **QA passed:** 109/0 structural, 43/0 interactive (0 new errors, all warnings pre-existing)
+
+### 3b — Component Type Swap ✅ DONE
+
+- [x] **Component type `<select>` dropdown** in each toolbar — shows types from same category
+- [x] **JSON model update** — changing type updates `comp.type` in embedded JSON and clears `comp.variant`
+- [x] **"⟳ Rebuild needed" badge** — red badge on section when type changed (visual changes require rebuild)
+- [x] **Revert detection** — badge removed if user selects original type back
+- [x] **Architecture note:** Visual re-render requires Node.js rebuild (fill functions live server-side). The dropdown updates the JSON model; user exports and rebuilds to see the new component type rendered.
+
+### 3c — Save/Export ✅ DONE
+
+- [x] **"↓ Export JSON" button** — blue, fixed top-right (left of Edit button), visible only in authoring mode
+- [x] **Downloads `course-layout.json`** with all user edits (text changes, type swaps, variant changes)
+- [x] **Blob download** — creates in-memory blob, triggers download, cleans up URL
+- [x] **QA passed:** 109/0 structural, 43/0 interactive
 
 ---
 
@@ -348,6 +384,24 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-28 — Phase 3b+3c Complete (Type Swap + Export) — Phase 3 DONE
+- hydrate.js: Component type `<select>` dropdown in each authoring toolbar — shows types from same category
+- hydrate.js: Changing type updates JSON model (`comp.type`), clears variant, adds red "⟳ Rebuild needed" badge
+- hydrate.js: "↓ Export JSON" button (blue, fixed top-right) — downloads modified course-layout.json
+- Export button visible only in authoring mode, uses Blob download
+- Architecture: type swap updates data model only — visual re-render requires Node.js rebuild
+- QA: 109/0 structural, 43/0 interactive (0 new issues)
+
+### 2026-03-28 — Phase 3a Complete (Inline Text Editing)
+- build-course.js: Embedded full course-layout.json as `<script id="course-data">` in built HTML (~44KB)
+- build-course.js: Added `data-section-index` + `data-component-index` attributes to all component sections (active + template variants)
+- hydrate.js: Added `loadCourseData()` / `saveCourseData()` for JSON model management
+- hydrate.js: Added `enableInlineEditingForSection()` — contenteditable on displayTitle (headings) + body (paragraphs) with real-time JSON sync
+- hydrate.js: Visual indicators — blue dashed outline on hover, solid blue + tint on focus
+- hydrate.js: Integrated with variant swap — re-enables editing after template swap
+- hydrate.js: Editing CSS stylesheet toggled with authoring mode
+- QA: 109/0 structural, 43/0 interactive (0 new issues)
 
 ### 2026-03-28 — Phase 2e Complete (Matrix Test) — Phase 2 DONE
 - Matrix test with 2 brand/topic combinations:

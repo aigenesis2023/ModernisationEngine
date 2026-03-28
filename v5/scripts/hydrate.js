@@ -1159,6 +1159,33 @@
       authoringBtn.addEventListener('mouseleave', function() { if (!authoringActive) authoringBtn.style.opacity = '0.7'; });
       document.body.appendChild(authoringBtn);
 
+      // ── Export button (download modified JSON) ──────────────────────────
+      var exportBtn = document.createElement('button');
+      exportBtn.textContent = '↓ Export JSON';
+      exportBtn.setAttribute('style',
+        'position:fixed;top:12px;right:120px;z-index:10000;' +
+        'background:#3b82f6;color:#fff;border:none;' +
+        'padding:5px 14px;border-radius:4px;font:bold 11px/1.4 monospace;' +
+        'cursor:pointer;display:none;'
+      );
+      exportBtn.addEventListener('mouseenter', function() { exportBtn.style.background = '#2563eb'; });
+      exportBtn.addEventListener('mouseleave', function() { exportBtn.style.background = '#3b82f6'; });
+      exportBtn.addEventListener('click', function() {
+        if (!courseData) return;
+        var json = JSON.stringify(courseData, null, 2);
+        var blob = new Blob([json], { type: 'application/json' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = 'course-layout.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        console.log('Authoring: Exported course-layout.json (' + json.length + ' chars)');
+      });
+      document.body.appendChild(exportBtn);
+
       // ── Init: extract DOM nodes from templates ────────────────────────
       var initialized = false;
       function initEntries() {
@@ -1218,10 +1245,27 @@
           catBadge.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;padding:1px 8px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;';
           toolbar.appendChild(catBadge);
 
-          var label = document.createElement('span');
-          label.textContent = compType;
-          label.style.cssText = 'opacity:0.7;margin-right:6px;text-transform:uppercase;font-size:10px;letter-spacing:0.05em;';
-          toolbar.appendChild(label);
+          // Component type selector (swap to another type in same category)
+          var typeSelect = document.createElement('select');
+          typeSelect.setAttribute('data-authoring-type-select', '');
+          typeSelect.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:2px 6px;border-radius:3px;font:bold 10px/1.4 monospace;cursor:pointer;margin-right:6px;text-transform:uppercase;letter-spacing:0.05em;';
+          // Populate with types from same category
+          var typesInCategory = Object.keys(catMap).filter(function(t) { return catMap[t] === category; });
+          typesInCategory.forEach(function(t) {
+            var opt = document.createElement('option');
+            opt.value = t;
+            opt.textContent = t;
+            opt.style.cssText = 'background:#333;color:#fff;';
+            if (t === compType) opt.selected = true;
+            typeSelect.appendChild(opt);
+          });
+          toolbar.appendChild(typeSelect);
+
+          // Separator
+          var sep = document.createElement('span');
+          sep.textContent = '›';
+          sep.style.cssText = 'opacity:0.4;margin:0 2px;';
+          toolbar.appendChild(sep);
 
           var variantNames = Object.keys(variantNodes);
           variantNames.forEach(function(v) {
@@ -1257,6 +1301,37 @@
             if (target === entry.activeVariant) return;
             swapVariant(entry, target);
           });
+
+          // Component type change handler
+          typeSelect.addEventListener('change', function() {
+            var newType = typeSelect.value;
+            if (newType === entry.compType) {
+              // Remove rebuild badge if reverting
+              var badge = entry.wrapper.querySelector('[data-rebuild-badge]');
+              if (badge) badge.remove();
+              return;
+            }
+            // Update JSON model
+            var sec = entry.wrapper.querySelector('section[data-component-type]');
+            if (sec && courseData) {
+              var cd = getCompData(sec);
+              if (cd) {
+                cd.type = newType;
+                // Clear variant since new type has different variants
+                delete cd.variant;
+                saveCourseData();
+              }
+            }
+            // Add "rebuild needed" badge if not already present
+            if (!entry.wrapper.querySelector('[data-rebuild-badge]')) {
+              var badge = document.createElement('div');
+              badge.setAttribute('data-rebuild-badge', '');
+              badge.style.cssText = 'position:absolute;top:0;right:12px;background:#ef4444;color:#fff;padding:2px 10px;border-radius:0 0 4px 4px;font:bold 10px/1.6 monospace;z-index:1;';
+              badge.textContent = '⟳ Rebuild needed';
+              entry.wrapper.appendChild(badge);
+            }
+            console.log('Authoring: type changed ' + entry.compType + ' → ' + newType + ' (rebuild needed)');
+          });
         });
       }
 
@@ -1278,6 +1353,11 @@
 
         // Re-hydrate interactivity
         hydrateComponent(newSection);
+
+        // Re-enable inline editing on swapped variant if authoring is active
+        if (authoringActive && courseData) {
+          enableInlineEditingForSection(newSection);
+        }
 
         // Strip animation attributes so CSS [data-animate]{opacity:0} doesn't hide swapped variants
         newSection.removeAttribute('data-animate');
@@ -1305,6 +1385,125 @@
         console.log('Authoring: ' + entry.compType + ' → ' + targetVariant);
       }
 
+      // ── Course data (JSON model) ──────────────────────────────────────
+      var courseData = null;
+      function loadCourseData() {
+        if (courseData) return courseData;
+        var el = document.getElementById('course-data');
+        if (!el) return null;
+        try { courseData = JSON.parse(el.textContent); } catch(e) { console.warn('Authoring: Failed to parse course-data JSON'); }
+        return courseData;
+      }
+
+      function saveCourseData() {
+        if (!courseData) return;
+        var el = document.getElementById('course-data');
+        if (el) el.textContent = JSON.stringify(courseData);
+      }
+
+      // ── Inline editing helpers ──────────────────────────────────────────
+      var editableElements = [];
+
+      // Map of which text fields are editable per component type
+      // displayTitle → first heading, body → prose paragraphs
+      var EDITABLE_FIELDS = {
+        displayTitle: { selector: 'h1,h2,h3,h4,h5,h6', first: true },
+        body: { selector: 'p', multi: true }
+      };
+
+      function getCompData(section) {
+        var si = section.getAttribute('data-section-index');
+        var ci = section.getAttribute('data-component-index');
+        if (si === null || ci === null || !courseData) return null;
+        var sec = courseData.sections[parseInt(si, 10)];
+        if (!sec) return null;
+        return sec.components[parseInt(ci, 10)] || null;
+      }
+
+      function enableInlineEditingForSection(section) {
+        var compData = getCompData(section);
+        if (!compData) return;
+
+        // displayTitle — first heading in the section
+        if (compData.displayTitle !== undefined) {
+          var heading = section.querySelector('h1,h2,h3,h4,h5,h6');
+          if (heading && !heading.hasAttribute('data-editable')) {
+            heading.setAttribute('contenteditable', 'true');
+            heading.setAttribute('data-editable', 'displayTitle');
+            heading.setAttribute('spellcheck', 'true');
+            editableElements.push(heading);
+
+            heading.addEventListener('input', function() {
+              var cd = getCompData(section);
+              if (cd) { cd.displayTitle = heading.textContent; saveCourseData(); }
+            });
+
+            heading.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter') { e.preventDefault(); heading.blur(); }
+            });
+          }
+        }
+
+        // body — paragraph text (can be multiple paragraphs)
+        if (compData.body !== undefined) {
+          var paras = section.querySelectorAll('p');
+          paras.forEach(function(p) {
+            // Skip paragraphs inside interactive elements (quiz choices, tab labels, etc.)
+            if (p.closest('[data-quiz], [data-tabs] [role="tablist"], [data-carousel] nav, [data-checklist] label')) return;
+            if (p.hasAttribute('data-editable')) return;
+
+            p.setAttribute('contenteditable', 'true');
+            p.setAttribute('data-editable', 'body');
+            p.setAttribute('spellcheck', 'true');
+            editableElements.push(p);
+
+            p.addEventListener('input', function() {
+              var cd = getCompData(section);
+              if (!cd) return;
+              // Collect all editable paragraphs in this section and join
+              var allParas = section.querySelectorAll('p[data-editable="body"]');
+              var texts = [];
+              allParas.forEach(function(pp) { texts.push(pp.innerHTML); });
+              cd.body = texts.join('\n\n');
+              saveCourseData();
+            });
+
+            p.addEventListener('keydown', function(e) {
+              // Allow Shift+Enter for line breaks within a paragraph
+              if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); }
+            });
+          });
+        }
+      }
+
+      function enableInlineEditing() {
+        var data = loadCourseData();
+        if (!data) { console.warn('Authoring: No course-data JSON found — inline editing disabled'); return; }
+
+        document.querySelectorAll('section[data-component-type][data-section-index]').forEach(function(section) {
+          enableInlineEditingForSection(section);
+        });
+      }
+
+      function disableInlineEditing() {
+        editableElements.forEach(function(el) {
+          el.removeAttribute('contenteditable');
+          el.removeAttribute('data-editable');
+          el.removeAttribute('spellcheck');
+        });
+        editableElements = [];
+      }
+
+      // ── Inline editing CSS ─────────────────────────────────────────────
+      var editingStyleEl = document.createElement('style');
+      editingStyleEl.textContent =
+        '[data-editable] { cursor: text; transition: outline 0.15s ease, background 0.15s ease; outline: 2px solid transparent; outline-offset: 2px; border-radius: 4px; }' +
+        '[data-editable]:hover { outline: 2px dashed rgba(59,130,246,0.5); }' +
+        '[data-editable]:focus { outline: 2px solid rgba(59,130,246,0.8); background: rgba(59,130,246,0.05); }' +
+        '[data-editable]::before { content: none; }';
+      document.head.appendChild(editingStyleEl);
+      editingStyleEl.disabled = true;
+
       // ── Toggle authoring mode ──────────────────────────────────────────
       authoringBtn.addEventListener('click', function() {
         authoringActive = !authoringActive;
@@ -1319,11 +1518,17 @@
             e.wrapper.style.outlineOffset = '-2px';
             e.wrapper.style.borderRadius = '8px';
           });
+          enableInlineEditing();
+          editingStyleEl.disabled = false;
+          exportBtn.style.display = 'block';
         } else {
           entries.forEach(function(e) {
             e.toolbar.style.display = 'none';
             e.wrapper.style.outline = 'none';
           });
+          disableInlineEditing();
+          editingStyleEl.disabled = true;
+          exportBtn.style.display = 'none';
         }
       });
     })();

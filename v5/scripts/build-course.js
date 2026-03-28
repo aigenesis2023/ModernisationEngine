@@ -2244,6 +2244,11 @@ function build() {
       if (interactiveTypes.has(type)) interactiveCount++;
       let filled = fillComponent(comp, compIndex, sectionWidth);
       if (filled) {
+        // Add authoring data attributes for JSON↔DOM mapping (all variants including templates)
+        filled = filled.replace(
+          /data-component-type="/g,
+          `data-section-index="${sectionIndex}" data-component-index="${compIndex}" data-component-type="`
+        );
         // Add required-items tracking if the layout engine tagged this component
         if (comp.requiredItems && interactiveTypes.has(type)) {
           filled = filled.replace(
@@ -2384,6 +2389,7 @@ ${sectionsHtml.join('\n\n')}
 </section>
 </main>
 
+<script type="application/json" id="course-data">${JSON.stringify(layout).replace(/<\//g, '<\\/')}</script>
 <script type="application/json" id="category-meta">${JSON.stringify({
   map: CATEGORY_MAP,
   colors: {
