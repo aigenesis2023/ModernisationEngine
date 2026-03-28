@@ -6,8 +6,10 @@
 - **"Test"** → full pipeline (Steps 1-5), then all QA gates (6a, 6b, 6c). Fix any failures.
 - **"Matrix test"** → run the default 3-combination matrix below. Fully autonomous — no user input needed.
 - **"Reference test"** → use pre-built reference course (all 28 component types, 56 variants across 23 types). User provides 1 or 2 brand URLs. Runs Steps 3-5 per URL. No QA — user reviews manually.
-- **"Authoring audit"** → comprehensive 4-phase audit of course output quality + authoring layer. See `v5/input/authoring-audit.md` for full protocol. Uses existing index.html. Runs autonomously, saves checkpoints to `v5/output/audit-findings.json`.
-- **"Continue audit"** → resume an authoring audit from the last saved checkpoint (reads `v5/output/audit-findings.json`).
+- **"Authoring audit phase 1"** → start the authoring audit (setup, inventory, desktop sweep first half). **Each phase runs in a fresh chat and stops after saving.** See `v5/input/authoring-audit.md`.
+- **"Authoring audit phase 2"** → desktop sweep second half.
+- **"Authoring audit phase 3"** → mobile sweep, edge cases, authoring-OFF verification.
+- **"Authoring audit phase 4"** → diagnose root causes, fix, verify, write report to `v5/output/audit-report.md`.
 
 Examples:
 - "Run it with sales and fin-ai" → just builds

@@ -140,6 +140,7 @@ v5/                                    ← ALL ACTIVE CODE
     topic-brief.txt                    ← Plain text topic description
     urls.txt                           ← One URL per line (optional)
     test-runs.md                       ← Test run config: brands, topics, matrix settings, reference test
+    authoring-audit.md                 ← Authoring audit protocol: 4 phases, per-phase-per-chat, checklists
     reference-course-layout.json       ← Pre-built course (23 components) for reference test mode
     docs/                              ← Drop PDFs/PPTXs here (future)
   output/
@@ -156,6 +157,8 @@ v5/                                    ← ALL ACTIVE CODE
     component-patterns/                ← Extracted HTML pattern per component type (28)
     images/                            ← Generated images
     course.html                        ← Final single-file output
+    audit-findings.json                ← Authoring audit checkpoint (persists between phases)
+    audit-report.md                    ← Authoring audit final report (written by Phase 4)
 
 screenshots/                           ← Dev screenshots (gitignored, overwritten each run)
 EV/                                    ← Test SCORM (64 slides, gitignored in Codespace)
@@ -240,6 +243,13 @@ Claude Code automatically selects the correct run level based on what changed. T
 - If the user provides no brands or topics, auto-select from the pools in test-runs.md
 - If the user specifies brands or topics, use those as overrides
 - **Approval workflow:** Objective bugs (6a/6b failures) are auto-fixed. Subjective bugs (6c vision findings) are listed for user approval before fixing. See test-runs.md Phase 4.
+
+**AUTHORING AUDIT** — systematic quality audit of course output + authoring layer. Required when:
+- User says "authoring audit phase 1" (or 2, 3, 4)
+- **Read `v5/input/authoring-audit.md` FIRST** — it contains the full protocol, checklists, and component criteria
+- **Each phase runs in a separate fresh chat.** Phase 1 → save → stop. Phase 2 → save → stop. Etc.
+- Findings persist in `v5/output/audit-findings.json` between phases. Report written to `v5/output/audit-report.md`.
+- Phase 4 includes root cause diagnosis before any fixes — see the Diagnose step in the protocol.
 
 **When in doubt, do a FULL RUN.** Announce which run level you're using and why.
 

@@ -429,9 +429,8 @@ function fillAccordion(comp, variant, maxW) {
 
   // ── Variant: accent-border ──
   if (variant === 'accent-border') {
-    // Use border from Stitch contract if available, otherwise consistent primary border
-    const stitchBorder = c.borderClass || '';
-    const borderStyle = stitchBorder || 'border-l-4 border-primary';
+    // accent-border variant always uses a visible left accent regardless of Stitch contract
+    const borderStyle = 'border-l-4 border-primary';
     const accentDetails = items.map((item, i) => {
       const icon = accentIcons[i % accentIcons.length];
       return `<details class="group glass-card rounded-2xl ${borderStyle} transition-all duration-300">
@@ -507,7 +506,9 @@ function fillMCQ(comp, variant, maxW) {
 
   // Always include text-on-surface so label is readable inside a glass card
   // (Stitch sometimes sets section text-white for dark section backgrounds; glass card is lighter)
-  const labelClass = (c.labelClass || 'font-bold text-sm uppercase tracking-widest') + ' text-on-surface-variant';
+  // Normalize Stitch sub-14px sizes to text-sm minimum
+  const rawLabelClass = (c.labelClass || 'font-bold text-sm uppercase tracking-widest').replace(/\btext-\[(?:[1-9]|1[0-3])px\]/g, 'text-sm');
+  const labelClass = rawLabelClass + ' text-on-surface-variant';
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   // Draw metadata
@@ -614,8 +615,8 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
   }
 
   // ── Default variant: split ──
-  const imageDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
-<div class="relative group">
+  const imageDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
+<div class="relative group overflow-hidden">
 ${glowClass ? `<div class="${glowClass}"></div>` : ''}
 <div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow} bg-surface-container">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container rounded-2xl"></div>'}
@@ -623,14 +624,14 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" 
 </div>
 </div>`;
 
-  const textDiv = `<div class="w-full md:w-1/2 min-w-[280px] flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
+  const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-6 leading-tight">${title}</h2>
 <div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
 
-  return `<section class="${secClass}" data-component-type="graphic-text">
-<div class="${maxW} mx-auto px-8">
-<div class="flex flex-col md:flex-row gap-12 items-center">
+  return `<section class="${secClass} overflow-x-hidden" data-component-type="graphic-text">
+<div class="${maxW} mx-auto px-4 md:px-8">
+<div class="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
 ${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
 </div>
 </div>
@@ -1050,7 +1051,7 @@ function fillTimeline(comp, variant, maxW) {
 </div>
 </div>
 <div class="relative z-10 flex-shrink-0">
-<div class="w-10 h-10 rounded-full bg-primary border-4 border-background flex items-center justify-center text-on-primary text-xs font-bold shadow-lg">${num}</div>
+<div class="w-10 h-10 rounded-full bg-primary border-4 border-background flex items-center justify-center text-on-primary text-sm font-bold shadow-lg">${num}</div>
 </div>
 <div class="md:w-[calc(50%-2rem)] md:hidden">
 <h4 class="font-headline text-xl font-bold mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
@@ -1111,7 +1112,7 @@ ${newSteps}
     const titleClass = i === 0 ? 'font-headline text-xl font-bold text-secondary mb-2' : 'font-headline text-xl font-bold mb-2';
     return `<div class="relative pl-14">
 <div class="${dotClass}"></div>
-<div class="text-primary/30 font-headline font-black text-xs uppercase tracking-widest mb-1">${num}</div>
+<div class="text-primary/30 font-headline font-black text-sm uppercase tracking-widest mb-1">${num}</div>
 <div class="${titleClass}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
 <p class="text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
@@ -1146,22 +1147,22 @@ function fillComparison(comp, variant, maxW) {
         if (v === false || v === 'false') return '<span class="material-symbols-outlined text-error/60 text-xl">cancel</span>';
         return `<span class="text-on-surface-variant text-sm">${esc(String(v))}</span>`;
       };
-      return `<div class="glass-card rounded-xl p-5 flex items-center gap-4">
-<div class="flex-1 text-right">${renderVal(vals[0])}</div>
-<div class="flex-shrink-0 px-4 py-2 bg-surface-container rounded-full text-xs font-bold uppercase tracking-widest text-on-surface" data-edit-path="rows.${ri}.label">${esc(label)}</div>
-<div class="flex-1 text-left">${renderVal(vals[1])}</div>
+      return `<div class="glass-card rounded-xl p-5 flex flex-col md:flex-row items-center gap-2 md:gap-4">
+<div class="flex-shrink-0 px-4 py-2 bg-surface-container rounded-full text-sm font-bold uppercase tracking-widest text-on-surface text-center md:order-2" data-edit-path="rows.${ri}.label">${esc(label)}</div>
+<div class="flex-1 text-center md:text-right md:order-1">${renderVal(vals[0])}</div>
+<div class="flex-1 text-center md:text-left md:order-3">${renderVal(vals[1])}</div>
 </div>`;
     }).join('\n');
 
     return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
-<div class="${maxW} mx-auto px-8">
+<div class="${maxW} mx-auto px-4 md:px-8">
 <h2 class="font-headline text-3xl font-bold mb-4 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-8">${stripTags(body)}</p>` : ''}
 <div class="flex justify-between mb-6 px-4">
 <span class="font-headline font-bold text-lg text-primary" data-edit-path="columns.0.title">${esc(columns[0].title || '')}</span>
 <span class="font-headline font-bold text-lg text-secondary" data-edit-path="columns.1.title">${esc(columns[1].title || '')}</span>
 </div>
-<div class="space-y-3" data-animate-stagger="fade-up">
+<div class="space-y-3 overflow-x-auto" data-animate-stagger="fade-up">
 ${stackedRows}
 </div>
 </div>
@@ -1216,7 +1217,7 @@ function fillStatCallout(comp, variant, maxW) {
       const numMatch = (item.stat || item.value || '').match(/[\d.]+/);
       const barWidth = numMatch ? Math.min(parseFloat(numMatch[0]), 100) : 50;
       return `<div class="glass-card rounded-2xl p-6 md:p-8 min-w-[200px]">
-<div class="text-3xl md:text-4xl font-headline ${numWeight} ${numColor} mb-2" data-counter data-edit-path="_items.${i}.value">${esc(displayValue)}</div>
+<div class="text-3xl md:text-4xl font-headline ${numWeight} ${numColor} mb-2" data-counter data-edit-path="_items.${i}.value" data-stat-prefix="${esc(item.prefix||'')}" data-stat-suffix="${esc(item.suffix||'')}">${esc(displayValue)}</div>
 <p class="text-on-surface-variant text-sm font-medium mb-4" data-edit-path="_items.${i}.label">${esc(item.label || '')}</p>
 <div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
 <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width:${barWidth}%"></div>
@@ -1248,7 +1249,7 @@ ${cardStats}
     const numWeight = style.numWeight || 'font-extrabold';
     const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
-<div class="text-4xl md:text-5xl font-headline ${numWeight} ${numColor} mb-3" data-counter data-edit-path="_items.${i}.value">${esc(displayValue)}</div>
+<div class="text-4xl md:text-5xl font-headline ${numWeight} ${numColor} mb-3" data-counter data-edit-path="_items.${i}.value" data-stat-prefix="${esc(item.prefix||'')}" data-stat-suffix="${esc(item.suffix||'')}">${esc(displayValue)}</div>
 ${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1" data-edit-path="_items.${i}.label">${esc(item.label || '')}</div>` : ''}
 <p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm leading-snug font-medium mt-2'}" data-edit-path="_items.${i}.label">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
@@ -1407,8 +1408,12 @@ function fillTabs(comp, variant, maxW) {
   // instead of individual button styles (no padding/bg = bad extraction)
   const activeFallback = 'px-6 py-3 rounded-full bg-secondary text-on-secondary font-bold text-sm tracking-wide';
   const inactiveFallback = 'px-6 py-3 rounded-full glass-card hover:bg-surface-variant transition-all text-on-surface-variant font-bold text-sm tracking-wide';
-  const activeBtn = (c.activeBtn && /\bp[xy]?-\d/.test(c.activeBtn)) ? c.activeBtn : activeFallback;
-  const inactiveBtn = (c.inactiveBtn && /\bp[xy]?-\d/.test(c.inactiveBtn)) ? c.inactiveBtn : inactiveFallback;
+  // Replace any sub-14px text size from Stitch contract with text-sm minimum
+  const normalizeTabSize = (cls) => cls ? cls.replace(/\btext-\[(?:[1-9]|1[0-3])px\]/g, 'text-sm') : cls;
+  const rawActiveBtn = (c.activeBtn && /\bp[xy]?-\d/.test(c.activeBtn)) ? c.activeBtn : activeFallback;
+  const rawInactiveBtn = (c.inactiveBtn && /\bp[xy]?-\d/.test(c.inactiveBtn)) ? c.inactiveBtn : inactiveFallback;
+  const activeBtn = normalizeTabSize(rawActiveBtn);
+  const inactiveBtn = normalizeTabSize(rawInactiveBtn);
 
   // ── Variant: vertical ──
   if (variant === 'vertical') {
@@ -1494,7 +1499,7 @@ function fillFlashcard(comp, variant, maxW) {
 <div class="text-center px-6">
 <div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '5' : '4'}xl mb-4">${icons[i % icons.length]}</div>
 <div class="font-headline font-bold text-${large ? 'xl md:text-2xl' : 'base md:text-lg'} leading-snug" data-edit-path="_items.${i}.front">${frontText}</div>
-<div class="mt-3 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
+<div class="mt-3 text-sm text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
@@ -1685,7 +1690,7 @@ function fillFullBleed(comp, variant) {
   const pos = variant || comp.overlayPosition || 'center';
 
   if (pos === 'left') {
-    return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
+    return `<section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
 <div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-left" data-animate="fade-up">
@@ -1696,7 +1701,7 @@ ${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-pat
   }
 
   if (pos === 'right') {
-    return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
+    return `<section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent"></div>
 <div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
@@ -1766,7 +1771,7 @@ function fillProcessFlow(comp, variant, maxW) {
       const borderColor = isFirst ? 'border-secondary' : isLast ? 'border-primary' : 'border-outline-variant/30';
       return `<div class="glass-card px-4 py-4 rounded-xl border-t-4 ${borderColor} flex-1 min-w-0 text-center">
 <div class="font-headline font-bold text-sm mb-1" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
-${item.body ? `<div class="text-xs text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body)}</div>` : ''}
+${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body)}</div>` : ''}
 </div>`;
     });
 

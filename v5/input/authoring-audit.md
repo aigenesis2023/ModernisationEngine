@@ -4,28 +4,30 @@ A comprehensive, systematic audit of both the **course output quality** and the 
 
 The audit tests every possible visual state of every component present in the course, not just the one the AI happened to generate. A typical course contains 15-20 of the 23 variant-capable component types, covering 35-50 of the 56 total variants. The summary reports exact coverage.
 
-**Trigger:** "authoring audit" starts Phase 1. "continue audit" resumes from last saved checkpoint.
+---
 
-**Pre-condition:** `index.html` must exist with a built course. If missing or empty, STOP and tell the user: "No built course found. Run the pipeline first (e.g. 'run it with [brand] and [topic]'), then type 'authoring audit' to begin."
+## Triggers
 
-Read `CLAUDE.md` and `v5/AUTHORING-LAYER.md` before starting.
+| Command | What it does |
+|---|---|
+| `authoring audit phase 1` | Setup, inventory, nav check, desktop sweep first half → save checkpoint → STOP |
+| `authoring audit phase 2` | Desktop sweep second half → save checkpoint → STOP |
+| `authoring audit phase 3` | Mobile sweep, edge cases, authoring-OFF verification → save checkpoint → STOP |
+| `authoring audit phase 4` | Diagnose, fix, verify, write report file → STOP |
+
+**Each phase runs in a fresh chat and stops after saving its checkpoint. Never chain phases in a single chat.**
+
+**Pre-conditions:**
+- All phases: `index.html` must exist with a built course. If missing or empty, STOP and tell the user: "No built course found. Run the pipeline first, then start the audit."
+- Phases 2, 3, 4: `v5/output/audit-findings.json` must exist and contain `completedPhases` showing the previous phase is done. If missing, tell the user which phase to run first.
+
+Read `CLAUDE.md` and `v5/AUTHORING-LAYER.md` before starting any phase.
 
 ---
 
-## Execution Model: 4 Phases with Checkpoints
+## Execution Model
 
-The audit runs in **4 phases within a single chat**. Each phase saves its findings to `v5/output/audit-findings.json` so that if context gets compressed or the session dies, nothing is lost.
-
-| Phase | What happens | Saves |
-|---|---|---|
-| **Phase 1** | Setup, inventory, nav check, desktop sweep of first half of components | Findings so far → `audit-findings.json` |
-| **Phase 2** | Desktop sweep of remaining components | Append findings → `audit-findings.json` |
-| **Phase 3** | Mobile sweep, edge case tests, authoring-OFF verification | Append findings → `audit-findings.json` |
-| **Phase 4** | Read all findings, classify, fix in priority order, rebuild, verify, report | Final report to user |
-
-**Auto-chaining:** After each phase, proceed directly to the next. No user input needed between phases. The checkpoint save is a safety net, not a pause point.
-
-**If the session dies or context is lost:** User types "continue audit". Read `v5/output/audit-findings.json` to see which phases are complete, then resume from the next incomplete phase.
+Each phase is a self-contained unit. It reads the findings file, does its work, appends its results, saves, verifies the save, then stops. The findings file is the only state that crosses phase boundaries.
 
 ### Findings file format
 
@@ -34,12 +36,12 @@ The audit runs in **4 phases within a single chat**. Each phase saves its findin
   "course": "course title",
   "brand": "brand URL",
   "theme": "dark|light",
-  "inventory": [ { "index": 0, "type": "hero", "variant": "split-screen", "templateCount": 2, "expectedCount": 2, "hasVariants": true, "jsonMatch": true } ],
+  "inventory": [ { "index": 0, "type": "hero", "variant": "split-screen", "hasVariants": true } ],
   "totalComponents": 18,
   "completedPhases": [1, 2],
   "lastComponentAudited": "checklist",
   "issues": [
-    { "id": 1, "component": "stat-callout", "variant": "card-row", "category": "TEXT-CONTRAST", "severity": "P2", "description": "Label text fails WCAG AA on dark card background", "phase": 1 }
+    { "id": 1, "component": "stat-callout", "variant": "card-row", "category": "TEXT-CONTRAST", "severity": "P2-MEDIUM", "description": "Label text fails WCAG AA on dark card background", "phase": 1, "status": "open" }
   ],
   "uxNotes": [ "Variant label 'Grid' on stat-callout is ambiguous — user can't predict what it does" ],
   "variantsTested": 42,
@@ -47,13 +49,27 @@ The audit runs in **4 phases within a single chat**. Each phase saves its findin
 }
 ```
 
-### How to check: programmatic vs visual
+### Checkpoint save protocol (mandatory at end of every phase)
 
-Use **browser JS evaluation** for anything measurable: font sizes, element dimensions, contrast ratios (getComputedStyle → extract colours → calculate), overflow detection, heading tag levels, touch target sizes, element visibility, DOM attribute values.
+1. Write the complete updated JSON to `v5/output/audit-findings.json`
+2. Immediately read the file back and confirm it contains valid JSON with the correct `completedPhases` array
+3. If the read returns empty or invalid JSON, write it again and re-verify before stopping
+4. Only stop the phase after the save is confirmed
 
-Use **screenshots + vision** for things that require judgement: visual hierarchy, professional feel, variant differentiation, brand consistency, whether a label is confusing, spacing rhythm.
+This guards against the Write tool creating a partial file if the session dies mid-write.
 
-This avoids spending vision tokens on things a DOM query can answer instantly.
+### Context size management
+
+**CRITICAL: Screenshots read into conversation context will hit the 20MB request limit and kill the session.**
+
+**Phases 1–3 (finding issues):**
+- Do ALL checks via `browser_evaluate` (JS evaluation) and `browser_snapshot` (accessibility tree). Font sizes, dimensions, contrast ratios, overflow, heading levels, touch targets, DOM attributes — all measurable via JS.
+- Save screenshots to `screenshots/audit/[type]-[variant].png` for evidence. Do NOT read them into context.
+- JS evaluation finds ~90% of issues without any visual input.
+
+**Phase 4 (fixing):**
+- Read ONE screenshot at a time with the Read tool when needed for a specific fix. Let it compress before reading the next.
+- Never load more than one screenshot into context at once.
 
 ---
 
@@ -61,25 +77,27 @@ This avoids spending vision tokens on things a DOM query can answer instantly.
 
 ### Setup
 
-1. Start a local HTTP server serving the repo root
+1. Delete any existing `v5/output/audit-findings.json` and `v5/output/audit-report.md` — this is a fresh audit
+2. Clear `screenshots/audit/` directory
+3. Start a local HTTP server serving the repo root
 2. Open in Playwright at **1440x900** (desktop)
-3. Screenshot the course landing state with authoring **OFF**
+3. Take a screenshot of the course with authoring **OFF** → save to `screenshots/audit/00-authoring-off.png` (do not read into context)
 4. Click the **"✎ Edit"** button (top-right amber button) to activate authoring mode
 5. Confirm: "✎ Edit ✓" label appears, toolbars appear on all sections, "↓ Export JSON" button appears
-6. Screenshot the landing state with authoring **ON**
+6. Take a screenshot with authoring **ON** → save to `screenshots/audit/00-authoring-on.png` (do not read into context)
 7. Determine theme: check for `class="dark"` on the html element. Note dark or light.
 
 ### Build the component inventory
 
 This is a **programmatic pre-scan** — query the DOM to plan the audit.
 
-Query all `[data-component-type]` sections (exclude `[data-component-type="navigation"]`). For each, record: section index, component index, component type, active variant, count of `<template data-variant-alt>` tags.
+Query all `[data-component-type]` sections (exclude `[data-component-type="navigation"]`). For each, record: section index, component type, active variant, count of `<template data-variant-alt>` tags.
 
 **Cross-reference against source of truth:**
 - `VARIANT_MAP` in `build-course.js` — flag any component with fewer templates than expected
 - `variantLabels` in `hydrate.js` — flag any variant button showing a raw internal name
 - `typeLabels` in `hydrate.js` — flag any toolbar showing a raw type like "mcq" or "graphic-text"
-- Embedded `course-layout.json` (the `#course-data` script element) — flag any section/component in the JSON that doesn't have a matching DOM section (silently dropped during build = build bug)
+- Embedded `course-layout.json` (the `#course-data` script element) — flag any section in the JSON that doesn't have a matching DOM section (silently dropped during build = build bug)
 
 Log any mismatches as issues immediately.
 
@@ -97,23 +115,23 @@ Note which components have **no variants** (media, textinput, image-gallery, vid
 
 ### Desktop sweep: first half of components
 
-Split the component list in half. Audit the **first half** now (Phase 1), the second half in Phase 2. Scroll top-to-bottom, stopping at each component.
+Split the component list in half. Audit the **first half** now, the second half in Phase 2. Scroll top-to-bottom, stopping at each component. Run the **Component Audit Checklist** (defined at the bottom of this file) for each.
 
-For each component, run the **Component Audit Checklist** (defined below).
-
-**Save checkpoint:** Write findings so far to `v5/output/audit-findings.json` with `completedPhases: [1]`.
+**Save checkpoint** — follow the checkpoint save protocol above. Confirm save before stopping.
 
 ---
 
 ## Phase 2: Desktop Sweep (Second Half)
 
-Continue the desktop sweep with the **remaining components**. Same checklist, same process.
+Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `1`. Continue the desktop sweep with the **remaining components**. Same checklist, same process.
 
-**Save checkpoint:** Update `audit-findings.json` with `completedPhases: [1, 2]`.
+**Save checkpoint** — follow the checkpoint save protocol above. Confirm save before stopping.
 
 ---
 
 ## Phase 3: Mobile + Edge Cases + Final Verification
+
+Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2]`.
 
 ### Mobile sweep (390x844)
 
@@ -187,15 +205,17 @@ Turn authoring OFF. Scroll through entire course:
 | Interactivity works | Spot-check 2-3 components — quiz, tabs, accordion function |
 | Course looks complete | No missing sections or broken layouts masked by toolbars |
 
-**Save checkpoint:** Update `audit-findings.json` with `completedPhases: [1, 2, 3]`.
+**Save checkpoint** — follow the checkpoint save protocol above. Confirm save before stopping.
 
 ---
 
-## Phase 4: Classify, Fix, Verify, Report
+## Phase 4: Diagnose, Fix, Verify, Report
+
+Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2, 3]`.
 
 ### Classify all issues
 
-Read `v5/output/audit-findings.json`. Compile all issues into one table:
+Compile all issues into one table:
 
 | # | Component | Variant | Category | Severity | Description |
 |---|---|---|---|---|---|
@@ -236,18 +256,44 @@ Read `v5/output/audit-findings.json`. Compile all issues into one table:
 | **P2-MEDIUM** | Visual quality issue visible to user. | Should fix |
 | **P3-LOW** | Minor polish. | Fix if easy |
 
+### Diagnose (mandatory — do not write any code until this is complete for all clusters)
+
+**Group all issues into root cause clusters.** Issues sharing a root cause get one fix, not separate patches. This step also catches the same bug in components not in this course.
+
+Write the clusters down before proceeding — make the grouping visible, don't reason through it silently.
+
+For each cluster, complete all 5 steps:
+
+**1. State the engine source** — which file causes this?
+- Font sizes, overflow, structural markup, HTML patterns → `build-course.js` fill functions
+- Variant swap behaviour, interactive state, toolbar logic, animation → `hydrate.js`
+- Affects both render and post-swap state → both files
+
+**2. Read the relevant source section now** — once for the whole cluster, not once per issue. Open the file, find the relevant fill function(s) or hydrate.js section, read it.
+
+**3. State the root cause in one sentence** — identify the specific line, class, or pattern causing the issue. "The `tabs` fill function uses `text-xs` for tab labels, which computes to 10px on this design contract." Not "tabs labels are too small."
+
+**4. Grep for the root cause pattern** — grep `build-course.js` and `hydrate.js` for the specific CSS class, function call, or code pattern identified in step 3 (not the component name — the pattern itself). List every component and variant that uses it, including those not in this course. This is the complete blast radius.
+
+**5. Confirm the fix is at the root** — if the pattern appears in 6 fill functions, the fix must be applied to all 6. Patching only the components that surfaced the bug is not a valid fix.
+
+**If root cause is unclear after reading the source:** check `git log` for recent changes to that component, then flag it to the user before guessing. Do not apply a speculative fix.
+
 ### Fix
 
-Fix all P0 first, then P1, then P2. P3 only if straightforward.
+**Fix order:** `hydrate.js` systemic issues first (variant swap, data mutation, toolbar logic), then `build-course.js` fill function issues. A swap logic fix may auto-resolve render bugs that only appear post-swap — fix it first to avoid patching symptoms that disappear with the root fix.
+
+Then fix remaining clusters by severity (P0 → P1 → P2). P3 only if straightforward.
 
 **All fixes go in the ENGINE** (build-course.js, hydrate.js). NEVER edit index.html or v5/output/ files directly.
 
-**After each batch of related fixes:**
+**After each cluster of fixes:**
 1. Rebuild: `node v5/scripts/build-course.js`
 2. Reload in Playwright
-3. Re-check the fixed components (screenshot before/after)
-4. **Regression check:** verify previously-fixed issues are still fixed
-5. Mark issues as FIXED in the log
+3. **In-course blast radius:** browser-verify all affected components present in the course
+4. **Out-of-course blast radius:** code-inspect only — confirm the fix was correctly applied to their fill functions (cannot browser-verify components not in this course)
+5. **Regression check:** verify previously-fixed issues are still fixed
+6. Mark all issues resolved by this root fix as FIXED in the log
 
 **If variants are truly identical:** add structural differences in the fill function that don't depend on the design contract.
 
@@ -259,9 +305,11 @@ After all fixes are complete:
 3. Turn authoring OFF, scroll through course — no artefacts, interactivity works
 4. Confirm all fixed issues are still fixed
 
-### Report
+### Write the report file
 
-Present to the user:
+Write the full report to `v5/output/audit-report.md` **before** presenting it to the user. Read it back to confirm it was written correctly. This ensures the report survives even if the session dies after this point.
+
+Report format:
 
 ```
 ## Authoring Audit Summary
@@ -307,19 +355,19 @@ Present to the user:
 - [ ] All fixed issues confirmed still fixed
 ```
 
-### Post-Audit Change Audit
+### Present report to user
+
+Present the contents of `v5/output/audit-report.md` to the user.
+
+### Post-audit
 
 If ANY engine files were modified, run `v5/CHANGE-AUDIT.md`. This catches stale docs, mismatched counts, and label sync issues.
-
-### Clean up
-
-Delete `v5/output/audit-findings.json` — it was a working file, not a permanent output.
 
 ---
 
 ## Component Audit Checklist
 
-This is the checklist used in Phase 1 and Phase 2 for each component during the desktop sweep. Do everything at one component before moving to the next.
+This checklist is used in Phases 1 and 2 for each component during the desktop sweep. Complete all checks for one component before moving to the next.
 
 ### 1. Toolbar (once — doesn't change with variant swap)
 
@@ -327,22 +375,22 @@ This is the checklist used in Phase 1 and Phase 2 for each component during the 
 |---|---|
 | Toolbar visible | Coloured bar above the component |
 | Toolbar colour | Matches category (Content=blue, Explore=purple, Assess=red, Layout=green, Media=cyan, Structure=amber) |
-| Type label clear | User-friendly name (e.g. "Quiz" not "mcq"). **UX:** would a non-technical author understand this? |
+| Type label clear | User-friendly name (e.g. "Quiz" not "mcq"). Would a non-technical author understand this? |
 | Variant buttons | One per variant; count matches VARIANT_MAP. Skip for no-variant components. |
-| Variant labels clear | Friendly labels (e.g. "Side by side" not "split"). **UX:** could a user predict the result without clicking? |
+| Variant labels clear | Friendly labels (e.g. "Side by side" not "split"). Could a user predict the result without clicking? |
 | Active button state | Active variant visually distinct (darker background) |
 | Edit text toggle | Present ONLY on: mcq, tabs, flashcard, narrative, checklist, branching, path-selector. ABSENT on all others including accordion. |
-| Delete button | "✕ Delete" visible, right-aligned. **UX:** easy to accidentally click? No-undo clear? |
+| Delete button | "✕ Delete" visible, right-aligned |
 | Toolbar overflow | No awkward wrapping or off-screen buttons |
 | Toolbar z-index | Not hidden behind adjacent full-bleed/hero sections |
 
 ### 2. Variant cycle
 
-**Components WITH variants:** click each variant button one at a time, screenshot each. Run checks A–D per variant. For interactive components, also run D (interactivity) on each variant. After all variants, evaluate E (differentiation).
+**Components WITH variants:** click each variant button one at a time. For each variant: save a screenshot to `screenshots/audit/[type]-[variant].png` (do NOT read it into context), then run checks A–D via JS evaluation. After all variants, evaluate E.
 
 **Components WITHOUT variants:** run A–C on the single rendered state. If interactive, also run D. Skip E.
 
-**Consult the component-specific criteria reference** to know what "correct" looks like for each variant.
+**Consult the component-specific criteria reference** (at the bottom of this file) to know what "correct" looks like for each variant.
 
 ---
 

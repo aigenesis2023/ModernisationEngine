@@ -13,7 +13,8 @@
       'details summary { list-style: none; cursor: pointer; }' +
       'details summary::-webkit-details-marker { display: none; }' +
       '#hydrate-progress { position: fixed; top: 0; left: 0; height: 3px; background: var(--color-primary, #0099ff); z-index: 9999; transition: width 0.15s linear; pointer-events: none; }' +
-      '.drawer-link-active .drawer-index { color: var(--color-primary, #0099ff); }';
+      '.drawer-link-active .drawer-index { color: var(--color-primary, #0099ff); }' +
+      '@media(max-width:640px){[data-authoring-category] button{min-height:44px !important;}}';
     document.head.appendChild(style);
 
     // ── Editing guard: check if the section is in edit mode ───────────
@@ -475,15 +476,26 @@
     heroCTAs.forEach(function (btn) {
       btn.style.cursor = 'pointer';
       btn.addEventListener('click', function () {
-        // Find the first section after the hero
+        // Find the first content section after the hero
         var hero = document.querySelector('[data-component-type="hero"]');
         var target = hero ? hero.nextElementSibling : null;
         // Walk past non-element nodes to find the first real section/div
         while (target && target.nodeType !== 1) target = target.nextElementSibling;
+        // If hero is wrapped (authoring), walk up to wrapper and find next sibling's section
+        if (!target && hero) {
+          var wrapper = hero.parentElement;
+          var nextWrapper = wrapper ? wrapper.nextElementSibling : null;
+          while (nextWrapper && !nextWrapper.querySelector('[data-component-type]')) {
+            nextWrapper = nextWrapper.nextElementSibling;
+          }
+          if (nextWrapper) target = nextWrapper.querySelector('[data-component-type]') || nextWrapper;
+        }
         if (!target) {
-          // Fallback: scroll to the first id-anchored element
-          var firstSection = document.querySelector('[id^="section-"]');
-          if (firstSection) target = firstSection;
+          // Fallback: scroll to the first section after section-00 (the hero)
+          var allSections = document.querySelectorAll('[id^="section-"]');
+          for (var i = 0; i < allSections.length; i++) {
+            if (allSections[i].dataset.componentType !== 'hero') { target = allSections[i]; break; }
+          }
         }
         if (target) {
           target.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1073,7 +1085,7 @@
 
     // ── HYDRATE COMPONENT — re-initialize a single component after variant swap ─
     // querySelectorAll only searches descendants, not the root itself.
-    // Many interactive attrs (data-quiz, data-carousel) live on the <section>,
+    // Many interactive attrs (data-quiz, data-carousel) live on the section element,
     // which IS the rootEl after a variant swap. This helper matches both.
     function qsaIncludingSelf(root, sel) {
       var list = Array.prototype.slice.call(root.querySelectorAll(sel));
@@ -1575,6 +1587,20 @@
                   // Strip HTML tags — JSON body values may contain <p> etc. from AI generation;
                   // build-course.js strips at build time but variant swap must do the same
                   var clean = typeof val === 'string' ? val.replace(/<[^>]*>/g, '') : val;
+                  // For stat-callout values, reconstruct prefix + value + suffix
+                  if (el.hasAttribute('data-counter') && path.match(/_items\.\d+\.value$/)) {
+                    var itemPath = path.replace(/\.value$/, '');
+                    var itemParts = itemPath.split('.');
+                    var itemObj = cd;
+                    for (var m = 0; m < itemParts.length; m++) {
+                      var ik = isNaN(itemParts[m]) ? itemParts[m] : parseInt(itemParts[m], 10);
+                      if (itemObj === undefined || itemObj === null) break;
+                      itemObj = itemObj[ik];
+                    }
+                    if (itemObj) {
+                      clean = (itemObj.prefix || '') + clean + (itemObj.suffix || '');
+                    }
+                  }
                   el.textContent = clean;
                 }
               }
