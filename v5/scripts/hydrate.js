@@ -1097,6 +1097,48 @@
       var authoringActive = false;
       var entries = [];
 
+      // User-friendly component type labels (display only — internal names unchanged)
+      var typeLabels = {
+        'hero': 'Hero Banner',
+        'text': 'Text Block',
+        'graphic': 'Image',
+        'graphic-text': 'Image & Text',
+        'full-bleed': 'Full-Width Image',
+        'pullquote': 'Featured Quote',
+        'stat-callout': 'Key Statistics',
+        'key-term': 'Glossary',
+        'callout': 'Callout',
+        'accordion': 'Expandable List',
+        'tabs': 'Tabs',
+        'narrative': 'Slideshow',
+        'flashcard': 'Flashcards',
+        'labeled-image': 'Labelled Image',
+        'mcq': 'Quiz',
+        'branching': 'Scenario',
+        'textinput': 'Free Text',
+        'checklist': 'Checklist',
+        'bento': 'Card Grid',
+        'comparison': 'Comparison',
+        'data-table': 'Table',
+        'timeline': 'Timeline',
+        'process-flow': 'Process Flow',
+        'image-gallery': 'Gallery',
+        'media': 'Video',
+        'video-transcript': 'Video + Transcript',
+        'divider': 'Divider',
+        'path-selector': 'Path Selector'
+      };
+
+      // User-friendly category labels (display only — internal names unchanged)
+      var USER_CATEGORY_LABELS = {
+        'Content': 'Text & Images',
+        'Explore': 'Interactive',
+        'Assess': 'Quiz & Activities',
+        'Layout': 'Data & Layout',
+        'Media': 'Media',
+        'Structure': 'Page Structure'
+      };
+
       var variantLabels = {
         'centered-overlay': 'Image + centred text',
         'split-screen': 'Text left, image right',
@@ -1239,33 +1281,36 @@
             'border-radius:6px 6px 0 0;margin:0 8px;flex-wrap:wrap;'
           );
 
-          // Category badge
+          // Category badge (user-friendly label)
           var catBadge = document.createElement('span');
-          catBadge.textContent = catLabel;
+          catBadge.textContent = USER_CATEGORY_LABELS[category] || catLabel;
           catBadge.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;padding:1px 8px;border-radius:3px;font-size:9px;text-transform:uppercase;letter-spacing:0.08em;margin-right:4px;';
           toolbar.appendChild(catBadge);
 
-          // Component type selector (swap to another type in same category)
-          var typeSelect = document.createElement('select');
-          typeSelect.setAttribute('data-authoring-type-select', '');
-          typeSelect.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:2px 6px;border-radius:3px;font:bold 10px/1.4 monospace;cursor:pointer;margin-right:6px;text-transform:uppercase;letter-spacing:0.05em;';
-          // Populate with types from same category
-          var typesInCategory = Object.keys(catMap).filter(function(t) { return catMap[t] === category; });
-          typesInCategory.forEach(function(t) {
-            var opt = document.createElement('option');
-            opt.value = t;
-            opt.textContent = t;
-            opt.style.cssText = 'background:#333;color:#fff;';
-            if (t === compType) opt.selected = true;
-            typeSelect.appendChild(opt);
-          });
-          toolbar.appendChild(typeSelect);
+          // Component type label (user-friendly display name)
+          var typeLabel = document.createElement('span');
+          typeLabel.textContent = typeLabels[compType] || compType;
+          typeLabel.style.cssText = 'font:bold 11px/1.4 monospace;margin-right:6px;opacity:0.9;';
+          toolbar.appendChild(typeLabel);
 
-          // Separator
-          var sep = document.createElement('span');
-          sep.textContent = '›';
-          sep.style.cssText = 'opacity:0.4;margin:0 2px;';
-          toolbar.appendChild(sep);
+          // Spacer to push delete button to the right
+          var spacer = document.createElement('span');
+          spacer.style.cssText = 'flex:1;';
+          toolbar.appendChild(spacer);
+
+          // Delete button (right-aligned)
+          var deleteBtn = document.createElement('button');
+          deleteBtn.textContent = '✕ Delete';
+          deleteBtn.title = 'Delete this section';
+          deleteBtn.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:2px 10px;border-radius:3px;font:bold 10px/1.4 monospace;cursor:pointer;margin-left:auto;';
+          deleteBtn.addEventListener('mouseenter', function() { deleteBtn.style.background = '#ef4444'; deleteBtn.style.borderColor = '#ef4444'; });
+          deleteBtn.addEventListener('mouseleave', function() { deleteBtn.style.background = 'rgba(0,0,0,0.3)'; deleteBtn.style.borderColor = 'rgba(255,255,255,0.3)'; });
+          toolbar.appendChild(deleteBtn);
+
+          // Variant buttons row (after spacer+delete, on a new flex line)
+          var variantRow = document.createElement('div');
+          variantRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:4px;';
+          toolbar.appendChild(variantRow);
 
           var variantNames = Object.keys(variantNodes);
           variantNames.forEach(function(v) {
@@ -1279,7 +1324,7 @@
               ';color:#fff' +
               ';border:1px solid ' + (isActive ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.3)') +
               ';padding:2px 10px;border-radius:3px;font:bold 11px/1.4 monospace;cursor:pointer;';
-            toolbar.appendChild(btn);
+            variantRow.appendChild(btn);
           });
 
           wrapper.insertBefore(toolbar, section);
@@ -1302,36 +1347,43 @@
             swapVariant(entry, target);
           });
 
-          // Component type change handler
-          typeSelect.addEventListener('change', function() {
-            var newType = typeSelect.value;
-            if (newType === entry.compType) {
-              // Remove rebuild badge if reverting
-              var badge = entry.wrapper.querySelector('[data-rebuild-badge]');
-              if (badge) badge.remove();
-              return;
-            }
-            // Update JSON model
+          // Delete section handler
+          deleteBtn.addEventListener('click', function() {
+            var friendlyName = typeLabels[entry.compType] || entry.compType;
+            if (!confirm('Delete this ' + friendlyName + ' section? This cannot be undone.')) return;
+
+            // Remove from JSON model
             var sec = entry.wrapper.querySelector('section[data-component-type]');
             if (sec && courseData) {
-              var cd = getCompData(sec);
-              if (cd) {
-                cd.type = newType;
-                // Clear variant since new type has different variants
-                delete cd.variant;
+              var si = parseInt(sec.getAttribute('data-section-index'), 10);
+              var ci = parseInt(sec.getAttribute('data-component-index'), 10);
+              if (!isNaN(si) && !isNaN(ci) && courseData.sections[si]) {
+                courseData.sections[si].components.splice(ci, 1);
+                var sectionRemoved = courseData.sections[si].components.length === 0;
+                if (sectionRemoved) {
+                  courseData.sections.splice(si, 1);
+                }
                 saveCourseData();
+                // Re-index remaining DOM sections to keep data attributes in sync
+                document.querySelectorAll('section[data-component-type][data-section-index]').forEach(function(s) {
+                  var sIdx = parseInt(s.getAttribute('data-section-index'), 10);
+                  var cIdx = parseInt(s.getAttribute('data-component-index'), 10);
+                  if (!sectionRemoved && sIdx === si && cIdx > ci) {
+                    s.setAttribute('data-component-index', cIdx - 1);
+                  } else if (sectionRemoved && sIdx > si) {
+                    s.setAttribute('data-section-index', sIdx - 1);
+                  }
+                });
               }
             }
-            // Add "rebuild needed" badge if not already present
-            if (!entry.wrapper.querySelector('[data-rebuild-badge]')) {
-              var badge = document.createElement('div');
-              badge.setAttribute('data-rebuild-badge', '');
-              badge.style.cssText = 'position:absolute;top:0;right:12px;background:#ef4444;color:#fff;padding:2px 10px;border-radius:0 0 4px 4px;font:bold 10px/1.6 monospace;z-index:1;';
-              badge.textContent = '⟳ Rebuild needed';
-              entry.wrapper.appendChild(badge);
-            }
-            console.log('Authoring: type changed ' + entry.compType + ' → ' + newType + ' (rebuild needed)');
+
+            // Remove from DOM
+            var idx = entries.indexOf(entry);
+            if (idx > -1) entries.splice(idx, 1);
+            entry.wrapper.remove();
+            console.log('Authoring: deleted ' + entry.compType + ' section');
           });
+
         });
       }
 
@@ -1375,6 +1427,22 @@
                 if (i < bodyParts.length) p.innerHTML = bodyParts[i];
               });
             }
+            // Apply structured data edits to data-edit-path elements in new variant
+            newSection.querySelectorAll('[data-edit-path]').forEach(function(el) {
+              var path = el.getAttribute('data-edit-path');
+              var useHtml = el.hasAttribute('data-edit-html');
+              var parts = path.split('.');
+              var val = cd;
+              for (var k = 0; k < parts.length; k++) {
+                var key = isNaN(parts[k]) ? parts[k] : parseInt(parts[k], 10);
+                if (val === undefined || val === null) break;
+                val = val[key];
+              }
+              if (val !== undefined && val !== null) {
+                if (useHtml) { el.innerHTML = val; } else { el.textContent = val; }
+              }
+            });
+
             // Update variant in JSON model
             cd.variant = targetVariant;
             saveCourseData();
@@ -1437,6 +1505,19 @@
         displayTitle: { selector: 'h1,h2,h3,h4,h5,h6', first: true },
         body: { selector: 'p', multi: true }
       };
+
+      // Set a value at a dot-separated path (e.g., "_items.2.title")
+      function setNestedValue(obj, path, value) {
+        var parts = path.split('.');
+        var target = obj;
+        for (var k = 0; k < parts.length - 1; k++) {
+          var key = isNaN(parts[k]) ? parts[k] : parseInt(parts[k], 10);
+          if (target[key] === undefined) return;
+          target = target[key];
+        }
+        var lastKey = isNaN(parts[parts.length - 1]) ? parts[parts.length - 1] : parseInt(parts[parts.length - 1], 10);
+        target[lastKey] = value;
+      }
 
       function getCompData(section) {
         var si = section.getAttribute('data-section-index');
@@ -1501,6 +1582,34 @@
             });
           });
         }
+
+        // Structured content — elements with data-edit-path (items, stats, nodes, etc.)
+        section.querySelectorAll('[data-edit-path]').forEach(function(el) {
+          if (el.hasAttribute('data-editable')) return;
+          // Skip elements inside interactive containers that shouldn't be edited
+          if (el.closest('[data-quiz] [data-choice]')) return;
+
+          var path = el.getAttribute('data-edit-path');
+          var useHtml = el.hasAttribute('data-edit-html');
+
+          el.setAttribute('contenteditable', 'true');
+          el.setAttribute('data-editable', 'path:' + path);
+          el.setAttribute('spellcheck', 'true');
+          editableElements.push(el);
+
+          el.addEventListener('input', function() {
+            var cd = getCompData(section);
+            if (!cd) return;
+            var value = useHtml ? el.innerHTML : el.textContent;
+            setNestedValue(cd, path, value);
+            saveCourseData();
+          });
+
+          el.addEventListener('keydown', function(e) {
+            // Block Enter on single-line fields (titles, labels, values)
+            if (!useHtml && e.key === 'Enter') { e.preventDefault(); el.blur(); }
+          });
+        });
       }
 
       function enableInlineEditing() {

@@ -437,10 +437,10 @@ function fillAccordion(comp, variant, maxW) {
       return `<details class="group glass-card rounded-2xl ${borderStyle} transition-all duration-300">
 <summary class="flex items-center gap-4 cursor-pointer font-headline font-bold text-lg px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
 <span class="material-symbols-outlined text-primary flex-shrink-0">${icon}</span>
-<span class="flex-1">${esc(item.title || '')}</span>
+<span class="flex-1" data-edit-path="_items.${i}.title">${esc(item.title || '')}</span>
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-on-surface-variant/50">expand_more</span>
 </summary>
-<div class="${bodyClass} px-8 pb-8 ml-10">
+<div class="${bodyClass} px-8 pb-8 ml-10" data-edit-path="_items.${i}.body" data-edit-html>
 ${item.body || ''}
 </div>
 </details>`;
@@ -458,13 +458,13 @@ ${accentDetails}
 
   // ── Default variant: standard ──
   const detailsClass = c.detailsClass || 'group glass-card rounded-2xl transition-all duration-300';
-  const newDetails = items.map(item =>
+  const newDetails = items.map((item, i) =>
     `<details class="${detailsClass}">
 <summary class="flex justify-between items-center cursor-pointer font-headline font-bold text-lg px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
-${esc(item.title || '')}
+<span data-edit-path="_items.${i}.title">${esc(item.title || '')}</span>
 <span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-secondary">expand_more</span>
 </summary>
-<div class="${bodyClass} px-8 pb-8">
+<div class="${bodyClass} px-8 pb-8" data-edit-path="_items.${i}.body" data-edit-html>
 ${item.body || ''}
 </div>
 </details>`
@@ -697,8 +697,8 @@ function fillBento(comp, variant, maxW) {
 <span class="material-symbols-outlined text-secondary text-2xl">${icons[i % icons.length]}</span>
 </div>
 <div class="min-w-0 flex-1">
-<h4 class="font-headline text-xl font-bold mb-2 ${headCls}">${esc(item.title || '')}</h4>
-<p class="${subtextCls} text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2 ${headCls}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="${subtextCls} text-sm leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }).join('\n');
@@ -722,8 +722,8 @@ ${wideCards}
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-15 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-primary text-5xl mb-4">${icons[0]}</span>
-<h4 class="font-headline text-2xl font-bold mb-3 text-on-surface">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-2xl font-bold mb-3 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
       }
@@ -732,8 +732,8 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opaci
       const subtextCls = bentoCardSubtextClass(bgN);
       return `<div class="${bgN} rounded-3xl p-6 md:p-8 flex flex-col min-h-[160px] overflow-hidden">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-2 ${headCls}">${esc(item.title || '')}</h4>
-<p class="text-sm ${subtextCls} leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headCls}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-sm ${subtextCls} leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
     }).join('\n');
 
@@ -758,8 +758,8 @@ ${featuredCards}
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-secondary text-4xl mb-3">${icons[0]}</span>
-<h4 class="font-headline text-xl font-bold mb-2 ${headCls0}">${esc(item.title || '')}</h4>
-<p class="${subtextCls0} text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2 ${headCls0}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="${subtextCls0} text-sm leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
@@ -770,8 +770,8 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opaci
       return `<div class="md:col-span-1 ${bgI} rounded-3xl p-6 md:p-8 flex flex-col min-h-[180px] overflow-hidden">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
 <div class="min-w-0 flex-1">
-<h4 class="font-headline text-lg font-bold mb-2 ${headClsI}">${esc(item.title || '')}</h4>
-<p class="${subtextClsI} text-sm leading-relaxed line-clamp-4">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headClsI}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="${subtextClsI} text-sm leading-relaxed line-clamp-4" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }
@@ -781,8 +781,8 @@ ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opaci
     const subtextClsN = bentoCardSubtextClass(bgN);
     return `<div class="${i >= 3 && items.length > 4 ? 'md:col-span-2' : ''} ${bgN} rounded-3xl p-6 md:p-8 flex flex-col min-h-[160px] overflow-hidden ${bgShadow}">
 <span class="material-symbols-outlined text-secondary text-3xl mb-4">${icons[i % icons.length]}</span>
-<h4 class="font-headline text-lg font-bold mb-2 ${headClsN}">${esc(item.title || '')}</h4>
-<p class="text-sm ${subtextClsN} leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-lg font-bold mb-2 ${headClsN}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-sm ${subtextClsN} leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -1045,16 +1045,16 @@ function fillTimeline(comp, variant, maxW) {
       return `<div class="relative flex items-center ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8">
 <div class="hidden md:block md:w-[calc(50%-2rem)] ${isLeft ? 'text-right' : 'text-left'}">
 <div class="glass-card rounded-2xl p-6 md:p-8 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}">
-<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>
 <div class="relative z-10 flex-shrink-0">
 <div class="w-10 h-10 rounded-full bg-primary border-4 border-background flex items-center justify-center text-on-primary text-xs font-bold shadow-lg">${num}</div>
 </div>
 <div class="md:w-[calc(50%-2rem)] md:hidden">
-<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm leading-relaxed">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant text-sm leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 <div class="hidden md:block md:w-[calc(50%-2rem)]"></div>
 </div>`;
@@ -1085,8 +1085,8 @@ ${altSteps}
 ${!isLast ? `<div class="${connectorClass}"></div>` : ''}
 </div>
 <div class="${isLast ? '' : 'pb-12'}">
-<h4 class="font-headline text-xl font-bold mb-2">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>`;
     }).join('\n');
@@ -1112,8 +1112,8 @@ ${newSteps}
     return `<div class="relative pl-14">
 <div class="${dotClass}"></div>
 <div class="text-primary/30 font-headline font-black text-xs uppercase tracking-widest mb-1">${num}</div>
-<div class="${titleClass}">${esc(item.title || '')}</div>
-<p class="text-on-surface-variant leading-relaxed">${stripTags(item.body || '')}</p>
+<div class="${titleClass}" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+<p class="text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -1216,8 +1216,8 @@ function fillStatCallout(comp, variant, maxW) {
       const numMatch = (item.stat || item.value || '').match(/[\d.]+/);
       const barWidth = numMatch ? Math.min(parseFloat(numMatch[0]), 100) : 50;
       return `<div class="glass-card rounded-2xl p-6 md:p-8 min-w-[200px]">
-<div class="text-3xl md:text-4xl font-headline ${numWeight} ${numColor} mb-2" data-counter>${esc(displayValue)}</div>
-<p class="text-on-surface-variant text-sm font-medium mb-4">${esc(item.label || '')}</p>
+<div class="text-3xl md:text-4xl font-headline ${numWeight} ${numColor} mb-2" data-counter data-edit-path="_items.${i}.value">${esc(displayValue)}</div>
+<p class="text-on-surface-variant text-sm font-medium mb-4" data-edit-path="_items.${i}.label">${esc(item.label || '')}</p>
 <div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
 <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width:${barWidth}%"></div>
 </div>
@@ -1248,9 +1248,9 @@ ${cardStats}
     const numWeight = style.numWeight || 'font-extrabold';
     const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
-<div class="text-4xl md:text-5xl font-headline ${numWeight} ${numColor} mb-3" data-counter>${esc(displayValue)}</div>
-${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1">${esc(item.label || '')}</div>` : ''}
-<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm leading-snug font-medium mt-2'}">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
+<div class="text-4xl md:text-5xl font-headline ${numWeight} ${numColor} mb-3" data-counter data-edit-path="_items.${i}.value">${esc(displayValue)}</div>
+${hasSublabel ? `<div class="text-on-surface font-bold text-lg mb-1" data-edit-path="_items.${i}.label">${esc(item.label || '')}</div>` : ''}
+<p class="text-on-surface-variant ${hasSublabel ? 'font-light text-sm' : 'text-sm leading-snug font-medium mt-2'}" data-edit-path="_items.${i}.label">${esc(item.sublabel || (hasSublabel ? '' : item.label) || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -1285,15 +1285,15 @@ function fillPullquote(comp, variant, maxW) {
       .replace(/\bmd:text-[6-9]xl\b/g, 'md:text-5xl');
   }
 
-  const attrHtml = attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up">— ${attribution}${role ? `<span class="block text-sm mt-1 text-on-surface-variant/60">${role}</span>` : ''}</p>` : '';
+  const attrHtml = attribution ? `<p class="mt-4 text-on-surface-variant" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? `<span class="block text-sm mt-1 text-on-surface-variant/60">${role}</span>` : ''}</p>` : '';
 
   if (variant === 'centered') {
     // Centered with decorative quotes — large impact
     return `<section class="${secClass} relative" data-component-type="pullquote">
 ${c.decorativeSpanHtml || '<span class="absolute top-8 left-1/2 -translate-x-1/2 text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
 <div class="max-w-4xl mx-auto px-8 text-center relative z-10">
-<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
-${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
+<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal data-edit-path="body">${quote}</blockquote>
+${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
 </div>
 </section>`;
   }
@@ -1302,8 +1302,8 @@ ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-an
     // Minimal — no decoration, just bold text on surface-container
     return `<section class="${sectionOnly('py-20 bg-surface-container-low')}" data-component-type="pullquote">
 <div class="max-w-3xl mx-auto px-8 text-center">
-<blockquote class="font-headline text-2xl md:text-3xl font-bold leading-relaxed text-on-surface" data-animate="fade-up">${quote}</blockquote>
-${attribution ? `<p class="mt-6 text-sm text-on-surface-variant uppercase tracking-widest" data-animate="fade-up">— ${attribution}${role ? ` · ${role}` : ''}</p>` : ''}
+<blockquote class="font-headline text-2xl md:text-3xl font-bold leading-relaxed text-on-surface" data-animate="fade-up" data-edit-path="body">${quote}</blockquote>
+${attribution ? `<p class="mt-6 text-sm text-on-surface-variant uppercase tracking-widest" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? ` · ${role}` : ''}</p>` : ''}
 </div>
 </section>`;
   }
@@ -1313,7 +1313,7 @@ ${attribution ? `<p class="mt-6 text-sm text-on-surface-variant uppercase tracki
 <div class="${maxW} mx-auto px-8">
 <div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
 <span class="text-primary/20 text-7xl font-serif absolute -top-6 -left-1 leading-none select-none" aria-hidden="true">&ldquo;</span>
-<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal>${quote}</blockquote>
+<blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal data-edit-path="body">${quote}</blockquote>
 ${attrHtml}
 </div>
 </div>
@@ -1334,10 +1334,10 @@ function fillChecklist(comp, variant, maxW) {
 
   // ── Variant: card-style — each item as a separate card ──
   if (variant === 'card-style') {
-    const cardItems = items.map(item =>
+    const cardItems = items.map((item, i) =>
       `<label class="flex items-center gap-5 p-6 glass-card rounded-2xl cursor-pointer group border border-outline-variant/10 ${labelHover}">
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}" data-edit-path="_items.${i}.text">${esc(item.text || item.title || '')}</span>
 </label>`
     ).join('\n');
 
@@ -1358,7 +1358,7 @@ ${cardItems}
       `<label class="flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}">
 <div class="w-8 h-8 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold text-sm">${i + 1}</div>
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}" data-edit-path="_items.${i}.text">${esc(item.text || item.title || '')}</span>
 </label>`
     ).join('\n');
 
@@ -1376,10 +1376,10 @@ ${numberedItems}
   }
 
   // ── Default variant: standard ──
-  const newLabels = items.map(item =>
+  const newLabels = items.map((item, i) =>
     `<label class="flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}">
 <input class="${inputClass}" type="checkbox"/>
-<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}">${esc(item.text || item.title || '')}</span>
+<span class="text-on-surface font-medium ${spanHover ? 'group-hover:text-primary transition-colors' : ''}" data-edit-path="_items.${i}.text">${esc(item.text || item.title || '')}</span>
 </label>`
   ).join('\n');
 
@@ -1419,8 +1419,8 @@ function fillTabs(comp, variant, maxW) {
 
     const vPanels = items.map((item, i) =>
       `<div class="glass-card rounded-3xl p-6 md:p-10 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
-<h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
-<div class="text-on-surface-variant leading-relaxed overflow-hidden">${item.body || ''}</div>
+<h4 class="font-headline text-xl font-bold mb-4" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant leading-relaxed overflow-hidden" data-edit-path="_items.${i}.body" data-edit-html>${item.body || ''}</div>
 </div>`
     ).join('\n');
 
@@ -1446,8 +1446,8 @@ ${vPanels}
 
   const panels = items.map((item, i) =>
     `<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
-<h4 class="font-headline text-xl font-bold mb-4">${esc(item.title || '')}</h4>
-<div class="text-on-surface-variant leading-relaxed overflow-hidden">${item.body || ''}</div>
+<h4 class="font-headline text-xl font-bold mb-4" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant leading-relaxed overflow-hidden" data-edit-path="_items.${i}.body" data-edit-html>${item.body || ''}</div>
 </div>`
   ).join('\n');
 
@@ -1489,12 +1489,12 @@ function fillFlashcard(comp, variant, maxW) {
 <div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
 <div class="text-center px-6">
 <div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '5' : '4'}xl mb-4">${icons[i % icons.length]}</div>
-<div class="font-headline font-bold text-${large ? 'xl md:text-2xl' : 'base md:text-lg'} leading-snug">${frontText}</div>
+<div class="font-headline font-bold text-${large ? 'xl md:text-2xl' : 'base md:text-lg'} leading-snug" data-edit-path="_items.${i}.front">${frontText}</div>
 <div class="mt-3 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium text-${large ? 'base' : 'sm'} leading-relaxed px-4">${backText}</p>
+<p class="text-on-secondary-container font-medium text-${large ? 'base' : 'sm'} leading-relaxed px-4" data-edit-path="_items.${i}.back">${backText}</p>
 </div>
 </div>
 </div>`;
@@ -1567,8 +1567,8 @@ function fillNarrative(comp, variant, maxW) {
       return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-[400px] object-cover rounded-2xl mb-6" src="${imgSrc}"/>` : ''}
 <div class="text-on-surface-variant font-bold mb-2">${counter}</div>
-<h4 class="font-headline text-xl font-bold mb-2 text-on-surface">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-sm">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-2 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant text-sm" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
     }).join('\n');
 
@@ -1589,8 +1589,8 @@ ${navButtons}
       const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
       return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 <div class="text-on-surface-variant font-bold mb-4">${counter}</div>
-<h4 class="font-headline text-2xl font-bold mb-4 text-on-surface">${esc(item.title || '')}</h4>
-<div class="text-on-surface-variant leading-relaxed text-lg">${stripTags(item.body || '')}</div>
+<h4 class="font-headline text-2xl font-bold mb-4 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<div class="text-on-surface-variant leading-relaxed text-lg" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>
 </div>`;
     }).join('\n');
 
@@ -1610,8 +1610,8 @@ ${navButtons}
     const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
     return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 <div class="text-on-surface-variant font-bold mb-4">${counter}</div>
-<h4 class="font-headline text-xl font-bold mb-4 text-on-surface">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant">${stripTags(item.body || '')}</p>
+<h4 class="font-headline text-xl font-bold mb-4 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
+<p class="text-on-surface-variant" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -1635,10 +1635,10 @@ function fillKeyTerm(comp, variant, maxW) {
 
   // ── Variant: list — vertical definition list ──
   if (variant === 'list') {
-    const listItems = items.map(item =>
+    const listItems = items.map((item, i) =>
       `<div class="flex gap-6 p-5 border-b border-on-surface/5 last:border-0">
-<div class="text-on-surface font-headline font-bold text-lg w-48 flex-shrink-0">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant text-sm leading-relaxed flex-1">${esc(item.definition || item.body || '')}</p>
+<div class="text-on-surface font-headline font-bold text-lg w-48 flex-shrink-0" data-edit-path="_items.${i}.term">${esc(item.term || item.title || '')}</div>
+<p class="text-on-surface-variant text-sm leading-relaxed flex-1" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
 </div>`
     ).join('\n');
 
@@ -1654,10 +1654,10 @@ ${listItems}
 
   // ── Default variant: card-grid ──
   const cols = items.length <= 2 ? items.length : items.length === 4 ? 2 : 3;
-  const newCards = items.map(item =>
+  const newCards = items.map((item, i) =>
     `<div class="glass-card p-6 md:p-8 rounded-2xl overflow-hidden border-l-4 border-primary">
-<div class="text-on-surface font-headline font-bold text-xl mb-3">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant text-sm leading-relaxed">${esc(item.definition || item.body || '')}</p>
+<div class="text-on-surface font-headline font-bold text-xl mb-3" data-edit-path="_items.${i}.term">${esc(item.term || item.title || '')}</div>
+<p class="text-on-surface-variant text-sm leading-relaxed" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
 </div>`
   ).join('\n');
 
@@ -1761,8 +1761,8 @@ function fillProcessFlow(comp, variant, maxW) {
       const isLast = i === items.length - 1;
       const borderColor = isFirst ? 'border-secondary' : isLast ? 'border-primary' : 'border-outline-variant/30';
       return `<div class="glass-card px-4 py-4 rounded-xl border-t-4 ${borderColor} flex-1 min-w-0 text-center">
-<div class="font-headline font-bold text-sm mb-1">${esc(item.title || '')}</div>
-${item.body ? `<div class="text-xs text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
+<div class="font-headline font-bold text-sm mb-1" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+${item.body ? `<div class="text-xs text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body)}</div>` : ''}
 </div>`;
     });
 
@@ -1792,8 +1792,8 @@ ${withHArrows}
     return `<div class="glass-card px-6 md:px-8 py-5 md:py-6 rounded-xl ${borderClass} flex items-start gap-5">
 <span class="${numColor} font-headline font-black text-2xl mt-0.5 flex-shrink-0">${stepNum}</span>
 <div class="min-w-0">
-<div class="font-headline font-bold text-lg mb-1">${esc(item.title || '')}</div>
-${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed">${stripTags(item.body)}</div>` : ''}
+<div class="font-headline font-bold text-lg mb-1" data-edit-path="_items.${i}.title">${esc(item.title || '')}</div>
+${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed" data-edit-path="_items.${i}.body">${stripTags(item.body)}</div>` : ''}
 </div>
 </div>`;
   });

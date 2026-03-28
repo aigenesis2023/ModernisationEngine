@@ -1,16 +1,16 @@
-Onboarding New Team Members Effectively
+Financial Risk Management Fundamentals
 
-Subject scope: A practical, research-backed guide to onboarding new employees — covering the critical first 90 days, the psychology of belonging, structured onboarding processes, manager responsibilities, and how great onboarding drives retention and performance.
+A comprehensive course on understanding and managing financial risk in modern organisations. Covers the core frameworks, tools, and strategies that risk professionals use to identify, assess, and mitigate financial threats.
 
-What it covers:
-1. Why onboarding matters — the business cost of poor onboarding, retention statistics, and time-to-productivity benchmarks
-2. The psychology of new joiners — belonging uncertainty, impression formation, and the anxiety of being new
-3. Pre-boarding — what to do before day one to reduce anxiety and accelerate integration
-4. Structured 30-60-90 day plans — milestones, goals, check-ins, and how to scaffold learning over the first quarter
-5. The manager's role — what great onboarding managers do differently, common mistakes, and the first conversation framework
-6. Culture integration — values, norms, unwritten rules, and how to help new hires decode the organization
-7. Measuring onboarding success — metrics, feedback loops, and continuous improvement
+Key topics to cover:
+1. What financial risk is — market risk, credit risk, liquidity risk, operational risk, the difference between systematic and unsystematic risk
+2. Risk identification and assessment — how organisations discover and quantify exposure, risk registers, heat maps, scenario analysis
+3. Value at Risk (VaR) and other quantitative measures — how banks and firms calculate potential losses, confidence intervals, limitations of models
+4. Hedging strategies — derivatives (futures, options, swaps), natural hedging, when to hedge vs when to accept risk
+5. Credit risk management — counterparty risk, credit scoring, collateral, credit default swaps, lessons from the 2008 financial crisis
+6. Regulatory frameworks — Basel III/IV, stress testing requirements, capital adequacy, how regulation shapes risk behaviour
+7. Building a risk culture — embedding risk awareness across the organisation, the role of the Chief Risk Officer, risk appetite statements, real-world case studies of risk failures and successes
 
-Target audience: Managers, HR professionals, and team leads responsible for integrating new hires
-Difficulty level: Foundational to Intermediate
+Target audience: Finance professionals, risk analysts, and business managers
+Difficulty: Intermediate (assumes basic financial literacy)
 Estimated duration: ~45 minutes

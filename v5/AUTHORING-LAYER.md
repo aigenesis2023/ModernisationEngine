@@ -4,7 +4,7 @@
 
 **Branch:** `authoring-layer-v5`
 **Started:** 2026-03-28
-**Last updated:** 2026-03-28 (Phase 3 COMPLETE — inline editing, type swap, export)
+**Last updated:** 2026-03-28 (Phase 3.5 COMPLETE — UX polish: friendly labels, delete, removed broken type swap)
 
 ---
 
@@ -184,7 +184,7 @@ These three features (swap component type, add new section, delete section) affe
 Based on these findings, Phase 4 should be restructured:
 
 ```
-Phase 3.5: Authoring UX Polish           Friendly labels, remove broken     NEXT
+Phase 3.5: Authoring UX Polish           Friendly labels, remove broken     DONE
                                           type dropdown, add delete button
 Phase 4a: Client-side type templates      Pre-render type template library   PLANNED
 Phase 4b: Type swap (client-side)         Clone template + fill from JSON    PLANNED
@@ -498,6 +498,28 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-28 — Deep Inline Editing (structured content)
+- build-course.js: Added `data-edit-path` attributes to text elements inside structured items across 12 components:
+  - accordion (title, body), tabs (title, body), timeline (title, body), process-flow (title, body)
+  - stat-callout (value, label), narrative (title, body), flashcard (front, back), bento (title, body)
+  - checklist (text), key-term (term, definition), pullquote (body, attribution)
+- build-course.js: Added `data-edit-html` attribute on rich-content fields (accordion body, tabs body) to preserve HTML formatting
+- hydrate.js: Added `setNestedValue()` helper for dot-path JSON updates (e.g., `_items.2.title`)
+- hydrate.js: `enableInlineEditingForSection()` now finds all `[data-edit-path]` elements and makes them contenteditable with JSON sync
+- hydrate.js: Variant swap now carries over structured edits via `data-edit-path` element matching
+- All item text (accordion panels, timeline steps, stat values, flashcard faces, etc.) is now editable in authoring mode
+- Not yet editable: MCQ choices (quiz logic sensitivity), comparison table cells, data-table, labeled-image markers, branching options
+- QA: 110/0 structural (0 new issues)
+
+### 2026-03-28 — Phase 3.5: Authoring Panel UX Polish
+- hydrate.js: Removed broken component type swap `<select>` dropdown, change handler, and "⟳ Rebuild needed" badge code
+- hydrate.js: Added `typeLabels` map (28 user-friendly component names) — display only in toolbar
+- hydrate.js: Added `USER_CATEGORY_LABELS` map (6 user-friendly category names) — display only in toolbar badge
+- hydrate.js: Toolbar now shows: [category badge] [type label] [delete] then [variant buttons] on second row
+- hydrate.js: Added "✕ Delete" button per section — right-aligned, red on hover, browser confirm dialog
+- hydrate.js: Delete removes section from DOM + embedded JSON model, re-indexes remaining sections
+- QA: 110/0 structural (0 new issues, all warnings pre-existing)
 
 ### 2026-03-28 — Post-Implementation UX Review (Phase 3)
 - User testing revealed Phase 3b type swap dropdown is broken UX — removal recommended

@@ -12,7 +12,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Branch:** Check `git branch` for current branch. `main` exists but is not actively used.
 
-**Authoring Layer:** Live (Phases 1–3 complete). Users can swap variants, edit text inline, change component types, and export modified JSON — all without re-running the pipeline. Phase 4 (Section Management) is next. See `v5/AUTHORING-LAYER.md`.
+**Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Phase 4 (Section Management) is next. See `v5/AUTHORING-LAYER.md`.
 
 ---
 
