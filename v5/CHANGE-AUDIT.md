@@ -75,6 +75,7 @@ After any change:
 - [ ] `v5/AUTHORING-LAYER.md` — no stale counts or duplicate table rows
 - [ ] `CLAUDE.md` — architecture diagram counts match reality
 - [ ] `CLAUDE.md` — file structure section counts match reality
+- [ ] `v5/input/test-runs.md` — component/variant counts, variant coverage table, reference test description, authoring panel description all match current state
 
 ---
 

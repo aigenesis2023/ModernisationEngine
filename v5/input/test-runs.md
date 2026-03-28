@@ -5,7 +5,7 @@
 - **"Run"** → full pipeline (Steps 1-5), deliver the output. No QA, no bug fixing.
 - **"Test"** → full pipeline (Steps 1-5), then all QA gates (6a, 6b, 6c). Fix any failures.
 - **"Matrix test"** → run the default 3-combination matrix below. Fully autonomous — no user input needed.
-- **"Reference test"** → use pre-built reference course (all 25 components, 19 variants). User provides 1 or 2 brand URLs. Runs Steps 3-5 per URL. No QA — user reviews manually.
+- **"Reference test"** → use pre-built reference course (all 28 component types, 56 variants across 23 types). User provides 1 or 2 brand URLs. Runs Steps 3-5 per URL. No QA — user reviews manually.
 
 Examples:
 - "Run it with sales and fin-ai" → just builds
@@ -210,7 +210,7 @@ After auto-fixing objective bugs, present the full report to the user:
 Reply with which subjective bugs to fix, skip, or adjust.
 
 ### Variant coverage
-- Covered: {N}/21 variants across 3 runs
+- Covered: {N}/56 variants across 3 runs
 - Missing: {list}
 
 ### Files modified so far
@@ -277,19 +277,33 @@ Overrides from chat take precedence over this file. Apply them and note the devi
 
 ## Variant coverage
 
-9 components have layout variants (21 total implementations). The matrix should cover as many as possible across the 3 runs. After Phase 2, check which variants were used:
+23 components have layout variants (56 total). The matrix should cover as many as possible across the 3 runs. After Phase 2, check which variants were used:
 
 | Component | Variants | Goal: covered by at least 1 run |
 |-----------|----------|-------------------------------|
 | hero | centered-overlay, split-screen, minimal-text | All 3 |
+| text | standard, two-column, highlight-box | All 3 |
+| graphic | standard, captioned-card | Both |
 | graphic-text | split, overlap, full-overlay | All 3 |
-| bento | grid-4, wide-2, featured | All 3 |
-| accordion | standard, accent-border | Both |
-| mcq | stacked, grid | Both |
+| pullquote | accent-bar, centered, minimal | All 3 |
 | stat-callout | centered, card-row | Both |
-| timeline | vertical, centered-alternating | Both |
-| comparison | columns, stacked-rows | Both |
+| callout | info, warning, tip, success | All 4 |
+| key-term | list, card-grid | Both |
+| accordion | standard, accent-border | Both |
 | tabs | horizontal, vertical | Both |
+| narrative | image-focused, text-focused | Both |
+| flashcard | grid, single-large | Both |
+| labeled-image | numbered-dots, side-panel | Both |
+| checklist | standard, card-style, numbered | All 3 |
+| mcq | stacked, grid | Both |
+| branching | cards, list | Both |
+| bento | grid-4, wide-2, featured | All 3 |
+| comparison | columns, stacked-rows | Both |
+| data-table | standard, striped-card | Both |
+| timeline | vertical, centered-alternating | Both |
+| process-flow | vertical, horizontal | Both |
+| divider | line, spacing, icon | All 3 |
+| full-bleed | center, left, right | All 3 |
 
 `qa-interactive.js` TEST 32 reports which variants were used and which are missing. If critical variants (hero, graphic-text) aren't covered after 3 runs, note it in the summary.
 
@@ -330,7 +344,7 @@ During matrix testing, pay extra attention to:
 
 ### Purpose
 
-Fast engine QA using a pre-built course that exercises all 25 component types and 19/21 layout variants. Skips the most time-consuming steps (research + layout generation) and runs everything else fresh. The user reviews the output manually instead of automated QA.
+Fast engine QA using a pre-built course that exercises all 28 component types and 56 layout variants across 23 types. Skips the most time-consuming steps (research + layout generation) and runs everything else fresh. The user reviews the output manually instead of automated QA.
 
 **Use when:** You've changed build-course.js, hydrate.js, extract-contract.js, generate-course-html.js, generate-images.js, or any engine script and want to verify the output visually.
 
@@ -340,9 +354,9 @@ Fast engine QA using a pre-built course that exercises all 25 component types an
 
 `v5/input/reference-course-layout.json`
 
-- 10 sections, 25 component instances (one per component type)
-- All 25 active component types (excludes path-selector which is SCORM-only)
-- All 21 layout variants accessible via the **authoring panel** (see below)
+- 10 sections, 28 component instances (one per component type)
+- All 28 component types (including divider and callout)
+- All 56 layout variants across 23 types, accessible via the **authoring panel** (see below)
 - Topic: "The Future of Work: Navigating Digital Transformation"
 - Realistic content, normal lengths
 
@@ -350,12 +364,13 @@ Fast engine QA using a pre-built course that exercises all 25 component types an
 
 Every built course includes a **"✎ Edit"** button (top-right corner, sticky). Click it to enter authoring mode:
 
-- Each component that has layout variants shows a colour-coded toolbar above it (colour = category)
-- The toolbar displays the category badge, component type, and buttons for each variant
+- Each component that has layout variants shows a toolbar above it with the component type label and buttons for each variant (using friendly per-component labels, not internal names)
 - Click a variant button to swap the layout live — content stays the same, layout changes
 - Interactive components (tabs, quizzes, etc.) re-initialize automatically after swap
+- Text elements become inline-editable (blue outline on hover/focus)
+- "↓ Export JSON" button appears to download the modified course data
 
-This means one component per type in the reference course covers ALL 21 variants. No duplicate components needed.
+This means one component per type in the reference course covers ALL 56 variants. No duplicate components needed.
 
 The authoring panel is always present in every built course — not just reference tests. It's subtle until clicked (no impact on end users). This IS the authoring layer — it evolves phase by phase.
 
