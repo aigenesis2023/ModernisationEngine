@@ -2371,22 +2371,10 @@ function build() {
     hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
   }
 
-  // Build state config from content-bucket if it exists
+  // ⚠️ ARCHIVED — content-bucket.json is SCORM-only. AI-first pipeline does not use it.
+  // Section gating and path groups are SCORM features. Do not read content-bucket.json.
   let pathStateScript = '';
   let sectionGatingScript = '';
-  const contentBucketPath = path.resolve(ROOT, 'v5/output/content-bucket.json');
-  if (fs.existsSync(contentBucketPath)) {
-    try {
-      const cb = JSON.parse(fs.readFileSync(contentBucketPath, 'utf-8'));
-      if (cb.pathGroups && cb.pathGroups.length > 0) {
-        pathStateScript = `\nwindow.__PATH_GROUPS__ = ${JSON.stringify(cb.pathGroups).replace(/<\//g, '<\\/')};\n`;
-      }
-      if (cb.sectionGating && cb.sectionGating.length > 0) {
-        sectionGatingScript = `\nwindow.__SECTION_GATING__ = ${JSON.stringify(cb.sectionGating).replace(/<\//g, '<\\/')};\n`;
-        console.log(`[ok] Section gating: ${cb.sectionGating.length} gated sections`);
-      }
-    } catch {}
-  }
 
   // Theme + course title
   const isDark = tokens.isDark !== false;
