@@ -385,6 +385,12 @@ These were identified in research as valuable but too complex for the current ph
 
 ## Changelog
 
+### 2026-03-28 — Bug Fix: Variant swap text carry-over
+- hydrate.js: swapVariant() now applies JSON model (displayTitle + body) to new variant DOM after cloning template
+- hydrate.js: Variant selection also persisted to JSON model (cd.variant = targetVariant)
+- Previously, edited text was lost on variant swap — template clone showed original pre-rendered text
+- QA: 110/0 structural
+
 ### 2026-03-28 — Phase 3b+3c Complete (Type Swap + Export) — Phase 3 DONE
 - hydrate.js: Component type `<select>` dropdown in each authoring toolbar — shows types from same category
 - hydrate.js: Changing type updates JSON model (`comp.type`), clears variant, adds red "⟳ Rebuild needed" badge
