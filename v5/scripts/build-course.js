@@ -1554,10 +1554,15 @@ ${largeCards}
   // ── Default variant: grid ──
   const newCards = items.map((item, i) => makeCard(item, i, false)).join('\n');
 
+  // Smart column count: avoid orphan rows (e.g., 5 cards in 3+2)
+  // ≤3 → 3 cols, 4 → 2 cols (2x2), 5 → 5 cols, 6 → 3 cols (2x3), 7+ → 4 cols
+  const n = items.length;
+  const gridCols = n <= 3 ? `md:grid-cols-${n}` : n === 4 ? '' : n === 5 ? 'md:grid-cols-5' : n === 6 ? 'md:grid-cols-3' : 'md:grid-cols-4';
+
   return `<section class="${secClass}" data-component-type="flashcard" data-interactive>
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
-<div class="grid grid-cols-1 sm:grid-cols-2 ${items.length === 4 ? '' : 'md:grid-cols-3'} gap-6" data-animate-stagger="scale-in">
+<div class="grid grid-cols-1 sm:grid-cols-2 ${gridCols} gap-6" data-animate-stagger="scale-in">
 ${newCards}
 </div>
 </div>
