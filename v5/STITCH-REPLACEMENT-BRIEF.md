@@ -228,30 +228,114 @@ Working well, not changing:
 
 ## 5. Implementation Phases
 
-### Phase 0: Mock Token Milestone (DAY ONE)
-Before writing any Dembrandt, MD3, or Figma code — manually create a `standard-tokens.json` from an existing brand (use the current Cyntch tokens as the base). Use it to build the 28 React/Preact components and the first 2 Visual Archetypes (`tech-modern` + `minimalist`). This proves the deterministic rendering pipeline works end-to-end before any brand intelligence code exists. If the mock-token course looks good, the architecture is validated. If it doesn't, we catch problems before investing in extraction/palette infrastructure.
+### EXECUTION ORDER — BUILD IN LAYERS YOU CAN SEE AND JUDGE
 
-### Phase A: Foundation
-React/Preact SSR setup, Tailwind v4 migration, component registry, container queries.
-**Must come first** — everything else builds on this.
-
-### Phase B: Brand Intelligence (can run in PARALLEL with Phase A)
-Enhanced CSS extraction (Dembrandt approach), MD3 palette generation, Vision AI archetype classification, Style Dictionary token transformation, optional Figma headless integration.
-**Replaces Stitch entirely.** Does not depend on Phase A — can generate tokens that the old system consumes while migration happens.
-
-### Phase C: Design System (start as soon as A1 components exist)
-Visual Archetype definitions, accent recipe engine, dynamic icon strategy.
-**The creative layer and most valuable IP** — this is where design quality lives. Don't block on Phase B. Mock tokens manually and build archetypes against real visual output.
-
-### Phase D: QA & Calibration
-Simplify QA tests, multi-brand calibration, visual regression baseline, archive Stitch code.
-**Validates the new system works across brands.**
+The full V6 plan is implemented in THREE rounds. Each round produces a working, testable system with visible course output. This lets you look at the result and say "that's right" or "that's wrong" before moving on. **Never change the design system AND the rendering layer at the same time.**
 
 ---
 
-## 6. Phase A: Foundation
+### ROUND 1: Replace Stitch (inside the EXISTING build system)
+**Goal:** Deterministic tokens + archetype recipes feeding into the current build-course.js. No React. No Tailwind v4. Same fill functions. Just better design input.
 
-### A1. React SSR Setup
+**If the output looks better than Stitch → the design system works. Proceed to Round 2.**
+**If the output looks wrong → the problem is in tokens/recipes, easy to isolate and fix.**
+
+Sessions:
+
+**Session 1 — Enhanced brand scraping**
+- Add `getComputedStyle()` extraction to scrape-brand.js (actual hex colors, font families, border-radii, shadows from brand website)
+- Investigate Dembrandt: run `npx dembrandt [brand-url] --dtcg` against 2-3 test brands, compare output
+- Save extracted CSS alongside existing brand-profile.json and brand-design.md
+- Test: extracted-css.json contains real values from the brand
+
+**Session 2 — MD3 palette + token generation**
+- Install `@material/material-color-utilities`
+- Create `generate-design-tokens.js`:
+  - Reads extracted CSS → identifies primary seed color (heuristics + AI fallback)
+  - MD3 generates full palette from seed → writes design-tokens.json
+  - Same JSON shape that build-course.js already consumes (colors, fonts, isDark, typography)
+- Vision AI archetype classification: subagent reads brand screenshot → outputs archetype + style params
+- Save archetype classification in tokens or alongside
+- Test: run the CURRENT build-course.js with the NEW tokens. Does the course look branded?
+
+**Session 3 — Archetype recipes in existing build-course.js**
+- Add archetype-driven accent recipes directly into the current fill functions:
+  - Replace `const c = DC.hero || {}` with archetype recipe lookups
+  - e.g., `if (archetype === 'tech-modern') { btnGlow = 'shadow-[0_0_15px_${primaryRgb}66]'; }`
+- Define 2-3 archetypes first (`tech-modern`, `minimalist`, `editorial`)
+- Remove design-contract.json dependency entirely
+- Remove dark-mode fixup block (MD3 generates dark-safe palettes)
+- Enforce consistent border-radius, spacing, surface rhythm per archetype
+- Test: run full pipeline with 2-3 different brand URLs. Compare output to Stitch. Is it better?
+
+**Session 4 — Multi-brand calibration**
+- Test across 4-5 brands (dark, light, gradient, minimal, multi-accent)
+- Tune MD3 surface tone overrides for brands where palette looks too "Google-y"
+- Tune seed color selection for edge cases
+- Add remaining archetypes as needed
+- Run QA gates. How many design tests pass now vs with Stitch?
+- Archive Stitch code (move generate-course-html.js + extract-contract.js to v5/archived/)
+
+**CHECKPOINT: The design system is proven. Output is consistently better than Stitch. Pipeline is faster. QA is more stable. You have a working V6 design layer on the V5 rendering layer. You can STOP HERE and have a significantly better engine. Or continue to Round 2.**
+
+---
+
+### ROUND 2: Migrate rendering (Preact SSR + Tailwind v4)
+**Goal:** Modern rendering foundation for the authoring layer. The token system is already proven from Round 1. If something looks wrong, it's the rendering migration, not the design system.
+
+Sessions:
+
+**Session 5 — Preact SSR setup**
+- Add Vite + Preact + preact-render-to-string
+- Create `src/render.ts` — SSR entry point
+- Convert 5-6 core components first (Hero, Text, Accordion, MCQ, Graphic-Text, Tabs)
+- Verify: SSR output matches current fill function output (diff the HTML)
+- hydrate.js continues working (it attaches to data-* attributes, framework-agnostic)
+
+**Session 6 — Complete component migration**
+- Convert remaining 22 components to Preact
+- Build data-driven component registry (replace VARIANT_MAP)
+- Verify: full course renders identically to Round 1 output
+- Test authoring panel still works (amber edit button, variant swap, inline editing)
+
+**Session 7 — Tailwind v4 migration**
+- Replace CDN JIT with Tailwind v4 CLI
+- Move token injection from `<script>tailwind.config</script>` to CSS `@theme` directives
+- Move custom classes (glass-card, text-gradient) to theme.css
+- Inline built CSS into single-file output
+- Verify: course looks identical, no CDN dependency, CSS is deterministic
+
+**CHECKPOINT: Full V6 rendering layer. Preact components, Tailwind v4, data-driven registry. Ready for Phase 4 authoring (drag-and-drop) whenever you want to build it.**
+
+---
+
+### ROUND 3: Polish
+**Goal:** Container queries, icon strategy, QA simplification, optional Figma/Style Dictionary if needed.
+
+**Session 8 — Container queries + width system**
+- Replace COMPONENT_WIDTH_BOOST/CAP with container-responsive layouts
+- Components adapt to container width, not viewport
+
+**Session 9 — QA simplification + visual regression baseline**
+- Remove or simplify design quality tests that can no longer fail (radius consistency, padding consistency)
+- Capture reference screenshots per archetype × brand
+- Optional: Framer Motion for authoring panel animations
+
+**Session 10+ — Optional: DTCG, Style Dictionary, Figma, dynamic icons**
+- Only if the simpler approach from Rounds 1-2 proves insufficient
+- These are "enterprise scaling" tools — evaluate based on actual need
+
+---
+
+**IMPORTANT FOR EACH SESSION:** Start by reading this brief. Read `CLAUDE.md` for current system context. Read the specific source files being modified. At the end of each session, run the pipeline and visually inspect the output before committing. The user is a vibe coder — their judgment is visual, not technical. Keep the feedback loop tight: change → build → look → judge.
+
+---
+
+## 6. Phase A: Foundation (ROUND 2)
+
+> **This phase runs in Round 2 AFTER the design system is proven in Round 1.** Do not change the rendering layer until tokens + archetypes are working in the existing build system. See execution order above.
+
+### A1. Preact SSR Setup
 
 **Why now:** Phase 4 authoring (drag-and-drop section management) requires a component framework. Fill functions are already component functions — they just return strings instead of JSX. Migrating now prevents a painful rewrite later.
 
@@ -359,7 +443,9 @@ Two options (decide during implementation):
 
 ---
 
-## 7. Phase B: Brand Intelligence
+## 7. Phase B: Brand Intelligence (ROUND 1, Sessions 1-4)
+
+> **This is the FIRST thing to build.** Works inside the existing build-course.js. No React, no Tailwind v4. Just better design input.
 
 ### B1. Dembrandt-Style CSS Extraction
 
@@ -538,7 +624,9 @@ Two options (decide during implementation):
 
 ---
 
-## 8. Phase C: Design System
+## 8. Phase C: Design System (ROUND 1, Session 3 + ROUND 3 for polish)
+
+> **Archetype recipes go into the existing build-course.js in Round 1.** Container queries, icon strategy, and polish happen in Round 3.
 
 ### C1. Visual Archetypes
 
@@ -646,7 +734,7 @@ generous: py-28 (hero, full-bleed)
 
 ---
 
-## 9. Phase D: QA & Calibration
+## 9. Phase D: QA & Calibration (ROUND 1 Session 4 + ROUND 3)
 
 ### D1. Simplified QA
 
