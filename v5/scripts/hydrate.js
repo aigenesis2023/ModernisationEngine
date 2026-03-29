@@ -221,11 +221,11 @@
         dotsWrap.setAttribute('data-carousel-dots', '');
         for (var d = 0; d < slides.length; d++) {
           var dot = document.createElement('button');
-          dot.className = 'flex items-center justify-center p-2';
+          dot.className = 'flex items-center justify-center p-1';
           dot.setAttribute('data-dot', d);
           dot.style.cursor = 'pointer';
           var dotInner = document.createElement('span');
-          dotInner.className = 'w-2.5 h-2.5 rounded-full bg-outline-variant/30 transition-colors pointer-events-none';
+          dotInner.className = 'w-2 h-2 rounded-full bg-outline-variant/30 transition-colors pointer-events-none';
           dot.appendChild(dotInner);
           dotsWrap.appendChild(dot);
         }
@@ -259,7 +259,7 @@
           var dots = dotsWrap.querySelectorAll('[data-dot]');
           dots.forEach(function (dot, i) {
             var inner = dot.querySelector('span');
-            if (inner) inner.className = 'w-2.5 h-2.5 rounded-full transition-colors pointer-events-none ' +
+            if (inner) inner.className = 'w-2 h-2 rounded-full transition-colors pointer-events-none ' +
               (i === current ? 'bg-primary' : 'bg-outline-variant/30');
           });
         }

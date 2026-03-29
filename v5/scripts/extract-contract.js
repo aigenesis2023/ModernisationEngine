@@ -22,6 +22,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PATTERNS_DIR = path.resolve(ROOT, 'v5/output/component-patterns');
 const SHELL_PATH = path.resolve(PATTERNS_DIR, '_page-shell.json');
 const OUTPUT_PATH = path.resolve(ROOT, 'v5/output/design-contract.json');
+const TOKENS_PATH = path.resolve(ROOT, 'v5/output/design-tokens.json');
+const STITCH_RAW_PATH = path.resolve(ROOT, 'v5/output/stitch-course-raw.html');
 
 // ─── Visual class filters ────────────────────────────────────────────
 // These identify Tailwind classes that are purely visual (no layout impact)
@@ -506,6 +508,140 @@ function extractNav(shellJson) {
 
 // Footer removed — e-learning courses don't need a website-style footer.
 
+// ─── Typography extraction ──────────────────────────────────────────
+// Extracts Stitch's typography choices from the raw HTML output.
+// These become the authoritative typography scale for all components.
+
+function isTypoClass(c) {
+  // Font size: text-xs, text-sm, text-base, text-lg, text-xl, text-2xl, etc.
+  if (/^(md:|lg:)?text-(xs|sm|base|lg|xl|\d)/.test(c)) return true;
+  // Custom size: text-[10px], text-[1.5rem]
+  if (/^(md:|lg:)?text-\[/.test(c)) return true;
+  // Font weight (NOT font-headline/body/label — we control font-family separately)
+  if (/^font-(thin|extralight|light|normal|medium|semibold|bold|extrabold|black)$/.test(c)) return true;
+  // Line height
+  if (/^(md:|lg:)?leading-/.test(c)) return true;
+  // Letter spacing
+  if (/^tracking-/.test(c)) return true;
+  // Text transform & style
+  if (/^(italic|uppercase|lowercase|capitalize|normal-case)$/.test(c)) return true;
+  return false;
+}
+
+function typoOnly(cls) {
+  if (!cls) return '';
+  return cls.split(/\s+/).filter(isTypoClass).join(' ');
+}
+
+function mostCommon(arr) {
+  if (!arr.length) return null;
+  const freq = {};
+  arr.forEach(c => { freq[c] = (freq[c] || 0) + 1; });
+  return Object.entries(freq).sort((a, b) => b[1] - a[1])[0][0];
+}
+
+function extractTypography() {
+  if (!fs.existsSync(STITCH_RAW_PATH)) {
+    console.log('  [skip] No stitch-course-raw.html — typography extraction skipped');
+    return null;
+  }
+
+  const html = fs.readFileSync(STITCH_RAW_PATH, 'utf-8');
+  const $ = cheerio.load(html);
+  const typo = {};
+
+  // H1 — hero title (first h1)
+  const h1 = $('h1').first();
+  if (h1.length) {
+    const t = typoOnly(h1.attr('class'));
+    if (t) typo.h1 = t;
+  }
+
+  // H2 — section headings (most common pattern across all h2s)
+  const h2Patterns = [];
+  $('h2').each((_, el) => {
+    const t = typoOnly($(el).attr('class'));
+    if (t) h2Patterns.push(t);
+  });
+  const h2Common = mostCommon(h2Patterns);
+  if (h2Common) typo.h2 = h2Common;
+
+  // H3 — subsection headings (most common)
+  const h3Patterns = [];
+  $('h3').each((_, el) => {
+    const t = typoOnly($(el).attr('class'));
+    if (t) h3Patterns.push(t);
+  });
+  const h3Common = mostCommon(h3Patterns);
+  if (h3Common) typo.h3 = h3Common;
+
+  // H4 — item headings (most common)
+  const h4Patterns = [];
+  $('h4').each((_, el) => {
+    const t = typoOnly($(el).attr('class'));
+    if (t) h4Patterns.push(t);
+  });
+  const h4Common = mostCommon(h4Patterns);
+  if (h4Common) typo.h4 = h4Common;
+
+  // Body text — p tags, excluding large display text
+  const bodyPatterns = [];
+  const bodyLargePatterns = [];
+  $('p').each((_, el) => {
+    const cls = $(el).attr('class') || '';
+    const t = typoOnly(cls);
+    // Skip display-level text (blockquotes, stats)
+    if (/text-(3xl|4xl|5xl|6xl|7xl|8xl)/.test(t)) return;
+    // Separate body-large (text-xl, text-lg with font-light, intro paragraphs)
+    if (/text-(xl|lg)/.test(t) || /font-light/.test(t)) {
+      bodyLargePatterns.push(t || 'text-lg leading-relaxed');
+    } else {
+      // Include paragraphs with explicit size or leading
+      bodyPatterns.push(t || 'text-sm leading-relaxed');
+    }
+  });
+  // Filter out entries that are just empty or only leading- (no size info)
+  const bodyWithSize = bodyPatterns.filter(b => /text-(xs|sm|base|lg)/.test(b));
+  const bodyCommon = mostCommon(bodyWithSize.length ? bodyWithSize : bodyPatterns);
+  if (bodyCommon) typo.body = bodyCommon;
+  const bodyLgCommon = mostCommon(bodyLargePatterns);
+  if (bodyLgCommon) typo.bodyLarge = bodyLgCommon;
+
+  // Labels — small uppercase text with tracking
+  const labelPatterns = [];
+  $('span, div, label').each((_, el) => {
+    const cls = $(el).attr('class') || '';
+    if (!cls.includes('uppercase') || !cls.includes('tracking')) return;
+    const t = typoOnly(cls);
+    if (t) labelPatterns.push(t);
+  });
+  const labelCommon = mostCommon(labelPatterns);
+  if (labelCommon) typo.label = labelCommon;
+
+  // Blockquote
+  const bq = $('blockquote').first();
+  if (bq.length) {
+    const t = typoOnly(bq.attr('class'));
+    if (t) typo.blockquote = t;
+  }
+
+  // Stat numbers — large number displays
+  const statPatterns = [];
+  $('div').each((_, el) => {
+    const cls = $(el).attr('class') || '';
+    const text = $(el).text().trim();
+    // Stat numbers are short text (1-8 chars) with large font sizes
+    if (text.length <= 8 && /text-(3xl|4xl|5xl|6xl)/.test(cls)) {
+      const t = typoOnly(cls);
+      if (t) statPatterns.push(t);
+    }
+  });
+  const statCommon = mostCommon(statPatterns);
+  if (statCommon) typo.statNumber = statCommon;
+
+  return typo;
+}
+
 // ─── Main extraction ─────────────────────────────────────────────────
 
 function extractAll() {
@@ -575,6 +711,24 @@ function extractAll() {
     const shell = JSON.parse(fs.readFileSync(SHELL_PATH, 'utf-8'));
     contract._nav = extractNav(shell);
     console.log(`  [ok] nav — ${Object.keys(contract._nav).length} properties`);
+  }
+
+  // Extract typography from raw Stitch HTML
+  const typo = extractTypography();
+  if (typo) {
+    contract._typography = typo;
+    console.log(`  [ok] typography — ${Object.keys(typo).length} roles extracted`);
+    for (const [role, classes] of Object.entries(typo)) {
+      console.log(`       ${role}: ${classes}`);
+    }
+
+    // Also inject typography into design-tokens.json so generateHead() can use it
+    if (fs.existsSync(TOKENS_PATH)) {
+      const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+      tokens.typography = typo;
+      fs.writeFileSync(TOKENS_PATH, JSON.stringify(tokens, null, 2));
+      console.log(`  [ok] Typography added to design-tokens.json`);
+    }
   }
 
   // Write contract

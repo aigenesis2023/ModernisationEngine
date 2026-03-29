@@ -121,11 +121,14 @@ function parseTypoClasses(classStr) {
   return result;
 }
 
-/** Merge parsed typography: Stitch values override defaults */
+/** Merge parsed typography: Stitch provides weight only, we control size/spacing.
+ *  Stitch designs the visual character (bold vs light), but the size scale is a
+ *  layout decision — we own it for cross-brand consistency and readability. */
 function mergeTypo(stitch, defaults) {
   const s = parseTypoClasses(stitch || '');
   const d = parseTypoClasses(defaults);
-  return { ...d, ...s };
+  // Only take fontWeight from Stitch — size, lineHeight, letterSpacing are ours
+  return { ...d, ...(s.fontWeight ? { fontWeight: s.fontWeight } : {}) };
 }
 
 /** Build Tailwind fontSize config entry string: ["size", { lineHeight, fontWeight, ... }] */
@@ -167,7 +170,7 @@ function generateHead(tokens, courseTitle) {
   // Fallbacks are premium-tuned: semibold headings, light lead text, normal body.
   const typo = tokens.typography || {};
   const T = {
-    display:   mergeTypo(typo.h1,         'text-5xl font-bold tracking-tighter leading-tight'),
+    display:   mergeTypo(typo.h1,         'text-5xl font-bold tracking-tighter leading-[1.15]'),
     h2:        mergeTypo(typo.h2,         'text-3xl font-semibold leading-snug'),
     h3:        mergeTypo(typo.h3,         'text-xl font-semibold leading-snug'),
     h4:        (() => {
@@ -440,7 +443,7 @@ function fillHero(comp, variant) {
     return `<section class="${sectionClass}" data-component-type="hero">
 <div class="relative z-10 w-full grid grid-cols-1 md:grid-cols-2 min-h-screen">
 <div class="flex flex-col justify-center px-8 md:px-16 py-20 md:py-0">
-<h1 class="font-headline text-display md:text-display-xl mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
+<h1 class="font-headline text-display md:text-display-xl mb-8 pb-1 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-body-lg text-on-surface-variant max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
@@ -457,7 +460,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
     return `<section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
 <div class="relative z-10 max-w-7xl mx-auto px-8 md:px-16 py-20">
 <div class="border-l-4 border-primary pl-8 md:pl-12">
-<h1 class="font-headline text-display md:text-display-xl mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
+<h1 class="font-headline text-display md:text-display-xl mb-8 pb-1 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-body-lg text-on-surface-variant max-w-3xl mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
@@ -471,7 +474,7 @@ ${buttons}
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover ${imgVisuals}" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 ${overlayGradient}"></div>
 <div class="relative z-10 text-center max-w-7xl mx-auto px-8">
-<h1 class="font-headline text-display md:text-display-xl mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
+<h1 class="font-headline text-display md:text-display-xl mb-8 pb-1 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-body-lg text-white/80 max-w-3xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
 <div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
 <button class="px-8 py-4 ${btn1Bg} ${btn1Text} ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
@@ -710,11 +713,11 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSr
     const gradientDir = align === 'left' ? 'bg-gradient-to-r' : 'bg-gradient-to-l';
     return `<section class="relative min-h-[60vh] flex items-center overflow-hidden" data-component-type="graphic-text">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : '<div class="absolute inset-0 bg-surface-container"></div>'}
-<div class="absolute inset-0 ${gradientDir} from-background via-background/80 to-transparent"></div>
+<div class="absolute inset-0 ${gradientDir} from-background via-background/85 to-background/20"></div>
 <div class="${maxW} mx-auto px-8 relative z-10 py-20" data-animate="fade-up">
 <div class="md:w-1/2 ${align === 'right' ? 'md:ml-auto' : ''}">
 <h2 class="font-headline text-h2 tracking-tight mb-6">${title}</h2>
-<div class="text-body-lg text-on-surface-variant space-y-4">${bodyText}</div>
+<div class="text-body-lg text-on-surface-variant leading-normal space-y-4">${bodyText}</div>
 </div>
 </div>
 </section>`;
@@ -732,7 +735,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" 
 
   const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0 min-w-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
 <h2 class="font-headline text-h2 tracking-tight mb-6">${title}</h2>
-<div class="text-body-lg text-on-surface-variant space-y-4">${bodyText}</div>
+<div class="text-body-lg text-on-surface-variant leading-normal space-y-4">${bodyText}</div>
 </div>`;
 
   return `<section class="${secClass} min-h-[70vh] overflow-x-hidden" data-component-type="graphic-text">
@@ -1256,8 +1259,8 @@ function fillComparison(comp, variant, maxW) {
         if (v === false || v === 'false') return '<span class="material-symbols-outlined text-error/60 text-xl">cancel</span>';
         return `<span class="text-on-surface-variant text-sm">${esc(String(v))}</span>`;
       };
-      return `<div class="glass-card rounded-xl p-5 flex flex-col md:flex-row items-center gap-2 md:gap-4">
-<div class="flex-shrink-0 px-4 py-2 bg-surface-container rounded-full text-label-text uppercase text-on-surface text-center md:order-2" data-edit-path="rows.${ri}.label">${esc(label)}</div>
+      return `<div class="glass-card rounded-xl px-5 py-3 flex flex-col md:flex-row items-center gap-2 md:gap-4">
+<div class="flex-shrink-0 px-3 py-1 bg-surface-container rounded-full text-label-text uppercase text-on-surface text-center md:order-2" data-edit-path="rows.${ri}.label">${esc(label)}</div>
 <div class="flex-1 text-center md:text-right md:order-1">${renderVal(vals[0])}</div>
 <div class="flex-1 text-center md:text-left md:order-3">${renderVal(vals[1])}</div>
 </div>`;
@@ -1279,17 +1282,17 @@ ${stackedRows}
   }
 
   // ── Default variant: columns ──
-  const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>` +
-    columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.title || '')}</th>`).join('');
+  const headerHtml = `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>` +
+    columns.map(c => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.title || '')}</th>`).join('');
 
   const rowsHtml = rows.map((row, ri) => {
     const label = row.label || '';
     const vals = (row.values || []).map(v => {
-      if (v === true || v === 'true') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-secondary text-2xl">check_circle</span></td>';
-      if (v === false || v === 'false') return '<td class="p-6 text-center"><span class="material-symbols-outlined text-error/60 text-2xl">cancel</span></td>';
-      return `<td class="p-6 text-on-surface-variant">${esc(String(v))}</td>`;
+      if (v === true || v === 'true') return '<td class="px-5 py-3 text-center"><span class="material-symbols-outlined text-secondary text-xl">check_circle</span></td>';
+      if (v === false || v === 'false') return '<td class="px-5 py-3 text-center"><span class="material-symbols-outlined text-error/60 text-xl">cancel</span></td>';
+      return `<td class="px-5 py-3 text-on-surface-variant">${esc(String(v))}</td>`;
     }).join('');
-    return `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors border-b border-on-surface/5 last:border-0"><td class="p-6 font-bold">${esc(label)}</td>${vals}</tr>`;
+    return `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors border-b border-on-surface/5 last:border-0"><td class="px-5 py-3 font-bold">${esc(label)}</td>${vals}</tr>`;
   }).join('\n');
 
   return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
@@ -1407,7 +1410,9 @@ function fillPullquote(comp, variant, maxW) {
   if (variant === 'centered') {
     // Centered with decorative quotes — large impact
     return `<section class="${secClass} relative" data-component-type="pullquote">
-${c.decorativeSpanHtml || '<span class="absolute top-8 left-1/2 -translate-x-1/2 text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
+<div class="absolute top-8 left-1/2 -translate-x-1/2">
+${c.decorativeSpanHtml || '<span class="text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
+</div>
 <div class="max-w-5xl mx-auto px-8 text-center relative z-10">
 <blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal data-edit-path="body">${quote}</blockquote>
 ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
