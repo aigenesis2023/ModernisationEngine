@@ -1964,19 +1964,23 @@ ${fallbackMarkerList}
 }
 
 // ─── Divider ──────────────────────────────────────────────────────────
+// Dividers use NO own vertical padding — adjacent sections' py-16 (64px each)
+// provides the gap. The divider's visual element sits centred in that 128px
+// natural gap. Negative margins pull it into the middle of the gap.
 function fillDivider(comp, variant) {
   // variant takes precedence — template pre-rendering passes variant override
   const style = variant || comp.style || 'line';
   const icon = esc(comp.icon || 'more_horiz');
 
   if (style === 'spacing') {
-    return `<section class="py-12" data-component-type="divider">
+    // Pure whitespace divider — collapse own padding, let sections provide gap
+    return `<section class="-my-8" data-component-type="divider">
 <div class="h-8"></div>
 </section>`;
   }
 
   if (style === 'icon') {
-    return `<section class="py-4" data-component-type="divider">
+    return `<section class="-my-8" data-component-type="divider">
 <div class="max-w-6xl mx-auto px-8 flex items-center gap-4">
 <div class="flex-1 h-px bg-outline-variant/20"></div>
 <span class="material-symbols-outlined text-on-surface-variant/40 text-xl">${icon}</span>
@@ -1986,7 +1990,7 @@ function fillDivider(comp, variant) {
   }
 
   // Default: line
-  return `<section class="py-4" data-component-type="divider">
+  return `<section class="-my-8" data-component-type="divider">
 <div class="max-w-4xl mx-auto px-8">
 <hr class="border-0 h-px bg-outline-variant/20"/>
 </div>
