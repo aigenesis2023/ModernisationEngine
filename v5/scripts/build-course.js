@@ -581,7 +581,7 @@ function fillGraphicText(comp, index, variant, maxW) {
 
   // ── Variant: overlap ──
   if (variant === 'overlap') {
-    return `<section class="${secClass} min-h-[70vh] overflow-hidden" data-component-type="graphic-text">
+    return `<section class="${secClass} overflow-hidden" data-component-type="graphic-text">
 <div class="${maxW} mx-auto px-8">
 <div class="relative" data-animate="fade-up">
 <div class="w-full md:w-[60%] ${align === 'left' ? 'md:ml-auto' : ''} rounded-2xl overflow-hidden aspect-[16/10] bg-surface-container ${imgShadow}">
