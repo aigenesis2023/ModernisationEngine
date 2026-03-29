@@ -583,11 +583,11 @@ function fillGraphicText(comp, index, variant, maxW) {
   if (variant === 'overlap') {
     return `<section class="${secClass}" data-component-type="graphic-text">
 <div class="${maxW} mx-auto px-8">
-<div class="relative" data-animate="fade-up">
-<div class="w-full md:w-[60%] ${align === 'left' ? 'md:ml-auto' : ''} rounded-2xl overflow-hidden aspect-[16/10] bg-surface-container ${imgShadow}">
+<div class="relative md:min-h-[450px]" data-animate="fade-up">
+<div class="w-full md:w-[55%] ${align === 'left' ? 'md:ml-auto' : ''} rounded-2xl overflow-hidden aspect-[3/2] bg-surface-container ${imgShadow}">
 ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSrc}"/>` : '<div class="w-full h-full bg-surface-container"></div>'}
 </div>
-<div class="relative md:absolute ${align === 'left' ? 'md:left-0' : 'md:right-0'} md:top-1/2 md:-translate-y-1/2 md:w-[50%] glass-card rounded-2xl p-8 md:p-10 mt-[-2rem] md:mt-0 mx-4 md:mx-0 ${imgShadow}">
+<div class="relative md:absolute ${align === 'left' ? 'md:left-0' : 'md:right-0'} md:top-1/2 md:-translate-y-1/2 md:w-[55%] glass-card rounded-2xl p-8 md:p-10 mt-[-2rem] md:mt-0 mx-4 md:mx-0 ${imgShadow}">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-4 leading-tight">${title}</h2>
 <div class="text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>
