@@ -506,7 +506,13 @@ Two options (decide during implementation):
 
 **What it is:** `@material/material-color-utilities` is Google's published library for Material Design 3 color science. Uses HCT (Hue, Chroma, Tone) color space. Given ONE seed color, generates the entire palette deterministically.
 
-**IMPORTANT: We use the COLOR MATH only, not the design language.** As of 2026, Material Design has evolved to "M3 Expressive" with AI-adaptive layouts, physics-based motion, and morphing shapes. None of that is relevant to us — those are Android UI patterns. We only use the HCT tonal palette algorithm (`CorePalette.of()`) to generate harmonious, accessible color systems from a seed color. Our Visual Archetypes handle the actual design language (glassmorphism, neo-brutalism, editorial, etc.). Don't confuse the palette math library with adopting Material Design's visual style. During implementation, verify the npm package is current and check if a newer palette generation library exists, but don't adopt M3 Expressive UI patterns.
+**We use M3 for TWO things: color math AND shape inspiration.**
+
+**Color math:** We use the HCT tonal palette algorithm (`CorePalette.of()`) to generate harmonious, accessible color systems from a seed color. M3 Expressive (2026) introduced **fidelity levels** and **Expressive palettes** — higher fidelity keeps colors closer to the brand's actual values instead of desaturating toward "Google-y" pastels. Also introduced **content-based dynamic color** (palette from an image, not just a hex seed — we have the brand screenshot). During Session 2, investigate whether the current npm package exposes these Expressive APIs. If available, use high-fidelity Expressive palettes instead of baseline `CorePalette.of()`.
+
+**Shape system:** M3 Expressive introduced 35+ morphing shapes, but these are Android-native and NOT available as web-ready path data in the npm package. We build our own shape library inspired by these shapes (squircle, chamfered, organic, cut-corner) as normalized SVG paths applied via CSS `clip-path`. See Section C5.
+
+**What we DON'T use from M3 Expressive:** Physics-based motion (Android-native), AI-adaptive layouts (Gemini Nano on-device), variable shape morphing (Flutter/Compose rendering). Our Visual Archetypes handle the actual design language. Don't adopt M3 Expressive UI patterns — just use the color math and shape concepts.
 
 **What to do:**
 - `npm install @material/material-color-utilities`
@@ -564,6 +570,7 @@ Two options (decide during implementation):
   {
     "archetype": "tech-modern",        // from defined set (see Phase C)
     "borderRadiusStyle": "sharp",       // sharp / rounded / pill
+    "shapeFamily": "chamfered",         // standard / squircle / chamfered / organic / cut-corner / asymmetric
     "shadowDepth": "glow",             // flat / subtle / medium / deep / glow
     "surfaceStyle": "glass",           // flat / glass / gradient / textured
     "iconWeight": "outlined",          // outlined / rounded / filled
@@ -640,19 +647,19 @@ Two options (decide during implementation):
 
 **Proposed archetypes:**
 
-| Archetype | Description | Border Radius | Shadows | Surfaces | Accents |
+| Archetype | Description | Shapes | Shadows | Surfaces | Accents |
 |---|---|---|---|---|---|
-| `tech-modern` | Dark, glowing, electric | Sharp (4-8px) | Glow (colored box-shadow) | Glass (backdrop-blur) | Neon glow on interactive elements |
-| `editorial` | Spacious, typographic, refined | Minimal (2-4px) | Flat (none or very subtle) | Flat solids from surface hierarchy | Thin accent borders, generous whitespace |
-| `glassmorphist` | Frosted, layered, depth | Rounded (16-24px) | Medium (standard box-shadow) | Heavy glass (high blur, transparency) | Gradient borders, frosted overlays |
-| `minimalist` | Clean, invisible UI, content-first | Rounded (8-12px) | Subtle (low-opacity shadow) | Flat with minimal contrast | Almost none — color only on CTAs |
-| `neo-brutalist` | Bold, high contrast, graphic | Sharp (0-4px) | None | Solid blocks, high contrast | Thick borders, bold colors, offset shadows |
-| `warm-organic` | Soft, approachable, friendly | Pill (20-32px) | Soft (large blur, low opacity) | Warm-tinted surfaces | Soft gradients, rounded everything |
-| `corporate` | Professional, structured, trustworthy | Standard (8px) | Subtle (clean, crisp) | Neutral surfaces, clear hierarchy | Accent color on key actions only |
-| `luxury` | Dark, subtle, premium | Minimal (4-8px) | None or very subtle | Deep, muted surfaces | Metallic gradients, thin gold/silver lines |
+| `tech-modern` | Dark, glowing, electric | Chamfered (cut corners at 45°) | Glow (colored box-shadow) | Glass (backdrop-blur) | Neon glow on interactive elements |
+| `editorial` | Spacious, typographic, refined | Standard (subtle border-radius) | Flat (none or very subtle) | Flat solids from surface hierarchy | Thin accent borders, generous whitespace |
+| `glassmorphist` | Frosted, layered, depth | Squircle (continuous Apple-style curves) | Medium (standard box-shadow) | Heavy glass (high blur, transparency) | Gradient borders, frosted overlays |
+| `minimalist` | Clean, invisible UI, content-first | Squircle (subtle) | Subtle (low-opacity shadow) | Flat with minimal contrast | Almost none — color only on CTAs |
+| `neo-brutalist` | Bold, high contrast, graphic | Cut-corner (one corner sliced) | None | Solid blocks, high contrast | Thick borders, bold colors, offset shadows |
+| `warm-organic` | Soft, approachable, friendly | Organic (soft blob-like contours) | Soft (large blur, low opacity) | Warm-tinted surfaces | Soft gradients, rounded everything |
+| `corporate` | Professional, structured, trustworthy | Standard (clean border-radius) | Subtle (clean, crisp) | Neutral surfaces, clear hierarchy | Accent color on key actions only |
+| `luxury` | Dark, subtle, premium | Squircle (refined, barely perceptible) | None or very subtle | Deep, muted surfaces | Metallic gradients, thin gold/silver lines |
 
 Each archetype is a complete recipe set that specifies:
-- Border radius values (consistent across all components)
+- **Shape family** (see C5 below — applied via `clip-path` to cards, buttons, image masks, decorative elements)
 - Shadow definitions
 - Surface treatment (glass vs flat vs gradient)
 - Hover/transition patterns
@@ -714,7 +721,49 @@ Each archetype is a complete recipe set that specifies:
   - Modern brands → outlined (Material Outlined, current default)
   - Friendly brands → rounded (Material Rounded)
 
-### C4. Consistent Spacing and Radius
+### C5. Expressive Shape System
+
+**What it is:** A custom JSON library of normalized SVG path definitions that give each archetype a distinct geometric personality. This goes far beyond `border-radius` — shapes like chamfered corners, organic blobs, squircles, and cut-corners make archetypes feel fundamentally different from each other, not just "same rectangle, different rounding."
+
+**Why we build our own (not from M3 npm package):** M3 Expressive's 35+ morphing shapes are tied to Android/Flutter rendering engines. The web `@material/web` package does NOT expose shape paths as CSS-ready data. We define our own shapes as normalized SVG paths and apply via CSS `clip-path`.
+
+**Shape families (one per archetype):**
+
+| Shape Family | CSS Technique | Visual Effect | Used By |
+|---|---|---|---|
+| `standard` | `border-radius` only | Clean rectangles, expected | `corporate`, `editorial` |
+| `squircle` | `clip-path: path()` with continuous curves | Apple-style smooth corners, premium feel | `glassmorphist`, `minimalist`, `luxury` |
+| `chamfered` | `clip-path: polygon()` with 45° cuts | Sharp geometric cuts, technical feel | `tech-modern` |
+| `cut-corner` | `clip-path: polygon()` with one corner sliced | Bold asymmetric geometry | `neo-brutalist` |
+| `organic` | `clip-path: path()` with bezier curves | Soft blob-like contours, friendly | `warm-organic` |
+| `asymmetric` | `clip-path: polygon()` with mixed corners | One rounded, one sharp — dynamic tension | Available as override |
+
+**Implementation approach:**
+- Store shapes in `v5/schemas/shape-library.json` as normalized SVG path strings (0-1 scale)
+- Each shape has variants for: `card`, `button`, `imageMask`, `decorative`
+- Apply via `clip-path: path('...')` or the modern `clip-path: shape()` function (Chrome 135+, Safari 18.4+)
+- Fallback: `border-radius` for browsers that don't support `clip-path` on the specific element
+
+**Where shapes are applied per component:**
+- Cards (MCQ, bento, flashcard, checklist, key-term, branching, textinput) — card shape
+- Buttons (hero CTA, MCQ submit, tab triggers) — button shape
+- Image containers (graphic-text, hero bg, bento featured) — imageMask shape
+- Section dividers — decorative shape
+
+**What shapes DON'T affect (structure stays fixed):**
+- Component internal layout (grids, flex, spacing)
+- Text flow and readability (clip-path doesn't affect text reflow inside the element)
+- Interactive hit areas (clip-path is visual only — the clickable area remains rectangular unless we also set `pointer-events` clipping, which we should NOT do for accessibility)
+
+**Risks and mitigations:**
+- **Content overflow:** `clip-path` clips visually but content can overflow. Ensure padding is generous enough that text never reaches clipped edges. Test each shape at minimum and maximum content lengths.
+- **Performance:** `clip-path: path()` is GPU-composited in modern browsers. No performance concern for static shapes. Only a concern if animating shapes (morphing) — defer morphing to Round 3 if pursued.
+- **Browser support:** `clip-path: path()` is supported in all modern browsers (Chrome 88+, Firefox 97+, Safari 15.4+). The newer `shape()` function (Chrome 135+) is optional enhancement. Use `path()` as baseline.
+- **Accessibility:** Clip-path is purely visual. Screen readers see the full content. Tab order and focus indicators work normally. No accessibility impact.
+
+**Session placement:** Shape library definition fits into Session 3 (archetype recipes). Shape paths are just another recipe parameter alongside glow/glass/gradient. Apply shapes in the same fill function pass where other archetype styles are applied. No architectural changes needed — it's CSS classes/inline styles on existing elements.
+
+### C6. Consistent Spacing and Radius
 
 **Replaces Stitch's random assignments:**
 
@@ -788,6 +837,7 @@ With deterministic upstream:
 | `v5/scripts/generate-design-tokens.js` | MD3 palette + archetype + token generation | B3 |
 | `v5/schemas/visual-archetypes.json` | 5-8 archetype definitions with recipe params | C1 |
 | `v5/schemas/accent-recipes.json` | Parameterized recipe definitions | C2 |
+| `v5/schemas/shape-library.json` | Normalized SVG paths per shape family (card, button, imageMask, decorative variants) | C5 |
 
 ### Files to modify
 
