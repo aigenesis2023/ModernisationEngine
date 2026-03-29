@@ -217,15 +217,13 @@
       var dotsWrap = container.querySelector('[data-carousel-dots]');
       if (!dotsWrap && slides.length > 1) {
         dotsWrap = document.createElement('div');
-        dotsWrap.className = 'flex justify-center gap-2 mt-4';
+        dotsWrap.className = 'flex justify-center gap-0 mt-4';
         dotsWrap.setAttribute('data-carousel-dots', '');
         for (var d = 0; d < slides.length; d++) {
           var dot = document.createElement('button');
-          dot.className = 'flex items-center justify-center';
+          dot.className = 'flex items-center justify-center p-2';
           dot.setAttribute('data-dot', d);
           dot.style.cursor = 'pointer';
-          dot.style.width = '44px';
-          dot.style.height = '44px';
           var dotInner = document.createElement('span');
           dotInner.className = 'w-2.5 h-2.5 rounded-full bg-outline-variant/30 transition-colors pointer-events-none';
           dot.appendChild(dotInner);
