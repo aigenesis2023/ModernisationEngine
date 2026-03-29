@@ -33,7 +33,7 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
 
 Every fill function enforces these rules. They are hardcoded in `build-course.js`, not derived from Stitch:
 
-1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag handles spacing/background only (via `sectionOnly()` helper that strips containment classes from Stitch patterns). An inner `<div>` provides containment.
+1. **Containment:** Every component gets `max-w-6xl mx-auto px-8` — no content touches screen edges. The `<section>` tag carries ONLY standardised `py-16` spacing + brand `bg-*` colours (via `sectionOnly()` whitelist — strips everything except `bg-*` and forces `py-16`). An inner `<div>` provides containment.
 
 2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2x2, not 3+1).
 
@@ -63,7 +63,7 @@ Each of the 28 component types has a `fill{Type}(comp, index)` function in `buil
 1. Read visual properties from DC (design-contract.json) with safe fallbacks
 2. Extract content from the component object (comp.displayTitle, comp.body, comp._items, etc.)
 3. Build HTML with:
-   - Section tag: sectionOnly(contractSection) for spacing/background only
+   - Section tag: sectionOnly(contractSection) → always py-16 + bg-* only
    - Inner div: max-w-6xl mx-auto px-8 for containment
    - Layout classes: hardcoded grids, gaps, typography scale
    - Visual classes: from design contract (shadows, hovers, gradients)
@@ -76,7 +76,7 @@ Each of the 28 component types has a `fill{Type}(comp, index)` function in `buil
 - `esc(s)` — HTML-escapes text
 - `stripTags(html)` — removes HTML tags for plain text contexts
 - `embedImage(path)` — reads image file, returns base64 data URI
-- `sectionOnly(cls)` — strips containment/grid classes from Stitch section patterns
+- `sectionOnly(cls)` — whitelist filter: keeps only `bg-*` classes from Stitch section patterns, forces `py-16` spacing on all standard sections (128px gap between any two components)
 - `mc(...parts)` — merges class strings, filtering empty/null, deduplicating
 
 ---

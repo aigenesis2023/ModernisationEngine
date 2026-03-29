@@ -57,15 +57,16 @@ function embedImage(imagePath) {
   return `data:${mimeMap[ext] || 'image/jpeg'};base64,${buffer.toString('base64')}`;
 }
 
-/** Strip containment/grid/flex classes from a section class string.
- *  Section handles spacing (py-*) and background (bg-*) only.
- *  Containment (max-w, mx-auto, px-*) and layout (flex, grid, gap)
- *  go in inner divs — never on the section element itself. */
+/** Standardise section classes: py-16 spacing + brand bg-* only.
+ *  Section tags carry ONLY vertical spacing and background colour.
+ *  Everything else — layout, visual, sizing, margin, overflow — is stripped.
+ *  Spacing is STANDARDISED to py-16 so the gap between any two sections
+ *  is always 128px (64px bottom of A + 64px top of B). */
 function sectionOnly(cls) {
-  // Strip layout/grid/flex classes from design-contract section strings.
-  // Works token-by-token so responsive prefixes (md:flex-row) are removed whole.
-  const strip = /^(?:(?:sm|md|lg|xl|2xl):)?(max-w-|mx-auto|px-\d|grid|gap-|flex|justify-|items-|place-|self-)/;
-  return cls.split(/\s+/).filter(t => !strip.test(t)).join(' ').trim() || 'py-24';
+  const bgs = cls.split(/\s+/)
+    .filter(t => /^(?:(?:sm|md|lg|xl|2xl):)?bg-/.test(t))
+    .join(' ');
+  return bgs ? `py-16 ${bgs}` : 'py-16';
 }
 
 /** Merge class strings, filtering empty/null, deduplicating */
@@ -580,7 +581,7 @@ function fillGraphicText(comp, index, variant, maxW) {
 
   // ── Variant: overlap ──
   if (variant === 'overlap') {
-    return `<section class="${secClass}" data-component-type="graphic-text">
+    return `<section class="${secClass} min-h-[70vh] overflow-hidden" data-component-type="graphic-text">
 <div class="${maxW} mx-auto px-8">
 <div class="relative" data-animate="fade-up">
 <div class="w-full md:w-[60%] ${align === 'left' ? 'md:ml-auto' : ''} rounded-2xl overflow-hidden aspect-[16/10] bg-surface-container ${imgShadow}">
@@ -625,7 +626,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" 
 <div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
 
-  return `<section class="${secClass} overflow-x-hidden" data-component-type="graphic-text">
+  return `<section class="${secClass} min-h-[70vh] overflow-x-hidden" data-component-type="graphic-text">
 <div class="${maxW} mx-auto px-4 md:px-8">
 <div class="flex flex-col md:flex-row gap-8 md:gap-12 items-center">
 ${align === 'left' ? imageDiv + textDiv : textDiv + imageDiv}
@@ -1996,6 +1997,7 @@ function fillDivider(comp, variant) {
 function fillCallout(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
+  const secClass = sectionOnly((DC.callout || {}).section || 'py-16');
   // variant takes precedence — template pre-rendering passes variant override
   // so each alternate (info/warning/tip/success) gets its own style
   const calloutType = variant || comp.calloutType || 'info';
@@ -2008,7 +2010,7 @@ function fillCallout(comp, variant, maxW) {
   };
   const cfg = typeConfig[calloutType] || typeConfig.info;
 
-  return `<section class="py-6" data-component-type="callout">
+  return `<section class="${secClass}" data-component-type="callout">
 <div class="${maxW} mx-auto px-8">
 <div class="border-l-4 ${cfg.border} ${cfg.bg} rounded-r-xl p-6 md:p-8" data-animate="fade-up">
 <div class="flex items-start gap-4">
