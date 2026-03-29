@@ -375,6 +375,8 @@ Two options (decide during implementation):
 
 **Why not full React?** We evaluated this. The single-file HTML output gets loaded in LMS iframes where every KB matters. Shipping 40KB of React runtime for static content that doesn't need client-side interactivity is waste. The authoring panel is the only interactive part, and it can be hydrated independently.
 
+**Hydration mismatch risk (noted by reviewer):** Using vanilla JS (hydrate.js) on Preact SSR output could theoretically cause double-event binding or state sync issues. In practice, our hydrate.js has zero knowledge of Preact — it's pure DOM manipulation via `data-*` attributes (click handlers, class toggles, scroll listeners). This is closer to jQuery-on-static-HTML than framework hydration mismatch. **However:** if the authoring panel later becomes a Preact island with client-side hydration, THAT'S where the real mismatch risk lives. At that point, the authoring panel should use Preact's native hydration, not hydrate.js. hydrate.js remains for course interactivity (quizzes, tabs, flashcards) which is framework-agnostic.
+
 **Framer Motion for authoring UX (optional, authoring panel only):** For drag-and-drop section management (Phase 4), Framer Motion (~25KB) provides layout animations (staggered fades, smooth height transitions when reordering). This loads ONLY in the authoring island, not in the static course. The course itself continues using GSAP scroll animations (CDN-loaded). Don't confuse the two animation layers.
 
 ### A2. Tailwind v4 Migration
@@ -659,7 +661,7 @@ Two options (decide during implementation):
 | `luxury` | Dark, subtle, premium | Squircle (refined, barely perceptible) | None or very subtle | Deep, muted surfaces | Metallic gradients, thin gold/silver lines |
 
 Each archetype is a complete recipe set that specifies:
-- **Shape family** (see C5 below — applied via `clip-path` to cards, buttons, image masks, decorative elements)
+- **Shape family** (see C6 below — applied via `clip-path` to cards, buttons, image masks, decorative elements)
 - Shadow definitions
 - Surface treatment (glass vs flat vs gradient)
 - Hover/transition patterns
@@ -721,7 +723,28 @@ Each archetype is a complete recipe set that specifies:
   - Modern brands → outlined (Material Outlined, current default)
   - Friendly brands → rounded (Material Rounded)
 
-### C5. Expressive Shape System
+### C4. Archetype-Aware Image Prompting
+
+**The gap:** `generate-images.js` currently creates image prompts without knowledge of the visual archetype. A "tech-modern" dark course and a "warm-organic" light course get the same image treatment. This breaks the branded feel — images are 40%+ of visual impact.
+
+**What to do:**
+- Pass the archetype classification + brand-design.md image treatment section to generate-images.js
+- Archetype influences the image prompt SUBTLY — not "make everything blue" but adjusting mood, lighting, color grading:
+  - `tech-modern` → cool lighting, high contrast, dark backgrounds, desaturated with accent color pops
+  - `editorial` → clean, well-lit, editorial photography, neutral backgrounds
+  - `minimalist` → lots of negative space, single subject, soft natural light
+  - `warm-organic` → warm tones, natural settings, soft diffused light, human subjects
+  - `luxury` → dramatic single-source lighting, dark environments, rich textures
+  - `neo-brutalist` → high contrast, graphic/flat style, bold colors
+  - `corporate` → professional, clean, office/team contexts, standard lighting
+
+**CRITICAL: Subtlety is everything.** The archetype should influence lighting, mood, and color grading — NOT inject obvious themed elements. "Cool blue-tinted lighting with dark negative space" is good. "Put blue glowing lines on everything" is bad. The images should feel naturally on-brand, not like a theme filter was applied.
+
+**The brand-design.md image treatment section already captures this well** (e.g., Cyntch: "deep space photography aesthetic — dark backgrounds, dramatic lighting from a single vivid source, cool blue-to-violet colour grading"). The archetype just provides a structured fallback when the prose brief is vague.
+
+**Future consideration: Open-Sora 2.0 for branded video loops.** AI-generated cinematic background loops (ambient motion, particle effects, slow gradients) matched to the brand archetype could massively elevate the premium feel. A `tech-modern` course with a subtle animated particle/nebula hero background, or a `luxury` course with slow-moving light caustics, would feel genuinely custom-built. Not in Round 1-3 scope but worth investigating when the static pipeline is stable. The "Visual Summary" from brand-profile.json could drive video generation prompts.
+
+### C6. Expressive Shape System
 
 **What it is:** A custom JSON library of normalized SVG path definitions that give each archetype a distinct geometric personality. This goes far beyond `border-radius` — shapes like chamfered corners, organic blobs, squircles, and cut-corners make archetypes feel fundamentally different from each other, not just "same rectangle, different rounding."
 
@@ -763,7 +786,7 @@ Each archetype is a complete recipe set that specifies:
 
 **Session placement:** Shape library definition fits into Session 3 (archetype recipes). Shape paths are just another recipe parameter alongside glow/glass/gradient. Apply shapes in the same fill function pass where other archetype styles are applied. No architectural changes needed — it's CSS classes/inline styles on existing elements.
 
-### C6. Consistent Spacing and Radius
+### C7. Consistent Spacing and Radius
 
 **Replaces Stitch's random assignments:**
 
@@ -787,7 +810,7 @@ generous: py-28 (hero, full-bleed)
 
 ## 9. Phase D: QA & Calibration (ROUND 1 Session 4 + ROUND 3)
 
-### D1. Simplified QA
+### D1. Simplified QA + axe-core Accessibility
 
 With deterministic upstream:
 - **Test 17 (WCAG contrast):** Still needed, but should rarely fail (MD3 generates accessible pairs)
@@ -796,6 +819,10 @@ With deterministic upstream:
 - **Test 26 (button style consistency):** Should never fail (recipe-defined buttons)
 - **Tests 1-16 (functional):** Unchanged — still needed for interactivity
 - **Dark-mode fixups:** Eliminated entirely (MD3 generates dark-safe palettes)
+
+**Replace custom WCAG contrast checks with axe-core.** axe-core (`npm install axe-core`) is the industry standard for automated WCAG 2.2 AA auditing. Runs locally (no API, no cost, no latency), produces structured JSON output. Superior to our hand-written contrast checks in qa-interactive.js Test 17 because it tests ALL accessibility rules (not just contrast): focus indicators, aria labels, heading hierarchy, color reliance, tap targets, and more.
+
+**Self-healing pipeline:** axe-core's JSON output can drive automated fixes. If axe reports a contrast error on a button, the build agent can look up the token, adjust the tonal value (e.g., shift primary from tone 80 to tone 90 for better contrast), and rebuild. This turns accessibility from a "test and fix" loop into a "test and auto-correct" step. Integrate in Phase D / Round 3.
 
 ### D2. Multi-Brand Calibration
 
