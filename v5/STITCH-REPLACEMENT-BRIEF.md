@@ -848,6 +848,34 @@ With deterministic upstream:
 
 ---
 
+## 9.5. Free High-Leverage Additions (Slot Into Existing Sessions)
+
+These are zero-cost, low-complexity improvements identified during external review. Each slots into an existing session — they do NOT add new sessions or complexity.
+
+### Implement (free, trivial)
+
+**OKLCH color output (Session 2):** Output final CSS colors in `oklch()` instead of hex. Prevents "gray-dead" gradients, looks premium on wide-gamut (P3) displays (iPhones, modern monitors). One-line change in token → CSS conversion. CSS standard, all modern browsers support it.
+
+**vite-plugin-singlefile (Session 5):** 3-line addition to `vite.config.ts` that flattens Preact SSR output into a single HTML file. Solves the single-file requirement perfectly without manual CSS/JS inlining.
+
+**clip-path video fallback (Session 3):** Chromium bug: `clip-path` breaks on iframes containing `<video>`. The `media` and `video-transcript` components MUST use standard `border-radius` instead of clip-path shapes. Add to shape system: `if (componentType === 'media' || componentType === 'video-transcript') { useRadiusFallback = true; }`.
+
+**Hero Moments flag (Session 3):** Add `heroMoment: true` to the component registry schema. When the generation agent tags a section as high-impact, the build system applies a unique one-off treatment: cinematic video background, full-bleed interactive element, extra-generous spacing. This is what makes a course feel bespoke rather than templated. The flag is just a boolean — the treatment is an archetype recipe variant.
+
+**Brand Memory cache (Session 4):** Save generated tokens + archetype classification per brand URL in `v5/output/brand-cache.json`. When the same brand URL is used again, load cached tokens instead of re-extracting. Ensures multiple courses for the same client look identical. Simple JSON read/write, no API.
+
+### Note for later (paid or adds complexity — do NOT implement in Round 1)
+
+- **Recraft V4** — paid API (~$0.08-0.30/SVG). Generates branded vector icons from MD3 seeds. High leverage but budget ~$2-5/course. Evaluate after Round 1 when basic iconography is working.
+- **LottieFiles Motion Tokens** — free method: store master Lottie files, use `lottie-web` to swap internal hex codes at runtime with brand colors. Defer to Round 3.
+- **AltText.ai** — SKIP the paid API. Instead, have the generation agent write alt-text from the image prompt it already created. Free, more contextual, no external dependency.
+- **Lucide-React / Phosphor Icons** — free alternative to Recraft for iconography. Apply archetype styles via Tailwind. Evaluate alongside dynamic icon strategy (C3).
+- **Monotype / Fontjoy font pairing** — unnecessary. We extract actual fonts from the brand site.
+- **Visual Paradigm table generation** — unnecessary. Claude subagent already handles this.
+- **Open-Sora 2.0 video loops** — noted in C4. Future premium enhancement, not Round 1-3.
+
+---
+
 ## 10. File Inventory
 
 ### New files to create
@@ -864,7 +892,8 @@ With deterministic upstream:
 | `v5/scripts/generate-design-tokens.js` | MD3 palette + archetype + token generation | B3 |
 | `v5/schemas/visual-archetypes.json` | 5-8 archetype definitions with recipe params | C1 |
 | `v5/schemas/accent-recipes.json` | Parameterized recipe definitions | C2 |
-| `v5/schemas/shape-library.json` | Normalized SVG paths per shape family (card, button, imageMask, decorative variants) | C5 |
+| `v5/schemas/shape-library.json` | Normalized SVG paths per shape family (card, button, imageMask, decorative variants) | C6 |
+| `v5/output/brand-cache.json` | Cached tokens + archetype per brand URL for consistency across courses | D2 |
 
 ### Files to modify
 
