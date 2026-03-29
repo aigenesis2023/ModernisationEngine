@@ -1535,7 +1535,7 @@ function fillFlashcard(comp, variant, maxW) {
     return `<section class="${secClass}" data-component-type="flashcard" data-interactive data-carousel>
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
-<div class="max-w-2xl mx-auto">
+<div class="max-w-3xl mx-auto">
 ${largeCards}
 </div>
 <div class="flex justify-center gap-3 mt-8">
@@ -1830,7 +1830,7 @@ ${item.body ? `<div class="text-sm text-on-surface-variant leading-relaxed" data
   ).join('\n');
 
   return `<section class="${secClass}" data-component-type="process-flow">
-<div class="max-w-4xl mx-auto px-8">
+<div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-12 text-center">${title}</h2>
 <div class="flex flex-col gap-2" data-animate-stagger="fade-up">
 ${withArrows}
