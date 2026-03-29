@@ -1,16 +1,1 @@
-Financial Risk Management Fundamentals
-
-A comprehensive course on understanding and managing financial risk in modern organisations. Covers the core frameworks, tools, and strategies that risk professionals use to identify, assess, and mitigate financial threats.
-
-Key topics to cover:
-1. What financial risk is — market risk, credit risk, liquidity risk, operational risk, the difference between systematic and unsystematic risk
-2. Risk identification and assessment — how organisations discover and quantify exposure, risk registers, heat maps, scenario analysis
-3. Value at Risk (VaR) and other quantitative measures — how banks and firms calculate potential losses, confidence intervals, limitations of models
-4. Hedging strategies — derivatives (futures, options, swaps), natural hedging, when to hedge vs when to accept risk
-5. Credit risk management — counterparty risk, credit scoring, collateral, credit default swaps, lessons from the 2008 financial crisis
-6. Regulatory frameworks — Basel III/IV, stress testing requirements, capital adequacy, how regulation shapes risk behaviour
-7. Building a risk culture — embedding risk awareness across the organisation, the role of the Chief Risk Officer, risk appetite statements, real-world case studies of risk failures and successes
-
-Target audience: Finance professionals, risk analysts, and business managers
-Difficulty: Intermediate (assumes basic financial literacy)
-Estimated duration: ~45 minutes
+Quantum Computing

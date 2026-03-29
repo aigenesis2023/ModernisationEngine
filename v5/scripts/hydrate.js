@@ -42,6 +42,7 @@
         choices.forEach(function (c) {
           c.classList.remove('border-primary-container', 'border-[#22c55e]', 'border-error');
           c.style.opacity = '';
+          c.style.borderColor = '';
         });
         if (submitBtn) submitBtn.remove();
         submitBtn = null;
@@ -220,9 +221,14 @@
         dotsWrap.setAttribute('data-carousel-dots', '');
         for (var d = 0; d < slides.length; d++) {
           var dot = document.createElement('button');
-          dot.className = 'w-2 h-2 rounded-full bg-outline-variant/30 transition-colors';
+          dot.className = 'flex items-center justify-center';
           dot.setAttribute('data-dot', d);
           dot.style.cursor = 'pointer';
+          dot.style.width = '44px';
+          dot.style.height = '44px';
+          var dotInner = document.createElement('span');
+          dotInner.className = 'w-2.5 h-2.5 rounded-full bg-outline-variant/30 transition-colors pointer-events-none';
+          dot.appendChild(dotInner);
           dotsWrap.appendChild(dot);
         }
         // Insert dots after the slides area or at end of container
@@ -234,7 +240,8 @@
         }
 
         dotsWrap.addEventListener('click', function (e) {
-          var dotIndex = e.target.getAttribute('data-dot');
+          var dotEl = e.target.closest('[data-dot]');
+          var dotIndex = dotEl ? dotEl.getAttribute('data-dot') : null;
           if (dotIndex !== null) {
             current = parseInt(dotIndex, 10);
             showSlide();
@@ -253,7 +260,8 @@
         if (dotsWrap) {
           var dots = dotsWrap.querySelectorAll('[data-dot]');
           dots.forEach(function (dot, i) {
-            dot.className = 'w-2 h-2 rounded-full transition-colors cursor-pointer ' +
+            var inner = dot.querySelector('span');
+            if (inner) inner.className = 'w-2.5 h-2.5 rounded-full transition-colors pointer-events-none ' +
               (i === current ? 'bg-primary' : 'bg-outline-variant/30');
           });
         }
@@ -350,6 +358,27 @@
     }
     var checklists = document.querySelectorAll('[data-checklist]');
     checklists.forEach(hydrateChecklist);
+
+    // ── 5b. BRANCHING — selection feedback ────────────────────────────
+    var branchingSections = document.querySelectorAll('[data-component-type="branching"]');
+    branchingSections.forEach(function (section) {
+      var buttons = section.querySelectorAll('button');
+      var selected = null;
+      buttons.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          if (isSectionEditing(section)) return;
+          buttons.forEach(function (b) {
+            b.style.borderColor = '';
+            b.style.opacity = '';
+          });
+          btn.style.borderColor = 'var(--md-sys-color-secondary, #8b5cf6)';
+          buttons.forEach(function (b) {
+            if (b !== btn) b.style.opacity = '0.5';
+          });
+          selected = btn;
+        });
+      });
+    });
 
     // ── 6. ACCORDION (details/summary) — CSS handles animation ────────
     // Already handled via injected CSS above. Nothing extra needed.

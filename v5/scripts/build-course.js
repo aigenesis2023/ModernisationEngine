@@ -31,6 +31,10 @@ const PAGES_PATH = path.resolve(ROOT, 'index.html');
 // This is the ONLY interface between Stitch's design and our build.
 let DC = {};
 
+// Theme flag — set from design-tokens.json in main(). Used by fill functions
+// to ensure text colours are readable on dark or light backgrounds.
+let IS_DARK = true;
+
 // ─── HTML helpers ────────────────────────────────────────────────────
 function esc(s) {
   if (!s) return '';
@@ -58,19 +62,10 @@ function embedImage(imagePath) {
  *  Containment (max-w, mx-auto, px-*) and layout (flex, grid, gap)
  *  go in inner divs — never on the section element itself. */
 function sectionOnly(cls) {
-  return cls
-    .replace(/max-w-\S+/g, '')
-    .replace(/\bmx-auto\b/g, '')
-    .replace(/\bpx-\d+\b/g, '')
-    .replace(/\bgrid\b/g, '')
-    .replace(/md:grid-cols-\d+/g, '')
-    .replace(/\bgap-\S+/g, '')
-    .replace(/\bflex\b/g, '')
-    .replace(/\bflex-\S+/g, '')
-    .replace(/\bjustify-\S+/g, '')
-    .replace(/\bitems-\S+/g, '')
-    .replace(/\s+/g, ' ')
-    .trim() || 'py-24';
+  // Strip layout/grid/flex classes from design-contract section strings.
+  // Works token-by-token so responsive prefixes (md:flex-row) are removed whole.
+  const strip = /^(?:(?:sm|md|lg|xl|2xl):)?(max-w-|mx-auto|px-\d|grid|gap-|flex|justify-|items-|place-|self-)/;
+  return cls.split(/\s+/).filter(t => !strip.test(t)).join(' ').trim() || 'py-24';
 }
 
 /** Merge class strings, filtering empty/null, deduplicating */
@@ -318,6 +313,7 @@ function fillHero(comp, variant) {
   const btn1Bg = btn1.gradient || btn1.customClass || btn1.bg || 'bg-primary';
   const btn1Round = btn1.rounded || 'rounded-xl';
   const btn1Visual = btn1.visual || '';
+  const btn1Text = btn1.textColor || 'text-on-primary';
 
   const btn2 = c.btn2 || {};
   const btn2Bg = btn2.bg || 'border border-outline-variant';
@@ -325,14 +321,14 @@ function fillHero(comp, variant) {
   const btn2Visual = btn2.visual || 'hover:bg-surface-variant transition-colors';
 
   const buttons = `<div class="flex gap-4 flex-wrap" data-animate="fade-up">
-<button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
+<button class="px-8 py-4 ${btn1Bg} ${btn1Text} ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
 </div>`;
 
   // ── Variant: split-screen ──
   if (variant === 'split-screen') {
     const sectionClass = c.section || 'relative min-h-screen flex items-center overflow-hidden';
     return `<section class="${sectionClass}" data-component-type="hero">
-<div class="relative z-10 grid grid-cols-1 md:grid-cols-2 min-h-screen">
+<div class="relative z-10 w-full grid grid-cols-1 md:grid-cols-2 min-h-screen">
 <div class="flex flex-col justify-center px-8 md:px-16 py-20 md:py-0">
 <h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-xl text-on-surface-variant max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
@@ -368,7 +364,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
 <h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
 <p class="text-xl text-white/80 max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
 <div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
-<button class="px-8 py-4 ${btn1Bg} text-on-primary ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
+<button class="px-8 py-4 ${btn1Bg} ${btn1Text} ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
 </div>
 </div>
 </section>`;
@@ -615,7 +611,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
   }
 
   // ── Default variant: split ──
-  const imageDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
+  const imageDiv = `<div class="w-full md:w-1/2 flex-shrink-0 min-w-0${align === 'left' ? ' order-2 md:order-1' : ''}" data-animate="${align === 'left' ? 'slide-in-left' : 'slide-in-right'}">
 <div class="relative group overflow-hidden">
 ${glowClass ? `<div class="${glowClass}"></div>` : ''}
 <div class="relative rounded-2xl overflow-hidden aspect-[4/3] ${imgShadow} bg-surface-container">
@@ -624,7 +620,7 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover rounded-2xl" 
 </div>
 </div>`;
 
-  const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
+  const textDiv = `<div class="w-full md:w-1/2 flex-shrink-0 min-w-0${align === 'left' ? ' order-1 md:order-2' : ''} flex flex-col justify-center" data-animate="fade-up">
 <h2 class="font-headline text-3xl font-bold tracking-tight mb-6 leading-tight">${title}</h2>
 <div class="text-lg text-on-surface-variant leading-relaxed space-y-4">${bodyText}</div>
 </div>`;
@@ -824,7 +820,7 @@ function fillDataTable(comp, variant, maxW) {
   let bodyHtml = '';
 
   if (columns.length > 0) {
-    headerHtml = columns.map(c => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(c.title || '')}</th>`).join('');
+    headerHtml = columns.map(c => `<th class="px-8 py-4 text-sm font-bold text-on-surface-variant uppercase tracking-widest">${esc(c.title || '')}</th>`).join('');
     bodyHtml = rows.map((row, ri) => {
       const label = row.label || '';
       const vals = row.values || [];
@@ -835,10 +831,10 @@ function fillDataTable(comp, variant, maxW) {
       }).join('');
       return `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors"><td class="px-8 py-4 font-medium">${esc(label)}</td>${cells}</tr>`;
     }).join('\n');
-    headerHtml = `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
+    headerHtml = `<th class="px-8 py-4 text-sm font-bold text-on-surface-variant uppercase tracking-widest"></th>` + headerHtml;
   } else if (rows.length > 0 && Array.isArray(rows[0])) {
     const headers = rows[0];
-    headerHtml = headers.map(h => `<th class="px-8 py-4 text-xs font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
+    headerHtml = headers.map(h => `<th class="px-8 py-4 text-sm font-bold text-on-surface-variant uppercase tracking-widest">${esc(h)}</th>`).join('');
     bodyHtml = rows.slice(1).map((row, ri) =>
       `<tr class="${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''} hover:bg-on-surface/5 transition-colors">${row.map((cell, ci) => `<td class="px-8 py-4${ci === 0 ? ' font-medium' : ' text-on-surface-variant'}">${esc(cell)}</td>`).join('')}</tr>`
     ).join('\n');
@@ -953,13 +949,15 @@ function fillBranching(comp, variant, maxW) {
     const liMatches = comp.body.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
     if (liMatches.length > 0) {
       items = liMatches.map(li => ({ title: stripTags(li) }));
-      // Detect scenario pattern: first item is a long description (no letter prefix),
-      // remaining items are options. Extract first item as scenario body text.
+      // Detect scenario pattern: first item is a long description (no letter prefix)
+      // that is significantly longer than the remaining items (true scenario vs equal options).
       if (items.length > 2) {
         const first = items[0].title || '';
         const hasLetterPrefix = /^[A-D][\.\):\s—–-]/.test(first.trim());
         const isLong = first.length > 80;
-        if (!hasLetterPrefix && isLong) {
+        const avgRest = items.slice(1).reduce((s, it) => s + (it.title || '').length, 0) / (items.length - 1);
+        const isScenario = isLong && first.length > avgRest * 2;
+        if (!hasLetterPrefix && isScenario) {
           scenarioText = first;
           items = items.slice(1);
         }
@@ -1171,8 +1169,8 @@ ${stackedRows}
   }
 
   // ── Default variant: columns ──
-  const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-xs text-on-surface-variant"></th>` +
-    columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-xs text-primary">${esc(c.title || '')}</th>`).join('');
+  const headerHtml = `<th class="p-6 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>` +
+    columns.map(c => `<th class="p-6 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.title || '')}</th>`).join('');
 
   const rowsHtml = rows.map((row, ri) => {
     const label = row.label || '';
@@ -1206,17 +1204,24 @@ function fillStatCallout(comp, variant, maxW) {
 
   const statStyles = c.stats || [];
   const hasSublabel = c.hasSublabel || false;
+  // Use a single consistent accent color for all stats (first stat's color)
+  const unifiedNumColor = (statStyles[0] || {}).numColor || 'text-secondary';
 
   // ── Variant: card-row ──
   if (variant === 'card-row') {
+    // Extract all numeric values first, then make bars proportional to max
+    const numericValues = items.map(item => {
+      const numMatch = (item.stat || item.value || '').replace(/,/g, '').match(/[\d.]+/);
+      return numMatch ? parseFloat(numMatch[0]) : 0;
+    });
+    const maxVal = Math.max(...numericValues, 1);
+
     const cardStats = items.map((item, i) => {
       const style = statStyles[i] || statStyles[0] || {};
-      const numColor = style.numColor || 'text-gradient';
+      const numColor = unifiedNumColor;
       const numWeight = style.numWeight || 'font-extrabold';
       const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
-      // Extract numeric for progress bar width (simple heuristic)
-      const numMatch = (item.stat || item.value || '').match(/[\d.]+/);
-      const barWidth = numMatch ? Math.min(parseFloat(numMatch[0]), 100) : 50;
+      const barWidth = Math.max(Math.round((numericValues[i] / maxVal) * 100), 5);
       return `<div class="glass-card rounded-2xl p-6 md:p-8 min-w-[200px]">
 <div class="text-3xl md:text-4xl font-headline ${numWeight} ${numColor} mb-2" data-counter data-edit-path="_items.${i}.value" data-stat-prefix="${esc(item.prefix||'')}" data-stat-suffix="${esc(item.suffix||'')}">${esc(displayValue)}</div>
 <p class="text-on-surface-variant text-sm font-medium mb-4" data-edit-path="_items.${i}.label">${esc(item.label || '')}</p>
@@ -1246,7 +1251,7 @@ ${cardStats}
     const cardShadow = style.cardShadow || '';
     const cardRound = style.cardRounded || 'rounded-lg';
     const cardBorder = style.cardBorder || '';
-    const numColor = style.numColor || 'text-gradient';
+    const numColor = unifiedNumColor;
     const numWeight = style.numWeight || 'font-extrabold';
     const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
     return `<div class="${mc('p-8', cardRound, cardBg, cardShadow, cardBorder, 'min-w-[120px]')}">
@@ -1330,7 +1335,7 @@ function fillChecklist(comp, variant, maxW) {
 
   const card = c.card || {};
   const cardClass = mc(card.bg || 'glass-card', 'p-6 md:p-12', card.rounded || 'rounded-3xl', card.shadow || '');
-  const inputClass = c.inputClass || 'w-6 h-6 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent';
+  const inputClass = c.inputClass || 'w-7 h-7 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent cursor-pointer';
   const labelHover = c.labelHover || 'hover:bg-surface-variant/50 transition-colors';
   const spanHover = c.spanHover || '';
 
@@ -1413,7 +1418,16 @@ function fillTabs(comp, variant, maxW) {
   const normalizeTabSize = (cls) => cls ? cls.replace(/\btext-\[(?:[1-9]|1[0-3])px\]/g, 'text-sm') : cls;
   const rawActiveBtn = (c.activeBtn && /\bp[xy]?-\d/.test(c.activeBtn)) ? c.activeBtn : activeFallback;
   const rawInactiveBtn = (c.inactiveBtn && /\bp[xy]?-\d/.test(c.inactiveBtn)) ? c.inactiveBtn : inactiveFallback;
-  const activeBtn = normalizeTabSize(rawActiveBtn);
+  // In dark themes, Material You `on-primary` is a dark colour (navy) meant for light primary buttons.
+  // When the active tab button uses a gradient background (not `background-color`), the contrast
+  // checker sees the dark page background — resulting in dark-on-dark. Force a readable light colour.
+  const fixActiveBtnContrast = (cls) => {
+    if (!IS_DARK) return cls;
+    return cls
+      .replace(/\btext-on-primary\b/g, 'text-on-surface')
+      .replace(/\btext-on-primary-container\b/g, 'text-on-surface');
+  };
+  const activeBtn = fixActiveBtnContrast(normalizeTabSize(rawActiveBtn));
   const inactiveBtn = normalizeTabSize(rawInactiveBtn);
 
   // ── Variant: vertical ──
@@ -1494,13 +1508,13 @@ function fillFlashcard(comp, variant, maxW) {
       ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', large ? 'p-10 md:p-14' : 'p-6 md:p-8')
       : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10', large ? 'p-10 md:p-14' : 'p-6 md:p-8');
     const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', large ? 'p-10 md:p-14 text-center' : 'p-6 md:p-8 text-center');
-    return `<div class="min-h-[${large ? '280' : '180'}px] group cursor-pointer" style="perspective:1000px" data-flashcard>
-<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d;min-height:inherit">
-<div class="absolute inset-0 flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
-<div class="text-center px-6">
-<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '5' : '4'}xl mb-4">${icons[i % icons.length]}</div>
-<div class="font-headline font-bold text-${large ? 'xl md:text-2xl' : 'base md:text-lg'} leading-snug" data-edit-path="_items.${i}.front">${frontText}</div>
-<div class="mt-3 text-sm text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
+    return `<div class="group cursor-pointer" style="perspective:1000px" data-flashcard>
+<div class="relative w-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
+<div class="text-center">
+<div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '4' : '3'}xl mb-3">${icons[i % icons.length]}</div>
+<div class="font-headline font-bold text-${large ? 'lg md:text-xl' : 'sm'} leading-snug" data-edit-path="_items.${i}.front">${frontText}</div>
+<div class="mt-2 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
@@ -1648,7 +1662,7 @@ function fillKeyTerm(comp, variant, maxW) {
     const listItems = items.map((item, i) =>
       `<div class="flex gap-6 p-5 border-b border-on-surface/5 last:border-0">
 <div class="text-on-surface font-headline font-bold text-lg w-48 flex-shrink-0" data-edit-path="_items.${i}.term">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant text-sm leading-relaxed flex-1" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
+<p class="text-on-surface-variant text-sm leading-relaxed flex-1 max-w-prose" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
 </div>`
     ).join('\n');
 
@@ -1961,7 +1975,7 @@ function fillDivider(comp, variant) {
   }
 
   if (style === 'icon') {
-    return `<section class="py-8" data-component-type="divider">
+    return `<section class="py-4" data-component-type="divider">
 <div class="max-w-6xl mx-auto px-8 flex items-center gap-4">
 <div class="flex-1 h-px bg-outline-variant/20"></div>
 <span class="material-symbols-outlined text-on-surface-variant/40 text-xl">${icon}</span>
@@ -1971,7 +1985,7 @@ function fillDivider(comp, variant) {
   }
 
   // Default: line
-  return `<section class="py-8" data-component-type="divider">
+  return `<section class="py-4" data-component-type="divider">
 <div class="max-w-4xl mx-auto px-8">
 <hr class="border-0 h-px bg-outline-variant/20"/>
 </div>
@@ -1990,7 +2004,7 @@ function fillCallout(comp, variant, maxW) {
     info:    { icon: 'info',          border: 'border-primary',      bg: 'bg-primary/5',   iconColor: 'text-primary' },
     warning: { icon: 'warning',       border: 'border-amber-500',    bg: 'bg-amber-500/5', iconColor: 'text-amber-500' },
     tip:     { icon: 'tips_and_updates', border: 'border-emerald-500', bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' },
-    success: { icon: 'check_circle',  border: 'border-emerald-500',  bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' }
+    success: { icon: 'check_circle',  border: 'border-teal-500',  bg: 'bg-teal-500/5', iconColor: 'text-teal-500' }
   };
   const cfg = typeConfig[calloutType] || typeConfig.info;
 
@@ -2235,6 +2249,7 @@ function build() {
     process.exit(1);
   }
   const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+  IS_DARK = tokens.isDark !== false;
   console.log(`[ok] Loaded design-tokens.json (${Object.keys(tokens.colors || {}).length} colours, fonts: ${tokens.fonts?.headline}/${tokens.fonts?.body}, isDark: ${tokens.isDark})`);
 
   // ── Dark-mode contract fixes ──────────────────────────────────────────

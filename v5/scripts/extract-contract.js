@@ -100,15 +100,17 @@ function extractHero(html) {
   const buttons = $('button');
   if (buttons.length > 0) {
     const btn1Cls = $(buttons[0]).attr('class') || '';
+    const textColor = btn1Cls.split(/\s+/).filter(c => /^text-(primary|secondary|tertiary|error|surface|on-|white|black)/.test(c))[0] || '';
     contract.btn1 = {
       visual: visualOnly(btn1Cls),
       bg: bgOnly(btn1Cls) || 'bg-primary',
       gradient: btn1Cls.split(/\s+/).filter(c => /^(bg-gradient|from-|to-|via-)/.test(c)).join(' '),
       rounded: roundedOnly(btn1Cls) || 'rounded-xl',
+      textColor: textColor || 'text-on-surface',
       raw: btn1Cls
     };
   } else {
-    contract.btn1 = { visual: '', bg: 'bg-primary', gradient: '', rounded: 'rounded-xl', raw: '' };
+    contract.btn1 = { visual: '', bg: 'bg-primary', gradient: '', rounded: 'rounded-xl', textColor: 'text-on-surface', raw: '' };
   }
 
   if (buttons.length > 1) {
@@ -236,6 +238,9 @@ function extractBento(html) {
     contract.cardBgs.push(bgOnly(cls));
     contract.cardShadows.push(shadowOnly(cls));
   });
+
+  // Filter out error-container backgrounds — content-semantic, not a reusable design pattern
+  contract.cardBgs = contract.cardBgs.map(bg => bg.includes('error') ? '' : bg);
 
   // Image hover effect
   contract.imgHover = html.includes('group-hover:scale')
