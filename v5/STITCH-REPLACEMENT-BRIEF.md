@@ -506,6 +506,8 @@ Two options (decide during implementation):
 
 **What it is:** `@material/material-color-utilities` is Google's published library for Material Design 3 color science. Uses HCT (Hue, Chroma, Tone) color space. Given ONE seed color, generates the entire palette deterministically.
 
+**IMPORTANT: We use the COLOR MATH only, not the design language.** As of 2026, Material Design has evolved to "M3 Expressive" with AI-adaptive layouts, physics-based motion, and morphing shapes. None of that is relevant to us — those are Android UI patterns. We only use the HCT tonal palette algorithm (`CorePalette.of()`) to generate harmonious, accessible color systems from a seed color. Our Visual Archetypes handle the actual design language (glassmorphism, neo-brutalism, editorial, etc.). Don't confuse the palette math library with adopting Material Design's visual style. During implementation, verify the npm package is current and check if a newer palette generation library exists, but don't adopt M3 Expressive UI patterns.
+
 **What to do:**
 - `npm install @material/material-color-utilities`
 - New script: `generate-design-tokens.js`
