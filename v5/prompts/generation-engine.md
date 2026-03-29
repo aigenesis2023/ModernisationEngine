@@ -285,10 +285,12 @@ Not every section should use the same content width. Set `"sectionWidth"` on eac
 
 | Width | Class | When to Use |
 |---|---|---|
-| `standard` | `max-w-6xl` | Default. Most sections. |
-| `narrow` | `max-w-3xl` | Focused reading: text-heavy sections, pullquotes, reflective textinput. |
-| `wide` | `max-w-7xl` | Visual components: bento, comparison, image-gallery, data-table. |
+| `standard` | `max-w-7xl` | Default. Most sections. |
+| `narrow` | `max-w-3xl` | **ONLY** for pure text, pullquote, or reflective textinput sections. NEVER for grids/cards/interactive. |
+| `wide` | `max-w-[90rem]` | Visual components: bento, comparison, image-gallery, data-table, flashcard grids. |
 | `full` | edge-to-edge | Full-bleed sections, hero. Content still contained inside. |
+
+**⚠️ NARROW RESTRICTIONS:** `narrow` is ONLY appropriate for sections containing ONLY these types: `text`, `pullquote`, `textinput`, `divider`, `callout`. Any section with multi-column components (mcq, flashcard, bento, tabs, comparison, branching, checklist, accordion, narrative, timeline, process-flow, data-table, key-term, stat-callout, image-gallery, labeled-image) MUST be `standard` or `wide`.
 
 **The goal is visual breathing:** a narrow text section followed by a wide bento grid followed by a standard section creates rhythm that a uniform width cannot. If every section is `standard`, you've missed this opportunity.
 

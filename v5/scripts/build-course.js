@@ -332,7 +332,7 @@ function fillHero(comp, variant) {
 <div class="relative z-10 w-full grid grid-cols-1 md:grid-cols-2 min-h-screen">
 <div class="flex flex-col justify-center px-8 md:px-16 py-20 md:py-0">
 <h1 class="font-headline text-5xl md:text-7xl font-black tracking-tighter mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl text-on-surface-variant max-w-lg mb-12" data-animate="fade-up">${bodyText}</p>
+<p class="text-xl text-on-surface-variant max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 <div class="relative hidden md:block">
@@ -346,10 +346,10 @@ ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-co
   // ── Variant: minimal-text ──
   if (variant === 'minimal-text') {
     return `<section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
-<div class="relative z-10 max-w-6xl mx-auto px-8 md:px-16 py-20">
+<div class="relative z-10 max-w-7xl mx-auto px-8 md:px-16 py-20">
 <div class="border-l-4 border-primary pl-8 md:pl-12">
 <h1 class="font-headline text-5xl md:text-8xl font-black tracking-tighter mb-8 text-on-surface" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl md:text-2xl text-on-surface-variant max-w-2xl mb-12" data-animate="fade-up">${bodyText}</p>
+<p class="text-xl md:text-2xl text-on-surface-variant max-w-3xl mb-12" data-animate="fade-up">${bodyText}</p>
 ${buttons}
 </div>
 </div>
@@ -361,9 +361,9 @@ ${buttons}
   return `<section class="${sectionClass}" data-component-type="hero">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover ${imgVisuals}" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 ${overlayGradient}"></div>
-<div class="relative z-10 text-center max-w-6xl mx-auto px-8">
+<div class="relative z-10 text-center max-w-7xl mx-auto px-8">
 <h1 class="font-headline text-6xl md:text-8xl font-black tracking-tighter mb-8 text-white" data-animate="fade-up" data-text-reveal>${title}</h1>
-<p class="text-xl text-white/80 max-w-2xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
+<p class="text-xl text-white/80 max-w-3xl mx-auto mb-12" data-animate="fade-up">${bodyText}</p>
 <div class="flex gap-4 justify-center flex-wrap" data-animate="fade-up">
 <button class="px-8 py-4 ${btn1Bg} ${btn1Text} ${btn1Round} font-bold ${btn1Visual}" data-hero-cta="begin">Begin Course</button>
 </div>
@@ -376,7 +376,7 @@ function fillText(comp, variant, maxW) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly(c.section || 'py-16');
   // Text uses narrower width for readability (~80 chars/line), but respects section width if narrow
-  const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-5xl';
+  const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-6xl';
 
   if (variant === 'two-column') {
     return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
@@ -495,7 +495,7 @@ function fillMCQ(comp, variant, maxW) {
   const card = c.card || {};
   const cardClass = mc(
     card.bg || 'glass-card',
-    'p-6 md:p-12',
+    'p-6 md:p-8',
     card.shadow || '',
     card.rounded || 'rounded-[2rem]',
     card.border || ''
@@ -717,7 +717,7 @@ ${wideCards}
       const imgSrc = item._graphic ? embedImage(item._graphic.large) : '';
       if (i === 0) {
         const featBg = cardBgs[0] || 'bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent glass-card';
-        return `<div class="md:col-span-2 md:row-span-2 rounded-3xl p-8 md:p-12 flex flex-col justify-end relative overflow-hidden group min-h-[320px] ${featBg}">
+        return `<div class="md:col-span-2 md:row-span-2 rounded-3xl p-6 md:p-8 flex flex-col justify-end relative overflow-hidden group min-h-[320px] ${featBg}">
 ${imgSrc ? `<img alt="" class="absolute inset-0 w-full h-full object-cover opacity-15 ${imgHover}" src="${imgSrc}"/>` : ''}
 <div class="relative z-10">
 <span class="material-symbols-outlined text-primary text-5xl mb-4">${icons[0]}</span>
@@ -886,7 +886,7 @@ function fillTextInput(comp, maxW) {
   const c = DC.textinput || {};
   const secClass = sectionOnly((DC.textinput || {}).section || 'py-16 bg-surface-container-low');
 
-  const cardClass = (c.cardClass || 'glass-card p-12 rounded-[2rem]').replace(/\bp-12\b/, 'p-6 md:p-12');
+  const cardClass = (c.cardClass || 'glass-card p-8 rounded-[2rem]').replace(/\bp-12\b/, 'p-6 md:p-8');
   const inputClass = c.inputClass || 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
 
   const newInputs = items.map((item, i) =>
@@ -1299,7 +1299,7 @@ function fillPullquote(comp, variant, maxW) {
     // Centered with decorative quotes — large impact
     return `<section class="${secClass} relative" data-component-type="pullquote">
 ${c.decorativeSpanHtml || '<span class="absolute top-8 left-1/2 -translate-x-1/2 text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
-<div class="max-w-4xl mx-auto px-8 text-center relative z-10">
+<div class="max-w-5xl mx-auto px-8 text-center relative z-10">
 <blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal data-edit-path="body">${quote}</blockquote>
 ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
 </div>
@@ -1309,7 +1309,7 @@ ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-an
   if (variant === 'minimal') {
     // Minimal — no decoration, just bold text on surface-container
     return `<section class="${sectionOnly('py-20 bg-surface-container-low')}" data-component-type="pullquote">
-<div class="max-w-3xl mx-auto px-8 text-center">
+<div class="max-w-4xl mx-auto px-8 text-center">
 <blockquote class="font-headline text-2xl md:text-3xl font-bold leading-relaxed text-on-surface" data-animate="fade-up" data-edit-path="body">${quote}</blockquote>
 ${attribution ? `<p class="mt-6 text-sm text-on-surface-variant uppercase tracking-widest" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? ` · ${role}` : ''}</p>` : ''}
 </div>
@@ -1335,7 +1335,7 @@ function fillChecklist(comp, variant, maxW) {
   const secClass = sectionOnly((DC.checklist || {}).section || 'py-16');
 
   const card = c.card || {};
-  const cardClass = mc(card.bg || 'glass-card', 'p-6 md:p-12', card.rounded || 'rounded-3xl', card.shadow || '');
+  const cardClass = mc(card.bg || 'glass-card', 'p-6 md:p-8', card.rounded || 'rounded-3xl', card.shadow || '');
   const inputClass = c.inputClass || 'w-7 h-7 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent cursor-pointer';
   const labelHover = c.labelHover || 'hover:bg-surface-variant/50 transition-colors';
   const spanHover = c.spanHover || '';
@@ -1443,7 +1443,7 @@ function fillTabs(comp, variant, maxW) {
     ).join('\n');
 
     const vPanels = items.map((item, i) =>
-      `<div class="glass-card rounded-3xl p-6 md:p-10 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+      `<div class="glass-card rounded-3xl p-6 md:p-8 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
 <h4 class="font-headline text-xl font-bold mb-4" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
 <div class="text-on-surface-variant leading-relaxed overflow-hidden" data-edit-path="_items.${i}.body" data-edit-html>${item.body || ''}</div>
 </div>`
@@ -1470,7 +1470,7 @@ ${vPanels}
   ).join('\n');
 
   const panels = items.map((item, i) =>
-    `<div class="glass-card rounded-3xl p-6 md:p-12 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
+    `<div class="glass-card rounded-3xl p-6 md:p-8 min-h-[300px] w-full min-w-0 overflow-hidden" data-tab-panel="${i}"${i > 0 ? ' style="display:none"' : ''}>
 <h4 class="font-headline text-xl font-bold mb-4" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
 <div class="text-on-surface-variant leading-relaxed overflow-hidden" data-edit-path="_items.${i}.body" data-edit-html>${item.body || ''}</div>
 </div>`
@@ -1535,7 +1535,7 @@ function fillFlashcard(comp, variant, maxW) {
     return `<section class="${secClass}" data-component-type="flashcard" data-interactive data-carousel>
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-10 text-center">${title}</h2>
-<div class="max-w-3xl mx-auto">
+<div class="max-w-4xl mx-auto">
 ${largeCards}
 </div>
 <div class="flex justify-center gap-3 mt-8">
@@ -1627,7 +1627,7 @@ ${navButtons}
     return `<section class="${secClass}" data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
-<div class="glass-card rounded-[2.5rem] p-8 md:p-12 relative">
+<div class="glass-card rounded-[2.5rem] p-6 md:p-8 relative">
 ${textSlides}
 ${navButtons}
 </div>
@@ -1648,7 +1648,7 @@ ${navButtons}
   return `<section class="${secClass}" data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
 <h2 class="font-headline text-3xl font-bold mb-8">${title}</h2>
-<div class="glass-card rounded-[2.5rem] p-6 md:p-10 relative">
+<div class="glass-card rounded-[2.5rem] p-6 md:p-8 relative">
 ${newSlides}
 ${navButtons}
 </div>
@@ -1668,7 +1668,7 @@ function fillKeyTerm(comp, variant, maxW) {
     const listItems = items.map((item, i) =>
       `<div class="flex gap-6 p-5 border-b border-on-surface/5 last:border-0">
 <div class="text-on-surface font-headline font-bold text-lg w-48 flex-shrink-0" data-edit-path="_items.${i}.term">${esc(item.term || item.title || '')}</div>
-<p class="text-on-surface-variant text-sm leading-relaxed flex-1 max-w-prose" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
+<p class="text-on-surface-variant text-sm leading-relaxed flex-1" data-edit-path="_items.${i}.definition">${esc(item.definition || item.body || '')}</p>
 </div>`
     ).join('\n');
 
@@ -1714,9 +1714,9 @@ function fillFullBleed(comp, variant) {
     return `<section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent"></div>
-<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-left" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg" data-edit-path="displayTitle">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-path="body">${bodyText}</p>` : ''}
+<div class="relative z-10 w-full max-w-6xl mx-auto px-8 text-left" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-2xl" data-edit-path="displayTitle">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-xl" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
   }
@@ -1725,9 +1725,9 @@ ${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-pat
     return `<section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent"></div>
-<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
-<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-lg" data-edit-path="displayTitle">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-path="body">${bodyText}</p>` : ''}
+<div class="relative z-10 w-full max-w-6xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
+<h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white max-w-2xl" data-edit-path="displayTitle">${title}</h2>
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-xl" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
   }
@@ -1736,9 +1736,9 @@ ${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-md" data-edit-pat
   return `<section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : ''}
 <div class="absolute inset-0 bg-black/60"></div>
-<div class="relative z-10 w-full max-w-4xl mx-auto px-8 text-center" data-animate="fade-up">
+<div class="relative z-10 w-full max-w-6xl mx-auto px-8 text-center" data-animate="fade-up">
 <h2 class="font-headline text-3xl md:text-5xl font-bold tracking-tight mb-4 text-white" data-edit-path="displayTitle">${title}</h2>
-${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-2xl mx-auto" data-edit-path="body">${bodyText}</p>` : ''}
+${bodyText ? `<p class="text-lg md:text-xl text-white/80 max-w-3xl mx-auto" data-edit-path="body">${bodyText}</p>` : ''}
 </div>
 </section>`;
 }
@@ -1972,21 +1972,21 @@ ${fallbackMarkerList}
 // Dividers use NO own vertical padding — adjacent sections' py-16 (64px each)
 // provides the gap. The divider's visual element sits centred in that 128px
 // natural gap. Negative margins pull it into the middle of the gap.
-function fillDivider(comp, variant) {
+function fillDivider(comp, variant, maxW) {
   // variant takes precedence — template pre-rendering passes variant override
   const style = variant || comp.style || 'line';
   const icon = esc(comp.icon || 'more_horiz');
 
   if (style === 'spacing') {
-    // Pure whitespace divider — collapse own padding, let sections provide gap
-    return `<section class="-my-8" data-component-type="divider">
-<div class="h-8"></div>
+    // Pure whitespace divider — no negative pull, just a clean spacer
+    return `<section class="py-4" data-component-type="divider">
+<div class="h-4"></div>
 </section>`;
   }
 
   if (style === 'icon') {
-    return `<section class="-my-8" data-component-type="divider">
-<div class="max-w-6xl mx-auto px-8 flex items-center gap-4">
+    return `<section class="py-4" data-component-type="divider">
+<div class="${maxW} mx-auto px-8 flex items-center gap-4">
 <div class="flex-1 h-px bg-outline-variant/20"></div>
 <span class="material-symbols-outlined text-on-surface-variant/40 text-xl">${icon}</span>
 <div class="flex-1 h-px bg-outline-variant/20"></div>
@@ -1995,8 +1995,8 @@ function fillDivider(comp, variant) {
   }
 
   // Default: line
-  return `<section class="-my-8" data-component-type="divider">
-<div class="max-w-4xl mx-auto px-8">
+  return `<section class="py-4" data-component-type="divider">
+<div class="${maxW} mx-auto px-8">
 <hr class="border-0 h-px bg-outline-variant/20"/>
 </div>
 </section>`;
@@ -2039,9 +2039,9 @@ ${title ? `<h4 class="font-headline font-bold text-on-surface mb-2">${title}</h4
 // Used by section assembly to vary content width per section.
 const SECTION_WIDTHS = {
   narrow:   'max-w-3xl',
-  standard: 'max-w-6xl',
-  wide:     'max-w-7xl',
-  full:     'max-w-6xl'  // 'full' uses edge-to-edge bg but contained inner content
+  standard: 'max-w-7xl',
+  wide:     'max-w-[90rem]',
+  full:     'max-w-7xl'  // 'full' uses edge-to-edge bg but contained inner content
 };
 function getSectionMaxW(sectionWidth) {
   return SECTION_WIDTHS[sectionWidth] || SECTION_WIDTHS.standard;
@@ -2088,11 +2088,40 @@ const VARIANT_MAP = {
   'branching':    ['cards', 'list']
 };
 
+// ─── Per-component width cap ─────────────────────────────────────────
+// Text-heavy / vertically-stacked components look better at max-w-6xl
+// even when the section is set to a wider width. Grids and card layouts
+// benefit from the full section width.
+const COMPONENT_WIDTH_CAP = {
+  'comparison:stacked-rows': 'max-w-6xl',
+  'accordion':               'max-w-6xl',
+  'timeline:vertical':       'max-w-6xl',
+  'mcq:stacked':             'max-w-6xl',
+  'checklist':               'max-w-6xl',
+  'key-term:list':           'max-w-6xl',
+  'callout':                 'max-w-6xl',
+  'tabs:horizontal':         'max-w-6xl',
+  'branching:list':          'max-w-6xl',
+};
+
+function getComponentMaxW(type, variant, sectionMaxW) {
+  // Check type:variant first, then type alone
+  const cap = COMPONENT_WIDTH_CAP[`${type}:${variant}`] || COMPONENT_WIDTH_CAP[type];
+  if (!cap) return sectionMaxW;
+  // Only cap down, never widen — parse the rem values
+  const remOf = (cls) => {
+    const m = cls.match(/max-w-(\d+)xl/);
+    if (!m) return 999;
+    return parseInt(m[1]);
+  };
+  return remOf(cap) < remOf(sectionMaxW) ? cap : sectionMaxW;
+}
+
 // ─── Single-variant renderer (used internally) ───────────────────────
 function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
   const type = (comp.type || 'text').toLowerCase();
   const variant = variantOverride !== undefined ? variantOverride : (comp.variant || '');
-  const maxW = getSectionMaxW(sectionWidth);
+  const maxW = getComponentMaxW(type, variant, getSectionMaxW(sectionWidth));
   let html;
   switch (type) {
     case 'hero':            html = fillHero(comp, variant); break;
@@ -2121,7 +2150,7 @@ function fillComponentVariant(comp, index, sectionWidth, variantOverride) {
     case 'video-transcript':html = fillVideoTranscript(comp, maxW); break;
     case 'image-gallery':   html = fillImageGallery(comp, maxW); break;
     case 'labeled-image':   html = fillLabeledImage(comp, variant, maxW); break;
-    case 'divider':         html = fillDivider(comp, variant); break;
+    case 'divider':         html = fillDivider(comp, variant, maxW); break;
     case 'callout':         html = fillCallout(comp, variant, maxW); break;
     default:
       console.log(`  [warn] Unknown component type: ${type}`);
@@ -2301,7 +2330,20 @@ function build() {
 
     const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
 
-    const sectionWidth = section.sectionWidth || 'standard';
+    // Determine section width, with minimum-width safeguards per component type.
+    // Components that use multi-column grids or need breathing room should never be narrow.
+    const NEEDS_STANDARD = new Set([
+      'mcq', 'branching', 'flashcard', 'bento', 'comparison', 'data-table',
+      'tabs', 'checklist', 'narrative', 'process-flow', 'image-gallery',
+      'labeled-image', 'timeline', 'key-term', 'accordion', 'stat-callout'
+    ]);
+    let sectionWidth = section.sectionWidth || 'standard';
+    if (sectionWidth === 'narrow') {
+      const hasWideComponent = components.some(c => NEEDS_STANDARD.has((c.type || '').toLowerCase()));
+      if (hasWideComponent) {
+        sectionWidth = 'standard';
+      }
+    }
     const componentHtmls = [];
     const interactiveTypes = new Set(['mcq', 'accordion', 'tabs', 'flashcard', 'narrative', 'checklist', 'textinput']);
     let interactiveCount = 0;

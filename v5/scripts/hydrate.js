@@ -1891,7 +1891,9 @@
         // Disable cursor:pointer on interactive buttons in edit mode
         'section[data-editing] [data-choice] { cursor: text !important; }' +
         'section[data-editing] [data-tab-trigger] { cursor: text !important; }' +
-        'section[data-editing] [data-path-option] { cursor: text !important; }';
+        'section[data-editing] [data-path-option] { cursor: text !important; }' +
+        // Ensure dividers are visible when authoring panel is active
+        '[data-authoring-wrapper="divider"] section[data-component-type="divider"] { min-height: 48px; display: flex; align-items: center; padding-top: 16px !important; padding-bottom: 16px !important; margin: 0 !important; }';
       document.head.appendChild(editingStyleEl);
       editingStyleEl.disabled = true;
 

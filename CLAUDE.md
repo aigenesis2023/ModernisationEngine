@@ -368,9 +368,9 @@ The generation engine classifies each topic and selects a **course archetype** t
 ### Section Width
 
 Sections can set `"sectionWidth"` to vary page-level content width:
-- `standard` — `max-w-6xl` (default)
+- `standard` — `max-w-7xl` (default; text-heavy components auto-cap to `max-w-6xl` via `COMPONENT_WIDTH_CAP`)
 - `narrow` — `max-w-3xl` (focused reading: text, pullquote)
-- `wide` — `max-w-7xl` (visual components: bento, comparison, gallery)
+- `wide` — `max-w-[90rem]` (visual components: bento, comparison, gallery)
 - `full` — edge-to-edge background with contained inner content
 
 ---
