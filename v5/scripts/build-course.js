@@ -1157,9 +1157,9 @@ function fillTimeline(comp, variant, maxW) {
       const isLeft = i % 2 === 0;
       return `<div class="relative flex items-center ${isLeft ? 'md:flex-row' : 'md:flex-row-reverse'} gap-8">
 <div class="hidden md:block md:w-[calc(50%-2rem)] ${isLeft ? 'text-right' : 'text-left'}">
-<div class="glass-card rounded-2xl p-6 md:p-8 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}">
+<div class="glass-card rounded-2xl p-5 md:p-6 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}">
 <h4 class="font-headline text-h4 mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-body" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
+<p class="text-on-surface-variant text-sm leading-normal" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 </div>
 <div class="relative z-10 flex-shrink-0">
@@ -1167,7 +1167,7 @@ function fillTimeline(comp, variant, maxW) {
 </div>
 <div class="md:w-[calc(50%-2rem)] md:hidden">
 <h4 class="font-headline text-h4 mb-2" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant text-body" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
+<p class="text-on-surface-variant text-sm leading-normal" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>
 <div class="hidden md:block md:w-[calc(50%-2rem)]"></div>
 </div>`;
@@ -1268,13 +1268,13 @@ function fillComparison(comp, variant, maxW) {
 
     return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
 <div class="${maxW} mx-auto px-4 md:px-8">
-<h2 class="font-headline text-h2 mb-4 text-center">${title}</h2>
+<h2 class="font-headline text-h2 mb-8 text-center">${title}</h2>
 ${body ? `<p class="text-center text-on-surface-variant mb-8">${stripTags(body)}</p>` : ''}
 <div class="flex justify-between mb-6 px-4">
 <span class="font-headline text-h4 text-primary" data-edit-path="columns.0.title">${esc(columns[0].title || '')}</span>
 <span class="font-headline text-h4 text-secondary" data-edit-path="columns.1.title">${esc(columns[1].title || '')}</span>
 </div>
-<div class="space-y-3 overflow-x-auto" data-animate-stagger="fade-up">
+<div class="space-y-3" data-animate-stagger="fade-up">
 ${stackedRows}
 </div>
 </div>
@@ -1297,8 +1297,8 @@ ${stackedRows}
 
   return `<section class="${secClass}" data-component-type="comparison" data-animate="fade-up">
 <div class="${maxW} mx-auto px-8">
-<h2 class="font-headline text-h2 mb-4 text-center">${title}</h2>
-${body ? `<p class="text-center text-on-surface-variant mb-12">${stripTags(body)}</p>` : ''}
+<h2 class="font-headline text-h2 mb-8 text-center">${title}</h2>
+${body ? `<p class="text-center text-on-surface-variant mb-10">${stripTags(body)}</p>` : ''}
 <div class="overflow-x-auto glass rounded-3xl border border-on-surface/5">
 <table class="w-full text-left">
 <thead class="bg-on-surface/5"><tr>${headerHtml}</tr></thead>
@@ -1335,10 +1335,10 @@ function fillStatCallout(comp, variant, maxW) {
       const numWeight = style.numWeight || 'font-extrabold';
       const displayValue = (item.prefix || '') + (item.stat || item.value || '') + (item.suffix || '');
       const barWidth = Math.max(Math.round((numericValues[i] / maxVal) * 100), 5);
-      return `<div class="glass-card rounded-2xl p-6 md:p-8 min-w-[200px]">
+      return `<div class="glass-card rounded-2xl p-6 md:p-8 min-w-[200px] flex flex-col">
 <div class="text-stat font-headline ${numWeight} ${numColor} mb-2" data-counter data-edit-path="_items.${i}.value" data-stat-prefix="${esc(item.prefix||'')}" data-stat-suffix="${esc(item.suffix||'')}">${esc(displayValue)}</div>
-<p class="text-on-surface-variant text-sm font-medium mb-4" data-edit-path="_items.${i}.label">${esc(item.label || '')}</p>
-<div class="h-1.5 bg-surface-container rounded-full overflow-hidden">
+<p class="text-on-surface-variant text-sm font-medium mb-4 flex-1" data-edit-path="_items.${i}.label">${esc(item.label || '')}</p>
+<div class="h-1.5 bg-surface-container rounded-full overflow-hidden mt-auto">
 <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full" style="width:${barWidth}%"></div>
 </div>
 </div>`;
@@ -1409,11 +1409,11 @@ function fillPullquote(comp, variant, maxW) {
 
   if (variant === 'centered') {
     // Centered with decorative quotes — large impact
-    return `<section class="${secClass} relative" data-component-type="pullquote">
-<div class="absolute top-8 left-1/2 -translate-x-1/2">
-${c.decorativeSpanHtml || '<span class="text-primary/10 text-[12rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
+    return `<section class="${secClass}" data-component-type="pullquote">
+<div class="max-w-5xl mx-auto px-8 text-center">
+<div class="flex justify-center mb-2">
+${c.decorativeSpanHtml || '<span class="text-primary/10 text-[6rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>'}
 </div>
-<div class="max-w-5xl mx-auto px-8 text-center relative z-10">
 <blockquote class="${mc('font-headline', quoteBqStyle)}" data-text-reveal data-edit-path="body">${quote}</blockquote>
 ${attribution ? `<cite class="${mc('mt-6 block not-italic', citeStyle)}" data-animate="fade-up" data-edit-path="attribution">— ${attribution}${role ? `, ${role}` : ''}</cite>` : ''}
 </div>
@@ -1622,18 +1622,18 @@ function fillFlashcard(comp, variant, maxW) {
     const frontFaceClass = useBoldFront
       ? mc(front.bg, 'text-white', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', large ? 'p-10 md:p-14' : 'p-6 md:p-8')
       : mc('glass-card', front.rounded || 'rounded-3xl', front.shadow || 'shadow-md', 'border border-outline-variant/10', large ? 'p-10 md:p-14' : 'p-6 md:p-8');
-    const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', large ? 'p-10 md:p-14 text-center' : 'p-6 md:p-8 text-center');
-    return `<div class="group cursor-pointer" style="perspective:1000px" data-flashcard>
-<div class="relative w-full transition-transform duration-500" style="transform-style:preserve-3d">
-<div class="flex items-center justify-center ${frontFaceClass}" style="backface-visibility:hidden">
+    const backFaceClass = mc(back.bg || 'bg-secondary-container', back.border || '', back.rounded || 'rounded-3xl', large ? 'p-8 md:p-12 text-center' : 'p-4 md:p-5 text-center');
+    return `<div class="group cursor-pointer h-full" style="perspective:1000px" data-flashcard>
+<div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
+<div class="flex items-center justify-center h-full ${frontFaceClass}" style="backface-visibility:hidden">
 <div class="text-center">
 <div class="material-symbols-outlined ${useBoldFront ? 'text-white/80' : 'text-secondary'} text-${large ? '4' : '3'}xl mb-3">${icons[i % icons.length]}</div>
-<div class="font-headline ${large ? 'text-h4' : 'text-body'}" data-edit-path="_items.${i}.front">${frontText}</div>
+<div class="font-headline ${large ? 'text-h4' : 'text-body'} leading-snug" data-edit-path="_items.${i}.front">${frontText}</div>
 <div class="mt-2 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
 </div>
 </div>
 <div class="absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto" style="backface-visibility:hidden;transform:rotateY(180deg)">
-<p class="text-on-secondary-container font-medium text-${large ? 'base' : 'sm'} leading-relaxed px-4" data-edit-path="_items.${i}.back">${backText}</p>
+<p class="text-on-secondary-container font-medium text-${large ? 'base' : 'xs'} leading-snug" data-edit-path="_items.${i}.back">${backText}</p>
 </div>
 </div>
 </div>`;
@@ -1693,7 +1693,7 @@ function fillNarrative(comp, variant, maxW) {
   const secClass = sectionOnly((DC.narrative || {}).section || 'py-16')
     .replace(/\bpy-(\d+)\b/g, (m, n) => parseInt(n) > 16 ? 'py-16' : m);
 
-  const navButtons = `<div class="flex gap-3 mt-6">
+  const navButtons = `<div class="flex justify-center gap-3 mt-6">
 <button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev>
 <span class="material-symbols-outlined">chevron_left</span>
 </button>
@@ -1734,7 +1734,7 @@ ${navButtons}
       return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 <div class="text-on-surface-variant font-bold mb-4">${counter}</div>
 <h4 class="font-headline text-h3 mb-4 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
-<div class="text-body-lg text-on-surface-variant" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>
+<div class="text-body text-on-surface-variant leading-normal" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</div>
 </div>`;
     }).join('\n');
 
@@ -1755,7 +1755,7 @@ ${navButtons}
     return `<div data-slide="${i + 1}"${i > 0 ? ' style="display:none"' : ''}>
 <div class="text-on-surface-variant font-bold mb-4">${counter}</div>
 <h4 class="font-headline text-h4 mb-4 text-on-surface" data-edit-path="_items.${i}.title">${esc(item.title || '')}</h4>
-<p class="text-on-surface-variant" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
+<p class="text-sm text-on-surface-variant leading-normal" data-edit-path="_items.${i}.body">${stripTags(item.body || '')}</p>
 </div>`;
   }).join('\n');
 
@@ -2219,15 +2219,27 @@ const COMPONENT_WIDTH_BOOST = {
   'timeline:centered-alternating':'max-w-7xl',
 };
 
+// ─── Per-component width cap ────────────────────────────────────────
+// Vertical list components look better narrower — cap them regardless of section width.
+const COMPONENT_WIDTH_CAP = {
+  'mcq:stacked':       'max-w-4xl',
+  'branching:list':    'max-w-4xl',
+  'bento:featured':    'max-w-6xl',
+  'stat-callout':      'max-w-6xl',
+};
+
 function getComponentMaxW(type, variant, sectionMaxW) {
-  const boost = COMPONENT_WIDTH_BOOST[`${type}:${variant}`] || COMPONENT_WIDTH_BOOST[type];
-  if (!boost) return sectionMaxW;
-  // Only boost up, never shrink — and only when the section allows it
   const remOf = (cls) => {
     const m = cls.match(/max-w-(\d+)xl/);
     if (!m) return cls.includes('max-w-[') ? 90 : 72; // 90rem or 6xl default
     return parseInt(m[1]);
   };
+  // Check for width cap first (narrows vertical list components)
+  const cap = COMPONENT_WIDTH_CAP[`${type}:${variant}`] || COMPONENT_WIDTH_CAP[type];
+  if (cap) return remOf(cap) < remOf(sectionMaxW) ? cap : sectionMaxW;
+  // Then check for width boost (widens visual/multi-column components)
+  const boost = COMPONENT_WIDTH_BOOST[`${type}:${variant}`] || COMPONENT_WIDTH_BOOST[type];
+  if (!boost) return sectionMaxW;
   // Boost applies when section is 'wide' or wider — never exceed section width
   return remOf(boost) <= remOf(sectionMaxW) ? boost : sectionMaxW;
 }

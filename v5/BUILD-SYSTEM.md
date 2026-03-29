@@ -33,7 +33,7 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
 
 Every fill function enforces these rules. They are hardcoded in `build-course.js`, not derived from Stitch:
 
-1. **Containment:** Default section width is `max-w-6xl mx-auto px-8`. Visual/multi-column components (graphic-text, graphic, image-gallery, labeled-image, flashcard:grid, mcq:grid, tabs:vertical, branching:cards, key-term:card-grid, timeline:centered-alternating) boost to `max-w-7xl` in wide sections via `COMPONENT_WIDTH_BOOST`. The `<section>` tag carries ONLY standardised `py-16` spacing + brand `bg-*` colours (via `sectionOnly()` whitelist — strips everything except `bg-*` and forces `py-16`). An inner `<div>` provides containment.
+1. **Containment:** Default section width is `max-w-6xl mx-auto px-8`. Visual/multi-column components (graphic-text, graphic, image-gallery, labeled-image, flashcard:grid, mcq:grid, tabs:vertical, branching:cards, key-term:card-grid, timeline:centered-alternating) boost to `max-w-7xl` in wide sections via `COMPONENT_WIDTH_BOOST`. Vertical list components (mcq:stacked, branching:list) and contained layouts (bento:featured, stat-callout) are capped to narrower widths via `COMPONENT_WIDTH_CAP` regardless of section width. The `<section>` tag carries ONLY standardised `py-16` spacing + brand `bg-*` colours (via `sectionOnly()` whitelist — strips everything except `bg-*` and forces `py-16`). An inner `<div>` provides containment.
 
 2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2x2, not 3+1).
 
@@ -64,7 +64,7 @@ Each of the 28 component types has a `fill{Type}(comp, index)` function in `buil
 2. Extract content from the component object (comp.displayTitle, comp.body, comp._items, etc.)
 3. Build HTML with:
    - Section tag: sectionOnly(contractSection) → always py-16 + bg-* only
-   - Inner div: max-w-6xl mx-auto px-8 (visual/multi-column components boost to max-w-7xl via COMPONENT_WIDTH_BOOST)
+   - Inner div: max-w-6xl mx-auto px-8 (boosted or capped per component via COMPONENT_WIDTH_BOOST / COMPONENT_WIDTH_CAP)
    - Layout classes: hardcoded grids, gaps, typography scale
    - Visual classes: from design contract (shadows, hovers, gradients)
    - Content: escaped text from course-layout.json

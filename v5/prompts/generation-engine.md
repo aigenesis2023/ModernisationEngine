@@ -320,6 +320,12 @@ These are the hallmarks of mediocre AI-generated courses. Avoid them:
 
 10. **DON'T write generic headings.** "Key Concepts" and "Important Information" are wasted words. Write headings that make someone curious: "Why Most Security Training Fails" beats "Security Overview".
 
+11. **DON'T overload card-based components with text.** Bento cards, flashcard backs, and narrative slides are constrained visual spaces — not article containers. Write to fit the format:
+    - **Bento cards:** 2-3 sentences max. If you need more, split into additional cards or use a different component.
+    - **Flashcard backs:** 2-4 sentences. The learner tapped to get a quick answer, not an essay.
+    - **Narrative slides:** 3-5 sentences per slide. If a slide needs more, split the content across additional slides.
+    - **General rule:** Look at your longest card/slide in any component. If it's more than ~60 words, cut it by a third or redistribute.
+
 11. **DON'T use the same variant of a component type more than twice in one course.** If you have 3 graphic-text components, use at least 2 different variants (e.g., split, overlap, full-overlay). If every graphic-text is `split`, the course looks templated.
 
 12. **DON'T use the default variant for everything.** If every component uses its default variant, the variant system adds zero value. Deliberately choose non-default variants where the content fits.
