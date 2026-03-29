@@ -375,8 +375,8 @@ function fillText(comp, variant, maxW) {
   const c = DC.text || {};
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly(c.section || 'py-16');
-  // Text always uses narrower width for readability, but respects section width if narrow
-  const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-4xl';
+  // Text uses narrower width for readability (~80 chars/line), but respects section width if narrow
+  const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-5xl';
 
   if (variant === 'two-column') {
     return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
@@ -391,7 +391,7 @@ ${comp.body || ''}
 
   if (variant === 'highlight-box') {
     return `<section class="${secClass}" data-component-type="text" data-animate="fade-up">
-<div class="${textW} mx-auto px-8">
+<div class="${maxW} mx-auto px-8">
 <div class="border-l-4 border-primary bg-surface-container/50 rounded-r-2xl p-8 md:p-10">
 ${title ? `<h2 class="font-headline text-2xl font-bold mb-4">${title}</h2>` : ''}
 <div class="space-y-4 text-lg text-on-surface-variant leading-relaxed">
