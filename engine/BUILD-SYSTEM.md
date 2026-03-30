@@ -1,9 +1,9 @@
 # Build System
 
-> **Status:** Implemented and working. Verified across 9+ brands.
-> **Last updated:** 2026-03-28
+> **Status:** Implemented and working. Verified across 9+ brands. Rounds 1-3 complete (Preact SSR, Tailwind v4, container queries).
+> **Last updated:** 2026-03-30
 
-This document covers how the Modernisation Engine assembles the final course HTML from the design contract, design tokens, course layout, and images. It includes the layout rules, fill function conventions, head generation, and hydration system.
+This document covers how the Modernisation Engine assembles the final course HTML from design tokens (MD3 palette), archetype recipes, course layout, and images. It includes the layout rules, component conventions, head generation, and hydration system.
 
 ---
 
@@ -14,7 +14,7 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
 
 **How it works:**
 
-1. **`generateHead()`** builds the entire `<head>` from `design-tokens.json` — Tailwind config (colours + fonts), Google Fonts, Material Symbols, and our own CSS definitions for `glass-card`, `text-gradient`, `btn-primary`, `glass-nav`.
+1. **`generateHeadV4()`** builds the entire `<head>` from `design-tokens.json` — resolves `src/theme-template.css` with token values, compiles with Tailwind v4 CLI, and inlines the resulting CSS. Includes Google Fonts, Material Symbols, GSAP. Custom classes (`glass-card`, `text-gradient`, `btn-primary`, `glass-nav`) are in the theme template. No CDN dependency.
 
 2. **`visual-archetypes.json`** defines 8 archetype recipes (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury). Each recipe specifies surface rhythm, border-radius scale, shadows, accent styles, and per-component visual overrides. `build-course.js` resolves the archetype from `design-tokens.json` → loads the recipe → uses it as `AR` (archetype recipe) in all fill functions.
 
@@ -31,9 +31,9 @@ We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML 
 
 ## Layout Rules (Non-Negotiable)
 
-Every fill function enforces these rules. They are hardcoded in `build-course.js`, not derived from Stitch:
+Every Preact component enforces these rules (originally fill functions, migrated to JSX in Round 2):
 
-1. **Containment:** Default section width is `max-w-6xl mx-auto px-8`. Visual/multi-column components (graphic-text, graphic, image-gallery, labeled-image, flashcard:grid, mcq:grid, tabs:vertical, branching:cards, key-term:card-grid, timeline:centered-alternating) boost to `max-w-7xl` in wide sections via `COMPONENT_WIDTH_BOOST`. Vertical list components (mcq:stacked, branching:list) and contained layouts (bento:featured, stat-callout) are capped to narrower widths via `COMPONENT_WIDTH_CAP` regardless of section width. The `<section>` tag carries ONLY standardised `py-16` spacing + brand `bg-*` colours (via `sectionOnly()` whitelist — strips everything except `bg-*` and forces `py-16`). An inner `<div>` provides containment.
+1. **Containment:** Default section width is `max-w-6xl mx-auto px-8`. Inner wrapper divs use `@container` for container queries — components respond to their container width via `@3xl:` breakpoints (768px container) instead of viewport `md:`. The `<section>` tag carries ONLY standardised `py-16` spacing + brand `bg-*` colours (via `sectionOnly()` whitelist — strips everything except `bg-*` and forces `py-16`). *(Round 3: COMPONENT_WIDTH_BOOST/CAP removed — container queries handle responsive behavior.)*
 
 2. **Grids/flex:** Every grid and flex layout gets explicit `gap-*` classes and minimum column widths (`min-w-[...]`) — no text wrapping per-word in narrow columns. Smart column counts avoid orphan items (e.g., 4 items use 2x2, not 3+1).
 

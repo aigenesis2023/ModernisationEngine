@@ -190,11 +190,13 @@ function checkHTMLStructure(html) {
     fail('HTML', 'Missing or empty <title>');
   }
 
-  // Tailwind CDN
+  // Tailwind CSS — either CDN JIT or compiled v4 inline
   if (html.includes('cdn.tailwindcss.com')) {
     pass('HTML', 'Tailwind CDN loaded');
+  } else if (html.includes('@keyframes') && html.includes('--color-primary')) {
+    pass('HTML', 'Tailwind v4 compiled CSS inlined');
   } else {
-    fail('HTML', 'Missing Tailwind CDN');
+    fail('HTML', 'Missing Tailwind CSS (no CDN and no compiled CSS found)');
   }
 
   // Google Fonts

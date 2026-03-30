@@ -1,6 +1,19 @@
 {
+  "scripts": {
+    "build:ssr": "vite build",
+    "build:course": "node engine/scripts/build-course.js",
+    "build": "npm run build:ssr && npm run build:course",
+    "build:cdn": "npm run build:ssr && node engine/scripts/build-course.js --tw-cdn"
+  },
   "devDependencies": {
-    "@playwright/mcp": "^0.0.68"
+    "@playwright/mcp": "^0.0.68",
+    "@preact/preset-vite": "^2.10.5",
+    "@tailwindcss/cli": "^4.2.2",
+    "@types/node": "^25.5.0",
+    "tailwindcss": "^4.2.2",
+    "typescript": "^6.0.2",
+    "vite": "^8.0.3",
+    "vite-plugin-singlefile": "^2.3.2"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.80.0",
@@ -8,6 +21,8 @@
     "@material/material-color-utilities": "^0.2.7",
     "cheerio": "^1.2.0",
     "dotenv": "^17.3.1",
-    "playwright": "^1.52.0"
+    "playwright": "^1.52.0",
+    "preact": "^10.29.0",
+    "preact-render-to-string": "^6.6.7"
   }
 }

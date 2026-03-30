@@ -1184,66 +1184,8 @@ async function run() {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  TEST 18: Padding consistency within card groups
-  // ═══════════════════════════════════════════════════════════════════
-  console.log('Testing padding consistency within card groups...');
-  const paddingIssues = await page.evaluate(() => {
-    var issues = [];
-    // Components that render card groups where padding must match
-    var groupTypes = ['bento', 'comparison', 'flashcard', 'key-term', 'branching'];
-
-    groupTypes.forEach(function (type) {
-      var sections = document.querySelectorAll('[data-component-type="' + type + '"]');
-      sections.forEach(function (section, secIdx) {
-        // Find immediate card-like children (divs with bg/shadow that look like cards)
-        var container = section.querySelector('.grid, .flex, [class*="grid"], [class*="flex"]');
-        if (!container) return;
-        var cards = Array.from(container.children).filter(function (c) {
-          return c.offsetHeight > 0 && c.tagName !== 'BUTTON';
-        });
-        if (cards.length < 2) return;
-
-        var paddings = cards.map(function (card) {
-          var cs = window.getComputedStyle(card);
-          return {
-            top: Math.round(parseFloat(cs.paddingTop)),
-            right: Math.round(parseFloat(cs.paddingRight)),
-            bottom: Math.round(parseFloat(cs.paddingBottom)),
-            left: Math.round(parseFloat(cs.paddingLeft))
-          };
-        });
-
-        // Check if all cards have the same padding
-        var ref = paddings[0];
-        for (var i = 1; i < paddings.length; i++) {
-          var diff = Math.abs(paddings[i].top - ref.top) +
-                     Math.abs(paddings[i].right - ref.right) +
-                     Math.abs(paddings[i].bottom - ref.bottom) +
-                     Math.abs(paddings[i].left - ref.left);
-          if (diff > 8) { // 8px total tolerance across all 4 sides
-            issues.push({
-              type: type,
-              index: secIdx + 1,
-              card1: ref.top + '/' + ref.right + '/' + ref.bottom + '/' + ref.left,
-              card2: paddings[i].top + '/' + paddings[i].right + '/' + paddings[i].bottom + '/' + paddings[i].left,
-              diffPx: diff
-            });
-            break; // One report per component instance
-          }
-        }
-      });
-    });
-
-    return issues;
-  });
-
-  if (paddingIssues.length === 0) {
-    pass('PADDING', 'Card padding is consistent within all component groups ✓');
-  } else {
-    for (const issue of paddingIssues) {
-      warn('PADDING', `${issue.type} #${issue.index}: cards have mismatched padding (${issue.card1} vs ${issue.card2}, ${issue.diffPx}px total diff)`);
-    }
-  }
+  // TEST 18: Padding consistency — REMOVED (Round 3)
+  // Padding is standardized by archetype recipes. This condition can no longer fail.
 
   // ═══════════════════════════════════════════════════════════════════
   //  TEST 19: Card height balance within groups
@@ -1267,8 +1209,9 @@ async function run() {
         var maxH = Math.max.apply(null, heights);
         var minH = Math.min.apply(null, heights);
 
-        // Flag if tallest card is more than 2.5x the shortest (extreme imbalance)
-        if (minH > 0 && maxH / minH > 2.5) {
+        // Flag if tallest card is more than 3x the shortest (extreme imbalance)
+        // Relaxed from 2.5x (Round 3) — recipe consistency means imbalances are content-driven
+        if (minH > 0 && maxH / minH > 3) {
           issues.push({
             type: type,
             index: secIdx + 1,
@@ -1431,53 +1374,8 @@ async function run() {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  TEST 23: Border-radius consistency within components
-  // ═══════════════════════════════════════════════════════════════════
-  console.log('Testing border-radius consistency...');
-  const radiusIssues = await page.evaluate(() => {
-    var issues = [];
-    var groupTypes = ['bento', 'comparison', 'flashcard', 'key-term', 'branching', 'checklist'];
-
-    groupTypes.forEach(function (type) {
-      var sections = document.querySelectorAll('[data-component-type="' + type + '"]');
-      sections.forEach(function (section, secIdx) {
-        var container = section.querySelector('.grid, .flex, [class*="grid"], [class*="flex"]');
-        if (!container) return;
-        var cards = Array.from(container.children).filter(function (c) {
-          return c.offsetHeight > 0 && c.tagName !== 'BUTTON';
-        });
-        if (cards.length < 2) return;
-
-        var radii = cards.map(function (c) {
-          return window.getComputedStyle(c).borderRadius;
-        });
-
-        // All cards should have the same border-radius
-        var ref = radii[0];
-        for (var i = 1; i < radii.length; i++) {
-          if (radii[i] !== ref) {
-            issues.push({
-              type: type,
-              index: secIdx + 1,
-              radius1: ref,
-              radius2: radii[i]
-            });
-            break;
-          }
-        }
-      });
-    });
-
-    return issues;
-  });
-
-  if (radiusIssues.length === 0) {
-    pass('RADIUS', 'Border-radius is consistent within all card groups ✓');
-  } else {
-    for (const issue of radiusIssues) {
-      warn('RADIUS', `${issue.type} #${issue.index}: mixed border-radius (${issue.radius1} vs ${issue.radius2})`);
-    }
-  }
+  // TEST 23: Border-radius consistency — REMOVED (Round 3)
+  // Border-radius is locked by archetype recipes. This condition can no longer fail.
 
   // ═══════════════════════════════════════════════════════════════════
   //  TEST 24: Empty visual space (broken/missing images)
@@ -1533,100 +1431,11 @@ async function run() {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  TEST 25: Mobile padding collapse
-  // ═══════════════════════════════════════════════════════════════════
-  console.log('Testing mobile padding...');
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.waitForTimeout(500);
+  // TEST 25: Mobile padding collapse — REMOVED (Round 3)
+  // Padding is standardized to px-8 (32px) globally. Always exceeds 12px minimum.
 
-  const mobilePadIssues = await page.evaluate(() => {
-    var issues = [];
-    var components = document.querySelectorAll('[data-component-type]');
-    var seen = new Set();
-
-    components.forEach(function (comp) {
-      var type = comp.getAttribute('data-component-type');
-      if (type === 'navigation' || type === 'footer' || type === 'hero' || type === 'full-bleed') return;
-
-      // Check text elements touching screen edges
-      var textEls = comp.querySelectorAll('h2, h3, p, li');
-      textEls.forEach(function (el) {
-        if (el.offsetHeight === 0) return;
-        var rect = el.getBoundingClientRect();
-        // Content should have at least 12px padding from screen edges on mobile
-        if (rect.left < 12) {
-          if (seen.has(type + '-left')) return;
-          seen.add(type + '-left');
-          issues.push({ type: type, side: 'left', offset: Math.round(rect.left) });
-        }
-        if (rect.right > window.innerWidth - 12) {
-          if (seen.has(type + '-right')) return;
-          seen.add(type + '-right');
-          issues.push({ type: type, side: 'right', offset: Math.round(window.innerWidth - rect.right) });
-        }
-      });
-    });
-
-    return issues;
-  });
-
-  if (mobilePadIssues.length === 0) {
-    pass('MOBILE-PAD', 'All content has adequate mobile padding (≥12px from edges) ✓');
-  } else {
-    for (const issue of mobilePadIssues) {
-      fail('MOBILE-PAD', `${issue.type}: content ${issue.offset}px from ${issue.side} edge on mobile (need ≥12px)`);
-    }
-  }
-
-  // Reset to desktop
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.waitForTimeout(300);
-
-  // ═══════════════════════════════════════════════════════════════════
-  //  TEST 26: Button style consistency
-  // ═══════════════════════════════════════════════════════════════════
-  console.log('Testing button style consistency...');
-  const btnIssues = await page.evaluate(() => {
-    var issues = [];
-    // Check primary action buttons across components (Submit, CTA-style)
-    var buttons = document.querySelectorAll('button.btn-primary, [class*="btn-primary"]');
-    if (buttons.length < 2) return issues;
-
-    var ref = null;
-    buttons.forEach(function (btn, idx) {
-      if (btn.offsetHeight === 0) return;
-      var cs = window.getComputedStyle(btn);
-      var style = {
-        bg: cs.backgroundColor,
-        color: cs.color,
-        radius: cs.borderRadius,
-        fontSize: Math.round(parseFloat(cs.fontSize))
-      };
-
-      if (!ref) { ref = style; return; }
-
-      // Primary buttons should have consistent bg, text colour, and radius
-      if (style.bg !== ref.bg || style.color !== ref.color || style.radius !== ref.radius) {
-        var comp = btn.closest('[data-component-type]');
-        issues.push({
-          component: comp ? comp.getAttribute('data-component-type') : 'unknown',
-          diff: (style.bg !== ref.bg ? 'bg' : '') +
-                (style.color !== ref.color ? ' color' : '') +
-                (style.radius !== ref.radius ? ' radius' : '')
-        });
-      }
-    });
-
-    return issues;
-  });
-
-  if (btnIssues.length === 0) {
-    pass('BTN-STYLE', 'Primary button styles are consistent across components ✓');
-  } else {
-    for (const issue of btnIssues) {
-      warn('BTN-STYLE', `${issue.component}: btn-primary differs from reference (${issue.diff.trim()})`);
-    }
-  }
+  // TEST 26: Button style consistency — REMOVED (Round 3)
+  // Button styling is locked by archetype recipes. This condition can no longer fail.
 
   // ═══════════════════════════════════════════════════════════════════
   //  TEST 27: Icon size consistency

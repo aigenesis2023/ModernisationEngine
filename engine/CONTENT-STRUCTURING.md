@@ -1,12 +1,12 @@
 # Content Structuring
 
-> **Status:** Implemented — dual-path content structuring (AI-first + SCORM). AI-first V2 rework with emotional arc, structural archetypes, and brand voice calibration.
-> **Last updated:** 2026-03-28
+> **Status:** Implemented — AI-first content structuring with emotional arc, structural archetypes, and brand voice calibration. SCORM import path archived.
+> **Last updated:** 2026-03-30
 
-This document covers how content gets transformed into a structured course layout (`course-layout.json`). Two paths exist:
+This document covers how content gets transformed into a structured course layout (`course-layout.json`).
 
-1. **AI-First Path (primary):** Raw research → creative instructional design with emotional arc
-2. **SCORM Import Path (legacy):** Extracted SCORM content → logic-aware restructuring
+1. **AI-First Path (active):** Raw research → creative instructional design with emotional arc
+2. **SCORM Import Path:** ⚠️ ARCHIVED — see below for historical reference
 
 Both paths produce the same `course-layout.json` format for the shared build pipeline.
 
@@ -46,7 +46,11 @@ No `statistics`, `terminology`, `quizIdeas`, or `commonMisconceptions` arrays. T
 
 ---
 
-## SCORM Import Path — Logic-Aware Restructuring
+## ⚠️ SCORM Import Path (ARCHIVED) — Historical Reference Only
+
+> This section documents legacy SCORM extraction logic. The active pipeline is AI-first only. Preserved for potential future reactivation.
+
+### SCORM Import Path — Logic-Aware Restructuring
 
 **Input:** `content-bucket.json` (extracted content + logic metadata)
 **Output:** `course-layout.json` (structured sections, components, conditions)

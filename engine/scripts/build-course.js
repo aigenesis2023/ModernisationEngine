@@ -17,6 +17,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { execSync } = require('child_process');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const TOKENS_PATH      = path.resolve(ROOT, 'engine/output/design-tokens.json');
@@ -25,6 +26,9 @@ const HYDRATE_PATH     = path.resolve(ROOT, 'engine/scripts/hydrate.js');
 const OUTPUT_PATH      = path.resolve(ROOT, 'engine/output/course.html');
 const PAGES_PATH       = path.resolve(ROOT, 'index.html');
 const ARCHETYPES_PATH  = path.resolve(ROOT, 'engine/schemas/visual-archetypes.json');
+const THEME_TEMPLATE   = path.resolve(ROOT, 'src/theme-template.css');
+const THEME_OUTPUT     = path.resolve(ROOT, 'engine/output/theme.css');
+const CSS_OUTPUT       = path.resolve(ROOT, 'engine/output/course.css');
 
 // Archetype Recipe object — resolved from visual-archetypes.json + tokens.archetype.
 // Replaces the old DC (design-contract) global. Set in buildArchetypeRecipe().
@@ -446,6 +450,172 @@ ${colorEntries}
 
     /* Better form checkboxes */
     input[type="checkbox"]:checked { background-color: ${secondary}; border-color: ${secondary}; }
+</style>`;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAILWIND v4 — build theme CSS from tokens and compile
+// ═══════════════════════════════════════════════════════════════════════
+
+/**
+ * Build a resolved theme.css from the template + design tokens, then
+ * compile with Tailwind v4 CLI. Returns the compiled CSS string.
+ *
+ * Flow: template → resolved theme.css → Tailwind CLI → course.css → inline
+ */
+function buildTailwindCSS(tokens) {
+  const colors = tokens.colors || {};
+  const fonts = tokens.fonts || {};
+  const typo = tokens.typography || {};
+
+  // ── Typography scale (same merge logic as generateHead) ────────────
+  const T = {
+    display:   mergeTypo(typo.h1,         'text-5xl font-bold tracking-tighter leading-[1.15]'),
+    h2:        mergeTypo(typo.h2,         'text-3xl font-semibold leading-snug'),
+    h3:        mergeTypo(typo.h3,         'text-xl font-semibold leading-snug'),
+    h4:        (() => {
+      const merged = mergeTypo(typo.h4, 'text-base font-medium leading-normal');
+      const size = parseFloat(merged.fontSize) || 0;
+      if (size > 0 && size < 1) return mergeTypo('', 'text-base font-medium leading-normal');
+      return merged;
+    })(),
+    bodyLg:    mergeTypo(typo.bodyLarge,   'text-lg font-light leading-relaxed'),
+    body:      mergeTypo(typo.body,        'text-base leading-relaxed'),
+    label:     mergeTypo(typo.label,       'text-xs font-medium tracking-widest'),
+    blockquote: mergeTypo(typo.blockquote, 'text-2xl font-light leading-relaxed'),
+    stat:      mergeTypo(typo.statNumber,  'text-4xl font-extrabold'),
+  };
+
+  const displayXlSize = T.display.fontSizeDesktop || (() => {
+    const base = parseFloat(T.display.fontSize) || 3;
+    return (base * 1.5).toFixed(2) + 'rem';
+  })();
+
+  // ── Color CSS vars for @theme ──────────────────────────────────────
+  const colorVars = Object.entries(colors)
+    .map(([k, v]) => `  --color-${k}: ${v};`)
+    .join('\n');
+
+  // ── Key color values for custom classes ────────────────────────────
+  const bg = colors['background'] || '#131313';
+  const onSurface = colors['on-surface'] || '#e2e2e2';
+  const surfaceContainer = colors['surface-container'] || '#1f1f1f';
+  const outlineVariant = colors['outline-variant'] || '#474747';
+  const primary = colors['primary'] || '#ffffff';
+  const primaryContainer = colors['primary-container'] || '#d4d4d4';
+  const onPrimaryContainer = colors['on-primary-container'] || '#000000';
+  const secondary = colors['secondary'] || '#adc6ff';
+  const tertiary = colors['tertiary'] || '#e9ddff';
+  const surfaceContainerLowest = colors['surface-container-lowest'] || '#0e0e0e';
+  const surfaceVariant = colors['surface-variant'] || '#353535';
+
+  // ── Read and resolve template ──────────────────────────────────────
+  let template = fs.readFileSync(THEME_TEMPLATE, 'utf-8');
+
+  const replacements = {
+    '{{COLOR_VARS}}': colorVars,
+    '{{HEADLINE_FONT}}': fonts.headline || 'Inter',
+    '{{BODY_FONT}}': fonts.body || 'Inter',
+    '{{LABEL_FONT}}': fonts.label || fonts.body || 'Inter',
+    '{{DISPLAY_SIZE}}': T.display.fontSize,
+    '{{DISPLAY_XL_SIZE}}': displayXlSize,
+    '{{DISPLAY_LH}}': T.display.lineHeight || '1.15',
+    '{{DISPLAY_FW}}': T.display.fontWeight || '700',
+    '{{DISPLAY_LS}}': T.display.letterSpacing || '-0.05em',
+    '{{H2_SIZE}}': T.h2.fontSize,
+    '{{H2_LH}}': T.h2.lineHeight || '1.375',
+    '{{H2_FW}}': T.h2.fontWeight || '600',
+    '{{H3_SIZE}}': T.h3.fontSize,
+    '{{H3_LH}}': T.h3.lineHeight || '1.375',
+    '{{H3_FW}}': T.h3.fontWeight || '600',
+    '{{H4_SIZE}}': T.h4.fontSize,
+    '{{H4_LH}}': T.h4.lineHeight || '1.5',
+    '{{H4_FW}}': T.h4.fontWeight || '500',
+    '{{BODY_LG_SIZE}}': T.bodyLg.fontSize,
+    '{{BODY_LG_LH}}': T.bodyLg.lineHeight || '1.625',
+    '{{BODY_LG_FW}}': T.bodyLg.fontWeight || '300',
+    '{{BODY_SIZE}}': T.body.fontSize,
+    '{{BODY_LH}}': T.body.lineHeight || '1.625',
+    '{{LABEL_SIZE}}': T.label.fontSize,
+    '{{LABEL_FW}}': T.label.fontWeight || '500',
+    '{{LABEL_LS}}': T.label.letterSpacing || '0.1em',
+    '{{BLOCKQUOTE_SIZE}}': T.blockquote.fontSize,
+    '{{BLOCKQUOTE_LH}}': T.blockquote.lineHeight || '1.625',
+    '{{BLOCKQUOTE_FW}}': T.blockquote.fontWeight || '300',
+    '{{STAT_SIZE}}': T.stat.fontSize,
+    '{{STAT_FW}}': T.stat.fontWeight || '800',
+    '{{BG}}': bg,
+    '{{ON_SURFACE}}': onSurface,
+    '{{SURFACE_CONTAINER}}': surfaceContainer,
+    '{{OUTLINE_VARIANT}}': outlineVariant,
+    '{{PRIMARY}}': primary,
+    '{{PRIMARY_CONTAINER}}': primaryContainer,
+    '{{ON_PRIMARY_CONTAINER}}': onPrimaryContainer,
+    '{{SECONDARY}}': secondary,
+    '{{TERTIARY}}': tertiary,
+    '{{SURFACE_CONTAINER_LOWEST}}': surfaceContainerLowest,
+    '{{SURFACE_VARIANT}}': surfaceVariant,
+  };
+
+  for (const [placeholder, value] of Object.entries(replacements)) {
+    template = template.split(placeholder).join(value);
+  }
+
+  // Write resolved theme.css
+  fs.writeFileSync(THEME_OUTPUT, template, 'utf-8');
+  console.log(`[ok] Resolved theme.css (${template.length} chars)`);
+
+  // ── Run Tailwind v4 CLI ────────────────────────────────────────────
+  // Scan the course HTML (which must already be built) + Preact components for classes
+  try {
+    execSync(
+      `npx @tailwindcss/cli -i "${THEME_OUTPUT}" -o "${CSS_OUTPUT}" --minify`,
+      { cwd: ROOT, stdio: 'pipe', timeout: 30000 }
+    );
+  } catch (e) {
+    console.error('[ERROR] Tailwind CSS compilation failed:', e.stderr?.toString() || e.message);
+    process.exit(1);
+  }
+
+  const css = fs.readFileSync(CSS_OUTPUT, 'utf-8');
+  console.log(`[ok] Tailwind v4 compiled CSS (${(css.length / 1024).toFixed(0)} KB)`);
+  return css;
+}
+
+/**
+ * Generate <head> for Tailwind v4 builds — compiled CSS inline, no CDN.
+ */
+function generateHeadV4(tokens, courseTitle, compiledCSS) {
+  const fonts = tokens.fonts || {};
+  const headlineFont = fonts.headline || 'Inter';
+  const bodyFont = fonts.body || 'Inter';
+  const labelFont = fonts.label || bodyFont;
+
+  const fontFamilies = [...new Set([headlineFont, bodyFont, labelFont])];
+  const googleFontsUrl = 'https://fonts.googleapis.com/css2?' +
+    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@300;400;500;600;700`).join('&') +
+    '&display=swap';
+
+  return `<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>${esc(courseTitle)}</title>
+
+<!-- Google Fonts -->
+<link href="${googleFontsUrl}" rel="stylesheet"/>
+
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+
+<!-- GSAP + ScrollTrigger (scroll animations) -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.7/dist/ScrollTrigger.min.js"></script>
+
+<!-- SplitType (text line reveals) -->
+<script src="https://cdn.jsdelivr.net/npm/split-type@0.3.4/umd/index.min.js"></script>
+
+<!-- Compiled Tailwind v4 CSS — deterministic, no CDN dependency -->
+<style>
+${compiledCSS}
 </style>`;
 }
 
@@ -2221,46 +2391,11 @@ const VARIANT_MAP = {
   'branching':    ['cards', 'list']
 };
 
-// ─── Per-component width boost ───────────────────────────────────────
-// Most components look best at the default section width (max-w-6xl).
-// Visual/multi-column components benefit from extra breathing room
-// when the section is set to 'wide'. Only these get boosted.
-const COMPONENT_WIDTH_BOOST = {
-  'graphic-text':                'max-w-7xl',
-  'graphic':                     'max-w-7xl',
-  'image-gallery':               'max-w-7xl',
-  'labeled-image':               'max-w-7xl',
-  'flashcard:grid':              'max-w-7xl',
-  'mcq:grid':                    'max-w-7xl',
-  'tabs:vertical':               'max-w-7xl',
-  'branching:cards':             'max-w-7xl',
-  'key-term:card-grid':          'max-w-7xl',
-  'timeline:centered-alternating':'max-w-7xl',
-};
-
-// ─── Per-component width cap ────────────────────────────────────────
-// Vertical list components look better narrower — cap them regardless of section width.
-const COMPONENT_WIDTH_CAP = {
-  'mcq:stacked':       'max-w-4xl',
-  'branching:list':    'max-w-4xl',
-  'bento:featured':    'max-w-6xl',
-  'stat-callout':      'max-w-6xl',
-};
-
+// ─── Component width (simplified — container queries handle responsive) ──
+// With container queries (Round 3), BOOST/CAP are no longer needed.
+// Components respond to their container width via @3xl: breakpoints.
 function getComponentMaxW(type, variant, sectionMaxW) {
-  const remOf = (cls) => {
-    const m = cls.match(/max-w-(\d+)xl/);
-    if (!m) return cls.includes('max-w-[') ? 90 : 72; // 90rem or 6xl default
-    return parseInt(m[1]);
-  };
-  // Check for width cap first (narrows vertical list components)
-  const cap = COMPONENT_WIDTH_CAP[`${type}:${variant}`] || COMPONENT_WIDTH_CAP[type];
-  if (cap) return remOf(cap) < remOf(sectionMaxW) ? cap : sectionMaxW;
-  // Then check for width boost (widens visual/multi-column components)
-  const boost = COMPONENT_WIDTH_BOOST[`${type}:${variant}`] || COMPONENT_WIDTH_BOOST[type];
-  if (!boost) return sectionMaxW;
-  // Boost applies when section is 'wide' or wider — never exceed section width
-  return remOf(boost) <= remOf(sectionMaxW) ? boost : sectionMaxW;
+  return sectionMaxW;
 }
 
 // ─── Single-variant renderer (used internally) ───────────────────────
@@ -2407,10 +2542,17 @@ ${drawerLinks}
 // No generic website footer needed. Future platform-level footer handled by authoring layer.
 
 // ═══════════════════════════════════════════════════════════════════════
+// PREACT SSR RENDERER — loaded from compiled dist/render.cjs
+// ═══════════════════════════════════════════════════════════════════════
+const PREACT_SSR_PATH = path.resolve(ROOT, 'dist/render.cjs');
+
+// ═══════════════════════════════════════════════════════════════════════
 // MAIN BUILD
 // ═══════════════════════════════════════════════════════════════════════
 function build() {
-  console.log('V5 Course Builder — Archetype Recipe Build');
+  const useLegacy = process.argv.includes('--legacy');
+
+  console.log(`V5 Course Builder — ${useLegacy ? 'Legacy String Templates' : 'Preact SSR'}`);
   console.log('===========================================\n');
 
   // Read inputs
@@ -2431,131 +2573,40 @@ function build() {
   console.log(`[ok] Loaded design-tokens.json (${Object.keys(tokens.colors || {}).length} colours, fonts: ${tokens.fonts?.headline}/${tokens.fonts?.body}, isDark: ${tokens.isDark})`);
 
   // ── Build archetype recipe ─────────────────────────────────────────────
-  // AR replaces DC: deterministic per-archetype styles, no Stitch parsing needed.
   const archetypeName = tokens.archetype?.name || 'tech-modern';
   AR = buildArchetypeRecipe(archetypeName);
   console.log(`[ok] Archetype recipe built: ${archetypeName} (confidence: ${tokens.archetype?.confidence ?? 'n/a'})`);
-  // No dark-mode fixups needed — MD3 palettes are dark-safe by design.
 
-  // Build all sections
-  let filledCount = 0;
-  let fallbackCount = 0;
-  const sectionsHtml = [];
+  // ── Render sections ────────────────────────────────────────────────────
+  let sectionsHtmlStr, navHtml, filledCount, fallbackCount;
 
-  layout.sections.forEach((section, sectionIndex) => {
-    const components = section.components || [];
-    if (components.length === 0) return;
-
-    const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
-
-    // Determine section width, with minimum-width safeguards per component type.
-    // Components that use multi-column grids or need breathing room should never be narrow.
-    const NEEDS_STANDARD = new Set([
-      'mcq', 'branching', 'flashcard', 'bento', 'comparison', 'data-table',
-      'tabs', 'checklist', 'narrative', 'process-flow', 'image-gallery',
-      'labeled-image', 'timeline', 'key-term', 'accordion', 'stat-callout'
-    ]);
-    let sectionWidth = section.sectionWidth || 'standard';
-    if (sectionWidth === 'narrow') {
-      const hasWideComponent = components.some(c => NEEDS_STANDARD.has((c.type || '').toLowerCase()));
-      if (hasWideComponent) {
-        sectionWidth = 'standard';
-      }
+  if (useLegacy) {
+    // Legacy path: string-template fill functions (Round 1)
+    const result = buildSectionsLegacy(layout);
+    sectionsHtmlStr = result.sectionsHtml;
+    navHtml = result.navHtml;
+    filledCount = result.filledCount;
+    fallbackCount = result.fallbackCount;
+  } else {
+    // Preact SSR path (Round 2 — default)
+    if (!fs.existsSync(PREACT_SSR_PATH)) {
+      console.error('ERROR: dist/render.cjs not found. Run `npx vite build` first.');
+      console.error('       Or use --legacy flag to use string-template rendering.');
+      process.exit(1);
     }
-    const componentHtmls = [];
-    const interactiveTypes = new Set(['mcq', 'accordion', 'tabs', 'flashcard', 'narrative', 'checklist', 'textinput']);
-    let interactiveCount = 0;
-    components.forEach((comp, compIndex) => {
-      const type = (comp.type || 'text').toLowerCase();
-      if (interactiveTypes.has(type)) interactiveCount++;
-      let filled = fillComponent(comp, compIndex, sectionWidth);
-      if (filled) {
-        // Add authoring data attributes for JSON↔DOM mapping (all variants including templates)
-        filled = filled.replace(
-          /data-component-type="/g,
-          `data-section-index="${sectionIndex}" data-component-index="${compIndex}" data-component-type="`
-        );
-        // Add required-items tracking if the layout engine tagged this component
-        if (comp.requiredItems && interactiveTypes.has(type)) {
-          filled = filled.replace(
-            /data-component-type="/,
-            `data-required-items="${comp.requiredItems}" data-component-type="`
-          );
-        }
-        // Wrap with data-show-if if the component has its OWN showIf condition
-        // (Section-level showIf is handled separately — wraps the entire section including title bar)
-        if (comp.showIf && Object.keys(comp.showIf).length > 0) {
-          const condition = Object.entries(comp.showIf)
-            .map(([k, v]) => `${k}=${v}`)
-            .join('|');
-          filled = `<div data-show-if="${esc(condition)}" style="display:none">\n${filled}\n</div>`;
-        }
-        componentHtmls.push(filled);
-        filledCount++;
-      } else {
-        console.log(`  [warn] Fill returned null for ${type}`);
-        fallbackCount++;
-      }
+    const { renderCourseBody } = require(PREACT_SSR_PATH);
+    const result = renderCourseBody(layout, {
+      AR,
+      isDark: IS_DARK,
+      embedImage,
     });
-
-    if (componentHtmls.length > 0) {
-      const sectionTitle = section.title || '';
-      // Track sections with interactive components for progress
-      const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
-      const secMaxW = getSectionMaxW(sectionWidth);
-      const titleBar = sectionTitle
-        ? `<div class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr}>
-<div class="flex items-center gap-6">
-<div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
-<h2 class="font-headline text-label-text uppercase text-primary">${esc(sectionTitle)}</h2>
-<div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
-</div>
-</div>`
-        : '';
-
-      const wrapped = componentHtmls.map((h, i) => {
-        if (h.trim().startsWith('<section') || h.trim().startsWith('<div data-show-if')) {
-          if (i === 0 && !sectionTitle) {
-            // Add section id to the first element
-            if (h.trim().startsWith('<div data-show-if')) {
-              return h.replace(/<div data-show-if/, `<div id="${sectionId}" data-show-if`);
-            }
-            return h.replace(/<section/, `<section id="${sectionId}"`);
-          }
-          return h;
-        }
-        return `<div class="py-12 ${secMaxW} mx-auto px-8">\n${h}\n</div>`;
-      }).join('\n\n');
-
-      // If section has showIf, wrap the entire section (title bar + components) together
-      let sectionBlock = titleBar + '\n' + wrapped;
-      if (section.showIf && Object.keys(section.showIf).length > 0) {
-        const condition = Object.entries(section.showIf)
-          .map(([k, v]) => `${k}=${v}`)
-          .join('|');
-        sectionBlock = `<div data-show-if="${esc(condition)}" style="display:none">\n${sectionBlock}\n</div>`;
-      }
-
-      sectionsHtml.push(sectionBlock);
-    }
-  });
-
-  console.log(`[ok] Filled ${filledCount} components (${fallbackCount} fallbacks)\n`);
-
-  // Course gate: if any section contains a path-selector, wrap everything after it
-  // in a gate wrapper so hydrate.js can enforce "choose before continuing"
-  const gateIndex = sectionsHtml.findIndex(h => h.includes('data-path-selector'));
-  if (gateIndex >= 0 && gateIndex < sectionsHtml.length - 1) {
-    const before = sectionsHtml.slice(0, gateIndex + 1);
-    const after = sectionsHtml.slice(gateIndex + 1);
-    const gatedBlock = `<div data-course-gate class="gated">\n${after.join('\n\n')}\n</div>`;
-    sectionsHtml.length = 0;
-    sectionsHtml.push(...before, gatedBlock);
-    console.log(`[ok] Course gate: content after section ${gateIndex} wrapped in gate (${after.length} sections gated)`);
+    sectionsHtmlStr = result.sectionsHtml;
+    navHtml = result.navHtml;
+    filledCount = result.filledCount;
+    fallbackCount = result.fallbackCount;
   }
 
-  // Build nav (slim header + drawer)
-  const navHtml = buildNav(layout);
+  console.log(`[ok] Rendered ${filledCount} components (${fallbackCount} fallbacks)\n`);
 
   // Get hydration script
   let hydrateScript = '';
@@ -2563,18 +2614,30 @@ function build() {
     hydrateScript = fs.readFileSync(HYDRATE_PATH, 'utf-8');
   }
 
-  // ⚠️ ARCHIVED — content-bucket.json is SCORM-only. AI-first pipeline does not use it.
-  // Section gating and path groups are SCORM features. Do not read content-bucket.json.
-  let pathStateScript = '';
-  let sectionGatingScript = '';
-
   // Theme + course title
   const isDark = tokens.isDark !== false;
   const courseTitle = layout.course.title || 'Course';
 
-  // Generate <head> from design-tokens.json — NOT from Stitch raw HTML
-  const finalHead = generateHead(tokens, courseTitle);
-  console.log(`[ok] Generated <head> from design-tokens.json (${finalHead.length} chars)`);
+  // ── Build CSS ──────────────────────────────────────────────────────
+  const useTailwindV4 = !process.argv.includes('--tw-cdn');
+  let finalHead;
+
+  if (useTailwindV4 && fs.existsSync(THEME_TEMPLATE)) {
+    // Tailwind v4: write body HTML for class scanning, then compile CSS
+    const bodyHtml = `${navHtml}\n${sectionsHtmlStr}`;
+    const scanPath = path.resolve(ROOT, 'engine/output/_tw-scan.html');
+    fs.writeFileSync(scanPath, bodyHtml, 'utf-8');
+
+    const compiledCSS = buildTailwindCSS(tokens);
+    finalHead = generateHeadV4(tokens, courseTitle, compiledCSS);
+
+    // Clean up scan file
+    fs.unlinkSync(scanPath);
+  } else {
+    // CDN fallback (--tw-cdn flag or no template)
+    finalHead = generateHead(tokens, courseTitle);
+  }
+  console.log(`[ok] Generated <head> (${finalHead.length} chars, ${useTailwindV4 ? 'Tailwind v4' : 'CDN JIT'})`);
 
   let finalHtml = `<!DOCTYPE html>
 <html class="${isDark ? 'dark' : ''}" lang="en">
@@ -2586,7 +2649,7 @@ ${finalHead}
 ${navHtml}
 
 <main class="min-h-screen bg-background overflow-x-hidden pt-14">
-${sectionsHtml.join('\n\n')}
+${sectionsHtmlStr}
 
 <!-- Course Completion -->
 <section class="py-16 text-center">
@@ -2616,7 +2679,7 @@ ${sectionsHtml.join('\n\n')}
   }
 }).replace(/<\//g, '<\\/')}</script>
 <script>
-${pathStateScript}${sectionGatingScript}${hydrateScript}
+${hydrateScript}
 </script>
 </body>
 </html>`;
@@ -2633,6 +2696,121 @@ ${pathStateScript}${sectionGatingScript}${hydrateScript}
   console.log(`[ok] Written: ${PAGES_PATH}`);
 
   console.log('\nBuild complete!');
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LEGACY BUILD PATH — string-template fill functions (for --legacy flag)
+// ═══════════════════════════════════════════════════════════════════════
+function buildSectionsLegacy(layout) {
+  let filledCount = 0;
+  let fallbackCount = 0;
+  const sectionsHtml = [];
+
+  layout.sections.forEach((section, sectionIndex) => {
+    const components = section.components || [];
+    if (components.length === 0) return;
+
+    const sectionId = section.sectionId || `section-${String(sectionIndex).padStart(2, '0')}`;
+
+    const NEEDS_STANDARD_SET = new Set([
+      'mcq', 'branching', 'flashcard', 'bento', 'comparison', 'data-table',
+      'tabs', 'checklist', 'narrative', 'process-flow', 'image-gallery',
+      'labeled-image', 'timeline', 'key-term', 'accordion', 'stat-callout'
+    ]);
+    let sectionWidth = section.sectionWidth || 'standard';
+    if (sectionWidth === 'narrow') {
+      const hasWideComponent = components.some(c => NEEDS_STANDARD_SET.has((c.type || '').toLowerCase()));
+      if (hasWideComponent) sectionWidth = 'standard';
+    }
+    const componentHtmls = [];
+    const interactiveTypes = new Set(['mcq', 'accordion', 'tabs', 'flashcard', 'narrative', 'checklist', 'textinput']);
+    let interactiveCount = 0;
+    components.forEach((comp, compIndex) => {
+      const type = (comp.type || 'text').toLowerCase();
+      if (interactiveTypes.has(type)) interactiveCount++;
+      let filled = fillComponent(comp, compIndex, sectionWidth);
+      if (filled) {
+        filled = filled.replace(
+          /data-component-type="/g,
+          `data-section-index="${sectionIndex}" data-component-index="${compIndex}" data-component-type="`
+        );
+        if (comp.requiredItems && interactiveTypes.has(type)) {
+          filled = filled.replace(
+            /data-component-type="/,
+            `data-required-items="${comp.requiredItems}" data-component-type="`
+          );
+        }
+        if (comp.showIf && Object.keys(comp.showIf).length > 0) {
+          const condition = Object.entries(comp.showIf)
+            .map(([k, v]) => `${k}=${v}`)
+            .join('|');
+          filled = `<div data-show-if="${esc(condition)}" style="display:none">\n${filled}\n</div>`;
+        }
+        componentHtmls.push(filled);
+        filledCount++;
+      } else {
+        console.log(`  [warn] Fill returned null for ${type}`);
+        fallbackCount++;
+      }
+    });
+
+    if (componentHtmls.length > 0) {
+      const sectionTitle = section.title || '';
+      const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
+      const secMaxW = getSectionMaxW(sectionWidth);
+      const titleBar = sectionTitle
+        ? `<div class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr}>
+<div class="flex items-center gap-6">
+<div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
+<h2 class="font-headline text-label-text uppercase text-primary">${esc(sectionTitle)}</h2>
+<div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
+</div>
+</div>`
+        : '';
+
+      const wrapped = componentHtmls.map((h, i) => {
+        if (h.trim().startsWith('<section') || h.trim().startsWith('<div data-show-if')) {
+          if (i === 0 && !sectionTitle) {
+            if (h.trim().startsWith('<div data-show-if')) {
+              return h.replace(/<div data-show-if/, `<div id="${sectionId}" data-show-if`);
+            }
+            return h.replace(/<section/, `<section id="${sectionId}"`);
+          }
+          return h;
+        }
+        return `<div class="py-12 ${secMaxW} mx-auto px-8">\n${h}\n</div>`;
+      }).join('\n\n');
+
+      let sectionBlock = titleBar + '\n' + wrapped;
+      if (section.showIf && Object.keys(section.showIf).length > 0) {
+        const condition = Object.entries(section.showIf)
+          .map(([k, v]) => `${k}=${v}`)
+          .join('|');
+        sectionBlock = `<div data-show-if="${esc(condition)}" style="display:none">\n${sectionBlock}\n</div>`;
+      }
+
+      sectionsHtml.push(sectionBlock);
+    }
+  });
+
+  // Course gate
+  const gateIndex = sectionsHtml.findIndex(h => h.includes('data-path-selector'));
+  if (gateIndex >= 0 && gateIndex < sectionsHtml.length - 1) {
+    const before = sectionsHtml.slice(0, gateIndex + 1);
+    const after = sectionsHtml.slice(gateIndex + 1);
+    const gatedBlock = `<div data-course-gate class="gated">\n${after.join('\n\n')}\n</div>`;
+    sectionsHtml.length = 0;
+    sectionsHtml.push(...before, gatedBlock);
+  }
+
+  const navHtml = buildNav(layout);
+
+  return {
+    sectionsHtml: sectionsHtml.join('\n\n'),
+    navHtml,
+    filledCount,
+    fallbackCount,
+  };
 }
 
 build();

@@ -13,3 +13,4 @@ engine/output/
 # Dev screenshots (Playwright viewport/full-page captures)
 /*.jpeg
 /*.png
+dist/

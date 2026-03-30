@@ -1,0 +1,266 @@
+/*
+ * Tailwind v4 theme template for course builds.
+ *
+ * This file is a TEMPLATE — build-course.js writes a resolved version
+ * with actual token values to engine/output/theme.css before running
+ * the Tailwind CLI. Placeholders like {{primary}} are replaced with
+ * hex values from design-tokens.json.
+ *
+ * The compiled CSS replaces the CDN JIT + <script>tailwind.config</script>.
+ */
+
+@import "tailwindcss";
+
+/* Scan course HTML + Preact components for Tailwind classes */
+@source "../engine/output/_tw-scan.html";
+@source "../src/components/*.tsx";
+@source "../src/components/*.ts";
+
+/* ═══ DESIGN TOKENS ═══════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Colors (from design-tokens.json) ────────────────────────────── */
+  /* Injected dynamically — {{COLOR_VARS}} placeholder replaced at build */
+  {{COLOR_VARS}}
+
+  /* ── Fonts ───────────────────────────────────────────────────────── */
+  --font-headline: "{{HEADLINE_FONT}}", ui-sans-serif, system-ui, sans-serif;
+  --font-body: "{{BODY_FONT}}", ui-sans-serif, system-ui, sans-serif;
+  --font-label: "{{LABEL_FONT}}", ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Font sizes (base values — line-height/weight applied via utility classes) */
+  --text-display: {{DISPLAY_SIZE}};
+  --text-display-xl: {{DISPLAY_XL_SIZE}};
+  --text-h2: {{H2_SIZE}};
+  --text-h3: {{H3_SIZE}};
+  --text-h4: {{H4_SIZE}};
+  --text-body-lg: {{BODY_LG_SIZE}};
+  --text-body: {{BODY_SIZE}};
+  --text-label-text: {{LABEL_SIZE}};
+  --text-blockquote: {{BLOCKQUOTE_SIZE}};
+  --text-stat: {{STAT_SIZE}};
+
+  /* ── Border radius ───────────────────────────────────────────────── */
+  --radius: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+}
+
+/* ═══ TYPOGRAPHY SCALE ════════════════════════════════════════════════
+ * Composite styles: font-size + line-height + font-weight + letter-spacing.
+ * Tailwind v4 @theme only handles simple values, so these are utility classes.
+ */
+
+/* --- Display (h1 hero) --- */
+.text-display {
+  font-size: var(--text-display);
+  line-height: {{DISPLAY_LH}};
+  font-weight: {{DISPLAY_FW}};
+  letter-spacing: {{DISPLAY_LS}};
+}
+@media (min-width: 768px) {
+  .md\:text-display-xl {
+    font-size: var(--text-display-xl);
+    line-height: {{DISPLAY_LH}};
+    font-weight: {{DISPLAY_FW}};
+    letter-spacing: {{DISPLAY_LS}};
+  }
+}
+.text-display-xl {
+  font-size: var(--text-display-xl);
+  line-height: {{DISPLAY_LH}};
+  font-weight: {{DISPLAY_FW}};
+  letter-spacing: {{DISPLAY_LS}};
+}
+
+/* --- Heading 2 --- */
+.text-h2 {
+  font-size: var(--text-h2);
+  line-height: {{H2_LH}};
+  font-weight: {{H2_FW}};
+}
+
+/* --- Heading 3 --- */
+.text-h3 {
+  font-size: var(--text-h3);
+  line-height: {{H3_LH}};
+  font-weight: {{H3_FW}};
+}
+
+/* --- Heading 4 --- */
+.text-h4 {
+  font-size: var(--text-h4);
+  line-height: {{H4_LH}};
+  font-weight: {{H4_FW}};
+}
+
+/* --- Body large --- */
+.text-body-lg {
+  font-size: var(--text-body-lg);
+  line-height: {{BODY_LG_LH}};
+  font-weight: {{BODY_LG_FW}};
+}
+
+/* --- Body --- */
+.text-body {
+  font-size: var(--text-body);
+  line-height: {{BODY_LH}};
+}
+
+/* --- Label --- */
+.text-label-text {
+  font-size: var(--text-label-text);
+  font-weight: {{LABEL_FW}};
+  letter-spacing: {{LABEL_LS}};
+}
+
+/* --- Blockquote --- */
+.text-blockquote {
+  font-size: var(--text-blockquote);
+  line-height: {{BLOCKQUOTE_LH}};
+  font-weight: {{BLOCKQUOTE_FW}};
+}
+
+/* --- Stat number --- */
+.text-stat {
+  font-size: var(--text-stat);
+  font-weight: {{STAT_FW}};
+}
+
+/* ═══ CUSTOM CLASSES ══════════════════════════════════════════════════ */
+
+/* Base */
+body {
+  background-color: {{BG}};
+  color: {{ON_SURFACE}};
+  font-family: var(--font-body);
+}
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Glass card — frosted surface panel */
+.glass-card {
+  background: {{SURFACE_CONTAINER}}cc;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid {{OUTLINE_VARIANT}}26;
+}
+
+/* Glass — lighter variant for tables/containers */
+.glass {
+  background: {{SURFACE_CONTAINER}}99;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Glass nav */
+.glass-nav {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid {{OUTLINE_VARIANT}}26;
+}
+
+/* Text gradient — brand gradient on text */
+.text-gradient {
+  background: linear-gradient(135deg, {{PRIMARY}}, {{SECONDARY}}, {{TERTIARY}});
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Primary button */
+.btn-primary {
+  background: {{PRIMARY_CONTAINER}};
+  color: {{ON_PRIMARY_CONTAINER}};
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* Scroll progress bar */
+#hydrate-progress {
+  background: linear-gradient(90deg, {{SECONDARY}}, {{PRIMARY}}) !important;
+}
+
+/* Nav drawer */
+.nav-drawer { scrollbar-width: thin; }
+.drawer-link-active .drawer-index { color: {{PRIMARY}}; }
+
+/* Utility: hide details marker */
+details summary::-webkit-details-marker { display: none; }
+
+/* Custom scrollbar */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: {{SURFACE_CONTAINER_LOWEST}}; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: {{SURFACE_VARIANT}}; border-radius: 10px; }
+
+/* Scroll animation initial states */
+[data-animate] { opacity: 0; }
+[data-animate="fade-up"] { transform: translateY(80px); }
+[data-animate="slide-in-left"] { transform: translateX(-120px); }
+[data-animate="slide-in-right"] { transform: translateX(120px); }
+[data-animate="scale-in"] { transform: scale(0.8); }
+[data-animate="clip-up"] { clip-path: inset(100% 0% 0% 0%); opacity: 1; }
+[data-component-type="hero"] { opacity: 1 !important; transform: none !important; }
+[data-component-type="hero"] [data-animate] { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-animate] { opacity: 1 !important; transform: none !important; clip-path: none !important; }
+}
+
+/* Containment safety net */
+html, body { overflow-x: hidden; }
+img, video, iframe { max-width: 100%; }
+.line-clamp-4 { display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+/* Course gate */
+[data-course-gate].gated {
+  position: relative;
+  max-height: 60vh;
+  overflow: hidden;
+  pointer-events: none;
+  filter: blur(6px) saturate(0.5);
+  opacity: 0.3;
+  transition: filter 0.6s ease, opacity 0.6s ease, max-height 0.6s ease;
+}
+[data-course-gate].gated::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 200px;
+  background: linear-gradient(to bottom, transparent, {{BG}});
+  pointer-events: none;
+}
+[data-course-gate]:not(.gated) {
+  transition: filter 0.6s ease, opacity 0.6s ease, max-height 0.6s ease;
+  max-height: none;
+  filter: none;
+  opacity: 1;
+}
+
+/* Section progress tracker */
+[data-section-gate] .section-lock-icon { display: inline; }
+[data-section-gate].section-complete .section-lock-icon { display: none; }
+[data-section-gate].section-complete .section-check-icon { display: inline; }
+[data-section-gate]:not(.section-complete) .section-check-icon { display: none; }
+
+/* Smooth card hover lift */
+.hover-lift { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.hover-lift:hover { transform: translateY(-2px); }
+
+/* Data table */
+table th { text-align: left; }
+
+/* Textarea focus glow */
+textarea:focus { box-shadow: 0 0 0 3px {{SECONDARY}}20; }
+
+/* Smooth section transitions */
+section { transition: opacity 0.3s ease; }
+
+/* Better form checkboxes */
+input[type="checkbox"]:checked { background-color: {{SECONDARY}}; border-color: {{SECONDARY}}; }

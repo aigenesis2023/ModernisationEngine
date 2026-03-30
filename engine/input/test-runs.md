@@ -1,5 +1,7 @@
 # Test Run Configuration
 
+> **Current state:** Engine rebuild Rounds 1-3 complete. All protocols below assume Preact SSR rendering, Tailwind v4 compiled CSS (no CDN), container queries, and MD3+archetype design system. Build requires `npx vite build` before `node engine/scripts/build-course.js`.
+
 ## Keywords
 
 - **"Run"** → full pipeline (Steps 1-5), deliver the output. No QA, no bug fixing.

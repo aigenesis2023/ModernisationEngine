@@ -2,9 +2,9 @@
 
 > **Living document.** Updated after every commit/push. Tracks what's done, what's next, what was skipped, and knock-on effects.
 
-**Branch:** `authoring-layer-v5`
+**Branch:** Check `git branch` for current branch.
 **Started:** 2026-03-28
-**Last updated:** 2026-03-28 (Phase 3.5 COMPLETE — UX polish: friendly labels, delete, removed broken type swap)
+**Last updated:** 2026-03-30 (Engine rebuild Rounds 1-3 complete. Rendering migrated to Preact SSR + Tailwind v4 + container queries. Phase 3.5 UX polish complete.)
 
 ---
 

@@ -11,7 +11,7 @@ If any component was added, removed, or renamed:
 
 - [ ] `CLAUDE.md` — component table count in heading + table rows
 - [ ] `CLAUDE.md` — all inline references (search for old count number)
-- [ ] `engine/BUILD-SYSTEM.md` — fill function count references
+- [ ] `engine/BUILD-SYSTEM.md` — component count and convention references
 - [ ] `engine/CONTENT-STRUCTURING.md` — component count references
 - [ ] `engine/schemas/visual-archetypes.json` — archetype recipe has component-specific keys if needed
 - [ ] `engine/schemas/component-library.json` — component exists with all fields
@@ -22,7 +22,7 @@ If any component was added, removed, or renamed:
 - [ ] `engine/scripts/build-course.js` — fill function exists + dispatcher case
 - [ ] `engine/scripts/qa-course.js` — component type recognized
 
-**How to check:** `grep -rn "25 component\|26 component\|25 type\|26 type\|25 fill\|26 fill" --include="*.md"` (replace numbers with the OLD count)
+**How to check:** `grep -rn "28 component\|28 type\|28 fill" --include="*.md"` and verify against the current component count in `engine/schemas/component-library.json`
 
 ---
 
@@ -32,9 +32,10 @@ If any variant was added, removed, or renamed:
 
 - [ ] `CLAUDE.md` — Layout Variants table has the variant listed
 - [ ] `engine/AUTHORING-LAYER.md` — Variant Inventory table matches (no duplicates)
-- [ ] `engine/scripts/build-course.js` — `VARIANT_MAP` includes the variant
-- [ ] `engine/scripts/build-course.js` — fill function has rendering logic (not just registered)
-- [ ] `engine/scripts/build-course.js` — dispatcher passes `variant` param to fill function
+- [ ] `src/utils.ts` — `VARIANT_MAP` includes the variant
+- [ ] `src/components/` — Preact component has rendering logic for the variant
+- [ ] `src/components/index.ts` — component registry entry exists
+- [ ] `engine/scripts/build-course.js` — legacy fill function has rendering logic (if --legacy path maintained)
 - [ ] `engine/scripts/hydrate.js` — `variantLabels[componentType]` has a human-friendly label for the variant
 - [ ] `engine/scripts/qa-course.js` — variant registry includes it
 - [ ] `engine/schemas/component-library.json` — variant listed in component's `variants` array
