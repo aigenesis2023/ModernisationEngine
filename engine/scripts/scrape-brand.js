@@ -1,15 +1,17 @@
 #!/usr/bin/env node
 /**
- * V5 Brand Scraper — Screenshot + Natural Language Description
+ * V6 Brand Scraper — Screenshot + Natural Language Description + CSS Token Extraction
  *
- * Takes a screenshot of the brand URL, then either:
+ * Takes a screenshot of the brand URL, extracts computed CSS tokens via getComputedStyle(),
+ * then either:
  *   - Manual mode: prints path, waits for user to paste a natural language description
  *   - API mode (ANTHROPIC_API_KEY): sends screenshot to Claude Vision for automatic description
  *
  * Outputs:
- *   1. brand-screenshot.png — viewport screenshot of the landing page
- *   2. brand-design.md — natural language brand description (DESIGN.md format)
- *   3. brand-profile.json — minimal metadata (sourceUrl, scrapedAt, imageTreatment)
+ *   1. brand-screenshot.png    — viewport screenshot of the landing page
+ *   2. brand-design.md         — natural language brand description (DESIGN.md format)
+ *   3. brand-profile.json      — minimal metadata (sourceUrl, scrapedAt, imageTreatment)
+ *   4. extracted-css.json      — NEW: computed CSS tokens (colors, fonts, radii, shadows)
  *
  * Usage:
  *   node engine/scripts/scrape-brand.js [brand-url]
@@ -26,6 +28,211 @@ const OUTPUT_DIR = path.resolve('engine/output');
 const SCREENSHOT_PATH = path.join(OUTPUT_DIR, 'brand-screenshot.png');
 const DESIGN_MD_PATH = path.join(OUTPUT_DIR, 'brand-design.md');
 const PROFILE_PATH = path.join(OUTPUT_DIR, 'brand-profile.json');
+const EXTRACTED_CSS_PATH = path.join(OUTPUT_DIR, 'extracted-css.json');
+
+// ─── CSS Token Extraction ─────────────────────────────────────────────
+/**
+ * Extracts computed CSS values from the live page using getComputedStyle().
+ * Samples buttons, headings, paragraphs, cards, backgrounds, links, and inputs.
+ * Returns raw samples + a consolidated summary with semantic candidates.
+ */
+async function extractCSSTokens(page) {
+  console.log('Extracting CSS tokens via getComputedStyle()...');
+
+  // Run inside the browser context
+  const extracted = await page.evaluate(() => {
+    // Convert rgb()/rgba() → hex. Returns null for transparent/unset.
+    const rgbToHex = (rgb) => {
+      if (!rgb || rgb === 'transparent') return null;
+      const match = rgb.match(/rgba?\((\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?),\s*(\d+(?:\.\d+)?)/);
+      if (!match) return null;
+      const r = Math.round(parseFloat(match[1]));
+      const g = Math.round(parseFloat(match[2]));
+      const b = Math.round(parseFloat(match[3]));
+      // Skip rgba(0,0,0,0) — transparent black
+      const alphaMatch = rgb.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);
+      if (alphaMatch && parseFloat(alphaMatch[1]) < 0.05) return null;
+      return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+    };
+
+    const sample = (selector, limit = 15) => {
+      return Array.from(document.querySelectorAll(selector))
+        .filter(el => {
+          const s = getComputedStyle(el);
+          return s.display !== 'none' && s.visibility !== 'hidden' && parseFloat(s.opacity) > 0;
+        })
+        .slice(0, limit)
+        .map(el => {
+          const s = getComputedStyle(el);
+          const fontFamily = s.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+          const borderRadius = s.borderRadius;
+          const boxShadow = s.boxShadow !== 'none' ? s.boxShadow : null;
+          return {
+            color: rgbToHex(s.color),
+            backgroundColor: rgbToHex(s.backgroundColor),
+            fontFamily: fontFamily || null,
+            fontWeight: s.fontWeight,
+            fontSize: s.fontSize,
+            borderRadius: borderRadius !== '0px' ? borderRadius : null,
+            boxShadow,
+            borderColor: rgbToHex(s.borderColor),
+            padding: s.padding,
+          };
+        })
+        // Only keep entries with at least one color value
+        .filter(item => item.color || item.backgroundColor);
+    };
+
+    return {
+      buttons: sample('button, [role="button"], a[class*="btn"], [class*="button"]:not(section):not(div > div)'),
+      headings: sample('h1, h2, h3'),
+      paragraphs: sample('p'),
+      cards: sample('[class*="card"], [class*="panel"], [class*="tile"], [class*="box"]'),
+      backgrounds: sample('section, main, header, [class*="hero"], [class*="section"]'),
+      links: sample('a:not([class*="btn"]):not([class*="button"])'),
+      inputs: sample('input, textarea, select'),
+      navItems: sample('nav a, [class*="nav"] a, [class*="menu"] a'),
+    };
+  });
+
+  // ── Server-side consolidation ──────────────────────────────────────
+
+  const countValue = (map, value) => {
+    if (!value || value === 'none' || value === 'transparent' || value === '0px') return;
+    map[value] = (map[value] || 0) + 1;
+  };
+
+  const sortedByCount = (map) =>
+    Object.entries(map).sort((a, b) => b[1] - a[1]);
+
+  // Frequency maps
+  const allColors = {};
+  const allFonts = {};
+  const allRadii = {};
+  const allShadows = {};
+  const accentCandidates = {};   // colors from interactive elements (buttons, links, nav)
+  const backgroundCandidates = {}; // colors from section/header backgrounds
+  const textCandidates = {};     // colors from paragraph/body text
+  const headingColors = {};
+  const headingFonts = {};
+
+  const processItems = (items, context) => {
+    for (const item of items) {
+      if (item.color) {
+        countValue(allColors, item.color);
+        if (context === 'paragraphs') countValue(textCandidates, item.color);
+        if (context === 'headings') countValue(headingColors, item.color);
+        if (context === 'buttons' || context === 'links' || context === 'nav') {
+          countValue(accentCandidates, item.color);
+        }
+      }
+      if (item.backgroundColor) {
+        countValue(allColors, item.backgroundColor);
+        if (context === 'backgrounds') countValue(backgroundCandidates, item.backgroundColor);
+        // Count backgroundColor from interactive elements as accent candidates
+        // (catches CTA links styled as pill buttons, cards with brand-colored backgrounds)
+        if (context === 'buttons' || context === 'links' || context === 'nav' || context === 'cards') {
+          countValue(accentCandidates, item.backgroundColor);
+        }
+      }
+      if (item.fontFamily) {
+        countValue(allFonts, item.fontFamily);
+        if (context === 'headings') countValue(headingFonts, item.fontFamily);
+      }
+      if (item.borderRadius) countValue(allRadii, item.borderRadius);
+      if (item.boxShadow) countValue(allShadows, item.boxShadow);
+    }
+  };
+
+  processItems(extracted.buttons || [], 'buttons');
+  processItems(extracted.headings || [], 'headings');
+  processItems(extracted.paragraphs || [], 'paragraphs');
+  processItems(extracted.links || [], 'links');
+  processItems(extracted.backgrounds || [], 'backgrounds');
+  processItems(extracted.cards || [], 'cards');
+  processItems(extracted.navItems || [], 'nav');
+  processItems(extracted.inputs || [], 'inputs');
+
+  // ── Semantic candidates ────────────────────────────────────────────
+
+  // Generic CSS font family names that browsers fall back to — not brand fonts
+  const GENERIC_FONTS = new Set([
+    'sans-serif', 'serif', 'monospace', 'cursive', 'fantasy',
+    'system-ui', 'ui-sans-serif', 'ui-serif', 'ui-monospace',
+    'ui-rounded', 'math', 'emoji',
+  ]);
+
+  // Browser default colors — not brand colors
+  const BROWSER_DEFAULT_COLORS = new Set([
+    '#0000ee', '#0000ff', '#551a8b', '#ee0000', '#ff0000',
+  ]);
+
+  // Is this color near-neutral (near-white, near-black, or low saturation gray)?
+  const isNearNeutral = (hex) => {
+    if (!hex || hex.length < 7) return true;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max === 0 ? 0 : (max - min) / max;
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return luminance > 0.88 || luminance < 0.08 || saturation < 0.20;
+  };
+
+  // Accent colors: saturated, non-neutral, non-browser-default colors from interactive elements
+  const accentColors = sortedByCount(accentCandidates)
+    .filter(([hex]) => !isNearNeutral(hex) && !BROWSER_DEFAULT_COLORS.has(hex))
+    .slice(0, 3)
+    .map(([hex, count]) => ({ hex, count }));
+
+  // Background colors: dominant section backgrounds
+  const backgroundColors = sortedByCount(backgroundCandidates)
+    .slice(0, 5)
+    .map(([hex, count]) => ({ hex, count }));
+
+  // Font role classification:
+  // - Headline: font most frequently seen on h1/h2/h3 headings (skip generic fallbacks)
+  // - Body: most frequent REAL font overall that isn't the headline font
+  const headlineFontEntry = sortedByCount(headingFonts).find(([f]) => !GENERIC_FONTS.has(f));
+  const headlineFont = headlineFontEntry?.[0] || null;
+  const bodyFontEntry = sortedByCount(allFonts).find(([f]) => f !== headlineFont && !GENERIC_FONTS.has(f));
+  const bodyFont = bodyFontEntry?.[0] || headlineFont;
+
+  // Border radius: dominant value from all elements
+  const dominantBorderRadius = sortedByCount(allRadii)[0]?.[0] || null;
+  const buttonRadius = sortedByCount(
+    Object.fromEntries(
+      (extracted.buttons || [])
+        .filter(b => b.borderRadius)
+        .map(b => [b.borderRadius, 1])
+    )
+  )[0]?.[0] || dominantBorderRadius;
+
+  // Primary shadow: most common box-shadow
+  const dominantShadow = sortedByCount(allShadows)[0]?.[0] || null;
+
+  const summary = {
+    headlineFont,
+    bodyFont,
+    dominantBorderRadius,
+    buttonBorderRadius: buttonRadius,
+    dominantShadow,
+    accentColors,
+    backgroundColors,
+    allColors: sortedByCount(allColors).slice(0, 20).map(([hex, count]) => ({ hex, count })),
+    allRadii: sortedByCount(allRadii).map(([value, count]) => ({ value, count })),
+    allFonts: sortedByCount(allFonts).map(([family, count]) => ({ family, count })),
+  };
+
+  console.log(`  Colors found: ${Object.keys(allColors).length} unique`);
+  console.log(`  Accent candidates: ${accentColors.length} saturated colors`);
+  console.log(`  Headline font: ${headlineFont || '(not detected)'}`);
+  console.log(`  Body font: ${bodyFont || '(not detected)'}`);
+  console.log(`  Border radii: ${Object.keys(allRadii).length} unique values`);
+
+  return { raw: extracted, summary };
+}
 
 // ─── Take screenshot + detect dominant theme with Playwright ─────────
 async function takeScreenshotAndDetectTheme(url) {
@@ -45,6 +252,15 @@ async function takeScreenshotAndDetectTheme(url) {
   // Take full-page screenshot so the whole brand is visible (not just the hero)
   await page.screenshot({ path: SCREENSHOT_PATH, fullPage: true });
   console.log(`Screenshot saved: ${SCREENSHOT_PATH} (full page)`);
+
+  // ─── Extract CSS tokens (while browser is still open) ──────────────
+  let extractedCSS = null;
+  try {
+    extractedCSS = await extractCSSTokens(page);
+  } catch (err) {
+    console.warn(`CSS extraction failed: ${err.message}`);
+    console.warn('Continuing without CSS tokens.');
+  }
 
   // ─── Detect dominant background colour ─────────────────────────────
   // Sample background colours at multiple scroll positions to determine
@@ -176,7 +392,7 @@ async function takeScreenshotAndDetectTheme(url) {
   console.log(`Theme detection: ${theme.samples.light} light samples, ${theme.samples.dark} dark samples → ${theme.isDark ? 'DARK' : 'LIGHT'}`);
 
   await browser.close();
-  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark };
+  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS };
 }
 
 // ─── Manual mode: read description from stdin ────────────────────────
@@ -310,7 +526,7 @@ function extractImageTreatment(description) {
 }
 
 // ─── Save outputs ────────────────────────────────────────────────────
-function saveOutputs(url, description, detectedIsDark) {
+function saveOutputs(url, description, detectedIsDark, extractedCSS) {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   // Save brand-design.md
@@ -328,8 +544,36 @@ function saveOutputs(url, description, detectedIsDark) {
   fs.writeFileSync(PROFILE_PATH, JSON.stringify(profile, null, 2));
   console.log(`Output: ${PROFILE_PATH}`);
 
+  // Save extracted-css.json (NEW — used by generate-design-tokens.js in Session 2)
+  if (extractedCSS) {
+    const cssOutput = {
+      extractedAt: new Date().toISOString(),
+      sourceUrl: url,
+      ...extractedCSS,
+    };
+    fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
+    console.log(`Output: ${EXTRACTED_CSS_PATH}`);
+
+    // Print summary for immediate inspection
+    const s = extractedCSS.summary;
+    console.log('\n--- CSS Token Summary ---');
+    console.log(`  Headline font:     ${s.headlineFont || 'not detected'}`);
+    console.log(`  Body font:         ${s.bodyFont || 'not detected'}`);
+    console.log(`  Border radius:     ${s.dominantBorderRadius || 'not detected'}`);
+    console.log(`  Button radius:     ${s.buttonBorderRadius || 'not detected'}`);
+    if (s.accentColors.length > 0) {
+      console.log(`  Accent colors:     ${s.accentColors.map(c => c.hex).join(', ')}`);
+    } else {
+      console.log(`  Accent colors:     none detected (may be a neutral brand)`);
+    }
+    if (s.backgroundColors.length > 0) {
+      console.log(`  Backgrounds:       ${s.backgroundColors.map(c => c.hex).join(', ')}`);
+    }
+    console.log('');
+  }
+
   // Preview
-  console.log('\n--- brand-design.md preview ---');
+  console.log('--- brand-design.md preview ---');
   console.log(description.split('\n').slice(0, 20).join('\n'));
   console.log('...\n');
 
@@ -353,17 +597,19 @@ async function main() {
     url = fs.readFileSync(urlFile, 'utf-8').trim();
   }
 
-  console.log(`\nBrand Scraper — Screenshot + Description\n`);
+  console.log(`\nBrand Scraper — Screenshot + Description + CSS Extraction\n`);
   console.log(`URL: ${url}\n`);
 
-  // Step 1: Take screenshot + detect dominant theme
+  // Step 1: Take screenshot + detect dominant theme + extract CSS tokens
   let detectedIsDark = false; // safe default: light
+  let extractedCSS = null;
   try {
     const result = await takeScreenshotAndDetectTheme(url);
     detectedIsDark = result.isDark;
+    extractedCSS = result.extractedCSS;
   } catch (err) {
-    console.error(`Screenshot failed: ${err.message}`);
-    console.error('Continuing without screenshot — you can describe the brand from memory.\n');
+    console.error(`Screenshot/extraction failed: ${err.message}`);
+    console.error('Continuing without screenshot or CSS tokens.\n');
   }
 
   // Step 2: Get description (API or manual)
@@ -388,8 +634,8 @@ async function main() {
     description = await readManualDescription();
   }
 
-  // Step 3: Save outputs (includes detected theme)
-  saveOutputs(url, description, detectedIsDark);
+  // Step 3: Save outputs (includes detected theme + extracted CSS)
+  saveOutputs(url, description, detectedIsDark, extractedCSS);
 
   console.log('Done.');
 }

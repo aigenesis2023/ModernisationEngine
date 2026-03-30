@@ -122,8 +122,8 @@ For each unique **topic** in the matrix:
 For each unique **brand** in the matrix:
 1. Write URL to `brand/url.txt`
 2. Run `node engine/scripts/scrape-brand.js`
-3. Run `node engine/scripts/generate-course-html.js` (Stitch component kit)
-4. Save brand outputs to `engine/output/matrix/{brand-slug}/` (brand-design.md, brand-profile.json, design-contract.json, design-tokens.json, component-patterns/)
+3. Run `node engine/scripts/generate-design-tokens.js` (MD3 palette + archetype)
+4. Save brand outputs to `engine/output/matrix/{brand-slug}/` (brand-design.md, brand-profile.json, extracted-css.json, design-tokens.json)
 
 This means: 3 topics researched + 3 brands scraped/designed = 6 upstream jobs, NOT 9.
 
@@ -350,7 +350,7 @@ During matrix testing, pay extra attention to:
 
 Fast engine QA using a pre-built course that exercises all 28 component types and 56 layout variants across 23 types. Skips the most time-consuming steps (research + layout generation) and runs everything else fresh. The user reviews the output manually instead of automated QA.
 
-**Use when:** You've changed build-course.js, hydrate.js, extract-contract.js, generate-course-html.js, generate-images.js, or any engine script and want to verify the output visually.
+**Use when:** You've changed build-course.js, hydrate.js, generate-design-tokens.js, visual-archetypes.json, generate-images.js, or any engine script and want to verify the output visually.
 
 **Do NOT use when:** You've changed prompts (generation-engine.md, research-agent.md) or schemas — use a full "run" or "test" for those since the reference course bypasses content generation.
 
@@ -387,7 +387,7 @@ User says: **"reference test"** + 1 or 2 brand URLs.
 1. Write URL to brand/url.txt
 2. Copy engine/input/reference-course-layout.json → engine/output/course-layout.json
 3. Run: node engine/scripts/scrape-brand.js
-4. Run: node engine/scripts/generate-course-html.js
+4. Run: node engine/scripts/generate-design-tokens.js
 5. Run: node engine/scripts/generate-images.js
 6. Run: node engine/scripts/build-course.js
 7. Output preview link to engine/output/course.html

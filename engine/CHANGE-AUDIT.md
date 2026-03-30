@@ -13,7 +13,7 @@ If any component was added, removed, or renamed:
 - [ ] `CLAUDE.md` — all inline references (search for old count number)
 - [ ] `engine/BUILD-SYSTEM.md` — fill function count references
 - [ ] `engine/CONTENT-STRUCTURING.md` — component count references
-- [ ] `engine/STITCH-INTEGRATION.md` — component count references
+- [ ] `engine/schemas/visual-archetypes.json` — archetype recipe has component-specific keys if needed
 - [ ] `engine/schemas/component-library.json` — component exists with all fields
 - [ ] `engine/schemas/course-layout.schema.json` — type enum includes it
 - [ ] `engine/prompts/generation-engine.md` — component referenced in guidance

@@ -124,7 +124,6 @@ function checkFileExistence() {
   const required = [
     'course.html',
     'course-layout.json',
-    'design-contract.json',
     'design-tokens.json',
   ];
   const optional = [
@@ -848,7 +847,27 @@ function checkDesignIntegrity(html, contract, tokens) {
     fail('DESIGN', 'Tokens say dark mode but HTML missing class="dark"');
   }
 
-  // Check design contract has entries for key component types
+  // Check archetype recipe is valid
+  const archetypeName = tokens.archetype?.name;
+  if (archetypeName) {
+    pass('DESIGN', `Archetype recipe: "${archetypeName}" (confidence: ${tokens.archetype?.confidence ?? 'n/a'})`);
+    // Verify the archetype JSON exists and has this recipe
+    const archetypesPath = path.resolve(__dirname, '..', 'schemas', 'visual-archetypes.json');
+    try {
+      const archetypes = JSON.parse(fs.readFileSync(archetypesPath, 'utf-8')).archetypes || {};
+      if (archetypes[archetypeName]) {
+        pass('DESIGN', `Archetype "${archetypeName}" found in visual-archetypes.json`);
+      } else {
+        fail('DESIGN', `Archetype "${archetypeName}" not found in visual-archetypes.json`);
+      }
+    } catch {
+      warn('DESIGN', 'Could not load visual-archetypes.json for validation');
+    }
+  } else {
+    warn('DESIGN', 'No archetype set in design-tokens.json — using default recipe');
+  }
+
+  // Legacy: check design-contract.json if present (Stitch-era, optional)
   if (contract) {
     const expectedContractTypes = ['hero', 'accordion', 'mcq', 'tabs', 'flashcard', 'checklist'];
     for (const type of expectedContractTypes) {
@@ -967,7 +986,7 @@ function run() {
   // Load files
   const html = loadFile('course.html');
   const layout = loadJSON('course-layout.json');
-  const contract = loadJSON('design-contract.json');
+  const contract = loadJSON('design-contract.json');  // Legacy (Stitch-era, optional)
   const tokens = loadJSON('design-tokens.json');
   const kb = loadJSON('knowledge-base.json');
 

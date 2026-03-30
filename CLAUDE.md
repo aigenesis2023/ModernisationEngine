@@ -3,7 +3,7 @@
 ## What This Is
 An AI-powered tool that creates modern, branded, premium deep-scroll web learning experiences.
 
-**Active pipeline: AI-First only.** User provides a topic brief → AI researches and generates a complete course → Google Stitch designs a branded component kit → we assemble the final course with full interactivity via a hydration script.
+**Active pipeline: AI-First only.** User provides a topic brief → AI researches and generates a complete course → MD3 palette + archetype recipes generate a deterministic brand design system → we assemble the final course with full interactivity via a hydration script.
 
 > **⚠️ SCORM Import is ARCHIVED.** The SCORM extraction path (extract.js, design-course.js, layout-engine.md, content-bucket.json) is dormant code preserved for potential future reactivation. It is NOT part of the active pipeline. Do not run it, do not include it in "end-to-end" runs, do not write QA checks for it. When the user says "run it" or "full pipeline", they mean the AI-first path ONLY.
 
@@ -14,7 +14,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4 (Section Management) is next. See `engine/AUTHORING-LAYER.md`.
 
-> **⚠️ ENGINE REBUILD PLANNED.** A comprehensive rebuild is underway to replace Google Stitch with a deterministic brand intelligence pipeline (Dembrandt CSS extraction + MD3 palette generation + Vision AI archetype classification), migrate to React SSR + Tailwind v4, and introduce a data-driven component registry. **Read `engine/STITCH-REPLACEMENT-BRIEF.md` FIRST** — it contains the complete technical brief with all findings, architecture, implementation phases, file inventory, and code references. The current architecture below remains the working system until each phase completes.
+> **⚠️ ENGINE REBUILD IN PROGRESS.** Round 1 (design system replacement) is COMPLETE. Google Stitch has been replaced with a deterministic brand intelligence pipeline: CSS extraction → MD3 palette generation → Vision AI archetype classification → 8 visual archetype recipes. Round 2 (Preact SSR + Tailwind v4 rendering migration) is NEXT. **Read `engine/STITCH-REPLACEMENT-BRIEF.md`** for the full brief and session history.
 
 ---
 
@@ -38,29 +38,27 @@ Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON
          ├─ AI creates ALL assessments (KB has raw facts, not pre-built quizzes)
          └─→ course-layout.json
 
-═══ BUILD PIPELINE ════════════════════════════════════════════════════
-Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand Design (DESIGN.md)
+═══ BRAND + BUILD PIPELINE ════════════════════════════════════════════
+Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + extracted-css.json
+               (Playwright screenshot + getComputedStyle() extraction)
                     │
                     ▼
-         generate-course-html.js (Google Stitch — GEMINI_3_1_PRO)
-         ├─ Sends brand-design.md (DESIGN.md format brief)
-         ├─ Sends representative-course.md (all 28 component types)
-         ├─ Stitch designs complete branded page experience
-         ├─ Extracts: page shell, component patterns, design tokens
-         └─→ component-patterns/ + design-tokens.json + stitch-course-raw.html
+         generate-design-tokens.js (MD3 palette + archetype classification)
+         ├─ Reads extracted-css.json → picks seed color (heuristics)
+         ├─ MD3 generates full palette from seed (dark-safe by design)
+         ├─ Checks fonts against Google Fonts (subagent match if unavailable)
+         ├─ Vision AI classifies brand → selects visual archetype (8 types)
+         └─→ design-tokens.json (colors, fonts, archetype, typography)
                     │
                     ▼
          generate-images.js (SiliconFlow AI → Pexels stock → SVG placeholder)
          └─→ images/*.jpg (AI-generated or stock photos)
                     │
                     ▼
-         extract-contract.js (cheerio — design contract extraction)
-         └─→ design-contract.json (stable interface for build)
-                    │
-                    ▼
-         build-course.js (content assembly — design/layout separation)
-         ├─ Generates own <head> from design-tokens.json (NOT Stitch raw CSS)
-         ├─ Reads visual classes from design-contract.json (NEVER raw HTML)
+         build-course.js (archetype recipe build — deterministic)
+         ├─ Reads design-tokens.json for colours/fonts in <head>
+         ├─ Reads visual-archetypes.json for archetype recipe (AR)
+         ├─ Fill functions use AR for all visual classes (no Stitch, no design-contract)
          ├─ Selects layout variant per component (variant field from course-layout.json)
          ├─ Applies sectionWidth per section (narrow/standard/wide/full)
          ├─ Tags sections with data-section-track for progress tracking
@@ -70,17 +68,17 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
 
 ### Core Principles
 
-**1. Stitch designs the visual system. We control layout and content.**
-Different brand URL → different Stitch kit → different visual character, identical layout. See `engine/STITCH-INTEGRATION.md` for full details.
+**1. Archetype recipes drive the visual system. We control layout and content.**
+Different brand URL → different MD3 palette + archetype → different visual character, identical layout. 8 visual archetypes (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury) defined in `engine/schemas/visual-archetypes.json`.
 
 **2. Content quality is non-negotiable.**
 The AI generation agent creates rich, accurate educational content. Every assessment tests application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm to produce courses worth scrolling.
 
 **3. The design system is a reusable asset.**
-Stitch's output (component patterns + design tokens) is extracted and stored. The future authoring layer can re-render with different content or swapped components without re-calling Stitch.
+MD3 tokens + archetype recipes are deterministic and reproducible. The authoring layer can re-render with different content or swapped components without re-running upstream steps.
 
-**4. Speak Stitch's language.**
-We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `engine/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
+**4. Design is deterministic, not generative.**
+Brand colours come from CSS extraction → MD3 palette (mathematical). Visual style comes from archetype recipes (JSON). No black-box AI generation in the design layer. Testable, auditable, consistent.
 
 **5. Interactivity is hydration-driven.**
 `hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `engine/BUILD-SYSTEM.md`.
@@ -91,8 +89,8 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `engin
 
 | Document | Covers | Status |
 |---|---|---|
-| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | Stitch replacement: audit findings, new architecture (React SSR, Tailwind v4, Dembrandt, MD3, Vision AI archetypes), implementation phases A-D, file inventory, risks. | **Active** — the rebuild guide |
-| **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **ARCHIVING** — being replaced by rebuild |
+| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | Engine rebuild: audit findings, new architecture (MD3, Vision AI archetypes, Preact SSR), implementation phases, file inventory, risks. Round 1 complete, Round 2 next. | **Active** — the rebuild guide |
+| **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints. | **ARCHIVED** — Stitch replaced by MD3+archetype pipeline |
 | **`engine/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
 | **`engine/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
 | **`engine/AUTHORING-LAYER.md`** | Authoring layer architecture, component taxonomy, phase plan, progress tracker, skipped-for-later items. | **Active** — living document |
@@ -105,7 +103,7 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `engin
 ```
 CLAUDE.md                              ← This file (index + rules)
 index.html                             ← GitHub Pages entry (generated by build-course.js)
-package.json / package-lock.json       ← Root dependencies (@google/stitch-sdk, dotenv)
+package.json / package-lock.json       ← Root dependencies (@material/material-color-utilities, dotenv)
 brand/
   url.txt                              ← Brand URL for pipeline (one URL)
 
@@ -113,27 +111,28 @@ engine/                                    ← ALL ACTIVE CODE
   CHANGE-AUDIT.md                      ← Post-change audit checklist (stale counts, doc drift, memory)
   LOGIC-EXTRACTION.md                  ← Logic extraction architecture
   CONTENT-STRUCTURING.md               ← Content structuring architecture
-  STITCH-INTEGRATION.md                ← Stitch integration architecture
+  STITCH-INTEGRATION.md                ← ⚠️ ARCHIVED — Stitch integration (replaced by MD3+archetypes)
   BUILD-SYSTEM.md                      ← Build system architecture
   schemas/
     knowledge-base.schema.json         ← Flat research output: keyPoints[] + teachableMoments[] (no component awareness)
     course-layout.schema.json          ← Layout engine output format
     component-library.json             ← 28 components: type, props, learningMoment, creativeUses, examples
+    visual-archetypes.json             ← 8 visual archetype recipes (tech-modern, minimalist, editorial, etc.)
     content-bucket.schema.json         ← ⚠️ ARCHIVED — SCORM extraction output format
   prompts/
     research-agent.md                  ← Expert SME persona: topic → raw knowledge + teachable moments
     generation-engine.md               ← Senior ID persona: emotional arc, archetypes, anti-patterns, voice calibration
     generation-agent.md                ← Subagent task: reads brand-design.md + KB → course-layout.json
-    representative-course.md           ← All 28 component types for Stitch to design
+    representative-course.md           ← All 28 component types (used for reference test builds)
     layout-engine.md                   ← ⚠️ ARCHIVED — SCORM layout engine prompt
   scripts/
     research-content.js                ← AI-first: topic → knowledge-base.json (subagent)
     generate-layout.js                 ← AI-first: knowledge-base → course-layout.json (subagent)
-    scrape-brand.js                    ← Brand URL → screenshot + natural language description
-    generate-course-html.js            ← DESIGN.md + representative course → Stitch → component kit
-    extract-contract.js                ← Cheerio: Stitch patterns → design-contract.json
+    scrape-brand.js                    ← Brand URL → screenshot + CSS extraction + natural language description
+    generate-design-tokens.js          ← extracted-css → MD3 palette + archetype classification → design-tokens.json
     generate-images.js                 ← Image generation: SiliconFlow AI → Pexels stock → SVG
-    build-course.js                    ← Contract fill: design-contract.json + real content → course.html
+    build-course.js                    ← Archetype recipe build: design-tokens + visual-archetypes + content → course.html
+    test-multi-brand.js                ← Multi-brand calibration harness (Session 4)
     qa-course.js                       ← Structural QA: HTML integrity, component coverage, content coverage
     qa-interactive.js                  ← Interactive QA: Playwright tests all clickable components + layout
     review-course.js                   ← Vision-based quality audit (subjective review)
@@ -142,6 +141,9 @@ engine/                                    ← ALL ACTIVE CODE
       validate-layout.js               ← Shared validation for course-layout.json
     extract.js                         ← ⚠️ ARCHIVED — SCORM: folder → content-bucket.json
     design-course.js                   ← ⚠️ ARCHIVED — SCORM: content-bucket → course-layout.json
+  archived/                            ← Archived scripts (Stitch-era, dormant)
+    generate-course-html.js            ← ⚠️ ARCHIVED — Stitch component kit generation
+    extract-contract.js                ← ⚠️ ARCHIVED — Cheerio design contract extraction
   input/                               ← AI-first inputs
     topic-brief.txt                    ← Plain text topic description
     urls.txt                           ← One URL per line (optional)
@@ -153,14 +155,11 @@ engine/                                    ← ALL ACTIVE CODE
     knowledge-base.json                ← AI-first research output
     brand-profile.json                 ← Scraped from brand URL (raw data)
     brand-screenshot.png               ← Playwright screenshot of brand landing page
-    brand-design.md                    ← Natural language brand description for Stitch
+    brand-design.md                    ← Natural language brand description
+    extracted-css.json                 ← getComputedStyle() tokens from brand website
     course-layout.json                 ← Structured course (AI-generated)
-    stitch-course-raw.html             ← Stitch's complete designed page
-    stitch-course-meta.json            ← Stitch API response metadata
-    stitch-course-screenshot.png       ← Stitch's design preview
-    design-tokens.json                 ← Extracted design system tokens
-    design-contract.json               ← Visual contract: cheerio-extracted from patterns
-    component-patterns/                ← Extracted HTML pattern per component type (28)
+    design-tokens.json                 ← MD3 palette + fonts + archetype (from generate-design-tokens.js)
+    calibration-results.json           ← Multi-brand test results (from test-multi-brand.js)
     images/                            ← Generated images
     course.html                        ← Final single-file output
     audit-findings.json                ← Authoring audit checkpoint (persists between phases)
@@ -188,18 +187,19 @@ Claude Code subagent with senior instructional designer persona generates the co
 
 **⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `engine/output/course-layout.json`. Validate after: `node engine/scripts/generate-layout.js --load engine/output/course-layout.json`.
 
-### Step 3 — Stitch Component Kit (`engine/scripts/generate-course-html.js`)
-**Input:** `brand-design.md` + `representative-course.md` | **Output:** `component-patterns/` + `design-tokens.json` + `design-contract.json`
-**Model:** GEMINI_3_1_PRO
+### Step 3 — Design Tokens (`engine/scripts/generate-design-tokens.js`)
+**Input:** `extracted-css.json` + `brand-screenshot.png` + `brand-design.md` | **Output:** `design-tokens.json`
 
-See `engine/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the end.
+Reads extracted CSS from scrape-brand.js → picks seed color (accent heuristics, monochrome fallback) → generates full MD3 palette → checks fonts against Google Fonts (subagent match if unavailable) → Vision AI classifies brand archetype (8 types, requires ANTHROPIC_API_KEY). Run: `node engine/scripts/generate-design-tokens.js` (or `--fonts-ready` after font subagent).
+
+**⚠️ Font subagent workflow:** If brand fonts aren't on Google Fonts, the script writes `font-match-prompt.txt` and exits. Spawn a subagent to read the prompt + screenshot, write `font-match.json`, then re-run with `--fonts-ready`.
 
 ### Step 4 — Image Generation (`engine/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
 **Runs AFTER Step 3.** Priority chain: SiliconFlow AI (Tongyi Z-Image-Turbo) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
 
 ### Step 5 — Build (`engine/scripts/build-course.js`)
-**Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
+**Input:** `design-tokens.json` + `visual-archetypes.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
 
 See `engine/BUILD-SYSTEM.md`.
 
@@ -229,14 +229,14 @@ Claude Code automatically selects the correct run level based on what changed. T
 - Any prompt file changed (engine/prompts/*.md)
 - Any schema file changed (engine/schemas/*)
 - research-content.js, generate-layout.js, scrape-brand.js changed
-- generate-course-html.js or extract-contract.js changed
+- generate-design-tokens.js or visual-archetypes.json changed
 - Testing a new topic/brand combination
 - Uncertain whether upstream outputs are still valid
 
 **DESIGN RUN** (Steps 3–6) — reuse KB + course layout, regenerate design + images + build. Required when:
-- generate-course-html.js or extract-contract.js changed (but not content scripts)
+- generate-design-tokens.js or visual-archetypes.json changed (but not content scripts)
 - Brand URL changed but topic hasn't
-- representative-course.md changed
+- Archetype recipes changed
 
 **BUILD RUN** (Steps 5–6 only) — reuse everything upstream, just rebuild HTML + QA. Allowed ONLY when:
 - ONLY build-course.js or hydrate.js changed
@@ -264,19 +264,18 @@ After completing any significant code change (new components, new variants, fill
 
 ### Full Run: Clear stale outputs
 ```bash
-rm -rf engine/output/component-patterns/ engine/output/images/
+rm -rf engine/output/images/
 rm -f engine/output/knowledge-base.json engine/output/brand-profile.json engine/output/brand-design.md
-rm -f engine/output/course-layout.json engine/output/design-tokens.json engine/output/design-contract.json
-rm -f engine/output/stitch-course-raw.html engine/output/stitch-course-meta.json
-rm -f engine/output/stitch-course-screenshot.png engine/output/course.html
+rm -f engine/output/extracted-css.json engine/output/course-layout.json engine/output/design-tokens.json
+rm -f engine/output/font-match-prompt.txt engine/output/font-match.json engine/output/course.html
 ```
 
 ### Full Run: Execute in order
 ```bash
 node engine/scripts/research-content.js --topic "Your Topic"  # Step 1 (subagent researches)
-node engine/scripts/scrape-brand.js                            # Brand analysis
+node engine/scripts/scrape-brand.js                            # Brand analysis + CSS extraction
 node engine/scripts/generate-layout.js                         # Step 2 (subagent generates course)
-node engine/scripts/generate-course-html.js                    # Step 3 (Stitch component kit)
+node engine/scripts/generate-design-tokens.js                  # Step 3 (MD3 palette + archetype)
 node engine/scripts/generate-images.js                         # Step 4 (image generation)
 node engine/scripts/build-course.js                            # Step 5 (build final HTML)
 node engine/scripts/qa-course.js                               # Step 6a (structural QA — fix if fails)
@@ -287,10 +286,9 @@ node engine/scripts/review-course.js                           # Step 6c (visual
 **If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**
 
 ### API Keys (stored in `.env`, gitignored)
-- `STITCH_API_KEY`: stitch.withgoogle.com → Settings → API Keys
 - `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via Tongyi Z-Image-Turbo (default)
 - `PEXELS_API_KEY`: pexels.com/api → free stock photo fallback, 200 req/hr
-- `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis
+- `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis + Vision AI archetype classification
 
 ---
 
@@ -341,7 +339,7 @@ The generation engine classifies each topic and selects a **course archetype** t
 
 ### Layout Variants
 
-23 components have **layout variants** — different visual arrangements that use the same design contract. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
+23 components have **layout variants** — different visual arrangements that use the same archetype recipe. The generation engine picks the variant based on content. Set `"variant": "name"` in course-layout.json. When absent, the first variant is the default.
 
 **All variants are pre-rendered into every built course** as `<template>` tags. The **authoring panel** (amber "✎ Edit" button, top-right of every course) lets you switch variants live without rebuilding. This IS the authoring layer — it evolves phase by phase (variant swapping → category browsing → text editing → section management → AI assist).
 
@@ -403,8 +401,8 @@ The purpose of every conversation is to improve the **engine** — the scripts, 
 
 **ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
 
-### STITCH DESIGNS THE COMPONENT KIT
-Stitch designs the visual system. We don't hardcode design decisions. Different brand URL → different Stitch kit → different visual output.
+### ARCHETYPE RECIPES DRIVE THE DESIGN
+The visual system comes from MD3 palette + archetype recipes (visual-archetypes.json). Different brand URL → different seed color → different MD3 palette + archetype → different visual output. All deterministic, no black-box generation.
 
 ### CONTENT QUALITY
 The AI generation agent creates rich, accurate educational content. Assessments test application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm. No invented facts.

@@ -9,23 +9,23 @@ This document covers how the Modernisation Engine assembles the final course HTM
 
 ## Design/Layout Separation (Core Principle)
 
-Stitch controls **DESIGN**: colours, fonts, shadows, gradients, hover effects, brand-specific card backgrounds.
+**Archetype recipes** control **DESIGN**: colours, fonts, shadows, gradients, hover effects, brand-specific card backgrounds — all defined in `visual-archetypes.json` and selected via `design-tokens.json`.
 We control **LAYOUT**: grids, containment, overflow, spacing, positioning, HTML structure.
 
 **How it works:**
 
-1. **`generateHead()`** builds the entire `<head>` from `design-tokens.json` — Tailwind config (colours + fonts), Google Fonts, Material Symbols, and our own CSS definitions for `glass-card`, `text-gradient`, `btn-primary`, `glass-nav`. **Never copies Stitch's raw `<head>`.**
+1. **`generateHead()`** builds the entire `<head>` from `design-tokens.json` — Tailwind config (colours + fonts), Google Fonts, Material Symbols, and our own CSS definitions for `glass-card`, `text-gradient`, `btn-primary`, `glass-nav`.
 
-2. **`design-contract.json`** is the single interface between Stitch's design and our build. It's produced by `extract-contract.js` (cheerio-based, runs automatically after Stitch). Contains per-component visual properties (shadows, backgrounds, borders, hover effects, button styles). `build-course.js` reads ONLY this JSON — never Stitch's raw HTML patterns.
+2. **`visual-archetypes.json`** defines 8 archetype recipes (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury). Each recipe specifies surface rhythm, border-radius scale, shadows, accent styles, and per-component visual overrides. `build-course.js` resolves the archetype from `design-tokens.json` → loads the recipe → uses it as `AR` (archetype recipe) in all fill functions.
 
 3. **Fill functions** own the HTML structure and layout classes. For each component:
    - Layout classes are hardcoded (grids, containment, spacing, typography scale)
-   - Visual classes come from `design-contract.json` (shadows, hovers, gradients, brand colours)
-   - Content comes from course-layout.json (100% SCORM fidelity)
+   - Visual classes come from `AR` — the archetype recipe (shadows, hovers, gradients, brand colours)
+   - Content comes from course-layout.json
 
-4. **If Stitch changes its HTML output**, fix `extract-contract.js` (one file). The 28 fill functions in `build-course.js` don't change.
+4. **If visual style needs changing**, edit the archetype recipe in `visual-archetypes.json`. The 28 fill functions read from `AR.*` — one JSON change applies across all components.
 
-**Result:** Different brand URL → different Stitch kit → different visual character, identical layout. Verified across 9+ brands.
+**Result:** Different brand URL → different MD3 palette + archetype → different visual character, identical layout. Deterministic and reproducible.
 
 ---
 
@@ -60,13 +60,13 @@ Every fill function enforces these rules. They are hardcoded in `build-course.js
 Each of the 28 component types has a `fill{Type}(comp, index)` function in `build-course.js`. Every fill function follows the same pattern:
 
 ```
-1. Read visual properties from DC (design-contract.json) with safe fallbacks
+1. Read visual properties from AR (archetype recipe) with safe fallbacks
 2. Extract content from the component object (comp.displayTitle, comp.body, comp._items, etc.)
 3. Build HTML with:
-   - Section tag: sectionOnly(contractSection) → always py-16 + bg-* only
+   - Section tag: archetype surface rhythm bg-* class + py-16 spacing
    - Inner div: max-w-6xl mx-auto px-8 (boosted or capped per component via COMPONENT_WIDTH_BOOST / COMPONENT_WIDTH_CAP)
    - Layout classes: hardcoded grids, gaps, typography scale
-   - Visual classes: from design contract (shadows, hovers, gradients)
+   - Visual classes: from archetype recipe (shadows, hovers, gradients)
    - Content: escaped text from course-layout.json
 4. Embed images as base64 via embedImage()
 5. Return the complete HTML string
@@ -76,25 +76,21 @@ Each of the 28 component types has a `fill{Type}(comp, index)` function in `buil
 - `esc(s)` — HTML-escapes text
 - `stripTags(html)` — removes HTML tags for plain text contexts
 - `embedImage(path)` — reads image file, returns base64 data URI
-- `sectionOnly(cls)` — whitelist filter: keeps only `bg-*` classes from Stitch section patterns, forces `py-16` spacing on all standard sections (128px gap between any two components)
+- `sectionOnly(cls)` — whitelist filter: keeps only `bg-*` classes, forces `py-16` spacing on all standard sections
 - `mc(...parts)` — merges class strings, filtering empty/null, deduplicating
 
 ---
 
 ## generateHead()
 
-Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place that translates Stitch's design tokens into CSS/config.
+Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place that translates MD3 colour tokens into CSS/config.
 
 **What it generates:**
-- Tailwind CDN script with custom colour config (all colours from Stitch)
-- Google Fonts link for headline + body + label fonts
+- Tailwind CDN script with custom colour config (all MD3 colours from design-tokens.json)
+- Google Fonts link for headline + body fonts
 - Material Symbols Outlined font
 - Custom CSS definitions: `body` base styles, `.glass-card`, `.glass`, `.glass-nav`, `.text-gradient`, `.btn-primary`, `#scroll-progress`, scrollbar styles
 - All custom CSS uses colour values from `design-tokens.json` — adapts to any brand
-
-**What it never does:**
-- Copy Stitch's raw `<head>` content
-- Include Stitch's CSS directly
 
 ---
 
@@ -102,8 +98,7 @@ Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place tha
 
 `build()` in `build-course.js` assembles the final HTML:
 
-1. Load `course-layout.json`, `design-contract.json`, `design-tokens.json`
-1b. **Dark-mode contract sanitizer:** If `isDark` is true, fix Stitch's hardcoded light-mode classes — `bg-white` in card/panel backgrounds → `glass-card` or `bg-surface-container`, `hover:bg-white` → `hover:bg-surface-container`, section `bg-white` stripped. Hero button accents preserved. Also validates tab button contract values have padding (falls back to styled defaults if Stitch extracted container layout instead of button styles).
+1. Load `course-layout.json`, `design-tokens.json`, resolve archetype recipe from `visual-archetypes.json`
 2. Generate `<head>` from tokens via `generateHead()`
 3. Build nav via `buildNav()` — slim sticky header + section drawer (self-contained, no contract needed)
 4. For each section in course-layout.json:
@@ -123,7 +118,7 @@ Vanilla JS IIFE injected into the final HTML. Uses ES5 `var` declarations for ma
 
 - **Quizzes**: Select answer → submit → correct/incorrect feedback → retry. Correct answer resolved by reading `data-correct` index from the quiz container and looking up `choices[idx]`. Submit button and feedback are injected inside the glass-card (choice container's parent), not the outer section.
 - **Accordions**: Native `<details>` with smooth CSS animation (injected keyframes)
-- **Tabs**: Click tab → show panel. Active/inactive styling captured from Stitch's initial class strings at init time, then swapped as full `className` — works with any Stitch button style (pills, underlines, etc.)
+- **Tabs**: Click tab → show panel. Active/inactive styling captured from archetype recipe class strings at init time, then swapped as full `className`
 - **Flashcards**: Click to flip via inline `style.transform = 'rotateY(180deg)'` (not Tailwind class toggle)
 - **Carousels/Narratives**: Prev/next navigation with dot indicators, disabled state on boundaries
 - **Checklists**: Check/uncheck with progress tracking. Build-course.js writes a static counter with `data-checklist-progress` attr — hydrate.js finds and reuses it instead of creating a duplicate

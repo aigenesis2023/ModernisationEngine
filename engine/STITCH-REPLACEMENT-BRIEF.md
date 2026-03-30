@@ -242,41 +242,34 @@ The full rebuild is implemented in THREE rounds. Each round produces a working, 
 
 Sessions:
 
-**Session 1 — Enhanced brand scraping**
-- Add `getComputedStyle()` extraction to scrape-brand.js (actual hex colors, font families, border-radii, shadows from brand website)
-- Investigate Dembrandt: run `npx dembrandt [brand-url] --dtcg` against 2-3 test brands, compare output
-- Save extracted CSS alongside existing brand-profile.json and brand-design.md
-- Test: extracted-css.json contains real values from the brand
+**Session 1 — Enhanced brand scraping** ✅ COMPLETE
+- Added `getComputedStyle()` extraction to scrape-brand.js
+- Saves extracted-css.json alongside brand-profile.json and brand-design.md
 
-**Session 2 — MD3 palette + token generation**
-- Install `@material/material-color-utilities`
-- Create `generate-design-tokens.js`:
-  - Reads extracted CSS → identifies primary seed color (heuristics + AI fallback)
-  - MD3 generates full palette from seed → writes design-tokens.json
-  - Same JSON shape that build-course.js already consumes (colors, fonts, isDark, typography)
-- Vision AI archetype classification: subagent reads brand screenshot → outputs archetype + style params
-- Save archetype classification in tokens or alongside
-- Test: run the CURRENT build-course.js with the NEW tokens. Does the course look branded?
+**Session 2 — MD3 palette + token generation** ✅ COMPLETE
+- Created `generate-design-tokens.js` with MD3 palette generation
+- Seed color heuristics (accent → chromatic → monochrome fallback)
+- Font checking against Google Fonts + subagent matching workflow
+- Vision AI archetype classification (requires ANTHROPIC_API_KEY)
 
-**Session 3 — Archetype recipes in existing build-course.js**
-- Add archetype-driven accent recipes directly into the current fill functions:
-  - Replace `const c = DC.hero || {}` with archetype recipe lookups
-  - e.g., `if (archetype === 'tech-modern') { btnGlow = 'shadow-[0_0_15px_${primaryRgb}66]'; }`
-- Define 2-3 archetypes first (`tech-modern`, `minimalist`, `editorial`)
-- Remove design-contract.json dependency entirely
-- Remove dark-mode fixup block (MD3 generates dark-safe palettes)
-- Enforce consistent border-radius, spacing, surface rhythm per archetype
-- Test: run full pipeline with 2-3 different brand URLs. Compare output to Stitch. Is it better?
+**Session 3 — Archetype recipes in existing build-course.js** ✅ COMPLETE
+- 8 archetype recipes in `visual-archetypes.json` (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury)
+- build-course.js reads from `AR` (archetype recipe) — no DC, no Stitch
+- design-contract.json dependency removed entirely
+- Dark-mode fixup block removed (MD3 palettes are dark-safe)
+- Consistent border-radius, spacing, surface rhythm per archetype
 
-**Session 4 — Multi-brand calibration**
-- Test across 4-5 brands (dark, light, gradient, minimal, multi-accent)
-- Tune MD3 surface tone overrides for brands where palette looks too "Google-y"
-- Tune seed color selection for edge cases
-- Add remaining archetypes as needed
-- Run QA gates. How many design tests pass now vs with Stitch?
-- Archive Stitch code (move generate-course-html.js + extract-contract.js to engine/archived/)
+**Session 4 — Multi-brand calibration** ✅ COMPLETE (2026-03-30)
+- Tested 4 brands: sprig (dark/cyan/tech-modern), aigents (light/mono/editorial), landio (dark/blue/glassmorphist), fluence (light/purple/warm-organic)
+- All 8 archetypes build cleanly (smoke tested)
+- QA results: 96-98 passes, 0 failures across all brands
+- Interactive QA: 37/37 design tests pass (8 broken images from skipping image gen)
+- Fixed light-mode surface tones: neutralVariantTone for brand-tinted surfaces (prevents "Google-y" identical light themes)
+- Fixed monochrome seed selection: grey seed + desaturated primary family for brands with no chromatic accent
+- Archived: generate-course-html.js + extract-contract.js → engine/archived/
+- Created test-multi-brand.js calibration harness
 
-**CHECKPOINT: The design system is proven. Output is consistently better than Stitch. Pipeline is faster. QA is more stable. You have the new design layer running on the existing rendering layer. You can STOP HERE and have a significantly better engine. Or continue to Round 2.**
+**✅ ROUND 1 CHECKPOINT REACHED.** The design system is proven. Output is deterministic and consistently branded. Pipeline is faster (no Stitch API call). QA is more stable. All design fixes go into archetype recipes (one JSON file) and apply universally.
 
 ---
 

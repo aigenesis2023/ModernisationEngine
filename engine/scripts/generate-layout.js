@@ -181,8 +181,8 @@ async function main() {
     }
 
     console.log('\nDone. Next steps:');
-    console.log('  node engine/scripts/generate-course-html.js    # Stitch component kit');
-    console.log('  node engine/scripts/generate-images.js          # Generate images');
+    console.log('  node engine/scripts/generate-design-tokens.js   # MD3 palette + archetype');
+    console.log('  node engine/scripts/generate-images.js           # Generate images');
     console.log('  node engine/scripts/build-course.js              # Build final HTML');
     return;
   }
@@ -219,7 +219,7 @@ After the subagent finishes, validate with:
   node engine/scripts/generate-layout.js --load engine/output/course-layout.json
 
 Then continue with:
-  node engine/scripts/generate-course-html.js
+  node engine/scripts/generate-design-tokens.js
   node engine/scripts/generate-images.js
   node engine/scripts/build-course.js
 `);

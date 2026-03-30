@@ -1,0 +1,534 @@
+{
+  "_comment": "Visual Archetype recipes — Session 3 of the Stitch Replacement rebuild. Each archetype is a complete recipe set that drives all fill functions in build-course.js. The archetype is selected by Vision AI in generate-design-tokens.js and stored in design-tokens.json as tokens.archetype.name.",
+
+  "archetypes": {
+
+    "tech-modern": {
+      "_description": "Dark, glowing, electric. Chamfered shapes. Glow shadows. Glass surfaces. Neon accents on interactive elements.",
+
+      "surfaceRhythm": [
+        "bg-surface-container-lowest",
+        "bg-surface-dim",
+        "bg-surface-container-low",
+        "bg-surface-dim",
+        "bg-surface-container-lowest"
+      ],
+
+      "borderRadius": {
+        "card": "rounded-2xl",
+        "cardLarge": "rounded-3xl",
+        "button": "rounded-xl",
+        "input": "rounded-xl",
+        "pill": "rounded-full",
+        "image": "rounded-2xl"
+      },
+
+      "spacing": {
+        "section": "py-20",
+        "sectionHero": "min-h-screen",
+        "sectionCompact": "py-12",
+        "sectionGenerous": "py-28"
+      },
+
+      "shadow": {
+        "card": "",
+        "button": "shadow-[0_0_20px_var(--glow-color,rgba(100,100,255,0.3))]",
+        "buttonHover": "hover:shadow-[0_0_30px_var(--glow-color,rgba(100,100,255,0.5))]",
+        "activeDot": "shadow-[0_0_10px_var(--glow-color,rgba(100,100,255,0.5))]"
+      },
+
+      "surface": {
+        "style": "glass",
+        "card": "glass-card",
+        "cardAlt": "bg-surface-container/60 border border-outline-variant/10",
+        "overlay": "bg-gradient-to-r from-surface-dim via-surface-dim/80 to-transparent",
+        "imgBlend": "mix-blend-overlay opacity-35"
+      },
+
+      "accent": {
+        "intensity": "strong",
+        "border": "border-l-4 border-primary",
+        "borderSubtle": "border border-outline-variant/20",
+        "borderHover": "hover:border-primary/50",
+        "labelColor": "text-primary",
+        "activeTabBg": "bg-primary-container text-on-primary-container",
+        "inactiveTabBg": "glass-card hover:bg-surface-container text-on-surface-variant",
+        "tabRounded": "rounded-full",
+        "progressBar": "bg-gradient-to-r from-secondary to-primary",
+        "checkboxBg": "bg-primary-container border-outline-variant text-on-primary-container rounded-sm",
+        "decorativeQuote": true,
+        "quoteIcon": "format_quote",
+        "quoteIconClass": "text-primary/30 text-6xl mb-8"
+      },
+
+      "hero": {
+        "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
+        "overlayGradient": "bg-gradient-to-r from-surface-dim via-surface-dim/80 to-transparent",
+        "imgVisuals": "mix-blend-overlay opacity-35",
+        "btn1Bg": "bg-primary-container",
+        "btn1Text": "text-on-primary-container",
+        "btn1Visual": "hover:opacity-90 transition-all duration-300 shadow-[0_0_20px_rgba(var(--pc-rgb,100,100,255),0.35)] hover:shadow-[0_0_30px_rgba(var(--pc-rgb,100,100,255),0.55)]",
+        "btn1Round": "rounded-xl"
+      },
+
+      "mcq": {
+        "cardBg": "glass-card",
+        "cardRound": "rounded-3xl",
+        "cardPad": "p-8 md:p-10",
+        "choiceBg": "bg-surface-container/60 border border-outline-variant/20",
+        "choiceHover": "hover:bg-surface-container hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all",
+        "choiceRound": "rounded-xl",
+        "letterBg": "border-2 border-outline-variant/40 group-hover:border-primary group-hover:bg-primary/10",
+        "letterText": "text-on-surface-variant group-hover:text-primary"
+      },
+
+      "tabs": {
+        "activeBtn": "bg-primary-container text-on-primary-container font-bold text-sm uppercase tracking-wider",
+        "inactiveBtn": "glass-card hover:bg-surface-container text-on-surface-variant font-bold text-sm uppercase tracking-wider",
+        "tabRound": "rounded-full",
+        "tabPad": "px-8 py-3"
+      },
+
+      "flashcard": {
+        "frontBg": "glass-card",
+        "frontRound": "rounded-3xl",
+        "backBg": "bg-primary-container",
+        "backText": "text-on-primary-container",
+        "backRound": "rounded-3xl"
+      },
+
+      "timeline": {
+        "activeDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-primary shadow-[0_0_12px_rgba(100,100,255,0.5)]",
+        "inactiveDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant/60",
+        "connectorClass": "w-[2px] h-full bg-outline-variant/20 group-last:hidden",
+        "stepTitleClass": "text-xl font-headline text-on-surface mb-2",
+        "hasNumberedCircles": false
+      },
+
+      "branching": {
+        "buttonBg": "glass-card border border-outline-variant/20",
+        "buttonHover": "hover:border-primary/40 hover:bg-surface-container transition-all duration-200",
+        "buttonRound": "rounded-2xl",
+        "hasArrow": false
+      },
+
+      "checklist": {
+        "cardBg": "glass-card",
+        "cardRound": "rounded-3xl",
+        "inputClass": "bg-surface-container border-outline-variant text-primary rounded-sm",
+        "labelHover": "hover:bg-on-surface/5 transition-colors"
+      },
+
+      "pullquote": {
+        "hasDecorativeQuote": true,
+        "quoteIconClass": "text-primary/30 text-6xl mb-8",
+        "blockquoteStyle": "font-headline",
+        "citeClass": "text-primary uppercase tracking-widest not-italic font-medium text-sm"
+      },
+
+      "bento": {
+        "cardBgs": ["bg-surface-container-low", "glass-card", "bg-surface-container-high", "bg-surface-container"],
+        "cardShadows": ["", "", "", ""],
+        "imgHover": "group-hover:scale-110 transition-transform duration-700"
+      },
+
+      "stat": {
+        "numColor": "text-gradient",
+        "cardBg": "glass-card",
+        "cardRound": "rounded-2xl"
+      },
+
+      "comparison": {
+        "yesIcon": "check_circle",
+        "noIcon": "cancel",
+        "yesColor": "text-secondary",
+        "noColor": "text-error/70",
+        "headerBg": "bg-surface-container"
+      },
+
+      "keyTerm": {
+        "cardBg": "glass-card",
+        "cardRound": "rounded-2xl",
+        "accentBorder": "border-l-2 border-primary/40"
+      },
+
+      "callout": {
+        "info": "bg-secondary/10 border-l-4 border-secondary text-on-surface",
+        "warning": "bg-tertiary/10 border-l-4 border-tertiary text-on-surface",
+        "tip": "bg-primary/10 border-l-4 border-primary text-on-surface",
+        "success": "bg-secondary-container/30 border-l-4 border-secondary text-on-surface"
+      }
+    },
+
+    "minimalist": {
+      "_description": "Clean, invisible UI, content-first. Subtle shapes. Flat minimal contrast. Accent only on CTAs.",
+
+      "surfaceRhythm": [
+        "bg-surface-container-lowest",
+        "bg-surface-container-low",
+        "bg-surface-container-lowest",
+        "bg-surface-container",
+        "bg-surface-container-lowest"
+      ],
+
+      "borderRadius": {
+        "card": "rounded-xl",
+        "cardLarge": "rounded-2xl",
+        "button": "rounded-lg",
+        "input": "rounded-lg",
+        "pill": "rounded-full",
+        "image": "rounded-xl"
+      },
+
+      "spacing": {
+        "section": "py-24",
+        "sectionHero": "min-h-screen",
+        "sectionCompact": "py-16",
+        "sectionGenerous": "py-32"
+      },
+
+      "shadow": {
+        "card": "shadow-sm",
+        "button": "",
+        "buttonHover": "",
+        "activeDot": ""
+      },
+
+      "surface": {
+        "style": "flat",
+        "card": "bg-surface-container border border-outline-variant/10",
+        "cardAlt": "bg-surface-container-low border border-outline-variant/10",
+        "overlay": "bg-gradient-to-t from-surface-dim/90 via-surface-dim/60 to-transparent",
+        "imgBlend": "opacity-50"
+      },
+
+      "accent": {
+        "intensity": "minimal",
+        "border": "border-b border-outline-variant/30",
+        "borderSubtle": "border border-outline-variant/15",
+        "borderHover": "hover:border-outline-variant/40",
+        "labelColor": "text-primary",
+        "activeTabBg": "bg-surface-container text-on-surface font-semibold",
+        "inactiveTabBg": "text-on-surface-variant hover:text-on-surface transition-colors",
+        "tabRounded": "rounded-lg",
+        "progressBar": "bg-primary",
+        "checkboxBg": "bg-primary border-outline-variant text-on-primary rounded",
+        "decorativeQuote": false,
+        "quoteIcon": "",
+        "quoteIconClass": ""
+      },
+
+      "hero": {
+        "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
+        "overlayGradient": "bg-gradient-to-t from-surface-dim/90 via-surface-dim/60 to-transparent",
+        "imgVisuals": "opacity-50",
+        "btn1Bg": "bg-primary",
+        "btn1Text": "text-on-primary",
+        "btn1Visual": "hover:opacity-85 transition-opacity duration-200",
+        "btn1Round": "rounded-lg"
+      },
+
+      "mcq": {
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-2xl",
+        "cardPad": "p-8 md:p-10",
+        "choiceBg": "bg-surface-container-low border border-outline-variant/15",
+        "choiceHover": "hover:bg-surface-container hover:border-outline-variant/40 transition-all",
+        "choiceRound": "rounded-lg",
+        "letterBg": "border-2 border-outline-variant/30 group-hover:border-primary/50 group-hover:bg-primary/5",
+        "letterText": "text-on-surface-variant group-hover:text-primary"
+      },
+
+      "tabs": {
+        "activeTabBg": "bg-surface-container text-on-surface font-semibold",
+        "inactiveBtn": "text-on-surface-variant hover:text-on-surface transition-colors",
+        "tabRound": "rounded-lg",
+        "tabPad": "px-6 py-3"
+      },
+
+      "flashcard": {
+        "frontBg": "bg-surface-container border border-outline-variant/10",
+        "frontRound": "rounded-2xl",
+        "backBg": "bg-primary-container",
+        "backText": "text-on-primary-container",
+        "backRound": "rounded-2xl"
+      },
+
+      "timeline": {
+        "activeDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-primary",
+        "inactiveDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant/40",
+        "connectorClass": "w-[1px] h-full bg-outline-variant/20 group-last:hidden",
+        "stepTitleClass": "text-xl font-headline text-on-surface mb-2",
+        "hasNumberedCircles": false
+      },
+
+      "branching": {
+        "buttonBg": "bg-surface-container border border-outline-variant/15",
+        "buttonHover": "hover:border-outline-variant/40 hover:bg-surface-container-high transition-all duration-200",
+        "buttonRound": "rounded-xl",
+        "hasArrow": false
+      },
+
+      "checklist": {
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-2xl",
+        "inputClass": "bg-surface-container-low border-outline-variant text-primary rounded",
+        "labelHover": "hover:bg-surface-container-high transition-colors"
+      },
+
+      "pullquote": {
+        "hasDecorativeQuote": false,
+        "quoteIconClass": "",
+        "blockquoteStyle": "font-headline font-light",
+        "citeClass": "text-on-surface-variant uppercase tracking-wider not-italic text-sm"
+      },
+
+      "bento": {
+        "cardBgs": ["bg-surface-container", "bg-surface-container-low", "bg-surface-container-high", "bg-surface-container"],
+        "cardShadows": ["", "", "", ""],
+        "imgHover": "group-hover:scale-105 transition-transform duration-500"
+      },
+
+      "stat": {
+        "numColor": "text-primary",
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-xl"
+      },
+
+      "comparison": {
+        "yesIcon": "check",
+        "noIcon": "close",
+        "yesColor": "text-secondary",
+        "noColor": "text-on-surface-variant/50",
+        "headerBg": "bg-surface-container-low"
+      },
+
+      "keyTerm": {
+        "cardBg": "bg-surface-container-low border border-outline-variant/10",
+        "cardRound": "rounded-xl",
+        "accentBorder": "border-b border-outline-variant/20"
+      },
+
+      "callout": {
+        "info": "bg-surface-container border-l-4 border-secondary/60 text-on-surface",
+        "warning": "bg-surface-container border-l-4 border-tertiary/60 text-on-surface",
+        "tip": "bg-surface-container border-l-4 border-primary/60 text-on-surface",
+        "success": "bg-surface-container border-l-4 border-secondary/40 text-on-surface"
+      }
+    },
+
+    "editorial": {
+      "_description": "Spacious, typographic, refined. Standard shapes. Flat shadows. Solid surfaces. Thin accent borders, generous whitespace.",
+
+      "surfaceRhythm": [
+        "bg-surface-container-lowest",
+        "bg-surface-dim",
+        "bg-surface-container-low",
+        "bg-surface-container-lowest",
+        "bg-surface-dim"
+      ],
+
+      "borderRadius": {
+        "card": "rounded-2xl",
+        "cardLarge": "rounded-3xl",
+        "button": "rounded-xl",
+        "input": "rounded-xl",
+        "pill": "rounded-full",
+        "image": "rounded-2xl"
+      },
+
+      "spacing": {
+        "section": "py-24",
+        "sectionHero": "min-h-screen",
+        "sectionCompact": "py-16",
+        "sectionGenerous": "py-32"
+      },
+
+      "shadow": {
+        "card": "shadow-md shadow-black/5",
+        "button": "",
+        "buttonHover": "",
+        "activeDot": ""
+      },
+
+      "surface": {
+        "style": "flat",
+        "card": "bg-surface-container border border-outline-variant/10",
+        "cardAlt": "bg-surface-container-low border border-outline-variant/10",
+        "overlay": "bg-gradient-to-t from-surface-dim via-surface-dim/75 to-surface-dim/30",
+        "imgBlend": "opacity-60"
+      },
+
+      "accent": {
+        "intensity": "medium",
+        "border": "border-l-4 border-primary/60",
+        "borderSubtle": "border border-outline-variant/15",
+        "borderHover": "hover:border-primary/40",
+        "labelColor": "text-primary",
+        "activeTabBg": "bg-primary text-on-primary font-bold text-sm uppercase tracking-wider",
+        "inactiveTabBg": "bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-medium text-sm",
+        "tabRounded": "rounded-xl",
+        "progressBar": "bg-gradient-to-r from-primary to-secondary",
+        "checkboxBg": "bg-primary border-outline-variant text-on-primary rounded-sm",
+        "decorativeQuote": true,
+        "quoteIcon": "format_quote",
+        "quoteIconClass": "text-primary/25 text-7xl mb-6"
+      },
+
+      "hero": {
+        "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
+        "overlayGradient": "bg-gradient-to-t from-surface-dim via-surface-dim/75 to-surface-dim/30",
+        "imgVisuals": "opacity-60",
+        "btn1Bg": "bg-primary",
+        "btn1Text": "text-on-primary",
+        "btn1Visual": "hover:opacity-90 transition-opacity duration-200",
+        "btn1Round": "rounded-xl"
+      },
+
+      "mcq": {
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-3xl",
+        "cardPad": "p-8 md:p-10",
+        "choiceBg": "bg-surface-container-low border border-outline-variant/15",
+        "choiceHover": "hover:bg-surface-container-high hover:border-primary/30 transition-all",
+        "choiceRound": "rounded-xl",
+        "letterBg": "border-2 border-outline-variant/30 group-hover:border-primary/60 group-hover:bg-primary/8",
+        "letterText": "text-on-surface-variant group-hover:text-primary"
+      },
+
+      "tabs": {
+        "activeTabBg": "bg-primary text-on-primary font-bold text-sm uppercase tracking-wider",
+        "inactiveBtn": "bg-surface-container hover:bg-surface-container-high text-on-surface-variant font-medium text-sm",
+        "tabRound": "rounded-xl",
+        "tabPad": "px-8 py-3"
+      },
+
+      "flashcard": {
+        "frontBg": "bg-surface-container border border-outline-variant/10",
+        "frontRound": "rounded-3xl",
+        "backBg": "bg-primary-container",
+        "backText": "text-on-primary-container",
+        "backRound": "rounded-3xl"
+      },
+
+      "timeline": {
+        "activeDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-primary border-2 border-background",
+        "inactiveDotClass": "absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant/50 border-2 border-background",
+        "connectorClass": "w-[2px] h-full bg-outline-variant/15 group-last:hidden",
+        "stepTitleClass": "text-xl font-headline text-on-surface mb-2 font-semibold",
+        "hasNumberedCircles": false
+      },
+
+      "branching": {
+        "buttonBg": "bg-surface-container border border-outline-variant/15",
+        "buttonHover": "hover:border-primary/40 hover:bg-surface-container-high transition-all duration-200",
+        "buttonRound": "rounded-2xl",
+        "hasArrow": false
+      },
+
+      "checklist": {
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-3xl",
+        "inputClass": "bg-surface-container-low border-outline-variant text-primary rounded-sm",
+        "labelHover": "hover:bg-surface-container-high transition-colors"
+      },
+
+      "pullquote": {
+        "hasDecorativeQuote": true,
+        "quoteIconClass": "text-primary/25 text-7xl mb-6",
+        "blockquoteStyle": "font-headline font-semibold",
+        "citeClass": "text-primary uppercase tracking-widest not-italic text-sm font-medium"
+      },
+
+      "bento": {
+        "cardBgs": ["bg-surface-container", "bg-surface-container-low", "bg-surface-container-high", "bg-surface-container"],
+        "cardShadows": ["shadow-sm", "", "shadow-sm", ""],
+        "imgHover": "group-hover:scale-105 transition-transform duration-600"
+      },
+
+      "stat": {
+        "numColor": "text-primary",
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-2xl"
+      },
+
+      "comparison": {
+        "yesIcon": "check_circle",
+        "noIcon": "remove_circle",
+        "yesColor": "text-secondary",
+        "noColor": "text-on-surface-variant/40",
+        "headerBg": "bg-surface-container-low border-b border-outline-variant/10"
+      },
+
+      "keyTerm": {
+        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardRound": "rounded-2xl",
+        "accentBorder": "border-l-3 border-primary/50"
+      },
+
+      "callout": {
+        "info": "bg-surface-container border border-secondary/30 border-l-4 border-l-secondary text-on-surface",
+        "warning": "bg-surface-container border border-tertiary/30 border-l-4 border-l-tertiary text-on-surface",
+        "tip": "bg-surface-container border border-primary/30 border-l-4 border-l-primary text-on-surface",
+        "success": "bg-surface-container border border-secondary/20 border-l-4 border-l-secondary/70 text-on-surface"
+      }
+    },
+
+    "glassmorphist": {
+      "_description": "Frosted, layered, depth. Squircle shapes. Heavy glass. Gradient borders. Inherits tech-modern recipes with glass amplified.",
+      "_extends": "tech-modern",
+      "_overrides": {
+        "surface.style": "glass",
+        "surface.card": "glass-card",
+        "surface.cardAlt": "glass-card",
+        "accent.intensity": "medium",
+        "shadow.button": ""
+      }
+    },
+
+    "corporate": {
+      "_description": "Professional, structured, trustworthy. Standard shapes. Subtle shadows. Accent on key actions only.",
+      "_extends": "editorial",
+      "_overrides": {
+        "accent.intensity": "subtle",
+        "spacing.section": "py-20"
+      }
+    },
+
+    "warm-organic": {
+      "_description": "Soft, approachable, friendly. Organic shapes. Warm surfaces. Soft gradients.",
+      "_extends": "editorial",
+      "_overrides": {
+        "surface.card": "bg-surface-container/80 border border-outline-variant/15",
+        "accent.intensity": "medium",
+        "shadow.card": "shadow-lg shadow-black/5"
+      }
+    },
+
+    "neo-brutalist": {
+      "_description": "Bold, high contrast, graphic. Cut-corner shapes. No shadows. Solid high-contrast blocks. Thick borders.",
+      "_extends": "minimalist",
+      "_overrides": {
+        "accent.border": "border-l-8 border-primary",
+        "accent.intensity": "strong",
+        "shadow.card": ""
+      }
+    },
+
+    "luxury": {
+      "_description": "Dark, subtle, premium. Squircle shapes. No shadows. Deep muted surfaces. Metallic gradients.",
+      "_extends": "tech-modern",
+      "_overrides": {
+        "shadow.button": "",
+        "shadow.activeDot": "",
+        "accent.intensity": "subtle",
+        "surface.imgBlend": "mix-blend-overlay opacity-25"
+      }
+    }
+  },
+
+  "defaults": {
+    "_comment": "Fallback when archetype is null or unrecognised. Mirrors tech-modern (the most capable recipe set).",
+    "_extends": "tech-modern"
+  }
+}
