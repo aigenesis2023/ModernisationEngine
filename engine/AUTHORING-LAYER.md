@@ -496,6 +496,11 @@ These were identified in research as valuable but too complex for the current ph
 - **Industry prevalence:** LMS-integrated tools only
 - **When to implement:** Only if/when backend is added
 
+### Glossary Panel in Nav Menu (Structure category)
+- **What:** Move the `key-term` component out of the inline course flow and into a persistent glossary panel accessible from the burger menu — learners can open it at any point without losing their place.
+- **Why skip:** Meaningful architectural change. Currently `key-term` is a full `<section>` component rendered inline like everything else. To move it to the nav: (a) extract key-term data at build time into a separate data structure, (b) render it as a sidebar/modal panel in the nav rather than inline, (c) decide if it still also appears inline OR only in the menu. Decision needed before implementation.
+- **When to implement:** Phase 4+ authoring layer work, after section management is complete.
+
 ---
 
 ## Pipeline Impact Notes

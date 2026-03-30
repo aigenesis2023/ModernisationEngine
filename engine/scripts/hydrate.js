@@ -1197,6 +1197,7 @@
         'media': 'Video',
         'video-transcript': 'Video + Transcript',
         'divider': 'Divider',
+        'section-heading': 'Section Heading',
         'path-selector': 'Course Paths'
       };
 
@@ -1355,7 +1356,7 @@
 
         document.querySelectorAll('section[data-component-type]').forEach(function(section) {
           var templates = section.querySelectorAll('template[data-variant-alt]');
-          if (templates.length === 0) return;
+          var hasVariants = templates.length > 0;
 
           var compType = section.getAttribute('data-component-type');
           var activeVariant = section.getAttribute('data-variant') || 'default';
@@ -1363,6 +1364,7 @@
           // Store cloned DOM nodes — NOT HTML strings
           var variantNodes = {};
 
+          if (hasVariants) {
           // Extract alternate variants from templates as DOM nodes
           templates.forEach(function(t) {
             var varName = t.getAttribute('data-variant-alt');
@@ -1376,6 +1378,7 @@
 
           // Remove templates from live DOM
           templates.forEach(function(t) { t.remove(); });
+          }
 
           // Store current active section as a cloned node
           variantNodes[activeVariant] = section.cloneNode(true);
@@ -1436,12 +1439,12 @@
           deleteBtn.addEventListener('mouseleave', function() { deleteBtn.style.background = 'rgba(0,0,0,0.3)'; deleteBtn.style.borderColor = 'rgba(255,255,255,0.3)'; });
           toolbar.appendChild(deleteBtn);
 
-          // Variant buttons row (after spacer+delete, on a new flex line)
+          // Variant buttons row (only if there are variants)
           var variantRow = document.createElement('div');
           variantRow.style.cssText = 'display:flex;gap:6px;flex-wrap:wrap;width:100%;margin-top:4px;';
-          toolbar.appendChild(variantRow);
+          if (hasVariants) toolbar.appendChild(variantRow);
 
-          var variantNames = Object.keys(variantNodes);
+          var variantNames = hasVariants ? Object.keys(variantNodes) : [];
           variantNames.forEach(function(v) {
             var btn = document.createElement('button');
             btn.textContent = (variantLabels[compType] && variantLabels[compType][v]) || v;

@@ -68,12 +68,12 @@ export function MCQ({ comp, variant }: Props) {
           <div class={cardClass}>
             {/* Badge label */}
             <div class="mb-5">
-              <span class={badgeClass} data-edit-path="displayTitle">
+              <span class={badgeClass}>
                 <span class="material-symbols-outlined" style="font-size:13px;line-height:1">quiz</span>
                 {label}
               </span>
             </div>
-            <h3 class="font-headline text-h3 mb-8 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
+            <h3 class="font-headline text-h3 mb-8 text-center text-on-surface" data-edit-path="displayTitle">{questionText}</h3>
             <div class="grid grid-cols-1 @xl:grid-cols-2 gap-4">
               {items.map((item, i) => (
                 <button
@@ -107,12 +107,12 @@ export function MCQ({ comp, variant }: Props) {
         <div class={cardClass}>
           {/* Badge label */}
           <div class="mb-5">
-            <span class={badgeClass} data-edit-path="displayTitle">
+            <span class={badgeClass}>
               <span class="material-symbols-outlined" style="font-size:13px;line-height:1">quiz</span>
               {label}
             </span>
           </div>
-          <h3 class="font-headline text-h3 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
+          <h3 class="font-headline text-h3 mb-8 text-on-surface" data-edit-path="displayTitle">{questionText}</h3>
           <div class="space-y-3">
             {items.map((item, i) => (
               <button

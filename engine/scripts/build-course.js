@@ -237,8 +237,8 @@ function generateHead(tokens, courseTitle) {
       if (size > 0 && size < 1) return mergeTypo('', 'text-base font-medium leading-normal');
       return merged;
     })(),
-    bodyLg:    mergeTypo(typo.bodyLarge,   'text-lg font-light leading-relaxed'),
-    body:      mergeTypo(typo.body,        'text-base leading-relaxed'),
+    bodyLg:    mergeTypo(typo.bodyLarge,   'text-sm font-light leading-normal'),
+    body:      mergeTypo(typo.body,        'text-sm leading-normal'),
     label:     mergeTypo(typo.label,       'text-xs font-medium tracking-widest'),
     blockquote: mergeTypo(typo.blockquote, 'text-2xl font-light leading-relaxed'),
     stat:      mergeTypo(typo.statNumber,  'text-4xl font-extrabold'),
@@ -477,8 +477,8 @@ function buildTailwindCSS(tokens) {
       if (size > 0 && size < 1) return mergeTypo('', 'text-base font-medium leading-normal');
       return merged;
     })(),
-    bodyLg:    mergeTypo(typo.bodyLarge,   'text-lg font-light leading-relaxed'),
-    body:      mergeTypo(typo.body,        'text-base leading-relaxed'),
+    bodyLg:    mergeTypo(typo.bodyLarge,   'text-sm font-light leading-normal'),
+    body:      mergeTypo(typo.body,        'text-sm leading-normal'),
     label:     mergeTypo(typo.label,       'text-xs font-medium tracking-widest'),
     blockquote: mergeTypo(typo.blockquote, 'text-2xl font-light leading-relaxed'),
     stat:      mergeTypo(typo.statNumber,  'text-4xl font-extrabold'),
@@ -2766,13 +2766,13 @@ function buildSectionsLegacy(layout) {
       const trackAttr = interactiveCount > 0 ? ` data-section-track="${sectionId}" data-interactive-count="${interactiveCount}"` : '';
       const secMaxW = getSectionMaxW(sectionWidth);
       const titleBar = sectionTitle
-        ? `<div class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr}>
+        ? `<section class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-type="section-heading">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
-<h2 class="font-headline text-label-text uppercase text-primary">${esc(sectionTitle)}</h2>
+<h2 class="font-headline text-label-text uppercase text-primary" data-edit-path="title">${esc(sectionTitle)}</h2>
 <div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
 </div>
-</div>`
+</section>`
         : '';
 
       const wrapped = componentHtmls.map((h, i) => {

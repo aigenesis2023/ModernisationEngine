@@ -318,9 +318,103 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
   const body = comp.body || '';
   const secClass = sectionOnly('py-16');
   const columns = (comp as any).columns || (comp as any)._columns || [];
-  const rows = comp.rows || [];
+  const rows = (comp as any).rows || [];
   if (columns.length === 0) return null;
 
+  // Detect data shape: AI generates columns[].items[], matrix uses rows[].values[]
+  const hasItemsFormat = columns.some((c: any) => Array.isArray(c.items) && c.items.length > 0);
+
+  // ── Side-by-side list format (AI-generated: columns[].items[]) ──────
+  if (hasItemsFormat) {
+    const colColors = ['text-primary', 'text-secondary', 'text-tertiary'];
+    const colBorders = ['border-primary/30', 'border-secondary/30', 'border-tertiary/30'];
+    const colBgs = ['bg-primary/5', 'bg-secondary/5', 'bg-tertiary/5'];
+
+    if (variant === 'stacked-rows') {
+      // Stacked: each item row spans all columns side by side
+      const maxItems = Math.max(...columns.map((c: any) => (c.items || []).length));
+      return (
+        <section class={secClass} data-component-type="comparison" data-animate="fade-up">
+          <div class={`@container ${maxW} mx-auto px-4 @3xl:px-8`}>
+            <h2 class="font-headline text-h2 mb-3 text-center" dangerouslySetInnerHTML={{ __html: title }} />
+            {body && <p class="text-center text-on-surface-variant mb-8 text-body">{stripTags(body)}</p>}
+            {/* Column headers */}
+            <div class={`grid gap-4 mb-4`} style={`grid-template-columns: repeat(${columns.length}, 1fr)`}>
+              {columns.map((col: any, ci: number) => (
+                <div class={`text-center font-headline text-h4 ${colColors[ci % colColors.length]} py-3 border-b-2 ${colBorders[ci % colBorders.length]}`}
+                  data-edit-path={`columns.${ci}.label`}>
+                  {esc(col.label || col.title || '')}
+                </div>
+              ))}
+            </div>
+            {/* Item rows */}
+            {Array.from({ length: maxItems }).map((_: any, ri: number) => (
+              <div class={`grid gap-4 py-3 border-b border-on-surface/5 last:border-0 ${ri % 2 === 0 ? 'bg-on-surface/[0.02]' : ''}`}
+                style={`grid-template-columns: repeat(${columns.length}, 1fr)`}>
+                {columns.map((col: any, ci: number) => {
+                  const item = (col.items || [])[ri];
+                  if (!item) return <div />;
+                  const isPos = item.positive === true;
+                  const isNeg = item.positive === false;
+                  return (
+                    <div class="flex items-start gap-2 px-3">
+                      {(isPos || isNeg) && (
+                        <span class={`material-symbols-outlined text-base flex-shrink-0 mt-0.5 ${isPos ? 'text-secondary' : 'text-error/60'}`}>
+                          {isPos ? 'check_circle' : 'cancel'}
+                        </span>
+                      )}
+                      <span class="text-on-surface-variant text-body" data-edit-path={`columns.${ci}.items.${ri}.text`}>
+                        {esc(item.text || '')}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // Default: columns side-by-side cards
+    return (
+      <section class={secClass} data-component-type="comparison" data-animate="fade-up">
+        <div class={`@container ${maxW} mx-auto px-4 @3xl:px-8`}>
+          <h2 class="font-headline text-h2 mb-10 text-center" dangerouslySetInnerHTML={{ __html: title }} />
+          {body && <p class="text-center text-on-surface-variant mb-8 text-body">{stripTags(body)}</p>}
+          <div class={`grid gap-5`} style={`grid-template-columns: repeat(${columns.length}, 1fr)`}>
+            {columns.map((col: any, ci: number) => (
+              <div class={`${AR.surface?.card || 'glass-card'} ${AR.borderRadius?.cardLarge || 'rounded-3xl'} p-6 border-t-4 ${colBorders[ci % colBorders.length]} ${colBgs[ci % colBgs.length]}`}>
+                <h3 class={`font-headline text-h3 mb-5 ${colColors[ci % colColors.length]}`} data-edit-path={`columns.${ci}.label`}>
+                  {esc(col.label || col.title || '')}
+                </h3>
+                <ul class="space-y-3">
+                  {(col.items || []).map((item: any, ii: number) => {
+                    const isPos = item.positive === true;
+                    const isNeg = item.positive === false;
+                    return (
+                      <li class="flex items-start gap-2.5">
+                        {(isPos || isNeg) && (
+                          <span class={`material-symbols-outlined text-base flex-shrink-0 mt-0.5 ${isPos ? 'text-secondary' : 'text-error/60'}`}>
+                            {isPos ? 'check_circle' : 'cancel'}
+                          </span>
+                        )}
+                        <span class="text-on-surface-variant text-body leading-snug" data-edit-path={`columns.${ci}.items.${ii}.text`}>
+                          {esc(item.text || '')}
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  // ── Matrix format (rows[].values[] with true/false cells) ────────────
   if (variant === 'stacked-rows' && columns.length === 2) {
     const renderVal = (v: any) => {
       if (v === true || v === 'true') return '<span class="material-symbols-outlined text-secondary text-xl">check_circle</span>';
@@ -333,10 +427,10 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
           <h2 class="font-headline text-h2 mb-8 text-center" dangerouslySetInnerHTML={{ __html: title }} />
           {body && <p class="text-center text-on-surface-variant mb-8">{stripTags(body)}</p>}
           <div class="flex justify-between mb-6 px-4">
-            <span class="font-headline text-h4 text-primary" data-edit-path="columns.0.title">{esc(columns[0].title || '')}</span>
-            <span class="font-headline text-h4 text-secondary" data-edit-path="columns.1.title">{esc(columns[1].title || '')}</span>
+            <span class="font-headline text-h4 text-primary" data-edit-path="columns.0.label">{esc(columns[0].label || columns[0].title || '')}</span>
+            <span class="font-headline text-h4 text-secondary" data-edit-path="columns.1.label">{esc(columns[1].label || columns[1].title || '')}</span>
           </div>
-          <div class="space-y-3" data-animate-stagger="fade-up">
+          <div class="space-y-3">
             {rows.map((row: any, ri: number) => {
               const vals = row.values || [];
               return (
@@ -353,9 +447,9 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
     );
   }
 
-  // Default: columns
+  // Matrix columns (table)
   const headerHtml = '<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>' +
-    columns.map((c: any) => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.title || '')}</th>`).join('');
+    columns.map((c: any) => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.label || c.title || '')}</th>`).join('');
   const rowsHtml = rows.map((row: any, ri: number) => {
     const vals = (row.values || []).map((v: any) => {
       if (v === true || v === 'true') return '<td class="px-5 py-3 text-center"><span class="material-symbols-outlined text-secondary text-xl">check_circle</span></td>';
