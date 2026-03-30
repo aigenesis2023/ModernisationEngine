@@ -12,9 +12,9 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Branch:** Check `git branch` for current branch. `main` exists but is not actively used.
 
-**Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4 (Section Management) is next. See `v5/AUTHORING-LAYER.md`.
+**Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4 (Section Management) is next. See `engine/AUTHORING-LAYER.md`.
 
-> **⚠️ V6 REBUILD PLANNED.** A comprehensive rebuild is underway to replace Google Stitch with a deterministic brand intelligence pipeline (Dembrandt CSS extraction + MD3 palette generation + Vision AI archetype classification), migrate to React SSR + Tailwind v4, and introduce a data-driven component registry. **Read `v5/STITCH-REPLACEMENT-BRIEF.md` FIRST** — it contains the complete technical brief with all findings, architecture, implementation phases, file inventory, and code references. The current V5 architecture below remains the working system until each phase completes.
+> **⚠️ V6 REBUILD PLANNED.** A comprehensive rebuild is underway to replace Google Stitch with a deterministic brand intelligence pipeline (Dembrandt CSS extraction + MD3 palette generation + Vision AI archetype classification), migrate to React SSR + Tailwind v4, and introduce a data-driven component registry. **Read `engine/STITCH-REPLACEMENT-BRIEF.md` FIRST** — it contains the complete technical brief with all findings, architecture, implementation phases, file inventory, and code references. The current V5 architecture below remains the working system until each phase completes.
 
 ---
 
@@ -71,7 +71,7 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile (JSON) + Brand De
 ### Core Principles
 
 **1. Stitch designs the visual system. We control layout and content.**
-Different brand URL → different Stitch kit → different visual character, identical layout. See `v5/STITCH-INTEGRATION.md` for full details.
+Different brand URL → different Stitch kit → different visual character, identical layout. See `engine/STITCH-INTEGRATION.md` for full details.
 
 **2. Content quality is non-negotiable.**
 The AI generation agent creates rich, accurate educational content. Every assessment tests application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm to produce courses worth scrolling.
@@ -80,10 +80,10 @@ The AI generation agent creates rich, accurate educational content. Every assess
 Stitch's output (component patterns + design tokens) is extracted and stored. The future authoring layer can re-render with different content or swapped components without re-calling Stitch.
 
 **4. Speak Stitch's language.**
-We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
+We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `engine/STITCH-INTEGRATION.md` for DESIGN.md format and supported fonts.
 
 **5. Interactivity is hydration-driven.**
-`hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `v5/BUILD-SYSTEM.md`.
+`hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `engine/BUILD-SYSTEM.md`.
 
 ---
 
@@ -91,12 +91,12 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/ST
 
 | Document | Covers | Status |
 |---|---|---|
-| **`v5/STITCH-REPLACEMENT-BRIEF.md`** | V6 rebuild plan: Stitch audit findings, new architecture (React SSR, Tailwind v4, Dembrandt, MD3, Vision AI archetypes), implementation phases A-D, file inventory, risks. | **Active** — the rebuild guide |
-| **`v5/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **ARCHIVING** — being replaced by V6 |
-| **`v5/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
-| **`v5/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
-| **`v5/AUTHORING-LAYER.md`** | Authoring layer architecture, component taxonomy, phase plan, progress tracker, skipped-for-later items. | **Active** — living document |
-| **`v5/LOGIC-EXTRACTION.md`** | How we extract triggers, variables, conditions, and interactive logic from Storyline SCORM exports. | **ARCHIVED** — SCORM path only |
+| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | V6 rebuild plan: Stitch audit findings, new architecture (React SSR, Tailwind v4, Dembrandt, MD3, Vision AI archetypes), implementation phases A-D, file inventory, risks. | **Active** — the rebuild guide |
+| **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **ARCHIVING** — being replaced by V6 |
+| **`engine/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
+| **`engine/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
+| **`engine/AUTHORING-LAYER.md`** | Authoring layer architecture, component taxonomy, phase plan, progress tracker, skipped-for-later items. | **Active** — living document |
+| **`engine/LOGIC-EXTRACTION.md`** | How we extract triggers, variables, conditions, and interactive logic from Storyline SCORM exports. | **ARCHIVED** — SCORM path only |
 
 ---
 
@@ -106,8 +106,11 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `v5/ST
 CLAUDE.md                              ← This file (index + rules)
 index.html                             ← GitHub Pages entry (generated by build-course.js)
 package.json / package-lock.json       ← Root dependencies (@google/stitch-sdk, dotenv)
+brand/
+  url.txt                              ← Brand URL for pipeline (one URL)
 
-v5/                                    ← ALL ACTIVE CODE
+engine/                                    ← ALL ACTIVE CODE
+  CHANGE-AUDIT.md                      ← Post-change audit checklist (stale counts, doc drift, memory)
   LOGIC-EXTRACTION.md                  ← Logic extraction architecture
   CONTENT-STRUCTURING.md               ← Content structuring architecture
   STITCH-INTEGRATION.md                ← Stitch integration architecture
@@ -171,45 +174,45 @@ EV/                                    ← Test SCORM (64 slides, gitignored in 
 
 ## The Pipeline
 
-### Step 1 — Research (`v5/scripts/research-content.js`)
+### Step 1 — Research (`engine/scripts/research-content.js`)
 **Input:** Topic brief + optional URLs | **Output:** `knowledge-base.json`
 
-Claude Code subagent with expert SME persona researches the topic using web search. Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent. Run: `node v5/scripts/research-content.js --topic "Your Topic"`
+Claude Code subagent with expert SME persona researches the topic using web search. Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent. Run: `node engine/scripts/research-content.js --topic "Your Topic"`
 
-**⚠️ Subagent workflow:** The script writes a research prompt, then you spawn a subagent (Agent tool) to do the research. The subagent uses web search, reads the schema, and writes `v5/output/knowledge-base.json`. Validate after: `node v5/scripts/research-content.js --load v5/output/knowledge-base.json`.
+**⚠️ Subagent workflow:** The script writes a research prompt, then you spawn a subagent (Agent tool) to do the research. The subagent uses web search, reads the schema, and writes `engine/output/knowledge-base.json`. Validate after: `node engine/scripts/research-content.js --load engine/output/knowledge-base.json`.
 
-### Step 2 — Generate Course (`v5/scripts/generate-layout.js`)
+### Step 2 — Generate Course (`engine/scripts/generate-layout.js`)
 **Input:** `knowledge-base.json` + `brand-design.md` + `brand-profile.json` + `generation-engine.md` | **Output:** `course-layout.json`
 
 Claude Code subagent with senior instructional designer persona generates the complete course. Reads the brand brief for voice calibration (playful/corporate/technical/warm). Designs with emotional arc (hook→foundation→challenge→insight→application), structural archetypes (6 patterns to remix), and density rhythm (breather/standard/deep-dive). Creates ALL assessments from raw facts (no pre-built quizzes in KB). Uses `component-library.json` as creative palette (reads `learningMoment` + `creativeUses` per component).
 
-**⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `v5/output/course-layout.json`. Validate after: `node v5/scripts/generate-layout.js --load v5/output/course-layout.json`.
+**⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `engine/output/course-layout.json`. Validate after: `node engine/scripts/generate-layout.js --load engine/output/course-layout.json`.
 
-### Step 3 — Stitch Component Kit (`v5/scripts/generate-course-html.js`)
+### Step 3 — Stitch Component Kit (`engine/scripts/generate-course-html.js`)
 **Input:** `brand-design.md` + `representative-course.md` | **Output:** `component-patterns/` + `design-tokens.json` + `design-contract.json`
 **Model:** GEMINI_3_1_PRO
 
-See `v5/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the end.
+See `engine/STITCH-INTEGRATION.md`. Automatically runs `extract-contract.js` at the end.
 
-### Step 4 — Image Generation (`v5/scripts/generate-images.js`)
+### Step 4 — Image Generation (`engine/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
 **Runs AFTER Step 3.** Priority chain: SiliconFlow AI (Tongyi Z-Image-Turbo) → Pexels stock → SVG placeholders. Guarantees 100% asset coverage.
 
-### Step 5 — Build (`v5/scripts/build-course.js`)
+### Step 5 — Build (`engine/scripts/build-course.js`)
 **Input:** `design-contract.json` + `design-tokens.json` + `course-layout.json` + `images/` | **Output:** `course.html` + root `index.html`
 
-See `v5/BUILD-SYSTEM.md`.
+See `engine/BUILD-SYSTEM.md`.
 
 ### Step 6 — QA + Review (three gates, in order)
-**6a — Structural QA (`v5/scripts/qa-course.js`):** Validates built HTML without a browser — section coverage, component integrity, quiz wiring, image integrity, heading hierarchy, duplicate IDs, content coverage vs knowledge base, design token/contract integrity, accessibility basics. **If it fails, fix before proceeding.**
+**6a — Structural QA (`engine/scripts/qa-course.js`):** Validates built HTML without a browser — section coverage, component integrity, quiz wiring, image integrity, heading hierarchy, duplicate IDs, content coverage vs knowledge base, design token/contract integrity, accessibility basics. **If it fails, fix before proceeding.**
 
-**6b — Interactive + Design Quality QA (`v5/scripts/qa-interactive.js`):** Opens course in Playwright browser. Tests 31 checks in two tiers:
+**6b — Interactive + Design Quality QA (`engine/scripts/qa-interactive.js`):** Opens course in Playwright browser. Tests 31 checks in two tiers:
 - **Functional (Tests 1-16):** Clicks quiz choices (submit → feedback → retry), switches tabs, flips flashcards, navigates carousels, expands accordions, checks checklists. Validates overflow (desktop + mobile), font sizes, tap targets, heading hierarchy, invisible content, section spacing, collapsed sections, nav z-index.
 - **Design quality (Tests 17-31):** WCAG AA contrast on ALL text, padding consistency within card groups, card height balance, image aspect ratios, line measure (chars/line), font weight hierarchy, border-radius consistency, broken/collapsed images, mobile padding collapse, button style consistency, icon size consistency, hover/transition feedback, focus indicators, assessment distribution, section density variation.
 - **Variant coverage (Test 32):** Checks which layout variants were used, verifies HTML renders the correct variant structure, reports untested variants.
 **If it fails, fix before proceeding.**
 
-**6c — Visual Review (`v5/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code **MUST read each screenshot file** with the Read tool and review using the structured criteria the script outputs (graphic design, UX, UI, instructional design). The script captures screenshots but does NOT review them — you must do the visual review yourself. Fixes go in the engine. **Only run after 6a and 6b pass.**
+**6c — Visual Review (`engine/scripts/review-course.js`):** Playwright captures screenshots of every section (desktop 1440x900) + mobile (390x844). Claude Code **MUST read each screenshot file** with the Read tool and review using the structured criteria the script outputs (graphic design, UX, UI, instructional design). The script captures screenshots but does NOT review them — you must do the visual review yourself. Fixes go in the engine. **Only run after 6a and 6b pass.**
 
 ---
 
@@ -223,8 +226,8 @@ Claude Code automatically selects the correct run level based on what changed. T
 - User says "run it", "full pipeline", or "full run"
 - Topic brief or URLs changed
 - Brand URL changed
-- Any prompt file changed (v5/prompts/*.md)
-- Any schema file changed (v5/schemas/*)
+- Any prompt file changed (engine/prompts/*.md)
+- Any schema file changed (engine/schemas/*)
 - research-content.js, generate-layout.js, scrape-brand.js changed
 - generate-course-html.js or extract-contract.js changed
 - Testing a new topic/brand combination
@@ -242,43 +245,43 @@ Claude Code automatically selects the correct run level based on what changed. T
 
 **MATRIX TEST** — autonomous multi-combination testing. Required when:
 - User says "matrix test" (with or without specifying brands/topics)
-- **Read `v5/input/test-runs.md` FIRST** — it contains the complete protocol: brand/topic pools, auto-selection rules, 6-phase workflow (generate → QA → classify → approve → fix → verify), bug classification, variant coverage tracking, and summary template
+- **Read `engine/input/test-runs.md` FIRST** — it contains the complete protocol: brand/topic pools, auto-selection rules, 6-phase workflow (generate → QA → classify → approve → fix → verify), bug classification, variant coverage tracking, and summary template
 - If the user provides no brands or topics, auto-select from the pools in test-runs.md
 - If the user specifies brands or topics, use those as overrides
 - **Approval workflow:** Objective bugs (6a/6b failures) are auto-fixed. Subjective bugs (6c vision findings) are listed for user approval before fixing. See test-runs.md Phase 4.
 
 **AUTHORING AUDIT** — systematic quality audit of course output + authoring layer. Required when:
 - User says "authoring audit phase 1" (or 2, 3, 4)
-- **Read `v5/input/authoring-audit.md` FIRST** — it contains the full protocol, checklists, and component criteria
+- **Read `engine/input/authoring-audit.md` FIRST** — it contains the full protocol, checklists, and component criteria
 - **Each phase runs in a separate fresh chat.** Phase 1 → save → stop. Phase 2 → save → stop. Etc.
-- Findings persist in `v5/output/audit-findings.json` between phases. Report written to `v5/output/audit-report.md`.
+- Findings persist in `engine/output/audit-findings.json` between phases. Report written to `engine/output/audit-report.md`.
 - Phase 4 includes root cause diagnosis before any fixes — see the Diagnose step in the protocol.
 
 **When in doubt, do a FULL RUN.** Announce which run level you're using and why.
 
 ### Post-Change Audit (MANDATORY)
-After completing any significant code change (new components, new variants, fill function changes, schema changes), **run the change audit checklist** in `v5/CHANGE-AUDIT.md`. This catches stale counts, missing variant labels, doc drift, and memory staleness that QA gates do not test. Do not skip this. Do not self-assess — execute every check in the file.
+After completing any significant code change (new components, new variants, fill function changes, schema changes), **run the change audit checklist** in `engine/CHANGE-AUDIT.md`. This catches stale counts, missing variant labels, doc drift, and memory staleness that QA gates do not test. Do not skip this. Do not self-assess — execute every check in the file.
 
 ### Full Run: Clear stale outputs
 ```bash
-rm -rf v5/output/component-patterns/ v5/output/images/
-rm -f v5/output/knowledge-base.json v5/output/brand-profile.json v5/output/brand-design.md
-rm -f v5/output/course-layout.json v5/output/design-tokens.json v5/output/design-contract.json
-rm -f v5/output/stitch-course-raw.html v5/output/stitch-course-meta.json
-rm -f v5/output/stitch-course-screenshot.png v5/output/course.html
+rm -rf engine/output/component-patterns/ engine/output/images/
+rm -f engine/output/knowledge-base.json engine/output/brand-profile.json engine/output/brand-design.md
+rm -f engine/output/course-layout.json engine/output/design-tokens.json engine/output/design-contract.json
+rm -f engine/output/stitch-course-raw.html engine/output/stitch-course-meta.json
+rm -f engine/output/stitch-course-screenshot.png engine/output/course.html
 ```
 
 ### Full Run: Execute in order
 ```bash
-node v5/scripts/research-content.js --topic "Your Topic"  # Step 1 (subagent researches)
-node v5/scripts/scrape-brand.js                            # Brand analysis
-node v5/scripts/generate-layout.js                         # Step 2 (subagent generates course)
-node v5/scripts/generate-course-html.js                    # Step 3 (Stitch component kit)
-node v5/scripts/generate-images.js                         # Step 4 (image generation)
-node v5/scripts/build-course.js                            # Step 5 (build final HTML)
-node v5/scripts/qa-course.js                               # Step 6a (structural QA — fix if fails)
-node v5/scripts/qa-interactive.js                          # Step 6b (interactive QA — fix if fails)
-node v5/scripts/review-course.js                           # Step 6c (visual review — only after 6a+6b pass)
+node engine/scripts/research-content.js --topic "Your Topic"  # Step 1 (subagent researches)
+node engine/scripts/scrape-brand.js                            # Brand analysis
+node engine/scripts/generate-layout.js                         # Step 2 (subagent generates course)
+node engine/scripts/generate-course-html.js                    # Step 3 (Stitch component kit)
+node engine/scripts/generate-images.js                         # Step 4 (image generation)
+node engine/scripts/build-course.js                            # Step 5 (build final HTML)
+node engine/scripts/qa-course.js                               # Step 6a (structural QA — fix if fails)
+node engine/scripts/qa-interactive.js                          # Step 6b (interactive QA — fix if fails)
+node engine/scripts/review-course.js                           # Step 6c (visual review — only after 6a+6b pass)
 ```
 
 **If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**

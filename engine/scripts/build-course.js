@@ -13,18 +13,18 @@
  *   2. Grids/flex: explicit gap-* and min column widths — no collapsed layouts
  *   3. Typography: text-display/h2/h3/h4/body-lg/body/label-text/blockquote/stat — Stitch-extracted scale
  *
- * Usage: node v5/scripts/build-course.js
+ * Usage: node engine/scripts/build-course.js
  */
 
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const CONTRACT_PATH = path.resolve(ROOT, 'v5/output/design-contract.json');
-const TOKENS_PATH = path.resolve(ROOT, 'v5/output/design-tokens.json');
-const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
-const HYDRATE_PATH = path.resolve(ROOT, 'v5/scripts/hydrate.js');
-const OUTPUT_PATH = path.resolve(ROOT, 'v5/output/course.html');
+const CONTRACT_PATH = path.resolve(ROOT, 'engine/output/design-contract.json');
+const TOKENS_PATH = path.resolve(ROOT, 'engine/output/design-tokens.json');
+const LAYOUT_PATH = path.resolve(ROOT, 'engine/output/course-layout.json');
+const HYDRATE_PATH = path.resolve(ROOT, 'engine/scripts/hydrate.js');
+const OUTPUT_PATH = path.resolve(ROOT, 'engine/output/course.html');
 const PAGES_PATH = path.resolve(ROOT, 'index.html');
 
 // The design contract — extracted from Stitch patterns by extract-contract.js
@@ -49,7 +49,7 @@ function stripTags(html) {
 function embedImage(imagePath) {
   if (!imagePath) return '';
   if (imagePath.startsWith('data:') || imagePath.startsWith('http')) return imagePath;
-  const fullPath = path.resolve(ROOT, 'v5/output', imagePath);
+  const fullPath = path.resolve(ROOT, 'engine/output', imagePath);
   if (!fs.existsSync(fullPath)) return imagePath;
   const buffer = fs.readFileSync(fullPath);
   const ext = path.extname(fullPath).toLowerCase();

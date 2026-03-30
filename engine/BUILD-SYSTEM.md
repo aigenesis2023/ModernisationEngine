@@ -111,7 +111,7 @@ Builds the entire `<head>` from `design-tokens.json`. This is the ONLY place tha
    - For each component: call the appropriate fill function
 5. Add "Course Complete" section
 6. Inline `hydrate.js` as a `<script>` block
-7. Write to `v5/output/course.html` AND root `index.html` (identical copies)
+7. Write to `engine/output/course.html` AND root `index.html` (identical copies)
 
 The output is a **single self-contained HTML file** — all images are base64-embedded, all JS is inlined, all CSS is via Tailwind CDN + inline `<style>` blocks.
 

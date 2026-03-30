@@ -8,7 +8,7 @@
  * Catches issues programmatically that would otherwise require visual review.
  * Run AFTER build-course.js, BEFORE review-course.js.
  *
- * Usage: node v5/scripts/qa-course.js
+ * Usage: node engine/scripts/qa-course.js
  */
 
 const fs = require('fs');
@@ -16,7 +16,7 @@ const path = require('path');
 const { VALID_TYPES } = require('./lib/validate-layout');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const OUTPUT = path.resolve(ROOT, 'v5/output');
+const OUTPUT = path.resolve(ROOT, 'engine/output');
 
 // ─── Load files ──────────────────────────────────────────────────────
 function loadJSON(name) {
@@ -972,7 +972,7 @@ function run() {
   const kb = loadJSON('knowledge-base.json');
 
   if (!html) {
-    console.log('❌ FATAL: v5/output/course.html not found. Run build-course.js first.\n');
+    console.log('❌ FATAL: engine/output/course.html not found. Run build-course.js first.\n');
     process.exit(1);
   }
 

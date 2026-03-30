@@ -11,7 +11,7 @@
  *
  * Deterministic checks (spacing, collapsed sections, z-index) live in qa-interactive.js.
  *
- * Usage: node v5/scripts/review-course.js
+ * Usage: node engine/scripts/review-course.js
  *
  * Output:
  *   screenshots/section-00.jpeg     — Hero section
@@ -32,8 +32,8 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
 const SCREENSHOTS_DIR = path.resolve(ROOT, 'screenshots');
-const COURSE_PATH = path.resolve(ROOT, 'v5/output/course.html');
-const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
+const COURSE_PATH = path.resolve(ROOT, 'engine/output/course.html');
+const LAYOUT_PATH = path.resolve(ROOT, 'engine/output/course-layout.json');
 
 async function main() {
   console.log('V5 Course Reviewer — Vision-Based Quality Audit');

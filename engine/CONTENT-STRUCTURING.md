@@ -117,7 +117,7 @@ Questions tagged with path conditions get grouped into path-specific quiz sectio
 
 ## The Layout Engine Prompt (layout-engine.md)
 
-The system prompt at `v5/prompts/layout-engine.md` defines the AI's role, design rules, and output format. Key sections:
+The system prompt at `engine/prompts/layout-engine.md` defines the AI's role, design rules, and output format. Key sections:
 
 - **Design Process:** Understand content → plan structure → choose components → write content
 - **Component Reference:** When to use each of the 28 types

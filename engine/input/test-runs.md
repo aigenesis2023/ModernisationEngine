@@ -6,10 +6,10 @@
 - **"Test"** → full pipeline (Steps 1-5), then all QA gates (6a, 6b, 6c). Fix any failures.
 - **"Matrix test"** → run the default 3-combination matrix below. Fully autonomous — no user input needed.
 - **"Reference test"** → use pre-built reference course (all 28 component types, 56 variants across 23 types). User provides 1 or 2 brand URLs. Runs Steps 3-5 per URL. No QA — user reviews manually.
-- **"Authoring audit phase 1"** → start the authoring audit (setup, inventory, desktop sweep first half). **Each phase runs in a fresh chat and stops after saving.** See `v5/input/authoring-audit.md`.
+- **"Authoring audit phase 1"** → start the authoring audit (setup, inventory, desktop sweep first half). **Each phase runs in a fresh chat and stops after saving.** See `engine/input/authoring-audit.md`.
 - **"Authoring audit phase 2"** → desktop sweep second half.
 - **"Authoring audit phase 3"** → mobile sweep, edge cases, authoring-OFF verification.
-- **"Authoring audit phase 4"** → diagnose root causes, fix, verify, write report to `v5/output/audit-report.md`.
+- **"Authoring audit phase 4"** → diagnose root causes, fix, verify, write report to `engine/output/audit-report.md`.
 
 Examples:
 - "Run it with sales and fin-ai" → just builds
@@ -88,7 +88,7 @@ Avoid repeating the same brand or topic from the user's most recent matrix run i
 2. Detect mode from user's keyword: "run" / "test" / "matrix test"
 3. **Topic selection:** If the user specifies a topic, use it. If they say "matrix test" with no topic, auto-select from the topic pool above. If a topic is short (1-3 words), expand it into a full brief before writing to `topic-brief.txt`. Include: subject scope, what it covers (5-7 subtopics), target audience, difficulty level, estimated duration (~45 minutes)
 4. **Brand selection:** If the user specifies a brand, use it. If they say "matrix test" with no brand, auto-select from the brand pool above per the selection rules.
-5. Update `brand/url.txt` and `v5/input/topic-brief.txt` with the chosen brand and topic
+5. Update `brand/url.txt` and `engine/input/topic-brief.txt` with the chosen brand and topic
 
 ### Mode: Run
 
@@ -97,9 +97,9 @@ Execute full pipeline (Steps 1-5 per CLAUDE.md). Deliver the output. No QA. Done
 ### Mode: Test
 
 Execute full pipeline (Steps 1-5), then run all three QA gates in order:
-1. `node v5/scripts/qa-course.js` — structural QA. Fix any failures before proceeding.
-2. `node v5/scripts/qa-interactive.js` — interactive + design quality QA. Fix any failures before proceeding.
-3. `node v5/scripts/review-course.js` — captures screenshots. Then **READ every screenshot file** with the Read tool and review using the prompt the script outputs. Fix any issues in the engine.
+1. `node engine/scripts/qa-course.js` — structural QA. Fix any failures before proceeding.
+2. `node engine/scripts/qa-interactive.js` — interactive + design quality QA. Fix any failures before proceeding.
+3. `node engine/scripts/review-course.js` — captures screenshots. Then **READ every screenshot file** with the Read tool and review using the prompt the script outputs. Fix any issues in the engine.
 
 **Gate 6c is NOT optional.** The script captures screenshots but does NOT review them itself. You MUST:
 - Read each `screenshots/section-*.jpeg` file
@@ -115,15 +115,15 @@ Fully autonomous. No user input needed. Follow this protocol exactly.
 #### Phase 1: Generate upstream assets (one-time per unique topic/brand)
 
 For each unique **topic** in the matrix:
-1. Write expanded brief to `v5/input/topic-brief.txt`
-2. Run `node v5/scripts/research-content.js` (spawn subagent)
-3. Save `v5/output/knowledge-base.json` to `v5/output/matrix/{topic-slug}/knowledge-base.json`
+1. Write expanded brief to `engine/input/topic-brief.txt`
+2. Run `node engine/scripts/research-content.js` (spawn subagent)
+3. Save `engine/output/knowledge-base.json` to `engine/output/matrix/{topic-slug}/knowledge-base.json`
 
 For each unique **brand** in the matrix:
 1. Write URL to `brand/url.txt`
-2. Run `node v5/scripts/scrape-brand.js`
-3. Run `node v5/scripts/generate-course-html.js` (Stitch component kit)
-4. Save brand outputs to `v5/output/matrix/{brand-slug}/` (brand-design.md, brand-profile.json, design-contract.json, design-tokens.json, component-patterns/)
+2. Run `node engine/scripts/scrape-brand.js`
+3. Run `node engine/scripts/generate-course-html.js` (Stitch component kit)
+4. Save brand outputs to `engine/output/matrix/{brand-slug}/` (brand-design.md, brand-profile.json, design-contract.json, design-tokens.json, component-patterns/)
 
 This means: 3 topics researched + 3 brands scraped/designed = 6 upstream jobs, NOT 9.
 
@@ -131,14 +131,14 @@ This means: 3 topics researched + 3 brands scraped/designed = 6 upstream jobs, N
 
 For each combination in the matrix (sequentially):
 
-1. **Restore upstream files:** Copy the topic's KB and the brand's design files back to `v5/output/`
-2. **Generate course layout:** Run `node v5/scripts/generate-layout.js` (subagent — content + brand voice = unique per combination)
-3. **Generate images:** Run `node v5/scripts/generate-images.js`. Real images are required — hero, full-bleed, and graphic-text components layer text over images, so contrast, overlay opacity, and readability can only be tested with actual images. Priority chain: SiliconFlow AI → Pexels stock → SVG placeholder (last resort only).
-4. **Build:** Run `node v5/scripts/build-course.js`
-5. **QA Gate 6a:** Run `node v5/scripts/qa-course.js`. Log all failures.
-6. **QA Gate 6b:** Run `node v5/scripts/qa-interactive.js`. Log all failures.
-7. **QA Gate 6c:** Run `node v5/scripts/review-course.js`. READ every screenshot. Log all visual issues.
-8. **Save results:** Copy `v5/output/course.html` to `v5/output/matrix/{brand-slug}-{topic-slug}/course.html`
+1. **Restore upstream files:** Copy the topic's KB and the brand's design files back to `engine/output/`
+2. **Generate course layout:** Run `node engine/scripts/generate-layout.js` (subagent — content + brand voice = unique per combination)
+3. **Generate images:** Run `node engine/scripts/generate-images.js`. Real images are required — hero, full-bleed, and graphic-text components layer text over images, so contrast, overlay opacity, and readability can only be tested with actual images. Priority chain: SiliconFlow AI → Pexels stock → SVG placeholder (last resort only).
+4. **Build:** Run `node engine/scripts/build-course.js`
+5. **QA Gate 6a:** Run `node engine/scripts/qa-course.js`. Log all failures.
+6. **QA Gate 6b:** Run `node engine/scripts/qa-interactive.js`. Log all failures.
+7. **QA Gate 6c:** Run `node engine/scripts/review-course.js`. READ every screenshot. Log all visual issues.
+8. **Save results:** Copy `engine/output/course.html` to `engine/output/matrix/{brand-slug}-{topic-slug}/course.html`
 
 **Do NOT fix bugs during Phase 2.** Log everything, fix nothing. The goal is to see the full picture before touching any code.
 
@@ -218,8 +218,8 @@ Reply with which subjective bugs to fix, skip, or adjust.
 - Missing: {list}
 
 ### Files modified so far
-- v5/scripts/build-course.js: {what changed}
-- v5/scripts/hydrate.js: {what changed}
+- engine/scripts/build-course.js: {what changed}
+- engine/scripts/hydrate.js: {what changed}
 ...
 ```
 
@@ -256,8 +256,8 @@ Output a final structured summary:
 ...
 
 ### Files modified
-- v5/scripts/build-course.js: {what changed}
-- v5/scripts/hydrate.js: {what changed}
+- engine/scripts/build-course.js: {what changed}
+- engine/scripts/hydrate.js: {what changed}
 ...
 
 ### Verification
@@ -356,7 +356,7 @@ Fast engine QA using a pre-built course that exercises all 28 component types an
 
 ### Reference course file
 
-`v5/input/reference-course-layout.json`
+`engine/input/reference-course-layout.json`
 
 - 10 sections, 28 component instances (one per component type)
 - All 28 component types (including divider and callout)
@@ -385,21 +385,21 @@ User says: **"reference test"** + 1 or 2 brand URLs.
 **With 1 URL:**
 ```
 1. Write URL to brand/url.txt
-2. Copy v5/input/reference-course-layout.json → v5/output/course-layout.json
-3. Run: node v5/scripts/scrape-brand.js
-4. Run: node v5/scripts/generate-course-html.js
-5. Run: node v5/scripts/generate-images.js
-6. Run: node v5/scripts/build-course.js
-7. Output preview link to v5/output/course.html
+2. Copy engine/input/reference-course-layout.json → engine/output/course-layout.json
+3. Run: node engine/scripts/scrape-brand.js
+4. Run: node engine/scripts/generate-course-html.js
+5. Run: node engine/scripts/generate-images.js
+6. Run: node engine/scripts/build-course.js
+7. Output preview link to engine/output/course.html
 ```
 
 **With 2 URLs (dark + light):**
 Run the above sequence for each URL. Save first output before starting second:
 ```
 1. Run steps 1-6 for URL 1
-2. Copy v5/output/course.html → v5/output/reference-test-1.html
+2. Copy engine/output/course.html → engine/output/reference-test-1.html
 3. Run steps 1-6 for URL 2
-4. Copy v5/output/course.html → v5/output/reference-test-2.html
+4. Copy engine/output/course.html → engine/output/reference-test-2.html
 5. Output both preview links
 ```
 

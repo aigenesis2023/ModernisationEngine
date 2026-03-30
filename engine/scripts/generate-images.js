@@ -9,13 +9,13 @@
  * For stock photos, prompts are converted to search queries.
  *
  * Usage:
- *   node v5/scripts/generate-images.js
+ *   node engine/scripts/generate-images.js
  *
  * API Keys (in .env):
  *   SILICONFLOW_API_KEY — AI image generation via Tongyi Z-Image-Turbo (default)
  *   PEXELS_API_KEY      — Free stock photos fallback (200 req/hr)
  *
- * Output: v5/output/images/*.jpg + updated course-layout.json
+ * Output: engine/output/images/*.jpg + updated course-layout.json
  */
 
 const fs = require('fs');
@@ -31,9 +31,9 @@ const SILICONFLOW_API_URL = 'https://api.siliconflow.com/v1/images/generations';
 const PEXELS_API_KEY = process.env.PEXELS_API_KEY || '';
 const PEXELS_API_URL = 'https://api.pexels.com/v1/search';
 
-const OUTPUT_DIR = path.resolve('v5/output/images');
-const LAYOUT_PATH = path.resolve('v5/output/course-layout.json');
-const BRAND_DESIGN_PATH = path.resolve('v5/output/brand-design.md');
+const OUTPUT_DIR = path.resolve('engine/output/images');
+const LAYOUT_PATH = path.resolve('engine/output/course-layout.json');
+const BRAND_DESIGN_PATH = path.resolve('engine/output/brand-design.md');
 
 const DELAY_MS = 3000;
 const RETRY_DELAY_MS = 8000;

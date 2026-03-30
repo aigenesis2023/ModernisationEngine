@@ -11,27 +11,27 @@
  *   - Load mode (--load):      loads pre-generated knowledge-base.json
  *
  * Usage:
- *   node v5/scripts/research-content.js --topic "Introduction to Cybersecurity"
- *   node v5/scripts/research-content.js --topic "EV Safety" --urls https://example.com
- *   node v5/scripts/research-content.js --load v5/output/knowledge-base.json
+ *   node engine/scripts/research-content.js --topic "Introduction to Cybersecurity"
+ *   node engine/scripts/research-content.js --topic "EV Safety" --urls https://example.com
+ *   node engine/scripts/research-content.js --load engine/output/knowledge-base.json
  *
  * Input sources:
  *   --topic "..."           Topic brief (required unless --load)
  *   --urls url1,url2        Additional URLs to incorporate (optional)
- *   v5/input/topic-brief.txt   Fallback topic source (plain text)
- *   v5/input/urls.txt          Fallback URLs source (one per line)
+ *   engine/input/topic-brief.txt   Fallback topic source (plain text)
+ *   engine/input/urls.txt          Fallback URLs source (one per line)
  */
 
 const fs = require('fs');
 const path = require('path');
 
 // ─── Paths ───────────────────────────────────────────────────────────
-const SCHEMA_PATH = path.resolve('v5/schemas/knowledge-base.schema.json');
-const OUTPUT_PATH = path.resolve('v5/output/knowledge-base.json');
-const PROMPT_TEMPLATE_PATH = path.resolve('v5/prompts/research-agent.md');
-const ASSEMBLED_PROMPT_PATH = path.resolve('v5/output/research-prompt.txt');
-const TOPIC_FILE = path.resolve('v5/input/topic-brief.txt');
-const URLS_FILE = path.resolve('v5/input/urls.txt');
+const SCHEMA_PATH = path.resolve('engine/schemas/knowledge-base.schema.json');
+const OUTPUT_PATH = path.resolve('engine/output/knowledge-base.json');
+const PROMPT_TEMPLATE_PATH = path.resolve('engine/prompts/research-agent.md');
+const ASSEMBLED_PROMPT_PATH = path.resolve('engine/output/research-prompt.txt');
+const TOPIC_FILE = path.resolve('engine/input/topic-brief.txt');
+const URLS_FILE = path.resolve('engine/input/urls.txt');
 
 // ─── Parse CLI arguments ─────────────────────────────────────────────
 function parseArgs() {
@@ -170,7 +170,7 @@ async function main() {
       console.log(`\nCopied to: ${OUTPUT_PATH}`);
     }
 
-    console.log('\nDone. Next: node v5/scripts/generate-layout.js');
+    console.log('\nDone. Next: node engine/scripts/generate-layout.js');
     return;
   }
 
@@ -178,9 +178,9 @@ async function main() {
   if (!topic) {
     console.error('Error: No topic provided.');
     console.error('Usage:');
-    console.error('  node v5/scripts/research-content.js --topic "Your Topic Here"');
-    console.error('  node v5/scripts/research-content.js --load v5/output/knowledge-base.json');
-    console.error('\nOr create: v5/input/topic-brief.txt');
+    console.error('  node engine/scripts/research-content.js --topic "Your Topic Here"');
+    console.error('  node engine/scripts/research-content.js --load engine/output/knowledge-base.json');
+    console.error('\nOr create: engine/input/topic-brief.txt');
     process.exit(1);
   }
 
@@ -207,14 +207,14 @@ ${prompt}
 
 The subagent will:
 1. Use web search to research the topic
-2. Read the schema at v5/schemas/knowledge-base.schema.json
-3. Write structured output to v5/output/knowledge-base.json
+2. Read the schema at engine/schemas/knowledge-base.schema.json
+3. Write structured output to engine/output/knowledge-base.json
 
 After the subagent finishes, validate with:
-  node v5/scripts/research-content.js --load v5/output/knowledge-base.json
+  node engine/scripts/research-content.js --load engine/output/knowledge-base.json
 
 Then continue with:
-  node v5/scripts/generate-layout.js
+  node engine/scripts/generate-layout.js
 `);
   console.log('='.repeat(70));
 }

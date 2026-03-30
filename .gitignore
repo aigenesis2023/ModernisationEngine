@@ -8,7 +8,7 @@ screenshots/
 .env
 
 # Pipeline output (regenerated every run — only root index.html is deployed)
-v5/output/
+engine/output/
 
 # Dev screenshots (Playwright viewport/full-page captures)
 /*.jpeg

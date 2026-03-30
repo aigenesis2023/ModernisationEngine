@@ -10,8 +10,8 @@
  *
  * If Stitch changes how it writes HTML, you fix this file. Not 25 fill functions.
  *
- * Input:  v5/output/component-patterns/*.html + v5/output/component-patterns/_page-shell.json
- * Output: v5/output/design-contract.json
+ * Input:  engine/output/component-patterns/*.html + engine/output/component-patterns/_page-shell.json
+ * Output: engine/output/design-contract.json
  */
 
 const fs = require('fs');
@@ -19,11 +19,11 @@ const path = require('path');
 const cheerio = require('cheerio');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const PATTERNS_DIR = path.resolve(ROOT, 'v5/output/component-patterns');
+const PATTERNS_DIR = path.resolve(ROOT, 'engine/output/component-patterns');
 const SHELL_PATH = path.resolve(PATTERNS_DIR, '_page-shell.json');
-const OUTPUT_PATH = path.resolve(ROOT, 'v5/output/design-contract.json');
-const TOKENS_PATH = path.resolve(ROOT, 'v5/output/design-tokens.json');
-const STITCH_RAW_PATH = path.resolve(ROOT, 'v5/output/stitch-course-raw.html');
+const OUTPUT_PATH = path.resolve(ROOT, 'engine/output/design-contract.json');
+const TOKENS_PATH = path.resolve(ROOT, 'engine/output/design-tokens.json');
+const STITCH_RAW_PATH = path.resolve(ROOT, 'engine/output/stitch-course-raw.html');
 
 // ─── Visual class filters ────────────────────────────────────────────
 // These identify Tailwind classes that are purely visual (no layout impact)

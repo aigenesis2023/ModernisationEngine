@@ -504,17 +504,17 @@ These were identified in research as valuable but too complex for the current ph
 
 | File | What Changes | Run Level Triggered |
 |---|---|---|
-| `v5/schemas/component-library.json` | Categories, new components, new variants | Full Run |
-| `v5/schemas/course-layout.schema.json` | Type enum + new component props | Full Run |
-| `v5/prompts/generation-engine.md` | Category-based component guidance | Full Run |
-| `v5/prompts/generation-agent.md` | Reference to categories | Full Run |
-| `v5/prompts/representative-course.md` | HTML for new components + variants | Design Run |
-| `v5/scripts/build-course.js` | Fill functions + variant rendering | Build Run |
-| `v5/scripts/hydrate.js` | Minimal — new components are non-interactive | Build Run |
-| `v5/scripts/extract-contract.js` | May need new component pattern extraction | Design Run |
-| `v5/scripts/qa-course.js` | Validate new types | Build Run |
-| `v5/scripts/qa-interactive.js` | Test new variants | Build Run |
-| `v5/scripts/lib/validate-layout.js` | Accept new types | Build Run |
+| `engine/schemas/component-library.json` | Categories, new components, new variants | Full Run |
+| `engine/schemas/course-layout.schema.json` | Type enum + new component props | Full Run |
+| `engine/prompts/generation-engine.md` | Category-based component guidance | Full Run |
+| `engine/prompts/generation-agent.md` | Reference to categories | Full Run |
+| `engine/prompts/representative-course.md` | HTML for new components + variants | Design Run |
+| `engine/scripts/build-course.js` | Fill functions + variant rendering | Build Run |
+| `engine/scripts/hydrate.js` | Minimal — new components are non-interactive | Build Run |
+| `engine/scripts/extract-contract.js` | May need new component pattern extraction | Design Run |
+| `engine/scripts/qa-course.js` | Validate new types | Build Run |
+| `engine/scripts/qa-interactive.js` | Test new variants | Build Run |
+| `engine/scripts/lib/validate-layout.js` | Accept new types | Build Run |
 
 ### Knock-on Effects to Watch
 - **Stitch token budget:** Adding 2 new components + 17 new variants to representative-course.md increases the prompt size sent to Stitch. Monitor for token limits.
@@ -692,9 +692,9 @@ These were identified in research as valuable but too complex for the current ph
 | Document | Relevance |
 |---|---|
 | `CLAUDE.md` | Master index — component list, pipeline steps, variant table |
-| `v5/BUILD-SYSTEM.md` | How build-course.js assembles HTML — fill functions, variant rendering |
-| `v5/STITCH-INTEGRATION.md` | How Stitch designs components — representative-course.md format |
-| `v5/CONTENT-STRUCTURING.md` | How AI selects components — generation engine guidance |
-| `v5/schemas/component-library.json` | Source of truth for all component types |
-| `v5/prompts/generation-engine.md` | AI prompt for component selection |
-| `v5/prompts/representative-course.md` | HTML examples sent to Stitch |
+| `engine/BUILD-SYSTEM.md` | How build-course.js assembles HTML — fill functions, variant rendering |
+| `engine/STITCH-INTEGRATION.md` | How Stitch designs components — representative-course.md format |
+| `engine/CONTENT-STRUCTURING.md` | How AI selects components — generation engine guidance |
+| `engine/schemas/component-library.json` | Source of truth for all component types |
+| `engine/prompts/generation-engine.md` | AI prompt for component selection |
+| `engine/prompts/representative-course.md` | HTML examples sent to Stitch |

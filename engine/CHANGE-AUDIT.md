@@ -11,16 +11,16 @@ If any component was added, removed, or renamed:
 
 - [ ] `CLAUDE.md` — component table count in heading + table rows
 - [ ] `CLAUDE.md` — all inline references (search for old count number)
-- [ ] `v5/BUILD-SYSTEM.md` — fill function count references
-- [ ] `v5/CONTENT-STRUCTURING.md` — component count references
-- [ ] `v5/STITCH-INTEGRATION.md` — component count references
-- [ ] `v5/schemas/component-library.json` — component exists with all fields
-- [ ] `v5/schemas/course-layout.schema.json` — type enum includes it
-- [ ] `v5/prompts/generation-engine.md` — component referenced in guidance
-- [ ] `v5/prompts/generation-agent.md` — count/reference updated
-- [ ] `v5/prompts/representative-course.md` — HTML example exists
-- [ ] `v5/scripts/build-course.js` — fill function exists + dispatcher case
-- [ ] `v5/scripts/qa-course.js` — component type recognized
+- [ ] `engine/BUILD-SYSTEM.md` — fill function count references
+- [ ] `engine/CONTENT-STRUCTURING.md` — component count references
+- [ ] `engine/STITCH-INTEGRATION.md` — component count references
+- [ ] `engine/schemas/component-library.json` — component exists with all fields
+- [ ] `engine/schemas/course-layout.schema.json` — type enum includes it
+- [ ] `engine/prompts/generation-engine.md` — component referenced in guidance
+- [ ] `engine/prompts/generation-agent.md` — count/reference updated
+- [ ] `engine/prompts/representative-course.md` — HTML example exists
+- [ ] `engine/scripts/build-course.js` — fill function exists + dispatcher case
+- [ ] `engine/scripts/qa-course.js` — component type recognized
 
 **How to check:** `grep -rn "25 component\|26 component\|25 type\|26 type\|25 fill\|26 fill" --include="*.md"` (replace numbers with the OLD count)
 
@@ -31,14 +31,14 @@ If any component was added, removed, or renamed:
 If any variant was added, removed, or renamed:
 
 - [ ] `CLAUDE.md` — Layout Variants table has the variant listed
-- [ ] `v5/AUTHORING-LAYER.md` — Variant Inventory table matches (no duplicates)
-- [ ] `v5/scripts/build-course.js` — `VARIANT_MAP` includes the variant
-- [ ] `v5/scripts/build-course.js` — fill function has rendering logic (not just registered)
-- [ ] `v5/scripts/build-course.js` — dispatcher passes `variant` param to fill function
-- [ ] `v5/scripts/hydrate.js` — `variantLabels[componentType]` has a human-friendly label for the variant
-- [ ] `v5/scripts/qa-course.js` — variant registry includes it
-- [ ] `v5/schemas/component-library.json` — variant listed in component's `variants` array
-- [ ] `v5/prompts/representative-course.md` — HTML example for the variant exists
+- [ ] `engine/AUTHORING-LAYER.md` — Variant Inventory table matches (no duplicates)
+- [ ] `engine/scripts/build-course.js` — `VARIANT_MAP` includes the variant
+- [ ] `engine/scripts/build-course.js` — fill function has rendering logic (not just registered)
+- [ ] `engine/scripts/build-course.js` — dispatcher passes `variant` param to fill function
+- [ ] `engine/scripts/hydrate.js` — `variantLabels[componentType]` has a human-friendly label for the variant
+- [ ] `engine/scripts/qa-course.js` — variant registry includes it
+- [ ] `engine/schemas/component-library.json` — variant listed in component's `variants` array
+- [ ] `engine/prompts/representative-course.md` — HTML example for the variant exists
 
 **How to check:** Compare VARIANT_MAP keys in build-course.js against variantLabels[componentType] keys in hydrate.js. Every VARIANT_MAP entry must have a matching nested label.
 
@@ -71,11 +71,11 @@ If build-course.js output structure changed:
 
 After any change:
 
-- [ ] `v5/AUTHORING-LAYER.md` — checklist items marked done, changelog entry added
-- [ ] `v5/AUTHORING-LAYER.md` — no stale counts or duplicate table rows
+- [ ] `engine/AUTHORING-LAYER.md` — checklist items marked done, changelog entry added
+- [ ] `engine/AUTHORING-LAYER.md` — no stale counts or duplicate table rows
 - [ ] `CLAUDE.md` — architecture diagram counts match reality
 - [ ] `CLAUDE.md` — file structure section counts match reality
-- [ ] `v5/input/test-runs.md` — component/variant counts, variant coverage table, reference test description, authoring panel description all match current state
+- [ ] `engine/input/test-runs.md` — component/variant counts, variant coverage table, reference test description, authoring panel description all match current state
 
 ---
 
@@ -97,14 +97,14 @@ Run these commands to catch drift:
 
 ```bash
 # Count components in source of truth
-node -e "const c = require('./v5/schemas/component-library.json'); console.log('Components:', Object.keys(c.components).length)"
+node -e "const c = require('./engine/schemas/component-library.json'); console.log('Components:', Object.keys(c.components).length)"
 
 # Count variants in VARIANT_MAP
-grep -c "'" v5/scripts/build-course.js | head -1  # rough check
+grep -c "'" engine/scripts/build-course.js | head -1  # rough check
 # Better: count unique variant names in VARIANT_MAP block
 
 # Count variant labels in hydrate.js
-grep -c "':'" v5/scripts/hydrate.js | head -1  # rough check
+grep -c "':'" engine/scripts/hydrate.js | head -1  # rough check
 
 # Find stale count references
 grep -rn "25 \|26 \|27 " --include="*.md" | grep -i "component\|type\|fill\|variant"

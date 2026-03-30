@@ -274,7 +274,7 @@ Sessions:
 - Tune seed color selection for edge cases
 - Add remaining archetypes as needed
 - Run QA gates. How many design tests pass now vs with Stitch?
-- Archive Stitch code (move generate-course-html.js + extract-contract.js to v5/archived/)
+- Archive Stitch code (move generate-course-html.js + extract-contract.js to engine/archived/)
 
 **CHECKPOINT: The design system is proven. Output is consistently better than Stitch. Pipeline is faster. QA is more stable. You have a working V6 design layer on the V5 rendering layer. You can STOP HERE and have a significantly better engine. Or continue to Round 2.**
 
@@ -286,7 +286,7 @@ Sessions:
 Sessions:
 
 **Session 5 — Preact SSR setup**
-- Add Vite + Preact + preact-render-to-string
+- Add Vite + Preact + preact-render-to-string + vite-plugin-singlefile (flattens SSR output into single HTML file — 3-line config)
 - Create `src/render.ts` — SSR entry point
 - Convert 5-6 core components first (Hero, Text, Accordion, MCQ, Graphic-Text, Tabs)
 - Verify: SSR output matches current fill function output (diff the HTML)
@@ -413,7 +413,7 @@ Two options (decide during implementation):
 **Why:** The hardcoded `VARIANT_MAP` in build-course.js is brittle. Adding a variant requires a code change.
 
 **What to do:**
-- Create `v5/schemas/component-registry.json` (or `.ts` with types)
+- Create `engine/schemas/component-registry.json` (or `.ts` with types)
 - Structure:
   ```json
   {
@@ -500,7 +500,7 @@ Two options (decide during implementation):
     };
   });
   ```
-- Save as `v5/output/extracted-css.json`
+- Save as `engine/output/extracted-css.json`
 - Keep existing prose brief generation (brand-design.md) — it's valuable for voice calibration and image treatment
 - Keep existing isDark detection via luminance sampling
 
@@ -510,7 +510,7 @@ Two options (decide during implementation):
 
 **We use M3 for TWO things: color math AND shape inspiration.**
 
-**Color math:** We use the HCT tonal palette algorithm (`CorePalette.of()`) to generate harmonious, accessible color systems from a seed color. M3 Expressive (2026) introduced **fidelity levels** and **Expressive palettes** — higher fidelity keeps colors closer to the brand's actual values instead of desaturating toward "Google-y" pastels. Also introduced **content-based dynamic color** (palette from an image, not just a hex seed — we have the brand screenshot). During Session 2, investigate whether the current npm package exposes these Expressive APIs. If available, use high-fidelity Expressive palettes instead of baseline `CorePalette.of()`.
+**Color math:** We use the HCT tonal palette algorithm (`CorePalette.of()`) to generate harmonious, accessible color systems from a seed color. M3 Expressive (2026) introduced fidelity levels, Expressive palettes, and content-based dynamic color — but these APIs are **Android/Compose-only and NOT exposed in the `@material/material-color-utilities` npm package.** Use `CorePalette.of()` with manual surface tone overrides to keep colors closer to the brand's actual values instead of desaturating toward "Google-y" pastels. No investigation needed — this is confirmed as of early 2026.
 
 **Shape system:** M3 Expressive introduced 35+ morphing shapes, but these are Android-native and NOT available as web-ready path data in the npm package. We build our own shape library inspired by these shapes (squircle, chamfered, organic, cut-corner) as normalized SVG paths applied via CSS `clip-path`. See Section C5.
 
@@ -762,7 +762,7 @@ Each archetype is a complete recipe set that specifies:
 | `asymmetric` | `clip-path: polygon()` with mixed corners | One rounded, one sharp — dynamic tension | Available as override |
 
 **Implementation approach:**
-- Store shapes in `v5/schemas/shape-library.json` as normalized SVG path strings (0-1 scale)
+- Store shapes in `engine/schemas/shape-library.json` as normalized SVG path strings (0-1 scale)
 - Each shape has variants for: `card`, `button`, `imageMask`, `decorative`
 - Apply via `clip-path: path('...')` or the modern `clip-path: shape()` function (Chrome 135+, Safari 18.4+)
 - Fallback: `border-radius` for browsers that don't support `clip-path` on the specific element
@@ -782,7 +782,7 @@ Each archetype is a complete recipe set that specifies:
 - **Content overflow:** `clip-path` clips visually but content can overflow. Ensure padding is generous enough that text never reaches clipped edges. Test each shape at minimum and maximum content lengths.
 - **Performance:** `clip-path: path()` is GPU-composited in modern browsers. No performance concern for static shapes. Only a concern if animating shapes (morphing) — defer morphing to Round 3 if pursued.
 - **Browser support:** `clip-path: path()` is supported in all modern browsers (Chrome 88+, Firefox 97+, Safari 15.4+). The newer `shape()` function (Chrome 135+) is optional enhancement. Use `path()` as baseline.
-- **Accessibility:** Clip-path is purely visual. Screen readers see the full content. Tab order and focus indicators work normally. No accessibility impact.
+- **Accessibility:** Clip-path is purely visual. Screen readers see the full content. Tab order works normally. **However, `clip-path` clips `outline` and `box-shadow` visually** — meaning focus rings on clipped elements will be cut off. Mitigation: apply clip-path shapes to cards and image masks only. Buttons and other focusable interactive elements should use `border-radius` instead of `clip-path` to preserve visible focus indicators. If a card contains focusable children, apply focus styles on the inner element (not the clipped wrapper) or use `outline-offset` with enough clearance to clear the clip boundary.
 
 **Session placement:** Shape library definition fits into Session 3 (archetype recipes). Shape paths are just another recipe parameter alongside glow/glass/gradient. Apply shapes in the same fill function pass where other archetype styles are applied. No architectural changes needed — it's CSS classes/inline styles on existing elements.
 
@@ -839,7 +839,7 @@ With deterministic upstream:
 
 ### D4. Archive Stitch Code
 
-- Move to `v5/archived/`:
+- Move to `engine/archived/`:
   - `generate-course-html.js`
   - `extract-contract.js`
   - `STITCH-INTEGRATION.md`
@@ -862,7 +862,7 @@ These are zero-cost, low-complexity improvements identified during external revi
 
 **Hero Moments flag (Session 3):** Add `heroMoment: true` to the component registry schema. When the generation agent tags a section as high-impact, the build system applies a unique one-off treatment: cinematic video background, full-bleed interactive element, extra-generous spacing. This is what makes a course feel bespoke rather than templated. The flag is just a boolean — the treatment is an archetype recipe variant.
 
-**Brand Memory cache (Session 4):** Save generated tokens + archetype classification per brand URL in `v5/output/brand-cache.json`. When the same brand URL is used again, load cached tokens instead of re-extracting. Ensures multiple courses for the same client look identical. Simple JSON read/write, no API.
+**Brand Memory cache (Session 4):** Save generated tokens + archetype classification per brand URL in `engine/output/brand-cache.json`. When the same brand URL is used again, load cached tokens instead of re-extracting. Ensures multiple courses for the same client look identical. Simple JSON read/write, no API.
 
 ### Note for later (paid or adds complexity — do NOT implement in Round 1)
 
@@ -888,35 +888,35 @@ These are zero-cost, low-complexity improvements identified during external revi
 | `src/components/*.tsx` | 28 component files total | A1 |
 | `src/render.ts` | SSR entry: renderToString → HTML | A1 |
 | `theme.css` | Tailwind v4 @theme tokens | A2 |
-| `v5/schemas/component-registry.json` | Data-driven variant/width/animation map | A3 |
-| `v5/scripts/generate-design-tokens.js` | MD3 palette + archetype + token generation | B3 |
-| `v5/schemas/visual-archetypes.json` | 5-8 archetype definitions with recipe params | C1 |
-| `v5/schemas/accent-recipes.json` | Parameterized recipe definitions | C2 |
-| `v5/schemas/shape-library.json` | Normalized SVG paths per shape family (card, button, imageMask, decorative variants) | C6 |
-| `v5/output/brand-cache.json` | Cached tokens + archetype per brand URL for consistency across courses | D2 |
+| `engine/schemas/component-registry.json` | Data-driven variant/width/animation map | A3 |
+| `engine/scripts/generate-design-tokens.js` | MD3 palette + archetype + token generation | B3 |
+| `engine/schemas/visual-archetypes.json` | 5-8 archetype definitions with recipe params | C1 |
+| `engine/schemas/accent-recipes.json` | Parameterized recipe definitions | C2 |
+| `engine/schemas/shape-library.json` | Normalized SVG paths per shape family (card, button, imageMask, decorative variants) | C6 |
+| `engine/output/brand-cache.json` | Cached tokens + archetype per brand URL for consistency across courses | D2 |
 
 ### Files to modify
 
 | File | Changes | Phase |
 |---|---|---|
 | `package.json` | Add: preact, preact-render-to-string (OR react/react-dom), vite, tailwindcss v4, @material/material-color-utilities, style-dictionary. Remove: @google/stitch-sdk | A1, A2, B3 |
-| `v5/scripts/scrape-brand.js` | Add CSS extraction via getComputedStyle() | B2 |
-| `v5/scripts/build-course.js` | Rewrite: React SSR, read from registry + recipes, Tailwind v4 | A1-A4 |
-| `v5/scripts/qa-interactive.js` | Simplify design quality tests (17-31) | D1 |
+| `engine/scripts/scrape-brand.js` | Add CSS extraction via getComputedStyle() | B2 |
+| `engine/scripts/build-course.js` | Rewrite: React SSR, read from registry + recipes, Tailwind v4 | A1-A4 |
+| `engine/scripts/qa-interactive.js` | Simplify design quality tests (17-31) | D1 |
 | `CLAUDE.md` | Update pipeline, architecture, file structure | All |
-| `v5/BUILD-SYSTEM.md` | Rewrite for new architecture | All |
+| `engine/BUILD-SYSTEM.md` | Rewrite for new architecture | All |
 
 ### Files to archive
 
 | File | Reason |
 |---|---|
-| `v5/scripts/generate-course-html.js` | Stitch SDK integration (754 lines) |
-| `v5/scripts/extract-contract.js` | Stitch extraction/repair (745 lines) |
-| `v5/STITCH-INTEGRATION.md` | Stitch documentation |
-| `v5/output/design-contract.json` | No longer generated |
-| `v5/output/component-patterns/` | No longer generated |
-| `v5/output/stitch-course-raw.html` | No longer generated |
-| `v5/output/stitch-course-meta.json` | No longer generated |
+| `engine/scripts/generate-course-html.js` | Stitch SDK integration (754 lines) |
+| `engine/scripts/extract-contract.js` | Stitch extraction/repair (745 lines) |
+| `engine/STITCH-INTEGRATION.md` | Stitch documentation |
+| `engine/output/design-contract.json` | No longer generated |
+| `engine/output/component-patterns/` | No longer generated |
+| `engine/output/stitch-course-raw.html` | No longer generated |
+| `engine/output/stitch-course-meta.json` | No longer generated |
 
 ---
 
@@ -1045,11 +1045,11 @@ This section captures decisions made during the audit conversation so a new chat
 
 **MD3 library handles the core math.** Figma's Variable Modes (Light/Dark, Compact/Spacious) are powerful but overlap with what `@material/material-color-utilities` already does. Figma adds an external API dependency with latency. Evaluate after MD3 palettes are working — if they're good enough, the complexity of Figma API integration isn't justified. If MD3 surfaces need more sophistication (e.g., mode switching in the authoring panel), Figma becomes worth it.
 
-### Why Phase A before Phase B?
+### Why Phase B (brand intelligence) before Phase A (rendering)?
 
-**Everything builds on React components + Tailwind v4.** The brand intelligence pipeline (Phase B) generates tokens. Those tokens need to flow into components (Phase A) via Tailwind `@theme`. If we build Phase B first, we'd be generating tokens that feed into the OLD string-template system, then migrating again. Phase A first means Phase B tokens flow directly into the target architecture.
+**Never change the design system AND the rendering layer at the same time.** Round 1 proves the new design tokens + archetype recipes work inside the EXISTING build-course.js. If the output looks wrong, the problem is isolated to token generation or recipe design — not a rendering migration. Only after the design system is proven (Round 1 checkpoint) do we migrate the rendering layer to Preact SSR + Tailwind v4 (Round 2). This way, if Round 2 output looks wrong, we know it's the rendering migration, not the design system.
 
-**However: Phase A and Phase B can run in parallel** on different workstreams. React migration doesn't depend on Dembrandt/MD3. And archetype design (Phase C) should start as soon as React components exist — mock tokens manually while building archetypes. The archetypes ARE the IP.
+The alternative (Phase A first, then Phase B) would mean building tokens that feed into the old string-template system and then migrating again — or changing both at once and not knowing which broke. The round order in Section 5 is correct and intentional.
 
 ### Why not visual regression tools (Applitools/Percy) now?
 

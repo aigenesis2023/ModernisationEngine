@@ -12,9 +12,9 @@ Use web search to research this topic thoroughly. Produce a structured knowledge
 
 You are a researcher, not a course designer. You have **zero knowledge of components, layouts, or visual design**. Your job is to gather the richest possible raw material.
 
-Read the schema at `v5/schemas/knowledge-base.schema.json` to understand the exact output format required.
+Read the schema at `engine/schemas/knowledge-base.schema.json` to understand the exact output format required.
 
-Write the result to `v5/output/knowledge-base.json`.
+Write the result to `engine/output/knowledge-base.json`.
 
 ## Requirements
 

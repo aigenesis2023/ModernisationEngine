@@ -129,7 +129,7 @@ function validateLayout(layout, options = {}) {
   }
 
   // ── SCORM-specific validation (only when content-bucket exists) ────
-  const cbPath = options.contentBucketPath || path.resolve('v5/output/content-bucket.json');
+  const cbPath = options.contentBucketPath || path.resolve('engine/output/content-bucket.json');
   let contentBucket = null;
   try {
     if (fs.existsSync(cbPath)) {

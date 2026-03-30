@@ -19,9 +19,9 @@ The audit tests every possible visual state of every component present in the co
 
 **Pre-conditions:**
 - All phases: `index.html` must exist with a built course. If missing or empty, STOP and tell the user: "No built course found. Run the pipeline first, then start the audit."
-- Phases 2, 3, 4: `v5/output/audit-findings.json` must exist and contain `completedPhases` showing the previous phase is done. If missing, tell the user which phase to run first.
+- Phases 2, 3, 4: `engine/output/audit-findings.json` must exist and contain `completedPhases` showing the previous phase is done. If missing, tell the user which phase to run first.
 
-Read `CLAUDE.md` and `v5/AUTHORING-LAYER.md` before starting any phase.
+Read `CLAUDE.md` and `engine/AUTHORING-LAYER.md` before starting any phase.
 
 ---
 
@@ -51,7 +51,7 @@ Each phase is a self-contained unit. It reads the findings file, does its work, 
 
 ### Checkpoint save protocol (mandatory at end of every phase)
 
-1. Write the complete updated JSON to `v5/output/audit-findings.json`
+1. Write the complete updated JSON to `engine/output/audit-findings.json`
 2. Immediately read the file back and confirm it contains valid JSON with the correct `completedPhases` array
 3. If the read returns empty or invalid JSON, write it again and re-verify before stopping
 4. Only stop the phase after the save is confirmed
@@ -77,7 +77,7 @@ This guards against the Write tool creating a partial file if the session dies m
 
 ### Setup
 
-1. Delete any existing `v5/output/audit-findings.json` and `v5/output/audit-report.md` — this is a fresh audit
+1. Delete any existing `engine/output/audit-findings.json` and `engine/output/audit-report.md` — this is a fresh audit
 2. Clear `screenshots/audit/` directory
 3. Start a local HTTP server serving the repo root
 2. Open in Playwright at **1440x900** (desktop)
@@ -123,7 +123,7 @@ Split the component list in half. Audit the **first half** now, the second half 
 
 ## Phase 2: Desktop Sweep (Second Half)
 
-Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `1`. Continue the desktop sweep with the **remaining components**. Same checklist, same process.
+Read `engine/output/audit-findings.json`. Confirm `completedPhases` contains `1`. Continue the desktop sweep with the **remaining components**. Same checklist, same process.
 
 **Save checkpoint** — follow the checkpoint save protocol above. Confirm save before stopping.
 
@@ -131,7 +131,7 @@ Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `1`. Co
 
 ## Phase 3: Mobile + Edge Cases + Final Verification
 
-Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2]`.
+Read `engine/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2]`.
 
 ### Mobile sweep (390x844)
 
@@ -211,7 +211,7 @@ Turn authoring OFF. Scroll through entire course:
 
 ## Phase 4: Diagnose, Fix, Verify, Report
 
-Read `v5/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2, 3]`.
+Read `engine/output/audit-findings.json`. Confirm `completedPhases` contains `[1, 2, 3]`.
 
 ### Classify all issues
 
@@ -286,10 +286,10 @@ For each cluster, complete all 5 steps:
 
 Then fix remaining clusters by severity (P0 → P1 → P2). P3 only if straightforward.
 
-**All fixes go in the ENGINE** (build-course.js, hydrate.js). NEVER edit index.html or v5/output/ files directly.
+**All fixes go in the ENGINE** (build-course.js, hydrate.js). NEVER edit index.html or engine/output/ files directly.
 
 **After each cluster of fixes:**
-1. Rebuild: `node v5/scripts/build-course.js`
+1. Rebuild: `node engine/scripts/build-course.js`
 2. Reload in Playwright
 3. **In-course blast radius:** browser-verify all affected components present in the course
 4. **Out-of-course blast radius:** code-inspect only — confirm the fix was correctly applied to their fill functions (cannot browser-verify components not in this course)
@@ -301,14 +301,14 @@ Then fix remaining clusters by severity (P0 → P1 → P2). P3 only if straightf
 ### Verify
 
 After all fixes are complete:
-1. `node v5/scripts/qa-course.js` — must pass
-2. `node v5/scripts/qa-interactive.js` — must pass
+1. `node engine/scripts/qa-course.js` — must pass
+2. `node engine/scripts/qa-interactive.js` — must pass
 3. Turn authoring OFF, scroll through course — no artefacts, interactivity works
 4. Confirm all fixed issues are still fixed
 
 ### Write the report file
 
-Write the full report to `v5/output/audit-report.md` **before** presenting it to the user. Read it back to confirm it was written correctly. This ensures the report survives even if the session dies after this point.
+Write the full report to `engine/output/audit-report.md` **before** presenting it to the user. Read it back to confirm it was written correctly. This ensures the report survives even if the session dies after this point.
 
 Report format:
 
@@ -358,11 +358,11 @@ Report format:
 
 ### Present report to user
 
-Present the contents of `v5/output/audit-report.md` to the user.
+Present the contents of `engine/output/audit-report.md` to the user.
 
 ### Post-audit
 
-If ANY engine files were modified, run `v5/CHANGE-AUDIT.md`. This catches stale docs, mismatched counts, and label sync issues.
+If ANY engine files were modified, run `engine/CHANGE-AUDIT.md`. This catches stale docs, mismatched counts, and label sync issues.
 
 ---
 

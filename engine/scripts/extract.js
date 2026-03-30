@@ -11,10 +11,10 @@
  *   - Question banks: bank slides associated with slidedraws
  *   - Complexity assessment: pattern detection and scope signals
  *
- * See v5/LOGIC-EXTRACTION.md for the complete architecture spec.
+ * See engine/LOGIC-EXTRACTION.md for the complete architecture spec.
  *
- * Usage: node v5/scripts/extract.js <scorm-folder>
- * Output: v5/output/content-bucket.json
+ * Usage: node engine/scripts/extract.js <scorm-folder>
+ * Output: engine/output/content-bucket.json
  */
 
 const fs = require('fs');
@@ -1605,8 +1605,8 @@ function extract(scormDir) {
 // ─── CLI entry point ─────────────────────────────────────────────────
 const scormDir = process.argv[2];
 if (!scormDir) {
-  console.error('Usage: node v5/scripts/extract.js <scorm-folder>');
-  console.error('Example: node v5/scripts/extract.js EV');
+  console.error('Usage: node engine/scripts/extract.js <scorm-folder>');
+  console.error('Example: node engine/scripts/extract.js EV');
   process.exit(1);
 }
 const resolvedDir = path.resolve(scormDir);
@@ -1619,7 +1619,7 @@ if (!fs.existsSync(resolvedDir)) {
 const result = extract(resolvedDir);
 
 // Write output
-const outputDir = path.resolve('v5/output');
+const outputDir = path.resolve('engine/output');
 if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
 const outputPath = path.join(outputDir, 'content-bucket.json');

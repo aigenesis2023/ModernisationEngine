@@ -1,7 +1,7 @@
 # Stitch Integration
 
 > **Status: ARCHIVING.** Being replaced by V6 deterministic brand intelligence pipeline.
-> See `v5/STITCH-REPLACEMENT-BRIEF.md` for the complete rebuild plan.
+> See `engine/STITCH-REPLACEMENT-BRIEF.md` for the complete rebuild plan.
 > The content below documents the V5 Stitch integration which remains functional until V6 phases complete.
 > **Last updated:** 2026-03-29
 

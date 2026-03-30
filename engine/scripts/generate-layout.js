@@ -11,23 +11,23 @@
  *   - Load mode (--load):      loads pre-generated course-layout.json, validates it
  *
  * Usage:
- *   node v5/scripts/generate-layout.js
- *   node v5/scripts/generate-layout.js --load v5/output/course-layout.json
+ *   node engine/scripts/generate-layout.js
+ *   node engine/scripts/generate-layout.js --load engine/output/course-layout.json
  */
 
 const fs = require('fs');
 const path = require('path');
 
 // ─── Paths ───────────────────────────────────────────────────────────
-const PROMPT_PATH = path.resolve('v5/prompts/generation-engine.md');
-const AGENT_TASK_PATH = path.resolve('v5/prompts/generation-agent.md');
-const COMPONENT_LIB_PATH = path.resolve('v5/schemas/component-library.json');
-const KB_PATH = path.resolve('v5/output/knowledge-base.json');
-const BRAND_PATH = path.resolve('v5/output/brand-profile.json');
-const BRAND_DESIGN_PATH = path.resolve('v5/output/brand-design.md');
-const SCHEMA_PATH = path.resolve('v5/schemas/course-layout.schema.json');
-const OUTPUT_PATH = path.resolve('v5/output/course-layout.json');
-const ASSEMBLED_PROMPT_PATH = path.resolve('v5/output/generation-prompt.txt');
+const PROMPT_PATH = path.resolve('engine/prompts/generation-engine.md');
+const AGENT_TASK_PATH = path.resolve('engine/prompts/generation-agent.md');
+const COMPONENT_LIB_PATH = path.resolve('engine/schemas/component-library.json');
+const KB_PATH = path.resolve('engine/output/knowledge-base.json');
+const BRAND_PATH = path.resolve('engine/output/brand-profile.json');
+const BRAND_DESIGN_PATH = path.resolve('engine/output/brand-design.md');
+const SCHEMA_PATH = path.resolve('engine/schemas/course-layout.schema.json');
+const OUTPUT_PATH = path.resolve('engine/output/course-layout.json');
+const ASSEMBLED_PROMPT_PATH = path.resolve('engine/output/generation-prompt.txt');
 
 // ─── Use shared validation ───────────────────────────────────────────
 const { validateLayout } = require('./lib/validate-layout');
@@ -181,9 +181,9 @@ async function main() {
     }
 
     console.log('\nDone. Next steps:');
-    console.log('  node v5/scripts/generate-course-html.js    # Stitch component kit');
-    console.log('  node v5/scripts/generate-images.js          # Generate images');
-    console.log('  node v5/scripts/build-course.js              # Build final HTML');
+    console.log('  node engine/scripts/generate-course-html.js    # Stitch component kit');
+    console.log('  node engine/scripts/generate-images.js          # Generate images');
+    console.log('  node engine/scripts/build-course.js              # Build final HTML');
     return;
   }
 
@@ -216,12 +216,12 @@ Spawn a subagent (Agent tool) with the task from:
   ${AGENT_TASK_PATH}
 
 After the subagent finishes, validate with:
-  node v5/scripts/generate-layout.js --load v5/output/course-layout.json
+  node engine/scripts/generate-layout.js --load engine/output/course-layout.json
 
 Then continue with:
-  node v5/scripts/generate-course-html.js
-  node v5/scripts/generate-images.js
-  node v5/scripts/build-course.js
+  node engine/scripts/generate-course-html.js
+  node engine/scripts/generate-images.js
+  node engine/scripts/build-course.js
 `);
   console.log('='.repeat(70));
 }

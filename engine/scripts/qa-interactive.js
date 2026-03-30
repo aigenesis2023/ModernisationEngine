@@ -9,7 +9,7 @@
  *
  * Run AFTER qa-course.js (structural), BEFORE review-course.js (visual).
  *
- * Usage: node v5/scripts/qa-interactive.js
+ * Usage: node engine/scripts/qa-interactive.js
  */
 
 const { chromium } = require('playwright');
@@ -17,8 +17,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..', '..');
-const COURSE_PATH = path.resolve(ROOT, 'v5/output/course.html');
-const LAYOUT_PATH = path.resolve(ROOT, 'v5/output/course-layout.json');
+const COURSE_PATH = path.resolve(ROOT, 'engine/output/course.html');
+const LAYOUT_PATH = path.resolve(ROOT, 'engine/output/course-layout.json');
 
 const errors = [];
 const warnings = [];
@@ -34,7 +34,7 @@ async function run() {
   console.log('╚══════════════════════════════════════════════════════╝\n');
 
   if (!fs.existsSync(COURSE_PATH)) {
-    console.log('❌ FATAL: v5/output/course.html not found. Run build-course.js first.\n');
+    console.log('❌ FATAL: engine/output/course.html not found. Run build-course.js first.\n');
     process.exit(1);
   }
 

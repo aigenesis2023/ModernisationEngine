@@ -12,7 +12,7 @@
  *   3. brand-profile.json — minimal metadata (sourceUrl, scrapedAt, imageTreatment)
  *
  * Usage:
- *   node v5/scripts/scrape-brand.js [brand-url]
+ *   node engine/scripts/scrape-brand.js [brand-url]
  *   If no URL argument, reads from brand/url.txt
  */
 
@@ -22,7 +22,7 @@ const readline = require('readline');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Paths ───────────────────────────────────────────────────────────
-const OUTPUT_DIR = path.resolve('v5/output');
+const OUTPUT_DIR = path.resolve('engine/output');
 const SCREENSHOT_PATH = path.join(OUTPUT_DIR, 'brand-screenshot.png');
 const DESIGN_MD_PATH = path.join(OUTPUT_DIR, 'brand-design.md');
 const PROFILE_PATH = path.join(OUTPUT_DIR, 'brand-profile.json');
@@ -347,7 +347,7 @@ async function main() {
     const urlFile = path.resolve('brand/url.txt');
     if (!fs.existsSync(urlFile)) {
       console.error('Error: No URL argument and brand/url.txt not found.');
-      console.error('Usage: node v5/scripts/scrape-brand.js [brand-url]');
+      console.error('Usage: node engine/scripts/scrape-brand.js [brand-url]');
       process.exit(1);
     }
     url = fs.readFileSync(urlFile, 'utf-8').trim();

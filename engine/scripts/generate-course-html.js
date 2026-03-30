@@ -18,12 +18,12 @@
  * input parameter. The DESIGN.md content goes INSIDE the text prompt parameter.
  * Stitch understands it there because it's trained on the DESIGN.md format.
  *
- * Input:  v5/output/brand-design.md + v5/prompts/representative-course.md
- * Output: v5/output/stitch-course-raw.html
- *         v5/output/stitch-course-meta.json
- *         v5/output/stitch-course-screenshot.png
- *         v5/output/component-patterns/*.html
- *         v5/output/design-tokens.json
+ * Input:  engine/output/brand-design.md + engine/prompts/representative-course.md
+ * Output: engine/output/stitch-course-raw.html
+ *         engine/output/stitch-course-meta.json
+ *         engine/output/stitch-course-screenshot.png
+ *         engine/output/component-patterns/*.html
+ *         engine/output/design-tokens.json
  *
  * Requires: STITCH_API_KEY environment variable
  * Model: GEMINI_3_1_PRO (Deep Think — significantly better for design reasoning)
@@ -38,7 +38,7 @@ import { StitchToolClient } from '@google/stitch-sdk';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..', '..');
 config({ path: join(ROOT, '.env') });
-const OUTPUT_DIR = join(ROOT, 'v5/output');
+const OUTPUT_DIR = join(ROOT, 'engine/output');
 const PATTERNS_DIR = join(OUTPUT_DIR, 'component-patterns');
 
 const API_KEY = process.env.STITCH_API_KEY;
@@ -56,7 +56,7 @@ function detectColorMode(designMd) {
   // This is far more reliable than keyword-matching a natural language description,
   // which can be misleading (e.g. a light brand with a dark hero).
   try {
-    const profilePath = join(ROOT, 'v5/output/brand-profile.json');
+    const profilePath = join(ROOT, 'engine/output/brand-profile.json');
     if (existsSync(profilePath)) {
       const profile = JSON.parse(readFileSync(profilePath, 'utf-8'));
       if (profile.detectedTheme) {
@@ -520,8 +520,8 @@ function getFallbackPattern(type) {
 // ─── Main ────────────────────────────────────────────────────────────
 
 // Read inputs
-const designMdPath = join(ROOT, 'v5/output/brand-design.md');
-const repCoursePath = join(ROOT, 'v5/prompts/representative-course.md');
+const designMdPath = join(ROOT, 'engine/output/brand-design.md');
+const repCoursePath = join(ROOT, 'engine/prompts/representative-course.md');
 
 if (!existsSync(designMdPath)) {
   console.error('ERROR: brand-design.md not found. Run scrape-brand.js first.');

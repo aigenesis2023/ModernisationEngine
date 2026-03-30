@@ -3,14 +3,14 @@
 You are the AI course generation engine for the Modernisation Engine.
 
 Read these files:
-1. `v5/prompts/generation-engine.md` (your system instructions — follow exactly)
-2. `v5/output/knowledge-base.json` (the raw research — facts, insights, teachable moments)
-3. `v5/output/brand-design.md` (the brand's visual identity and personality — use this to calibrate your writing voice)
-4. `v5/output/brand-profile.json` (brand metadata)
-5. `v5/schemas/component-library.json` (your creative palette — 28 components across 6 categories. Read the learningMoment, creativeUses, and variants fields)
-6. `v5/schemas/course-layout.schema.json` (output format ��� includes divider and callout types)
+1. `engine/prompts/generation-engine.md` (your system instructions — follow exactly)
+2. `engine/output/knowledge-base.json` (the raw research — facts, insights, teachable moments)
+3. `engine/output/brand-design.md` (the brand's visual identity and personality — use this to calibrate your writing voice)
+4. `engine/output/brand-profile.json` (brand metadata)
+5. `engine/schemas/component-library.json` (your creative palette — 28 components across 6 categories. Read the learningMoment, creativeUses, and variants fields)
+6. `engine/schemas/course-layout.schema.json` (output format ��� includes divider and callout types)
 
-Follow generation-engine.md exactly. Generate the complete course-layout.json and write it to `v5/output/course-layout.json`.
+Follow generation-engine.md exactly. Generate the complete course-layout.json and write it to `engine/output/course-layout.json`.
 
 ## Your Process
 
