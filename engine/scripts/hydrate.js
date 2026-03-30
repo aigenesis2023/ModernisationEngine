@@ -1583,18 +1583,16 @@
       }
 
       // ── Picker categories (7 groups for add section UI) ────────────────
+      // Picker uses the same 7 categories as toolbars (unified system)
+      // Colors come from catColors (loaded from category-meta JSON)
       var pickerCategories = {
-        'Text':        ['text', 'pullquote', 'callout', 'key-term'],
-        'Image':       ['graphic', 'graphic-text', 'full-bleed', 'image-gallery'],
-        'Layout':      ['stat-callout', 'data-table', 'comparison', 'bento'],
-        'Interactive':  ['accordion', 'tabs', 'narrative', 'flashcard', 'labeled-image', 'checklist', 'timeline', 'process-flow'],
-        'Quiz':        ['mcq', 'branching', 'textinput'],
-        'Media':       ['media', 'video-transcript'],
-        'Structure':   ['divider']
-      };
-      var pickerColors = {
-        'Text': '#3b82f6', 'Image': '#8b5cf6', 'Layout': '#22c55e',
-        'Interactive': '#a855f7', 'Quiz': '#ef4444', 'Media': '#06b6d4', 'Structure': '#f59e0b'
+        'Text':      ['text', 'pullquote', 'callout', 'key-term'],
+        'Image':     ['graphic', 'graphic-text', 'full-bleed', 'image-gallery'],
+        'Explore':   ['accordion', 'tabs', 'narrative', 'flashcard', 'labeled-image'],
+        'Quiz':      ['mcq', 'branching', 'textinput', 'checklist'],
+        'Layout':    ['stat-callout', 'bento', 'comparison', 'data-table', 'timeline', 'process-flow'],
+        'Media':     ['media', 'video-transcript'],
+        'Structure': ['hero', 'divider']
       };
 
       // ── Add section: "+" buttons + picker popup ────────────────────────
@@ -1634,7 +1632,7 @@
         Object.keys(pickerCategories).forEach(function(cat) {
           var catBtn = document.createElement('button');
           catBtn.textContent = cat;
-          var color = pickerColors[cat] || '#666';
+          var color = catColors[cat] || '#666';
           catBtn.style.cssText = 'background:' + color + ';color:#fff;border:none;padding:4px 12px;border-radius:6px;font:bold 11px/1.4 monospace;cursor:pointer;opacity:0.7;transition:opacity 0.15s;';
           catBtn.addEventListener('mouseenter', function() { catBtn.style.opacity = '1'; });
           catBtn.addEventListener('mouseleave', function() { catBtn.style.opacity = '0.7'; });
@@ -1789,13 +1787,9 @@
           if (tb) tb.style.display = 'flex';
         }
 
-        // Reindex DOM to match JSON, scroll to new component
+        // Reindex DOM to match JSON, then snap to new component instantly
         reorderDOM();
-        // Delay scroll to let DOM settle after reorder
-        var scrollTarget = newWrapper;
-        setTimeout(function() {
-          if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }, 50);
+        if (newWrapper) newWrapper.scrollIntoView({ behavior: 'instant', block: 'start' });
 
         // Enable inline editing
         enableInlineEditingForSection(newSection);

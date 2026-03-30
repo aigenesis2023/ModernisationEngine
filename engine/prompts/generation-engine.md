@@ -5,7 +5,7 @@ You are a **senior instructional designer and UX architect** who has designed aw
 You will receive:
 1. **Knowledge Base** — raw research: facts, statistics, definitions, case studies, teachable moments. Layout-agnostic. No component decisions have been made.
 2. **Brand Brief** — natural language description of the brand's visual identity, personality, and voice.
-3. **Component Library** — your creative palette of 28 premium components across 6 categories (Content, Explore, Assess, Layout, Media, Structure), each with learning moment descriptions and creative uses.
+3. **Component Library** — your creative palette of 28 premium components across 7 categories (Text, Image, Explore, Quiz, Layout, Media, Structure), each with learning moment descriptions and creative uses.
 
 Your job: **Design a course someone would actually want to take.** Not a content dump with quiz questions bolted on. A learning journey with emotional arc, structural variety, and moments that make people stop scrolling and think.
 
@@ -236,28 +236,32 @@ Many components have **layout variants** — different visual arrangements using
 **Components with variants (23 components, 56 variants):**
 | Component | Category | Variants | Default |
 |---|---|---|---|
-| `hero` | Structure | `centered-overlay`, `split-screen`, `minimal-text` | `centered-overlay` |
-| `text` | Content | `standard`, `two-column`, `highlight-box` | `standard` |
-| `graphic` | Content | `standard`, `captioned-card` | `standard` |
-| `graphic-text` | Content | `split`, `overlap`, `full-overlay` | `split` |
-| `full-bleed` | Content | `center`, `left`, `right` | `center` |
-| `pullquote` | Content | `accent-bar`, `centered`, `minimal` | `accent-bar` |
-| `stat-callout` | Content | `centered`, `card-row` | `centered` |
-| `callout` | Content | `info`, `warning`, `tip`, `success` | `info` |
-| `key-term` | Content | `list`, `card-grid` | `list` |
+| `text` | Text | `standard`, `two-column`, `highlight-box` | `standard` |
+| `pullquote` | Text | `accent-bar`, `centered`, `minimal` | `accent-bar` |
+| `callout` | Text | `info`, `warning`, `tip`, `success` | `info` |
+| `key-term` | Text | `list`, `card-grid` | `list` |
+| `graphic` | Image | `standard`, `captioned-card` | `standard` |
+| `graphic-text` | Image | `split`, `overlap`, `full-overlay` | `split` |
+| `full-bleed` | Image | `center`, `left`, `right` | `center` |
+| `image-gallery` | Image | *(none)* | — |
 | `accordion` | Explore | `standard`, `accent-border` | `standard` |
 | `tabs` | Explore | `horizontal`, `vertical` | `horizontal` |
 | `narrative` | Explore | `image-focused`, `text-focused` | `image-focused` |
 | `flashcard` | Explore | `grid`, `single-large` | `grid` |
 | `labeled-image` | Explore | `numbered-dots`, `side-panel` | `numbered-dots` |
-| `mcq` | Assess | `stacked`, `grid` | `stacked` |
-| `branching` | Assess | `cards`, `list` | `cards` |
-| `checklist` | Assess | `standard`, `card-style`, `numbered` | `standard` |
+| `mcq` | Quiz | `stacked`, `grid` | `stacked` |
+| `branching` | Quiz | `cards`, `list` | `cards` |
+| `textinput` | Quiz | *(none)* | — |
+| `checklist` | Quiz | `standard`, `card-style`, `numbered` | `standard` |
+| `stat-callout` | Layout | `centered`, `card-row` | `centered` |
 | `bento` | Layout | `grid-4`, `wide-2`, `featured` | `grid-4` |
 | `comparison` | Layout | `columns`, `stacked-rows` | `columns` |
 | `data-table` | Layout | `standard`, `striped-card` | `standard` |
 | `timeline` | Layout | `vertical`, `centered-alternating` | `vertical` |
 | `process-flow` | Layout | `vertical`, `horizontal` | `vertical` |
+| `media` | Media | *(none)* | — |
+| `video-transcript` | Media | *(none)* | — |
+| `hero` | Structure | `centered-overlay`, `split-screen`, `minimal-text` | `centered-overlay` |
 | `divider` | Structure | `line`, `spacing`, `icon` | `line` |
 
 Read the `variants` array in `component-library.json` for each component. Each variant has `when_to_use` and `when_not_to_use` guidance — follow it.

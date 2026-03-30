@@ -73,16 +73,15 @@ export const INTERACTIVE_TYPES = new Set([
 // ─── Category map ────────────────────────────────────────────────────
 
 export const CATEGORY_MAP: Record<string, string> = {
-  'hero': 'Structure', 'path-selector': 'Structure', 'divider': 'Structure',
-  'text': 'Content', 'graphic': 'Content', 'graphic-text': 'Content',
-  'full-bleed': 'Content', 'pullquote': 'Content', 'stat-callout': 'Content',
-  'key-term': 'Content', 'callout': 'Content',
+  'text': 'Text', 'pullquote': 'Text', 'callout': 'Text', 'key-term': 'Text',
+  'graphic': 'Image', 'graphic-text': 'Image', 'full-bleed': 'Image', 'image-gallery': 'Image',
   'accordion': 'Explore', 'tabs': 'Explore', 'narrative': 'Explore',
   'flashcard': 'Explore', 'labeled-image': 'Explore',
-  'mcq': 'Assess', 'branching': 'Assess', 'textinput': 'Assess', 'checklist': 'Assess',
-  'bento': 'Layout', 'comparison': 'Layout', 'data-table': 'Layout',
-  'timeline': 'Layout', 'process-flow': 'Layout', 'image-gallery': 'Layout',
+  'mcq': 'Quiz', 'branching': 'Quiz', 'textinput': 'Quiz', 'checklist': 'Quiz',
+  'stat-callout': 'Layout', 'bento': 'Layout', 'comparison': 'Layout', 'data-table': 'Layout',
+  'timeline': 'Layout', 'process-flow': 'Layout',
   'media': 'Media', 'video-transcript': 'Media',
+  'hero': 'Structure', 'divider': 'Structure', 'path-selector': 'Structure',
 };
 
 // ─── Variant map ─────────────────────────────────────────────────────

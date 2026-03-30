@@ -282,59 +282,33 @@ Phase 4e: Section width control           DROPPED (design decision, not user con
 
 ---
 
-## Category System (6 categories)
+## Unified Category System (7 categories)
 
-| Category | Intent | User Question It Answers | Components |
+One system used everywhere: toolbars, picker, JSON, docs, generation engine.
+
+| Category | Colour | User Question | Components |
 |---|---|---|---|
-| **Content** | Deliver information | "I want to present text, images, or key messages" | text, graphic, graphic-text, full-bleed, pullquote, stat-callout, key-term, **callout** |
-| **Explore** | Learner discovers by clicking | "I want the learner to reveal content at their own pace" | accordion, tabs, narrative, flashcard, labeled-image |
-| **Assess** | Test, reflect, or commit | "I want to check understanding or prompt action" | mcq, branching, textinput, checklist |
-| **Layout** | Arrange multiple items visually | "I have several related items to display together" | bento, comparison, data-table, timeline, process-flow, image-gallery |
-| **Media** | Video and audio | "I have video/audio content" | media, video-transcript |
-| **Structure** | Course-level elements | "I need course framing or visual breaks" | hero, path-selector, **divider** |
+| **Text** | `#3b82f6` blue | "I want to present text or key messages" | text, pullquote, callout, key-term (4) |
+| **Image** | `#8b5cf6` purple | "I want to show images or pair images with text" | graphic, graphic-text, full-bleed, image-gallery (4) |
+| **Explore** | `#10b981` emerald | "I want the learner to discover content at their own pace" | accordion, tabs, narrative, flashcard, labeled-image (5) |
+| **Quiz** | `#ef4444` red | "I want to check understanding or prompt action" | mcq, branching, textinput, checklist (4) |
+| **Layout** | `#f59e0b` amber | "I have several related items to display together" | stat-callout, bento, comparison, data-table, timeline, process-flow (6) |
+| **Media** | `#06b6d4` cyan | "I have video or audio content" | media, video-transcript (2) |
+| **Structure** | `#ec4899` pink | "I need a course opener or visual break" | hero, divider, path-selector (3) |
 
-### Design Decisions Behind Categories
+### Design Decisions
 
-**Why "Explore" not "Interactive"?** — "Interactive" is vague; MCQ is interactive too, but it's assessment. "Explore" clearly signals: content the learner reveals at their own pace. Every component in this category hides content behind a click (accordion panels, tab switches, carousel slides, flashcard flips, hotspot markers). The shared pattern is *discovery*.
+**Why 7 categories not 5-6?** — More specific categories are faster to scan. A user wanting a video clicks "Media" and sees 2 items instantly, rather than scrolling through "Content & Media" with 10+ items. Specificity beats consolidation for quick selection.
 
-**Why checklist is "Assess" not "Explore"?** — Checklists don't reveal hidden content. They prompt the learner to *commit* to actions and self-assess completion. The interaction pattern is closer to textinput (reflection) than accordion (discovery).
+**Text vs Image split** — "Image & Text" goes under Image because the image is the primary element. Text components (text, pullquote, callout, key-term) are all primarily text-driven.
 
-**Why branching is "Assess" not "Explore"?** — Branching asks "what would you do?" — it tests decision-making. The learner makes a judgement call, not a discovery. It's ungraded assessment.
+**Why "Explore"?** — "Interactive" is vague (MCQ is interactive too). "Explore" signals: content behind a click. Every Explore component hides content that the learner reveals (accordion panels, tab switches, carousel slides, flashcard flips, hotspot markers).
 
-**Why bento/timeline/process-flow are "Layout" not "Content" or "Explore"?** — These components arrange multiple items in a visual structure (grid, sequence, flow). The *arrangement* is the value, not the text content or an interaction pattern. A user asking "I have 5 related things to show" reaches for Layout.
+**Why checklist is Quiz?** — Checklists prompt self-assessment and commitment, not content discovery. The interaction pattern is closer to textinput (reflection) than accordion (discovery).
 
-**Why "Content" includes both text-only and image components?** — All deliver information directly. Graphic, full-bleed, pullquote, stat-callout — they present content to be consumed, not explored or assessed. The user question is always "I want to show/tell something."
+**Why stat-callout is Layout?** — It arranges multiple items (statistics) in a grid or card row. The arrangement is the value, same as bento, timeline, or comparison.
 
-### Category Migration Map (current → new)
-
-| Component | Current Category | New Category | Reason for Change |
-|---|---|---|---|
-| hero | structural | Structure | Rename only |
-| text | content | Content | No change |
-| graphic | visual | Content | It delivers visual content, not "layout" |
-| graphic-text | content | Content | No change |
-| full-bleed | visual | Content | It's a content delivery format |
-| pullquote | visual | Content | It emphasizes key text content |
-| stat-callout | content | Content | No change |
-| key-term | content | Content | No change |
-| accordion | interactive | Explore | Learner reveals content by clicking |
-| tabs | interactive | Explore | Learner reveals content by clicking |
-| narrative | interactive | Explore | Learner navigates through slides |
-| flashcard | interactive | Explore | Learner flips to discover |
-| labeled-image | visual | Explore | Learner clicks markers to reveal |
-| mcq | assessment | Assess | No change (renamed) |
-| branching | interactive | Assess | It tests decision-making |
-| textinput | interactive | Assess | It prompts reflection |
-| checklist | interactive | Assess | It prompts self-assessment/commitment |
-| bento | content | Layout | It arranges multiple cards in a grid |
-| comparison | content | Layout | It arranges items in columns |
-| data-table | content | Layout | It arranges data in rows/columns |
-| timeline | content | Layout | It arranges items in sequence |
-| process-flow | visual | Layout | It arranges nodes in a flow |
-| image-gallery | visual | Layout | It arranges images in a grid |
-| media | visual | Media | No change |
-| video-transcript | visual | Media | No change |
-| path-selector | structural | Structure | No change |
+**Why image-gallery is Image not Layout?** — A gallery presents images. The user reaches for it when thinking "I have images to show," not "I need to arrange data."
 
 ---
 
@@ -378,21 +352,25 @@ This table defines every user-facing label in the authoring tool. Internal names
 | | | `right` | Text right |
 | `image-gallery` | Gallery | *(no variants)* | |
 
-### Layout (4 components)
+### Layout (6 components)
 
 | Internal Name | User Label | Variant (internal) | Variant Label |
 |---|---|---|---|
 | `stat-callout` | Key Statistics | `centered` | Grid |
 | | | `card-row` | Cards with bars |
-| `data-table` | Table | `standard` | Simple |
-| | | `striped-card` | Card with stripes |
-| `comparison` | Comparison | `columns` | Side by side |
-| | | `stacked-rows` | Stacked rows |
 | `bento` | Cards | `grid-4` | Grid |
 | | | `wide-2` | Two columns |
 | | | `featured` | Featured card |
+| `comparison` | Comparison | `columns` | Side by side |
+| | | `stacked-rows` | Stacked rows |
+| `data-table` | Table | `standard` | Simple |
+| | | `striped-card` | Card with stripes |
+| `timeline` | Timeline | `vertical` | Stacked |
+| | | `centered-alternating` | Alternating sides |
+| `process-flow` | Process | `vertical` | Top to bottom |
+| | | `horizontal` | Left to right |
 
-### Interactive (8 components)
+### Explore (5 components)
 
 | Internal Name | User Label | Variant (internal) | Variant Label |
 |---|---|---|---|
@@ -406,15 +384,8 @@ This table defines every user-facing label in the authoring tool. Internal names
 | | | `single-large` | One at a time |
 | `labeled-image` | Labelled Image | `numbered-dots` | Numbered on image |
 | | | `side-panel` | Side panel |
-| `checklist` | Checklist | `standard` | Simple list |
-| | | `card-style` | Cards |
-| | | `numbered` | Numbered |
-| `timeline` | Timeline | `vertical` | Stacked |
-| | | `centered-alternating` | Alternating sides |
-| `process-flow` | Process | `vertical` | Top to bottom |
-| | | `horizontal` | Left to right |
 
-### Quiz (3 components)
+### Quiz (4 components)
 
 | Internal Name | User Label | Variant (internal) | Variant Label |
 |---|---|---|---|
@@ -423,6 +394,9 @@ This table defines every user-facing label in the authoring tool. Internal names
 | `branching` | Scenario | `cards` | Cards |
 | | | `list` | List |
 | `textinput` | Open Response | *(no variants)* | |
+| `checklist` | Checklist | `standard` | Simple list |
+| | | `card-style` | Cards |
+| | | `numbered` | Numbered |
 
 ### Media (2 components)
 

@@ -3,7 +3,6 @@
   "title": "Component Library",
   "description": "Creative palette of 28 components across 6 categories (Content, Explore, Assess, Layout, Media, Structure) for designing premium deep-scroll learning experiences. Each entry describes the learning moment it creates, creative uses beyond the obvious, and technical props. The generation agent should treat this as an inspiration deck, not a checklist.",
   "version": "4.0.0",
-
   "components": [
     {
       "type": "hero",
@@ -20,9 +19,21 @@
       "when_to_use": "Always use as the FIRST component. Every course starts with a hero.",
       "when_not_to_use": "Never use more than once per course.",
       "variants": [
-        { "name": "centered-overlay", "when_to_use": "Default. Strong hero image, punchy title. Works for any topic.", "when_not_to_use": "Never wrong, but predictable if used every time." },
-        { "name": "split-screen", "when_to_use": "When the hero image is strong and specific (not abstract). Creates a magazine feel. Text left, image right, 50/50 grid.", "when_not_to_use": "Weak without a real image. Don't use if the image would be generic." },
-        { "name": "minimal-text", "when_to_use": "Abstract or conceptual topics. When typography IS the design. No image, border-left accent, bold typography only. Creates sophistication.", "when_not_to_use": "Don't use if you have a great hero image — it would be wasted." }
+        {
+          "name": "centered-overlay",
+          "when_to_use": "Default. Strong hero image, punchy title. Works for any topic.",
+          "when_not_to_use": "Never wrong, but predictable if used every time."
+        },
+        {
+          "name": "split-screen",
+          "when_to_use": "When the hero image is strong and specific (not abstract). Creates a magazine feel. Text left, image right, 50/50 grid.",
+          "when_not_to_use": "Weak without a real image. Don't use if the image would be generic."
+        },
+        {
+          "name": "minimal-text",
+          "when_to_use": "Abstract or conceptual topics. When typography IS the design. No image, border-left accent, bold typography only. Creates sophistication.",
+          "when_not_to_use": "Don't use if you have a great hero image — it would be wasted."
+        }
       ],
       "image_dimensions": "1920x1080 (16:9)",
       "props": {
@@ -47,11 +58,10 @@
         }
       }
     },
-
     {
       "type": "text",
       "component": "TextBlock",
-      "category": "Content",
+      "category": "Text",
       "status": "built",
       "description": "Clean text block with heading and body. The workhorse component for explanatory content.",
       "learningMoment": "Text sets the stage. It's where you build the narrative thread that connects everything else. The best text blocks make the learner nod and think 'tell me more' — not 'I know this already.'",
@@ -63,9 +73,21 @@
       "when_to_use": "For introductory paragraphs, explanations, context-setting text, or any content that is primarily prose. Works well as the first block in a section to set context before interactive components.",
       "when_not_to_use": "Don't use for content that would benefit from visual structure (lists → checklist, steps → timeline, definitions → key-term).",
       "variants": [
-        { "name": "standard", "when_to_use": "Default. Single-column prose with heading. Clean, readable, works everywhere.", "when_not_to_use": "Can feel monotonous if every text block uses this." },
-        { "name": "two-column", "when_to_use": "Split body text into two columns for scannable content — comparisons, parallel points, or dense reference material. Creates a magazine feel.", "when_not_to_use": "Don't use for narrative prose that flows linearly. Don't use for short text (needs enough content to fill both columns)." },
-        { "name": "highlight-box", "when_to_use": "Subtle background card with left accent border. Elevates the text visually — good for key takeaways, summary paragraphs, or important context.", "when_not_to_use": "Don't use for every text block — loses impact. Reserve for 1-2 per course that deserve emphasis." }
+        {
+          "name": "standard",
+          "when_to_use": "Default. Single-column prose with heading. Clean, readable, works everywhere.",
+          "when_not_to_use": "Can feel monotonous if every text block uses this."
+        },
+        {
+          "name": "two-column",
+          "when_to_use": "Split body text into two columns for scannable content — comparisons, parallel points, or dense reference material. Creates a magazine feel.",
+          "when_not_to_use": "Don't use for narrative prose that flows linearly. Don't use for short text (needs enough content to fill both columns)."
+        },
+        {
+          "name": "highlight-box",
+          "when_to_use": "Subtle background card with left accent border. Elevates the text visually — good for key takeaways, summary paragraphs, or important context.",
+          "when_not_to_use": "Don't use for every text block — loses impact. Reserve for 1-2 per course that deserve emphasis."
+        }
       ],
       "props": {
         "required": {
@@ -82,11 +104,10 @@
         "body": "<p>Electric vehicles replace the internal combustion engine with an electric motor powered by a rechargeable battery pack. This fundamental difference affects every aspect of how the vehicle is maintained, repaired, and handled in emergencies.</p>"
       }
     },
-
     {
       "type": "graphic",
       "component": "GraphicBlock",
-      "category": "Content",
+      "category": "Image",
       "status": "built",
       "description": "Full-width image with hover zoom effect and optional caption. Provides visual breathing room between text-heavy sections.",
       "learningMoment": "A well-placed image lets the brain process what it just read. It's not decoration — it's cognitive breathing room. The best standalone images make the learner pause and look closer.",
@@ -98,8 +119,16 @@
       "when_to_use": "For standalone images that deserve full attention — diagrams, photographs, infographics. Place between text sections to break up content rhythm.",
       "when_not_to_use": "Don't use for images paired with explanatory text (use graphic-text instead). Don't use for decorative images with no educational value.",
       "variants": [
-        { "name": "standard", "when_to_use": "Default. Full-width image with hover zoom. Clean, simple presentation.", "when_not_to_use": "If the image needs a prominent caption, use captioned-card." },
-        { "name": "captioned-card", "when_to_use": "Image presented inside a card with rounded corners, shadow, and a visible caption area below. Better for diagrams or infographics that need context.", "when_not_to_use": "Don't use for atmospheric or background-style images — the card frame reduces impact." }
+        {
+          "name": "standard",
+          "when_to_use": "Default. Full-width image with hover zoom. Clean, simple presentation.",
+          "when_not_to_use": "If the image needs a prominent caption, use captioned-card."
+        },
+        {
+          "name": "captioned-card",
+          "when_to_use": "Image presented inside a card with rounded corners, shadow, and a visible caption area below. Better for diagrams or infographics that need context.",
+          "when_not_to_use": "Don't use for atmospheric or background-style images — the card frame reduces impact."
+        }
       ],
       "image_dimensions": "1920x1080 (16:9)",
       "props": {
@@ -124,11 +153,10 @@
         "body": "<p>A typical EV battery pack contains thousands of individual cells arranged in modules.</p>"
       }
     },
-
     {
       "type": "graphic-text",
       "component": "GraphicText",
-      "category": "Content",
+      "category": "Image",
       "status": "built",
       "description": "Side-by-side split layout with text on one side and image on the other. Alternates left/right for visual rhythm.",
       "learningMoment": "The human eye naturally moves between image and text, creating a visual dialogue. Each graphic-text is a mini-story: the image catches attention, the text delivers understanding.",
@@ -140,9 +168,21 @@
       "when_to_use": "For content that pairs an explanation with a supporting image. Alternate _imageAlign between sections for visual variety.",
       "when_not_to_use": "Don't use back-to-back more than twice. If the image isn't directly related to the text, use separate text + graphic components.",
       "variants": [
-        { "name": "split", "when_to_use": "Default 50/50 side-by-side with glow effect on image. Works for any paired content.", "when_not_to_use": "Predictable if every graphic-text uses this." },
-        { "name": "overlap", "when_to_use": "60% image with text card overlapping from the right. Elevated, premium feel. Great for feature highlights or case studies.", "when_not_to_use": "Don't use without a strong image — the overlap draws attention to the image." },
-        { "name": "full-overlay", "when_to_use": "Full-width image with gradient overlay, text positioned on one side. Image is the star. Best when the image tells half the story.", "when_not_to_use": "Don't use for long body text — the overlay limits reading space." }
+        {
+          "name": "split",
+          "when_to_use": "Default 50/50 side-by-side with glow effect on image. Works for any paired content.",
+          "when_not_to_use": "Predictable if every graphic-text uses this."
+        },
+        {
+          "name": "overlap",
+          "when_to_use": "60% image with text card overlapping from the right. Elevated, premium feel. Great for feature highlights or case studies.",
+          "when_not_to_use": "Don't use without a strong image — the overlap draws attention to the image."
+        },
+        {
+          "name": "full-overlay",
+          "when_to_use": "Full-width image with gradient overlay, text positioned on one side. Image is the star. Best when the image tells half the story.",
+          "when_not_to_use": "Don't use for long body text — the overlay limits reading space."
+        }
       ],
       "image_dimensions": "800x600 (4:3)",
       "props": {
@@ -169,7 +209,6 @@
         "_imageAlign": "right"
       }
     },
-
     {
       "type": "accordion",
       "component": "SilkyAccordion",
@@ -186,8 +225,16 @@
       "when_to_use": "For content with 3-8 distinct topics of roughly equal weight that learners can explore in any order.",
       "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items. Don't use for critical content that ALL learners must see (it's optional to expand).",
       "variants": [
-        { "name": "standard", "when_to_use": "Default. Clean panels with border and chevron icon. Works for any accordion content.", "when_not_to_use": "Predictable if every accordion uses this." },
-        { "name": "accent-border", "when_to_use": "Left border accent alternating primary/secondary colours with Material Symbols icons in summary. More visual distinction between panels. Great for myths vs reality, categorised content.", "when_not_to_use": "Don't use if the accordion items don't have a natural icon mapping." }
+        {
+          "name": "standard",
+          "when_to_use": "Default. Clean panels with border and chevron icon. Works for any accordion content.",
+          "when_not_to_use": "Predictable if every accordion uses this."
+        },
+        {
+          "name": "accent-border",
+          "when_to_use": "Left border accent alternating primary/secondary colours with Material Symbols icons in summary. More visual distinction between panels. Great for myths vs reality, categorised content.",
+          "when_not_to_use": "Don't use if the accordion items don't have a natural icon mapping."
+        }
       ],
       "props": {
         "required": {
@@ -219,11 +266,10 @@
         ]
       }
     },
-
     {
       "type": "mcq",
       "component": "MCQPro",
-      "category": "Assess",
+      "category": "Quiz",
       "status": "built",
       "description": "Multiple-choice quiz with selection, submit, visual feedback, and retry. Supports single and multi-select modes.",
       "learningMoment": "The best quiz questions create a moment of productive doubt — the learner thinks they know, commits to an answer, and then discovers whether their understanding holds up. That moment of uncertainty is where learning happens.",
@@ -236,8 +282,16 @@
       "when_to_use": "For knowledge checks that test comprehension and application, not trivia recall. The generation agent creates ALL assessments — there are no pre-built quiz questions in the knowledge base.",
       "when_not_to_use": "Don't cluster multiple quizzes together. Don't test trivial recall. Don't place before teaching the material.",
       "variants": [
-        { "name": "stacked", "when_to_use": "Default. Vertical list of choices in a card. Better for long answer text or detailed scenarios.", "when_not_to_use": "Can feel monotonous if every quiz uses this." },
-        { "name": "grid", "when_to_use": "2x2 grid with large letter labels (A/B/C/D), question centered above. Better for short answer text (under 15 words each). Creates a more visual, game-like feel.", "when_not_to_use": "Don't use with long answer text — cards will overflow. Don't use with more than 4 choices." }
+        {
+          "name": "stacked",
+          "when_to_use": "Default. Vertical list of choices in a card. Better for long answer text or detailed scenarios.",
+          "when_not_to_use": "Can feel monotonous if every quiz uses this."
+        },
+        {
+          "name": "grid",
+          "when_to_use": "2x2 grid with large letter labels (A/B/C/D), question centered above. Better for short answer text (under 15 words each). Creates a more visual, game-like feel.",
+          "when_not_to_use": "Don't use with long answer text — cards will overflow. Don't use with more than 4 choices."
+        }
       ],
       "props": {
         "required": {
@@ -263,10 +317,22 @@
         "instruction": "Choose the best answer.",
         "_selectable": 1,
         "_items": [
-          { "text": "12-48V", "_shouldBeSelected": false },
-          { "text": "100-200V", "_shouldBeSelected": false },
-          { "text": "400-800V", "_shouldBeSelected": true },
-          { "text": "1000-2000V", "_shouldBeSelected": false }
+          {
+            "text": "12-48V",
+            "_shouldBeSelected": false
+          },
+          {
+            "text": "100-200V",
+            "_shouldBeSelected": false
+          },
+          {
+            "text": "400-800V",
+            "_shouldBeSelected": true
+          },
+          {
+            "text": "1000-2000V",
+            "_shouldBeSelected": false
+          }
         ],
         "_feedback": {
           "correct": "<p>Correct! Most modern EVs operate in the 400-800V range, with some performance vehicles reaching even higher.</p>",
@@ -276,7 +342,6 @@
         }
       }
     },
-
     {
       "type": "narrative",
       "component": "NarrativeSlider",
@@ -293,8 +358,16 @@
       "when_to_use": "For sequential content that tells a story or walks through a process step by step. Use 3-7 slides.",
       "when_not_to_use": "Don't use for content that isn't sequential. Don't use with fewer than 3 slides.",
       "variants": [
-        { "name": "image-focused", "when_to_use": "Default. Large image area (60%+) with text overlay or sidebar. Best when slides have strong visuals that tell the story.", "when_not_to_use": "Don't use if slides lack images or have generic stock photos." },
-        { "name": "text-focused", "when_to_use": "Larger text area with optional small image. Best for story-driven narratives where the writing carries the content — case studies, incident walkthroughs.", "when_not_to_use": "Don't use if you have strong images that should be the focus." }
+        {
+          "name": "image-focused",
+          "when_to_use": "Default. Large image area (60%+) with text overlay or sidebar. Best when slides have strong visuals that tell the story.",
+          "when_not_to_use": "Don't use if slides lack images or have generic stock photos."
+        },
+        {
+          "name": "text-focused",
+          "when_to_use": "Larger text area with optional small image. Best for story-driven narratives where the writing carries the content — case studies, incident walkthroughs.",
+          "when_not_to_use": "Don't use if you have strong images that should be the focus."
+        }
       ],
       "image_dimensions": "800x600 (4:3) per slide",
       "props": {
@@ -313,22 +386,30 @@
           {
             "title": "Step 1: Scene Assessment",
             "body": "<p>Before approaching the vehicle, assess the scene for immediate hazards: fire, fluid leaks, structural damage, or downed power lines.</p>",
-            "_graphic": { "large": "images/scene-assessment.jpg", "alt": "First responder assessing an EV accident scene" }
+            "_graphic": {
+              "large": "images/scene-assessment.jpg",
+              "alt": "First responder assessing an EV accident scene"
+            }
           },
           {
             "title": "Step 2: Disable the Vehicle",
             "body": "<p>Locate and activate the high-voltage disconnect. This is typically found in the engine bay or under the rear seat.</p>",
-            "_graphic": { "large": "images/hv-disconnect.jpg", "alt": "High-voltage disconnect switch location" }
+            "_graphic": {
+              "large": "images/hv-disconnect.jpg",
+              "alt": "High-voltage disconnect switch location"
+            }
           },
           {
             "title": "Step 3: Establish Safe Zone",
             "body": "<p>Create a 10-metre exclusion zone around the vehicle. Ensure all personnel wear appropriate PPE including insulated gloves rated to 1000V.</p>",
-            "_graphic": { "large": "images/safe-zone.jpg", "alt": "Exclusion zone diagram around damaged EV" }
+            "_graphic": {
+              "large": "images/safe-zone.jpg",
+              "alt": "Exclusion zone diagram around damaged EV"
+            }
           }
         ]
       }
     },
-
     {
       "type": "bento",
       "component": "BentoGrid",
@@ -345,9 +426,21 @@
       "when_to_use": "For presenting 3-6 related concepts, features, or topics at a glance. Perfect for peer items that aren't sequential.",
       "when_not_to_use": "Don't use for sequential content (use narrative or timeline). Don't use with fewer than 3 items.",
       "variants": [
-        { "name": "grid-4", "when_to_use": "Default. 4-column grid with featured first card spanning 2 cols. Works for 4-6 items of mixed importance.", "when_not_to_use": "Can feel cramped with very long card text." },
-        { "name": "wide-2", "when_to_use": "2-column layout with icon circles and more text space. Better for 3-4 items with detailed descriptions.", "when_not_to_use": "Don't use with 5+ items — too many rows." },
-        { "name": "featured", "when_to_use": "One large featured card (gradient background, col-span-2, row-span-2) plus smaller cards. Use when one item is clearly more important than the others.", "when_not_to_use": "Don't use if all items are equally important." }
+        {
+          "name": "grid-4",
+          "when_to_use": "Default. 4-column grid with featured first card spanning 2 cols. Works for 4-6 items of mixed importance.",
+          "when_not_to_use": "Can feel cramped with very long card text."
+        },
+        {
+          "name": "wide-2",
+          "when_to_use": "2-column layout with icon circles and more text space. Better for 3-4 items with detailed descriptions.",
+          "when_not_to_use": "Don't use with 5+ items — too many rows."
+        },
+        {
+          "name": "featured",
+          "when_to_use": "One large featured card (gradient background, col-span-2, row-span-2) plus smaller cards. Use when one item is clearly more important than the others.",
+          "when_not_to_use": "Don't use if all items are equally important."
+        }
       ],
       "image_dimensions": "600x400 (3:2) per card",
       "props": {
@@ -366,22 +459,30 @@
           {
             "title": "Level 1 — Home Outlet",
             "body": "<p>Standard 120V outlet. Adds 5-8km of range per hour. Best for overnight charging at home.</p>",
-            "_graphic": { "large": "images/level1-charging.jpg", "alt": "EV plugged into home outlet" }
+            "_graphic": {
+              "large": "images/level1-charging.jpg",
+              "alt": "EV plugged into home outlet"
+            }
           },
           {
             "title": "Level 2 — Dedicated Charger",
             "body": "<p>240V installation. Adds 40-50km of range per hour. Ideal for home and workplace charging.</p>",
-            "_graphic": { "large": "images/level2-charging.jpg", "alt": "Wall-mounted Level 2 charger" }
+            "_graphic": {
+              "large": "images/level2-charging.jpg",
+              "alt": "Wall-mounted Level 2 charger"
+            }
           },
           {
             "title": "DC Fast Charging",
             "body": "<p>Direct current at 50-350kW. Can charge to 80% in 20-40 minutes. Found at public charging stations.</p>",
-            "_graphic": { "large": "images/dc-fast-charging.jpg", "alt": "DC fast charging station" }
+            "_graphic": {
+              "large": "images/dc-fast-charging.jpg",
+              "alt": "DC fast charging station"
+            }
           }
         ]
       }
     },
-
     {
       "type": "data-table",
       "component": "DataTable",
@@ -398,8 +499,16 @@
       "when_to_use": "For comparative data, specifications, reference tables, or any structured information with consistent columns.",
       "when_not_to_use": "Don't use for simple two-column comparisons (use comparison instead). Don't use for narrative content forced into table format.",
       "variants": [
-        { "name": "standard", "when_to_use": "Default. Clean table with sticky header and alternating row shading. Works for any tabular data.", "when_not_to_use": "Can feel utilitarian for premium courses." },
-        { "name": "striped-card", "when_to_use": "Table rendered as a card with stronger visual styling — rounded corners, elevated shadow, bold header row. Better for specification tables or reference cards the learner might screenshot.", "when_not_to_use": "Don't use for very wide tables with many columns — card padding reduces available width." }
+        {
+          "name": "standard",
+          "when_to_use": "Default. Clean table with sticky header and alternating row shading. Works for any tabular data.",
+          "when_not_to_use": "Can feel utilitarian for premium courses."
+        },
+        {
+          "name": "striped-card",
+          "when_to_use": "Table rendered as a card with stronger visual styling — rounded corners, elevated shadow, bold header row. Better for specification tables or reference cards the learner might screenshot.",
+          "when_not_to_use": "Don't use for very wide tables with many columns — card padding reduces available width."
+        }
       ],
       "props": {
         "required": {
@@ -415,7 +524,6 @@
         "body": "<ul><li>Battery Capacity | 75 kWh</li><li>Voltage | 400V</li><li>Weight | 450 kg</li><li>Warranty | 8 years / 160,000 km</li><li>Cycle Life | 1,500+ cycles</li></ul>"
       }
     },
-
     {
       "type": "media",
       "component": "MediaBlock",
@@ -452,11 +560,10 @@
         }
       }
     },
-
     {
       "type": "textinput",
       "component": "TextInputBlock",
-      "category": "Assess",
+      "category": "Quiz",
       "status": "built",
       "description": "Multi-field form with labeled text inputs and submit button. Used for reflection prompts or data entry activities.",
       "learningMoment": "Writing forces thinking. When learners put their thoughts into words, they move from passive understanding to active ownership. The reflection is the learning — the form is just the container.",
@@ -482,17 +589,25 @@
         "displayTitle": "Personal Action Plan",
         "body": "<p>Based on what you've learned, document your key takeaways and next steps.</p>",
         "_items": [
-          { "prefix": "Key takeaway from this module", "placeholder": "What stood out most to you?" },
-          { "prefix": "How will you apply this in your role?", "placeholder": "Describe a specific action..." },
-          { "prefix": "Questions you still have", "placeholder": "What would you like to explore further?" }
+          {
+            "prefix": "Key takeaway from this module",
+            "placeholder": "What stood out most to you?"
+          },
+          {
+            "prefix": "How will you apply this in your role?",
+            "placeholder": "Describe a specific action..."
+          },
+          {
+            "prefix": "Questions you still have",
+            "placeholder": "What would you like to explore further?"
+          }
         ]
       }
     },
-
     {
       "type": "branching",
       "component": "BranchingCards",
-      "category": "Assess",
+      "category": "Quiz",
       "status": "built",
       "description": "Selectable option cards with letter labels (A, B, C...) and selection indicator. For scenario-based choices or self-assessment.",
       "learningMoment": "Branching forces the learner to commit to a decision before seeing the outcome. That moment of choice — 'What would I actually do?' — is more powerful than any amount of telling.",
@@ -505,8 +620,16 @@
       "when_to_use": "For scenario-based learning where learners choose an option. Good for decision-making exercises and self-assessment.",
       "when_not_to_use": "Don't use for graded questions (use mcq). Don't use with more than 5 options.",
       "variants": [
-        { "name": "cards", "when_to_use": "Default. Large selectable cards with letter labels (A, B, C). Visual, engaging, game-like feel.", "when_not_to_use": "Can feel heavy with 5 options." },
-        { "name": "list", "when_to_use": "Compact list format with radio-button style selection. Better for longer option text or when space is tight.", "when_not_to_use": "Less visually engaging — don't use when you want impact." }
+        {
+          "name": "cards",
+          "when_to_use": "Default. Large selectable cards with letter labels (A, B, C). Visual, engaging, game-like feel.",
+          "when_not_to_use": "Can feel heavy with 5 options."
+        },
+        {
+          "name": "list",
+          "when_to_use": "Compact list format with radio-button style selection. Better for longer option text or when space is tight.",
+          "when_not_to_use": "Less visually engaging — don't use when you want impact."
+        }
       ],
       "props": {
         "required": {
@@ -520,7 +643,6 @@
         "body": "<ul><li>Immediately approach the vehicle to check for injuries</li><li>Call emergency services and establish a safe perimeter</li><li>Attempt to disconnect the battery yourself</li><li>Wait for the vehicle manufacturer's emergency response team</li></ul>"
       }
     },
-
     {
       "type": "timeline",
       "component": "TimelineStepper",
@@ -537,8 +659,16 @@
       "when_to_use": "For sequential processes, historical timelines, or step-by-step procedures where ORDER matters. Use 3-8 steps.",
       "when_not_to_use": "Don't use for non-sequential content (use accordion or bento). Don't use for very short steps with just a title (use checklist).",
       "variants": [
-        { "name": "vertical", "when_to_use": "Default. Left-border with glowing dots. Works for any number of steps (3-8). Best for 5+ items.", "when_not_to_use": "Can feel long with 7+ items." },
-        { "name": "centered-alternating", "when_to_use": "Center line, items alternate left/right with numbered circles. More visual, magazine-like feel. Best for 3-5 items.", "when_not_to_use": "Don't use with 6+ items — becomes very tall. Don't use on mobile-heavy audiences (falls back to vertical)." }
+        {
+          "name": "vertical",
+          "when_to_use": "Default. Left-border with glowing dots. Works for any number of steps (3-8). Best for 5+ items.",
+          "when_not_to_use": "Can feel long with 7+ items."
+        },
+        {
+          "name": "centered-alternating",
+          "when_to_use": "Center line, items alternate left/right with numbered circles. More visual, magazine-like feel. Best for 3-5 items.",
+          "when_not_to_use": "Don't use with 6+ items — becomes very tall. Don't use on mobile-heavy audiences (falls back to vertical)."
+        }
       ],
       "props": {
         "required": {
@@ -553,14 +683,25 @@
         "_component": "timeline",
         "displayTitle": "EV Maintenance Schedule",
         "_items": [
-          { "title": "Monthly Check", "body": "<p>Inspect tyre pressure, washer fluid, and charge cable condition. Check for any dashboard warning lights.</p>" },
-          { "title": "Every 6 Months", "body": "<p>Rotate tyres, inspect brake pads (they last longer on EVs due to regenerative braking), and check coolant levels.</p>" },
-          { "title": "Annual Service", "body": "<p>Full diagnostic scan, cabin air filter replacement, battery health check, and software updates.</p>" },
-          { "title": "Every 2 Years", "body": "<p>Replace brake fluid, inspect suspension components, and check high-voltage cable insulation integrity.</p>" }
+          {
+            "title": "Monthly Check",
+            "body": "<p>Inspect tyre pressure, washer fluid, and charge cable condition. Check for any dashboard warning lights.</p>"
+          },
+          {
+            "title": "Every 6 Months",
+            "body": "<p>Rotate tyres, inspect brake pads (they last longer on EVs due to regenerative braking), and check coolant levels.</p>"
+          },
+          {
+            "title": "Annual Service",
+            "body": "<p>Full diagnostic scan, cabin air filter replacement, battery health check, and software updates.</p>"
+          },
+          {
+            "title": "Every 2 Years",
+            "body": "<p>Replace brake fluid, inspect suspension components, and check high-voltage cable insulation integrity.</p>"
+          }
         ]
       }
     },
-
     {
       "type": "comparison",
       "component": "ComparisonTable",
@@ -577,8 +718,16 @@
       "when_to_use": "For comparing 2-3 options, plans, approaches, or technologies across multiple criteria.",
       "when_not_to_use": "Don't use for data-heavy tables (use data-table). Don't compare more than 3 columns.",
       "variants": [
-        { "name": "columns", "when_to_use": "Default. Side-by-side table with check/cross icons. Classic comparison format.", "when_not_to_use": "Can look plain if used repeatedly." },
-        { "name": "stacked-rows", "when_to_use": "Horizontal rows with category label in center, options on each side. More compact, scannable. Better for 2-column comparisons.", "when_not_to_use": "Don't use with 3 columns — only works for 2-column comparisons." }
+        {
+          "name": "columns",
+          "when_to_use": "Default. Side-by-side table with check/cross icons. Classic comparison format.",
+          "when_not_to_use": "Can look plain if used repeatedly."
+        },
+        {
+          "name": "stacked-rows",
+          "when_to_use": "Horizontal rows with category label in center, options on each side. More compact, scannable. Better for 2-column comparisons.",
+          "when_not_to_use": "Don't use with 3 columns — only works for 2-column comparisons."
+        }
       ],
       "props": {
         "required": {
@@ -594,23 +743,58 @@
         "_component": "comparison",
         "displayTitle": "EV vs ICE: Maintenance Comparison",
         "columns": [
-          { "title": "Electric Vehicle", "subtitle": "Battery-powered" },
-          { "title": "ICE Vehicle", "subtitle": "Petrol/Diesel" }
+          {
+            "title": "Electric Vehicle",
+            "subtitle": "Battery-powered"
+          },
+          {
+            "title": "ICE Vehicle",
+            "subtitle": "Petrol/Diesel"
+          }
         ],
         "rows": [
-          { "label": "Oil changes required", "values": [false, true] },
-          { "label": "Brake pad replacement frequency", "values": ["Every 80,000 km", "Every 40,000 km"] },
-          { "label": "Transmission service", "values": [false, true] },
-          { "label": "Battery health monitoring", "values": [true, false] },
-          { "label": "Software updates", "values": [true, "Rare"] }
+          {
+            "label": "Oil changes required",
+            "values": [
+              false,
+              true
+            ]
+          },
+          {
+            "label": "Brake pad replacement frequency",
+            "values": [
+              "Every 80,000 km",
+              "Every 40,000 km"
+            ]
+          },
+          {
+            "label": "Transmission service",
+            "values": [
+              false,
+              true
+            ]
+          },
+          {
+            "label": "Battery health monitoring",
+            "values": [
+              true,
+              false
+            ]
+          },
+          {
+            "label": "Software updates",
+            "values": [
+              true,
+              "Rare"
+            ]
+          }
         ]
       }
     },
-
     {
       "type": "stat-callout",
       "component": "StatCallout",
-      "category": "Content",
+      "category": "Layout",
       "status": "new",
       "description": "Large prominent numbers or statistics with labels and optional context. Animated count-up on scroll. Displayed in a row of 2-4 stats.",
       "learningMoment": "Big numbers create emotional impact before the brain even processes the words. The count-up animation forces the eye to watch the number grow — building tension and making the final value land harder.",
@@ -623,8 +807,16 @@
       "when_to_use": "For impactful statistics or numbers that deserve emphasis. Use 2-4 stats that tell a story together.",
       "when_not_to_use": "Don't use for non-numeric content. Don't use more than 4 stats. Don't use for numbers that aren't surprising or impactful.",
       "variants": [
-        { "name": "centered", "when_to_use": "Default. Large centered numbers in a grid. Clean and impactful.", "when_not_to_use": "Predictable if used every time." },
-        { "name": "card-row", "when_to_use": "Individual glass cards with progress bars underneath each stat. More visual weight and structure. Better when stats represent completion or progress.", "when_not_to_use": "Don't use for simple percentages where the bar adds no meaning." }
+        {
+          "name": "centered",
+          "when_to_use": "Default. Large centered numbers in a grid. Clean and impactful.",
+          "when_not_to_use": "Predictable if used every time."
+        },
+        {
+          "name": "card-row",
+          "when_to_use": "Individual glass cards with progress bars underneath each stat. More visual weight and structure. Better when stats represent completion or progress.",
+          "when_not_to_use": "Don't use for simple percentages where the bar adds no meaning."
+        }
       ],
       "props": {
         "required": {
@@ -639,17 +831,28 @@
         "_component": "stat-callout",
         "displayTitle": "The EV Revolution in Numbers",
         "_items": [
-          { "value": "14", "suffix": "M+", "label": "EVs sold globally in 2023" },
-          { "value": "70", "suffix": "%", "label": "Reduction in moving parts vs ICE" },
-          { "value": "80", "suffix": "%", "label": "Lower fuel costs per km" }
+          {
+            "value": "14",
+            "suffix": "M+",
+            "label": "EVs sold globally in 2023"
+          },
+          {
+            "value": "70",
+            "suffix": "%",
+            "label": "Reduction in moving parts vs ICE"
+          },
+          {
+            "value": "80",
+            "suffix": "%",
+            "label": "Lower fuel costs per km"
+          }
         ]
       }
     },
-
     {
       "type": "pullquote",
       "component": "PullQuote",
-      "category": "Content",
+      "category": "Text",
       "status": "new",
       "description": "Emphasized text with a vertical accent bar and optional attribution. Draws attention to key messages or expert quotes.",
       "learningMoment": "A pullquote is a visual exclamation mark. It says: 'This is the one thing to remember from this section.' Used well, it becomes the line the learner quotes to their colleagues tomorrow.",
@@ -662,9 +865,21 @@
       "when_to_use": "For highlighting a critical insight, expert quote, or key message. Use sparingly — 1-2 per course maximum.",
       "when_not_to_use": "Don't overuse. Don't use for generic text that doesn't deserve emphasis.",
       "variants": [
-        { "name": "accent-bar", "when_to_use": "Default. Vertical accent bar on the left with large italic quote text. Classic editorial look.", "when_not_to_use": "Predictable if every pullquote uses this." },
-        { "name": "centered", "when_to_use": "Centered text with decorative quotation marks above and below. More dramatic, statement-like. Better for provocative or aspirational quotes.", "when_not_to_use": "Don't use for long quotes — centered text is harder to read at length." },
-        { "name": "minimal", "when_to_use": "Clean text with no decorative elements — just larger font size and extra whitespace. Sophisticated, understated. Best when the words speak for themselves.", "when_not_to_use": "Can look like a regular text block if the font size difference isn't clear enough. Don't use if you need visual emphasis." }
+        {
+          "name": "accent-bar",
+          "when_to_use": "Default. Vertical accent bar on the left with large italic quote text. Classic editorial look.",
+          "when_not_to_use": "Predictable if every pullquote uses this."
+        },
+        {
+          "name": "centered",
+          "when_to_use": "Centered text with decorative quotation marks above and below. More dramatic, statement-like. Better for provocative or aspirational quotes.",
+          "when_not_to_use": "Don't use for long quotes — centered text is harder to read at length."
+        },
+        {
+          "name": "minimal",
+          "when_to_use": "Clean text with no decorative elements — just larger font size and extra whitespace. Sophisticated, understated. Best when the words speak for themselves.",
+          "when_not_to_use": "Can look like a regular text block if the font size difference isn't clear enough. Don't use if you need visual emphasis."
+        }
       ],
       "props": {
         "required": {
@@ -682,11 +897,10 @@
         "role": "2024 Safety Guidelines"
       }
     },
-
     {
       "type": "key-term",
       "component": "KeyTerm",
-      "category": "Content",
+      "category": "Text",
       "status": "new",
       "description": "Highlighted vocabulary term with its definition. Styled with a distinctive background and icon to stand out from body text.",
       "learningMoment": "Key terms are anchors — they give learners precise language to describe what they've learned. When someone learns the RIGHT word for a concept, they can search for it, discuss it, and build on it.",
@@ -699,8 +913,16 @@
       "when_to_use": "For introducing domain-specific terminology. Can group 2-5 terms together. Don't use for every new word — only for terms the learner needs to remember.",
       "when_not_to_use": "Don't use for common words. Don't use for full paragraphs of explanation (use text instead). Consider weaving simple definitions into prose, comparisons, or flashcards instead.",
       "variants": [
-        { "name": "list", "when_to_use": "Default. Vertical list with term highlighted and definition below. Clean, scannable, works for 1-5 terms.", "when_not_to_use": "Can feel long with 5+ terms." },
-        { "name": "card-grid", "when_to_use": "Terms displayed as cards in a responsive grid. More visual, each term gets equal weight. Better for 3-5 terms of similar importance.", "when_not_to_use": "Don't use for single terms. Don't use with very long definitions — cards need concise text." }
+        {
+          "name": "list",
+          "when_to_use": "Default. Vertical list with term highlighted and definition below. Clean, scannable, works for 1-5 terms.",
+          "when_not_to_use": "Can feel long with 5+ terms."
+        },
+        {
+          "name": "card-grid",
+          "when_to_use": "Terms displayed as cards in a responsive grid. More visual, each term gets equal weight. Better for 3-5 terms of similar importance.",
+          "when_not_to_use": "Don't use for single terms. Don't use with very long definitions — cards need concise text."
+        }
       ],
       "props": {
         "required": {
@@ -714,17 +936,25 @@
         "_component": "key-term",
         "displayTitle": "Key Terms",
         "_items": [
-          { "term": "Thermal Runaway", "definition": "An uncontrolled chain reaction in battery cells where rising temperature causes further heat generation, potentially leading to fire or explosion." },
-          { "term": "State of Charge (SoC)", "definition": "The current battery charge level expressed as a percentage of total capacity, similar to a fuel gauge." },
-          { "term": "Regenerative Braking", "definition": "A system that recovers kinetic energy during deceleration by using the electric motor as a generator to recharge the battery." }
+          {
+            "term": "Thermal Runaway",
+            "definition": "An uncontrolled chain reaction in battery cells where rising temperature causes further heat generation, potentially leading to fire or explosion."
+          },
+          {
+            "term": "State of Charge (SoC)",
+            "definition": "The current battery charge level expressed as a percentage of total capacity, similar to a fuel gauge."
+          },
+          {
+            "term": "Regenerative Braking",
+            "definition": "A system that recovers kinetic energy during deceleration by using the electric motor as a generator to recharge the battery."
+          }
         ]
       }
     },
-
     {
       "type": "checklist",
       "component": "Checklist",
-      "category": "Assess",
+      "category": "Quiz",
       "status": "new",
       "description": "Checkable items with completion tracking and a progress indicator. Items can be ticked off by the learner.",
       "learningMoment": "Checklists transform knowledge into action. Each checkbox is a commitment: 'I understand this, and I'll do it.' The progress indicator creates momentum — learners want to reach 100%.",
@@ -737,9 +967,21 @@
       "when_to_use": "For action lists, pre-task checklists, safety procedures, or any content where learners should confirm understanding of each item.",
       "when_not_to_use": "Don't use for informational lists without actionable items (use text with <ul>). Don't use for sequential steps (use timeline).",
       "variants": [
-        { "name": "standard", "when_to_use": "Default. Simple checkbox list with progress bar. Clean, functional, works everywhere.", "when_not_to_use": "Can feel plain for high-stakes or premium courses." },
-        { "name": "card-style", "when_to_use": "Each item is a visual card with checkbox. More visual weight, premium feel. Better for action plans or commitment lists where each item deserves attention.", "when_not_to_use": "Don't use for long lists (8+) — too many cards." },
-        { "name": "numbered", "when_to_use": "Numbered badges instead of checkboxes. Items must be completed in order. Best for sequential procedures or priority-ranked lists.", "when_not_to_use": "Don't use for non-sequential items where order doesn't matter." }
+        {
+          "name": "standard",
+          "when_to_use": "Default. Simple checkbox list with progress bar. Clean, functional, works everywhere.",
+          "when_not_to_use": "Can feel plain for high-stakes or premium courses."
+        },
+        {
+          "name": "card-style",
+          "when_to_use": "Each item is a visual card with checkbox. More visual weight, premium feel. Better for action plans or commitment lists where each item deserves attention.",
+          "when_not_to_use": "Don't use for long lists (8+) — too many cards."
+        },
+        {
+          "name": "numbered",
+          "when_to_use": "Numbered badges instead of checkboxes. Items must be completed in order. Best for sequential procedures or priority-ranked lists.",
+          "when_not_to_use": "Don't use for non-sequential items where order doesn't matter."
+        }
       ],
       "props": {
         "required": {
@@ -756,15 +998,26 @@
         "displayTitle": "Pre-Inspection Safety Checklist",
         "instruction": "Confirm each item before beginning work on an EV.",
         "_items": [
-          { "text": "Insulated gloves rated to 1000V are available and inspected", "detail": "Check for tears, holes, or signs of damage before each use." },
-          { "text": "Vehicle is powered off and key is removed", "detail": "Verify 'Ready' light on dashboard is off." },
-          { "text": "High-voltage service disconnect is confirmed open" },
-          { "text": "Area is clear of water and conductive materials" },
-          { "text": "Emergency response plan is reviewed and understood" }
+          {
+            "text": "Insulated gloves rated to 1000V are available and inspected",
+            "detail": "Check for tears, holes, or signs of damage before each use."
+          },
+          {
+            "text": "Vehicle is powered off and key is removed",
+            "detail": "Verify 'Ready' light on dashboard is off."
+          },
+          {
+            "text": "High-voltage service disconnect is confirmed open"
+          },
+          {
+            "text": "Area is clear of water and conductive materials"
+          },
+          {
+            "text": "Emergency response plan is reviewed and understood"
+          }
         ]
       }
     },
-
     {
       "type": "tabs",
       "component": "TabPanel",
@@ -781,8 +1034,16 @@
       "when_to_use": "For 2-6 categories of content that are alternatives (not sequential). Users choose which to view.",
       "when_not_to_use": "Don't use for sequential content (use narrative). Don't use with more than 6 tabs (use accordion). Don't nest tabs inside tabs.",
       "variants": [
-        { "name": "horizontal", "when_to_use": "Default. Centered pill buttons above content panel. Clean, familiar pattern.", "when_not_to_use": "Can feel crowded with 5+ tabs or long tab labels." },
-        { "name": "vertical", "when_to_use": "Sidebar buttons on left, content panel on right. Better for longer tab labels, many tabs (4-6), or when tab names are descriptive phrases.", "when_not_to_use": "Don't use with only 2 tabs — looks unbalanced." }
+        {
+          "name": "horizontal",
+          "when_to_use": "Default. Centered pill buttons above content panel. Clean, familiar pattern.",
+          "when_not_to_use": "Can feel crowded with 5+ tabs or long tab labels."
+        },
+        {
+          "name": "vertical",
+          "when_to_use": "Sidebar buttons on left, content panel on right. Better for longer tab labels, many tabs (4-6), or when tab names are descriptive phrases.",
+          "when_not_to_use": "Don't use with only 2 tabs — looks unbalanced."
+        }
       ],
       "props": {
         "required": {
@@ -812,7 +1073,6 @@
         ]
       }
     },
-
     {
       "type": "flashcard",
       "component": "Flashcard",
@@ -829,8 +1089,16 @@
       "when_to_use": "For vocabulary review, Q&A pairs, or any content where learners should try to recall before seeing the answer. Place AFTER the teaching section.",
       "when_not_to_use": "Don't use for first-time content delivery. Don't use for complex multi-paragraph content.",
       "variants": [
-        { "name": "grid", "when_to_use": "Default. Cards displayed in a responsive grid (2-3 columns). Best for 4-8 cards — creates a visual overview the learner can scan.", "when_not_to_use": "Can feel crowded with very long front/back text." },
-        { "name": "single-large", "when_to_use": "One large card at a time with prev/next navigation. Better for longer content on each card or when you want focused attention on each flip.", "when_not_to_use": "Don't use with 3 or fewer cards — not enough to justify navigation." }
+        {
+          "name": "grid",
+          "when_to_use": "Default. Cards displayed in a responsive grid (2-3 columns). Best for 4-8 cards — creates a visual overview the learner can scan.",
+          "when_not_to_use": "Can feel crowded with very long front/back text."
+        },
+        {
+          "name": "single-large",
+          "when_to_use": "One large card at a time with prev/next navigation. Better for longer content on each card or when you want focused attention on each flip.",
+          "when_not_to_use": "Don't use with 3 or fewer cards — not enough to justify navigation."
+        }
       ],
       "props": {
         "required": {
@@ -846,13 +1114,21 @@
         "displayTitle": "Review: Key Concepts",
         "instruction": "Click each card to test your knowledge.",
         "_items": [
-          { "front": "What voltage range do EV batteries typically operate at?", "back": "400-800V DC, with some performance vehicles exceeding 800V." },
-          { "front": "What is regenerative braking?", "back": "A system that uses the electric motor as a generator during deceleration to convert kinetic energy back into stored electrical energy." },
-          { "front": "What PPE is required for EV high-voltage work?", "back": "Class 0 insulated gloves (rated to 1000V), safety glasses, and insulated tools." }
+          {
+            "front": "What voltage range do EV batteries typically operate at?",
+            "back": "400-800V DC, with some performance vehicles exceeding 800V."
+          },
+          {
+            "front": "What is regenerative braking?",
+            "back": "A system that uses the electric motor as a generator during deceleration to convert kinetic energy back into stored electrical energy."
+          },
+          {
+            "front": "What PPE is required for EV high-voltage work?",
+            "back": "Class 0 insulated gloves (rated to 1000V), safety glasses, and insulated tools."
+          }
         ]
       }
     },
-
     {
       "type": "labeled-image",
       "component": "LabeledImage",
@@ -869,8 +1145,16 @@
       "when_to_use": "For diagrams, equipment photos, or illustrations where specific parts need identification.",
       "when_not_to_use": "Don't use if the image is simple enough for a caption (use graphic).",
       "variants": [
-        { "name": "numbered-dots", "when_to_use": "Default. Numbered circular markers on the image, clicking reveals a tooltip. Classic hotspot pattern.", "when_not_to_use": "Can feel cluttered with 8+ markers." },
-        { "name": "side-panel", "when_to_use": "Image on left with a scrollable list panel on right. Clicking a list item highlights the corresponding area on the image. Better for detailed descriptions per marker.", "when_not_to_use": "Don't use for images where spatial position matters more than description detail." }
+        {
+          "name": "numbered-dots",
+          "when_to_use": "Default. Numbered circular markers on the image, clicking reveals a tooltip. Classic hotspot pattern.",
+          "when_not_to_use": "Can feel cluttered with 8+ markers."
+        },
+        {
+          "name": "side-panel",
+          "when_to_use": "Image on left with a scrollable list panel on right. Clicking a list item highlights the corresponding area on the image. Better for detailed descriptions per marker.",
+          "when_not_to_use": "Don't use for images where spatial position matters more than description detail."
+        }
       ],
       "image_dimensions": "1200x800 (3:2)",
       "props": {
@@ -895,14 +1179,33 @@
           "alt": "Cutaway view of an EV battery pack showing internal components"
         },
         "_markers": [
-          { "x": 25, "y": 40, "label": "Battery Cells", "body": "Individual lithium-ion cells arranged in series and parallel to achieve target voltage and capacity." },
-          { "x": 60, "y": 30, "label": "Cooling System", "body": "Liquid cooling channels that maintain optimal cell temperature between 20-40°C." },
-          { "x": 80, "y": 60, "label": "BMS Module", "body": "The Battery Management System that monitors and balances all cells." },
-          { "x": 15, "y": 75, "label": "HV Connector", "body": "High-voltage connector with safety interlock that disconnects during service." }
+          {
+            "x": 25,
+            "y": 40,
+            "label": "Battery Cells",
+            "body": "Individual lithium-ion cells arranged in series and parallel to achieve target voltage and capacity."
+          },
+          {
+            "x": 60,
+            "y": 30,
+            "label": "Cooling System",
+            "body": "Liquid cooling channels that maintain optimal cell temperature between 20-40°C."
+          },
+          {
+            "x": 80,
+            "y": 60,
+            "label": "BMS Module",
+            "body": "The Battery Management System that monitors and balances all cells."
+          },
+          {
+            "x": 15,
+            "y": 75,
+            "label": "HV Connector",
+            "body": "High-voltage connector with safety interlock that disconnects during service."
+          }
         ]
       }
     },
-
     {
       "type": "process-flow",
       "component": "ProcessFlow",
@@ -919,8 +1222,16 @@
       "when_to_use": "For workflows, decision trees, or any process where the flow and connections matter. Use 3-6 nodes.",
       "when_not_to_use": "Don't use for simple linear steps (use timeline).",
       "variants": [
-        { "name": "vertical", "when_to_use": "Default. Nodes stacked vertically with downward arrows. Works for any number of nodes (3-6). Clear top-to-bottom flow.", "when_not_to_use": "Can feel like a timeline if nodes don't have decision branching." },
-        { "name": "horizontal", "when_to_use": "Nodes arranged left-to-right with horizontal arrows. Better for 3-4 nodes on desktop. Creates a pipeline/workflow feel.", "when_not_to_use": "Don't use with 5+ nodes — overflows on smaller screens. Falls back to vertical on mobile." }
+        {
+          "name": "vertical",
+          "when_to_use": "Default. Nodes stacked vertically with downward arrows. Works for any number of nodes (3-6). Clear top-to-bottom flow.",
+          "when_not_to_use": "Can feel like a timeline if nodes don't have decision branching."
+        },
+        {
+          "name": "horizontal",
+          "when_to_use": "Nodes arranged left-to-right with horizontal arrows. Better for 3-4 nodes on desktop. Creates a pipeline/workflow feel.",
+          "when_not_to_use": "Don't use with 5+ nodes — overflows on smaller screens. Falls back to vertical on mobile."
+        }
       ],
       "props": {
         "required": {
@@ -935,19 +1246,38 @@
         "_component": "process-flow",
         "displayTitle": "EV Charging Decision Flow",
         "_nodes": [
-          { "title": "Check Battery Level", "body": "Read the current State of Charge on the dashboard.", "type": "start" },
-          { "title": "Below 20%?", "body": "If SoC is below 20%, proceed to charge immediately.", "type": "decision" },
-          { "title": "Select Charger Type", "body": "Choose between Level 2 (if time available) or DC Fast Charge (if urgent).", "type": "process" },
-          { "title": "Connect & Charge", "body": "Plug in, authenticate, and monitor charging progress via the app.", "type": "process" },
-          { "title": "Charged to 80%+", "body": "Disconnect once target SoC is reached. Avoid routinely charging to 100%.", "type": "end" }
+          {
+            "title": "Check Battery Level",
+            "body": "Read the current State of Charge on the dashboard.",
+            "type": "start"
+          },
+          {
+            "title": "Below 20%?",
+            "body": "If SoC is below 20%, proceed to charge immediately.",
+            "type": "decision"
+          },
+          {
+            "title": "Select Charger Type",
+            "body": "Choose between Level 2 (if time available) or DC Fast Charge (if urgent).",
+            "type": "process"
+          },
+          {
+            "title": "Connect & Charge",
+            "body": "Plug in, authenticate, and monitor charging progress via the app.",
+            "type": "process"
+          },
+          {
+            "title": "Charged to 80%+",
+            "body": "Disconnect once target SoC is reached. Avoid routinely charging to 100%.",
+            "type": "end"
+          }
         ]
       }
     },
-
     {
       "type": "image-gallery",
       "component": "ImageGallery",
-      "category": "Layout",
+      "category": "Image",
       "status": "new",
       "description": "Grid or masonry layout of multiple images with lightbox zoom on click. Captions shown on hover.",
       "learningMoment": "Galleries create a sense of abundance and variety. Multiple images together help learners see patterns, differences, and real-world diversity that a single image can't convey.",
@@ -973,18 +1303,41 @@
         "_component": "image-gallery",
         "displayTitle": "EV Charger Types",
         "_items": [
-          { "_graphic": { "large": "images/type1-connector.jpg", "alt": "Type 1 (J1772) connector" }, "caption": "Type 1 / J1772 — Standard in North America" },
-          { "_graphic": { "large": "images/type2-connector.jpg", "alt": "Type 2 (Mennekes) connector" }, "caption": "Type 2 / Mennekes — Standard in Europe" },
-          { "_graphic": { "large": "images/ccs-connector.jpg", "alt": "CCS Combo connector" }, "caption": "CCS Combo — DC fast charging" },
-          { "_graphic": { "large": "images/chademo-connector.jpg", "alt": "CHAdeMO connector" }, "caption": "CHAdeMO — Japanese standard DC fast charging" }
+          {
+            "_graphic": {
+              "large": "images/type1-connector.jpg",
+              "alt": "Type 1 (J1772) connector"
+            },
+            "caption": "Type 1 / J1772 — Standard in North America"
+          },
+          {
+            "_graphic": {
+              "large": "images/type2-connector.jpg",
+              "alt": "Type 2 (Mennekes) connector"
+            },
+            "caption": "Type 2 / Mennekes — Standard in Europe"
+          },
+          {
+            "_graphic": {
+              "large": "images/ccs-connector.jpg",
+              "alt": "CCS Combo connector"
+            },
+            "caption": "CCS Combo — DC fast charging"
+          },
+          {
+            "_graphic": {
+              "large": "images/chademo-connector.jpg",
+              "alt": "CHAdeMO connector"
+            },
+            "caption": "CHAdeMO — Japanese standard DC fast charging"
+          }
         ]
       }
     },
-
     {
       "type": "full-bleed",
       "component": "FullBleedImage",
-      "category": "Content",
+      "category": "Image",
       "status": "new",
       "description": "Edge-to-edge full-width image with optional text overlay. Creates visual impact and section breaks. Parallax scroll effect.",
       "learningMoment": "Full-bleeds are emotional punctuation. They say: 'Pause. Feel this. The next section is different.' The best full-bleeds create a sense of transition — closing one chapter and opening another.",
@@ -997,9 +1350,21 @@
       "when_to_use": "For dramatic visual section dividers between major topics. 1-3 per course maximum.",
       "when_not_to_use": "Don't overuse. Don't use for images that need captions or detailed study.",
       "variants": [
-        { "name": "center", "when_to_use": "Default. Text overlay centered on the image. Balanced, works for any message.", "when_not_to_use": "If the image has a strong focal point on one side, the centered text may compete with it." },
-        { "name": "left", "when_to_use": "Text positioned on the left third with gradient from left. Better when the image's focal point is on the right side.", "when_not_to_use": "Don't use if the left side of the image contains the important visual content." },
-        { "name": "right", "when_to_use": "Text positioned on the right third with gradient from right. Mirror of left variant.", "when_not_to_use": "Don't use if the right side of the image contains the important visual content." }
+        {
+          "name": "center",
+          "when_to_use": "Default. Text overlay centered on the image. Balanced, works for any message.",
+          "when_not_to_use": "If the image has a strong focal point on one side, the centered text may compete with it."
+        },
+        {
+          "name": "left",
+          "when_to_use": "Text positioned on the left third with gradient from left. Better when the image's focal point is on the right side.",
+          "when_not_to_use": "Don't use if the left side of the image contains the important visual content."
+        },
+        {
+          "name": "right",
+          "when_to_use": "Text positioned on the right third with gradient from right. Mirror of left variant.",
+          "when_not_to_use": "Don't use if the right side of the image contains the important visual content."
+        }
       ],
       "image_dimensions": "1920x800 (12:5 ultra-wide)",
       "props": {
@@ -1026,7 +1391,6 @@
         "overlayPosition": "center"
       }
     },
-
     {
       "type": "video-transcript",
       "component": "VideoTranscript",
@@ -1064,7 +1428,6 @@
         "transcript": "<p><strong>Interviewer:</strong> Can you explain the safety systems built into modern EV batteries?</p><p><strong>Dr. Chen:</strong> Absolutely. Modern battery packs have multiple layers of protection...</p>"
       }
     },
-
     {
       "type": "path-selector",
       "component": "PathSelector",
@@ -1096,13 +1459,24 @@
         "body": "<p>Select your role to see content tailored to your responsibilities.</p>",
         "pathGroup": "group",
         "_items": [
-          { "title": "Non-Technical", "body": "Site logistics, car parking, valeting.", "variable": "Group1NonTechnical" },
-          { "title": "Semi-Technical", "body": "Service advisor, customer liaison.", "variable": "Group2SemiTechnical" },
-          { "title": "Technical", "body": "Workshop technician, mechanic.", "variable": "Group3Technical" }
+          {
+            "title": "Non-Technical",
+            "body": "Site logistics, car parking, valeting.",
+            "variable": "Group1NonTechnical"
+          },
+          {
+            "title": "Semi-Technical",
+            "body": "Service advisor, customer liaison.",
+            "variable": "Group2SemiTechnical"
+          },
+          {
+            "title": "Technical",
+            "body": "Workshop technician, mechanic.",
+            "variable": "Group3Technical"
+          }
         ]
       }
     },
-
     {
       "type": "divider",
       "component": "Divider",
@@ -1118,9 +1492,21 @@
       "when_to_use": "Between sections or content groups that need visual separation. Use sparingly — 2-4 per course maximum. The AI generation engine should place dividers at natural topic transitions.",
       "when_not_to_use": "Don't use between every section — sections already have spacing. Don't use inside interactive components. Don't use as decoration.",
       "variants": [
-        { "name": "line", "when_to_use": "Default. Subtle horizontal rule with opacity. Clean, minimal separation.", "when_not_to_use": "Can feel clinical if overused." },
-        { "name": "spacing", "when_to_use": "Extra whitespace only — no visible element. For cognitive breathing room between heavy sections.", "when_not_to_use": "Invisible, so don't use where the learner needs a clear signal of topic change." },
-        { "name": "icon", "when_to_use": "Centered icon (from Material Symbols) with thin lines on either side. Signals a topic shift with personality.", "when_not_to_use": "Don't use if there's no natural icon for the transition. Don't use more than once per course." }
+        {
+          "name": "line",
+          "when_to_use": "Default. Subtle horizontal rule with opacity. Clean, minimal separation.",
+          "when_not_to_use": "Can feel clinical if overused."
+        },
+        {
+          "name": "spacing",
+          "when_to_use": "Extra whitespace only — no visible element. For cognitive breathing room between heavy sections.",
+          "when_not_to_use": "Invisible, so don't use where the learner needs a clear signal of topic change."
+        },
+        {
+          "name": "icon",
+          "when_to_use": "Centered icon (from Material Symbols) with thin lines on either side. Signals a topic shift with personality.",
+          "when_not_to_use": "Don't use if there's no natural icon for the transition. Don't use more than once per course."
+        }
       ],
       "props": {
         "required": {},
@@ -1145,11 +1531,10 @@
         "icon": "lightbulb"
       }
     },
-
     {
       "type": "callout",
       "component": "Callout",
-      "category": "Content",
+      "category": "Text",
       "status": "new",
       "description": "Styled notification box with icon, title, and body. Used for tips, warnings, important notes, or success messages.",
       "learningMoment": "Callouts are attention anchors — they break the reading flow intentionally to say 'This is important enough to highlight.' The icon and colour create an instant emotional signal before the text is even read.",
@@ -1162,10 +1547,26 @@
       "when_to_use": "For content that deserves visual emphasis — tips, warnings, important notes, or success celebrations. Use 2-5 per course.",
       "when_not_to_use": "Don't use for regular content that doesn't need highlighting. Don't cluster multiple callouts together. Don't use as a substitute for good heading hierarchy.",
       "variants": [
-        { "name": "info", "when_to_use": "Default. Blue/neutral accent. For supplementary context, additional detail, or 'good to know' notes.", "when_not_to_use": "Don't use for warnings or critical information." },
-        { "name": "warning", "when_to_use": "Amber/orange accent with warning icon. For common mistakes, pitfalls, or 'watch out' moments.", "when_not_to_use": "Don't overuse — if everything is a warning, nothing is." },
-        { "name": "tip", "when_to_use": "Green accent with lightbulb icon. For pro tips, shortcuts, best practices, or insider knowledge.", "when_not_to_use": "Don't use for basic information that isn't actually a tip." },
-        { "name": "success", "when_to_use": "Green/positive accent with check icon. For celebrating milestones, confirming understanding, or positive reinforcement.", "when_not_to_use": "Don't use at the start of a course — save for after the learner has achieved something." }
+        {
+          "name": "info",
+          "when_to_use": "Default. Blue/neutral accent. For supplementary context, additional detail, or 'good to know' notes.",
+          "when_not_to_use": "Don't use for warnings or critical information."
+        },
+        {
+          "name": "warning",
+          "when_to_use": "Amber/orange accent with warning icon. For common mistakes, pitfalls, or 'watch out' moments.",
+          "when_not_to_use": "Don't overuse — if everything is a warning, nothing is."
+        },
+        {
+          "name": "tip",
+          "when_to_use": "Green accent with lightbulb icon. For pro tips, shortcuts, best practices, or insider knowledge.",
+          "when_not_to_use": "Don't use for basic information that isn't actually a tip."
+        },
+        {
+          "name": "success",
+          "when_to_use": "Green/positive accent with check icon. For celebrating milestones, confirming understanding, or positive reinforcement.",
+          "when_not_to_use": "Don't use at the start of a course — save for after the learner has achieved something."
+        }
       ],
       "props": {
         "required": {
@@ -1185,7 +1586,6 @@
       }
     }
   ],
-
   "design_rules": {
     "visual_variety": "Never place two consecutive components of the same type. Alternate between content-heavy and visual components.",
     "section_rhythm": "Vary section density intentionally. Breather sections (1-2 components) give the learner space. Deep dive sections (5-7 components) go thorough. Standard sections (3-4 components) are the workhorse.",
@@ -1195,43 +1595,83 @@
     "visual_breaks": "Use full-bleed, stat-callout, or pullquote between dense content sections to create breathing room.",
     "scroll_test": "For every section, ask: 'Would a learner on their phone scroll past this at 11pm?' If yes, redesign it."
   },
-
   "component_categories": {
-    "Content": {
-      "label": "Content",
-      "description": "Deliver information — text, images, key messages, and visual emphasis",
-      "question": "I want to present text, images, or key messages",
-      "components": ["text", "graphic", "graphic-text", "full-bleed", "pullquote", "stat-callout", "key-term", "callout"]
+    "Text": {
+      "label": "Text",
+      "description": "Text blocks, quotes, callouts, and glossary terms",
+      "question": "I want to present text or key messages",
+      "components": [
+        "text",
+        "pullquote",
+        "callout",
+        "key-term"
+      ]
+    },
+    "Image": {
+      "label": "Image",
+      "description": "Images, image-text pairings, and galleries",
+      "question": "I want to show images or pair images with text",
+      "components": [
+        "graphic",
+        "graphic-text",
+        "full-bleed",
+        "image-gallery"
+      ]
     },
     "Explore": {
       "label": "Explore",
-      "description": "Learner discovers by clicking — reveal content at their own pace",
-      "question": "I want the learner to reveal content at their own pace",
-      "components": ["accordion", "tabs", "narrative", "flashcard", "labeled-image"]
+      "description": "Content the learner reveals by clicking, tapping, or navigating",
+      "question": "I want the learner to discover content at their own pace",
+      "components": [
+        "accordion",
+        "tabs",
+        "narrative",
+        "flashcard",
+        "labeled-image"
+      ]
     },
-    "Assess": {
-      "label": "Assess",
-      "description": "Test, reflect, or commit — check understanding or prompt action",
+    "Quiz": {
+      "label": "Quiz",
+      "description": "Test understanding, prompt reflection, or track progress",
       "question": "I want to check understanding or prompt action",
-      "components": ["mcq", "branching", "textinput", "checklist"]
+      "components": [
+        "mcq",
+        "branching",
+        "textinput",
+        "checklist"
+      ]
     },
     "Layout": {
       "label": "Layout",
-      "description": "Arrange multiple items visually — grids, tables, sequences, flows",
+      "description": "Arrange multiple items in grids, sequences, tables, or flows",
       "question": "I have several related items to display together",
-      "components": ["bento", "comparison", "data-table", "timeline", "process-flow", "image-gallery"]
+      "components": [
+        "stat-callout",
+        "bento",
+        "comparison",
+        "data-table",
+        "timeline",
+        "process-flow"
+      ]
     },
     "Media": {
       "label": "Media",
       "description": "Video and audio content",
-      "question": "I have video/audio content",
-      "components": ["media", "video-transcript"]
+      "question": "I have video or audio content",
+      "components": [
+        "media",
+        "video-transcript"
+      ]
     },
     "Structure": {
       "label": "Structure",
-      "description": "Course-level elements — framing and visual breaks",
-      "question": "I need course framing or visual breaks",
-      "components": ["hero", "path-selector", "divider"]
+      "description": "Course framing, navigation, and visual breaks",
+      "question": "I need a course opener or visual break",
+      "components": [
+        "hero",
+        "divider",
+        "path-selector"
+      ]
     }
   }
 }

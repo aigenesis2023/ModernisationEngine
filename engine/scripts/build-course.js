@@ -2351,16 +2351,15 @@ function getSectionMaxW(sectionWidth) {
 
 // ─── Category map: component type → category (for authoring panel) ────
 const CATEGORY_MAP = {
-  'hero': 'Structure', 'path-selector': 'Structure', 'divider': 'Structure',
-  'text': 'Content', 'graphic': 'Content', 'graphic-text': 'Content',
-  'full-bleed': 'Content', 'pullquote': 'Content', 'stat-callout': 'Content',
-  'key-term': 'Content', 'callout': 'Content',
+  'text': 'Text', 'pullquote': 'Text', 'callout': 'Text', 'key-term': 'Text',
+  'graphic': 'Image', 'graphic-text': 'Image', 'full-bleed': 'Image', 'image-gallery': 'Image',
   'accordion': 'Explore', 'tabs': 'Explore', 'narrative': 'Explore',
   'flashcard': 'Explore', 'labeled-image': 'Explore',
-  'mcq': 'Assess', 'branching': 'Assess', 'textinput': 'Assess', 'checklist': 'Assess',
-  'bento': 'Layout', 'comparison': 'Layout', 'data-table': 'Layout',
-  'timeline': 'Layout', 'process-flow': 'Layout', 'image-gallery': 'Layout',
-  'media': 'Media', 'video-transcript': 'Media'
+  'mcq': 'Quiz', 'branching': 'Quiz', 'textinput': 'Quiz', 'checklist': 'Quiz',
+  'stat-callout': 'Layout', 'bento': 'Layout', 'comparison': 'Layout', 'data-table': 'Layout',
+  'timeline': 'Layout', 'process-flow': 'Layout',
+  'media': 'Media', 'video-transcript': 'Media',
+  'hero': 'Structure', 'divider': 'Structure', 'path-selector': 'Structure',
 };
 
 // ─── Variant map: component types that have layout variants ───────────
@@ -2764,12 +2763,12 @@ ${templateLibraryHtml}
 <script type="application/json" id="category-meta">${JSON.stringify({
   map: CATEGORY_MAP,
   colors: {
-    Content: '#3b82f6', Explore: '#8b5cf6', Assess: '#ef4444',
-    Layout: '#22c55e', Media: '#06b6d4', Structure: '#f59e0b'
+    Text: '#3b82f6', Image: '#8b5cf6', Explore: '#10b981',
+    Quiz: '#ef4444', Layout: '#f59e0b', Media: '#06b6d4', Structure: '#ec4899'
   },
   labels: {
-    Content: 'Content', Explore: 'Explore', Assess: 'Assess',
-    Layout: 'Layout', Media: 'Media', Structure: 'Structure'
+    Text: 'Text', Image: 'Image', Explore: 'Explore',
+    Quiz: 'Quiz', Layout: 'Layout', Media: 'Media', Structure: 'Structure'
   }
 }).replace(/<\//g, '<\\/')}</script>
 <script>
