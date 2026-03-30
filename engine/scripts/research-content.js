@@ -85,7 +85,7 @@ function tavilyPost(endpoint, payload) {
 async function tavilySearch(query, topic) {
   const result = await tavilyPost('search', {
     query,
-    search_depth: 'advanced',
+    search_depth: 'basic',
     max_results: 6,
     include_raw_content: 'markdown',
     time_range: 'year',
