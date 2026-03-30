@@ -18,6 +18,63 @@ import {
 } from './utils.js';
 import type { CourseLayout, Section, Component, RenderContext } from './types.js';
 
+// ─── Component data normalisation ───────────────────────────────────
+// Preact components all read comp._items, comp._feedback, etc.
+// course-layout.json uses public names: items, cards, tabs, choices, steps, etc.
+// This function produces a normalised copy so we never mutate the original layout.
+
+function normalizeComponent(raw: any): Component {
+  const comp: any = { ...raw };
+
+  if (!comp._items) {
+    if (comp.type === 'flashcard') {
+      // cards: [{front, back}] → _items: [{front, back}]
+      comp._items = comp.cards || [];
+    } else if (comp.type === 'tabs') {
+      // tabs: [{label, body}] → _items: [{title, body}]
+      comp._items = (comp.tabs || []).map((t: any) => ({ ...t, title: t.label || t.title || '' }));
+    } else if (comp.type === 'mcq' || comp.type === 'branching') {
+      // choices: [{id, text, label, body}] → _items with correct flag
+      const correctId = comp.correct;
+      comp._items = (comp.choices || []).map((ch: any) => ({
+        ...ch,
+        title: ch.text || ch.label || ch.title || '',
+        body: ch.body || '',
+        correct: ch.id === correctId || ch.correct || false,
+      }));
+    } else if (comp.type === 'process-flow') {
+      // steps or nodes → _items
+      comp._items = comp.steps || comp.nodes || comp.items || [];
+    } else if (comp.type === 'stat-callout') {
+      // stats: [{value, unit, label}] → _items with suffix=unit
+      comp._items = (comp.stats || comp.items || []).map((s: any) => ({
+        ...s,
+        value: s.value || s.stat || '',
+        suffix: s.unit || s.suffix || '',
+        label: s.label || '',
+      }));
+    } else if (comp.type === 'textinput') {
+      // May have an items array, or a single placeholder/instruction as one item
+      comp._items = comp.items || (comp.placeholder
+        ? [{ label: comp.instruction || comp.displayTitle || '', placeholder: comp.placeholder }]
+        : []);
+    } else {
+      // accordion, timeline, bento, key-term, checklist, narrative, etc.
+      comp._items = comp.items || [];
+    }
+  }
+
+  // MCQ feedback: {correct, incorrect} → _feedback: {correct, _incorrect:{final}}
+  if (!comp._feedback && comp.feedback) {
+    comp._feedback = {
+      correct: comp.feedback.correct || '',
+      _incorrect: { final: comp.feedback.incorrect || '' },
+    };
+  }
+
+  return comp as Component;
+}
+
 // ─── Component rendering ────────────────────────────────────────────
 
 function renderComponentVariant(
@@ -37,7 +94,7 @@ function renderComponentVariant(
   }
 
   const Comp = entry.component;
-  const props: any = { comp };
+  const props: any = { comp: normalizeComponent(comp) };
 
   if (!entry.noVariant) props.variant = variant;
   if (!entry.noMaxW) props.maxW = maxW;

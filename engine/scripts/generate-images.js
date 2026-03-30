@@ -61,23 +61,19 @@ function getDimensions(componentType) {
 // Reads brand-design.md and extracts just the photographic mood for images.
 // NEVER includes UI design elements (glassmorphism, pill buttons, etc.)
 function extractTreatmentFromDescription(description) {
-  // Try to find an "Image Treatment" section
+  // Use Image Treatment section if present, otherwise full description
   const sectionMatch = description.match(/##\s*Image Treatment\s*\n([\s\S]*?)(?=\n##|\n$|$)/i);
-  if (sectionMatch) {
-    const raw = sectionMatch[1].trim();
-    // Clean: take first paragraph, strip markdown formatting
-    const firstPara = raw.split('\n\n')[0].replace(/[*_#]/g, '').trim();
-    if (firstPara.length > 10) return firstPara;
-  }
+  const source = sectionMatch ? sectionMatch[1].trim() : description;
+  const lower = source.toLowerCase();
 
-  // Fallback: derive photographic mood from overall tone words in the description
-  const lower = description.toLowerCase();
+  // Extract only lighting/mood/style signals — never use the raw text as a prompt
+  // (it may contain example photo descriptions like "person at laptop" that bleed into AI prompts)
   const parts = [];
 
   // Lighting
-  if (lower.includes('dark') || lower.includes('moody') || lower.includes('midnight') || lower.includes('deep shadow')) {
+  if (lower.includes('dark') || lower.includes('moody') || lower.includes('midnight') || lower.includes('low-key') || lower.includes('deep shadow')) {
     parts.push('dramatic low-key lighting, deep shadows');
-  } else if (lower.includes('bright') || lower.includes('airy') || lower.includes('light') || lower.includes('luminous')) {
+  } else if (lower.includes('bright') || lower.includes('airy') || lower.includes('luminous') || lower.includes('high-key')) {
     parts.push('clean bright natural lighting, soft even illumination');
   } else {
     parts.push('balanced professional lighting');
@@ -86,12 +82,15 @@ function extractTreatmentFromDescription(description) {
   // Colour temperature
   if (lower.includes('warm') || lower.includes('coral') || lower.includes('amber') || lower.includes('golden')) {
     parts.push('warm colour tones');
-  } else if (lower.includes('cool') || lower.includes('blue') || lower.includes('teal') || lower.includes('cyan') || lower.includes('ice')) {
+  } else if (lower.includes('cool') || lower.includes('teal') || lower.includes('cyan') || lower.includes('ice') || lower.includes('cold') ||
+             (lower.includes('blue') && !lower.includes('navy blue palette'))) {
     parts.push('cool blue-toned atmosphere');
   }
 
   // Style
-  if (lower.includes('elegant') || lower.includes('sophisticated') || lower.includes('premium') || lower.includes('luxury')) {
+  if (lower.includes('cinematic')) {
+    parts.push('cinematic wide composition');
+  } else if (lower.includes('elegant') || lower.includes('sophisticated') || lower.includes('premium') || lower.includes('luxury')) {
     parts.push('refined professional photography');
   } else if (lower.includes('creative') || lower.includes('bold') || lower.includes('dynamic') || lower.includes('vibrant')) {
     parts.push('dynamic artistic composition');
@@ -103,27 +102,40 @@ function extractTreatmentFromDescription(description) {
 }
 
 // ─── Stock photo via Pexels (default) ────────────────────────────────
-// Converts the AI image prompt into a search query, finds a matching
-// stock photo, downloads it. Free tier: 200 req/hr, 20k/month.
-function promptToSearchQuery(prompt) {
-  // Strip photographic treatment terms — keep only the content subject
-  return prompt
-    .replace(/,\s*(high resolution|sharp details|no text|no watermarks|dramatic|cinematic|moody|professional|clean|bright|warm|cool|balanced|artistic|editorial|low-key|lighting|shadows|highlights|illumination|composition|atmosphere|tones?|undertones?|colour temperature|photographic mood)[^,]*/gi, '')
-    .replace(/,\s*-\s*\*\*[^*]+\*\*[^,]*/g, '') // strip markdown bold items
+// Converts the AI image prompt into a short Pexels-searchable query.
+// Pexels is a stock photo library — it works best with concrete 2-4 word subjects,
+// not abstract descriptions. We extract the core subject noun phrase.
+function promptToSearchQuery(prompt, simplified = false) {
+  // Strip everything after the first em-dash or comma — keep only the opening subject
+  let subject = prompt
+    .split(/—|–/)[0]          // cut at em-dash
+    .split(',')[0]             // cut at first comma
     .replace(/\*\*/g, '')
     .replace(/\s+/g, ' ')
-    .trim()
-    .split(',')[0] // take first phrase (the subject)
-    .trim()
-    .substring(0, 100); // Pexels max query length
+    .trim();
+
+  if (simplified) {
+    // For retry: reduce to first 2-3 meaningful words, drop adjectives
+    const words = subject.split(' ').filter(w =>
+      w.length > 3 &&
+      !/^(deep|dark|bright|large|small|high|full|wide|long|dramatic|cinematic|abstract|photorealistic|close-up|artist|modern|dramatic|glowing|electric|faint|radiant|stunning|beautiful|stunning|vibrant|vast)/i.test(w)
+    );
+    subject = words.slice(0, 3).join(' ');
+  }
+
+  return subject.substring(0, 100);
 }
 
-async function fetchStockPhoto(prompt, dimensions, outputFilename) {
-  const query = promptToSearchQuery(prompt);
+async function fetchStockPhoto(prompt, dimensions, outputFilename, pexelsQuery = null) {
   const outputPath = path.join(OUTPUT_DIR, outputFilename);
   const orientation = dimensions.width > dimensions.height ? 'landscape' : 'portrait';
 
   for (let attempt = 1; attempt <= 2; attempt++) {
+    // Attempt 1: use pexelsQuery if provided, otherwise derive from prompt
+    // Attempt 2: fall back to simplified derived query
+    const query = (attempt === 1 && pexelsQuery)
+      ? pexelsQuery
+      : promptToSearchQuery(prompt, attempt === 2);
     try {
       console.log(`  Searching Pexels: "${query}" (${orientation})...`);
 
@@ -145,9 +157,8 @@ async function fetchStockPhoto(prompt, dimensions, outputFilename) {
 
       const data = await resp.json();
       if (!data.photos || data.photos.length === 0) {
-        // Try a simpler query (first 2 words)
         if (attempt === 1) {
-          console.log(`  No results, will retry with simpler query...`);
+          console.log(`  No results for "${query}", retrying with simplified query...`);
           continue;
         }
         throw new Error('No photos found');
@@ -373,10 +384,10 @@ async function main() {
     for (const comp of section.components) {
       if (comp.imagePrompt) {
         const dims = getDimensions(comp.type);
-        // Combine content subject + design treatment
         const fullPrompt = `${comp.imagePrompt}, ${treatment}`;
         queue.push({
           prompt: fullPrompt,
+          pexelsQuery: comp.pexelsQuery || null,
           dimensions: dims,
           filename: `${comp.componentId}.jpg`,
           component: comp,
@@ -391,6 +402,7 @@ async function main() {
           const fullPrompt = `${ip.prompt}, ${treatment}`;
           queue.push({
             prompt: fullPrompt,
+            pexelsQuery: ip.pexelsQuery || null,
             dimensions: dims,
             filename: `${comp.componentId}-${ip.key}.jpg`,
             component: comp,
@@ -420,7 +432,7 @@ async function main() {
     }
     if (!result && usePexels) {
       console.log(`  Falling back to Pexels...`);
-      result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
+      result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename, task.pexelsQuery);
     }
 
     if (result) {
@@ -453,7 +465,7 @@ async function main() {
         result = await generateImageSiliconFlow(task.prompt, task.dimensions, task.filename);
       }
       if (!result && usePexels) {
-        result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename);
+        result = await fetchStockPhoto(task.prompt, task.dimensions, task.filename, task.pexelsQuery);
       }
 
       if (result) {

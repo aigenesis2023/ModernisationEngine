@@ -59,7 +59,7 @@ export function MCQ({ comp, variant, maxW }: Props) {
         <div class={`@container ${maxW} mx-auto px-8`}>
           <div class={cardClass}>
             <span class={labelClass} data-edit-path="displayTitle">{title}</span>
-            <h3 class="font-headline text-h3 mt-2 mb-10 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
+            <h3 class="font-headline text-h2 mt-4 mb-10 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
             <div class="grid grid-cols-1 @xl:grid-cols-2 gap-4">
               {items.map((item, i) => (
                 <button
@@ -94,7 +94,7 @@ export function MCQ({ comp, variant, maxW }: Props) {
       <div class={`@container ${maxW} mx-auto px-8`}>
         <div class={cardClass}>
           <span class={labelClass} data-edit-path="displayTitle">{title}</span>
-          <h3 class="font-headline text-h3 mt-2 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
+          <h3 class="font-headline text-h2 mt-4 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
           <div class="space-y-4">
             {items.map((item, i) => (
               <button

@@ -214,9 +214,11 @@ Claude Code subagent with senior instructional designer persona generates the co
 ### Step 3 — Design Tokens (`engine/scripts/generate-design-tokens.js`)
 **Input:** `extracted-css.json` + `brand-screenshot.png` + `brand-design.md` | **Output:** `design-tokens.json`
 
-Reads extracted CSS from scrape-brand.js → picks seed color (accent heuristics, monochrome fallback) → generates full MD3 palette → checks fonts against Google Fonts (subagent match if unavailable) → Vision AI classifies brand archetype (8 types, requires ANTHROPIC_API_KEY). Run: `node engine/scripts/generate-design-tokens.js` (or `--fonts-ready` after font subagent).
+Reads extracted CSS from scrape-brand.js → picks seed color (accent heuristics, monochrome fallback) → generates full MD3 palette → checks fonts against Google Fonts (subagent match if unavailable) → subagent classifies brand archetype (8 types, no API key required). Run: `node engine/scripts/generate-design-tokens.js`, then re-run with `--archetype-ready` (and/or `--fonts-ready`) after subagents complete.
 
 **⚠️ Font subagent workflow:** If brand fonts aren't on Google Fonts, the script writes `font-match-prompt.txt` and exits. Spawn a subagent to read the prompt + screenshot, write `font-match.json`, then re-run with `--fonts-ready`.
+
+**⚠️ Archetype subagent workflow:** On every first run the script writes `archetype-prompt.txt` and exits. Spawn a subagent to read the prompt, view the brand screenshot with the Read tool, and write `archetype-match.json`. Then re-run with `--archetype-ready`.
 
 ### Step 4 — Image Generation (`engine/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
@@ -292,6 +294,7 @@ rm -rf engine/output/images/
 rm -f engine/output/knowledge-base.json engine/output/brand-profile.json engine/output/brand-design.md
 rm -f engine/output/extracted-css.json engine/output/course-layout.json engine/output/design-tokens.json
 rm -f engine/output/font-match-prompt.txt engine/output/font-match.json engine/output/course.html
+rm -f engine/output/archetype-prompt.txt engine/output/archetype-match.json
 ```
 
 ### Full Run: Execute in order

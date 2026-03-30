@@ -36,8 +36,17 @@ export function Hero({ comp, variant }: Props) {
     const sectionClass = h.sectionClass || 'relative min-h-screen flex items-center overflow-hidden';
     return (
       <section class={sectionClass} data-component-type="hero">
-        <div class="@container relative z-10 w-full grid grid-cols-1 @3xl:grid-cols-2 min-h-screen">
-          <div class="flex flex-col justify-center px-8 @3xl:px-16 py-20 @3xl:py-0">
+        {/* Full-bleed background image */}
+        {imgSrc ? (
+          <img alt={imgAlt} class="absolute inset-0 w-full h-full object-cover" src={imgSrc} />
+        ) : (
+          <div class="absolute inset-0 bg-surface-container" />
+        )}
+        {/* Left-to-right gradient: opaque on left for text readability, transparent on right to reveal image */}
+        <div class="absolute inset-0 bg-gradient-to-r from-background via-background/75 to-background/10" />
+        {/* Text content left-aligned */}
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-8 md:px-16 py-20">
+          <div class="max-w-xl">
             <h1
               class="font-headline text-display md:text-display-xl mb-8 pb-1 text-on-surface"
               data-animate="fade-up"
@@ -51,14 +60,6 @@ export function Hero({ comp, variant }: Props) {
               {beginBtn}
             </div>
           </div>
-          <div class="relative hidden @3xl:block">
-            {imgSrc ? (
-              <img alt={imgAlt} class="absolute inset-0 w-full h-full object-cover" src={imgSrc} />
-            ) : (
-              <div class="absolute inset-0 bg-surface-container" />
-            )}
-            <div class="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent" />
-          </div>
         </div>
       </section>
     );
@@ -67,7 +68,7 @@ export function Hero({ comp, variant }: Props) {
   if (variant === 'minimal-text') {
     return (
       <section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
-        <div class="@container relative z-10 max-w-7xl mx-auto px-8 @3xl:px-16 py-20">
+        <div class="@container w-full relative z-10 max-w-7xl mx-auto px-8 @3xl:px-16 py-20">
           <div class="border-l-4 border-primary pl-8 @3xl:pl-12">
             <h1
               class="font-headline text-display md:text-display-xl mb-8 pb-1 text-on-surface"
@@ -100,7 +101,7 @@ export function Hero({ comp, variant }: Props) {
         />
       ) : null}
       <div class={`absolute inset-0 ${overlayGradient}`} />
-      <div class="@container relative z-10 text-center max-w-7xl mx-auto px-8">
+      <div class="@container w-full relative z-10 text-center max-w-7xl mx-auto px-8">
         <h1
           class="font-headline text-display md:text-display-xl mb-8 pb-1 text-white"
           data-animate="fade-up"

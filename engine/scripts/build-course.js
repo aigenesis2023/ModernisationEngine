@@ -2394,7 +2394,15 @@ const VARIANT_MAP = {
 // ─── Component width (simplified — container queries handle responsive) ──
 // With container queries (Round 3), BOOST/CAP are no longer needed.
 // Components respond to their container width via @3xl: breakpoints.
+// Components that should never stretch beyond max-w-6xl regardless of section width
+const COMPONENT_MAX_W_CAP = new Set([
+  'data-table', 'key-term', 'checklist', 'textinput', 'comparison',
+]);
+
 function getComponentMaxW(type, variant, sectionMaxW) {
+  if (COMPONENT_MAX_W_CAP.has(type) && sectionMaxW === 'max-w-[90rem]') {
+    return 'max-w-6xl';
+  }
   return sectionMaxW;
 }
 

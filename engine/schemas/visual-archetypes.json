@@ -63,8 +63,8 @@
 
       "hero": {
         "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
-        "overlayGradient": "bg-gradient-to-r from-surface-dim via-surface-dim/80 to-transparent",
-        "imgVisuals": "mix-blend-overlay opacity-35",
+        "overlayGradient": "bg-gradient-to-t from-surface-dim via-surface-dim/60 to-surface-dim/20",
+        "imgVisuals": "opacity-80",
         "btn1Bg": "bg-primary-container",
         "btn1Text": "text-on-primary-container",
         "btn1Visual": "hover:opacity-90 transition-all duration-300 shadow-[0_0_20px_rgba(var(--pc-rgb,100,100,255),0.35)] hover:shadow-[0_0_30px_rgba(var(--pc-rgb,100,100,255),0.55)]",

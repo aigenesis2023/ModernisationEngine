@@ -472,9 +472,7 @@ Describe button shapes (pill, rounded, sharp), card treatments (glass/frosted, e
 Describe the whitespace strategy, grid feel, visual rhythm, and overall density.
 
 ## Image Treatment
-Describe ONLY the photographic mood that would complement this design — things like "dramatic low-key lighting, dark atmosphere, cool tones" or "bright natural daylight, warm tones, soft focus". This is for AI-generated photographs, NOT UI design elements. Do not mention glassmorphism, buttons, gradients, or any UI concepts here — only photographic lighting, colour temperature, and mood.
-
-Write naturally and descriptively. Do not use hex codes anywhere. Focus on the FEELING and VISUAL LANGUAGE of the design.`,
+Write 1-2 sentences describing ONLY lighting style, colour temperature, and mood — for example: "Dramatic low-key lighting, deep shadows, cool blue tones, cinematic." Do NOT describe example photographs, people, subjects, or scenes. Do NOT write "a shot of someone..." or "an image of...". Only lighting, colour, and atmosphere. No hex codes.`,
         },
       ],
     }],

@@ -250,7 +250,7 @@ Sessions:
 - Created `generate-design-tokens.js` with MD3 palette generation
 - Seed color heuristics (accent → chromatic → monochrome fallback)
 - Font checking against Google Fonts + subagent matching workflow
-- Vision AI archetype classification (requires ANTHROPIC_API_KEY)
+- Archetype classification via Claude Code subagent (no API key required — prompt-file pattern, same as font matching)
 
 **Session 3 — Archetype recipes in existing build-course.js** ✅ COMPLETE
 - 8 archetype recipes in `visual-archetypes.json` (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury)

@@ -10,12 +10,14 @@
  * → identifies primary seed color
  * → generates full MD3 palette
  * → maps to design-tokens.json shape that build-course.js consumes
- * → Vision AI archetype classification (if ANTHROPIC_API_KEY set)
+ * → archetype classification via subagent (writes archetype-prompt.txt, exit, re-run with --archetype-ready)
  * → writes engine/output/design-tokens.json
  *
  * Usage:
- *   node engine/scripts/generate-design-tokens.js              ← first run
- *   node engine/scripts/generate-design-tokens.js --fonts-ready ← after subagent writes font-match.json
+ *   node engine/scripts/generate-design-tokens.js                  ← first run (fonts + archetype prompt)
+ *   node engine/scripts/generate-design-tokens.js --fonts-ready    ← after font subagent writes font-match.json
+ *   node engine/scripts/generate-design-tokens.js --archetype-ready ← after archetype subagent writes archetype-match.json
+ *   node engine/scripts/generate-design-tokens.js --fonts-ready --archetype-ready ← both
  */
 
 'use strict';
@@ -555,59 +557,29 @@ ${colorEntries}
 
 // ─── Vision AI archetype classification ───────────────────────────────────────
 
+const ARCHETYPE_PROMPT_PATH = path.join(ROOT, 'engine/output/archetype-prompt.txt');
+const ARCHETYPE_RESULT_PATH = path.join(ROOT, 'engine/output/archetype-match.json');
+
 /**
- * Classify brand archetype using Vision AI.
- * Spawns a Claude Code subagent that reads the brand screenshot and returns JSON.
- * Returns the archetype string and style params, or null if classification fails.
- *
- * This is called with --classify flag for the subagent workflow.
+ * Classify brand archetype — subagent prompt-file pattern (no API key required).
+ * Writes archetype-prompt.txt for a Claude Code subagent to read and classify.
+ * Returns null to signal to main() that it should exit and wait for --archetype-ready.
  */
 async function classifyArchetype(screenshotPath, brandDesignPath, extractedCss) {
-  const AnthropicSDK = require('@anthropic-ai/sdk');
-
-  const envPath = path.join(ROOT, '.env');
-  if (fs.existsSync(envPath)) {
-    const env = fs.readFileSync(envPath, 'utf-8');
-    for (const line of env.split('\n')) {
-      const [k, ...rest] = line.split('=');
-      if (k && rest.length && !process.env[k]) {
-        process.env[k.trim()] = rest.join('=').trim().replace(/^["']|["']$/g, '');
-      }
-    }
-  }
-
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.warn('[archetype] No ANTHROPIC_API_KEY — skipping Vision AI classification');
-    return null;
-  }
-
   if (!fs.existsSync(screenshotPath)) {
     console.warn('[archetype] No brand screenshot found — skipping classification');
     return null;
   }
 
-  const client = new AnthropicSDK.Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-  // Build context
   const brandDesign = fs.existsSync(brandDesignPath)
     ? fs.readFileSync(brandDesignPath, 'utf-8')
     : '';
-
   const summary = extractedCss?.summary || {};
-  const screenshotBase64 = fs.readFileSync(screenshotPath).toString('base64');
-
-  const archetypeList = [
-    'tech-modern',
-    'editorial',
-    'glassmorphist',
-    'minimalist',
-    'neo-brutalist',
-    'warm-organic',
-    'corporate',
-    'luxury',
-  ];
 
   const prompt = `You are classifying a brand's visual design archetype by looking at their website screenshot.
+
+Read the brand screenshot at: ${screenshotPath}
+(Use the Read tool to view it as an image.)
 
 The available archetypes and their characteristics:
 - tech-modern: Dark, glowing, electric. Chamfered shapes. Glow shadows. Glass surfaces. Neon accents.
@@ -636,7 +608,9 @@ Look at the screenshot carefully. Consider:
 5. Is it warm/soft or sharp/cold?
 6. What's the overall personality?
 
-Respond ONLY with valid JSON in this exact format — nothing else:
+Write your answer as a JSON file at: engine/output/archetype-match.json
+
+The file must contain ONLY valid JSON in this exact format:
 {
   "archetype": "<one of the 8 archetype names>",
   "confidence": <0.0-1.0>,
@@ -650,42 +624,15 @@ Respond ONLY with valid JSON in this exact format — nothing else:
   }
 }`;
 
-  try {
-    console.log('[archetype] Running Vision AI classification...');
-    const response = await client.messages.create({
-      model: 'claude-haiku-4-5-20251001',
-      max_tokens: 400,
-      messages: [{
-        role: 'user',
-        content: [
-          {
-            type: 'image',
-            source: {
-              type: 'base64',
-              media_type: 'image/png',
-              data: screenshotBase64,
-            },
-          },
-          { type: 'text', text: prompt },
-        ],
-      }],
-    });
-
-    const text = response.content[0]?.text || '';
-    // Extract JSON from response
-    const jsonMatch = text.match(/\{[\s\S]+\}/);
-    if (!jsonMatch) {
-      console.warn('[archetype] Could not parse JSON from response:', text.slice(0, 200));
-      return null;
-    }
-    const result = JSON.parse(jsonMatch[0]);
-    console.log(`[archetype] Classified as: ${result.archetype} (confidence: ${result.confidence})`);
-    console.log(`[archetype] Reasoning: ${result.reasoning}`);
-    return result;
-  } catch (err) {
-    console.warn('[archetype] Vision AI classification failed:', err.message);
-    return null;
-  }
+  fs.writeFileSync(ARCHETYPE_PROMPT_PATH, prompt);
+  console.log('\n[archetype] Subagent prompt written to: engine/output/archetype-prompt.txt');
+  console.log('\n  Spawn a subagent with this task:');
+  console.log('  "Read engine/output/archetype-prompt.txt and follow its instructions.');
+  console.log('   View the brand screenshot with the Read tool and classify the archetype.');
+  console.log('   Write the result JSON to engine/output/archetype-match.json"');
+  console.log('\n  Then re-run:');
+  console.log('  node engine/scripts/generate-design-tokens.js --archetype-ready\n');
+  return null; // signal to main() to exit and wait
 }
 
 // ─── Main ──────────────────────────────────────────────────────────────────────
@@ -708,6 +655,7 @@ async function main() {
   }
 
   const fontsReady = process.argv.includes('--fonts-ready');
+  const archetypeReady = process.argv.includes('--archetype-ready');
 
   // ── Load extracted CSS ──
   if (!fs.existsSync(EXTRACTED_CSS)) {
@@ -803,8 +751,27 @@ async function main() {
     }
   }
 
-  // ── Vision AI archetype classification ──
-  const archetypeResult = await classifyArchetype(SCREENSHOT, brandDesignPath, extractedCss);
+  // ── Archetype classification (subagent prompt-file pattern) ──
+  let archetypeResult = null;
+  if (archetypeReady) {
+    // --archetype-ready: read subagent result
+    if (!fs.existsSync(ARCHETYPE_RESULT_PATH)) {
+      console.error('ERROR: engine/output/archetype-match.json not found.');
+      console.error('The archetype classification subagent must write this file first.');
+      process.exit(1);
+    }
+    archetypeResult = JSON.parse(fs.readFileSync(ARCHETYPE_RESULT_PATH, 'utf-8'));
+    console.log(`[archetype] Using subagent-classified archetype: ${archetypeResult.archetype} (${Math.round((archetypeResult.confidence || 0) * 100)}% confidence)`);
+    if (archetypeResult.reasoning) console.log(`[archetype]   reasoning: ${archetypeResult.reasoning}`);
+  } else {
+    // First run: write prompt for subagent and exit
+    const result = await classifyArchetype(SCREENSHOT, brandDesignPath, extractedCss);
+    if (!result) {
+      // Subagent needed — prompt written, exit cleanly
+      process.exit(0);
+    }
+    archetypeResult = result;
+  }
 
   // ── Compose final tokens ──
   const tokens = {

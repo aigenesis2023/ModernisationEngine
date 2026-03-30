@@ -470,7 +470,8 @@ Components are organised into 6 categories. When designing a section, ask yourse
 8. **Write imagePrompt for every component that displays an image** — hero, graphic, graphic-text, bento cards, narrative slides, full-bleed, labeled-image, gallery items
 9. **Image prompts must include**: subject matter, style (modern, clean, professional), color hints from brand brief, and mood
 10. **Never reference the brand name in image prompts** — describe the visual, not the brand
-11. **Use appropriate dimensions** per component type:
+11. **Also write a `pexelsQuery` alongside every `imagePrompt`** — a 2-3 word concrete noun phrase that Pexels stock photo search can find (e.g. `"galaxy stars"`, `"solar panels"`, `"brain scan"`). Avoid abstract words like "concept", "representation", "abstract", or adjectives. This is the stock photo fallback search term.
+12. **Use appropriate dimensions** per component type:
     - Hero, full-bleed: 1920x1080 or 1920x800
     - Graphic: 1920x1080
     - Graphic-text: 800x600
