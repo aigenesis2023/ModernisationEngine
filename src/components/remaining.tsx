@@ -152,7 +152,7 @@ export function PathSelector({ comp, maxW }: { comp: Component; maxW: string }) 
         <div class={`grid grid-cols-1 @3xl:grid-cols-${Math.min(items.length, 3)} gap-6`} data-animate-stagger="scale-in">
           {items.map((item, i) => (
             <button class={`group p-6 @3xl:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals}`} data-path-option data-path-variable={item.variable || ''}>
-              <div class="text-h4 mb-2" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+              <div class="text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
               <div class="text-sm text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>
             </button>
           ))}
@@ -203,7 +203,7 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
               <button class={`group flex items-start gap-5 p-5 @3xl:p-6 ${btnBg} rounded-xl text-left ${btnVisuals} w-full`}>
                 <div class="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold">{String.fromCharCode(65 + i)}</div>
                 <div class="flex-1 min-w-0">
-                  <div class="text-h4 text-on-surface" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+                  <div class="text-h4 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   {(item.body || '') && <div class="text-body text-on-surface-variant mt-1" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>}
                 </div>
                 <span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-secondary transition-colors self-center">chevron_right</span>
@@ -226,7 +226,7 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
             <button class={`group p-6 @3xl:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden`}>
               <span class="absolute bottom-2 right-3 text-4xl font-headline font-black text-primary/8 group-hover:text-secondary/15 transition-colors select-none leading-none">{String.fromCharCode(65 + i)}</span>
               <div class="relative z-10">
-                <div class="text-h4 text-on-surface mb-2" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+                <div class="text-h4 text-on-surface mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <div class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>
               </div>
             </button>
@@ -261,7 +261,7 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
                   <div class={`relative flex items-center ${isLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'} gap-8`}>
                     <div class={`hidden @3xl:block @3xl:w-[calc(50%-2rem)] ${isLeft ? 'text-right' : 'text-left'}`}>
                       <div class={`glass-card rounded-2xl p-5 @3xl:p-6 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}`}>
-                        <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                        <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                         <p class="text-on-surface-variant text-sm leading-normal" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
                       </div>
                     </div>
@@ -269,7 +269,7 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
                       <div class="w-10 h-10 rounded-full bg-primary border-4 border-background flex items-center justify-center text-on-primary text-sm font-bold shadow-lg">{num}</div>
                     </div>
                     <div class="@3xl:w-[calc(50%-2rem)] @3xl:hidden">
-                      <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                      <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                       <p class="text-on-surface-variant text-sm leading-normal" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
                     </div>
                     <div class="hidden @3xl:block @3xl:w-[calc(50%-2rem)]" />
@@ -300,7 +300,7 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
               <div class="relative pl-14">
                 <div class={dotClass} />
                 <div class="text-primary/30 font-headline font-black text-sm uppercase tracking-widest mb-1">{num}</div>
-                <div class={titleClass} data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+                <div class={titleClass} data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <p class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
               </div>
             );
@@ -446,8 +446,10 @@ export function StatCallout({ comp, variant, maxW }: { comp: Component; variant:
 // ─── Pullquote ───────────────────────────────────────────────────────
 export function Pullquote({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
   const { AR } = useRender();
-  const quote = stripTags(comp.body || '');
-  const attribution = esc((comp as any).attribution || '');
+  const quote = stripTags((comp as any).quote || comp.body || '');
+  const rawAttrib = stripTags((comp as any).attribution || '');
+  // Only show attribution if it looks like a name/source (short, no sentence-ending punctuation)
+  const attribution = rawAttrib.length <= 60 && !rawAttrib.match(/[.!?]$/) ? esc(rawAttrib) : '';
   const role = esc((comp as any).role || '');
   const pqCfg = AR.pullquote || {};
   const secClass = sectionOnly('py-16');
@@ -456,12 +458,10 @@ export function Pullquote({ comp, variant, maxW }: { comp: Component; variant: s
   if (variant === 'centered') {
     return (
       <section class={secClass} data-component-type="pullquote">
-        <div class="@container max-w-5xl mx-auto px-8 text-center">
-          <div class="flex justify-center mb-2">
-            <span class="text-primary/10 text-[6rem] font-serif leading-none select-none pointer-events-none" aria-hidden="true">&ldquo;</span>
-          </div>
-          <blockquote class={mc('font-headline', bqStyle)} data-text-reveal data-edit-path="body">{quote}</blockquote>
-          {attribution && <cite class={`mt-6 block not-italic ${(pqCfg as any).citeClass || 'text-on-surface-variant'}`} data-animate="fade-up" data-edit-path="attribution">— {attribution}{role ? `, ${role}` : ''}</cite>}
+        <div class="@container max-w-4xl mx-auto px-8 text-center relative" data-animate="fade-up">
+          <span class="text-primary/15 text-[4rem] font-serif leading-none select-none absolute -top-4 left-1/2 -translate-x-1/2" aria-hidden="true">&ldquo;</span>
+          <blockquote class="font-headline text-blockquote text-on-surface pt-8" data-edit-path="body">{quote}</blockquote>
+          {attribution && <cite class={`mt-5 block not-italic text-sm ${(pqCfg as any).citeClass || 'text-on-surface-variant'}`} data-edit-path="attribution">— {attribution}{role ? `, ${role}` : ''}</cite>}
         </div>
       </section>
     );
@@ -469,10 +469,10 @@ export function Pullquote({ comp, variant, maxW }: { comp: Component; variant: s
 
   if (variant === 'minimal') {
     return (
-      <section class={sectionOnly('py-20 bg-surface-container-low')} data-component-type="pullquote">
-        <div class="@container max-w-4xl mx-auto px-8 text-center">
-          <blockquote class="font-headline text-blockquote text-on-surface" data-animate="fade-up" data-edit-path="body">{quote}</blockquote>
-          {attribution && <p class="mt-6 text-sm text-on-surface-variant uppercase tracking-widest" data-animate="fade-up" data-edit-path="attribution">— {attribution}{role ? ` · ${role}` : ''}</p>}
+      <section class={sectionOnly('py-16 bg-surface-container-low')} data-component-type="pullquote">
+        <div class="@container max-w-4xl mx-auto px-8 text-center" data-animate="fade-up">
+          <blockquote class="font-headline text-h3 text-on-surface" data-edit-path="body">{quote}</blockquote>
+          {attribution && <p class="mt-5 text-sm text-on-surface-variant tracking-widest" data-edit-path="attribution">— {attribution}{role ? ` · ${role}` : ''}</p>}
         </div>
       </section>
     );
@@ -482,10 +482,9 @@ export function Pullquote({ comp, variant, maxW }: { comp: Component; variant: s
   return (
     <section class={secClass} data-component-type="pullquote">
       <div class={`@container ${maxW} mx-auto px-8`}>
-        <div class="relative pl-8 border-l-4 border-primary" data-animate="fade-up" data-accent-bar>
-          <span class="text-primary/20 text-7xl font-serif absolute -top-6 -left-1 leading-none select-none" aria-hidden="true">&ldquo;</span>
-          <blockquote class={mc('font-headline', bqStyle)} data-text-reveal data-edit-path="body">{quote}</blockquote>
-          {attribution && <p class="mt-4 text-on-surface-variant" data-animate="fade-up" data-edit-path="attribution">— {attribution}{role && <span class="block text-sm mt-1 text-on-surface-variant/60">{role}</span>}</p>}
+        <div class="border-l-4 border-primary pl-8" data-animate="fade-up">
+          <blockquote class="font-headline text-blockquote text-on-surface" data-edit-path="body">{quote}</blockquote>
+          {attribution && <p class="mt-4 text-on-surface-variant" data-edit-path="attribution">— {attribution}{role && <span class="block text-sm mt-1 text-on-surface-variant/60">{role}</span>}</p>}
         </div>
       </div>
     </section>
@@ -664,7 +663,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
                 <div data-slide={String(i + 1)} style={i > 0 ? 'display:none' : undefined}>
                   {imgSrc && <img alt={imgAlt} class="w-full h-[400px] object-cover rounded-2xl mb-6" src={imgSrc} />}
                   <div class="text-on-surface-variant font-bold mb-2">{counter}</div>
-                  <h4 class="font-headline text-h4 mb-2 text-on-surface" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                  <h4 class="font-headline text-h4 mb-2 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   <p class="text-on-surface-variant text-sm" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
                 </div>
               );
@@ -687,7 +686,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
               return (
                 <div data-slide={String(i + 1)} style={i > 0 ? 'display:none' : undefined}>
                   <div class="text-on-surface-variant font-bold mb-4">{counter}</div>
-                  <h4 class="font-headline text-h3 mb-4 text-on-surface" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                  <h4 class="font-headline text-h3 mb-4 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   <div class="text-body text-on-surface-variant leading-normal" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>
                 </div>
               );
@@ -710,7 +709,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
             return (
               <div data-slide={String(i + 1)} style={i > 0 ? 'display:none' : undefined}>
                 <div class="text-on-surface-variant font-bold mb-4">{counter}</div>
-                <h4 class="font-headline text-h4 mb-4 text-on-surface" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                <h4 class="font-headline text-h4 mb-4 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <p class="text-sm text-on-surface-variant leading-normal" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
               </div>
             );
@@ -875,7 +874,7 @@ export function ProcessFlow({ comp, variant, maxW }: { comp: Component; variant:
               return (
                 <>
                   <div class={`glass-card px-4 py-4 rounded-xl border-t-4 ${borderColor} flex-1 min-w-0 text-center`}>
-                    <div class="font-headline text-body mb-1" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+                    <div class="font-headline text-body mb-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                     {item.body && <div class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body)}</div>}
                   </div>
                   {i < items.length - 1 && arrow}
@@ -904,7 +903,7 @@ export function ProcessFlow({ comp, variant, maxW }: { comp: Component; variant:
                 <div class={`glass-card px-6 @3xl:px-8 py-5 @3xl:py-6 rounded-xl ${borderClass} flex items-start gap-5`}>
                   <span class={`${numColor} font-headline font-black text-2xl mt-0.5 flex-shrink-0`}>{stepNum}</span>
                   <div class="min-w-0">
-                    <div class="font-headline text-h4 mb-1" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</div>
+                    <div class="font-headline text-h4 mb-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                     {item.body && <div class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body)}</div>}
                   </div>
                 </div>
@@ -1086,13 +1085,10 @@ export function Callout({ comp, variant, maxW }: { comp: Component; variant: str
   const body = comp.body || '';
   const secClass = sectionOnly('py-16');
   const calloutType = variant || (comp as any).calloutType || 'info';
-  const typeConfig: Record<string, { icon: string; border: string; bg: string; iconColor: string }> = {
-    info:    { icon: 'info',             border: 'border-primary',      bg: 'bg-primary/5',     iconColor: 'text-primary' },
-    warning: { icon: 'warning',          border: 'border-amber-500',    bg: 'bg-amber-500/5',   iconColor: 'text-amber-500' },
-    tip:     { icon: 'tips_and_updates', border: 'border-emerald-500',  bg: 'bg-emerald-500/5', iconColor: 'text-emerald-500' },
-    success: { icon: 'check_circle',     border: 'border-teal-500',     bg: 'bg-teal-500/5',    iconColor: 'text-teal-500' },
+  const iconMap: Record<string, string> = {
+    info: 'info', warning: 'warning', tip: 'tips_and_updates', success: 'check_circle',
   };
-  const cfg = typeConfig[calloutType] || typeConfig.info;
+  const cfg = { icon: iconMap[calloutType] || 'info', border: 'border-primary', bg: 'bg-primary/5', iconColor: 'text-primary' };
 
   return (
     <section class={secClass} data-component-type="callout">

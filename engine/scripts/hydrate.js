@@ -86,7 +86,7 @@
                   correctBtn.classList.add('border-[#22c55e]');
                   correctBtn.style.opacity = '1';
                 }
-                feedbackEl.textContent = 'Incorrect — see the correct answer highlighted in green.';
+                feedbackEl.textContent = 'Incorrect.';
                 feedbackEl.style.color = '#ef4444';
 
                 var tryAgain = document.createElement('button');
@@ -412,7 +412,7 @@
 
     function openDrawer() {
       if (!drawer) return;
-      drawer.style.transform = 'translateX(0)';
+      drawer.style.translate = '0';
       if (drawerOverlay) {
         drawerOverlay.style.opacity = '1';
         drawerOverlay.style.pointerEvents = 'auto';
@@ -422,7 +422,7 @@
 
     function closeDrawer() {
       if (!drawer) return;
-      drawer.style.transform = 'translateX(-100%)';
+      drawer.style.translate = '-100%';
       if (drawerOverlay) {
         drawerOverlay.style.opacity = '0';
         drawerOverlay.style.pointerEvents = 'none';

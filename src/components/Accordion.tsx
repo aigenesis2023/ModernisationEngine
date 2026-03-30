@@ -31,7 +31,7 @@ export function Accordion({ comp, variant, maxW }: Props) {
                 <details class="group glass-card rounded-2xl border-l-4 border-primary transition-all duration-300">
                   <summary class="flex items-center gap-4 cursor-pointer font-headline text-h4 px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
                     <span class="material-symbols-outlined text-primary flex-shrink-0">{icon}</span>
-                    <span class="flex-1" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</span>
+                    <span class="flex-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                     <span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-on-surface-variant/50">expand_more</span>
                   </summary>
                   <div
@@ -60,7 +60,7 @@ export function Accordion({ comp, variant, maxW }: Props) {
           {items.map((item, i) => (
             <details class={detailsClass}>
               <summary class="flex justify-between items-center cursor-pointer font-headline text-h4 px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
-                <span data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</span>
+                <span data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <span class="material-symbols-outlined group-open:rotate-180 transition-transform flex-shrink-0 ml-4 text-secondary">expand_more</span>
               </summary>
               <div

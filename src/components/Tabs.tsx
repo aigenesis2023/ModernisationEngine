@@ -38,7 +38,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
                   class={`flex-shrink-0 @3xl:w-full whitespace-nowrap @3xl:whitespace-normal ${i === 0 ? vActiveBtn : vInactiveBtn}`}
                   data-tab-trigger={String(i)}
                 >
-                  <span data-edit-path={`_items.${i}.title`}>{esc(item.title || `Tab ${i + 1}`)}</span>
+                  <span data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || `Tab ${i + 1}`) }} />
                 </button>
               ))}
             </div>
@@ -49,7 +49,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
                   data-tab-panel={String(i)}
                   style={i > 0 ? 'display:none' : undefined}
                 >
-                  <h4 class="font-headline text-h4 mb-4" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+                  <h4 class="font-headline text-h4 mb-4" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   <div
                     class="text-body text-on-surface-variant overflow-hidden"
                     data-edit-path={`_items.${i}.body`}
@@ -77,7 +77,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
                 class={i === 0 ? activeBtn : inactiveBtn}
                 data-tab-trigger={String(i)}
               >
-                <span data-edit-path={`_items.${i}.title`}>{esc(item.title || `Tab ${i + 1}`)}</span>
+                <span data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || `Tab ${i + 1}`) }} />
               </button>
             ))}
           </div>
@@ -87,7 +87,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
               data-tab-panel={String(i)}
               style={i > 0 ? 'display:none' : undefined}
             >
-              <h4 class="font-headline text-h4 mb-4" data-edit-path={`_items.${i}.title`}>{esc(item.title || '')}</h4>
+              <h4 class="font-headline text-h4 mb-4" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
               <div
                 class="text-body text-on-surface-variant overflow-hidden"
                 data-edit-path={`_items.${i}.body`}

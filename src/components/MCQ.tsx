@@ -21,8 +21,9 @@ export function MCQ({ comp, variant, maxW }: Props) {
   let correctIdx = items.findIndex(i => i.correct || i._shouldBeSelected);
   if (correctIdx < 0) correctIdx = 0;
 
-  const questionText = stripTags(comp.instruction || comp.body || '');
-  const title = esc(comp.displayTitle || 'Knowledge Check');
+  // AI puts the question in displayTitle. instruction/body are fallbacks.
+  const questionText = stripTags(comp.instruction || comp.body || comp.displayTitle || '');
+  const label = 'Knowledge Check';
   const secClass = sectionOnly('py-20');
 
   const cardClass = mc(
@@ -58,8 +59,8 @@ export function MCQ({ comp, variant, maxW }: Props) {
       <section class={secClass} {...sectionAttrs}>
         <div class={`@container ${maxW} mx-auto px-8`}>
           <div class={cardClass}>
-            <span class={labelClass} data-edit-path="displayTitle">{title}</span>
-            <h3 class="font-headline text-h2 mt-4 mb-10 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
+            <span class={labelClass} data-edit-path="displayTitle">{label}</span>
+            <h3 class="font-headline text-h3 mt-3 mb-8 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
             <div class="grid grid-cols-1 @xl:grid-cols-2 gap-4">
               {items.map((item, i) => (
                 <button
@@ -75,9 +76,7 @@ export function MCQ({ comp, variant, maxW }: Props) {
                   <span class={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-secondary'}`}>
                     {OPTION_LETTERS[i] || ''}
                   </span>
-                  <span class="text-on-surface font-medium leading-snug" data-edit-path={`_items.${i}.title`}>
-                    {esc(item.text || item.title || '')}
-                  </span>
+                  <span class="text-on-surface font-medium leading-snug" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.text || item.title || '') }} />
                 </button>
               ))}
             </div>
@@ -93,8 +92,8 @@ export function MCQ({ comp, variant, maxW }: Props) {
     <section class={secClass} {...sectionAttrs}>
       <div class={`@container ${maxW} mx-auto px-8`}>
         <div class={cardClass}>
-          <span class={labelClass} data-edit-path="displayTitle">{title}</span>
-          <h3 class="font-headline text-h2 mt-4 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
+          <span class={labelClass} data-edit-path="displayTitle">{label}</span>
+          <h3 class="font-headline text-h3 mt-3 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
           <div class="space-y-4">
             {items.map((item, i) => (
               <button
@@ -110,9 +109,7 @@ export function MCQ({ comp, variant, maxW }: Props) {
                 <span class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-secondary'}`}>
                   {OPTION_LETTERS[i] || ''}
                 </span>
-                <span class="text-on-surface leading-relaxed" data-edit-path={`_items.${i}.title`}>
-                  {esc(item.text || item.title || '')}
-                </span>
+                <span class="text-on-surface leading-relaxed" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.text || item.title || '') }} />
               </button>
             ))}
           </div>

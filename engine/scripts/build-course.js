@@ -1588,8 +1588,9 @@ ${newStats}
 }
 
 function fillPullquote(comp, variant, maxW) {
-  const quote = stripTags(comp.body || '');
-  const attribution = esc(comp.attribution || '');
+  const quote = stripTags(comp.quote || comp.body || '');
+  const rawAttrib = stripTags(comp.attribution || '');
+  const attribution = rawAttrib.length <= 60 && !rawAttrib.match(/[.!?]$/) ? esc(rawAttrib) : '';
   const role = esc(comp.role || '');
   const pqCfg = AR.pullquote || {};
   const secClass = sectionOnly('py-16');

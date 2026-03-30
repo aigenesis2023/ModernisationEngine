@@ -19,6 +19,7 @@ export function stripTags(html: string | undefined | null): string {
   return html.replace(/<[^>]*>/g, '');
 }
 
+
 /** Standardise section classes: py-16 spacing + brand bg-* only */
 export function sectionOnly(cls: string): string {
   const bgs = cls.split(/\s+/)
@@ -51,7 +52,9 @@ export function getSectionMaxW(sectionWidth: string): string {
 // components stack/expand naturally via @3xl: breakpoints.
 // getComponentMaxW now simply returns the section width.
 
-export function getComponentMaxW(_type: string, _variant: string, sectionMaxW: string): string {
+export function getComponentMaxW(type: string, _variant: string, sectionMaxW: string): string {
+  // Components in NEEDS_STANDARD should never exceed max-w-6xl even in wide sections
+  if (NEEDS_STANDARD.has(type) && sectionMaxW === 'max-w-[90rem]') return 'max-w-6xl';
   return sectionMaxW;
 }
 
