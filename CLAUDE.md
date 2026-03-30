@@ -14,7 +14,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4 (Section Management) is next. See `engine/AUTHORING-LAYER.md`.
 
-> **⚠️ V6 REBUILD PLANNED.** A comprehensive rebuild is underway to replace Google Stitch with a deterministic brand intelligence pipeline (Dembrandt CSS extraction + MD3 palette generation + Vision AI archetype classification), migrate to React SSR + Tailwind v4, and introduce a data-driven component registry. **Read `engine/STITCH-REPLACEMENT-BRIEF.md` FIRST** — it contains the complete technical brief with all findings, architecture, implementation phases, file inventory, and code references. The current V5 architecture below remains the working system until each phase completes.
+> **⚠️ ENGINE REBUILD PLANNED.** A comprehensive rebuild is underway to replace Google Stitch with a deterministic brand intelligence pipeline (Dembrandt CSS extraction + MD3 palette generation + Vision AI archetype classification), migrate to React SSR + Tailwind v4, and introduce a data-driven component registry. **Read `engine/STITCH-REPLACEMENT-BRIEF.md` FIRST** — it contains the complete technical brief with all findings, architecture, implementation phases, file inventory, and code references. The current architecture below remains the working system until each phase completes.
 
 ---
 
@@ -91,8 +91,8 @@ We generate a DESIGN.md brand brief using Stitch's native vocabulary. See `engin
 
 | Document | Covers | Status |
 |---|---|---|
-| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | V6 rebuild plan: Stitch audit findings, new architecture (React SSR, Tailwind v4, Dembrandt, MD3, Vision AI archetypes), implementation phases A-D, file inventory, risks. | **Active** — the rebuild guide |
-| **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **ARCHIVING** — being replaced by V6 |
+| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | Stitch replacement: audit findings, new architecture (React SSR, Tailwind v4, Dembrandt, MD3, Vision AI archetypes), implementation phases A-D, file inventory, risks. | **Active** — the rebuild guide |
+| **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints, design contract architecture, pattern extraction, colorMode detection. | **ARCHIVING** — being replaced by rebuild |
 | **`engine/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, fill function conventions, generateHead(), hydrate.js interactivity, image embedding. | **Active** |
 | **`engine/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
 | **`engine/AUTHORING-LAYER.md`** | Authoring layer architecture, component taxonomy, phase plan, progress tracker, skipped-for-later items. | **Active** — living document |

@@ -1,8 +1,8 @@
 # Stitch Integration
 
-> **Status: ARCHIVING.** Being replaced by V6 deterministic brand intelligence pipeline.
+> **Status: ARCHIVING.** Being replaced by deterministic brand intelligence pipeline.
 > See `engine/STITCH-REPLACEMENT-BRIEF.md` for the complete rebuild plan.
-> The content below documents the V5 Stitch integration which remains functional until V6 phases complete.
+> The content below documents the current Stitch integration which remains functional until the rebuild completes.
 > **Last updated:** 2026-03-29
 
 This document covers how the Modernisation Engine uses Google Stitch to generate branded visual systems. Stitch designs the look — we control layout, content, and interactivity.

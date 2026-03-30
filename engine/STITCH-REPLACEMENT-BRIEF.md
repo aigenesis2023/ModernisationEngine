@@ -1,6 +1,6 @@
-# Engine V6 — Complete Rebuild Brief
+# Engine Rebuild — Complete Brief (Stitch Replacement)
 
-> This is the single source of truth for the V6 engine rebuild. It captures all findings from the Stitch audit, two external architecture reviews, and the agreed replacement strategy. A new chat should read this document first and use it to drive the implementation.
+> This is the single source of truth for the engine rebuild. It captures all findings from the Stitch audit, two external architecture reviews, and the agreed replacement strategy. A new chat should read this document first and use it to drive the implementation.
 
 ---
 
@@ -174,7 +174,7 @@ Working well, not changing:
 8. QA gates (compensating for Stitch randomness)
 ```
 
-**Target (V6):**
+**Target (rebuilt engine):**
 ```
 1. research-content.js → knowledge-base.json                                    (unchanged)
 2. scrape-brand.js (enhanced) → brand-profile.json + brand-design.md
@@ -230,7 +230,7 @@ Working well, not changing:
 
 ### EXECUTION ORDER — BUILD IN LAYERS YOU CAN SEE AND JUDGE
 
-The full V6 plan is implemented in THREE rounds. Each round produces a working, testable system with visible course output. This lets you look at the result and say "that's right" or "that's wrong" before moving on. **Never change the design system AND the rendering layer at the same time.**
+The full rebuild is implemented in THREE rounds. Each round produces a working, testable system with visible course output. This lets you look at the result and say "that's right" or "that's wrong" before moving on. **Never change the design system AND the rendering layer at the same time.**
 
 ---
 
@@ -276,7 +276,7 @@ Sessions:
 - Run QA gates. How many design tests pass now vs with Stitch?
 - Archive Stitch code (move generate-course-html.js + extract-contract.js to engine/archived/)
 
-**CHECKPOINT: The design system is proven. Output is consistently better than Stitch. Pipeline is faster. QA is more stable. You have a working V6 design layer on the V5 rendering layer. You can STOP HERE and have a significantly better engine. Or continue to Round 2.**
+**CHECKPOINT: The design system is proven. Output is consistently better than Stitch. Pipeline is faster. QA is more stable. You have the new design layer running on the existing rendering layer. You can STOP HERE and have a significantly better engine. Or continue to Round 2.**
 
 ---
 
@@ -305,7 +305,7 @@ Sessions:
 - Inline built CSS into single-file output
 - Verify: course looks identical, no CDN dependency, CSS is deterministic
 
-**CHECKPOINT: Full V6 rendering layer. Preact components, Tailwind v4, data-driven registry. Ready for Phase 4 authoring (drag-and-drop) whenever you want to build it.**
+**CHECKPOINT: Full rebuilt rendering layer. Preact components, Tailwind v4, data-driven registry. Ready for Phase 4 authoring (drag-and-drop) whenever you want to build it.**
 
 ---
 
@@ -984,7 +984,7 @@ These are zero-cost, low-complexity improvements identified during external revi
 
 ### Quality expectations (honest)
 
-| | Stitch V5 (current) | V6 (projected) |
+| | Stitch (current) | Rebuilt engine (projected) |
 |---|---|---|
 | **Best case** | S-tier (rare, ~1 in 4 runs) | A+ consistently, improving to S with archetype tuning |
 | **Average case** | B+ (most accents fall to fallbacks) | A+ consistently |
@@ -993,7 +993,7 @@ These are zero-cost, low-complexity improvements identified during external revi
 | **Build speed** | 10+ min (Stitch API + retry) | Seconds (deterministic computation) |
 | **Reliability** | Retry mechanism needed | Deterministic — same input, same output |
 
-The honest gap: V6's first version will be "consistently excellent" not "occasionally breathtaking." Getting to S-tier requires iterating archetype recipes across brands. But every improvement is permanent, and the floor is dramatically higher.
+The honest gap: the rebuilt engine's first version will be "consistently excellent" not "occasionally breathtaking." Getting to S-tier requires iterating archetype recipes across brands. But every improvement is permanent, and the floor is dramatically higher.
 
 ---
 
