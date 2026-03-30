@@ -55,7 +55,8 @@ Phase 2: Component Taxonomy          Categories + new components +         DONE
          + Expanded Palette          new variants + AI guidance
 Phase 3: Inline Editing              Edit text + swap component type       DONE  ⚠️ KEY PHASE
          3a: JSON + text edit ✅   3b: Type swap ✅   3c: Export ✅
-Phase 4: Section Management          Reorder + add/remove + width control  PLANNED
+Phase 4: Section Management          Reorder + add/delete + add component  IN PROGRESS
+         4d: Reorder ✅  4a: Template lib ✅  4c: Add section ✅
 Phase 5: AI-Assisted Editing         "Regenerate section" + category       PLANNED
                                      browser for manual add
 Phase 6: Full Authoring              Blank course creation + complex       PLANNED
@@ -142,11 +143,14 @@ Based on these findings, Phase 4 should be restructured:
 ```
 Phase 3.5: Authoring UX Polish           Friendly labels, remove broken     DONE
                                           type dropdown, add delete button
-Phase 4a: Client-side type templates      Pre-render type template library   PLANNED
+Phase 4d: Reorder blocks                  Move ↑↓ per component + heading   DONE
+          Flatten→swap→rebuild approach   Section headings move like blocks
+Phase 4a: Client-side type templates      28 templates with variant alts     DONE
+          Pre-rendered by Preact SSR      Placeholder images + text
+Phase 4c: Add section                     "+" buttons, 7-category picker     DONE
+          initEntries reused for wiring   Full variant/edit/move support
 Phase 4b: Type swap (client-side)         Clone template + fill from JSON    PLANNED
-Phase 4c: Add section                     Component picker + placeholder     PLANNED  ⚠️ UX DECISIONS NEEDED
-Phase 4d: Reorder sections                Move up/down + JSON reorder        PLANNED
-Phase 4e: Section width control           narrow/standard/wide/full toggle   PLANNED
+Phase 4e: Section width control           DROPPED (design decision, not user control)
 ```
 
 ### SCORM & Accessibility Notes
@@ -531,6 +535,37 @@ These were identified in research as valuable but too complex for the current ph
 ---
 
 ## Changelog
+
+### 2026-03-30 — Phase 4: Section Management (Reorder + Add Component)
+
+**4d: Block Reorder**
+- hydrate.js: ↑↓ buttons on every component toolbar + section headings
+- Flatten→swap→rebuild approach: course flattened to block list, adjacent swap, sections rebuilt from headings
+- Section headings move independently (shuffle components between sections behind the scenes)
+- Hero locked at position 0 (no move buttons, no swapping into hero section)
+- ID-based DOM reorder: `data-component-id` on all sections (render.tsx), `data-wrapper-id` on wrappers, `reorderDOM()` rebuilds wrapper order from JSON using stable IDs
+
+**4a: Client-Side Type Template Library**
+- build-course.js: Pre-renders all 28 component types with placeholder content as `<template data-type-template="TYPE">` inside `#component-templates` div
+- SVG placeholder image (grey box with image icon) for all image-bearing components
+- Each template includes variant alternates as nested `<template data-variant-alt>` tags
+- Templates included in Tailwind CSS scan so all classes are compiled
+- render.tsx: `renderComponentVariant` exported, `data-component-id` added to all rendered sections
+
+**4c: Add Component**
+- hydrate.js: Blue "+" buttons between all component wrappers when authoring is active
+- 7-category colour-coded picker popup (Text, Image, Layout, Interactive, Quiz, Media, Structure)
+- Clicking a type clones the pre-rendered template, generates unique componentId, inserts into JSON
+- New sections processed through `initEntries` (not a custom toolbar) — full variant switching, inline editing, move, delete
+- `initEntries` refactored to skip already-wrapped sections (incremental processing)
+- Scroll snaps new component toolbar to top of viewport
+- "+" buttons rebuild after every add/move/delete operation
+
+**Bug fixes**
+- hydrate.js: `getCompData()` now handles section headings (`data-component-index="-1"` returns section object)
+- hydrate.js: `swapVariant()` now transfers `data-section-index`, `data-component-index`, `data-component-id` to cloned variant — fixes broken inline editing after variant swap on ALL components
+- hydrate.js: Strip `data-animate` from cloned templates + variant alternates (GSAP was hiding new components)
+- hydrate.js: `reorderDOM()` anchor logic skips add-row divs (was incorrectly treating them as insertion point)
 
 ### 2026-03-28 — Authoring Label Overhaul (UX clarity)
 - hydrate.js: Removed `USER_CATEGORY_LABELS` — category badges no longer shown on per-section toolbars (categories reserved for future block picker, Phase 4c)

@@ -77,7 +77,7 @@ function normalizeComponent(raw: any): Component {
 
 // ─── Component rendering ────────────────────────────────────────────
 
-function renderComponentVariant(
+export function renderComponentVariant(
   comp: Component,
   index: number,
   sectionWidth: string,
@@ -231,9 +231,10 @@ function assembleSection(
     let filled = renderComponent(comp, compIndex, sectionWidth);
     if (filled) {
       // Inject authoring data attributes
+      const compId = (comp as any).componentId || `comp-${sectionIndex}-${compIndex}`;
       filled = filled.replace(
         /data-component-type="/g,
-        `data-section-index="${sectionIndex}" data-component-index="${compIndex}" data-component-type="`
+        `data-component-id="${compId}" data-section-index="${sectionIndex}" data-component-index="${compIndex}" data-component-type="`
       );
       if (comp.requiredItems && INTERACTIVE_TYPES.has(type)) {
         filled = filled.replace(
@@ -258,7 +259,7 @@ function assembleSection(
   const secMaxW = getSectionMaxW(sectionWidth);
 
   const titleBar = sectionTitle
-    ? `<section class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-type="section-heading" data-section-index="${sectionIndex}" data-component-index="-1">
+    ? `<section class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-id="heading-${sectionId}" data-component-type="section-heading" data-section-index="${sectionIndex}" data-component-index="-1">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
 <h2 class="font-headline text-label-text uppercase text-primary" data-edit-path="title">${esc(sectionTitle)}</h2>

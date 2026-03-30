@@ -12,9 +12,9 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Branch:** Check `git branch` for current branch. `main` exists but is not actively used.
 
-**Authoring Layer:** Live (Phases 1–3.5 complete). Users can swap variants, edit text inline, delete sections, and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4 (Section Management) is next. See `engine/AUTHORING-LAYER.md`.
+**Authoring Layer:** Live (Phases 1–4 in progress). Users can swap variants, edit text inline, delete sections, reorder blocks (↑↓), add new components (28 types via "+" picker with 7 categories), and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4b (type swap) is next. See `engine/AUTHORING-LAYER.md`.
 
-> **ENGINE REBUILD COMPLETE (Rounds 1-3).** Round 1: Stitch → MD3 palette + archetype recipes. Round 2: Preact SSR + Tailwind v4 (no CDN). Round 3: Container queries + QA simplification. See `engine/STITCH-REPLACEMENT-BRIEF.md` for full history. Next: Phase 4 authoring (section management) or optional Sessions 10+ (DTCG, Style Dictionary).
+> **ENGINE REBUILD COMPLETE (Rounds 1-3).** Round 1: Stitch → MD3 palette + archetype recipes. Round 2: Preact SSR + Tailwind v4 (no CDN). Round 3: Container queries + QA simplification. See `engine/STITCH-REPLACEMENT-BRIEF.md` for full history. Phase 4 authoring (section management) in progress.
 
 ---
 

@@ -1351,10 +1351,9 @@
       // ── Init: extract DOM nodes from templates ────────────────────────
       var initialized = false;
       function initEntries() {
-        if (initialized) return;
-        initialized = true;
-
         document.querySelectorAll('section[data-component-type]').forEach(function(section) {
+          // Skip sections already wrapped by a previous initEntries call
+          if (section.parentElement && section.parentElement.hasAttribute('data-authoring-wrapper')) return;
           var templates = section.querySelectorAll('template[data-variant-alt]');
           var hasVariants = templates.length > 0;
 
@@ -1386,6 +1385,9 @@
           // Wrap section in a stable container
           var wrapper = document.createElement('div');
           wrapper.setAttribute('data-authoring-wrapper', compType);
+          // Tag with stable identity for reorder
+          var wrapId = section.getAttribute('data-component-id') || (compType + '-' + section.getAttribute('data-section-index'));
+          wrapper.setAttribute('data-wrapper-id', wrapId);
           wrapper.style.position = 'relative';
           section.parentElement.insertBefore(wrapper, section);
           wrapper.appendChild(section);
@@ -1408,6 +1410,28 @@
           typeLabel.textContent = typeLabels[compType] || compType;
           typeLabel.style.cssText = 'font:bold 11px/1.4 monospace;margin-right:6px;opacity:0.9;';
           toolbar.appendChild(typeLabel);
+
+          // Move up/down buttons (hidden on hero only)
+          var isHero = compType === 'hero';
+          var moveUpBtn = null;
+          var moveDownBtn = null;
+          if (!isHero) {
+            moveUpBtn = document.createElement('button');
+            moveUpBtn.textContent = '↑';
+            moveUpBtn.title = 'Move up';
+            moveUpBtn.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:2px 8px;border-radius:3px;font:bold 12px/1.4 monospace;cursor:pointer;';
+            moveUpBtn.addEventListener('mouseenter', function() { moveUpBtn.style.background = 'rgba(255,255,255,0.2)'; });
+            moveUpBtn.addEventListener('mouseleave', function() { moveUpBtn.style.background = 'rgba(0,0,0,0.3)'; });
+            toolbar.appendChild(moveUpBtn);
+
+            moveDownBtn = document.createElement('button');
+            moveDownBtn.textContent = '↓';
+            moveDownBtn.title = 'Move down';
+            moveDownBtn.style.cssText = 'background:rgba(0,0,0,0.3);color:#fff;border:1px solid rgba(255,255,255,0.3);padding:2px 8px;border-radius:3px;font:bold 12px/1.4 monospace;cursor:pointer;';
+            moveDownBtn.addEventListener('mouseenter', function() { moveDownBtn.style.background = 'rgba(255,255,255,0.2)'; });
+            moveDownBtn.addEventListener('mouseleave', function() { moveDownBtn.style.background = 'rgba(0,0,0,0.3)'; });
+            toolbar.appendChild(moveDownBtn);
+          }
 
           // Spacer to push delete button to the right
           var spacer = document.createElement('span');
@@ -1516,6 +1540,10 @@
             console.log('Authoring: deleted ' + entry.compType + ' section');
           });
 
+          // Move block handlers (component = individual move, heading = section move)
+          if (moveUpBtn) moveUpBtn.addEventListener('click', function() { moveBlock(entry, -1); });
+          if (moveDownBtn) moveDownBtn.addEventListener('click', function() { moveBlock(entry, 1); });
+
           // Edit text toggle handler (interactive components only)
           if (editToggleBtn) {
             editToggleBtn.addEventListener('click', function() {
@@ -1554,6 +1582,467 @@
         });
       }
 
+      // ── Picker categories (7 groups for add section UI) ────────────────
+      var pickerCategories = {
+        'Text':        ['text', 'pullquote', 'callout', 'key-term'],
+        'Image':       ['graphic', 'graphic-text', 'full-bleed', 'image-gallery'],
+        'Layout':      ['stat-callout', 'data-table', 'comparison', 'bento'],
+        'Interactive':  ['accordion', 'tabs', 'narrative', 'flashcard', 'labeled-image', 'checklist', 'timeline', 'process-flow'],
+        'Quiz':        ['mcq', 'branching', 'textinput'],
+        'Media':       ['media', 'video-transcript'],
+        'Structure':   ['divider']
+      };
+      var pickerColors = {
+        'Text': '#3b82f6', 'Image': '#8b5cf6', 'Layout': '#22c55e',
+        'Interactive': '#a855f7', 'Quiz': '#ef4444', 'Media': '#06b6d4', 'Structure': '#f59e0b'
+      };
+
+      // ── Add section: "+" buttons + picker popup ────────────────────────
+      var activePicker = null; // currently open picker element
+
+      function createAddButton(insertAfterWrapper) {
+        var btn = document.createElement('button');
+        btn.textContent = '+';
+        btn.title = 'Add component here';
+        btn.setAttribute('data-add-btn', '');
+        btn.style.cssText = 'display:none;width:36px;height:36px;margin:0 auto;border-radius:50%;background:rgba(59,130,246,0.8);color:#fff;border:2px solid rgba(59,130,246,0.9);font:bold 20px/1 sans-serif;cursor:pointer;transition:all 0.15s;';
+        btn.addEventListener('mouseenter', function() { btn.style.background = 'rgba(59,130,246,1)'; btn.style.transform = 'scale(1.1)'; });
+        btn.addEventListener('mouseleave', function() { btn.style.background = 'rgba(59,130,246,0.8)'; btn.style.transform = ''; });
+
+        var row = document.createElement('div');
+        row.setAttribute('data-add-row', '');
+        row.style.cssText = 'display:none;text-align:center;padding:4px 0;position:relative;';
+        row.appendChild(btn);
+
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          if (activePicker) { activePicker.remove(); activePicker = null; }
+          showPicker(row, insertAfterWrapper);
+        });
+
+        return row;
+      }
+
+      function showPicker(addRow, insertAfterWrapper) {
+        var picker = document.createElement('div');
+        picker.setAttribute('data-component-picker', '');
+        picker.style.cssText = 'position:absolute;left:50%;transform:translateX(-50%);top:100%;z-index:9999;background:#1e1e2e;border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:12px;min-width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.5);font:12px/1.4 monospace;';
+
+        // Category buttons
+        var catRow = document.createElement('div');
+        catRow.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px;';
+        Object.keys(pickerCategories).forEach(function(cat) {
+          var catBtn = document.createElement('button');
+          catBtn.textContent = cat;
+          var color = pickerColors[cat] || '#666';
+          catBtn.style.cssText = 'background:' + color + ';color:#fff;border:none;padding:4px 12px;border-radius:6px;font:bold 11px/1.4 monospace;cursor:pointer;opacity:0.7;transition:opacity 0.15s;';
+          catBtn.addEventListener('mouseenter', function() { catBtn.style.opacity = '1'; });
+          catBtn.addEventListener('mouseleave', function() { catBtn.style.opacity = '0.7'; });
+          catBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            showCategoryTypes(picker, cat, insertAfterWrapper);
+          });
+          catRow.appendChild(catBtn);
+        });
+        picker.appendChild(catRow);
+
+        // Type list area (populated when category is clicked)
+        var typeArea = document.createElement('div');
+        typeArea.setAttribute('data-picker-types', '');
+        typeArea.style.cssText = 'display:flex;flex-wrap:wrap;gap:6px;';
+        typeArea.innerHTML = '<span style="color:rgba(255,255,255,0.4);font-size:11px;">Pick a category above</span>';
+        picker.appendChild(typeArea);
+
+        addRow.appendChild(picker);
+        activePicker = picker;
+
+        // Close on outside click
+        function closePicker(e) {
+          if (!picker.contains(e.target) && e.target !== picker) {
+            picker.remove();
+            activePicker = null;
+            document.removeEventListener('click', closePicker);
+          }
+        }
+        setTimeout(function() { document.addEventListener('click', closePicker); }, 0);
+      }
+
+      function showCategoryTypes(picker, category, insertAfterWrapper) {
+        var typeArea = picker.querySelector('[data-picker-types]');
+        if (!typeArea) return;
+        typeArea.innerHTML = '';
+        var types = pickerCategories[category] || [];
+        var color = catColors[category] || '#666';
+
+        types.forEach(function(type) {
+          var typeBtn = document.createElement('button');
+          typeBtn.textContent = typeLabels[type] || type;
+          typeBtn.style.cssText = 'background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);padding:6px 14px;border-radius:6px;font:11px/1.4 monospace;cursor:pointer;transition:all 0.15s;';
+          typeBtn.addEventListener('mouseenter', function() { typeBtn.style.background = color; typeBtn.style.borderColor = color; });
+          typeBtn.addEventListener('mouseleave', function() { typeBtn.style.background = 'rgba(255,255,255,0.08)'; typeBtn.style.borderColor = 'rgba(255,255,255,0.15)'; });
+          typeBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            addComponent(type, insertAfterWrapper);
+            picker.remove();
+            activePicker = null;
+          });
+          typeArea.appendChild(typeBtn);
+        });
+      }
+
+      function addComponent(type, insertAfterWrapper) {
+        if (!courseData) return;
+
+        // Find the template
+        var tplContainer = document.getElementById('component-templates');
+        if (!tplContainer) { console.warn('Authoring: No template library found'); return; }
+        var tpl = tplContainer.querySelector('[data-type-template="' + type + '"]');
+        if (!tpl) { console.warn('Authoring: No template for type:', type); return; }
+
+        // Clone the ENTIRE template (section + variant alternates inside it)
+        var tplContent = tpl.content || tpl;
+        var sectionEl = tplContent.querySelector('section');
+        if (!sectionEl) { console.warn('Authoring: Empty template for type:', type); return; }
+
+        // Deep clone: section + all its children (including <template data-variant-alt> tags)
+        var newSection = sectionEl.cloneNode(true);
+
+        // Remove ALL scroll animations so new section + variants are immediately visible
+        function stripAnimations(root) {
+          root.removeAttribute('data-animate');
+          root.style.opacity = '1';
+          root.style.transform = 'none';
+          root.querySelectorAll('[data-animate]').forEach(function(el) {
+            el.removeAttribute('data-animate');
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+          });
+        }
+        stripAnimations(newSection);
+        // Also strip from variant alternate templates (inside DocumentFragments)
+        newSection.querySelectorAll('template[data-variant-alt]').forEach(function(tpl) {
+          var content = tpl.content || tpl;
+          content.querySelectorAll('[data-animate]').forEach(function(el) {
+            el.removeAttribute('data-animate');
+            el.style.opacity = '1';
+            el.style.transform = 'none';
+          });
+          var sec = content.querySelector('section');
+          if (sec) {
+            sec.removeAttribute('data-animate');
+            sec.style.opacity = '1';
+            sec.style.transform = 'none';
+          }
+        });
+
+        // Generate unique componentId + set required attributes
+        var newId = 'comp-new-' + Date.now();
+        newSection.setAttribute('data-component-id', newId);
+        newSection.setAttribute('data-component-type', type);
+        newSection.setAttribute('data-section-index', '0');
+        newSection.setAttribute('data-component-index', '0');
+
+        // Build placeholder JSON data
+        var tplData = JSON.parse(JSON.stringify(
+          PLACEHOLDER_JSON[type] || { type: type, displayTitle: 'New ' + (typeLabels[type] || type), body: '' }
+        ));
+        tplData.componentId = newId;
+        tplData.type = type;
+
+        // Find insertion point in JSON
+        var afterSec = insertAfterWrapper ? insertAfterWrapper.querySelector('section[data-section-index]') : null;
+        var afterSI = afterSec ? parseInt(afterSec.getAttribute('data-section-index'), 10) : 0;
+        var afterCI = afterSec ? parseInt(afterSec.getAttribute('data-component-index'), 10) : -1;
+
+        // Insert into JSON model (never into the hero section)
+        if (afterSI === 0 && courseData.sections.length > 1) {
+          courseData.sections[1].components.unshift(tplData);
+        } else {
+          var targetSection = courseData.sections[afterSI];
+          if (targetSection) {
+            if (afterCI === -1) {
+              targetSection.components.unshift(tplData);
+            } else {
+              targetSection.components.splice(afterCI + 1, 0, tplData);
+            }
+          }
+        }
+
+        // Insert RAW section into DOM (NOT wrapped — initEntries will wrap it)
+        if (insertAfterWrapper && insertAfterWrapper.nextSibling) {
+          insertAfterWrapper.parentElement.insertBefore(newSection, insertAfterWrapper.nextSibling);
+        } else if (insertAfterWrapper) {
+          insertAfterWrapper.parentElement.appendChild(newSection);
+        }
+
+        // Let initEntries wrap it with full toolbar, variants, event wiring
+        initEntries();
+
+        // Apply authoring styling to the new wrapper
+        var newWrapper = newSection.parentElement;
+        if (newWrapper && newWrapper.hasAttribute('data-authoring-wrapper')) {
+          newWrapper.style.outline = '2px dashed ' + (catColors[catMap[type] || 'Structure'] || '#f59e0b');
+          newWrapper.style.outlineOffset = '-2px';
+          newWrapper.style.borderRadius = '8px';
+          // Show toolbar immediately
+          var tb = newWrapper.querySelector('[data-authoring-category]');
+          if (tb) tb.style.display = 'flex';
+        }
+
+        // Reindex DOM to match JSON, scroll to new component
+        reorderDOM();
+        // Delay scroll to let DOM settle after reorder
+        var scrollTarget = newWrapper;
+        setTimeout(function() {
+          if (scrollTarget) scrollTarget.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+
+        // Enable inline editing
+        enableInlineEditingForSection(newSection);
+
+        // Rebuild "+" buttons
+        insertAddButtons();
+        showAddButtons(true);
+        console.log('Authoring: added ' + type + ' (id: ' + newId + ')');
+      }
+
+      // Placeholder JSON for new components (matches template library data)
+      var PLACEHOLDER_JSON = {
+        hero:            { displayTitle:'Your Heading Here', body:'<p>Enter your introduction text here.</p>' },
+        text:            { displayTitle:'Your Heading Here', body:'<p>Enter your body text here.</p>' },
+        graphic:         { displayTitle:'', body:'', _graphic:{large:'',alt:'Image'} },
+        'graphic-text':  { displayTitle:'Your Heading Here', body:'<p>Enter your text here.</p>', _graphic:{large:'',alt:'Image'} },
+        accordion:       { displayTitle:'Your Heading Here', items:[{title:'Panel 1',body:'Content here.'},{title:'Panel 2',body:'Content here.'}] },
+        mcq:             { displayTitle:'Your Question Here', body:'<p>Select the best answer.</p>', choices:[{id:'a',text:'Option A',isCorrect:true},{id:'b',text:'Option B'},{id:'c',text:'Option C'}], _feedback:{correct:'Correct!',incorrect:'Try again.'} },
+        narrative:       { displayTitle:'Your Heading Here', items:[{title:'Slide 1',body:'Content here.',_graphic:{large:'',alt:''}},{title:'Slide 2',body:'Content here.',_graphic:{large:'',alt:''}}] },
+        bento:           { displayTitle:'Your Heading Here', body:'<p>Overview text.</p>', items:[{title:'Card 1',body:'Content.'},{title:'Card 2',body:'Content.'},{title:'Card 3',body:'Content.'},{title:'Card 4',body:'Content.'}] },
+        'data-table':    { displayTitle:'Your Heading Here', body:'<p>Table description.</p>', columns:[{title:'Column A'},{title:'Column B'}], rows:[{label:'Row 1',values:['A','B']},{label:'Row 2',values:['A','B']}] },
+        media:           { displayTitle:'Your Heading Here', body:'<p>Video description.</p>', _media:{src:'',poster:''} },
+        textinput:       { displayTitle:'Your Question Here', body:'<p>Enter your response.</p>', instruction:'Type your answer', placeholder:'Your answer here...' },
+        branching:       { displayTitle:'Your Scenario Here', body:'<p>Choose the best approach.</p>', choices:[{id:'a',text:'Option A',body:'Result A.'},{id:'b',text:'Option B',body:'Result B.'}] },
+        timeline:        { displayTitle:'Your Heading Here', body:'<p>Follow these steps.</p>', items:[{title:'Step 1',body:'Details.'},{title:'Step 2',body:'Details.'},{title:'Step 3',body:'Details.'}] },
+        comparison:      { displayTitle:'Your Heading Here', body:'<p>Compare the options.</p>', columns:[{title:'Option A',items:[{text:'Feature 1',value:true},{text:'Feature 2',value:false}]},{title:'Option B',items:[{text:'Feature 1',value:false},{text:'Feature 2',value:true}]}] },
+        'stat-callout':  { displayTitle:'Key Statistics', stats:[{value:'100',suffix:'%',label:'Stat One'},{value:'50',suffix:'K',label:'Stat Two'},{value:'3.5',suffix:'x',label:'Stat Three'}] },
+        pullquote:       { body:'Enter your quote text here.', attribution:'Attribution', role:'Role' },
+        'key-term':      { displayTitle:'Key Terms', items:[{term:'Term 1',definition:'Definition here.'},{term:'Term 2',definition:'Definition here.'}] },
+        checklist:       { displayTitle:'Your Checklist', body:'<p>Complete these items.</p>', items:[{text:'Item 1'},{text:'Item 2'},{text:'Item 3'}] },
+        tabs:            { displayTitle:'Your Heading Here', tabs:[{label:'Tab 1',body:'Content.'},{label:'Tab 2',body:'Content.'},{label:'Tab 3',body:'Content.'}] },
+        flashcard:       { displayTitle:'Your Heading Here', cards:[{front:'Front 1',back:'Back 1'},{front:'Front 2',back:'Back 2'},{front:'Front 3',back:'Back 3'}] },
+        'labeled-image': { displayTitle:'Your Heading Here', instruction:'Click the markers.', _graphic:{large:'',alt:''}, _markers:[{x:25,y:30,label:'Marker 1',description:'Description.'},{x:75,y:60,label:'Marker 2',description:'Description.'}] },
+        'process-flow':  { displayTitle:'Your Heading Here', body:'<p>Process overview.</p>', nodes:[{title:'Step 1',body:'First.'},{title:'Step 2',body:'Second.'},{title:'Step 3',body:'Third.'}] },
+        'image-gallery': { displayTitle:'Your Heading Here', body:'<p>Gallery.</p>', items:[{_graphic:{large:'',alt:'Image 1'},caption:'Caption 1'},{_graphic:{large:'',alt:'Image 2'},caption:'Caption 2'}] },
+        'full-bleed':    { displayTitle:'Your Heading Here', body:'<p>Overlay text.</p>', _graphic:{large:'',alt:''} },
+        'video-transcript':{ displayTitle:'Your Heading Here', body:'<p>Video description.</p>', _media:{src:'',poster:''}, transcript:'Transcript here.' },
+        divider:         { style:'line' },
+        callout:         { displayTitle:'Callout Title', body:'<p>Callout content.</p>', calloutType:'info' },
+        'path-selector': { displayTitle:'Choose Your Path', instruction:'Select a path.', items:[{id:'a',title:'Path A',body:'Description.'},{id:'b',title:'Path B',body:'Description.'}], pathGroup:'default' },
+      };
+
+      // ── Insert "+" buttons between wrappers when authoring is active ───
+      function insertAddButtons() {
+        // Remove existing add buttons
+        document.querySelectorAll('[data-add-row]').forEach(function(r) { r.remove(); });
+
+        var allWrappers = document.querySelectorAll('[data-authoring-wrapper]');
+        allWrappers.forEach(function(wrapper, i) {
+          // Skip hero — don't allow adding before the first section heading
+          if (i === 0) return;
+          var addRow = createAddButton(allWrappers[i - 1]);
+          wrapper.parentElement.insertBefore(addRow, wrapper);
+        });
+
+        // Also add one after the last wrapper
+        if (allWrappers.length > 0) {
+          var lastWrapper = allWrappers[allWrappers.length - 1];
+          var addRow = createAddButton(lastWrapper);
+          lastWrapper.parentElement.insertBefore(addRow, lastWrapper.nextSibling);
+        }
+      }
+
+      function showAddButtons(show) {
+        document.querySelectorAll('[data-add-row]').forEach(function(r) {
+          r.style.display = show ? 'block' : 'none';
+        });
+        document.querySelectorAll('[data-add-btn]').forEach(function(b) {
+          b.style.display = show ? 'inline-block' : 'none';
+        });
+      }
+
+      // ── Reorder DOM wrappers to match JSON using stable IDs ────────────
+      function reorderDOM() {
+        if (!courseData || !courseData.sections) return;
+
+        // Build wrapper lookup by stable ID
+        var wrapperById = {};
+        entries.forEach(function(e) {
+          var id = e.wrapper.getAttribute('data-wrapper-id');
+          if (id) wrapperById[id] = e.wrapper;
+        });
+
+        // Build desired order from JSON
+        var orderedIds = [];
+        courseData.sections.forEach(function(sec, si) {
+          if (sec.title) {
+            var headingId = 'heading-' + (sec.sectionId || 'section-' + String(si).padStart(2, '0'));
+            orderedIds.push(headingId);
+          }
+          (sec.components || []).forEach(function(comp) {
+            orderedIds.push(comp.componentId || '');
+          });
+        });
+
+        // Re-append wrappers in JSON order before the first non-wrapper sibling
+        var parent = entries[0] && entries[0].wrapper.parentElement;
+        if (!parent) return;
+        // Find the anchor: first child that is NOT a wrapper or add-button row
+        var anchor = null;
+        var children = parent.children;
+        for (var a = 0; a < children.length; a++) {
+          if (!children[a].hasAttribute('data-authoring-wrapper') && !children[a].hasAttribute('data-add-row')) {
+            anchor = children[a]; break;
+          }
+        }
+        var missingIds = [];
+        orderedIds.forEach(function(id) {
+          var w = wrapperById[id];
+          if (w) {
+            parent.insertBefore(w, anchor);
+          } else {
+            missingIds.push(id);
+          }
+        });
+        if (missingIds.length > 0) {
+          console.warn('Authoring reorder: missing wrappers for IDs:', missingIds);
+        }
+
+        // Re-index data-section-index and data-component-index on all sections
+        courseData.sections.forEach(function(sec, si) {
+          if (sec.title) {
+            var hId = 'heading-' + (sec.sectionId || 'section-' + String(si).padStart(2, '0'));
+            var hw = wrapperById[hId];
+            if (hw) {
+              var hSec = hw.querySelector('section[data-section-index]');
+              if (hSec) {
+                hSec.setAttribute('data-section-index', si);
+                hSec.setAttribute('data-component-index', -1);
+              }
+            }
+          }
+          (sec.components || []).forEach(function(comp, ci) {
+            var cw = wrapperById[comp.componentId];
+            if (cw) {
+              var cSec = cw.querySelector('section[data-section-index]');
+              if (cSec) {
+                cSec.setAttribute('data-section-index', si);
+                cSec.setAttribute('data-component-index', ci);
+              }
+            }
+          });
+        });
+
+        saveCourseData();
+      }
+
+      // ── Move any block (heading or component) up/down ───────────────────
+      // Approach: flatten course → swap adjacent → rebuild sections → reorder DOM
+      function moveBlock(entry, direction) {
+        var wrapper = entry.wrapper;
+        var sec = wrapper.querySelector('section[data-section-index]');
+        if (!sec || !courseData) return;
+
+        var compId = sec.getAttribute('data-component-id') || '';
+
+        // 1. Flatten: hero section stays fixed at position 0, everything else becomes a flat block list
+        var heroSection = courseData.sections[0];
+        var blocks = [];
+        for (var s = 1; s < courseData.sections.length; s++) {
+          var secData = courseData.sections[s];
+          if (secData.title) {
+            // Heading block — carries all section-level metadata
+            blocks.push({
+              blockType: 'heading',
+              id: 'heading-' + (secData.sectionId || ''),
+              meta: { sectionId: secData.sectionId, title: secData.title, sectionWidth: secData.sectionWidth, showIf: secData.showIf }
+            });
+          }
+          (secData.components || []).forEach(function(comp) {
+            blocks.push({ blockType: 'component', id: comp.componentId || '', data: comp });
+          });
+        }
+
+        // 2. Find this block in the flat list
+        var myIdx = -1;
+        for (var i = 0; i < blocks.length; i++) {
+          if (blocks[i].id === compId) { myIdx = i; break; }
+        }
+        if (myIdx === -1) {
+          console.warn('Authoring: block not found in flat list:', compId);
+          return;
+        }
+
+        var targetIdx = myIdx + direction;
+        if (targetIdx < 0 || targetIdx >= blocks.length) return;
+
+        // 3. Swap adjacent blocks
+        var temp = blocks[myIdx];
+        blocks[myIdx] = blocks[targetIdx];
+        blocks[targetIdx] = temp;
+
+        // 4. Rebuild sections from flat list
+        var newSections = [heroSection];
+        var currentSec = null;
+        blocks.forEach(function(block) {
+          if (block.blockType === 'heading') {
+            currentSec = {
+              sectionId: block.meta.sectionId,
+              title: block.meta.title,
+              sectionWidth: block.meta.sectionWidth || 'standard',
+              components: []
+            };
+            if (block.meta.showIf) currentSec.showIf = block.meta.showIf;
+            newSections.push(currentSec);
+          } else {
+            // Component — add to current section, or create untitled section if none
+            if (!currentSec) {
+              currentSec = { sectionId: 'section-orphan', title: '', sectionWidth: 'standard', components: [] };
+              newSections.push(currentSec);
+            }
+            currentSec.components.push(block.data);
+          }
+        });
+
+        // Remove any sections that ended up empty (heading with no components after it)
+        courseData.sections = newSections.filter(function(s, i) {
+          return i === 0 || s.components.length > 0 || s.title;
+        });
+
+        // 5. Clean up heading wrappers for removed sections
+        var liveSectionIds = {};
+        courseData.sections.forEach(function(s) { if (s.sectionId) liveSectionIds[s.sectionId] = true; });
+        for (var i = entries.length - 1; i >= 0; i--) {
+          var wId = entries[i].wrapper.getAttribute('data-wrapper-id') || '';
+          if (wId.indexOf('heading-') === 0) {
+            var secId = wId.replace('heading-', '');
+            // Check if this heading's section still exists AND still has a title
+            var found = false;
+            for (var j = 0; j < courseData.sections.length; j++) {
+              if (courseData.sections[j].sectionId === secId && courseData.sections[j].title) { found = true; break; }
+            }
+            if (!found) {
+              entries[i].wrapper.remove();
+              entries.splice(i, 1);
+            }
+          }
+        }
+
+        // 6. Reorder DOM to match new JSON
+        reorderDOM();
+        // Rebuild "+" buttons since DOM changed
+        insertAddButtons();
+        showAddButtons(true);
+        console.log('Authoring: moved ' + compId + (direction === -1 ? ' up' : ' down'));
+      }
+
       // ── Swap using cloned DOM nodes ───────────────────────────────────
       function swapVariant(entry, targetVariant) {
         var targetNode = entry.variantNodes[targetVariant];
@@ -1569,8 +2058,15 @@
         // from double-hydration, GSAP inline style accumulation, carousel dot duplication,
         // contenteditable artifact carry-over, and image dimension corruption.
 
-        // Clone the target and insert
+        // Clone the target and insert — carry over authoring attributes
         var newSection = targetNode.cloneNode(true);
+        // Transfer index + identity attributes so getCompData/reorderDOM still work
+        var siAttr = currentSection.getAttribute('data-section-index');
+        var ciAttr = currentSection.getAttribute('data-component-index');
+        var cidAttr = currentSection.getAttribute('data-component-id');
+        if (siAttr !== null) newSection.setAttribute('data-section-index', siAttr);
+        if (ciAttr !== null) newSection.setAttribute('data-component-index', ciAttr);
+        if (cidAttr) newSection.setAttribute('data-component-id', cidAttr);
         currentSection.parentNode.replaceChild(newSection, currentSection);
 
         // Re-hydrate interactivity
@@ -1727,6 +2223,8 @@
         if (si === null || ci === null || !courseData) return null;
         var sec = courseData.sections[parseInt(si, 10)];
         if (!sec) return null;
+        // Section headings use component-index="-1" — return the section object itself
+        if (parseInt(ci, 10) === -1) return sec;
         return sec.components[parseInt(ci, 10)] || null;
       }
 
@@ -1917,6 +2415,8 @@
           enableInlineEditing();
           editingStyleEl.disabled = false;
           exportBtn.style.display = 'block';
+          insertAddButtons();
+          showAddButtons(true);
         } else {
           entries.forEach(function(e) {
             e.toolbar.style.display = 'none';
@@ -1936,6 +2436,7 @@
           disableInlineEditing();
           editingStyleEl.disabled = true;
           exportBtn.style.display = 'none';
+          showAddButtons(false);
         }
       });
     })();

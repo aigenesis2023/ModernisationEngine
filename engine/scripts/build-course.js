@@ -2613,7 +2613,89 @@ function build() {
     fallbackCount = result.fallbackCount;
   }
 
-  console.log(`[ok] Rendered ${filledCount} components (${fallbackCount} fallbacks)\n`);
+  console.log(`[ok] Rendered ${filledCount} components (${fallbackCount} fallbacks)`);
+
+  // ── Template library: pre-render placeholder for each component type ──
+  const { renderComponentVariant } = require(PREACT_SSR_PATH);
+  // SVG placeholder image (grey box with image icon) as data URI
+  const PH_IMG = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='500' fill='none'%3E%3Crect width='800' height='500' rx='8' fill='%23374151'/%3E%3Cpath d='M370 230h60v8h-60z' fill='%236B7280'/%3E%3Ccircle cx='385' cy='215' r='12' fill='%236B7280'/%3E%3Cpath d='M365 260l20-25 15 18 10-10 25 30H365z' fill='%236B7280'/%3E%3Ctext x='400' y='290' text-anchor='middle' fill='%239CA3AF' font-family='sans-serif' font-size='14'%3EPlaceholder Image%3C/text%3E%3C/svg%3E";
+  const PH_GFX = { large: PH_IMG, alt: 'Placeholder image' };
+  const PLACEHOLDER_DATA = {
+    hero:            { type:'hero', displayTitle:'Your Heading Here', body:'<p>Enter your introduction text here.</p>', _graphic: PH_GFX },
+    text:            { type:'text', displayTitle:'Your Heading Here', body:'<p>Enter your body text here. You can write multiple paragraphs.</p>' },
+    graphic:         { type:'graphic', _graphic: PH_GFX, displayTitle:'Image', body:'' },
+    'graphic-text':  { type:'graphic-text', displayTitle:'Your Heading Here', body:'<p>Describe the key concept shown in this image. Add context, explanation, or a supporting narrative that complements the visual.</p>', _graphic: PH_GFX },
+    accordion:       { type:'accordion', displayTitle:'Your Heading Here', items:[{title:'Panel 1',body:'Content for this panel.'},{title:'Panel 2',body:'Content for this panel.'}] },
+    mcq:             { type:'mcq', displayTitle:'Your Question Here', body:'<p>Select the best answer.</p>', choices:[{id:'a',text:'Option A',isCorrect:true},{id:'b',text:'Option B'},{id:'c',text:'Option C'}], _feedback:{correct:'Correct!',incorrect:'Try again.'} },
+    narrative:       { type:'narrative', displayTitle:'Your Heading Here', items:[{title:'Slide 1',body:'Content for slide 1.',_graphic:PH_GFX},{title:'Slide 2',body:'Content for slide 2.',_graphic:PH_GFX}] },
+    bento:           { type:'bento', displayTitle:'Your Heading Here', body:'<p>Overview text.</p>', items:[{title:'Card 1',body:'Card content.',_graphic:PH_GFX},{title:'Card 2',body:'Card content.',_graphic:PH_GFX},{title:'Card 3',body:'Card content.'},{title:'Card 4',body:'Card content.'}] },
+    'data-table':    { type:'data-table', displayTitle:'Your Heading Here', body:'<p>Table description.</p>', columns:[{title:'Column A'},{title:'Column B'}], rows:[{label:'Row 1',values:['Value A','Value B']},{label:'Row 2',values:['Value A','Value B']}] },
+    media:           { type:'media', displayTitle:'Your Heading Here', body:'<p>Video description.</p>', _media:{src:'',poster:PH_IMG} },
+    textinput:       { type:'textinput', displayTitle:'Your Question Here', body:'<p>Enter your response below.</p>', instruction:'Type your answer', placeholder:'Your answer here...' },
+    branching:       { type:'branching', displayTitle:'Your Scenario Here', body:'<p>Choose the best approach.</p>', choices:[{id:'a',text:'Option A',body:'What happens if you choose A.'},{id:'b',text:'Option B',body:'What happens if you choose B.'}] },
+    timeline:        { type:'timeline', displayTitle:'Your Heading Here', body:'<p>Follow these steps.</p>', items:[{title:'Step 1',body:'First step details.'},{title:'Step 2',body:'Second step details.'},{title:'Step 3',body:'Third step details.'}] },
+    comparison:      { type:'comparison', displayTitle:'Your Heading Here', body:'<p>Compare the options.</p>', columns:[{title:'Option A',items:[{text:'Feature 1',value:true},{text:'Feature 2',value:false}]},{title:'Option B',items:[{text:'Feature 1',value:false},{text:'Feature 2',value:true}]}] },
+    'stat-callout':  { type:'stat-callout', displayTitle:'Key Statistics', stats:[{value:'100',suffix:'%',label:'Stat One'},{value:'50',suffix:'K',label:'Stat Two'},{value:'3.5',suffix:'x',label:'Stat Three'}] },
+    pullquote:       { type:'pullquote', body:'Enter your quote text here.', attribution:'Attribution', role:'Role' },
+    'key-term':      { type:'key-term', displayTitle:'Key Terms', items:[{term:'Term 1',definition:'Definition of term 1.'},{term:'Term 2',definition:'Definition of term 2.'}] },
+    checklist:       { type:'checklist', displayTitle:'Your Checklist', body:'<p>Complete these items.</p>', instruction:'Check each item as you complete it.', items:[{text:'Item 1'},{text:'Item 2'},{text:'Item 3'}] },
+    tabs:            { type:'tabs', displayTitle:'Your Heading Here', tabs:[{label:'Tab 1',body:'Content for tab 1.'},{label:'Tab 2',body:'Content for tab 2.'},{label:'Tab 3',body:'Content for tab 3.'}] },
+    flashcard:       { type:'flashcard', displayTitle:'Your Heading Here', cards:[{front:'Front of card 1',back:'Back of card 1'},{front:'Front of card 2',back:'Back of card 2'},{front:'Front of card 3',back:'Back of card 3'}] },
+    'labeled-image': { type:'labeled-image', displayTitle:'Your Heading Here', instruction:'Click the markers.', _graphic:PH_GFX, _markers:[{x:25,y:30,label:'Marker 1',description:'Description 1.'},{x:75,y:60,label:'Marker 2',description:'Description 2.'}] },
+    'process-flow':  { type:'process-flow', displayTitle:'Your Heading Here', body:'<p>Process overview.</p>', nodes:[{title:'Step 1',body:'First step.'},{title:'Step 2',body:'Second step.'},{title:'Step 3',body:'Third step.'}] },
+    'image-gallery': { type:'image-gallery', displayTitle:'Your Heading Here', body:'<p>Gallery description.</p>', items:[{_graphic:PH_GFX,caption:'Caption 1'},{_graphic:PH_GFX,caption:'Caption 2'}] },
+    'full-bleed':    { type:'full-bleed', displayTitle:'Your Heading Here', body:'<p>Overlay text on this full-width image.</p>', _graphic:PH_GFX },
+    'video-transcript':{ type:'video-transcript', displayTitle:'Your Heading Here', body:'<p>Video description.</p>', _media:{src:'',poster:PH_IMG}, transcript:'Transcript text goes here.' },
+    divider:         { type:'divider', style:'line' },
+    callout:         { type:'callout', displayTitle:'Callout Title', body:'<p>Callout content here.</p>', calloutType:'info' },
+    'path-selector': { type:'path-selector', displayTitle:'Choose Your Path', instruction:'Select a learning path.', items:[{id:'path-a',title:'Path A',body:'Description of path A.'},{id:'path-b',title:'Path B',body:'Description of path B.'}], pathGroup:'default' },
+  };
+
+  // Variant map for template library (matches src/utils.ts VARIANT_MAP)
+  const TPL_VARIANTS = {
+    'hero':['centered-overlay','split-screen','minimal-text'],'graphic-text':['split','overlap','full-overlay'],
+    'bento':['grid-4','wide-2','featured'],'accordion':['standard','accent-border'],'mcq':['stacked','grid'],
+    'stat-callout':['centered','card-row'],'timeline':['vertical','centered-alternating'],
+    'comparison':['columns','stacked-rows'],'tabs':['horizontal','vertical'],
+    'pullquote':['accent-bar','centered','minimal'],'full-bleed':['center','left','right'],
+    'process-flow':['vertical','horizontal'],'graphic':['standard','captioned-card'],
+    'divider':['line','spacing','icon'],'callout':['info','warning','tip','success'],
+    'text':['standard','two-column','highlight-box'],'narrative':['image-focused','text-focused'],
+    'flashcard':['grid','single-large'],'checklist':['standard','card-style','numbered'],
+    'key-term':['list','card-grid'],'labeled-image':['numbered-dots','side-panel'],
+    'data-table':['standard','striped-card'],'branching':['cards','list'],
+  };
+
+  const templateLibraryHtml = Object.entries(PLACEHOLDER_DATA).map(([type, placeholder]) => {
+    const comp = { ...placeholder, componentId: `tpl-${type}` };
+    // Render default variant
+    let html = renderComponentVariant(comp, 0, 'standard');
+    if (!html) return '';
+
+    // Add data-variant to default
+    const variants = TPL_VARIANTS[type];
+    if (variants && variants.length > 1) {
+      const defaultVariant = variants[0];
+      html = html.replace(/^(<section\b[^>]*)>/, `$1 data-variant="${defaultVariant}">`);
+
+      // Render alternate variants as <template data-variant-alt> tags
+      const alts = [];
+      for (const v of variants.slice(1)) {
+        const altHtml = renderComponentVariant(comp, 0, 'standard', v);
+        if (altHtml) {
+          const tagged = altHtml.replace(/^(<section\b[^>]*)>/, `$1 data-variant="${v}">`);
+          alts.push(`<template data-variant-alt="${esc(v)}">${tagged}</template>`);
+        }
+      }
+      if (alts.length > 0) {
+        html = html.replace(/<\/section>\s*$/, `${alts.join('\n')}\n</section>`);
+      }
+    }
+
+    return `<template data-type-template="${type}">${html}</template>`;
+  }).filter(Boolean).join('\n');
+
+  console.log(`[ok] Template library: ${Object.keys(PLACEHOLDER_DATA).length} component types\n`);
 
   // Get hydration script
   let hydrateScript = '';
@@ -2631,7 +2713,7 @@ function build() {
 
   if (useTailwindV4 && fs.existsSync(THEME_TEMPLATE)) {
     // Tailwind v4: write body HTML for class scanning, then compile CSS
-    const bodyHtml = `${navHtml}\n${sectionsHtmlStr}`;
+    const bodyHtml = `${navHtml}\n${sectionsHtmlStr}\n${templateLibraryHtml}`;
     const scanPath = path.resolve(ROOT, 'engine/output/_tw-scan.html');
     fs.writeFileSync(scanPath, bodyHtml, 'utf-8');
 
@@ -2657,6 +2739,11 @@ ${navHtml}
 
 <main class="min-h-screen bg-background overflow-x-hidden pt-14">
 ${sectionsHtmlStr}
+
+<!-- Template Library (authoring layer — hidden) -->
+<div id="component-templates" style="display:none">
+${templateLibraryHtml}
+</div>
 
 <!-- Course Completion -->
 <section class="py-16 text-center">
