@@ -126,6 +126,7 @@
 .text-stat {
   font-size: var(--text-stat);
   font-weight: {{STAT_FW}};
+  line-height: 1.1;
 }
 
 /* ═══ CUSTOM CLASSES ══════════════════════════════════════════════════ */

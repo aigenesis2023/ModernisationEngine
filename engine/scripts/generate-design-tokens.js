@@ -495,11 +495,12 @@ function extractBorderRadius(summary) {
 // ─── Typography generation ─────────────────────────────────────────────────────
 
 /**
- * Generate typography scale from brand signals.
- * build-course.js uses these as Tailwind class strings via mergeTypo().
+ * Generate brand weight preferences from extracted CSS.
+ * Only font-weight is brand-variable — sizes, line-heights, and letter-spacing
+ * are engine-controlled defaults in build-course.js for cross-brand consistency.
+ * build-course.js mergeTypo() extracts only fontWeight from these strings.
  */
 function generateTypography(isDark, summary, borderRadiusInfo) {
-  // Detect weight preferences from heading weights
   const headingWeights = (summary.headings || []).map(h => parseInt(h.fontWeight || '400', 10)).filter(w => !isNaN(w));
   const avgHeadingWeight = headingWeights.length
     ? headingWeights.reduce((a, b) => a + b, 0) / headingWeights.length
@@ -511,16 +512,17 @@ function generateTypography(isDark, summary, borderRadiusInfo) {
   const headingWeight = isBold ? 'font-bold' : isLight ? 'font-light' : 'font-medium';
   const displayWeight = isBold ? 'font-extrabold' : isLight ? 'font-light' : 'font-semibold';
 
+  // Only weight classes — build-course.js owns sizes/line-heights/tracking
   return {
-    h1: `text-5xl ${displayWeight} tracking-tight leading-none`,
-    h2: `text-3xl ${headingWeight} leading-snug`,
-    h3: `text-xl ${headingWeight} leading-snug`,
-    h4: `text-base ${headingWeight} leading-normal`,
-    body: 'text-base leading-relaxed',
-    bodyLarge: `text-lg ${isLight ? 'font-light' : 'font-normal'} leading-relaxed`,
-    label: 'text-xs font-medium tracking-widest uppercase',
-    blockquote: `text-2xl ${isLight ? 'font-light' : 'font-normal'} leading-relaxed`,
-    statNumber: `text-5xl ${isBold ? 'font-black' : 'font-bold'}`,
+    h1: displayWeight,
+    h2: headingWeight,
+    h3: headingWeight,
+    h4: headingWeight,
+    body: '',
+    bodyLarge: isLight ? 'font-light' : 'font-normal',
+    label: 'font-medium',
+    blockquote: isLight ? 'font-light' : 'font-normal',
+    statNumber: isBold ? 'font-black' : 'font-bold',
   };
 }
 

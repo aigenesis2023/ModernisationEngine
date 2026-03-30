@@ -32,7 +32,7 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
             </div>
             <div class={`relative @3xl:absolute ${align === 'left' ? '@3xl:left-0' : '@3xl:right-0'} @3xl:top-1/2 @3xl:-translate-y-1/2 @3xl:w-[55%] glass-card rounded-2xl p-8 @3xl:p-10 mt-[-2rem] @3xl:mt-0 mx-4 @3xl:mx-0`}>
               <h2 class="font-headline text-h2 tracking-tight mb-4" dangerouslySetInnerHTML={{ __html: title }} />
-              <div class="text-body text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
+              <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
             </div>
           </div>
         </div>
@@ -53,7 +53,7 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
         <div class={`@container w-full ${maxW} mx-auto px-8 relative z-10 py-20`} data-animate="fade-up">
           <div class={`w-full @3xl:w-1/2 ${align === 'right' ? '@3xl:ml-auto' : ''}`}>
             <h2 class="font-headline text-h2 tracking-tight mb-6" dangerouslySetInnerHTML={{ __html: title }} />
-            <div class="text-body-lg text-on-surface-variant leading-normal space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
+            <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
           </div>
         </div>
       </section>
@@ -84,7 +84,7 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
       data-animate="fade-up"
     >
       <h2 class="font-headline text-h2 tracking-tight mb-6" dangerouslySetInnerHTML={{ __html: title }} />
-      <div class="text-body-lg text-on-surface-variant leading-normal space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
+      <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
     </div>
   );
 

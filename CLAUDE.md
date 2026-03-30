@@ -23,7 +23,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 ```
 ═══ AI-FIRST PIPELINE ═════════════════════════════════════════════════
 Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON)
-                       (Claude Code subagent with web search)
+                       (Tavily API gathers raw web content → Claude subagent synthesises)
                        (Expert SME persona — gathers raw knowledge + teachable moments)
                                           │
                     ┌─────────────────────┘
@@ -84,6 +84,9 @@ Brand colours come from CSS extraction → MD3 palette (mathematical). Visual st
 
 **5. Interactivity is hydration-driven.**
 `hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `engine/BUILD-SYSTEM.md`.
+
+**6. Typography scale lives in ONE place: `buildTailwindCSS()` in `build-course.js`.**
+Font sizes, line-heights, letter-spacing, and default weights are defined in the `T = { ... }` object (~line 472). This is the single source of truth — all values flow through `theme-template.css` placeholders into compiled CSS. **To adjust typography (e.g., tighter line-height, smaller H2), change the defaults here.** Do NOT edit `theme-template.css` placeholders directly, add inline styles to components, or put typography in `visual-archetypes.json`. Brand input only controls font-weight preference (bold/light/medium) via `mergeTypo()` — sizes and spacing are engine-controlled for cross-brand consistency.
 
 ---
 
@@ -200,9 +203,11 @@ EV/                                    ← Test SCORM (64 slides, gitignored in 
 ### Step 1 — Research (`engine/scripts/research-content.js`)
 **Input:** Topic brief + optional URLs | **Output:** `knowledge-base.json`
 
-Claude Code subagent with expert SME persona researches the topic using web search. Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent. Run: `node engine/scripts/research-content.js --topic "Your Topic"`
+**Tavily-first pipeline:** The script runs 6 targeted Tavily searches in parallel (fundamentals, stats, case studies, misconceptions, trends, applications) plus Tavily extract on any user-provided URLs. All raw content is bundled into the prompt. A Claude subagent then **synthesises only** — no web searching — which dramatically reduces token usage. Run: `node engine/scripts/research-content.js --topic "Your Topic"`
 
-**⚠️ Subagent workflow:** The script writes a research prompt, then you spawn a subagent (Agent tool) to do the research. The subagent uses web search, reads the schema, and writes `engine/output/knowledge-base.json`. Validate after: `node engine/scripts/research-content.js --load engine/output/knowledge-base.json`.
+Gathers raw knowledge as uniform `keyPoints[]` + `teachableMoments[]` (5 types: surprising-insight, case-study, analogy, contrast, decision-framework). The research agent has **zero knowledge of components** — it gathers raw material for the generation agent.
+
+**⚠️ Subagent workflow:** The script runs Tavily, assembles the prompt with pre-gathered content, then you spawn a subagent (Agent tool) to synthesise and structure it. The subagent reads the bundled research and writes `engine/output/knowledge-base.json` — no web search needed. Validate after: `node engine/scripts/research-content.js --load engine/output/knowledge-base.json`.
 
 ### Step 2 — Generate Course (`engine/scripts/generate-layout.js`)
 **Input:** `knowledge-base.json` + `brand-design.md` + `brand-profile.json` + `generation-engine.md` | **Output:** `course-layout.json`
@@ -299,7 +304,7 @@ rm -f engine/output/archetype-prompt.txt engine/output/archetype-match.json
 
 ### Full Run: Execute in order
 ```bash
-node engine/scripts/research-content.js --topic "Your Topic"  # Step 1 (subagent researches)
+node engine/scripts/research-content.js --topic "Your Topic"  # Step 1 (Tavily gathers → subagent synthesises)
 node engine/scripts/scrape-brand.js                            # Brand analysis + CSS extraction
 node engine/scripts/generate-layout.js                         # Step 2 (subagent generates course)
 node engine/scripts/generate-design-tokens.js                  # Step 3 (MD3 palette + archetype)
@@ -314,6 +319,7 @@ node engine/scripts/review-course.js                           # Step 6c (visual
 **If ANY step fails, STOP and tell the user. Do not silently continue with stale data.**
 
 ### API Keys (stored in `.env`, gitignored)
+- `TAVILY_API_KEY`: Tavily web search + extract — used by research-content.js (Step 1) to gather raw content before Claude synthesises
 - `SILICONFLOW_API_KEY`: SiliconFlow AI image generation via Tongyi Z-Image-Turbo (default)
 - `PEXELS_API_KEY`: pexels.com/api → free stock photo fallback, 200 req/hr
 - `ANTHROPIC_API_KEY`: (Optional) Enables API mode for brand analysis + Vision AI archetype classification

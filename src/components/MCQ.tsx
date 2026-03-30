@@ -10,7 +10,7 @@ interface Props {
 
 const OPTION_LETTERS = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-export function MCQ({ comp, variant, maxW }: Props) {
+export function MCQ({ comp, variant }: Props) {
   const { AR } = useRender();
   const items = comp._items || [];
   const feedback = comp._feedback || {};
@@ -26,13 +26,20 @@ export function MCQ({ comp, variant, maxW }: Props) {
   const label = 'Knowledge Check';
   const secClass = sectionOnly('py-20');
 
+  // MCQ always renders narrower than the page — signals "assessment moment"
+  const containerW = 'max-w-[54rem]';
+
   const cardClass = mc(
     m.cardBg || AR.surface?.card || 'glass-card',
-    m.cardPad || 'p-6 @3xl:p-8',
-    m.cardRound || AR.borderRadius?.cardLarge || 'rounded-3xl'
+    m.cardPad || 'p-8 @3xl:p-10',
+    m.cardRound || AR.borderRadius?.cardLarge || 'rounded-3xl',
   );
 
-  const labelClass = 'text-label-text text-on-surface-variant';
+  // Badge pill for the "Knowledge Check" label
+  const badgeClass = mc(
+    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest',
+    m.badgeBg || 'bg-primary/10 border border-primary/25 text-primary'
+  );
 
   // Draw metadata
   const dm = comp.drawMetadata || {};
@@ -57,10 +64,16 @@ export function MCQ({ comp, variant, maxW }: Props) {
   if (variant === 'grid' && items.length <= 4) {
     return (
       <section class={secClass} {...sectionAttrs}>
-        <div class={`@container ${maxW} mx-auto px-8`}>
+        <div class={`@container ${containerW} mx-auto px-8`}>
           <div class={cardClass}>
-            <span class={labelClass} data-edit-path="displayTitle">{label}</span>
-            <h3 class="font-headline text-h3 mt-3 mb-8 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
+            {/* Badge label */}
+            <div class="mb-5">
+              <span class={badgeClass} data-edit-path="displayTitle">
+                <span class="material-symbols-outlined" style="font-size:13px;line-height:1">quiz</span>
+                {label}
+              </span>
+            </div>
+            <h3 class="font-headline text-h3 mb-8 text-center text-on-surface" data-edit-path="instruction">{questionText}</h3>
             <div class="grid grid-cols-1 @xl:grid-cols-2 gap-4">
               {items.map((item, i) => (
                 <button
@@ -68,12 +81,12 @@ export function MCQ({ comp, variant, maxW }: Props) {
                     'flex flex-col items-center justify-center gap-3 p-6 @3xl:p-8',
                     m.choiceRound || AR.borderRadius?.card || 'rounded-2xl',
                     m.choiceBg || 'glass-card border border-outline-variant/20',
-                    m.choiceHover || 'hover:bg-surface-container hover:border-secondary/50 transition-all',
+                    m.choiceHover || 'hover:bg-surface-container hover:border-primary/40 transition-all',
                     'cursor-pointer group text-center'
                   )}
                   data-choice={String(i)}
                 >
-                  <span class={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-secondary'}`}>
+                  <span class={`w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold transition-all flex-shrink-0 ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-primary group-hover:bg-primary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-primary'}`}>
                     {OPTION_LETTERS[i] || ''}
                   </span>
                   <span class="text-on-surface font-medium leading-snug" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.text || item.title || '') }} />
@@ -90,23 +103,29 @@ export function MCQ({ comp, variant, maxW }: Props) {
   // Default: stacked
   return (
     <section class={secClass} {...sectionAttrs}>
-      <div class={`@container ${maxW} mx-auto px-8`}>
+      <div class={`@container ${containerW} mx-auto px-8`}>
         <div class={cardClass}>
-          <span class={labelClass} data-edit-path="displayTitle">{label}</span>
-          <h3 class="font-headline text-h3 mt-3 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
-          <div class="space-y-4">
+          {/* Badge label */}
+          <div class="mb-5">
+            <span class={badgeClass} data-edit-path="displayTitle">
+              <span class="material-symbols-outlined" style="font-size:13px;line-height:1">quiz</span>
+              {label}
+            </span>
+          </div>
+          <h3 class="font-headline text-h3 mb-8 text-on-surface" data-edit-path="instruction">{questionText}</h3>
+          <div class="space-y-3">
             {items.map((item, i) => (
               <button
                 class={mc(
-                  'w-full text-left flex items-center gap-5 p-5 @3xl:p-6',
+                  'w-full text-left flex items-center gap-4 p-5 @3xl:p-6',
                   m.choiceRound || AR.borderRadius?.button || 'rounded-xl',
                   m.choiceBg || 'bg-surface-container/60 border border-outline-variant/20',
-                  m.choiceHover || 'hover:bg-surface-container hover:border-secondary/50 transition-all',
+                  m.choiceHover || 'hover:bg-surface-container hover:border-primary/40 transition-all',
                   'cursor-pointer group'
                 )}
                 data-choice={String(i)}
               >
-                <span class={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-secondary group-hover:bg-secondary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-secondary'}`}>
+                <span class={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold transition-all flex-shrink-0 ${m.letterBg || 'border-2 border-outline-variant/40 group-hover:border-primary group-hover:bg-primary/10'} ${m.letterText || 'text-on-surface-variant group-hover:text-primary'}`}>
                   {OPTION_LETTERS[i] || ''}
                 </span>
                 <span class="text-on-surface leading-relaxed" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.text || item.title || '') }} />

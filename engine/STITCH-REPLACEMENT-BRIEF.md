@@ -147,12 +147,12 @@ Already has:
 - 28 fill functions with premium fallbacks for every DC property (`glass-card`, MD3 semantic colors, consistent transitions)
 - Custom CSS classes built from tokens: `.glass-card`, `.text-gradient`, `.btn-primary`, `.glass-nav`
 - Dark-mode fixup block (lines ~2426-2446) that strips Stitch's light-mode mistakes
-- `mergeTypo()` that only keeps font-weight from Stitch, discards sizes/spacing (we own the scale)
+- `mergeTypo()` that only keeps font-weight from brand tokens, discards sizes/spacing (engine owns the scale)
 
 ### Content pipeline
 
 Working well, not changing:
-- `research-content.js` → knowledge-base.json (subagent with web search)
+- `research-content.js` → knowledge-base.json (Tavily API gathers content → subagent synthesises, no web search)
 - `generate-layout.js` → course-layout.json (subagent with archetypes, emotional arc)
 - `component-library.json` — 28 components with variants, learningMoment, creativeUses
 
