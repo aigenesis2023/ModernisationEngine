@@ -10,7 +10,7 @@
  */
 import { h, Fragment } from 'preact';
 import renderToString from 'preact-render-to-string';
-import { setRenderContext } from './context.js';
+import { setRenderContext, useRender } from './context.js';
 import { COMPONENT_REGISTRY } from './components/index.js';
 import {
   esc, getSectionMaxW, getComponentMaxW, VARIANT_MAP,
@@ -282,6 +282,22 @@ function assembleSection(
   }).join('\n\n');
 
   let sectionBlock = titleBar + '\n' + wrapped;
+
+  // ── Apply surfaceRhythm background to non-hero sections ──────────────
+  // Hero (index 0) controls its own background — skip it.
+  // Wrap the entire section block in a div with the rhythm bg class so that
+  // the CSS cascade (--color-on-surface etc.) propagates to all descendants.
+  if (sectionIndex > 0) {
+    const { AR } = useRender();
+    const rhythm = ((AR as any).surfaceRhythm || []) as string[];
+    if (rhythm.length > 0) {
+      const rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
+      if (rhythmBg) {
+        sectionBlock = `<div class="${rhythmBg}">\n${sectionBlock}\n</div>`;
+      }
+    }
+  }
+
   if (section.showIf && Object.keys(section.showIf).length > 0) {
     const condition = Object.entries(section.showIf)
       .map(([k, v]) => `${k}=${v}`)

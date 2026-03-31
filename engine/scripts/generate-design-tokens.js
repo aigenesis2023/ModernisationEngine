@@ -210,6 +210,29 @@ function generateMd3Tokens(seedHex, isDark) {
   const neutralVariantTone = (t) => hexFromArgb(palettes.neutralVariant.tone(t));
   const primaryTone = (t) => hexFromArgb(palettes.primary.tone(t));
 
+  // ── Vivid brand detection ──────────────────────────────────────────────
+  // MD3 light-mode "primary" = tone 40 = a darkened, muted version of the seed.
+  // This destroys brands like Rep Republic (#ff4400 → #b12d00) that use their
+  // vivid color as buttons, backgrounds, and bold accents — not just as text.
+  // When the seed is highly saturated (> 50%) in a light brand, preserve it
+  // directly as primary so "bg-primary" in the course IS the brand's real color.
+  const seedRgb = hexToRgb(seedHex);
+  const sMax = Math.max(seedRgb.r, seedRgb.g, seedRgb.b);
+  const sMin = Math.min(seedRgb.r, seedRgb.g, seedRgb.b);
+  const seedSat = sMax === 0 ? 0 : (sMax - sMin) / sMax;
+  const seedLum = luminance(seedRgb);
+  // Vivid = saturation > 50% and not near-black (lum > 0.04)
+  const isVividLight = !isDark && seedSat > 0.5 && seedLum > 0.04;
+
+  const primaryHex   = isVividLight ? seedHex : toHex(s.primary);
+  const onPrimaryHex = isVividLight
+    ? (seedLum > 0.35 ? '#1a1a1a' : '#ffffff')
+    : toHex(s.onPrimary);
+
+  if (isVividLight) {
+    console.log(`[vivid] Seed is vivid (sat: ${(seedSat * 100).toFixed(0)}%, lum: ${seedLum.toFixed(2)}) — preserving ${seedHex} as primary (MD3 tone-40 would give ${toHex(s.primary)})`);
+  }
+
   if (isDark) {
     return {
       // Page background — very dark neutral
@@ -252,19 +275,21 @@ function generateMd3Tokens(seedHex, isDark) {
     // Light scheme — use neutralVariant for mid-level surfaces to carry
     // the seed color's hue tint. This prevents all light brands from
     // looking identical ("Google-y" neutral grey).
+    // For vivid brands: use pure white background (the brand's actual bg IS white;
+    // the vivid color is used as bold accent/section bg, not as page tone).
     return {
-      'background':                  neutralTone(98),
+      'background':                  isVividLight ? '#ffffff' : neutralTone(98),
       'on-surface':                  toHex(s.onSurface),
       'surface-dim':                 neutralVariantTone(87),
-      'surface-bright':              neutralTone(98),
-      'surface-container-lowest':    neutralTone(100),
+      'surface-bright':              isVividLight ? '#ffffff' : neutralTone(98),
+      'surface-container-lowest':    isVividLight ? '#ffffff' : neutralTone(100),
       'surface-container-low':       neutralVariantTone(96),
       'surface-container':           neutralVariantTone(94),
       'surface-container-high':      neutralVariantTone(92),
       'surface-container-highest':   neutralVariantTone(90),
       'surface-variant':             toHex(s.surfaceVariant),
-      'primary':                     toHex(s.primary),
-      'on-primary':                  toHex(s.onPrimary),
+      'primary':                     primaryHex,
+      'on-primary':                  onPrimaryHex,
       'primary-container':           toHex(s.primaryContainer),
       'on-primary-container':        toHex(s.onPrimaryContainer),
       'secondary':                   toHex(s.secondary),

@@ -174,13 +174,28 @@ body {
 
 /* Primary button */
 .btn-primary {
-  background: {{PRIMARY_CONTAINER}};
-  color: {{ON_PRIMARY_CONTAINER}};
+  background: {{PRIMARY}};
+  color: {{ON_PRIMARY}};
   transition: opacity 0.2s, transform 0.2s;
 }
 .btn-primary:hover {
-  opacity: 0.9;
+  opacity: 0.85;
   transform: translateY(-1px);
+}
+
+/* Bold primary background sections: cascade text/border tokens so all
+   descendants are readable without per-component color overrides. */
+.bg-primary {
+  background-color: {{PRIMARY}};
+  --color-on-surface: {{ON_PRIMARY}};
+  --color-on-surface-variant: {{ON_PRIMARY}};
+  --color-primary: {{ON_PRIMARY}};
+  --color-outline-variant: {{ON_PRIMARY}}66;
+  --color-surface-container: {{ON_PRIMARY}}1a;
+  --color-surface-container-low: {{ON_PRIMARY}}0d;
+  --color-surface-container-lowest: {{ON_PRIMARY}}0a;
+  --color-surface-container-high: {{ON_PRIMARY}}26;
+  --color-surface-container-highest: {{ON_PRIMARY}}33;
 }
 
 /* Scroll progress bar */

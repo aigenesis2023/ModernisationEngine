@@ -271,6 +271,7 @@ function generateHead(tokens, courseTitle) {
   const surfaceContainer = colors['surface-container'] || '#1f1f1f';
   const outlineVariant = colors['outline-variant'] || '#474747';
   const primary = colors['primary'] || '#ffffff';
+  const onPrimary = colors['on-primary'] || '#000000';
   const primaryContainer = colors['primary-container'] || '#d4d4d4';
   const onPrimaryContainer = colors['on-primary-container'] || '#000000';
   const secondary = colors['secondary'] || '#adc6ff';
@@ -357,11 +358,11 @@ ${colorEntries}
 
     /* Primary button */
     .btn-primary {
-        background: ${primaryContainer};
-        color: ${onPrimaryContainer};
+        background: ${primary};
+        color: ${onPrimary};
         transition: opacity 0.2s, transform 0.2s;
     }
-    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:hover { opacity: 0.85; transform: translateY(-1px); }
 
     /* Scroll progress bar (injected by hydrate.js as #hydrate-progress) */
     #hydrate-progress {
@@ -500,6 +501,7 @@ function buildTailwindCSS(tokens) {
   const surfaceContainer = colors['surface-container'] || '#1f1f1f';
   const outlineVariant = colors['outline-variant'] || '#474747';
   const primary = colors['primary'] || '#ffffff';
+  const onPrimary = colors['on-primary'] || '#000000';
   const primaryContainer = colors['primary-container'] || '#d4d4d4';
   const onPrimaryContainer = colors['on-primary-container'] || '#000000';
   const secondary = colors['secondary'] || '#adc6ff';
@@ -547,6 +549,7 @@ function buildTailwindCSS(tokens) {
     '{{SURFACE_CONTAINER}}': surfaceContainer,
     '{{OUTLINE_VARIANT}}': outlineVariant,
     '{{PRIMARY}}': primary,
+    '{{ON_PRIMARY}}': onPrimary,
     '{{PRIMARY_CONTAINER}}': primaryContainer,
     '{{ON_PRIMARY_CONTAINER}}': onPrimaryContainer,
     '{{SECONDARY}}': secondary,
