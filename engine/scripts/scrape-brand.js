@@ -4,8 +4,10 @@
  *
  * Takes a screenshot of the brand URL, extracts computed CSS tokens via getComputedStyle(),
  * then either:
- *   - Manual mode: prints path, waits for user to paste a natural language description
- *   - API mode (ANTHROPIC_API_KEY): sends screenshot to Claude Vision for automatic description
+ *   - API mode (ANTHROPIC_API_KEY set): sends screenshot to Claude Vision for automatic description
+ *   - Subagent mode (no API key): writes brand-describe-prompt.txt and exits.
+ *     Spawn a subagent to read the screenshot + write brand-describe.json,
+ *     then re-run with --description-ready.
  *
  * Outputs:
  *   1. brand-screenshot.png    — viewport screenshot of the landing page
@@ -20,7 +22,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const readline = require('readline');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
 
 // ─── Paths ───────────────────────────────────────────────────────────
@@ -395,36 +396,48 @@ async function takeScreenshotAndDetectTheme(url) {
   return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS };
 }
 
-// ─── Manual mode: read description from stdin ────────────────────────
-async function readManualDescription() {
+// ─── Subagent mode: write prompt file and exit ───────────────────────
+const DESCRIBE_PROMPT_PATH = path.join(OUTPUT_DIR, 'brand-describe-prompt.txt');
+const DESCRIBE_RESULT_PATH = path.join(OUTPUT_DIR, 'brand-describe.json');
+
+function writeBrandDescribePrompt(url) {
+  const prompt = `# Brand Visual Description Task
+
+Read the brand screenshot at: engine/output/brand-screenshot.png
+
+Write a natural language brand description covering ALL of these:
+
+1. **Visual Theme & Atmosphere** — 3–5 evocative adjectives (e.g. "clean, minimal, confident")
+2. **Colour descriptions IN WORDS** — describe the palette in English (e.g. "deep navy background with electric coral accents and white text") — no hex codes
+3. **Typography feel** — describe headline + body font character (e.g. "bold geometric sans-serif headlines, light body text")
+4. **Component styles** — button shapes (rounded/sharp/pill), card treatments (bordered/shadowed/flat), icon style
+5. **Layout feel** — spacious vs compact, editorial vs functional, symmetrical vs asymmetric
+6. **Image Treatment** — photographic mood: dark/light, warm/cool, dramatic/soft, or "no photography" if illustration/abstract
+
+The description must be in natural language prose — no bullet points, no hex values.
+Aim for 150–250 words.
+
+Then determine whether the brand is DARK or LIGHT themed (dark = dark background is dominant).
+
+Write your result to engine/output/brand-describe.json in this format:
+{
+  "description": "...",
+  "isDark": true | false
+}
+
+Brand URL for reference: ${url}
+`;
+  fs.writeFileSync(DESCRIBE_PROMPT_PATH, prompt);
   console.log('\n' + '='.repeat(70));
-  console.log('MANUAL MODE');
+  console.log('BRAND DESCRIPTION NEEDED (no ANTHROPIC_API_KEY set)');
   console.log('='.repeat(70));
-  console.log(`\nScreenshot saved to:\n  ${SCREENSHOT_PATH}\n`);
-  console.log('Open the screenshot and describe the brand\'s visual design.');
-  console.log('Include:');
-  console.log('  - Visual Theme & Atmosphere (evocative adjectives)');
-  console.log('  - Colour descriptions IN WORDS (no hex codes needed)');
-  console.log('  - Typography feel (modern sans-serif, elegant serif, etc.)');
-  console.log('  - Component styles (button shapes, card treatments)');
-  console.log('  - Layout feel (spacious, compact, editorial, etc.)');
-  console.log('  - Image Treatment (photographic mood: dark/light, warm/cool, dramatic/soft)');
-  console.log('\nPaste your description below, then type END on a new line:\n');
-  console.log('-'.repeat(70));
-
-  const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
-  const lines = [];
-
-  return new Promise((resolve) => {
-    rl.on('line', (line) => {
-      if (line.trim() === 'END') {
-        rl.close();
-        resolve(lines.join('\n'));
-      } else {
-        lines.push(line);
-      }
-    });
-  });
+  console.log('\nA subagent prompt has been written to:');
+  console.log(`  ${DESCRIBE_PROMPT_PATH}`);
+  console.log('\nSpawn a subagent to:');
+  console.log('  1. Read engine/output/brand-screenshot.png (use Read tool — Claude has vision)');
+  console.log('  2. Follow the instructions in brand-describe-prompt.txt');
+  console.log('  3. Write engine/output/brand-describe.json');
+  console.log('\nThen re-run: node engine/scripts/scrape-brand.js --description-ready\n');
 }
 
 // ─── API mode: send screenshot to Claude Vision ─────────────────────
@@ -580,8 +593,11 @@ function saveOutputs(url, description, detectedIsDark, extractedCSS) {
 
 // ─── Main ────────────────────────────────────────────────────────────
 async function main() {
+  const args = process.argv.slice(2);
+  const descriptionReady = args.includes('--description-ready');
+
   // Read brand URL from CLI arg or brand/url.txt
-  const urlArg = process.argv[2];
+  const urlArg = args.find(a => !a.startsWith('--'));
   let url;
   if (urlArg) {
     url = urlArg;
@@ -599,22 +615,44 @@ async function main() {
   console.log(`URL: ${url}\n`);
 
   // Step 1: Take screenshot + detect dominant theme + extract CSS tokens
+  // (Skip if --description-ready: screenshot and CSS already done on first run)
   let detectedIsDark = false; // safe default: light
   let extractedCSS = null;
-  try {
-    const result = await takeScreenshotAndDetectTheme(url);
-    detectedIsDark = result.isDark;
-    extractedCSS = result.extractedCSS;
-  } catch (err) {
-    console.error(`Screenshot/extraction failed: ${err.message}`);
-    console.error('Continuing without screenshot or CSS tokens.\n');
+
+  if (descriptionReady) {
+    // Load previously extracted CSS (written on first run)
+    if (fs.existsSync(EXTRACTED_CSS_PATH)) {
+      extractedCSS = JSON.parse(fs.readFileSync(EXTRACTED_CSS_PATH, 'utf-8'));
+      console.log('Loaded existing extracted-css.json');
+    }
+    // isDark comes from brand-describe.json — no need to re-scrape
+  } else {
+    try {
+      const result = await takeScreenshotAndDetectTheme(url);
+      detectedIsDark = result.isDark;
+      extractedCSS = result.extractedCSS;
+    } catch (err) {
+      console.error(`Screenshot/extraction failed: ${err.message}`);
+      console.error('Continuing without screenshot or CSS tokens.\n');
+    }
   }
 
-  // Step 2: Get description (API or manual)
+  // Step 2: Get description (API or subagent)
   const apiKey = process.env.ANTHROPIC_API_KEY;
   let description;
 
-  if (apiKey) {
+  if (descriptionReady) {
+    // Subagent has written brand-describe.json — load it
+    if (!fs.existsSync(DESCRIBE_RESULT_PATH)) {
+      console.error(`Error: --description-ready flag set but ${DESCRIBE_RESULT_PATH} not found.`);
+      console.error('Run the subagent first, then re-run with --description-ready.');
+      process.exit(1);
+    }
+    const result = JSON.parse(fs.readFileSync(DESCRIBE_RESULT_PATH, 'utf-8'));
+    description = result.description;
+    if (typeof result.isDark === 'boolean') detectedIsDark = result.isDark;
+    console.log('Loaded brand description from brand-describe.json');
+  } else if (apiKey) {
     // API mode: send screenshot to Claude Vision
     if (!fs.existsSync(SCREENSHOT_PATH)) {
       console.error('Error: Screenshot not available for Vision API. Cannot proceed in API mode.');
@@ -624,12 +662,14 @@ async function main() {
       description = await describeWithVision(SCREENSHOT_PATH, apiKey);
     } catch (err) {
       console.error(`Vision API failed: ${err.message}`);
-      console.error('Falling back to manual mode.\n');
-      description = await readManualDescription();
+      console.error('Falling back to subagent mode.\n');
+      writeBrandDescribePrompt(url);
+      process.exit(0);
     }
   } else {
-    // Manual mode: wait for user to paste description
-    description = await readManualDescription();
+    // No API key — write subagent prompt and exit
+    writeBrandDescribePrompt(url);
+    process.exit(0);
   }
 
   // Step 3: Save outputs (includes detected theme + extracted CSS)

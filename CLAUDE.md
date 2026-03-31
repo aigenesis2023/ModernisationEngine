@@ -306,6 +306,9 @@ rm -f engine/output/archetype-prompt.txt engine/output/archetype-match.json
 ```bash
 node engine/scripts/research-content.js --topic "Your Topic"  # Step 1 (Tavily gathers → subagent synthesises)
 node engine/scripts/scrape-brand.js                            # Brand analysis + CSS extraction
+# ⚠️ If no ANTHROPIC_API_KEY: script writes brand-describe-prompt.txt and exits.
+#    Spawn a subagent: read engine/output/brand-screenshot.png + follow the prompt → write brand-describe.json
+#    Then re-run: node engine/scripts/scrape-brand.js --description-ready
 node engine/scripts/generate-layout.js                         # Step 2 (subagent generates course)
 node engine/scripts/generate-design-tokens.js                  # Step 3 (MD3 palette + archetype)
 node engine/scripts/generate-images.js                         # Step 4 (image generation)
