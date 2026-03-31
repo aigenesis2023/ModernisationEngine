@@ -72,7 +72,7 @@ EXTRACTION TIER (scrape-brand.js — enhanced)
   │
   ▼
 STRUCTURED DESIGN SPEC (brand-spec.json — NEW artifact, replaces prose brand-design.md for build)
-  ├─ Produced by Vision AI answering 14 structured questions about the screenshot
+  ├─ Produced by Vision AI answering 15 structured questions about the screenshot
   ├─ Machine-readable JSON, not prose
   ├─ Encodes:
   │   ├─ Color mapping: brand background → our background, brand accent → our primary
@@ -148,7 +148,7 @@ Components are "dumb" reusable structural blocks. They consume resolved CSS vari
 - **MD3 is demoted or removed** — no longer generates the palette; at most fills gaps where brand has no explicit value
 - **brand-spec.json is the new contract** — structured, machine-readable, produced once during scraping
 - **Recipes use composition over inheritance** — no more hardcoded Tailwind classes in JSON; recipes are functions that accept brand-spec.json and return adaptive CSS. Shape comes from the archetype, color comes from the spec.
-- **Vision AI has a clear, bounded role** — answers 14 structured questions, not free-form prose
+- **Vision AI has a clear, bounded role** — answers 15 structured questions, not free-form prose
 - **Tokens are a DAG, not a flat list** — primitives (extracted hex) → semantic roles (background, accent-surface) → component tokens (mcq.cardBg). A change to a primitive ripples through the graph consistently. `pairingLogic` in brand-spec.json enforces accessible foreground/background pairs at every level.
 
 ### The MD3 Decision
@@ -225,7 +225,7 @@ The `brand-spec.json` artifact. Produced by Vision AI during scraping. Consumed 
 brand-spec.json merges THREE data sources — it is NOT purely Vision AI output:
 
 1. **CSS extraction** (ground truth for hex values) — background, primary, secondary, onBackground, isDark, font weights, border radii, shadows. These come from extracted-css.json which already exists.
-2. **Vision AI** (ground truth for design strategy) — a **Technical Design Audit**: 14 structured questions about HOW colors/type/images are used. Answers colorStrategy flags, archetype, surface style, image treatment, contrast, application constraints.
+2. **Vision AI** (ground truth for design strategy) — a **Technical Design Audit**: 15 structured questions about HOW colors/type/images are used. Answers colorStrategy flags, archetype, surface style, image treatment, contrast, application constraints.
 3. **Computed** (derived from the above) — onPrimary (from primary luminance), pairingLogic (from color pairs), backgroundAlt (step from background).
 
 **Vision AI does NOT guess hex values.** CSS extraction provides colors. Vision AI provides strategy and classification only. See Phase 1 implementation section below for full data source mapping, the 13 Vision AI questions, and the subagent workflow.
@@ -316,9 +316,9 @@ Root cause of OBS 4: Font matching quality. Separate concern — improve subagen
 | 1 | Font substitution quality | High | `generate-design-tokens.js` + `font-match-prompt.txt` |
 | 2 | MD3 surface tint | High | `generate-design-tokens.js` — addressed by proposed architecture |
 | 3 | Single seed color | High | `pickSeedColor()` — addressed by direct extraction |
-| 4 | No gradient extraction | Medium | `scrape-brand.js` sample() |
-| 5 | No border width/style extraction | Medium | `scrape-brand.js` sample() |
-| 6 | Limited accent color sampling | Medium | `scrape-brand.js` summary generation |
+| 4 | No gradient extraction | **High** | `scrape-brand.js` sample() — **CONFIRMED in Phase 1 testing: darkfolio and coursesite both get #666666 fallback for primary because accent colors come from gradients/images, not flat CSS. Solved by Vision AI hex sampling (Q15, added for Phase 2).** |
+| 5 | No border width/style extraction | Medium | `scrape-brand.js` sample() — **PARTIALLY ADDRESSED: borderWidth added to sample() in Phase 1** |
+| 6 | Limited accent color sampling | **High** | `scrape-brand.js` summary generation — **CONFIRMED: same root cause as Gap 4. CSS extraction only finds colors on interactive elements (buttons, links, nav). Brands using gradients, images, or CSS custom properties for accent colors get gray fallback.** |
 | 7 | Pseudo-element blindness | Low | `scrape-brand.js` selector strategy |
 | 8 | Google Fonts weight range (300-700 only) | Low-Med | `generateHeadV4()` in `build-course.js` |
 | 9 | Image treatment not flowing through | Medium | `brand-profile.json` → not consumed |
@@ -341,7 +341,7 @@ brand-spec.json is NOT produced purely by Vision AI. It merges THREE sources:
 |---|---|---|
 | `colors.background` | CSS extraction | Most frequent backgroundColor from extracted-css.json backgrounds |
 | `colors.backgroundAlt` | CSS extraction | 2nd most frequent backgroundColor, or computed (slight step from bg) |
-| `colors.primary` | CSS extraction | Top accent color from extracted-css.json accentColors |
+| `colors.primary` | CSS extraction + **Vision AI fallback (Q15)** | Top accent color from extracted-css.json accentColors. **If CSS returns near-neutral (gray), Vision AI Q15 hex overrides.** |
 | `colors.secondary` | CSS extraction | 2nd accent color, or null |
 | `colors.onPrimary` | Computed | Luminance of primary: dark primary → `#ffffff`, light primary → `#1a1a1a` |
 | `colors.onBackground` | CSS extraction | Most frequent heading/paragraph text color |
@@ -392,6 +392,7 @@ The prompt provides the screenshot + CSS-extracted data (so Vision AI doesn't gu
 12. Which visual archetype best matches? (tech-modern / minimalist / editorial / glassmorphist / corporate / warm-organic / neo-brutalist / luxury)
 13. What is the overall visual contrast level? Consider text-to-background contrast, color intensity, and whether the design uses high-contrast pairings or muted/low-contrast treatments. (high / medium / low)
 14. List any "never" rules observed (e.g., "no shadows", "no gradients", "no body text on accent"). Return as JSON array.
+15. What is the dominant accent color hex? Sample the most prominent non-neutral color used for CTAs, highlights, hero sections, or brand identity. Return as hex (e.g., `#7c3aed`). This is a VALIDATION input — CSS extraction is the primary source, but it misses colors from gradients and images.
 
 The subagent reads the screenshot with the Read tool, answers in strict JSON, writes to `engine/output/brand-spec-vision.json`.
 
@@ -425,10 +426,23 @@ Test brands: rep-republic (vivid orange, neo-brutalist), sprig (dark, cyan, tech
 **EXIT CRITERIA MET (2026-03-31).** Tested: rep-republic (light, orange, neo-brutalist), darkfolio (dark, purple, tech-modern), coursesite (light, lavender, minimalist). All strategy flags verified accurate. Prompt tuned for Q2/Q3 hybrid pattern (cards + headings on accent). Merge logic fixed for textDirectlyOnAccent mapping. Known limitation: CSS extraction misses accent colors from gradients/images — Phase 2 concern.
 
 ### Phase 2: Direct Color Extraction (Replace MD3)
-- Refactor `generate-design-tokens.js` to map extracted colors → token roles
-- Demote MD3 to gap-filler for missing tokens only
-- Brand's actual backgrounds, accents, surfaces → design-tokens.json
-- Test: do surfaces match the brand's actual backgrounds?
+
+#### Phase 2a: Vision AI Hex Validation (solve the gradient gap)
+CSS extraction misses accent colors from gradients and images (confirmed: darkfolio gets `#666666` instead of purple, coursesite gets `#666666` instead of lavender). The fix:
+
+- **Add Q15 to Vision AI prompt** (already documented above): "What is the dominant accent color hex?"
+- **Add Q15 to `brand-spec-audit.md`** and update `scrape-brand.js` to handle it
+- **Update `mergeBrandSpec()` in scrape-brand.js**: if CSS `primary` is near-neutral (`isNearNeutral()` already exists in scrape-brand.js), substitute the Vision AI Q15 hex value. CSS remains ground truth when it has a chromatic accent; Vision AI overrides only when CSS fails.
+- **Update `brand-spec.schema.json`**: add `colors.visionPrimaryOverride` field (nullable hex — records when Vision AI provided the value, for auditability)
+- **Test**: re-run darkfolio and coursesite. Verify `primary` is now the correct purple/lavender, not `#666666`.
+
+#### Phase 2b: Token Mapping (replace MD3)
+- Refactor `generate-design-tokens.js` to read `brand-spec.json` and map extracted colors → token roles
+- Demote MD3 to gap-filler for missing tokens only (error, outline-variant, container hierarchy)
+- Brand's actual backgrounds, accents, surfaces → design-tokens.json (no MD3 distortion)
+- Remove the archetype subagent workflow from `generate-design-tokens.js` (archetype now comes from brand-spec.json)
+- Update `qa-course.js` if token structure changes (AUDIT 7)
+- Test: do surfaces match the brand's actual backgrounds? Is the primary color the exact hex from the brand?
 
 ### Phase 3: Adaptive Color Application
 - Refactor surfaceRhythm in `render.tsx` to read `colorStrategy` flags
@@ -462,4 +476,5 @@ Score: side-by-side brand URL vs course output. Focus on: color accuracy, typogr
 | 2026-03-31 | Prompt tuning: Q2/Q3 clarified for hybrid cards+headings pattern (rep-republic caught wrong flags) | Phase 1 | Complete |
 | 2026-03-31 | Merge logic fix: textDirectlyOnAccent "headings-only" → false (only "all" → true) | Phase 1 | Complete |
 | 2026-03-31 | Known limitation: CSS extraction misses accent colors from gradients/images (darkfolio, coursesite get #666666 fallback). Phase 2 concern. | Phase 1 | Noted |
+| 2026-03-31 | Decision: Vision AI Q15 (accent hex sampling) as validation layer — CSS primary, Vision override when near-neutral. Phase 2a scope. | Planning | **APPROVED** |
 | 2026-03-31 | Sprig/crimzon/landio/najaf Framer sites are DOWN. Replaced with darkfolio for dark brand test. | Phase 1 | Noted |

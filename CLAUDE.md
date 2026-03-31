@@ -49,7 +49,7 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + 
          ├─ Reads extracted-css.json + brand-spec.json → maps extracted colors to token roles
          ├─ MD3 as gap-filler only (error, outline-variant — NOT primary palette)
          ├─ Checks fonts against Google Fonts (subagent match if unavailable)
-         ├─ Vision AI produces brand-spec.json (14 structured questions — includes archetype)
+         ├─ Vision AI produces brand-spec.json (15 structured questions — includes archetype + accent hex validation)
          └─→ design-tokens.json (colors, fonts, archetype, typography)
                     │
                     ▼
