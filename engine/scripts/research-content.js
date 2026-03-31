@@ -173,7 +173,7 @@ function formatResearchBundle(searchResults, extractResults, topic) {
 }
 
 // ─── Build the subagent synthesis prompt ─────────────────────────────
-function buildSynthesisPrompt(topic, researchContent, sourceUrls, userUrls) {
+function buildSynthesisPrompt(topic, researchContent, sourceUrls) {
   if (!fs.existsSync(PROMPT_TEMPLATE)) {
     throw new Error('research-agent.md not found. Run from repo root.');
   }
@@ -181,8 +181,8 @@ function buildSynthesisPrompt(topic, researchContent, sourceUrls, userUrls) {
   let prompt = fs.readFileSync(PROMPT_TEMPLATE, 'utf-8');
   prompt = prompt.replace('{{TOPIC}}', topic);
 
-  const urlNote = userUrls.length > 0
-    ? `The user also provided these specific URLs, which have been extracted and included in the research bundle:\n${userUrls.map(u => `- ${u}`).join('\n')}`
+  const urlNote = sourceUrls && sourceUrls.length > 0
+    ? `The user also provided these specific URLs, which have been extracted and included in the research bundle:\n${sourceUrls.map(u => `- ${u}`).join('\n')}`
     : '';
   prompt = prompt.replace('{{URL_SECTION}}', urlNote);
   prompt = prompt.replace('{{RESEARCH_CONTENT}}', researchContent);

@@ -243,8 +243,9 @@ function checkHTMLStructure(html) {
     fail('HTML', `Unbalanced section tags: ${openSections} open vs ${closeSections} close`);
   }
 
-  // Check for duplicate IDs
-  const idMatches = html.match(/\bid="([^"]+)"/g) || [];
+  // Check for duplicate IDs — exclude content inside <template> tags (variant pre-renders)
+  const htmlWithoutTemplates = html.replace(/<template[^>]*>[\s\S]*?<\/template>/gi, '');
+  const idMatches = htmlWithoutTemplates.match(/\bid="([^"]+)"/g) || [];
   const ids = idMatches.map(m => m.match(/id="([^"]+)"/)[1]);
   const idCounts = {};
   for (const id of ids) {
@@ -252,7 +253,7 @@ function checkHTMLStructure(html) {
   }
   const dupes = Object.entries(idCounts).filter(([, c]) => c > 1);
   if (dupes.length === 0) {
-    pass('HTML', `All ${ids.length} IDs are unique`);
+    pass('HTML', `All ${ids.length} IDs are unique (templates excluded)`);
   } else {
     for (const [id, count] of dupes) {
       fail('HTML', `Duplicate ID "${id}" appears ${count} times`);
@@ -631,8 +632,10 @@ function checkInteractiveWiring(html) {
 //  CHECK 5: Image integrity
 // ═══════════════════════════════════════════════════════════════════════
 function checkImageIntegrity(html, layout) {
+  // Exclude <template> tags (variant pre-renders) from image checks
+  const htmlWithoutTemplates = html.replace(/<template[^>]*>[\s\S]*?<\/template>/gi, '');
   // Count images in HTML
-  const imgTags = html.match(/<img[^>]+>/g) || [];
+  const imgTags = htmlWithoutTemplates.match(/<img[^>]+>/g) || [];
   const base64Count = imgTags.filter(t => t.includes('data:image')).length;
   const externalCount = imgTags.filter(t => t.includes('src="http')).length;
   const brokenCount = imgTags.filter(t =>
@@ -645,9 +648,9 @@ function checkImageIntegrity(html, layout) {
     warn('IMAGES', `${brokenCount} image(s) with potentially broken src`);
   }
 
-  // Check all images have alt text
-  const missingAlt = imgTags.filter(t => !t.includes('alt=')).length;
-  const emptyAlt = imgTags.filter(t => t.includes('alt=""')).length;
+  // Check all images have alt text (bare `alt` without value = alt="" = decorative, acceptable)
+  const missingAlt = imgTags.filter(t => !/\balt[\s=>]/.test(t) && !t.endsWith('alt')).length;
+  const emptyAlt = imgTags.filter(t => t.includes('alt=""') || /\balt[\s>]/.test(t) || t.endsWith('alt')).length;
   if (missingAlt > 0) {
     fail('IMAGES', `${missingAlt} image(s) missing alt attribute`);
   } else {

@@ -1723,9 +1723,11 @@ async function run() {
 
         // Variant-specific structural checks
         if (type === 'hero') {
+          // split-screen can be implemented as a grid OR as full-bleed image with gradient overlay
           var hasGrid = comp.querySelector('.grid, [class*="grid-cols-2"]');
-          if (variant === 'split-screen' && !hasGrid) {
-            result.issues.push('split-screen hero should have a 2-column grid');
+          var hasGradientSplit = comp.querySelector('[class*="bg-gradient-to-r"], [class*="bg-gradient-to-l"]');
+          if (variant === 'split-screen' && !hasGrid && !hasGradientSplit) {
+            result.issues.push('split-screen hero should have a 2-column grid or gradient-split layout');
           }
           if (variant === 'minimal-text') {
             var h1 = comp.querySelector('h1');

@@ -1592,7 +1592,7 @@
         'Quiz':      ['mcq', 'branching', 'textinput', 'checklist'],
         'Layout':    ['stat-callout', 'bento', 'comparison', 'data-table', 'timeline', 'process-flow'],
         'Media':     ['media', 'video-transcript'],
-        'Structure': ['hero', 'divider']
+        'Structure': ['section-heading', 'hero', 'divider']
       };
 
       // ── Add section: "+" buttons + picker popup ────────────────────────
@@ -1688,8 +1688,111 @@
         });
       }
 
+      function addSectionHeading(insertAfterWrapper) {
+        if (!courseData) return;
+
+        // Find insertion point
+        var afterSec = insertAfterWrapper ? insertAfterWrapper.querySelector('section[data-section-index]') : null;
+        var afterSI = afterSec ? parseInt(afterSec.getAttribute('data-section-index'), 10) : 0;
+
+        // Use the flatten→rebuild approach: insert a heading block, then rebuild sections
+        var heroSection = courseData.sections[0];
+        var blocks = [];
+        for (var s = 1; s < courseData.sections.length; s++) {
+          var secData = courseData.sections[s];
+          if (secData.title) {
+            blocks.push({ blockType: 'heading', id: 'heading-' + (secData.sectionId || ''), meta: { sectionId: secData.sectionId, title: secData.title, sectionWidth: secData.sectionWidth, showIf: secData.showIf } });
+          }
+          (secData.components || []).forEach(function(comp) {
+            blocks.push({ blockType: 'component', id: comp.componentId || '', data: comp });
+          });
+        }
+
+        // Find where this block sits in the flat list
+        var insertCompId = afterSec ? (afterSec.getAttribute('data-component-id') || '') : '';
+        var insertIdx = 0;
+        for (var i = 0; i < blocks.length; i++) {
+          if (blocks[i].id === insertCompId) { insertIdx = i + 1; break; }
+        }
+
+        // Create new heading block
+        var newSectionId = 'section-new-' + Date.now();
+        var newHeadingId = 'heading-' + newSectionId;
+        blocks.splice(insertIdx, 0, {
+          blockType: 'heading',
+          id: newHeadingId,
+          meta: { sectionId: newSectionId, title: 'New Section', sectionWidth: 'standard' }
+        });
+
+        // Rebuild sections
+        var newSections = [heroSection];
+        var currentSec = null;
+        blocks.forEach(function(block) {
+          if (block.blockType === 'heading') {
+            currentSec = { sectionId: block.meta.sectionId, title: block.meta.title, sectionWidth: block.meta.sectionWidth || 'standard', components: [] };
+            if (block.meta.showIf) currentSec.showIf = block.meta.showIf;
+            newSections.push(currentSec);
+          } else {
+            if (!currentSec) {
+              currentSec = { sectionId: 'section-orphan', title: '', sectionWidth: 'standard', components: [] };
+              newSections.push(currentSec);
+            }
+            currentSec.components.push(block.data);
+          }
+        });
+        courseData.sections = newSections.filter(function(s, i) {
+          return i === 0 || s.components.length > 0 || s.title;
+        });
+        saveCourseData();
+
+        // Create the section heading DOM element
+        var headingEl = document.createElement('section');
+        headingEl.setAttribute('data-component-type', 'section-heading');
+        headingEl.setAttribute('data-component-id', newHeadingId);
+        headingEl.setAttribute('data-section-index', '0');
+        headingEl.setAttribute('data-component-index', '-1');
+        headingEl.className = 'max-w-6xl mx-auto px-8 pt-24 pb-8';
+        headingEl.innerHTML = '<div class="flex items-center gap-6">' +
+          '<div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>' +
+          '<h2 class="font-headline text-label-text uppercase text-primary" data-edit-path="title">New Section</h2>' +
+          '<div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>' +
+          '</div>';
+        headingEl.style.opacity = '1';
+
+        // Insert into DOM (before initEntries wraps it)
+        if (insertAfterWrapper && insertAfterWrapper.nextSibling) {
+          insertAfterWrapper.parentElement.insertBefore(headingEl, insertAfterWrapper.nextSibling);
+        } else if (insertAfterWrapper) {
+          insertAfterWrapper.parentElement.appendChild(headingEl);
+        }
+
+        // Let initEntries wrap it with toolbar
+        initEntries();
+        var newWrapper = headingEl.parentElement;
+        if (newWrapper && newWrapper.hasAttribute('data-authoring-wrapper')) {
+          newWrapper.style.outline = '2px dashed ' + (catColors['Structure'] || '#ec4899');
+          newWrapper.style.outlineOffset = '-2px';
+          newWrapper.style.borderRadius = '8px';
+          var tb = newWrapper.querySelector('[data-authoring-category]');
+          if (tb) tb.style.display = 'flex';
+        }
+
+        reorderDOM();
+        if (newWrapper) newWrapper.scrollIntoView({ behavior: 'instant', block: 'start' });
+        enableInlineEditingForSection(headingEl);
+        insertAddButtons();
+        showAddButtons(true);
+        console.log('Authoring: added section heading (id: ' + newSectionId + ')');
+      }
+
       function addComponent(type, insertAfterWrapper) {
         if (!courseData) return;
+
+        // Special case: section heading (not a component — creates a new section with a title)
+        if (type === 'section-heading') {
+          addSectionHeading(insertAfterWrapper);
+          return;
+        }
 
         // Find the template
         var tplContainer = document.getElementById('component-templates');
@@ -2029,8 +2132,9 @@
           }
         }
 
-        // 6. Reorder DOM to match new JSON
+        // 6. Reorder DOM to match new JSON + keep viewport stable
         reorderDOM();
+        wrapper.scrollIntoView({ behavior: 'instant', block: 'nearest' });
         // Rebuild "+" buttons since DOM changed
         insertAddButtons();
         showAddButtons(true);
