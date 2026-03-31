@@ -179,7 +179,7 @@ function buildSynthesisPrompt(topic, researchContent, sourceUrls) {
   }
 
   let prompt = fs.readFileSync(PROMPT_TEMPLATE, 'utf-8');
-  prompt = prompt.replace('{{TOPIC}}', topic);
+  prompt = prompt.replaceAll('{{TOPIC}}', topic);
 
   const urlNote = sourceUrls && sourceUrls.length > 0
     ? `The user also provided these specific URLs, which have been extracted and included in the research bundle:\n${sourceUrls.map(u => `- ${u}`).join('\n')}`
