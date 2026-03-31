@@ -30,6 +30,7 @@ const http    = require('http');
 const ROOT          = path.resolve(__dirname, '../..');
 const OUTPUT_DIR    = path.join(ROOT, 'engine/output');
 const EXTRACTED_CSS = path.join(OUTPUT_DIR, 'extracted-css.json');
+const BRAND_SPEC    = path.join(OUTPUT_DIR, 'brand-spec.json');
 const TOKENS_OUT    = path.join(OUTPUT_DIR, 'design-tokens.json');
 const SCREENSHOT    = path.join(OUTPUT_DIR, 'brand-screenshot.png');
 
@@ -307,6 +308,99 @@ function generateMd3Tokens(seedHex, isDark) {
       'error-container':             toHex(s.errorContainer),
     };
   }
+}
+
+// ─── Direct token mapping from brand-spec.json ───────────────────────────────
+
+/**
+ * Map brand-spec.json colors directly to design tokens.
+ * MD3 is used ONLY for gap-filling tokens the brand doesn't define
+ * (error, tertiary, outline-variant, container hierarchy).
+ * The brand's actual colors are preserved without MD3 transformation.
+ */
+function mapBrandSpecToTokens(brandSpec) {
+  const colors = brandSpec.colors;
+  const isDark = brandSpec.isDark;
+
+  // Use brand-spec primary as MD3 seed for gap-fill tokens (so they harmonize)
+  const {
+    argbFromHex,
+    themeFromSourceColor,
+    hexFromArgb,
+  } = require('@material/material-color-utilities');
+
+  const theme = themeFromSourceColor(argbFromHex(colors.primary));
+  const scheme = isDark ? theme.schemes.dark : theme.schemes.light;
+  const s = scheme.toJSON();
+  const toHex = (v) => hexFromArgb(v);
+  const palettes = theme.palettes;
+  const neutralTone = (t) => hexFromArgb(palettes.neutral.tone(t));
+  const neutralVariantTone = (t) => hexFromArgb(palettes.neutralVariant.tone(t));
+
+  // Direct mapping: brand's actual colors → token roles
+  const background = colors.background;
+  const primary = colors.primary;
+  const onPrimary = colors.onPrimary;
+  const onSurface = colors.onBackground;
+  const cardSurface = colors.cardSurface || colors.backgroundAlt || (isDark ? neutralTone(12) : neutralVariantTone(94));
+  const backgroundAlt = colors.backgroundAlt || (isDark ? neutralTone(10) : neutralVariantTone(96));
+
+  // Surface hierarchy: compute from brand background (not MD3)
+  // For light brands: slightly darker steps. For dark brands: slightly lighter steps.
+  const stepSurface = (hex, steps) => {
+    if (!hex || hex.length < 7) return hex;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const dir = isDark ? 1 : -1; // lighten for dark, darken for light
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v + dir * steps)));
+    return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+  };
+
+  const tokens = {
+    'background':                  background,
+    'on-surface':                  onSurface,
+    // Surface hierarchy — derived from brand background
+    'surface-dim':                 isDark ? background : stepSurface(background, 10),
+    'surface-bright':              isDark ? stepSurface(background, 18) : background,
+    'surface-container-lowest':    isDark ? stepSurface(background, -2) : background,
+    'surface-container-low':       backgroundAlt,
+    'surface-container':           cardSurface,
+    'surface-container-high':      stepSurface(cardSurface, isDark ? 5 : -3),
+    'surface-container-highest':   stepSurface(cardSurface, isDark ? 10 : -6),
+    'surface-variant':             toHex(s.surfaceVariant),
+    // Primary — brand's exact color, not MD3-transformed
+    'primary':                     primary,
+    'on-primary':                  onPrimary,
+    'primary-container':           toHex(s.primaryContainer),
+    'on-primary-container':        toHex(s.onPrimaryContainer),
+    // Secondary — use brand's secondary if available, else MD3 gap-fill
+    'secondary':                   colors.secondary || toHex(s.secondary),
+    'on-secondary':                toHex(s.onSecondary),
+    'secondary-container':         toHex(s.secondaryContainer),
+    'on-secondary-container':      toHex(s.onSecondaryContainer),
+    // Tertiary — always MD3 gap-fill
+    'tertiary':                    toHex(s.tertiary),
+    'on-tertiary':                 toHex(s.onTertiary),
+    'tertiary-container':          toHex(s.tertiaryContainer),
+    'on-tertiary-container':       toHex(s.onTertiaryContainer),
+    // Outline — MD3 gap-fill
+    'outline':                     toHex(s.outline),
+    'outline-variant':             toHex(s.outlineVariant),
+    'on-surface-variant':          toHex(s.onSurfaceVariant),
+    // Error — always MD3 gap-fill
+    'error':                       toHex(s.error),
+    'error-container':             toHex(s.errorContainer),
+  };
+
+  console.log(`[brand-spec] Direct mapping: ${Object.keys(tokens).length} tokens`);
+  console.log(`[brand-spec]   background: ${tokens.background} (brand's actual)`);
+  console.log(`[brand-spec]   primary: ${tokens.primary} (brand's actual, source: ${colors.primarySource || 'unknown'})`);
+  console.log(`[brand-spec]   on-primary: ${tokens['on-primary']} (brand's actual)`);
+  console.log(`[brand-spec]   surface-container: ${tokens['surface-container']} (${colors.cardSurface ? "brand's card surface" : 'computed'})`);
+  console.log(`[brand-spec]   MD3 gap-fill tokens: error, tertiary, outline, containers`);
+
+  return tokens;
 }
 
 // ─── Font checking + subagent matching ────────────────────────────────────────
@@ -665,9 +759,9 @@ The file must contain ONLY valid JSON in this exact format:
 // ─── Main ──────────────────────────────────────────────────────────────────────
 
 async function main() {
-  console.log('\n╔══════════════════════════════════════════════════════╗');
-  console.log('║  generate-design-tokens.js — MD3 Palette + Archetype ║');
-  console.log('╚══════════════════════════════════════════════════════╝\n');
+  console.log('\n╔═══════════════════════════════════════════════════════════╗');
+  console.log('║  generate-design-tokens.js — Brand Spec + Token Mapping  ║');
+  console.log('╚═══════════════════════════════════════════════════════════╝\n');
 
   // Load .env
   const envPath = path.join(ROOT, '.env');
@@ -720,42 +814,53 @@ async function main() {
     }
   }
 
-  // ── Pick seed color ──
-  const seedHex = pickSeedColor(summary);
-  console.log(`[seed] Seed color: ${seedHex}`);
-
-  // ── Detect dark/light ──
-  const isDark = detectIsDark(summary);
-  console.log(`[mode] isDark: ${isDark}`);
-
-  // ── Generate MD3 palette ──
-  console.log('[md3] Generating Material Design 3 palette...');
-  const colors = generateMd3Tokens(seedHex, isDark);
-
-  // ── Monochrome brand override ──
-  // If the brand has no chromatic accent, MD3 still generates a colourful primary
-  // (teal, purple, brown). For monochrome/editorial brands, we desaturate the
-  // primary family to near-neutral so the accent doesn't clash with the brand.
-  const hasChromatic = (summary.accentColors || []).some(c => !isNeutral(c.hex) && !isBrowserDefault(c.hex));
-  const hasAnyChromatic = (summary.allColors || []).some(c => !isNeutral(c.hex) && !isBrowserDefault(c.hex));
-  if (!hasChromatic && !hasAnyChromatic) {
-    console.log('[monochrome] Brand has no chromatic colors — desaturating primary family');
-    // Replace primary/secondary/tertiary with desaturated versions
-    // Use the on-surface color as the "accent" — dark text on light, light on dark
-    const neutralAccent = isDark ? '#B0B0B0' : '#3A3A3A';
-    const neutralAccentLight = isDark ? '#D0D0D0' : '#5A5A5A';
-    const neutralContainer = isDark ? '#2A2A2A' : '#E8E8E8';
-    const onNeutralContainer = isDark ? '#E0E0E0' : '#1A1A1A';
-    colors['primary'] = neutralAccent;
-    colors['on-primary'] = isDark ? '#1A1A1A' : '#FFFFFF';
-    colors['primary-container'] = neutralContainer;
-    colors['on-primary-container'] = onNeutralContainer;
+  // ── Load brand-spec.json (Phase 2b: primary input for color mapping) ──
+  let brandSpec = null;
+  if (fs.existsSync(BRAND_SPEC)) {
+    brandSpec = JSON.parse(fs.readFileSync(BRAND_SPEC, 'utf-8'));
+    console.log(`[ok] Loaded brand-spec.json (archetype: ${brandSpec.archetype}, primary: ${brandSpec.colors?.primary})`);
+  } else {
+    console.warn('[warn] brand-spec.json not found — falling back to MD3 palette generation');
   }
 
-  console.log(`[md3] Generated ${Object.keys(colors).length} color tokens`);
-  console.log(`      primary: ${colors.primary}`);
-  console.log(`      background: ${colors.background}`);
-  console.log(`      surface-container: ${colors['surface-container']}`);
+  // ── Generate color tokens ──
+  let colors, seedHex, isDark;
+
+  if (brandSpec) {
+    // ── BRAND-SPEC PATH: direct mapping from extracted brand colors ──
+    isDark = brandSpec.isDark;
+    seedHex = brandSpec.colors.primary;
+    colors = mapBrandSpecToTokens(brandSpec);
+  } else {
+    // ── LEGACY MD3 PATH: seed → palette generation (backward compatibility) ──
+    seedHex = pickSeedColor(summary);
+    console.log(`[seed] Seed color: ${seedHex}`);
+
+    isDark = detectIsDark(summary);
+    console.log(`[mode] isDark: ${isDark}`);
+
+    console.log('[md3] Generating Material Design 3 palette...');
+    colors = generateMd3Tokens(seedHex, isDark);
+
+    // Monochrome brand override
+    const hasChromatic = (summary.accentColors || []).some(c => !isNeutral(c.hex) && !isBrowserDefault(c.hex));
+    const hasAnyChromatic = (summary.allColors || []).some(c => !isNeutral(c.hex) && !isBrowserDefault(c.hex));
+    if (!hasChromatic && !hasAnyChromatic) {
+      console.log('[monochrome] Brand has no chromatic colors — desaturating primary family');
+      const neutralAccent = isDark ? '#B0B0B0' : '#3A3A3A';
+      const neutralContainer = isDark ? '#2A2A2A' : '#E8E8E8';
+      const onNeutralContainer = isDark ? '#E0E0E0' : '#1A1A1A';
+      colors['primary'] = neutralAccent;
+      colors['on-primary'] = isDark ? '#1A1A1A' : '#FFFFFF';
+      colors['primary-container'] = neutralContainer;
+      colors['on-primary-container'] = onNeutralContainer;
+    }
+
+    console.log(`[md3] Generated ${Object.keys(colors).length} color tokens`);
+    console.log(`      primary: ${colors.primary}`);
+    console.log(`      background: ${colors.background}`);
+    console.log(`      surface-container: ${colors['surface-container']}`);
+  }
 
   // ── Extract border radius ──
   const radiusInfo = extractBorderRadius(summary);
@@ -778,10 +883,19 @@ async function main() {
     }
   }
 
-  // ── Archetype classification (subagent prompt-file pattern) ──
+  // ── Archetype ──
   let archetypeResult = null;
-  if (archetypeReady) {
-    // --archetype-ready: read subagent result
+
+  if (brandSpec) {
+    // Brand-spec path: archetype comes from brand-spec.json (Vision AI Q12)
+    archetypeResult = {
+      archetype: brandSpec.archetype,
+      confidence: 0.85, // Vision AI classification — no separate confidence score
+      reasoning: `Classified by Vision AI during brand scraping (brand-spec.json)`,
+    };
+    console.log(`[archetype] From brand-spec.json: ${archetypeResult.archetype}`);
+  } else if (archetypeReady) {
+    // Legacy: --archetype-ready from subagent result
     if (!fs.existsSync(ARCHETYPE_RESULT_PATH)) {
       console.error('ERROR: engine/output/archetype-match.json not found.');
       console.error('The archetype classification subagent must write this file first.');
@@ -791,7 +905,7 @@ async function main() {
     console.log(`[archetype] Using subagent-classified archetype: ${archetypeResult.archetype} (${Math.round((archetypeResult.confidence || 0) * 100)}% confidence)`);
     if (archetypeResult.reasoning) console.log(`[archetype]   reasoning: ${archetypeResult.reasoning}`);
   } else {
-    // First run: write prompt for subagent and exit
+    // Legacy: first run without brand-spec — write prompt for subagent and exit
     const result = await classifyArchetype(SCREENSHOT, brandDesignPath, extractedCss);
     if (!result) {
       // Subagent needed — prompt written, exit cleanly
