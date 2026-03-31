@@ -54,6 +54,11 @@
           "type": ["string", "null"],
           "pattern": "^#[0-9a-fA-F]{6}$",
           "description": "Card border color, or null if cards have no borders. Source: CSS extraction from card elements."
+        },
+        "primarySource": {
+          "type": "string",
+          "enum": ["css", "vibrant", "fallback"],
+          "description": "Records where the primary color value came from for auditability. 'css' = CSS extraction accentColors, 'vibrant' = Vibrant.js image analysis, 'fallback' = gray default. Source: computed during three-source cascade in computeCssDerivedSpec()."
         }
       }
     },

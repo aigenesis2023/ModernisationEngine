@@ -23,6 +23,7 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
+const { Vibrant } = require('node-vibrant/node');
 
 // ─── Paths ───────────────────────────────────────────────────────────
 const OUTPUT_DIR = path.resolve('engine/output');
@@ -295,6 +296,34 @@ async function extractCSSTokens(page) {
   return { raw: extracted, summary };
 }
 
+// ─── Vibrant.js color extraction ─────────────────────────────────────
+/**
+ * Extract the 6 standard color swatches from a screenshot using node-vibrant.
+ * Deterministic, ~50ms, no AI. Catches gradient-heavy brands where CSS extraction
+ * misses accent colors (they live in background-image, not backgroundColor).
+ * Returns { vibrant, darkVibrant, lightVibrant, muted, darkMuted, lightMuted }
+ * with hex values, or null for any swatch not found.
+ */
+async function extractVibrantColors(screenshotPath) {
+  try {
+    const v = new Vibrant(screenshotPath);
+    const palette = await v.getPalette();
+    const swatches = {
+      vibrant: palette.Vibrant?.hex || null,
+      darkVibrant: palette.DarkVibrant?.hex || null,
+      lightVibrant: palette.LightVibrant?.hex || null,
+      muted: palette.Muted?.hex || null,
+      darkMuted: palette.DarkMuted?.hex || null,
+      lightMuted: palette.LightMuted?.hex || null,
+    };
+    console.log(`Vibrant.js swatches: ${Object.entries(swatches).filter(([,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ')}`);
+    return swatches;
+  } catch (err) {
+    console.warn(`Vibrant.js extraction failed: ${err.message}`);
+    return null;
+  }
+}
+
 // ─── Take screenshot + detect dominant theme with Playwright ─────────
 async function takeScreenshotAndDetectTheme(url) {
   const { chromium } = require('playwright');
@@ -453,7 +482,11 @@ async function takeScreenshotAndDetectTheme(url) {
   console.log(`Theme detection: ${theme.samples.light} light samples, ${theme.samples.dark} dark samples → ${theme.isDark ? 'DARK' : 'LIGHT'}`);
 
   await browser.close();
-  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS };
+
+  // Extract Vibrant.js swatches from the saved screenshot (deterministic, ~50ms)
+  const vibrantSwatches = await extractVibrantColors(SCREENSHOT_PATH);
+
+  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS, vibrantSwatches };
 }
 
 // ─── Subagent mode: write prompt file and exit ───────────────────────
@@ -635,11 +668,58 @@ function computeBackgroundAlt(bgHex, isDark) {
  * Maps the CSS extraction summary to all CSS-derivable fields of brand-spec.json.
  * Vision AI fills the rest (colorStrategy, archetype, surfaceStyle, imageStyle, etc.).
  */
-function computeCssDerivedSpec(summary, isDark) {
+function computeCssDerivedSpec(summary, isDark, vibrantSwatches) {
+  // ── Three-source cascade for primary accent color ──────────────────
+  // 1. CSS accent (if chromatic) → 2. Vibrant.js swatch → 3. gray fallback
+  const isChromatic = (hex) => {
+    if (!hex || hex.length < 7) return false;
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max === 0 ? 0 : (max - min) / max;
+    const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return saturation >= 0.20 && lum > 0.08 && lum < 0.88;
+  };
+
+  let primary = '#666666';
+  let primarySource = 'fallback';
+
+  const cssAccent = summary.accentColors?.[0]?.hex;
+  if (cssAccent && isChromatic(cssAccent)) {
+    primary = cssAccent;
+    primarySource = 'css';
+  } else if (vibrantSwatches) {
+    // For dark brands: LightVibrant pops best against dark backgrounds.
+    // For light brands: prefer the chromatic swatch with highest population.
+    //   Vibrant.js "Vibrant" = highest saturation, which can be a tiny decorative element.
+    //   "LightVibrant" often represents the dominant gradient/accent on light pages.
+    //   We check both and prefer the one with higher population via _population data
+    //   stored in the swatches, falling back to lightVibrant > vibrant ordering for light brands.
+    let vibrantPick = null;
+    if (isDark) {
+      vibrantPick = vibrantSwatches.lightVibrant;
+    } else {
+      // Light brand: prefer lightVibrant (dominant accent in gradients) over vibrant (may be tiny element)
+      // Both are valid candidates — pick whichever is chromatic, favoring lightVibrant
+      if (vibrantSwatches.lightVibrant && isChromatic(vibrantSwatches.lightVibrant)) {
+        vibrantPick = vibrantSwatches.lightVibrant;
+      } else if (vibrantSwatches.vibrant && isChromatic(vibrantSwatches.vibrant)) {
+        vibrantPick = vibrantSwatches.vibrant;
+      }
+    }
+    if (vibrantPick && isChromatic(vibrantPick)) {
+      primary = vibrantPick;
+      primarySource = 'vibrant';
+    }
+  }
+
+  console.log(`[cascade] Primary: ${primary} (source: ${primarySource})`);
+
   // Colors
   const background = summary.backgroundColors?.[0]?.hex || (isDark ? '#111111' : '#ffffff');
   const backgroundAlt = summary.backgroundColors?.[1]?.hex || computeBackgroundAlt(background, isDark);
-  const primary = summary.accentColors?.[0]?.hex || '#666666';
   const secondary = summary.accentColors?.[1]?.hex || null;
   const onBackground = summary.headingTextColor || summary.textColor || (isDark ? '#ffffff' : '#1a1a1a');
   const onPrimary = hexLuminance(primary) > 0.4 ? '#1a1a1a' : '#ffffff';
@@ -707,6 +787,7 @@ function computeCssDerivedSpec(summary, isDark) {
       shadowDepth,
     },
     isDark,
+    primarySource,
   };
 }
 
@@ -731,9 +812,9 @@ The following values were extracted directly from the brand's CSS. Use them as c
 ${JSON.stringify(cssDerivedSpec, null, 2)}
 \`\`\`
 
-## Step 3: Answer the 14 structured questions
+## Step 3: Answer the 15 structured questions
 Read the full prompt at: engine/prompts/brand-spec-audit.md
-Follow its instructions exactly. Answer all 14 questions.
+Follow its instructions exactly. Answer all 15 questions.
 
 ## Step 4: Write output
 Write your answers as strict JSON to: engine/output/brand-spec-vision.json
@@ -780,9 +861,9 @@ ${JSON.stringify(cssDerivedSpec, null, 2)}
 \`\`\`
 
 ## Your Task
-Answer the 14 structured questions below. Return ONLY a JSON object with your answers — no markdown, no commentary, no code fences.
+Answer the 15 structured questions below. Return ONLY a JSON object with your answers — no markdown, no commentary, no code fences.
 
-${auditPrompt.split('## The 14 Questions')[1]?.split('## Output Format')[0] || ''}
+${auditPrompt.split('## The 15 Questions')[1]?.split('## Output Format')[0] || ''}
 
 Return the JSON object matching this structure:
 {
@@ -800,7 +881,8 @@ Return the JSON object matching this structure:
   "imageColorTemp": "warm" | "cool" | "neutral",
   "archetype": "tech-modern" | "minimalist" | "editorial" | "glassmorphist" | "corporate" | "warm-organic" | "neo-brutalist" | "luxury",
   "contrast": "high" | "medium" | "low",
-  "applicationConstraints": [string array]
+  "applicationConstraints": [string array],
+  "accentColorHex": "#hex"
 }
 
 RESPOND WITH ONLY THE JSON OBJECT. No markdown fences, no explanation.`,
@@ -857,10 +939,42 @@ function mergeBrandSpec(cssDerivedSpec, visionResult) {
   const headlineCharacter = visionResult.headlineCharacter || 'standard-sans';
   const bodyCharacter = visionResult.bodyCharacter || 'clean-lightweight';
 
+  // Cross-validation: Vision AI Q15 accentColorHex vs cascade-selected primary
+  if (visionResult.accentColorHex && cssDerivedSpec.colors.primary) {
+    const cascadePrimary = cssDerivedSpec.colors.primary.toLowerCase();
+    const visionAccent = visionResult.accentColorHex.toLowerCase();
+    if (cascadePrimary !== visionAccent) {
+      // Check if they're in the same hue family (within ~30° on the color wheel)
+      const hexToHue = (hex) => {
+        if (!hex || hex.length < 7) return -1;
+        const r = parseInt(hex.slice(1, 3), 16) / 255;
+        const g = parseInt(hex.slice(3, 5), 16) / 255;
+        const b = parseInt(hex.slice(5, 7), 16) / 255;
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const d = max - min;
+        if (d === 0) return -1; // achromatic
+        let h;
+        if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        else if (max === g) h = ((b - r) / d + 2) / 6;
+        else h = ((r - g) / d + 4) / 6;
+        return h * 360;
+      };
+      const hue1 = hexToHue(cascadePrimary);
+      const hue2 = hexToHue(visionAccent);
+      if (hue1 >= 0 && hue2 >= 0) {
+        const hueDiff = Math.min(Math.abs(hue1 - hue2), 360 - Math.abs(hue1 - hue2));
+        if (hueDiff > 30) {
+          warnings.push(`Primary hue mismatch: cascade=${cascadePrimary} (hue ${Math.round(hue1)}°), Vision AI Q15=${visionAccent} (hue ${Math.round(hue2)}°). Keeping cascade result (${cssDerivedSpec.primarySource} source). Vision AI is validation only.`);
+        }
+      }
+    }
+  }
+
   // Build final spec
   const spec = {
     colors: {
       ...cssDerivedSpec.colors,
+      primarySource: cssDerivedSpec.primarySource || 'fallback',
     },
     colorStrategy: {
       accentSectionBg: visionResult.accentSectionBg,
@@ -925,7 +1039,7 @@ function mergeBrandSpec(cssDerivedSpec, visionResult) {
 }
 
 // ─── Save outputs ────────────────────────────────────────────────────
-function saveOutputs(url, description, detectedIsDark, extractedCSS) {
+function saveOutputs(url, description, detectedIsDark, extractedCSS, vibrantSwatches) {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   // Save brand-design.md
@@ -950,6 +1064,10 @@ function saveOutputs(url, description, detectedIsDark, extractedCSS) {
       sourceUrl: url,
       ...extractedCSS,
     };
+    // Add Vibrant.js swatches if available
+    if (vibrantSwatches) {
+      cssOutput.vibrantSwatches = vibrantSwatches;
+    }
     fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
     console.log(`Output: ${EXTRACTED_CSS_PATH}`);
 
@@ -1007,12 +1125,15 @@ async function main() {
   // (Skip if --description-ready or --spec-ready: screenshot and CSS already done on first run)
   let detectedIsDark = false; // safe default: light
   let extractedCSS = null;
+  let vibrantSwatches = null;
 
   if (descriptionReady || specReady) {
     // Load previously extracted CSS (written on first run)
     if (fs.existsSync(EXTRACTED_CSS_PATH)) {
       extractedCSS = JSON.parse(fs.readFileSync(EXTRACTED_CSS_PATH, 'utf-8'));
+      vibrantSwatches = extractedCSS.vibrantSwatches || null;
       console.log('Loaded existing extracted-css.json');
+      if (vibrantSwatches) console.log('Loaded Vibrant.js swatches from extracted-css.json');
     }
     // isDark comes from brand-describe.json — no need to re-scrape
   } else {
@@ -1020,6 +1141,7 @@ async function main() {
       const result = await takeScreenshotAndDetectTheme(url);
       detectedIsDark = result.isDark;
       extractedCSS = result.extractedCSS;
+      vibrantSwatches = result.vibrantSwatches;
     } catch (err) {
       console.error(`Screenshot/extraction failed: ${err.message}`);
       console.error('Continuing without screenshot or CSS tokens.\n');
@@ -1070,18 +1192,16 @@ async function main() {
       console.error('Falling back to subagent mode.\n');
       if (extractedCSS) {
         if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-        fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify({
-          extractedAt: new Date().toISOString(),
-          sourceUrl: url,
-          ...extractedCSS,
-        }, null, 2));
+        const cssOutput = { extractedAt: new Date().toISOString(), sourceUrl: url, ...extractedCSS };
+        if (vibrantSwatches) cssOutput.vibrantSwatches = vibrantSwatches;
+        fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
         console.log(`Saved extracted-css.json`);
       }
       writeBrandDescribePrompt(url);
       // Also write brand-spec prompt
       const cssSummary = extractedCSS?.summary || extractedCSS?.summary;
       if (cssSummary) {
-        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
         writeBrandSpecPrompt(cssDerivedSpec);
       }
       process.exit(0);
@@ -1090,18 +1210,16 @@ async function main() {
     // No API key — save CSS now (needed for generate-design-tokens.js later)
     if (extractedCSS) {
       if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
-      fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify({
-        extractedAt: new Date().toISOString(),
-        sourceUrl: url,
-        ...extractedCSS,
-      }, null, 2));
+      const cssOutput = { extractedAt: new Date().toISOString(), sourceUrl: url, ...extractedCSS };
+      if (vibrantSwatches) cssOutput.vibrantSwatches = vibrantSwatches;
+      fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
       console.log(`Saved extracted-css.json`);
     }
     writeBrandDescribePrompt(url);
     // Also write brand-spec prompt for subagent
     const cssSummary = extractedCSS?.summary;
     if (cssSummary) {
-      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
       writeBrandSpecPrompt(cssDerivedSpec);
       console.log('\nSpawn a SECOND subagent to:');
       console.log('  1. Read engine/output/brand-spec-prompt.txt');
@@ -1114,7 +1232,7 @@ async function main() {
 
   // Step 3: Save standard outputs (includes detected theme + extracted CSS)
   if (descriptionDone && description) {
-    saveOutputs(url, description, detectedIsDark, extractedCSS);
+    saveOutputs(url, description, detectedIsDark, extractedCSS, vibrantSwatches);
   }
 
   // Step 4: Brand Spec workflow
@@ -1122,7 +1240,7 @@ async function main() {
   const cssSummary = extractedCSS?.summary;
   let cssDerivedSpec = null;
   if (cssSummary) {
-    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
   }
 
   if (specReady) {

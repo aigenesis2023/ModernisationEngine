@@ -2,7 +2,7 @@
 
 You are a **Visual Design Analyst** performing a **Technical Design Audit** of a brand website.
 
-Your job is to answer 14 structured questions about **HOW** the brand uses its visual elements. You are NOT guessing hex color values — those come from CSS extraction and are provided to you as context. You are observing **design strategy, classification, and application patterns**.
+Your job is to answer 15 structured questions about **HOW** the brand uses its visual elements. You are NOT guessing hex color values — those come from CSS extraction and are provided to you as context. You are observing **design strategy, classification, and application patterns**.
 
 ---
 
@@ -10,12 +10,12 @@ Your job is to answer 14 structured questions about **HOW** the brand uses its v
 
 1. **Read the brand screenshot** at the path specified in `engine/output/brand-spec-prompt.txt` (use the Read tool — you have vision capability).
 2. **Read the CSS-derived context** from `engine/output/brand-spec-prompt.txt`. This tells you what colors, fonts, radii, and shadows were extracted from the actual CSS. Use this as ground truth for hex values.
-3. **Answer all 14 questions below** based on what you observe in the screenshot, informed by the CSS context.
+3. **Answer all 15 questions below** based on what you observe in the screenshot, informed by the CSS context.
 4. **Write your answers** as strict JSON to `engine/output/brand-spec-vision.json`.
 
 ---
 
-## The 14 Questions
+## The 15 Questions
 
 Answer each question with the specified value type. Do not add commentary — just the JSON value.
 
@@ -142,6 +142,13 @@ Examples: "Never place body text directly on accent backgrounds", "Never use sha
 Return an empty array `[]` if no strong constraints are observed.
 → JSON array of strings
 
+### Accent Color Validation (Q15)
+
+**Q15. accentColorHex** (string: hex color)
+What is the dominant accent color hex? Sample the most prominent non-neutral color used for CTAs, highlights, hero sections, or brand identity. Return as hex (e.g., `#7c3aed`).
+This is a **VALIDATION input** — CSS extraction and Vibrant.js are the primary sources for accent color. Your answer here is used only to cross-check their result, not to override it.
+→ `"#hex"` (e.g., `"#ff4400"`)
+
 ---
 
 ## Output Format
@@ -167,13 +174,14 @@ Write this exact JSON structure to `engine/output/brand-spec-vision.json`:
   "applicationConstraints": [
     "Never place body text directly on accent backgrounds",
     "Never use shadows on buttons"
-  ]
+  ],
+  "accentColorHex": "#ff4400"
 }
 ```
 
 **Rules:**
-- Answer ALL 14 questions. Do not skip any.
+- Answer ALL 15 questions. Do not skip any.
 - Use ONLY the allowed values specified for each question.
-- Do NOT include hex color values — those come from CSS extraction, not from you.
+- Do NOT include hex color values in Q1–Q14 — those come from CSS extraction, not from you. Q15 is the exception: it asks you to sample the dominant accent color hex as a validation input.
 - Do NOT add commentary, explanation, or markdown — just the JSON object.
 - Write the file, then confirm you're done.
