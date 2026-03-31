@@ -41,15 +41,14 @@ Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON
          └─→ course-layout.json
 
 ═══ BRAND + BUILD PIPELINE ════════════════════════════════════════════
-Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + extracted-css.json
-               (Playwright screenshot + getComputedStyle() extraction)
+Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + extracted-css.json + brand-spec.json
+               (Playwright screenshot + getComputedStyle() + Vibrant.js + Vision AI audit)
                     │
                     ▼
          generate-design-tokens.js (BEING REFACTORED — see engine/BRAND-FIDELITY.md)
          ├─ Reads extracted-css.json + brand-spec.json → maps extracted colors to token roles
          ├─ MD3 as gap-filler only (error, outline-variant — NOT primary palette)
          ├─ Checks fonts against Google Fonts (subagent match if unavailable)
-         ├─ Vision AI produces brand-spec.json (15 structured questions — includes archetype + accent hex validation)
          └─→ design-tokens.json (colors, fonts, archetype, typography)
                     │
                     ▼

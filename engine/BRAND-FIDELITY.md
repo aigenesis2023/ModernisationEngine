@@ -63,12 +63,14 @@ Brand URL
 EXTRACTION TIER (scrape-brand.js — enhanced)
   ├─ Raw primitives: actual hex colors, actual fonts, actual radii, actual border widths
   ├─ Color roles observed: which colors appear as backgrounds, accents, text, icons
-  ├─ Tooling (verified available):
-  │   ├─ dembrandt — CLI extracting tokens from any URL into W3C DTCG JSON
-  │   │   (groups colors by "confidence" — distinguishes logo colors vs border colors)
-  │   ├─ BRANDr API — Puppeteer-based branding color extraction by usage patterns
-  │   └─ Fallback: enhance our Playwright getComputedStyle extraction directly
-  ├─ Output format: W3C DTCG JSON standard (machine-readable, AI-agent-consumable)
+  ├─ Three-source color cascade (most reliable first):
+  │   1. CSS extraction (getComputedStyle) — ground truth for flat colors
+  │   2. Vibrant.js (node-vibrant) — deterministic image analysis of brand-screenshot.png
+  │   │   Extracts Vibrant/DarkVibrant/LightVibrant/Muted swatches from the screenshot
+  │   │   Used when CSS returns near-neutral accent (gradient/image brands)
+  │   3. Vision AI Q15 — validation/cross-check (warns if it disagrees with cascade result)
+  ├─ CSS extraction handles: backgrounds, text colors, fonts, radii, shadows, border widths
+  ├─ Vibrant.js handles: accent colors hidden in gradients, hero images, CSS custom properties
   │
   ▼
 STRUCTURED DESIGN SPEC (brand-spec.json — NEW artifact, replaces prose brand-design.md for build)
@@ -316,9 +318,9 @@ Root cause of OBS 4: Font matching quality. Separate concern — improve subagen
 | 1 | Font substitution quality | High | `generate-design-tokens.js` + `font-match-prompt.txt` |
 | 2 | MD3 surface tint | High | `generate-design-tokens.js` — addressed by proposed architecture |
 | 3 | Single seed color | High | `pickSeedColor()` — addressed by direct extraction |
-| 4 | No gradient extraction | **High** | `scrape-brand.js` sample() — **CONFIRMED in Phase 1 testing: darkfolio and coursesite both get #666666 fallback for primary because accent colors come from gradients/images, not flat CSS. Solved by Vision AI hex sampling (Q15, added for Phase 2).** |
+| 4 | No gradient extraction | **High** | `scrape-brand.js` sample() — **CONFIRMED in Phase 1 testing: darkfolio and coursesite both get #666666 fallback. SOLUTION: Vibrant.js (node-vibrant) as deterministic fallback in three-source cascade. Phase 2a.** |
 | 5 | No border width/style extraction | Medium | `scrape-brand.js` sample() — **PARTIALLY ADDRESSED: borderWidth added to sample() in Phase 1** |
-| 6 | Limited accent color sampling | **High** | `scrape-brand.js` summary generation — **CONFIRMED: same root cause as Gap 4. CSS extraction only finds colors on interactive elements (buttons, links, nav). Brands using gradients, images, or CSS custom properties for accent colors get gray fallback.** |
+| 6 | Limited accent color sampling | **High** | Same root cause as Gap 4. CSS only finds colors on interactive elements. **SOLUTION: Vibrant.js extracts dominant palette from screenshot image. Phase 2a.** |
 | 7 | Pseudo-element blindness | Low | `scrape-brand.js` selector strategy |
 | 8 | Google Fonts weight range (300-700 only) | Low-Med | `generateHeadV4()` in `build-course.js` |
 | 9 | Image treatment not flowing through | Medium | `brand-profile.json` → not consumed |
@@ -341,7 +343,7 @@ brand-spec.json is NOT produced purely by Vision AI. It merges THREE sources:
 |---|---|---|
 | `colors.background` | CSS extraction | Most frequent backgroundColor from extracted-css.json backgrounds |
 | `colors.backgroundAlt` | CSS extraction | 2nd most frequent backgroundColor, or computed (slight step from bg) |
-| `colors.primary` | CSS extraction + **Vision AI fallback (Q15)** | Top accent color from extracted-css.json accentColors. **If CSS returns near-neutral (gray), Vision AI Q15 hex overrides.** |
+| `colors.primary` | CSS extraction → **Vibrant.js fallback** → Vision AI Q15 validation | Three-source cascade: CSS accentColors (if chromatic) → Vibrant.js swatch from screenshot (if CSS near-neutral) → Vision AI Q15 (validation/warning only). See Phase 2a. |
 | `colors.secondary` | CSS extraction | 2nd accent color, or null |
 | `colors.onPrimary` | Computed | Luminance of primary: dark primary → `#ffffff`, light primary → `#1a1a1a` |
 | `colors.onBackground` | CSS extraction | Most frequent heading/paragraph text color |
@@ -427,14 +429,31 @@ Test brands: rep-republic (vivid orange, neo-brutalist), sprig (dark, cyan, tech
 
 ### Phase 2: Direct Color Extraction (Replace MD3)
 
-#### Phase 2a: Vision AI Hex Validation (solve the gradient gap)
-CSS extraction misses accent colors from gradients and images (confirmed: darkfolio gets `#666666` instead of purple, coursesite gets `#666666` instead of lavender). The fix:
+#### Phase 2a: Vibrant.js Color Extraction (solve the gradient gap)
+CSS extraction misses accent colors from gradients and images (confirmed: darkfolio gets `#666666` instead of purple, coursesite gets `#666666` instead of lavender). The fix is a three-source cascade, not a single fallback:
 
-- **Add Q15 to Vision AI prompt** (already documented above): "What is the dominant accent color hex?"
-- **Add Q15 to `brand-spec-audit.md`** and update `scrape-brand.js` to handle it
-- **Update `mergeBrandSpec()` in scrape-brand.js**: if CSS `primary` is near-neutral (`isNearNeutral()` already exists in scrape-brand.js), substitute the Vision AI Q15 hex value. CSS remains ground truth when it has a chromatic accent; Vision AI overrides only when CSS fails.
-- **Update `brand-spec.schema.json`**: add `colors.visionPrimaryOverride` field (nullable hex — records when Vision AI provided the value, for auditability)
-- **Test**: re-run darkfolio and coursesite. Verify `primary` is now the correct purple/lavender, not `#666666`.
+**Three-source accent color cascade:**
+1. **CSS extraction** (ground truth) — `accentColors[0].hex` from `extractCSSTokens()`. Used when it returns a chromatic (saturated) color.
+2. **Vibrant.js** (`node-vibrant`, MIT license, `npm install node-vibrant`) — deterministic image analysis of `brand-screenshot.png`. Extracts `Vibrant`, `DarkVibrant`, `LightVibrant`, `Muted`, `DarkMuted`, `LightMuted` swatches. Used when CSS returns near-neutral. Select the `Vibrant` swatch for light brands, `LightVibrant` for dark brands (to get the accent that pops against the background).
+3. **Vision AI Q15** — "What is the dominant accent color hex?" Used as **validation only** — if it disagrees with the cascade result by more than a perceptual threshold, log a warning. Not used as a source.
+
+**Implementation:**
+- **`npm install node-vibrant`** — add to package.json
+- **Add `extractVibrantColors(screenshotPath)` to scrape-brand.js** — runs after screenshot, returns swatch palette. Deterministic, no AI, ~50ms.
+- **Add vibrant swatches to `extracted-css.json` summary** — new field `vibrantSwatches: { vibrant: "#hex", darkVibrant: "#hex", ... }` for downstream consumption and auditability
+- **Update `computeCssDerivedSpec()`** — cascade logic: if `accentColors[0]` is chromatic → use it; else if vibrant swatch is chromatic → use it; else → `#666666` fallback (and Vision AI Q15 will flag it)
+- **Add Q15 to `brand-spec-audit.md`** — already documented in the questions list above. The subagent provides a hex. `mergeBrandSpec()` compares it against the cascade result and logs a warning if they differ significantly.
+- **Update `brand-spec.schema.json`**: add `colors.primarySource` field (enum: `"css"` | `"vibrant"` | `"vision"`) for auditability — records WHERE the primary color came from
+- **Test**: re-run darkfolio and coursesite. Verify `primary` is now the correct purple/lavender, not `#666666`. Verify rep-republic still gets `#ff4400` from CSS (Vibrant.js should not override a good CSS result).
+
+**Why Vibrant.js over Vision AI for hex values:**
+- Deterministic: same image → same result, every time
+- Fast: ~50ms vs API call
+- Free: no API cost, no rate limits
+- Accurate: purpose-built for dominant color extraction from images
+- Auditable: the swatch palette is saved in extracted-css.json
+
+Vision AI is excellent at strategy classification (Q1-Q14) but unreliable for precise hex sampling from compressed screenshots. Vibrant.js is the reverse — bad at strategy, perfect at hex extraction. Use each for what it's good at.
 
 #### Phase 2b: Token Mapping (replace MD3)
 - Refactor `generate-design-tokens.js` to read `brand-spec.json` and map extracted colors → token roles
@@ -476,5 +495,5 @@ Score: side-by-side brand URL vs course output. Focus on: color accuracy, typogr
 | 2026-03-31 | Prompt tuning: Q2/Q3 clarified for hybrid cards+headings pattern (rep-republic caught wrong flags) | Phase 1 | Complete |
 | 2026-03-31 | Merge logic fix: textDirectlyOnAccent "headings-only" → false (only "all" → true) | Phase 1 | Complete |
 | 2026-03-31 | Known limitation: CSS extraction misses accent colors from gradients/images (darkfolio, coursesite get #666666 fallback). Phase 2 concern. | Phase 1 | Noted |
-| 2026-03-31 | Decision: Vision AI Q15 (accent hex sampling) as validation layer — CSS primary, Vision override when near-neutral. Phase 2a scope. | Planning | **APPROVED** |
+| 2026-03-31 | Decision: Three-source cascade for accent colors — CSS → Vibrant.js (node-vibrant) → Vision AI Q15 (validation only). Vibrant.js is deterministic, free, ~50ms. Vision AI Q15 kept for cross-validation warnings, not as hex source. Phase 2a scope. | Planning | **APPROVED** |
 | 2026-03-31 | Sprig/crimzon/landio/najaf Framer sites are DOWN. Replaced with darkfolio for dark brand test. | Phase 1 | Noted |
