@@ -663,11 +663,29 @@ async function main() {
     } catch (err) {
       console.error(`Vision API failed: ${err.message}`);
       console.error('Falling back to subagent mode.\n');
+      if (extractedCSS) {
+        if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+        fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify({
+          extractedAt: new Date().toISOString(),
+          sourceUrl: url,
+          ...extractedCSS,
+        }, null, 2));
+        console.log(`Saved extracted-css.json`);
+      }
       writeBrandDescribePrompt(url);
       process.exit(0);
     }
   } else {
-    // No API key — write subagent prompt and exit
+    // No API key — save CSS now (needed for generate-design-tokens.js later), then exit
+    if (extractedCSS) {
+      if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
+      fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify({
+        extractedAt: new Date().toISOString(),
+        sourceUrl: url,
+        ...extractedCSS,
+      }, null, 2));
+      console.log(`Saved extracted-css.json`);
+    }
     writeBrandDescribePrompt(url);
     process.exit(0);
   }
