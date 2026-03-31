@@ -1,0 +1,232 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "brand-spec.schema.json",
+  "title": "Brand Design Spec",
+  "description": "Structured design specification extracted from a brand URL. Merges CSS-extracted data (ground truth for hex values), Vision AI observations (ground truth for design strategy), and computed fields (derived from the above). Consumed by generate-design-tokens.js and build-course.js.",
+
+  "type": "object",
+  "required": ["colors", "colorStrategy", "typography", "shape", "imageStyle", "pairingLogic", "archetype", "isDark"],
+  "additionalProperties": false,
+
+  "properties": {
+    "colors": {
+      "type": "object",
+      "description": "Brand color primitives — extracted hex values from the brand's actual CSS, not generated.",
+      "required": ["background", "primary", "onPrimary", "onBackground"],
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Dominant page background color. Source: CSS extraction (most frequent section backgroundColor)."
+        },
+        "backgroundAlt": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Alternate background for visual rhythm. Source: CSS extraction (2nd most frequent backgroundColor) or computed (slight step from background)."
+        },
+        "primary": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Primary accent color — the brand's signature color. Source: CSS extraction (top accent color from interactive elements). Preserved exact hex, never MD3-transformed."
+        },
+        "secondary": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Secondary accent color, or null if the brand uses a single accent. Source: CSS extraction (2nd accent color)."
+        },
+        "onPrimary": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Text/icon color used ON the primary accent. Source: computed from primary luminance (dark primary → #ffffff, light primary → #1a1a1a)."
+        },
+        "onBackground": {
+          "type": "string",
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Primary text color on the main background. Source: CSS extraction (most frequent paragraph/heading text color)."
+        },
+        "cardSurface": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Card/container background color. Source: CSS extraction from card elements, cross-validated by Vision AI."
+        },
+        "cardBorder": {
+          "type": ["string", "null"],
+          "pattern": "^#[0-9a-fA-F]{6}$",
+          "description": "Card border color, or null if cards have no borders. Source: CSS extraction from card elements."
+        }
+      }
+    },
+
+    "colorStrategy": {
+      "type": "object",
+      "description": "HOW the brand applies its colors — the application rules that prevent incorrect color usage. Source: Vision AI structured audit.",
+      "required": ["accentSectionBg", "cardsOnAccentBg", "primaryForIcons", "primaryForStatNumbers", "primaryForButtons", "textDirectlyOnAccent", "accentSectionFrequency"],
+      "additionalProperties": false,
+      "properties": {
+        "accentSectionBg": {
+          "type": "boolean",
+          "description": "Does the brand use its accent/primary color as full-width section backgrounds? Source: Vision AI Q1."
+        },
+        "cardsOnAccentBg": {
+          "type": "boolean",
+          "description": "When accent sections appear, does content sit in cards/containers (true) or directly on the color (false)? Only meaningful when accentSectionBg is true. Source: Vision AI Q2."
+        },
+        "primaryForIcons": {
+          "type": "boolean",
+          "description": "Is the primary accent color used for icons? Source: Vision AI Q4."
+        },
+        "primaryForStatNumbers": {
+          "type": "boolean",
+          "description": "Is the accent color used to highlight statistics or key numbers? Source: Vision AI Q5."
+        },
+        "primaryForButtons": {
+          "type": "boolean",
+          "description": "Is the primary accent color used for button backgrounds? Source: Vision AI Q4."
+        },
+        "textDirectlyOnAccent": {
+          "type": "boolean",
+          "description": "Does body text appear directly on accent backgrounds (without a card container)? False means only headings/stats may appear on accent, body text needs a neutral card. Source: Vision AI Q3."
+        },
+        "accentSectionFrequency": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "How often accent-colored sections appear. 0 = never, 2 = every 2nd section, 3 = every 3rd, etc. Source: Vision AI Q6."
+        }
+      }
+    },
+
+    "typography": {
+      "type": "object",
+      "description": "Typography character and weights — a mix of Vision AI observation (character) and CSS extraction (weights).",
+      "required": ["headlineCharacter", "bodyCharacter", "headlineWeight", "bodyWeight", "uppercaseHeadings"],
+      "additionalProperties": false,
+      "properties": {
+        "headlineCharacter": {
+          "type": "string",
+          "enum": ["heavy-condensed", "bold-geometric", "light-elegant", "standard-sans", "serif"],
+          "description": "Visual character of headline typography. Source: Vision AI Q8."
+        },
+        "bodyCharacter": {
+          "type": "string",
+          "enum": ["clean-lightweight", "medium-weight", "heavy-readable", "serif-body"],
+          "description": "Visual character of body text. Source: Vision AI Q8."
+        },
+        "headlineWeight": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 900,
+          "description": "Average CSS font-weight of heading elements. Source: CSS extraction."
+        },
+        "bodyWeight": {
+          "type": "integer",
+          "minimum": 100,
+          "maximum": 900,
+          "description": "Average CSS font-weight of paragraph elements. Source: CSS extraction."
+        },
+        "uppercaseHeadings": {
+          "type": "boolean",
+          "description": "Are headings displayed in uppercase? Source: Vision AI Q9, cross-validated with CSS text-transform."
+        }
+      }
+    },
+
+    "shape": {
+      "type": "object",
+      "description": "Shape language — borders, radii, shadows. Primarily from CSS extraction with Vision AI providing surface style.",
+      "required": ["borderRadius", "borderWidth", "shadowDepth", "surfaceStyle"],
+      "additionalProperties": false,
+      "properties": {
+        "borderRadius": {
+          "type": "string",
+          "enum": ["sharp", "rounded", "pill"],
+          "description": "Dominant corner treatment. Mapped from CSS dominantBorderRadius: 0-4px=sharp, 5-12px=rounded, 13px+=pill. Source: CSS extraction."
+        },
+        "borderWidth": {
+          "type": "string",
+          "enum": ["none", "thin", "thick"],
+          "description": "Border presence and weight on cards/buttons. Source: CSS extraction."
+        },
+        "shadowDepth": {
+          "type": "string",
+          "enum": ["none", "flat", "soft", "deep", "glow"],
+          "description": "Shadow treatment. Mapped from CSS dominantShadow. Source: CSS extraction."
+        },
+        "surfaceStyle": {
+          "type": "string",
+          "enum": ["flat-solid", "glassmorphic", "soft-shadow", "gradient"],
+          "description": "Overall surface treatment style. Source: Vision AI Q7."
+        }
+      }
+    },
+
+    "imageStyle": {
+      "type": "object",
+      "description": "Photography/image treatment observed on the brand site. Source: Vision AI Q10-Q11.",
+      "required": ["treatment", "colorTemp", "contrast"],
+      "additionalProperties": false,
+      "properties": {
+        "treatment": {
+          "type": "string",
+          "enum": ["dramatic-dark", "bright-airy", "monochrome", "illustrated", "none"],
+          "description": "Overall image/photography treatment. Source: Vision AI Q10."
+        },
+        "colorTemp": {
+          "type": "string",
+          "enum": ["warm", "cool", "neutral"],
+          "description": "Dominant color temperature of photography. Source: Vision AI Q11."
+        },
+        "contrast": {
+          "type": "string",
+          "enum": ["high", "medium", "low"],
+          "description": "Overall visual contrast level — considers text-to-background contrast, color intensity, and whether the design uses high-contrast pairings or muted/low-contrast treatments. Source: Vision AI Q13."
+        }
+      }
+    },
+
+    "pairingLogic": {
+      "type": "object",
+      "description": "Which foreground color is used on which background. Prevents the invisible-icon problem. Source: computed from extracted color pairs.",
+      "required": ["background", "primary", "cardSurface"],
+      "additionalProperties": false,
+      "properties": {
+        "background": {
+          "type": "string",
+          "description": "Foreground color key for main background. Value is a key name from colors (e.g., 'onBackground')."
+        },
+        "primary": {
+          "type": "string",
+          "description": "Foreground color key for primary accent background. Value is a key name from colors (e.g., 'onPrimary')."
+        },
+        "cardSurface": {
+          "type": "string",
+          "description": "Foreground color key for card surfaces. Value is a key name from colors (e.g., 'onBackground')."
+        },
+        "accentSectionBg": {
+          "type": "string",
+          "description": "Foreground color key for accent section backgrounds. Value is a key name from colors (e.g., 'onPrimary')."
+        }
+      }
+    },
+
+    "applicationConstraints": {
+      "type": "array",
+      "description": "Governance rules observed from the brand — things the engine must NEVER do. Source: Vision AI Q14.",
+      "items": {
+        "type": "string",
+        "description": "A 'never' rule, e.g., 'Never place body text directly on accent backgrounds'."
+      }
+    },
+
+    "archetype": {
+      "type": "string",
+      "enum": ["tech-modern", "minimalist", "editorial", "glassmorphist", "corporate", "warm-organic", "neo-brutalist", "luxury"],
+      "description": "Visual archetype classification. Drives SHAPE (borders, radii, shadows, spacing) via visual-archetypes.json recipes. Source: Vision AI Q12."
+    },
+
+    "isDark": {
+      "type": "boolean",
+      "description": "Whether the brand uses a dark background as its dominant theme. Source: CSS extraction (scroll-sampled luminance detection). Vision AI isDark is cross-validated but CSS is ground truth."
+    }
+  }
+}

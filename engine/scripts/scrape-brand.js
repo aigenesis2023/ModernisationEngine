@@ -77,6 +77,8 @@ async function extractCSSTokens(page) {
             borderRadius: borderRadius !== '0px' ? borderRadius : null,
             boxShadow,
             borderColor: rgbToHex(s.borderColor),
+            borderWidth: s.borderWidth !== '0px' ? s.borderWidth : null,
+            textTransform: s.textTransform !== 'none' ? s.textTransform : null,
             padding: s.padding,
           };
         })
@@ -213,6 +215,55 @@ async function extractCSSTokens(page) {
   // Primary shadow: most common box-shadow
   const dominantShadow = sortedByCount(allShadows)[0]?.[0] || null;
 
+  // Text color: most frequent paragraph text color
+  const textColor = sortedByCount(textCandidates)[0]?.[0] || null;
+
+  // Heading text color: most frequent heading text color
+  const headingTextColor = sortedByCount(headingColors)[0]?.[0] || null;
+
+  // Card surface: most frequent card backgroundColor
+  const cardBgMap = {};
+  const cardBorderMap = {};
+  const cardBorderWidthMap = {};
+  for (const item of (extracted.cards || [])) {
+    if (item.backgroundColor) countValue(cardBgMap, item.backgroundColor);
+    if (item.borderColor) countValue(cardBorderMap, item.borderColor);
+    if (item.borderWidth) countValue(cardBorderWidthMap, item.borderWidth);
+  }
+  const cardSurfaceColor = sortedByCount(cardBgMap)[0]?.[0] || null;
+  const cardBorderColor = sortedByCount(cardBorderMap)[0]?.[0] || null;
+  const cardBorderWidth = sortedByCount(cardBorderWidthMap)[0]?.[0] || null;
+
+  // Average heading weight
+  const headingWeights = (extracted.headings || [])
+    .map(h => parseInt(h.fontWeight, 10))
+    .filter(w => !isNaN(w));
+  const avgHeadingWeight = headingWeights.length > 0
+    ? Math.round(headingWeights.reduce((a, b) => a + b, 0) / headingWeights.length)
+    : null;
+
+  // Average body/paragraph weight
+  const bodyWeights = (extracted.paragraphs || [])
+    .map(p => parseInt(p.fontWeight, 10))
+    .filter(w => !isNaN(w));
+  const avgBodyWeight = bodyWeights.length > 0
+    ? Math.round(bodyWeights.reduce((a, b) => a + b, 0) / bodyWeights.length)
+    : null;
+
+  // Heading text-transform (check for uppercase)
+  const headingTransforms = {};
+  for (const h of (extracted.headings || [])) {
+    if (h.textTransform) countValue(headingTransforms, h.textTransform);
+  }
+  const dominantHeadingTransform = sortedByCount(headingTransforms)[0]?.[0] || null;
+
+  // Button border width
+  const buttonBorderWidthMap = {};
+  for (const b of (extracted.buttons || [])) {
+    if (b.borderWidth) countValue(buttonBorderWidthMap, b.borderWidth);
+  }
+  const buttonBorderWidth = sortedByCount(buttonBorderWidthMap)[0]?.[0] || null;
+
   const summary = {
     headlineFont,
     bodyFont,
@@ -221,6 +272,15 @@ async function extractCSSTokens(page) {
     dominantShadow,
     accentColors,
     backgroundColors,
+    textColor,
+    headingTextColor,
+    cardSurfaceColor,
+    cardBorderColor,
+    cardBorderWidth,
+    avgHeadingWeight,
+    avgBodyWeight,
+    dominantHeadingTransform,
+    buttonBorderWidth,
     allColors: sortedByCount(allColors).slice(0, 20).map(([hex, count]) => ({ hex, count })),
     allRadii: sortedByCount(allRadii).map(([value, count]) => ({ value, count })),
     allFonts: sortedByCount(allFonts).map(([family, count]) => ({ family, count })),
@@ -536,6 +596,334 @@ function extractImageTreatment(description) {
   return parts.join(', ');
 }
 
+// ─── Brand Spec paths ────────────────────────────────────────────────
+const BRAND_SPEC_PROMPT_PATH = path.join(OUTPUT_DIR, 'brand-spec-prompt.txt');
+const BRAND_SPEC_VISION_PATH = path.join(OUTPUT_DIR, 'brand-spec-vision.json');
+const BRAND_SPEC_PATH = path.join(OUTPUT_DIR, 'brand-spec.json');
+
+// ─── Luminance helper ────────────────────────────────────────────────
+/**
+ * Compute relative luminance of a hex color (0 = black, 1 = white).
+ * Used to determine onPrimary: dark primary → #ffffff, light primary → #1a1a1a.
+ */
+function hexLuminance(hex) {
+  if (!hex || hex.length < 7) return 0.5;
+  const r = parseInt(hex.slice(1, 3), 16) / 255;
+  const g = parseInt(hex.slice(3, 5), 16) / 255;
+  const b = parseInt(hex.slice(5, 7), 16) / 255;
+  // sRGB linearize
+  const linearize = (c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
+}
+
+/**
+ * Compute a slight step from a background color for backgroundAlt.
+ * Light backgrounds get slightly darker, dark backgrounds get slightly lighter.
+ */
+function computeBackgroundAlt(bgHex, isDark) {
+  if (!bgHex || bgHex.length < 7) return null;
+  const r = parseInt(bgHex.slice(1, 3), 16);
+  const g = parseInt(bgHex.slice(3, 5), 16);
+  const b = parseInt(bgHex.slice(5, 7), 16);
+  const step = isDark ? 12 : -8; // lighten dark bgs, darken light bgs
+  const clamp = (v) => Math.max(0, Math.min(255, v + step));
+  return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
+}
+
+// ─── Compute CSS-derived spec fields ─────────────────────────────────
+/**
+ * Maps the CSS extraction summary to all CSS-derivable fields of brand-spec.json.
+ * Vision AI fills the rest (colorStrategy, archetype, surfaceStyle, imageStyle, etc.).
+ */
+function computeCssDerivedSpec(summary, isDark) {
+  // Colors
+  const background = summary.backgroundColors?.[0]?.hex || (isDark ? '#111111' : '#ffffff');
+  const backgroundAlt = summary.backgroundColors?.[1]?.hex || computeBackgroundAlt(background, isDark);
+  const primary = summary.accentColors?.[0]?.hex || '#666666';
+  const secondary = summary.accentColors?.[1]?.hex || null;
+  const onBackground = summary.headingTextColor || summary.textColor || (isDark ? '#ffffff' : '#1a1a1a');
+  const onPrimary = hexLuminance(primary) > 0.4 ? '#1a1a1a' : '#ffffff';
+  const cardSurface = summary.cardSurfaceColor || null;
+  const cardBorder = summary.cardBorderColor || null;
+
+  // Shape — map CSS values to enum tokens
+  let borderRadius = 'rounded'; // default
+  if (summary.dominantBorderRadius) {
+    const px = parseFloat(summary.dominantBorderRadius);
+    if (!isNaN(px)) {
+      if (px <= 4) borderRadius = 'sharp';
+      else if (px <= 12) borderRadius = 'rounded';
+      else borderRadius = 'pill';
+    }
+  }
+
+  let borderWidth = 'none';
+  // Check card borders and button borders
+  const bw = summary.cardBorderWidth || summary.buttonBorderWidth;
+  if (bw) {
+    const px = parseFloat(bw);
+    if (!isNaN(px) && px > 0) {
+      borderWidth = px >= 2 ? 'thick' : 'thin';
+    }
+  }
+
+  let shadowDepth = 'none';
+  if (summary.dominantShadow) {
+    const s = summary.dominantShadow;
+    // Rough heuristic: check blur radius in box-shadow
+    const blurMatch = s.match(/\d+px\s+\d+px\s+(\d+)px/);
+    if (blurMatch) {
+      const blur = parseInt(blurMatch[1], 10);
+      if (blur <= 4) shadowDepth = 'flat';
+      else if (blur <= 15) shadowDepth = 'soft';
+      else shadowDepth = 'deep';
+    } else {
+      shadowDepth = 'flat'; // has shadow but can't parse blur
+    }
+  }
+
+  // Typography weights
+  const headlineWeight = summary.avgHeadingWeight || 700;
+  const bodyWeight = summary.avgBodyWeight || 400;
+
+  return {
+    colors: {
+      background,
+      backgroundAlt,
+      primary,
+      secondary,
+      onPrimary,
+      onBackground,
+      cardSurface,
+      cardBorder,
+    },
+    typography: {
+      headlineWeight,
+      bodyWeight,
+    },
+    shape: {
+      borderRadius,
+      borderWidth,
+      shadowDepth,
+    },
+    isDark,
+  };
+}
+
+// ─── Write brand-spec prompt for subagent ────────────────────────────
+/**
+ * Writes engine/output/brand-spec-prompt.txt with:
+ * - Screenshot path
+ * - All CSS-derived data as context
+ * - Pointer to the prompt .md file
+ */
+function writeBrandSpecPrompt(cssDerivedSpec) {
+  const prompt = `# Brand Spec Vision AI Audit — Subagent Task
+
+## Step 1: Read the screenshot
+Read the brand screenshot at: engine/output/brand-screenshot.png
+(Use the Read tool — you have vision capability.)
+
+## Step 2: CSS-Derived Context (ground truth — do NOT override these)
+The following values were extracted directly from the brand's CSS. Use them as context when answering questions — do NOT guess hex values.
+
+\`\`\`json
+${JSON.stringify(cssDerivedSpec, null, 2)}
+\`\`\`
+
+## Step 3: Answer the 14 structured questions
+Read the full prompt at: engine/prompts/brand-spec-audit.md
+Follow its instructions exactly. Answer all 14 questions.
+
+## Step 4: Write output
+Write your answers as strict JSON to: engine/output/brand-spec-vision.json
+`;
+  fs.writeFileSync(BRAND_SPEC_PROMPT_PATH, prompt);
+  console.log(`\nBrand spec prompt written: ${BRAND_SPEC_PROMPT_PATH}`);
+}
+
+// ─── API mode: Vision AI for brand-spec ──────────────────────────────
+/**
+ * Calls Claude Vision API with the brand screenshot + 14 structured questions.
+ * Returns the parsed JSON answers.
+ */
+async function produceSpecWithVision(screenshotPath, cssDerivedSpec, apiKey) {
+  const Anthropic = require('@anthropic-ai/sdk');
+  const client = new Anthropic({ apiKey });
+
+  console.log('Sending screenshot to Claude Vision for brand-spec audit...');
+
+  const imageData = fs.readFileSync(screenshotPath).toString('base64');
+  const auditPrompt = fs.readFileSync(path.resolve('engine/prompts/brand-spec-audit.md'), 'utf-8');
+
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-20250514',
+    max_tokens: 2000,
+    messages: [{
+      role: 'user',
+      content: [
+        {
+          type: 'image',
+          source: {
+            type: 'base64',
+            media_type: 'image/png',
+            data: imageData,
+          },
+        },
+        {
+          type: 'text',
+          text: `You are performing a Technical Design Audit of the brand website shown in the screenshot.
+
+## CSS-Derived Context (ground truth — use as reference, do NOT guess hex values)
+\`\`\`json
+${JSON.stringify(cssDerivedSpec, null, 2)}
+\`\`\`
+
+## Your Task
+Answer the 14 structured questions below. Return ONLY a JSON object with your answers — no markdown, no commentary, no code fences.
+
+${auditPrompt.split('## The 14 Questions')[1]?.split('## Output Format')[0] || ''}
+
+Return the JSON object matching this structure:
+{
+  "accentSectionBg": boolean,
+  "cardsOnAccentBg": "cards" | "direct" | "none",
+  "textDirectlyOnAccent": "none" | "headings-only" | "all",
+  "primaryRole": "buttons-only" | "buttons-and-icons" | "section-backgrounds-and-buttons",
+  "primaryForStatNumbers": boolean,
+  "accentSectionFrequency": integer,
+  "surfaceStyle": "flat-solid" | "glassmorphic" | "soft-shadow" | "gradient",
+  "headlineCharacter": "heavy-condensed" | "bold-geometric" | "light-elegant" | "standard-sans" | "serif",
+  "bodyCharacter": "clean-lightweight" | "medium-weight" | "heavy-readable" | "serif-body",
+  "uppercaseHeadings": boolean,
+  "imageTreatment": "dramatic-dark" | "bright-airy" | "monochrome" | "illustrated" | "none",
+  "imageColorTemp": "warm" | "cool" | "neutral",
+  "archetype": "tech-modern" | "minimalist" | "editorial" | "glassmorphist" | "corporate" | "warm-organic" | "neo-brutalist" | "luxury",
+  "contrast": "high" | "medium" | "low",
+  "applicationConstraints": [string array]
+}
+
+RESPOND WITH ONLY THE JSON OBJECT. No markdown fences, no explanation.`,
+        },
+      ],
+    }],
+  });
+
+  const text = response.content?.[0]?.text;
+  if (!text) throw new Error('Empty response from Claude Vision for brand-spec');
+
+  // Parse JSON — handle potential markdown fences
+  let cleaned = text.trim();
+  if (cleaned.startsWith('```')) {
+    cleaned = cleaned.replace(/^```(?:json)?\s*/, '').replace(/\s*```$/, '');
+  }
+  const parsed = JSON.parse(cleaned);
+  console.log(`Brand-spec vision response parsed: ${Object.keys(parsed).length} fields`);
+  return parsed;
+}
+
+// ─── Merge CSS-derived + Vision AI → final brand-spec.json ──────────
+/**
+ * Merges CSS-derived data (ground truth for hex) with Vision AI answers (ground truth for strategy).
+ * Computes derived fields (onPrimary, pairingLogic, backgroundAlt).
+ * Cross-validates and writes engine/output/brand-spec.json.
+ */
+function mergeBrandSpec(cssDerivedSpec, visionResult) {
+  const warnings = [];
+
+  // Cross-validation 1: accentSectionBg vs CSS backgrounds
+  // If Vision says no accent sections but CSS found primary as a section background
+  if (!visionResult.accentSectionBg && cssDerivedSpec.colors.primary) {
+    // Check if primary appears in background colors (would need raw data — skip for now, just note)
+    // This is a soft check — Vision AI is the authority for strategy questions
+  }
+
+  // Cross-validation 2: isDark — CSS is ground truth for luminance
+  if (typeof visionResult.isDark === 'boolean' && visionResult.isDark !== cssDerivedSpec.isDark) {
+    warnings.push(`isDark mismatch: Vision=${visionResult.isDark}, CSS=${cssDerivedSpec.isDark}. Using CSS (ground truth).`);
+  }
+
+  // Cross-validation 3: uppercaseHeadings — CSS text-transform can verify
+  // (cssDerivedSpec doesn't carry headingTransform, but we could add it if needed)
+
+  // Map Vision AI answers to schema fields
+  const cardsOnAccentBg = visionResult.cardsOnAccentBg === 'cards';
+  // "headings-only" means body text is in cards — only "all" means body text directly on accent
+  const textDirectlyOnAccent = visionResult.textDirectlyOnAccent === 'all';
+  const primaryForIcons = visionResult.primaryRole === 'buttons-and-icons' || visionResult.primaryRole === 'section-backgrounds-and-buttons';
+  const primaryForButtons = true; // accent is always used for buttons
+
+  // Determine headline/body character from Vision AI
+  const headlineCharacter = visionResult.headlineCharacter || 'standard-sans';
+  const bodyCharacter = visionResult.bodyCharacter || 'clean-lightweight';
+
+  // Build final spec
+  const spec = {
+    colors: {
+      ...cssDerivedSpec.colors,
+    },
+    colorStrategy: {
+      accentSectionBg: visionResult.accentSectionBg,
+      cardsOnAccentBg,
+      primaryForIcons,
+      primaryForStatNumbers: visionResult.primaryForStatNumbers,
+      primaryForButtons,
+      textDirectlyOnAccent,
+      accentSectionFrequency: visionResult.accentSectionFrequency || 0,
+    },
+    typography: {
+      headlineCharacter,
+      bodyCharacter,
+      headlineWeight: cssDerivedSpec.typography.headlineWeight,
+      bodyWeight: cssDerivedSpec.typography.bodyWeight,
+      uppercaseHeadings: visionResult.uppercaseHeadings,
+    },
+    shape: {
+      ...cssDerivedSpec.shape,
+      surfaceStyle: visionResult.surfaceStyle || 'flat-solid',
+    },
+    imageStyle: {
+      treatment: visionResult.imageTreatment || 'none',
+      colorTemp: visionResult.imageColorTemp || 'neutral',
+      contrast: visionResult.contrast || 'medium',
+    },
+    pairingLogic: {
+      background: 'onBackground',
+      primary: 'onPrimary',
+      cardSurface: 'onBackground',
+      accentSectionBg: 'onPrimary',
+    },
+    applicationConstraints: visionResult.applicationConstraints || [],
+    archetype: visionResult.archetype || 'corporate',
+    isDark: cssDerivedSpec.isDark, // CSS is ground truth
+  };
+
+  // Log warnings
+  if (warnings.length > 0) {
+    console.log('\n⚠️  Cross-validation warnings:');
+    for (const w of warnings) console.log(`   ${w}`);
+  }
+
+  // Write brand-spec.json
+  fs.writeFileSync(BRAND_SPEC_PATH, JSON.stringify(spec, null, 2));
+  console.log(`\nOutput: ${BRAND_SPEC_PATH}`);
+
+  // Print summary
+  console.log('\n--- brand-spec.json summary ---');
+  console.log(`  Background:     ${spec.colors.background}`);
+  console.log(`  Primary:        ${spec.colors.primary}`);
+  console.log(`  onPrimary:      ${spec.colors.onPrimary}`);
+  console.log(`  Archetype:      ${spec.archetype}`);
+  console.log(`  isDark:         ${spec.isDark}`);
+  console.log(`  accentSectionBg: ${spec.colorStrategy.accentSectionBg}`);
+  console.log(`  cardsOnAccent:  ${spec.colorStrategy.cardsOnAccentBg}`);
+  console.log(`  surfaceStyle:   ${spec.shape.surfaceStyle}`);
+  console.log(`  Constraints:    ${spec.applicationConstraints.length} rules`);
+  console.log('');
+
+  return spec;
+}
+
 // ─── Save outputs ────────────────────────────────────────────────────
 function saveOutputs(url, description, detectedIsDark, extractedCSS) {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -595,6 +983,7 @@ function saveOutputs(url, description, detectedIsDark, extractedCSS) {
 async function main() {
   const args = process.argv.slice(2);
   const descriptionReady = args.includes('--description-ready');
+  const specReady = args.includes('--spec-ready');
 
   // Read brand URL from CLI arg or brand/url.txt
   const urlArg = args.find(a => !a.startsWith('--'));
@@ -611,15 +1000,15 @@ async function main() {
     url = fs.readFileSync(urlFile, 'utf-8').trim();
   }
 
-  console.log(`\nBrand Scraper — Screenshot + Description + CSS Extraction\n`);
+  console.log(`\nBrand Scraper — Screenshot + Description + CSS Extraction + Brand Spec\n`);
   console.log(`URL: ${url}\n`);
 
   // Step 1: Take screenshot + detect dominant theme + extract CSS tokens
-  // (Skip if --description-ready: screenshot and CSS already done on first run)
+  // (Skip if --description-ready or --spec-ready: screenshot and CSS already done on first run)
   let detectedIsDark = false; // safe default: light
   let extractedCSS = null;
 
-  if (descriptionReady) {
+  if (descriptionReady || specReady) {
     // Load previously extracted CSS (written on first run)
     if (fs.existsSync(EXTRACTED_CSS_PATH)) {
       extractedCSS = JSON.parse(fs.readFileSync(EXTRACTED_CSS_PATH, 'utf-8'));
@@ -640,6 +1029,7 @@ async function main() {
   // Step 2: Get description (API or subagent)
   const apiKey = process.env.ANTHROPIC_API_KEY;
   let description;
+  let descriptionDone = false;
 
   if (descriptionReady) {
     // Subagent has written brand-describe.json — load it
@@ -652,6 +1042,20 @@ async function main() {
     description = result.description;
     if (typeof result.isDark === 'boolean') detectedIsDark = result.isDark;
     console.log('Loaded brand description from brand-describe.json');
+    descriptionDone = true;
+  } else if (specReady && !descriptionReady) {
+    // --spec-ready only (description was done in a previous run via API mode)
+    // Load existing brand-design.md if it exists
+    if (fs.existsSync(DESIGN_MD_PATH)) {
+      description = fs.readFileSync(DESIGN_MD_PATH, 'utf-8');
+      console.log('Loaded existing brand-design.md');
+      descriptionDone = true;
+    }
+    // Load isDark from existing brand-profile.json
+    if (fs.existsSync(PROFILE_PATH)) {
+      const profile = JSON.parse(fs.readFileSync(PROFILE_PATH, 'utf-8'));
+      detectedIsDark = profile.detectedTheme === 'dark';
+    }
   } else if (apiKey) {
     // API mode: send screenshot to Claude Vision
     if (!fs.existsSync(SCREENSHOT_PATH)) {
@@ -660,6 +1064,7 @@ async function main() {
     }
     try {
       description = await describeWithVision(SCREENSHOT_PATH, apiKey);
+      descriptionDone = true;
     } catch (err) {
       console.error(`Vision API failed: ${err.message}`);
       console.error('Falling back to subagent mode.\n');
@@ -673,10 +1078,16 @@ async function main() {
         console.log(`Saved extracted-css.json`);
       }
       writeBrandDescribePrompt(url);
+      // Also write brand-spec prompt
+      const cssSummary = extractedCSS?.summary || extractedCSS?.summary;
+      if (cssSummary) {
+        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+        writeBrandSpecPrompt(cssDerivedSpec);
+      }
       process.exit(0);
     }
   } else {
-    // No API key — save CSS now (needed for generate-design-tokens.js later), then exit
+    // No API key — save CSS now (needed for generate-design-tokens.js later)
     if (extractedCSS) {
       if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
       fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify({
@@ -687,11 +1098,76 @@ async function main() {
       console.log(`Saved extracted-css.json`);
     }
     writeBrandDescribePrompt(url);
+    // Also write brand-spec prompt for subagent
+    const cssSummary = extractedCSS?.summary;
+    if (cssSummary) {
+      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+      writeBrandSpecPrompt(cssDerivedSpec);
+      console.log('\nSpawn a SECOND subagent to:');
+      console.log('  1. Read engine/output/brand-spec-prompt.txt');
+      console.log('  2. Follow the instructions → read screenshot + answer 14 questions');
+      console.log('  3. Write engine/output/brand-spec-vision.json');
+      console.log('\nThen re-run: node engine/scripts/scrape-brand.js --description-ready --spec-ready\n');
+    }
     process.exit(0);
   }
 
-  // Step 3: Save outputs (includes detected theme + extracted CSS)
-  saveOutputs(url, description, detectedIsDark, extractedCSS);
+  // Step 3: Save standard outputs (includes detected theme + extracted CSS)
+  if (descriptionDone && description) {
+    saveOutputs(url, description, detectedIsDark, extractedCSS);
+  }
+
+  // Step 4: Brand Spec workflow
+  // Compute CSS-derived spec from summary
+  const cssSummary = extractedCSS?.summary;
+  let cssDerivedSpec = null;
+  if (cssSummary) {
+    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark);
+  }
+
+  if (specReady) {
+    // Subagent has written brand-spec-vision.json — merge and produce final brand-spec.json
+    if (!fs.existsSync(BRAND_SPEC_VISION_PATH)) {
+      console.error(`Error: --spec-ready flag set but ${BRAND_SPEC_VISION_PATH} not found.`);
+      console.error('Run the brand-spec subagent first, then re-run with --spec-ready.');
+      process.exit(1);
+    }
+    const visionResult = JSON.parse(fs.readFileSync(BRAND_SPEC_VISION_PATH, 'utf-8'));
+    console.log('Loaded brand-spec vision answers from brand-spec-vision.json');
+
+    if (!cssDerivedSpec) {
+      console.error('Error: Cannot merge brand-spec — no CSS summary available.');
+      console.error('Ensure extracted-css.json exists from the first run.');
+      process.exit(1);
+    }
+
+    mergeBrandSpec(cssDerivedSpec, visionResult);
+  } else if (apiKey && cssDerivedSpec) {
+    // API mode: call Vision AI for brand-spec directly
+    try {
+      const visionResult = await produceSpecWithVision(SCREENSHOT_PATH, cssDerivedSpec, apiKey);
+      // Save vision result for debugging/reference
+      fs.writeFileSync(BRAND_SPEC_VISION_PATH, JSON.stringify(visionResult, null, 2));
+      console.log(`Output: ${BRAND_SPEC_VISION_PATH}`);
+      mergeBrandSpec(cssDerivedSpec, visionResult);
+    } catch (err) {
+      console.error(`Brand-spec Vision API failed: ${err.message}`);
+      console.error('Falling back: writing brand-spec-prompt.txt for subagent.\n');
+      writeBrandSpecPrompt(cssDerivedSpec);
+      console.log('Spawn a subagent to answer the 14 questions, then re-run with --spec-ready.');
+    }
+  } else if (cssDerivedSpec) {
+    // No API key, description came from subagent — write brand-spec prompt
+    writeBrandSpecPrompt(cssDerivedSpec);
+    console.log('\n' + '='.repeat(70));
+    console.log('BRAND SPEC AUDIT NEEDED');
+    console.log('='.repeat(70));
+    console.log('\nSpawn a subagent to:');
+    console.log('  1. Read engine/output/brand-spec-prompt.txt');
+    console.log('  2. Follow the instructions → read screenshot + answer 14 questions');
+    console.log('  3. Write engine/output/brand-spec-vision.json');
+    console.log('\nThen re-run: node engine/scripts/scrape-brand.js --spec-ready\n');
+  }
 
   console.log('Done.');
 }

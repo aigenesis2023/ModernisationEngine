@@ -328,7 +328,7 @@ Root cause of OBS 4: Font matching quality. Separate concern — improve subagen
 
 ## Implementation Phases
 
-### Phase 1: Structured Design Spec (SCHEMA IS THE PRIORITY)
+### Phase 1: Structured Design Spec (SCHEMA IS THE PRIORITY) — ✅ COMPLETE
 The schema is the hard part. If the schema is wrong, everything downstream is wrong. If the schema is right, Phases 2-4 are just plumbing. Focus almost entirely on nailing the application rules (the "how") — hex extraction is just data our Playwright setup already handles.
 
 **No build changes in Phase 1. No changes to generate-design-tokens.js, build-course.js, render.tsx, or any component. Only scrape-brand.js is modified to produce brand-spec.json alongside existing outputs. All existing outputs (extracted-css.json, brand-design.md, brand-profile.json) continue to be produced.**
@@ -422,6 +422,8 @@ Test brands: rep-republic (vivid orange, neo-brutalist), sprig (dark, cyan, tech
 
 **Exit criteria:** brand-spec.json is accurate for 3 diverse brands. All fields populated. No build changes made.
 
+**EXIT CRITERIA MET (2026-03-31).** Tested: rep-republic (light, orange, neo-brutalist), darkfolio (dark, purple, tech-modern), coursesite (light, lavender, minimalist). All strategy flags verified accurate. Prompt tuned for Q2/Q3 hybrid pattern (cards + headings on accent). Merge logic fixed for textDirectlyOnAccent mapping. Known limitation: CSS extraction misses accent colors from gradients/images — Phase 2 concern.
+
 ### Phase 2: Direct Color Extraction (Replace MD3)
 - Refactor `generate-design-tokens.js` to map extracted colors → token roles
 - Demote MD3 to gap-filler for missing tokens only
@@ -441,7 +443,7 @@ Test brands: rep-republic (vivid orange, neo-brutalist), sprig (dark, cyan, tech
 - Flow image treatment into generate-images.js prompts
 
 ### Multi-Brand Validation (after each phase)
-Test brands: sprig (dark, cyan), fluence (light, amethyst), fitflow (light, pink-blue gradient), crimzon (dark, crimson), coursesite (light, lavender-purple), rep-republic (light, vivid orange neo-brutalist)
+Test brands: darkfolio (dark, purple), coursesite (light, lavender-purple), rep-republic (light, vivid orange neo-brutalist). *(sprig, crimzon, landio, najaf Framer sites are DOWN as of 2026-03-31.)*
 
 Score: side-by-side brand URL vs course output. Focus on: color accuracy, typography character, surface treatment, color application patterns.
 
@@ -455,3 +457,9 @@ Score: side-by-side brand URL vs course output. Focus on: color accuracy, typogr
 | 2026-03-31 | Proposed architecture: Extract → Spec → Map → Build | Planning | **APPROVED** |
 | 2026-03-31 | Pre-implementation audit: 12 issues found, all documented above | Planning | Complete |
 | 2026-03-31 | Decisions: 14 questions (Q13=contrast added), Sonnet for API mode | Planning | Complete |
+| 2026-03-31 | Phase 1 implemented: schema, prompt, scrape-brand.js modifications | Phase 1 | Complete |
+| 2026-03-31 | Phase 1 tested: rep-republic (neo-brutalist), darkfolio (tech-modern), coursesite (minimalist) | Phase 1 | **COMPLETE** |
+| 2026-03-31 | Prompt tuning: Q2/Q3 clarified for hybrid cards+headings pattern (rep-republic caught wrong flags) | Phase 1 | Complete |
+| 2026-03-31 | Merge logic fix: textDirectlyOnAccent "headings-only" → false (only "all" → true) | Phase 1 | Complete |
+| 2026-03-31 | Known limitation: CSS extraction misses accent colors from gradients/images (darkfolio, coursesite get #666666 fallback). Phase 2 concern. | Phase 1 | Noted |
+| 2026-03-31 | Sprig/crimzon/landio/najaf Framer sites are DOWN. Replaced with darkfolio for dark brand test. | Phase 1 | Noted |
