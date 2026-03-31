@@ -42,7 +42,7 @@ Topic Brief + URLs ──→ research-content.js  ──→ Knowledge Base (JSON
 
 ═══ BRAND + BUILD PIPELINE ════════════════════════════════════════════
 Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + extracted-css.json + brand-spec.json
-               (Playwright screenshot + getComputedStyle() + Vibrant.js + Vision AI audit)
+               (Playwright screenshot + getComputedStyle() + dembrandt + Vision AI audit)
                     │
                     ▼
          generate-design-tokens.js (BEING REFACTORED — see engine/BRAND-FIDELITY.md)
