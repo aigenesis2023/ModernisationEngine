@@ -45,7 +45,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
             <div class="flex-1 min-w-0">
               {items.map((item, i) => (
                 <div
-                  class="glass-card rounded-3xl p-6 @3xl:p-8 min-h-[300px] w-full min-w-0 overflow-hidden"
+                  class={`${AR.surface?.card || 'glass-card'} ${AR.borderRadius?.cardLarge || 'rounded-2xl'} p-6 @3xl:p-8 min-h-[300px] w-full min-w-0 overflow-hidden`}
                   data-tab-panel={String(i)}
                   style={i > 0 ? 'display:none' : undefined}
                 >
@@ -83,7 +83,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
           </div>
           {items.map((item, i) => (
             <div
-              class="glass-card rounded-3xl p-6 @3xl:p-8 min-h-[300px] w-full min-w-0 overflow-hidden"
+              class={`${AR.surface?.card || 'glass-card'} ${AR.borderRadius?.cardLarge || 'rounded-2xl'} p-6 @3xl:p-8 min-h-[300px] w-full min-w-0 overflow-hidden`}
               data-tab-panel={String(i)}
               style={i > 0 ? 'display:none' : undefined}
             >

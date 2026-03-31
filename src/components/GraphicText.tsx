@@ -10,7 +10,10 @@ interface Props {
 }
 
 export function GraphicText({ comp, index, variant, maxW }: Props) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
+  const cardSurface = AR.surface?.card || 'glass-card';
   const title = esc(comp.displayTitle || '');
   const bodyText = comp.body || '';
   const secClass = sectionOnly('py-16');
@@ -23,14 +26,14 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
       <section class={secClass} data-component-type="graphic-text">
         <div class={`@container ${maxW} mx-auto px-8`}>
           <div class="relative @3xl:min-h-[450px]" data-animate="fade-up">
-            <div class={`w-full @3xl:w-[55%] ${align === 'left' ? '@3xl:ml-auto' : ''} rounded-2xl overflow-hidden aspect-[3/2] bg-surface-container`}>
+            <div class={`w-full @3xl:w-[55%] ${align === 'left' ? '@3xl:ml-auto' : ''} ${imgRound} overflow-hidden aspect-[3/2] bg-surface-container`}>
               {imgSrc ? (
                 <img alt={imgAlt} class="w-full h-full object-cover" src={imgSrc} />
               ) : (
                 <div class="w-full h-full bg-surface-container" />
               )}
             </div>
-            <div class={`relative @3xl:absolute ${align === 'left' ? '@3xl:left-0' : '@3xl:right-0'} @3xl:top-1/2 @3xl:-translate-y-1/2 @3xl:w-[55%] glass-card rounded-2xl p-8 @3xl:p-10 mt-[-2rem] @3xl:mt-0 mx-4 @3xl:mx-0`}>
+            <div class={`relative @3xl:absolute ${align === 'left' ? '@3xl:left-0' : '@3xl:right-0'} @3xl:top-1/2 @3xl:-translate-y-1/2 @3xl:w-[55%] glass-card ${cardRound} p-8 @3xl:p-10 mt-[-2rem] @3xl:mt-0 mx-4 @3xl:mx-0`}>
               <h2 class="font-headline text-h2 tracking-tight mb-4" dangerouslySetInnerHTML={{ __html: title }} />
               <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
             </div>
@@ -67,11 +70,11 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
       data-animate={align === 'left' ? 'slide-in-left' : 'slide-in-right'}
     >
       <div class="relative group overflow-hidden">
-        <div class="relative rounded-2xl overflow-hidden aspect-[4/3] bg-surface-container">
+        <div class={`relative ${imgRound} overflow-hidden aspect-[4/3] bg-surface-container`}>
           {imgSrc ? (
-            <img alt={imgAlt} class="w-full h-full object-cover rounded-2xl" src={imgSrc} />
+            <img alt={imgAlt} class={`w-full h-full object-cover ${imgRound}`} src={imgSrc} />
           ) : (
-            <div class="w-full h-full bg-surface-container rounded-2xl" />
+            <div class={`w-full h-full bg-surface-container ${imgRound}`} />
           )}
         </div>
       </div>

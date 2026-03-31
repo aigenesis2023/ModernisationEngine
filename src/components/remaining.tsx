@@ -449,7 +449,7 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
 
   // Matrix columns (table)
   const headerHtml = '<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>' +
-    columns.map((c: any) => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.label || c.title || '')}</th>`).join('');
+    columns.map((c: any) => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface">${esc(c.label || c.title || '')}</th>`).join('');
   const rowsHtml = rows.map((row: any, ri: number) => {
     const vals = (row.values || []).map((v: any) => {
       if (v === true || v === 'true') return '<td class="px-5 py-3 text-center"><span class="material-symbols-outlined text-secondary text-xl">check_circle</span></td>';

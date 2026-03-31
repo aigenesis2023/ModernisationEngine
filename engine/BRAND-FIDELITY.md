@@ -476,11 +476,114 @@ CSS extraction misses accent colors from gradients and images (confirmed: course
 - When `textDirectlyOnAccent: false`, only headings/stats appear on accent bg
 - Test: does the Rep Republic output match the brand's card-on-orange pattern?
 
-### Phase 4: Shape/Typography Refinement
+### Phase 4: Clean Color Architecture
+
+**Goal:** Make the engine work correctly for ANY brand URL by eliminating the two systemic problems that remain after Phase 3: (1) invented tinted surfaces from MD3, and (2) position-locked section backgrounds that fight the authoring layer.
+
+#### Why this matters
+
+After Phases 1–3 the engine correctly identifies `onPrimary`, wraps components in `.card-on-accent` when `cardsOnAccentBg: true`, and preserves the brand's exact primary hex. But two structural problems persist:
+
+1. **MD3-derived surface tints.** `surface-container` still fell back to `neutralVariantTone()` — seeded from the brand's primary. Orange primary → peach `#ffe9e4`. Purple primary → lavender tint. Non-accent sections look "off" even though the brand uses pure white. Fixed in Phase 4a.
+
+2. **Formula-locked section backgrounds.** `accentSectionFrequency` = a dumb `% N` formula. The AI that designed the course content knows which sections suit accent treatment — the formula doesn't. A user who adds or reorders a section in the authoring layer shouldn't have their background choice dictated by an index calculation. Fixed in Phase 4b.
+
+#### The model
+
+Only **two section background states** exist:
+- `background` — the brand's actual background (white `#ffffff`, dark `#0a0a0a`, etc.)
+- `primary` — the brand's accent color (`#ff4400`, `#814fff`, etc.)
+
+Nothing else. No derived tints. No `surface-container-high`. Components always sit on `--color-surface` (white/dark surface), not on the section background directly. The section background is just the outer frame.
+
+---
+
+#### Phase 4a: Remove MD3 tinting from surface hierarchy ✅ COMPLETE
+
+**Problem:** `mapBrandSpecToTokens()` fell back to `neutralVariantTone(94/96)` when brand-spec didn't provide explicit card surface or background-alt colors. `neutralVariantTone` is derived from the MD3 theme seeded with the brand's primary — orange → peach, purple → lavender.
+
+**Fix (generate-design-tokens.js):** Move `stepSurface()` definition before `cardSurface` computation. Replace ALL `neutralVariantTone()` and `neutralTone()` fallbacks in the surface hierarchy with `stepSurface(background, ...)` — derive the surface hierarchy exclusively from the brand's actual background hex. No MD3 involvement.
+
+- `cardSurface` fallback: `stepSurface(background, isDark ? 8 : -4)` — slight neutral step from bg
+- `backgroundAlt` fallback: `stepSurface(background, isDark ? 6 : -2)` — barely a step
+- `surface-container-low`: uses `backgroundAlt` (no `neutralVariantTone`)
+
+**Result:** Rep republic surface-container = `#f8f8f8` (near-white, a 4-step darken from `#ffffff`) instead of `#ffe9e4` (peach). Coursesite = neutral lavender-free grey. All non-accent sections are clean brand-background derivations.
+
+**Files changed:** `engine/scripts/generate-design-tokens.js` only.
+
+---
+
+#### Phase 4b: AI-set section backgrounds (replace frequency formula)
+
+**Problem:** Section backgrounds assigned by `(sectionIndex - 1) % frequency === 0`. Locks accent sections to positions 1, 4, 7, 10... regardless of content. Fights the authoring layer — adding a section shifts all downstream bg assignments.
+
+**Solution:** Add an optional `sectionBg` field to course-layout.json. AI generation agent sets it per section. Frequency formula is fallback only when `sectionBg` is absent.
+
+`sectionBg` values:
+- `"accent"` — brand primary background for this section
+- `"default"` — brand background (white/dark) — no accent
+- absent/null — fall back to frequency formula (backwards compat)
+
+**Files to change:**
+1. `engine/schemas/course-layout.schema.json` — add `sectionBg: { "type": "string", "enum": ["default", "accent"] }` as optional section property
+2. `engine/prompts/generation-engine.md` — instruct AI to set `sectionBg: "accent"` for stat-callout, pullquote, key-term, hero-like sections; `sectionBg: "default"` for MCQ, flashcard, video, dense interactive layouts
+3. `src/render.tsx` — in `assembleSection()`: if `section.sectionBg === "accent"` → `isAccentSection = true`; if `section.sectionBg === "default"` → `isAccentSection = false`; else → existing frequency formula
+
+**Authoring layer:** After Phase 4b, the authoring panel can expose a per-section bg toggle (default / accent). This is a `hydrate.js` change — add a bg-swap button to section headers that writes `sectionBg` into the exported JSON.
+
+---
+
+#### Phase 4c: data-context cascade (contextual component tokens)
+
+**Problem:** `.card-on-accent` in theme-template.css resets `--color-on-surface` via CSS variable overrides. This works for most cases but Tailwind v4 bakes some fractional opacity utilities as static `color-mix()` calls, making cascade overrides unreliable in edge cases. More importantly, new components added in the authoring layer need automatic correct behaviour in any section context — not per-component logic.
+
+**Solution:** `data-context="accent"` attribute on the section wrapper div. CSS variable contract in theme-template.css:
+
+```css
+:root {
+  --ctx-card-bg: var(--color-surface-container);
+  --ctx-card-text: var(--color-on-surface);
+  --ctx-card-text-muted: var(--color-on-surface-variant);
+}
+
+[data-context="accent"] {
+  --ctx-card-bg: var(--color-background);
+  --ctx-card-text: var(--color-on-surface);
+  --ctx-card-text-muted: var(--color-on-surface-variant);
+}
+```
+
+Components that render inside sections use `bg-[var(--ctx-card-bg)]` for their card surfaces. Any component dropped into an accent section automatically picks up clean background — no per-component logic needed.
+
+**Files to change:**
+1. `src/render.tsx` — add `data-context="accent"` to section wrapper div when `isAccentSection`
+2. `src/theme-template.css` — add `[data-context="accent"]` block with contextual token overrides
+3. **Surgical component updates** — only components that render card backgrounds need updating. The `.card-on-accent` mechanism stays as belt-and-suspenders for existing builds.
+
+**Priority:** Lower than 4a and 4b. 4a solves the visible peach bug. 4b solves the formula lock-in. 4c is architectural hardening — implement when 4b is stable.
+
+---
+
+#### Phase 4d: Vision AI volume check (accent over-classification)
+
+**Problem:** Vision AI classifies coursesite as `accentSectionBg: true` because the hero gradient "looks purple". The actual criterion should be: does the brand use its primary as a FULL SECTION BACKGROUND, or only as a small accent element (button, icon, border)?
+
+**Solution:** Add a volume/area heuristic to the Vision AI prompt in `scrape-brand.js`:
+
+> Q1 (updated): "Does the brand use its primary accent color as FULL-WIDTH section backgrounds covering >30% of the viewport? (A hero gradient that fades, a button, or a top bar does NOT qualify — only solid full-width sections do.)"
+
+Also cross-validate: if CSS extraction shows primary only on small elements (buttons `<200px`, icons, borders) and never on full-page backgrounds, force-override `accentSectionBg: false` regardless of Vision AI answer.
+
+**Files to change:** `engine/scripts/scrape-brand.js` — update Q1 in the Vision AI prompt, add CSS cross-validation rule in `mergeBrandSpec()`.
+
+---
+
+### Phase 5: Shape/Typography Refinement
 - Ensure archetype recipes drive shape only (not color strategy)
 - Improve font substitution for condensed/display faces
 - Expand font weight range to 100-900
-- Flow image treatment into generate-images.js prompts
+- Flow image treatment (`brand-spec.json imageStyle`) into generate-images.js prompts
 
 ### Multi-Brand Validation (after each phase)
 Test brands: darkfolio (dark, purple), coursesite (light, lavender-purple), rep-republic (light, vivid orange neo-brutalist). *(sprig, crimzon, landio, najaf Framer sites are DOWN as of 2026-03-31.)*
@@ -511,3 +614,5 @@ Score: side-by-side brand URL vs course output. Focus on: color accuracy, typogr
 | 2026-03-31 | Sprig/crimzon/landio/najaf/darkfolio Framer sites are DOWN. Test pool: rep-republic + coursesite. | Phase 1 | Noted |
 | 2026-03-31 | Phase 2a-revised: Replaced Vibrant.js with dembrandt. npm uninstall node-vibrant, npm install dembrandt. extractDembrandtColors() shells out to CLI. Three-source cascade: CSS → dembrandt → fallback. brand-spec.schema.json primarySource enum updated. | Phase 2a-revised | **COMPLETE** |
 | 2026-03-31 | Phase 3: Adaptive color application. colorStrategy passed to RenderContext. surfaceRhythm respects accentSectionBg/frequency flags. .card-on-accent CSS reset for neutral cards on accent sections. Components wrapped in cards when cardsOnAccentBg is true. | Phase 3 | **COMPLETE** |
+| 2026-03-31 | Phase 4 plan locked: Clean Color Architecture. Two bg states only (background + primary). AI-set sectionBg in course-layout.json. data-context cascade. Remove all MD3 surface tinting. | Phase 4 | **PLANNED** |
+| 2026-03-31 | Phase 4a: Removed MD3 neutralVariantTone() fallbacks from mapBrandSpecToTokens(). stepSurface() moved before cardSurface. surface-container and surface-container-low now derive from brand background only. Kills peach/salmon tinting for vivid primary brands. | Phase 4a | **COMPLETE** |

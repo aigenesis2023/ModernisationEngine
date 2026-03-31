@@ -342,11 +342,10 @@ function mapBrandSpecToTokens(brandSpec) {
   const primary = colors.primary;
   const onPrimary = colors.onPrimary;
   const onSurface = colors.onBackground;
-  const cardSurface = colors.cardSurface || colors.backgroundAlt || (isDark ? neutralTone(12) : neutralVariantTone(94));
-  const backgroundAlt = colors.backgroundAlt || (isDark ? neutralTone(10) : neutralVariantTone(96));
 
   // Surface hierarchy: compute from brand background (not MD3)
   // For light brands: slightly darker steps. For dark brands: slightly lighter steps.
+  // IMPORTANT: stepSurface must be defined BEFORE cardSurface so we can use it in the fallback.
   const stepSurface = (hex, steps) => {
     if (!hex || hex.length < 7) return hex;
     const r = parseInt(hex.slice(1, 3), 16);
@@ -357,10 +356,21 @@ function mapBrandSpecToTokens(brandSpec) {
     return '#' + [clamp(r), clamp(g), clamp(b)].map(x => x.toString(16).padStart(2, '0')).join('');
   };
 
+  // Card surface: use brand's extracted card color, or derive from background.
+  // NEVER fall back to neutralVariantTone() — that's MD3-seeded from primary and produces
+  // tinted surfaces the brand doesn't use (e.g. #ff4400 orange → #ffe9e4 peach).
+  const safeBackgroundAlt = (colors.backgroundAlt && colors.backgroundAlt !== colors.primary)
+    ? colors.backgroundAlt
+    : null;
+  // Light brand: step slightly darker from background (#ffffff → #f8f8f8)
+  // Dark brand: step slightly lighter from background (#0a0a0a → #161616)
+  const cardSurface = colors.cardSurface || safeBackgroundAlt || stepSurface(background, isDark ? 8 : -4);
+  const backgroundAlt = colors.backgroundAlt || stepSurface(background, isDark ? 6 : -2);
+
   const tokens = {
     'background':                  background,
     'on-surface':                  onSurface,
-    // Surface hierarchy — derived from brand background
+    // Surface hierarchy — derived from brand background only, never from MD3
     'surface-dim':                 isDark ? background : stepSurface(background, 10),
     'surface-bright':              isDark ? stepSurface(background, 18) : background,
     'surface-container-lowest':    isDark ? stepSurface(background, -2) : background,

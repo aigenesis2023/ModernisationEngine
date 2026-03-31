@@ -14,6 +14,7 @@ export function Bento({ comp, variant, maxW }: Props) {
   const bentoCfg = AR.bento || {};
   const cardBgs = bentoCfg.cardBgs || ['glass-card', 'bg-surface-container-low', 'bg-surface-container-high', 'glass-card'];
   const imgHover = bentoCfg.imgHover || 'group-hover:scale-110 transition-transform duration-700';
+  const cardRound = AR.borderRadius?.card || 'rounded-xl';
 
   if (variant === 'wide-2') {
     return (
@@ -24,7 +25,7 @@ export function Bento({ comp, variant, maxW }: Props) {
             {items.map((item, i) => {
               const bg = cardBgs[i] || cardBgs[0] || 'glass-card';
               return (
-                <div class={`${bg} rounded-3xl p-8 @3xl:p-10 flex items-start gap-6 min-h-[140px] overflow-hidden`}>
+                <div class={`${bg} ${cardRound} p-8 @3xl:p-10 flex items-start gap-6 min-h-[140px] overflow-hidden`}>
                   <div class="w-14 h-14 rounded-full bg-secondary/10 flex items-center justify-center flex-shrink-0">
                     <span class="material-symbols-outlined text-secondary text-2xl">{ICONS[i % ICONS.length]}</span>
                   </div>
@@ -52,7 +53,7 @@ export function Bento({ comp, variant, maxW }: Props) {
               if (i === 0) {
                 const featBg = cardBgs[0] || 'bg-gradient-to-br from-primary/20 via-secondary/10 to-transparent glass-card';
                 return (
-                  <div class={`@3xl:col-span-2 @3xl:row-span-2 rounded-3xl p-6 @3xl:p-8 flex flex-col justify-end relative overflow-hidden group min-h-[320px] ${featBg}`}>
+                  <div class={`@3xl:col-span-2 @3xl:row-span-2 ${cardRound} p-6 @3xl:p-8 flex flex-col justify-end relative overflow-hidden group min-h-[320px] ${featBg}`}>
                     {imgSrc && <img alt="" class={`absolute inset-0 w-full h-full object-cover opacity-15 ${imgHover}`} src={imgSrc} />}
                     <div class="relative z-10">
                       <span class="material-symbols-outlined text-primary text-5xl mb-4">{ICONS[0]}</span>
@@ -64,7 +65,7 @@ export function Bento({ comp, variant, maxW }: Props) {
               }
               const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
               return (
-                <div class={`${bgN} rounded-3xl p-6 @3xl:p-8 flex flex-col min-h-[160px] overflow-hidden`}>
+                <div class={`${bgN} ${cardRound} p-6 @3xl:p-8 flex flex-col min-h-[160px] overflow-hidden`}>
                   <span class="material-symbols-outlined text-secondary text-3xl mb-4">{ICONS[i % ICONS.length]}</span>
                   <h4 class={`font-headline text-h4 mb-2 ${bentoCardTextClass(bgN)}`} data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   <p class={`text-sm ${bentoCardSubtextClass(bgN)} leading-relaxed`} data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
@@ -88,7 +89,7 @@ export function Bento({ comp, variant, maxW }: Props) {
               const imgSrc = item._graphic ? embedImage(item._graphic.large || '') : '';
               const bg0 = cardBgs[0] || 'glass-card';
               return (
-                <div class={`@3xl:col-span-2 @3xl:row-span-2 ${bg0} rounded-3xl p-6 @3xl:p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]`}>
+                <div class={`@3xl:col-span-2 @3xl:row-span-2 ${bg0} ${cardRound} p-6 @3xl:p-8 flex flex-col justify-center relative overflow-hidden group min-h-[200px]`}>
                   {imgSrc && <img alt="" class={`absolute inset-0 w-full h-full object-cover opacity-20 ${imgHover}`} src={imgSrc} />}
                   <div class="relative z-10">
                     <span class="material-symbols-outlined text-secondary text-4xl mb-3">{ICONS[0]}</span>
@@ -101,7 +102,7 @@ export function Bento({ comp, variant, maxW }: Props) {
             if (i <= 2 && items.length > 3) {
               const bgI = cardBgs[i] || 'glass-card';
               return (
-                <div class={`@3xl:col-span-1 ${bgI} rounded-3xl p-6 @3xl:p-8 flex flex-col min-h-[180px] overflow-hidden`}>
+                <div class={`@3xl:col-span-1 ${bgI} ${cardRound} p-6 @3xl:p-8 flex flex-col min-h-[180px] overflow-hidden`}>
                   <span class="material-symbols-outlined text-secondary text-3xl mb-4">{ICONS[i % ICONS.length]}</span>
                   <div class="min-w-0 flex-1">
                     <h4 class={`font-headline text-h4 mb-2 ${bentoCardTextClass(bgI)}`} data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
@@ -113,7 +114,7 @@ export function Bento({ comp, variant, maxW }: Props) {
             const bgN = cardBgs[i] || cardBgs[cardBgs.length - 1] || 'glass-card';
             const bgShadow = (bentoCfg.cardShadows || [])[i] || '';
             return (
-              <div class={`${i >= 3 && items.length > 4 ? '@3xl:col-span-2' : ''} ${bgN} rounded-3xl p-6 @3xl:p-8 flex flex-col min-h-[160px] overflow-hidden ${bgShadow}`}>
+              <div class={`${i >= 3 && items.length > 4 ? '@3xl:col-span-2' : ''} ${bgN} ${cardRound} p-6 @3xl:p-8 flex flex-col min-h-[160px] overflow-hidden ${bgShadow}`}>
                 <span class="material-symbols-outlined text-secondary text-3xl mb-4">{ICONS[i % ICONS.length]}</span>
                 <h4 class={`font-headline text-h4 mb-2 ${bentoCardTextClass(bgN)}`} data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <p class={`text-sm ${bentoCardSubtextClass(bgN)} leading-relaxed`} data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>

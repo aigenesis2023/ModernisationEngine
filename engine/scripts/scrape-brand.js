@@ -743,7 +743,10 @@ function computeCssDerivedSpec(summary, isDark, dembrandtPalette) {
     }
   }
   const onBackground = summary.headingTextColor || summary.textColor || (isDark ? '#ffffff' : '#1a1a1a');
-  const onPrimary = hexLuminance(primary) > 0.4 ? '#1a1a1a' : '#ffffff';
+  // WCAG AA threshold: white text on bg passes only when bg luminance ≤ 0.18.
+  // Above that, dark text gives better contrast. Use 0.18 (not 0.4) to avoid
+  // low-contrast white-on-orange situations.
+  const onPrimary = hexLuminance(primary) > 0.18 ? '#1a1a1a' : '#ffffff';
   const cardSurface = summary.cardSurfaceColor || null;
   const cardBorder = summary.cardBorderColor || null;
 

@@ -243,6 +243,41 @@ function assembleSection(
     if (hasWideComponent) sectionWidth = 'standard';
   }
 
+  // ── Determine accent section status early (needed for card wrapping) ──
+  // Hero (index 0) is never wrapped — it controls its own background.
+  let rhythmBg = '';
+  let isAccentSection = false;
+  let sectionColorStrategy: any = null;
+  if (sectionIndex > 0) {
+    const { AR, colorStrategy } = useRender();
+    sectionColorStrategy = colorStrategy;
+    const rhythm = ((AR as any).surfaceRhythm || []) as string[];
+    if (rhythm.length > 0) {
+      if (!colorStrategy) {
+        rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
+      } else if (!colorStrategy.accentSectionBg) {
+        const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
+        rhythmBg = neutralRhythm.length > 0 ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length] : '';
+      } else {
+        const freq = colorStrategy.accentSectionFrequency || 3;
+        isAccentSection = (sectionIndex - 1) % freq === 0;
+        if (isAccentSection) {
+          rhythmBg = 'bg-primary';
+        } else {
+          // When brand uses accent sections, non-accent sections must use only safe neutral
+          // backgrounds. bg-surface-container-* classes can resolve to orange-tinted colors
+          // for brands where surface-container = primary (e.g. rep-republic). Filter them out
+          // and use only bg-background and bg-surface-* that don't derive from primary.
+          const safeRhythm = rhythm.filter(cls =>
+            !cls.includes('bg-primary') && !cls.includes('bg-surface-container')
+          );
+          rhythmBg = safeRhythm.length > 0 ? safeRhythm[(sectionIndex - 1) % safeRhythm.length] : '';
+        }
+      }
+    }
+  }
+  const wrapInCards = isAccentSection && (sectionColorStrategy?.cardsOnAccentBg ?? false);
+
   const componentHtmls: string[] = [];
   let interactiveCount = 0;
 
@@ -270,6 +305,10 @@ function assembleSection(
           .join('|');
         filled = `<div data-show-if="${esc(condition)}" style="display:none">\n${filled}\n</div>`;
       }
+      // Wrap component in card-on-accent when section has bg-primary and brand uses cards
+      if (wrapInCards) {
+        filled = `<div class="card-on-accent">\n${filled}\n</div>`;
+      }
       componentHtmls.push(filled);
     }
   });
@@ -284,14 +323,14 @@ function assembleSection(
     ? `<section class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-id="heading-${sectionId}" data-component-type="section-heading" data-section-index="${sectionIndex}" data-component-index="-1">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
-<h2 class="font-headline text-label-text uppercase text-primary" data-edit-path="title">${esc(sectionTitle)}</h2>
+<h2 class="font-headline text-label-text uppercase text-on-surface" data-edit-path="title">${esc(sectionTitle)}</h2>
 <div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
 </div>
 </section>`
     : '';
 
   const wrapped = componentHtmls.map((h, i) => {
-    if (h.trim().startsWith('<section') || h.trim().startsWith('<div data-show-if')) {
+    if (h.trim().startsWith('<section') || h.trim().startsWith('<div data-show-if') || h.trim().startsWith('<div class="card-on-accent"')) {
       if (i === 0 && !sectionTitle) {
         if (h.trim().startsWith('<div data-show-if')) {
           return h.replace(/<div data-show-if/, `<div id="${sectionId}" data-show-if`);
@@ -306,54 +345,10 @@ function assembleSection(
   let sectionBlock = titleBar + '\n' + wrapped;
 
   // ── Apply surfaceRhythm background to non-hero sections ──────────────
-  // Hero (index 0) controls its own background — skip it.
-  // Wrap the entire section block in a div with the rhythm bg class so that
-  // the CSS cascade (--color-on-surface etc.) propagates to all descendants.
-  if (sectionIndex > 0) {
-    const { AR, colorStrategy } = useRender();
-    const rhythm = ((AR as any).surfaceRhythm || []) as string[];
-
-    if (rhythm.length > 0) {
-      let rhythmBg: string;
-
-      if (!colorStrategy) {
-        // No brand-spec.json — backward compatible: use rhythm as-is
-        rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
-      } else if (!colorStrategy.accentSectionBg) {
-        // Brand doesn't use accent section backgrounds — filter out bg-primary
-        const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
-        rhythmBg = neutralRhythm.length > 0
-          ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length]
-          : '';
-      } else {
-        // Brand uses accent sections — apply bg-primary at the specified frequency
-        const freq = colorStrategy.accentSectionFrequency || 3;
-        const isAccentSection = (sectionIndex - 1) % freq === 0;
-        if (isAccentSection) {
-          rhythmBg = 'bg-primary';
-        } else {
-          // Non-accent sections use neutral classes from rhythm (excluding bg-primary)
-          const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
-          rhythmBg = neutralRhythm.length > 0
-            ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length]
-            : '';
-        }
-      }
-
-      if (rhythmBg) {
-        const isAccent = rhythmBg.includes('bg-primary');
-        sectionBlock = `<div class="${rhythmBg}">\n${sectionBlock}\n</div>`;
-
-        // When a section has bg-primary AND colorStrategy says cards on accent,
-        // wrap each component's output in a neutral card container.
-        // Section headings (titleBar) stay on the accent — only component content gets wrapped.
-        if (isAccent && colorStrategy?.cardsOnAccentBg) {
-          // TODO Phase 3: card wrapping disabled — regex approach breaks DOM structure.
-          // Needs to be done at component render time, not post-hoc string manipulation.
-          // sectionBlock = wrapComponentsInCards(sectionBlock);
-        }
-      }
-    }
+  // rhythmBg was pre-computed above (before the component loop) so card wrapping
+  // could be applied at component render time instead of via post-hoc regex.
+  if (rhythmBg) {
+    sectionBlock = `<div class="${rhythmBg}">\n${sectionBlock}\n</div>`;
   }
 
   if (section.showIf && Object.keys(section.showIf).length > 0) {

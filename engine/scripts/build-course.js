@@ -1500,7 +1500,7 @@ ${stackedRows}
 
   // ── Default variant: columns ──
   const headerHtml = `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface-variant"></th>` +
-    columns.map(c => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-primary">${esc(c.title || '')}</th>`).join('');
+    columns.map(c => `<th class="px-5 py-3 font-bold uppercase tracking-widest text-sm text-on-surface">${esc(c.title || '')}</th>`).join('');
 
   const rowsHtml = rows.map((row, ri) => {
     const label = row.label || '';

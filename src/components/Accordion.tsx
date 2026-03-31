@@ -28,7 +28,7 @@ export function Accordion({ comp, variant, maxW }: Props) {
             {items.map((item, i) => {
               const icon = ACCENT_ICONS[i % ACCENT_ICONS.length];
               return (
-                <details class="group glass-card rounded-2xl border-l-4 border-primary transition-all duration-300">
+                <details class={`group ${AR.surface?.card || 'glass-card'} ${AR.borderRadius?.card || 'rounded-2xl'} border-l-4 border-primary transition-all duration-300`}>
                   <summary class="flex items-center gap-4 cursor-pointer font-headline text-h4 px-8 py-6 hover:bg-on-surface/[0.03] transition-colors">
                     <span class="material-symbols-outlined text-primary flex-shrink-0">{icon}</span>
                     <span class="flex-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
