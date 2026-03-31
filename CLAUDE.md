@@ -3,7 +3,9 @@
 ## What This Is
 An AI-powered tool that creates modern, branded, premium deep-scroll web learning experiences.
 
-**Active pipeline: AI-First only.** User provides a topic brief → AI researches and generates a complete course → MD3 palette + archetype recipes generate a deterministic brand design system → we assemble the final course with full interactivity via a hydration script.
+**Active pipeline: AI-First only.** User provides a topic brief → AI researches and generates a complete course → brand-spec.json + archetype recipes generate a deterministic brand design system → we assemble the final course with full interactivity via a hydration script.
+
+> **⚠️ BRAND FIDELITY REBUILD IN PROGRESS (Round 4).** MD3 is being demoted to gap-filler. The new pipeline extracts actual brand colors and maps them directly to tokens (no MD3 distortion). A new `brand-spec.json` artifact drives color application via structured flags. Archetypes now drive SHAPE only (borders, radii, shadows). Color strategy comes from brand-spec.json. **Read `engine/BRAND-FIDELITY.md` FIRST for the full plan, phases, and schema.** Branch: `brand-fidelity1`.
 
 > **⚠️ SCORM Import is ARCHIVED.** The SCORM extraction path (extract.js, design-course.js, layout-engine.md, content-bucket.json) is dormant code preserved for potential future reactivation. It is NOT part of the active pipeline. Do not run it, do not include it in "end-to-end" runs, do not write QA checks for it. When the user says "run it" or "full pipeline", they mean the AI-first path ONLY.
 
@@ -14,7 +16,7 @@ An AI-powered tool that creates modern, branded, premium deep-scroll web learnin
 
 **Authoring Layer:** Live (Phases 1–4 in progress). Users can swap variants, edit text inline, delete sections, reorder blocks (↑↓), add new components (28 types via "+" picker with 7 categories), and export modified JSON — all without re-running the pipeline. Interactive components (MCQ, tabs, flashcard, checklist, etc.) use a per-section `✏️ Edit text` / `▶ Done` toggle that pauses interactivity for editing. Non-interactive components are auto-editable. Phase 4b (type swap) is next. See `engine/AUTHORING-LAYER.md`.
 
-> **ENGINE REBUILD COMPLETE (Rounds 1-3).** Round 1: Stitch → MD3 palette + archetype recipes. Round 2: Preact SSR + Tailwind v4 (no CDN). Round 3: Container queries + QA simplification. See `engine/STITCH-REPLACEMENT-BRIEF.md` for full history. Phase 4 authoring (section management) in progress.
+> **ENGINE REBUILD Rounds 1-3 COMPLETE. Round 4 (Brand Fidelity) IN PROGRESS.** Rounds 1-3: Stitch → MD3 + archetypes → Preact SSR + Tailwind v4 → Container queries. Round 4: MD3 demoted, brand-spec.json added, archetypes drive shape only. See `engine/BRAND-FIDELITY.md` for Round 4 plan. See `engine/STITCH-REPLACEMENT-BRIEF.md` for Rounds 1-3 history.
 
 ---
 
@@ -43,11 +45,11 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + 
                (Playwright screenshot + getComputedStyle() extraction)
                     │
                     ▼
-         generate-design-tokens.js (MD3 palette + archetype classification)
-         ├─ Reads extracted-css.json → picks seed color (heuristics)
-         ├─ MD3 generates full palette from seed (dark-safe by design)
+         generate-design-tokens.js (BEING REFACTORED — see engine/BRAND-FIDELITY.md)
+         ├─ Reads extracted-css.json + brand-spec.json → maps extracted colors to token roles
+         ├─ MD3 as gap-filler only (error, outline-variant — NOT primary palette)
          ├─ Checks fonts against Google Fonts (subagent match if unavailable)
-         ├─ Vision AI classifies brand → selects visual archetype (8 types)
+         ├─ Vision AI produces brand-spec.json (14 structured questions — includes archetype)
          └─→ design-tokens.json (colors, fonts, archetype, typography)
                     │
                     ▼
@@ -70,17 +72,17 @@ Brand URL  ──→ scrape-brand.js   ──→ Brand Profile + Brand Design + 
 
 ### Core Principles
 
-**1. Archetype recipes drive the visual system. We control layout and content.**
-Different brand URL → different MD3 palette + archetype → different visual character, identical layout. 8 visual archetypes (tech-modern, minimalist, editorial, glassmorphist, corporate, warm-organic, neo-brutalist, luxury) defined in `engine/schemas/visual-archetypes.json`.
+**1. brand-spec.json + archetype recipes drive the visual system. We control layout and content.**
+Different brand URL → different extracted colors + color strategy + archetype → different visual character, identical layout. Archetypes (8 types in `visual-archetypes.json`) control SHAPE (borders, radii, shadows, spacing). Color APPLICATION is driven by `brand-spec.json` flags (extracted from the brand URL). See `engine/BRAND-FIDELITY.md`.
 
 **2. Content quality is non-negotiable.**
 The AI generation agent creates rich, accurate educational content. Every assessment tests application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm to produce courses worth scrolling.
 
 **3. The design system is a reusable asset.**
-MD3 tokens + archetype recipes are deterministic and reproducible. The authoring layer can re-render with different content or swapped components without re-running upstream steps.
+Extracted brand tokens + archetype recipes are deterministic and reproducible. The authoring layer can re-render with different content or swapped components without re-running upstream steps.
 
 **4. Design is deterministic, not generative.**
-Brand colours come from CSS extraction → MD3 palette (mathematical). Visual style comes from archetype recipes (JSON). No black-box AI generation in the design layer. Testable, auditable, consistent.
+Brand colours come from CSS extraction → direct token mapping (brand-spec.json). Visual shape comes from archetype recipes (JSON). Vision AI produces the structured spec during scraping, then everything downstream is pure JSON → HTML. No black-box AI in the build layer. Testable, auditable, consistent.
 
 **5. Interactivity is hydration-driven.**
 `hydrate.js` manages all runtime behavior: MCQ quizzes, tab panels, flashcard flips, carousels, checklists with progress, section progress tracking, scroll animations (GSAP), and stat counter animations. All wired via `data-*` attributes. See `engine/BUILD-SYSTEM.md`.
@@ -94,7 +96,8 @@ Font sizes, line-heights, letter-spacing, and default weights are defined in the
 
 | Document | Covers | Status |
 |---|---|---|
-| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | Engine rebuild: audit findings, new architecture (MD3, Vision AI archetypes, Preact SSR, Tailwind v4, container queries). Rounds 1-3 COMPLETE. Session history. | **Complete** — rebuild reference |
+| **`engine/BRAND-FIDELITY.md`** | Brand fidelity rebuild: Extract → Spec → Map → Build architecture. MD3 demoted, brand-spec.json schema, adaptive recipes, implementation phases. | **Active** — Round 4 |
+| **`engine/STITCH-REPLACEMENT-BRIEF.md`** | Engine rebuild: audit findings, new architecture (Rounds 1-3). Preact SSR, Tailwind v4, container queries. | **Complete** — Rounds 1-3 reference |
 | **`engine/STITCH-INTEGRATION.md`** | Google Stitch SDK, DESIGN.md format, supported fonts, API constraints. | **ARCHIVED** — Stitch replaced by MD3+archetype pipeline |
 | **`engine/BUILD-SYSTEM.md`** | Final HTML assembly. Design/layout separation, 10 layout rules, Preact component conventions, generateHeadV4(), Tailwind v4, hydrate.js interactivity. | **Active** |
 | **`engine/CONTENT-STRUCTURING.md`** | How data gets transformed by the AI layout engine into a structured course. Component mapping, layout engine prompt, validation. | **Active** (AI-first sections) |
@@ -156,7 +159,7 @@ engine/                                    ← ALL ACTIVE CODE
     research-content.js                ← AI-first: topic → knowledge-base.json (subagent)
     generate-layout.js                 ← AI-first: knowledge-base → course-layout.json (subagent)
     scrape-brand.js                    ← Brand URL → screenshot + CSS extraction + natural language description
-    generate-design-tokens.js          ← extracted-css → MD3 palette + archetype classification → design-tokens.json
+    generate-design-tokens.js          ← extracted-css + brand-spec.json → mapped tokens (MD3 gap-filler only)
     generate-images.js                 ← Image generation: SiliconFlow AI → Pexels stock → SVG
     build-course.js                    ← Archetype recipe build: design-tokens + visual-archetypes + content → course.html
     test-multi-brand.js                ← Multi-brand calibration harness (Session 4)
@@ -185,7 +188,8 @@ engine/                                    ← ALL ACTIVE CODE
     brand-design.md                    ← Natural language brand description
     extracted-css.json                 ← getComputedStyle() tokens from brand website
     course-layout.json                 ← Structured course (AI-generated)
-    design-tokens.json                 ← MD3 palette + fonts + archetype (from generate-design-tokens.js)
+    brand-spec.json                    ← Structured design spec (Vision AI extraction — colors, strategy, shape)
+    design-tokens.json                 ← Mapped brand tokens + fonts + archetype (from generate-design-tokens.js)
     calibration-results.json           ← Multi-brand test results (from test-multi-brand.js)
     images/                            ← Generated images
     course.html                        ← Final single-file output
@@ -217,13 +221,15 @@ Claude Code subagent with senior instructional designer persona generates the co
 **⚠️ Subagent workflow:** Same pattern. Spawn a subagent that reads `generation-agent.md` task prompt (which references all required files). Writes `engine/output/course-layout.json`. Validate after: `node engine/scripts/generate-layout.js --load engine/output/course-layout.json`.
 
 ### Step 3 — Design Tokens (`engine/scripts/generate-design-tokens.js`)
-**Input:** `extracted-css.json` + `brand-screenshot.png` + `brand-design.md` | **Output:** `design-tokens.json`
+**Input:** `extracted-css.json` + `brand-spec.json` + `brand-screenshot.png` | **Output:** `design-tokens.json`
 
-Reads extracted CSS from scrape-brand.js → picks seed color (accent heuristics, monochrome fallback) → generates full MD3 palette → checks fonts against Google Fonts (subagent match if unavailable) → subagent classifies brand archetype (8 types, no API key required). Run: `node engine/scripts/generate-design-tokens.js`, then re-run with `--archetype-ready` (and/or `--fonts-ready`) after subagents complete.
+**⚠️ BEING REFACTORED — see `engine/BRAND-FIDELITY.md` for the new architecture.**
+
+**Current (pre-refactor):** Reads extracted CSS → picks seed color → MD3 generates palette → subagent classifies archetype. Run: `node engine/scripts/generate-design-tokens.js`, then re-run with `--archetype-ready` (and/or `--fonts-ready`) after subagents complete.
+
+**Target (post-refactor):** Reads extracted CSS + brand-spec.json → maps brand's actual colors directly to token roles → MD3 only for gap-filling (error, outline-variant) → archetype from brand-spec.json (shape classification, not color generation).
 
 **⚠️ Font subagent workflow:** If brand fonts aren't on Google Fonts, the script writes `font-match-prompt.txt` and exits. Spawn a subagent to read the prompt + screenshot, write `font-match.json`, then re-run with `--fonts-ready`.
-
-**⚠️ Archetype subagent workflow:** On every first run the script writes `archetype-prompt.txt` and exits. Spawn a subagent to read the prompt, view the brand screenshot with the Read tool, and write `archetype-match.json`. Then re-run with `--archetype-ready`.
 
 ### Step 4 — Image Generation (`engine/scripts/generate-images.js`)
 **Input:** `course-layout.json` + `brand-design.md` | **Output:** `images/*.jpg`
@@ -310,7 +316,7 @@ node engine/scripts/scrape-brand.js                            # Brand analysis 
 #    Spawn a subagent: read engine/output/brand-screenshot.png + follow the prompt → write brand-describe.json
 #    Then re-run: node engine/scripts/scrape-brand.js --description-ready
 node engine/scripts/generate-layout.js                         # Step 2 (subagent generates course)
-node engine/scripts/generate-design-tokens.js                  # Step 3 (MD3 palette + archetype)
+node engine/scripts/generate-design-tokens.js                  # Step 3 (token mapping — see BRAND-FIDELITY.md)
 node engine/scripts/generate-images.js                         # Step 4 (image generation)
 npx vite build                                                 # Step 5a (compile Preact SSR → dist/render.cjs)
 node engine/scripts/build-course.js                            # Step 5b (build final HTML via Preact SSR)
@@ -438,8 +444,8 @@ The purpose of every conversation is to improve the **engine** — the scripts, 
 
 **ALL FIXES GO IN THE ENGINE — NEVER IN TEST DATA OR OUTPUT.**
 
-### ARCHETYPE RECIPES DRIVE THE DESIGN
-The visual system comes from MD3 palette + archetype recipes (visual-archetypes.json). Different brand URL → different seed color → different MD3 palette + archetype → different visual output. All deterministic, no black-box generation.
+### BRAND-SPEC.JSON + ARCHETYPE RECIPES DRIVE THE DESIGN
+The visual system comes from extracted brand colors (brand-spec.json) + archetype recipes (visual-archetypes.json). Archetypes control SHAPE (borders, radii, shadows). brand-spec.json controls COLOR APPLICATION (which colors, where they're used, pairing logic, constraints). MD3 is a gap-filler only — it does NOT generate the primary palette. See `engine/BRAND-FIDELITY.md` for the full architecture.
 
 ### CONTENT QUALITY
 The AI generation agent creates rich, accurate educational content. Assessments test application, not recall. The generation engine uses emotional arc, structural archetypes, and density rhythm. No invented facts.

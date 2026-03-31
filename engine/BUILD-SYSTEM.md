@@ -2,6 +2,8 @@
 
 > **Status:** Implemented and working. Verified across 9+ brands. Rounds 1-3 complete (Preact SSR, Tailwind v4, container queries).
 > **Last updated:** 2026-03-30
+>
+> **⚠️ BRAND FIDELITY REBUILD IN PROGRESS (Round 4).** The design layer is being refactored: MD3 demoted to gap-filler, brand-spec.json replaces MD3 as color source, archetypes drive shape only. This doc describes the CURRENT code (pre-refactor). See `engine/BRAND-FIDELITY.md` for the new architecture.
 
 This document covers how the Modernisation Engine assembles the final course HTML from design tokens (MD3 palette), archetype recipes, course layout, and images. It includes the layout rules, component conventions, head generation, and hydration system.
 
