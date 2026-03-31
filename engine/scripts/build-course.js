@@ -28,6 +28,7 @@ const PAGES_PATH       = path.resolve(ROOT, 'index.html');
 const ARCHETYPES_PATH  = path.resolve(ROOT, 'engine/schemas/visual-archetypes.json');
 const THEME_TEMPLATE   = path.resolve(ROOT, 'src/theme-template.css');
 const THEME_OUTPUT     = path.resolve(ROOT, 'engine/output/theme.css');
+const BRAND_SPEC_PATH  = path.resolve(ROOT, 'engine/output/brand-spec.json');
 const CSS_OUTPUT       = path.resolve(ROOT, 'engine/output/course.css');
 
 // Archetype Recipe object — resolved from visual-archetypes.json + tokens.archetype.
@@ -556,6 +557,8 @@ function buildTailwindCSS(tokens) {
     '{{TERTIARY}}': tertiary,
     '{{SURFACE_CONTAINER_LOWEST}}': surfaceContainerLowest,
     '{{SURFACE_VARIANT}}': surfaceVariant,
+    '{{ON_BACKGROUND}}': onSurface,
+    '{{CARD_SURFACE}}': surfaceContainer,
   };
 
   for (const [placeholder, value] of Object.entries(replacements)) {
@@ -2604,10 +2607,22 @@ function build() {
       process.exit(1);
     }
     const { renderCourseBody } = require(PREACT_SSR_PATH);
+    // Load brand-spec.json for colorStrategy (if it exists)
+    let colorStrategy = null;
+    if (fs.existsSync(BRAND_SPEC_PATH)) {
+      try {
+        const brandSpec = JSON.parse(fs.readFileSync(BRAND_SPEC_PATH, 'utf-8'));
+        colorStrategy = brandSpec.colorStrategy || null;
+        if (colorStrategy) console.log(`[ok] Loaded colorStrategy from brand-spec.json (accentSectionBg: ${colorStrategy.accentSectionBg}, cardsOnAccentBg: ${colorStrategy.cardsOnAccentBg})`);
+      } catch (e) {
+        console.warn('[warn] Could not load brand-spec.json for colorStrategy');
+      }
+    }
     const result = renderCourseBody(layout, {
       AR,
       isDark: IS_DARK,
       embedImage,
+      colorStrategy,
     });
     sectionsHtmlStr = result.sectionsHtml;
     navHtml = result.navHtml;

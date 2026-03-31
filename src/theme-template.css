@@ -198,6 +198,16 @@ body {
   --color-surface-container-highest: {{ON_PRIMARY}}33;
 }
 
+/* Neutral card container inside accent (bg-primary) sections.
+   Resets the cascade so text, icons, and borders use normal surface colors. */
+.card-on-accent {
+  --color-on-surface: {{ON_BACKGROUND}};
+  --color-on-surface-variant: {{ON_BACKGROUND}}cc;
+  --color-primary: {{PRIMARY}};
+  --color-outline-variant: {{OUTLINE_VARIANT}};
+  background-color: {{CARD_SURFACE}};
+}
+
 /* Scroll progress bar */
 #hydrate-progress {
   background: linear-gradient(90deg, {{SECONDARY}}, {{PRIMARY}}) !important;

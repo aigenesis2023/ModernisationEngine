@@ -106,8 +106,19 @@ export interface ArchetypeRecipe {
 
 // ─── Render Context (replaces globals AR, IS_DARK) ───────────────────
 
+export interface ColorStrategy {
+  accentSectionBg: boolean;
+  cardsOnAccentBg: boolean;
+  textDirectlyOnAccent: boolean;
+  accentSectionFrequency: number;
+  primaryForIcons: boolean;
+  primaryForStatNumbers: boolean;
+  primaryForButtons: boolean;
+}
+
 export interface RenderContext {
   AR: ArchetypeRecipe;
   isDark: boolean;
   embedImage: (imagePath: string) => string;
+  colorStrategy?: ColorStrategy | null;
 }

@@ -203,6 +203,28 @@ ${drawerLinks}
 </aside>`;
 }
 
+// ─── Card-on-accent wrapping ────────────────────────────────────────
+// When a section has bg-primary and colorStrategy.cardsOnAccentBg is true,
+// wrap component content (not section headings) in neutral card containers.
+// This resets the CSS cascade so text/icons are dark-on-white inside cards.
+
+function wrapComponentsInCards(sectionBlock: string): string {
+  // Split the section block into lines and find component containers to wrap.
+  // Section headings have data-component-type="section-heading" — leave those unwrapped.
+  // Component containers are either:
+  //   <section ... data-component-type="..."> (direct component sections)
+  //   <div class="py-12 ..."> (wrapper divs around components)
+  // We wrap each non-heading top-level element inside the bg-primary div.
+  return sectionBlock.replace(
+    /(<(?:section|div)[^>]*data-component-type="(?!section-heading)[^"]*"[\s\S]*?(?:<\/section>|<\/div>)\s*(?:<\/div>)?)/g,
+    (match) => {
+      // Don't double-wrap if already wrapped
+      if (match.includes('card-on-accent')) return match;
+      return `<div class="card-on-accent">\n${match}\n</div>`;
+    }
+  );
+}
+
 // ─── Section assembly ────────────────────────────────────────────────
 
 function assembleSection(
@@ -288,12 +310,48 @@ function assembleSection(
   // Wrap the entire section block in a div with the rhythm bg class so that
   // the CSS cascade (--color-on-surface etc.) propagates to all descendants.
   if (sectionIndex > 0) {
-    const { AR } = useRender();
+    const { AR, colorStrategy } = useRender();
     const rhythm = ((AR as any).surfaceRhythm || []) as string[];
+
     if (rhythm.length > 0) {
-      const rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
+      let rhythmBg: string;
+
+      if (!colorStrategy) {
+        // No brand-spec.json — backward compatible: use rhythm as-is
+        rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
+      } else if (!colorStrategy.accentSectionBg) {
+        // Brand doesn't use accent section backgrounds — filter out bg-primary
+        const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
+        rhythmBg = neutralRhythm.length > 0
+          ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length]
+          : '';
+      } else {
+        // Brand uses accent sections — apply bg-primary at the specified frequency
+        const freq = colorStrategy.accentSectionFrequency || 3;
+        const isAccentSection = (sectionIndex - 1) % freq === 0;
+        if (isAccentSection) {
+          rhythmBg = 'bg-primary';
+        } else {
+          // Non-accent sections use neutral classes from rhythm (excluding bg-primary)
+          const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
+          rhythmBg = neutralRhythm.length > 0
+            ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length]
+            : '';
+        }
+      }
+
       if (rhythmBg) {
+        const isAccent = rhythmBg.includes('bg-primary');
         sectionBlock = `<div class="${rhythmBg}">\n${sectionBlock}\n</div>`;
+
+        // When a section has bg-primary AND colorStrategy says cards on accent,
+        // wrap each component's output in a neutral card container.
+        // Section headings (titleBar) stay on the accent — only component content gets wrapped.
+        if (isAccent && colorStrategy?.cardsOnAccentBg) {
+          // TODO Phase 3: card wrapping disabled — regex approach breaks DOM structure.
+          // Needs to be done at component render time, not post-hoc string manipulation.
+          // sectionBlock = wrapComponentsInCards(sectionBlock);
+        }
       }
     }
   }

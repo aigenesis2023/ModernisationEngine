@@ -23,7 +23,7 @@
 const fs = require('fs');
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '..', '..', '.env') });
-const { Vibrant } = require('node-vibrant/node');
+const { execSync } = require('child_process');
 
 // ─── Paths ───────────────────────────────────────────────────────────
 const OUTPUT_DIR = path.resolve('engine/output');
@@ -296,30 +296,37 @@ async function extractCSSTokens(page) {
   return { raw: extracted, summary };
 }
 
-// ─── Vibrant.js color extraction ─────────────────────────────────────
+// ─── dembrandt color extraction ──────────────────────────────────────
 /**
- * Extract the 6 standard color swatches from a screenshot using node-vibrant.
- * Deterministic, ~50ms, no AI. Catches gradient-heavy brands where CSS extraction
- * misses accent colors (they live in background-image, not backgroundColor).
- * Returns { vibrant, darkVibrant, lightVibrant, muted, darkMuted, lightMuted }
- * with hex values, or null for any swatch not found.
+ * Extract design tokens from a URL using dembrandt CLI.
+ * dembrandt runs its own Playwright instance — do NOT share browser.
+ * Returns the palette array: [{ normalized: "#hex", count: N, confidence: "high"|"medium"|"low" }, ...]
+ * or null on failure.
  */
-async function extractVibrantColors(screenshotPath) {
+const DEMBRANDT_OUTPUT_PATH = path.join(OUTPUT_DIR, 'extracted-dembrandt.json');
+
+async function extractDembrandtColors(url) {
   try {
-    const v = new Vibrant(screenshotPath);
-    const palette = await v.getPalette();
-    const swatches = {
-      vibrant: palette.Vibrant?.hex || null,
-      darkVibrant: palette.DarkVibrant?.hex || null,
-      lightVibrant: palette.LightVibrant?.hex || null,
-      muted: palette.Muted?.hex || null,
-      darkMuted: palette.DarkMuted?.hex || null,
-      lightMuted: palette.LightMuted?.hex || null,
-    };
-    console.log(`Vibrant.js swatches: ${Object.entries(swatches).filter(([,v]) => v).map(([k,v]) => `${k}=${v}`).join(', ')}`);
-    return swatches;
+    console.log('Running dembrandt color extraction...');
+    const result = execSync(
+      `npx dembrandt "${url}" --json-only --no-sandbox`,
+      { timeout: 60000, encoding: 'utf-8', stdio: ['pipe', 'pipe', 'pipe'] }
+    );
+    const parsed = JSON.parse(result.trim());
+
+    // Save full output for auditability
+    fs.writeFileSync(DEMBRANDT_OUTPUT_PATH, JSON.stringify(parsed, null, 2));
+    console.log(`dembrandt output saved: ${DEMBRANDT_OUTPUT_PATH}`);
+
+    const palette = parsed.colors?.palette || parsed.palette || [];
+    console.log(`dembrandt palette: ${palette.length} colors extracted`);
+    if (palette.length > 0) {
+      const highConf = palette.filter(c => c.confidence === 'high');
+      console.log(`  High confidence: ${highConf.map(c => `${c.normalized} (count=${c.count})`).join(', ') || 'none'}`);
+    }
+    return palette;
   } catch (err) {
-    console.warn(`Vibrant.js extraction failed: ${err.message}`);
+    console.warn(`dembrandt extraction failed: ${err.message}`);
     return null;
   }
 }
@@ -483,10 +490,7 @@ async function takeScreenshotAndDetectTheme(url) {
 
   await browser.close();
 
-  // Extract Vibrant.js swatches from the saved screenshot (deterministic, ~50ms)
-  const vibrantSwatches = await extractVibrantColors(SCREENSHOT_PATH);
-
-  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS, vibrantSwatches };
+  return { screenshotPath: SCREENSHOT_PATH, isDark: theme.isDark, extractedCSS };
 }
 
 // ─── Subagent mode: write prompt file and exit ───────────────────────
@@ -668,9 +672,9 @@ function computeBackgroundAlt(bgHex, isDark) {
  * Maps the CSS extraction summary to all CSS-derivable fields of brand-spec.json.
  * Vision AI fills the rest (colorStrategy, archetype, surfaceStyle, imageStyle, etc.).
  */
-function computeCssDerivedSpec(summary, isDark, vibrantSwatches) {
+function computeCssDerivedSpec(summary, isDark, dembrandtPalette) {
   // ── Three-source cascade for primary accent color ──────────────────
-  // 1. CSS accent (if chromatic) → 2. Vibrant.js swatch → 3. gray fallback
+  // 1. CSS accent (if chromatic) → 2. dembrandt high-confidence → 3. gray fallback
   const isChromatic = (hex) => {
     if (!hex || hex.length < 7) return false;
     const r = parseInt(hex.slice(1, 3), 16);
@@ -690,28 +694,14 @@ function computeCssDerivedSpec(summary, isDark, vibrantSwatches) {
   if (cssAccent && isChromatic(cssAccent)) {
     primary = cssAccent;
     primarySource = 'css';
-  } else if (vibrantSwatches) {
-    // For dark brands: LightVibrant pops best against dark backgrounds.
-    // For light brands: prefer the chromatic swatch with highest population.
-    //   Vibrant.js "Vibrant" = highest saturation, which can be a tiny decorative element.
-    //   "LightVibrant" often represents the dominant gradient/accent on light pages.
-    //   We check both and prefer the one with higher population via _population data
-    //   stored in the swatches, falling back to lightVibrant > vibrant ordering for light brands.
-    let vibrantPick = null;
-    if (isDark) {
-      vibrantPick = vibrantSwatches.lightVibrant;
-    } else {
-      // Light brand: prefer lightVibrant (dominant accent in gradients) over vibrant (may be tiny element)
-      // Both are valid candidates — pick whichever is chromatic, favoring lightVibrant
-      if (vibrantSwatches.lightVibrant && isChromatic(vibrantSwatches.lightVibrant)) {
-        vibrantPick = vibrantSwatches.lightVibrant;
-      } else if (vibrantSwatches.vibrant && isChromatic(vibrantSwatches.vibrant)) {
-        vibrantPick = vibrantSwatches.vibrant;
-      }
-    }
-    if (vibrantPick && isChromatic(vibrantPick)) {
-      primary = vibrantPick;
-      primarySource = 'vibrant';
+  } else if (dembrandtPalette && dembrandtPalette.length > 0) {
+    // Find the highest-count chromatic color with high confidence
+    const highConfChromatic = dembrandtPalette
+      .filter(c => c.confidence === 'high' && c.normalized && isChromatic(c.normalized))
+      .sort((a, b) => (b.count || 0) - (a.count || 0));
+    if (highConfChromatic.length > 0) {
+      primary = highConfChromatic[0].normalized;
+      primarySource = 'dembrandt';
     }
   }
 
@@ -720,7 +710,38 @@ function computeCssDerivedSpec(summary, isDark, vibrantSwatches) {
   // Colors
   const background = summary.backgroundColors?.[0]?.hex || (isDark ? '#111111' : '#ffffff');
   const backgroundAlt = summary.backgroundColors?.[1]?.hex || computeBackgroundAlt(background, isDark);
-  const secondary = summary.accentColors?.[1]?.hex || null;
+  // Secondary: CSS 2nd accent, or dembrandt 2nd high-confidence chromatic color (different hue from primary)
+  let secondary = summary.accentColors?.[1]?.hex || null;
+  if (!secondary && dembrandtPalette && dembrandtPalette.length > 0) {
+    const hexToHue = (hex) => {
+      if (!hex || hex.length < 7) return -1;
+      const r = parseInt(hex.slice(1, 3), 16) / 255;
+      const g = parseInt(hex.slice(3, 5), 16) / 255;
+      const b = parseInt(hex.slice(5, 7), 16) / 255;
+      const max = Math.max(r, g, b), min = Math.min(r, g, b);
+      const d = max - min;
+      if (d === 0) return -1;
+      let h;
+      if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+      else if (max === g) h = ((b - r) / d + 2) / 6;
+      else h = ((r - g) / d + 4) / 6;
+      return h * 360;
+    };
+    const primaryHue = hexToHue(primary);
+    const secondaryCandidate = dembrandtPalette
+      .filter(c => c.confidence === 'high' && c.normalized && isChromatic(c.normalized) && c.normalized !== primary)
+      .filter(c => {
+        if (primaryHue < 0) return true;
+        const hue = hexToHue(c.normalized);
+        if (hue < 0) return false;
+        const diff = Math.min(Math.abs(primaryHue - hue), 360 - Math.abs(primaryHue - hue));
+        return diff > 30; // different hue family
+      })
+      .sort((a, b) => (b.count || 0) - (a.count || 0));
+    if (secondaryCandidate.length > 0) {
+      secondary = secondaryCandidate[0].normalized;
+    }
+  }
   const onBackground = summary.headingTextColor || summary.textColor || (isDark ? '#ffffff' : '#1a1a1a');
   const onPrimary = hexLuminance(primary) > 0.4 ? '#1a1a1a' : '#ffffff';
   const cardSurface = summary.cardSurfaceColor || null;
@@ -1039,7 +1060,7 @@ function mergeBrandSpec(cssDerivedSpec, visionResult) {
 }
 
 // ─── Save outputs ────────────────────────────────────────────────────
-function saveOutputs(url, description, detectedIsDark, extractedCSS, vibrantSwatches) {
+function saveOutputs(url, description, detectedIsDark, extractedCSS) {
   if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
 
   // Save brand-design.md
@@ -1064,10 +1085,6 @@ function saveOutputs(url, description, detectedIsDark, extractedCSS, vibrantSwat
       sourceUrl: url,
       ...extractedCSS,
     };
-    // Add Vibrant.js swatches if available
-    if (vibrantSwatches) {
-      cssOutput.vibrantSwatches = vibrantSwatches;
-    }
     fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
     console.log(`Output: ${EXTRACTED_CSS_PATH}`);
 
@@ -1125,15 +1142,23 @@ async function main() {
   // (Skip if --description-ready or --spec-ready: screenshot and CSS already done on first run)
   let detectedIsDark = false; // safe default: light
   let extractedCSS = null;
-  let vibrantSwatches = null;
+  let dembrandtPalette = null;
 
   if (descriptionReady || specReady) {
     // Load previously extracted CSS (written on first run)
     if (fs.existsSync(EXTRACTED_CSS_PATH)) {
       extractedCSS = JSON.parse(fs.readFileSync(EXTRACTED_CSS_PATH, 'utf-8'));
-      vibrantSwatches = extractedCSS.vibrantSwatches || null;
       console.log('Loaded existing extracted-css.json');
-      if (vibrantSwatches) console.log('Loaded Vibrant.js swatches from extracted-css.json');
+    }
+    // Load previously extracted dembrandt palette (written on first run)
+    if (fs.existsSync(DEMBRANDT_OUTPUT_PATH)) {
+      try {
+        const dembrandtData = JSON.parse(fs.readFileSync(DEMBRANDT_OUTPUT_PATH, 'utf-8'));
+        dembrandtPalette = dembrandtData.colors?.palette || dembrandtData.palette || [];
+        console.log(`Loaded dembrandt palette: ${dembrandtPalette.length} colors`);
+      } catch (e) {
+        console.warn('Could not load dembrandt data');
+      }
     }
     // isDark comes from brand-describe.json — no need to re-scrape
   } else {
@@ -1141,11 +1166,13 @@ async function main() {
       const result = await takeScreenshotAndDetectTheme(url);
       detectedIsDark = result.isDark;
       extractedCSS = result.extractedCSS;
-      vibrantSwatches = result.vibrantSwatches;
     } catch (err) {
       console.error(`Screenshot/extraction failed: ${err.message}`);
       console.error('Continuing without screenshot or CSS tokens.\n');
     }
+
+    // Run dembrandt extraction (separate Playwright instance, ~8-15s)
+    dembrandtPalette = await extractDembrandtColors(url);
   }
 
   // Step 2: Get description (API or subagent)
@@ -1193,7 +1220,6 @@ async function main() {
       if (extractedCSS) {
         if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
         const cssOutput = { extractedAt: new Date().toISOString(), sourceUrl: url, ...extractedCSS };
-        if (vibrantSwatches) cssOutput.vibrantSwatches = vibrantSwatches;
         fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
         console.log(`Saved extracted-css.json`);
       }
@@ -1201,7 +1227,7 @@ async function main() {
       // Also write brand-spec prompt
       const cssSummary = extractedCSS?.summary || extractedCSS?.summary;
       if (cssSummary) {
-        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
+        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
         writeBrandSpecPrompt(cssDerivedSpec);
       }
       process.exit(0);
@@ -1211,7 +1237,6 @@ async function main() {
     if (extractedCSS) {
       if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR, { recursive: true });
       const cssOutput = { extractedAt: new Date().toISOString(), sourceUrl: url, ...extractedCSS };
-      if (vibrantSwatches) cssOutput.vibrantSwatches = vibrantSwatches;
       fs.writeFileSync(EXTRACTED_CSS_PATH, JSON.stringify(cssOutput, null, 2));
       console.log(`Saved extracted-css.json`);
     }
@@ -1219,7 +1244,7 @@ async function main() {
     // Also write brand-spec prompt for subagent
     const cssSummary = extractedCSS?.summary;
     if (cssSummary) {
-      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
+      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
       writeBrandSpecPrompt(cssDerivedSpec);
       console.log('\nSpawn a SECOND subagent to:');
       console.log('  1. Read engine/output/brand-spec-prompt.txt');
@@ -1232,7 +1257,7 @@ async function main() {
 
   // Step 3: Save standard outputs (includes detected theme + extracted CSS)
   if (descriptionDone && description) {
-    saveOutputs(url, description, detectedIsDark, extractedCSS, vibrantSwatches);
+    saveOutputs(url, description, detectedIsDark, extractedCSS);
   }
 
   // Step 4: Brand Spec workflow
@@ -1240,7 +1265,7 @@ async function main() {
   const cssSummary = extractedCSS?.summary;
   let cssDerivedSpec = null;
   if (cssSummary) {
-    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, vibrantSwatches);
+    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
   }
 
   if (specReady) {

@@ -57,8 +57,8 @@
         },
         "primarySource": {
           "type": "string",
-          "enum": ["css", "vibrant", "fallback"],
-          "description": "Records where the primary color value came from for auditability. 'css' = CSS extraction accentColors, 'vibrant' = Vibrant.js image analysis, 'fallback' = gray default. Source: computed during three-source cascade in computeCssDerivedSpec()."
+          "enum": ["css", "dembrandt", "fallback"],
+          "description": "Records where the primary color value came from for auditability. 'css' = CSS extraction accentColors, 'dembrandt' = dembrandt design token extraction, 'fallback' = gray default. Source: computed during three-source cascade in computeCssDerivedSpec()."
         }
       }
     },
