@@ -14,6 +14,9 @@ import type { Component } from '../types.js';
 
 // ─── DataTable ───────────────────────────────────────────────────────
 export function DataTable({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
+  const { AR } = useRender();
+  const cardClass = AR.surface?.card || 'glass-card';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
   const body = comp.body || '';
@@ -64,7 +67,7 @@ export function DataTable({ comp, variant, maxW }: { comp: Component; variant: s
       <section class={secClass} data-component-type="data-table" data-animate="fade-up">
         <div class={`@container ${maxW} mx-auto px-8`}>
           {bodyAbove && <div dangerouslySetInnerHTML={{ __html: bodyAbove }} />}
-          <div class="overflow-hidden rounded-2xl glass-card shadow-lg">
+          <div class={`overflow-hidden ${cardRound} ${cardClass}`}>
             <div class="px-8 py-6 bg-surface-container border-b border-on-surface/10">
               <h3 class="text-h3 tracking-tight" dangerouslySetInnerHTML={{ __html: title }} />
             </div>
@@ -84,7 +87,7 @@ export function DataTable({ comp, variant, maxW }: { comp: Component; variant: s
     <section class={secClass} data-component-type="data-table" data-animate="fade-up">
       <div class={`@container ${maxW} mx-auto px-8`}>
         {bodyAbove && <div dangerouslySetInnerHTML={{ __html: bodyAbove }} />}
-        <div class="overflow-hidden rounded-xl border border-on-surface/5 glass">
+        <div class={`overflow-hidden ${cardRound} ${cardClass}`}>
           <div class="px-8 py-6 border-b border-on-surface/5">
             <h3 class="text-h3 tracking-tight" dangerouslySetInnerHTML={{ __html: title }} />
           </div>
@@ -191,6 +194,10 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
   const btnBg = brCfg.buttonBg || AR.surface?.card || 'glass-card border border-outline-variant/20';
   const btnRound = AR.borderRadius?.cardLarge || 'rounded-2xl';
   const btnVisuals = brCfg.buttonHover || 'hover:border-primary/40 hover:bg-surface-container transition-all duration-200';
+  const letterBg = brCfg.letterBg || 'bg-primary/10';
+  const letterText = brCfg.letterText || 'text-primary';
+  const chevronColor = brCfg.chevronColor || 'text-on-surface-variant/40 group-hover:text-primary';
+  const bgLetterColor = brCfg.bgLetterColor || 'text-primary/8 group-hover:text-primary/15';
 
   if (variant === 'list') {
     return (
@@ -201,12 +208,12 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
           <div class="flex flex-col gap-3" data-animate-stagger="fade-up">
             {items.map((item, i) => (
               <button class={`group flex items-start gap-5 p-5 @3xl:p-6 ${btnBg} rounded-xl text-left ${btnVisuals} w-full`}>
-                <div class="w-10 h-10 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold">{String.fromCharCode(65 + i)}</div>
+                <div class={`w-10 h-10 rounded-full ${letterBg} flex-shrink-0 flex items-center justify-center ${letterText} font-bold`}>{String.fromCharCode(65 + i)}</div>
                 <div class="flex-1 min-w-0">
                   <div class="text-h4 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   {(item.body || '') && <div class="text-body text-on-surface-variant mt-1" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>}
                 </div>
-                <span class="material-symbols-outlined text-on-surface-variant/40 group-hover:text-secondary transition-colors self-center">chevron_right</span>
+                <span class={`material-symbols-outlined ${chevronColor} transition-colors self-center`}>chevron_right</span>
               </button>
             ))}
           </div>
@@ -224,7 +231,7 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
         <div class="grid grid-cols-1 @3xl:grid-cols-2 gap-5" data-animate-stagger="fade-up">
           {items.map((item, i) => (
             <button class={`group p-6 @3xl:p-8 ${btnBg} ${btnRound} text-left ${btnVisuals} relative overflow-hidden`}>
-              <span class="absolute bottom-2 right-3 text-4xl font-headline font-black text-primary/8 group-hover:text-secondary/15 transition-colors select-none leading-none">{String.fromCharCode(65 + i)}</span>
+              <span class={`absolute bottom-2 right-3 text-4xl font-headline font-black ${bgLetterColor} transition-colors select-none leading-none`}>{String.fromCharCode(65 + i)}</span>
               <div class="relative z-10">
                 <div class="text-h4 text-on-surface mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <div class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</div>
@@ -246,13 +253,20 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
 
+  const lineColor = (tlCfg as any).lineColor || 'bg-outline-variant/30';
+  const dotBg = (tlCfg as any).dotBg || 'bg-primary';
+  const dotText = (tlCfg as any).dotText || 'text-on-primary';
+  const stepNumColor = (tlCfg as any).stepNumColor || 'text-primary/30';
+  const cardClass = (tlCfg as any).cardBg || AR.surface?.card || 'glass-card';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
+
   if (variant === 'centered-alternating') {
     return (
       <section class={secClass} data-component-type="timeline">
         <div class={`@container ${maxW} mx-auto px-8`}>
           <h2 class="font-headline text-h2 mb-12 text-center" dangerouslySetInnerHTML={{ __html: title }} />
           <div class="relative">
-            <div class="hidden @3xl:block absolute left-1/2 top-0 bottom-0 w-0.5 bg-outline-variant/30 -translate-x-1/2" />
+            <div class={`hidden @3xl:block absolute left-1/2 top-0 bottom-0 w-0.5 ${lineColor} -translate-x-1/2`} />
             <div class="space-y-8" data-animate-stagger="fade-up">
               {items.map((item, i) => {
                 const num = String(i + 1).padStart(2, '0');
@@ -260,13 +274,13 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
                 return (
                   <div class={`relative flex items-center ${isLeft ? '@3xl:flex-row' : '@3xl:flex-row-reverse'} gap-8`}>
                     <div class={`hidden @3xl:block @3xl:w-[calc(50%-2rem)] ${isLeft ? 'text-right' : 'text-left'}`}>
-                      <div class={`glass-card rounded-2xl p-5 @3xl:p-6 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}`}>
+                      <div class={`${cardClass} ${cardRound} p-5 @3xl:p-6 inline-block ${isLeft ? 'ml-auto' : 'mr-auto'}`}>
                         <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                         <p class="text-on-surface-variant text-sm leading-normal" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
                       </div>
                     </div>
                     <div class="relative z-10 flex-shrink-0">
-                      <div class="w-10 h-10 rounded-full bg-primary border-4 border-background flex items-center justify-center text-on-primary text-sm font-bold shadow-lg">{num}</div>
+                      <div class={`w-10 h-10 rounded-full ${dotBg} border-4 border-background flex items-center justify-center ${dotText} text-sm font-bold shadow-lg`}>{num}</div>
                     </div>
                     <div class="@3xl:w-[calc(50%-2rem)] @3xl:hidden">
                       <h4 class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
@@ -286,21 +300,21 @@ export function Timeline({ comp, variant, maxW }: { comp: Component; variant: st
   // Default: vertical (border-l dot layout)
   const activeDotClass = (tlCfg as any).activeDotClass || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-primary shadow-[0_0_10px_rgba(100,100,255,0.4)]';
   const inactiveDotClass = (tlCfg as any).inactiveDotClass || 'absolute -left-[11px] top-0 w-5 h-5 rounded-full bg-outline-variant/60';
+  const borderColor = (tlCfg as any).lineColor || 'border-outline-variant';
 
   return (
     <section class={secClass} data-component-type="timeline">
       <div class={`@container ${maxW} mx-auto px-8`}>
         <h2 class="font-headline text-h2 mb-10 text-center" dangerouslySetInnerHTML={{ __html: title }} />
-        <div class="relative border-l-2 border-outline-variant ml-4 space-y-10" data-animate-stagger="fade-up">
+        <div class={`relative border-l-2 ${borderColor} ml-4 space-y-10`} data-animate-stagger="fade-up">
           {items.map((item, i) => {
             const num = String(i + 1).padStart(2, '0');
             const dotClass = i === 0 ? activeDotClass : inactiveDotClass;
-            const titleClass = i === 0 ? 'font-headline text-h4 text-secondary mb-2' : 'font-headline text-h4 mb-2';
             return (
               <div class="relative pl-14">
                 <div class={dotClass} />
-                <div class="text-primary/30 font-headline font-black text-sm uppercase tracking-widest mb-1">{num}</div>
-                <div class={titleClass} data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
+                <div class={`${stepNumColor} font-headline font-black text-sm uppercase tracking-widest mb-1`}>{num}</div>
+                <div class="font-headline text-h4 mb-2" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                 <p class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
               </div>
             );
@@ -326,9 +340,9 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
 
   // ── Side-by-side list format (AI-generated: columns[].items[]) ──────
   if (hasItemsFormat) {
-    const colColors = ['text-primary', 'text-secondary', 'text-tertiary'];
-    const colBorders = ['border-primary/30', 'border-secondary/30', 'border-tertiary/30'];
-    const colBgs = ['bg-primary/5', 'bg-secondary/5', 'bg-tertiary/5'];
+    const colColors = ['text-primary', 'text-on-surface', 'text-on-surface-variant'];
+    const colBorders = ['border-primary/30', 'border-outline-variant', 'border-outline-variant/50'];
+    const colBgs = ['bg-primary/5', 'bg-surface-container', 'bg-surface-container-low'];
 
     if (variant === 'stacked-rows') {
       // Stacked: each item row spans all columns side by side
@@ -464,7 +478,7 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
       <div class={`@container ${maxW} mx-auto px-8`}>
         <h2 class="font-headline text-h2 mb-8 text-center" dangerouslySetInnerHTML={{ __html: title }} />
         {body && <p class="text-center text-on-surface-variant mb-10">{stripTags(body)}</p>}
-        <div class="overflow-x-auto glass rounded-3xl border border-on-surface/5">
+        <div class={`overflow-x-auto ${AR.surface?.card || 'glass-card'} ${AR.borderRadius?.card || 'rounded-2xl'}`}>
           <table class="w-full text-left">
             <thead class="bg-on-surface/5" dangerouslySetInnerHTML={{ __html: `<tr>${headerHtml}</tr>` }} />
             <tbody class="divide-y divide-on-surface/5" dangerouslySetInnerHTML={{ __html: rowsHtml }} />
@@ -603,7 +617,7 @@ export function Checklist({ comp, variant, maxW }: { comp: Component; variant: s
           <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
           <div class="grid grid-cols-1 @3xl:grid-cols-2 gap-4">
             {items.map((item, i) => (
-              <label class={`flex items-center gap-5 p-6 glass-card rounded-2xl cursor-pointer group border border-outline-variant/10 ${labelHover}`}>
+              <label class={`flex items-center gap-5 p-6 ${(clCfg as any).cardBg || AR.surface?.card || 'glass-card'} ${AR.borderRadius?.card || 'rounded-2xl'} cursor-pointer group ${labelHover}`}>
                 <input class={inputClass} type="checkbox" />
                 <span class="text-on-surface font-medium" data-edit-path={`_items.${i}.text`}>{esc(item.text || item.title || '')}</span>
               </label>
@@ -670,23 +684,27 @@ export function Flashcard({ comp, variant, maxW }: { comp: Component; variant: s
   const fcRound = (fcCfg as any).frontRound || AR.borderRadius?.cardLarge || 'rounded-3xl';
   const backRound = (fcCfg as any).backRound || fcRound;
 
+  const iconColor = (fcCfg as any).iconColor || 'text-primary';
+  const navPrev = (fcCfg as any).navPrev || 'w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors';
+  const navNext = (fcCfg as any).navNext || 'w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center';
+
   const makeCard = (item: any, i: number, large: boolean) => {
     const frontText = esc(item.front || item.title || item.term || '');
     const backText = item.back || item.definition || item.body || '';
     const frontFaceClass = mc((fcCfg as any).frontBg || AR.surface?.card || 'glass-card', fcRound, 'border border-outline-variant/10', large ? 'p-10 @3xl:p-14' : 'p-6 @3xl:p-8');
-    const backFaceClass = mc((fcCfg as any).backBg || 'bg-secondary-container', backRound, large ? 'p-8 @3xl:p-12 text-center' : 'p-4 @3xl:p-5 text-center');
+    const backFaceClass = mc((fcCfg as any).backBg || 'bg-surface-container-high', backRound, large ? 'p-8 @3xl:p-12 text-center' : 'p-4 @3xl:p-5 text-center');
     return (
       <div class="group cursor-pointer h-full" style="perspective:1000px" data-flashcard>
         <div class="relative w-full h-full transition-transform duration-500" style="transform-style:preserve-3d">
           <div class={`flex items-center justify-center h-full ${frontFaceClass}`} style="backface-visibility:hidden">
             <div class="text-center">
-              <div class={`material-symbols-outlined text-secondary text-${large ? '4' : '3'}xl mb-3`}>{icons[i % icons.length]}</div>
+              <div class={`material-symbols-outlined ${iconColor} text-${large ? '4' : '3'}xl mb-3`}>{icons[i % icons.length]}</div>
               <div class={`font-headline ${large ? 'text-h4' : 'text-body'} leading-snug`} data-edit-path={`_items.${i}.front`}>{frontText}</div>
               <div class="mt-2 text-xs text-on-surface-variant/60 uppercase tracking-wider">Tap to reveal</div>
             </div>
           </div>
           <div class={`absolute inset-0 flex items-center justify-center ${backFaceClass} overflow-y-auto`} style="backface-visibility:hidden;transform:rotateY(180deg)">
-            <p class={`${(fcCfg as any).backText || 'text-on-primary-container'} font-medium text-${large ? 'base' : 'xs'} leading-snug`} data-edit-path={`_items.${i}.back`}>{backText}</p>
+            <p class={`${(fcCfg as any).backText || 'text-on-surface'} font-medium text-${large ? 'base' : 'xs'} leading-snug`} data-edit-path={`_items.${i}.back`}>{backText}</p>
           </div>
         </div>
       </div>
@@ -704,9 +722,9 @@ export function Flashcard({ comp, variant, maxW }: { comp: Component; variant: s
             ))}
           </div>
           <div class="flex justify-center gap-3 mt-8">
-            <button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev><span class="material-symbols-outlined">chevron_left</span></button>
+            <button class={navPrev} data-prev><span class="material-symbols-outlined">chevron_left</span></button>
             <span class="flex items-center text-sm text-on-surface-variant font-bold" data-slide-counter>1 / {items.length}</span>
-            <button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next><span class="material-symbols-outlined">chevron_right</span></button>
+            <button class={navNext} data-next><span class="material-symbols-outlined">chevron_right</span></button>
           </div>
         </div>
       </section>
@@ -730,16 +748,21 @@ export function Flashcard({ comp, variant, maxW }: { comp: Component; variant: s
 
 // ─── Narrative ───────────────────────────────────────────────────────
 export function Narrative({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const nCfg = (AR as any).narrative || {};
   const items = comp._items || [];
   if (items.length === 0) return null;
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16').replace(/\bpy-(\d+)\b/g, (_m: string, n: string) => parseInt(n) > 16 ? 'py-16' : _m);
+  const cardClass = nCfg.cardBg || AR.surface?.card || 'glass-card';
+  const cardRound = nCfg.cardRound || 'rounded-[2.5rem]';
+  const navPrev = nCfg.navPrev || 'w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors';
+  const navNext = nCfg.navNext || 'w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center';
 
   const navButtons = (
     <div class="flex justify-center gap-3 mt-6">
-      <button class="w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-secondary/20 transition-colors" data-prev><span class="material-symbols-outlined">chevron_left</span></button>
-      <button class="w-11 h-11 rounded-full bg-secondary text-on-secondary flex items-center justify-center" data-next><span class="material-symbols-outlined">chevron_right</span></button>
+      <button class={navPrev} data-prev><span class="material-symbols-outlined">chevron_left</span></button>
+      <button class={navNext} data-next><span class="material-symbols-outlined">chevron_right</span></button>
     </div>
   );
 
@@ -748,14 +771,14 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
       <section class={secClass} data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
         <div class={`@container ${maxW} mx-auto px-8`}>
           <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
-          <div class="glass-card rounded-[2.5rem] p-4 @3xl:p-6 relative overflow-hidden">
+          <div class={`${cardClass} ${cardRound} p-4 @3xl:p-6 relative overflow-hidden`}>
             {items.map((item, i) => {
               const imgSrc = item._graphic ? embedImage(item._graphic.large || '') : '';
               const imgAlt = esc(item._graphic?.alt || item.title || '');
               const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
               return (
                 <div data-slide={String(i + 1)} style={i > 0 ? 'display:none' : undefined}>
-                  {imgSrc && <img alt={imgAlt} class="w-full h-[400px] object-cover rounded-2xl mb-6" src={imgSrc} />}
+                  {imgSrc && <img alt={imgAlt} class={`w-full h-[400px] object-cover ${AR.borderRadius?.image || 'rounded-2xl'} mb-6`} src={imgSrc} />}
                   <div class="text-on-surface-variant font-bold mb-2">{counter}</div>
                   <h4 class="font-headline text-h4 mb-2 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                   <p class="text-on-surface-variant text-sm" data-edit-path={`_items.${i}.body`}>{stripTags(item.body || '')}</p>
@@ -774,7 +797,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
       <section class={secClass} data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
         <div class={`@container ${maxW} mx-auto px-8`}>
           <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
-          <div class="glass-card rounded-[2.5rem] p-6 @3xl:p-8 relative">
+          <div class={`${cardClass} ${cardRound} p-6 @3xl:p-8 relative`}>
             {items.map((item, i) => {
               const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
               return (
@@ -797,7 +820,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
     <section class={secClass} data-component-type="narrative" data-interactive data-carousel data-animate="fade-up">
       <div class={`@container ${maxW} mx-auto px-8`}>
         <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
-        <div class="glass-card rounded-[2.5rem] p-6 @3xl:p-8 relative">
+        <div class={`${cardClass} ${cardRound} p-6 @3xl:p-8 relative`}>
           {items.map((item, i) => {
             const counter = `${String(i + 1).padStart(2, '0')} / ${String(items.length).padStart(2, '0')}`;
             return (
@@ -863,12 +886,17 @@ export function KeyTerm({ comp, variant, maxW }: { comp: Component; variant: str
 
 // ─── FullBleed ───────────────────────────────────────────────────────
 export function FullBleed({ comp, variant }: { comp: Component; variant: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const fbCfg = (AR as any).fullBleed || {};
   const title = esc(comp.displayTitle || '');
   const bodyText = stripTags(comp.body || '');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large || '') : '';
   const imgAlt = esc(comp._graphic?.alt || '');
   const pos = variant || (comp as any).overlayPosition || 'center';
+  // Full-bleed always has image + dark scrim — text is always white (like hero)
+  const overlayCenter = fbCfg.overlayCenter || 'bg-black/60';
+  const overlayLeft = fbCfg.overlayLeft || 'bg-gradient-to-r from-black/90 via-black/50 to-transparent';
+  const overlayRight = fbCfg.overlayRight || 'bg-gradient-to-l from-black/90 via-black/50 to-transparent';
 
   const img = imgSrc ? <img alt={imgAlt} class="absolute inset-0 w-full h-full object-cover" src={imgSrc} data-parallax /> : null;
 
@@ -876,7 +904,7 @@ export function FullBleed({ comp, variant }: { comp: Component; variant: string 
     return (
       <section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
         {img}
-        <div class="absolute inset-0 bg-gradient-to-r from-black/90 via-black/50 to-transparent" />
+        <div class={`absolute inset-0 ${overlayLeft}`} />
         <div class="@container relative z-10 w-full max-w-6xl mx-auto px-8 text-left" data-animate="fade-up">
           <h2 class="font-headline text-h2 @3xl:text-display tracking-tight mb-4 text-white max-w-2xl" data-edit-path="displayTitle" dangerouslySetInnerHTML={{ __html: title }} />
           {bodyText && <p class="text-lg @3xl:text-xl text-white/80 max-w-xl" data-edit-path="body">{bodyText}</p>}
@@ -889,7 +917,7 @@ export function FullBleed({ comp, variant }: { comp: Component; variant: string 
     return (
       <section class="relative h-[60vh] flex items-center overflow-x-hidden overflow-y-hidden" data-component-type="full-bleed">
         {img}
-        <div class="absolute inset-0 bg-gradient-to-l from-black/90 via-black/50 to-transparent" />
+        <div class={`absolute inset-0 ${overlayRight}`} />
         <div class="@container relative z-10 w-full max-w-6xl mx-auto px-8 text-right flex flex-col items-end" data-animate="fade-up">
           <h2 class="font-headline text-h2 @3xl:text-display tracking-tight mb-4 text-white max-w-2xl" data-edit-path="displayTitle" dangerouslySetInnerHTML={{ __html: title }} />
           {bodyText && <p class="text-lg @3xl:text-xl text-white/80 max-w-xl" data-edit-path="body">{bodyText}</p>}
@@ -902,7 +930,7 @@ export function FullBleed({ comp, variant }: { comp: Component; variant: string 
   return (
     <section class="relative h-[60vh] flex items-center overflow-hidden" data-component-type="full-bleed">
       {img}
-      <div class="absolute inset-0 bg-black/60" />
+      <div class={`absolute inset-0 ${overlayCenter}`} />
       <div class="@container relative z-10 w-full max-w-6xl mx-auto px-8 text-center" data-animate="fade-up">
         <h2 class="font-headline text-h2 @3xl:text-display tracking-tight mb-4 text-white" data-edit-path="displayTitle" dangerouslySetInnerHTML={{ __html: title }} />
         {bodyText && <p class="text-lg @3xl:text-xl text-white/80 max-w-3xl mx-auto" data-edit-path="body">{bodyText}</p>}
@@ -913,7 +941,10 @@ export function FullBleed({ comp, variant }: { comp: Component; variant: string 
 
 // ─── Graphic ─────────────────────────────────────────────────────────
 export function Graphic({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
+  const cardClass = AR.surface?.card || 'glass-card';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
   const secClass = sectionOnly('py-12');
@@ -924,7 +955,7 @@ export function Graphic({ comp, variant, maxW }: { comp: Component; variant: str
     return (
       <section class={secClass} data-component-type="graphic">
         <div class={`@container ${maxW} mx-auto px-8`}>
-          <div class="glass-card rounded-2xl overflow-hidden" data-animate="fade-up">
+          <div class={`${cardClass} ${cardRound} overflow-hidden`} data-animate="fade-up">
             <div class="relative">
               {imgSrc ? <img alt={imgAlt} class="w-full h-auto max-h-[50vh] object-cover" src={imgSrc} /> : <div class="w-full h-64 bg-surface-container" />}
               {title && <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/80 to-transparent px-8 pb-6 pt-16"><h2 class="font-headline text-h3 text-white" dangerouslySetInnerHTML={{ __html: title }} /></div>}
@@ -940,8 +971,8 @@ export function Graphic({ comp, variant, maxW }: { comp: Component; variant: str
     <section class={secClass} data-component-type="graphic">
       <div class={`@container ${maxW} mx-auto px-8`}>
         {title && <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />}
-        <div class="rounded-2xl overflow-hidden" data-animate="clip-up">
-          {imgSrc ? <img alt={imgAlt} class="w-full h-auto max-h-[60vh] object-cover" src={imgSrc} /> : <div class="w-full h-64 bg-surface-container rounded-2xl" />}
+        <div class={`${imgRound} overflow-hidden`} data-animate="clip-up">
+          {imgSrc ? <img alt={imgAlt} class="w-full h-auto max-h-[60vh] object-cover" src={imgSrc} /> : <div class={`w-full h-64 bg-surface-container ${imgRound}`} />}
         </div>
         {body && <div class="mt-4 text-on-surface-variant" dangerouslySetInnerHTML={{ __html: body }} />}
       </div>
@@ -951,23 +982,33 @@ export function Graphic({ comp, variant, maxW }: { comp: Component; variant: str
 
 // ─── ProcessFlow ─────────────────────────────────────────────────────
 export function ProcessFlow({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
+  const { AR } = useRender();
+  const pfCfg = (AR as any).processFlow || {};
   const items = (comp._items || (comp as any)._nodes || []) as any[];
   if (items.length === 0) return null;
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16 bg-surface-container-low');
+  const cardClass = pfCfg.cardBg || AR.surface?.card || 'glass-card';
+  const cardRound = pfCfg.cardRound || AR.borderRadius?.card || 'rounded-xl';
+  const connectorColor = pfCfg.connectorColor || 'text-outline-variant/50';
+  const firstBorder = pfCfg.firstBorder || 'border-primary';
+  const lastBorder = pfCfg.lastBorder || 'border-primary';
+  const midBorder = pfCfg.midBorder || 'border-outline-variant/30';
+  const stepNumActive = pfCfg.stepNumActive || 'text-primary';
+  const stepNumMuted = pfCfg.stepNumMuted || 'text-primary/40';
 
   if (variant === 'horizontal') {
-    const arrow = <div class="flex items-center flex-shrink-0 px-1"><span class="material-symbols-outlined text-outline-variant/50 text-lg">arrow_forward</span></div>;
+    const arrow = <div class="flex items-center flex-shrink-0 px-1"><span class={`material-symbols-outlined ${connectorColor} text-lg`}>arrow_forward</span></div>;
     return (
       <section class={secClass} data-component-type="process-flow">
         <div class={`@container ${maxW} mx-auto px-8`}>
           {title && <h2 class="font-headline text-h2 mb-10 text-center" dangerouslySetInnerHTML={{ __html: title }} />}
           <div class="flex flex-col @3xl:flex-row gap-2 items-stretch" data-animate="fade-up">
             {items.map((item, i) => {
-              const borderColor = i === 0 ? 'border-secondary' : i === items.length - 1 ? 'border-primary' : 'border-outline-variant/30';
+              const borderColor = i === 0 ? firstBorder : i === items.length - 1 ? lastBorder : midBorder;
               return (
                 <>
-                  <div class={`glass-card px-4 py-4 rounded-xl border-t-4 ${borderColor} flex-1 min-w-0 text-center`}>
+                  <div class={`${cardClass} px-4 py-4 ${cardRound} border-t-4 ${borderColor} flex-1 min-w-0 text-center`}>
                     <div class="font-headline text-body mb-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
                     {item.body && <div class="text-body text-on-surface-variant" data-edit-path={`_items.${i}.body`}>{stripTags(item.body)}</div>}
                   </div>
@@ -982,19 +1023,19 @@ export function ProcessFlow({ comp, variant, maxW }: { comp: Component; variant:
   }
 
   // Default: vertical
-  const downArrow = <div class="flex justify-center py-1"><span class="material-symbols-outlined text-outline-variant/50 text-lg">arrow_downward</span></div>;
+  const downArrow = <div class="flex justify-center py-1"><span class={`material-symbols-outlined ${connectorColor} text-lg`}>arrow_downward</span></div>;
   return (
     <section class={secClass} data-component-type="process-flow">
       <div class={`@container ${maxW} mx-auto px-8`}>
         <h2 class="font-headline text-h2 mb-12 text-center" dangerouslySetInnerHTML={{ __html: title }} />
         <div class="flex flex-col gap-2" data-animate-stagger="fade-up">
           {items.map((item, i) => {
-            const borderClass = i === 0 ? 'border-l-4 border-secondary' : i === items.length - 1 ? 'border-l-4 border-primary' : 'border-l-4 border-outline-variant/30';
-            const numColor = i === 0 ? 'text-secondary' : i === items.length - 1 ? 'text-primary' : 'text-primary/40';
+            const borderClass = i === 0 ? `border-l-4 ${firstBorder}` : i === items.length - 1 ? `border-l-4 ${lastBorder}` : `border-l-4 ${midBorder}`;
+            const numColor = i === 0 || i === items.length - 1 ? stepNumActive : stepNumMuted;
             const stepNum = String(i + 1).padStart(2, '0');
             return (
               <>
-                <div class={`glass-card px-6 @3xl:px-8 py-5 @3xl:py-6 rounded-xl ${borderClass} flex items-start gap-5`}>
+                <div class={`${cardClass} px-6 @3xl:px-8 py-5 @3xl:py-6 ${cardRound} ${borderClass} flex items-start gap-5`}>
                   <span class={`${numColor} font-headline font-black text-2xl mt-0.5 flex-shrink-0`}>{stepNum}</span>
                   <div class="min-w-0">
                     <div class="font-headline text-h4 mb-1" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
@@ -1013,7 +1054,8 @@ export function ProcessFlow({ comp, variant, maxW }: { comp: Component; variant:
 
 // ─── Media ───────────────────────────────────────────────────────────
 export function Media({ comp, maxW }: { comp: Component; maxW: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large || '') : '';
@@ -1021,7 +1063,7 @@ export function Media({ comp, maxW }: { comp: Component; maxW: string }) {
     <section class={secClass} data-component-type="media" data-animate="clip-up">
       <div class={`@container ${maxW} mx-auto px-8`}>
         {title && <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />}
-        <div class="relative bg-surface-container rounded-3xl overflow-hidden aspect-video flex items-center justify-center">
+        <div class={`relative bg-surface-container ${imgRound} overflow-hidden aspect-video flex items-center justify-center`}>
           {imgSrc ? <img alt="" class="w-full h-full object-cover" src={imgSrc} /> : <span class="material-symbols-outlined text-6xl text-on-surface-variant">play_circle</span>}
         </div>
       </div>
@@ -1031,15 +1073,19 @@ export function Media({ comp, maxW }: { comp: Component; maxW: string }) {
 
 // ─── VideoTranscript ─────────────────────────────────────────────────
 export function VideoTranscript({ comp, maxW }: { comp: Component; maxW: string }) {
+  const { AR } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
+  const cardClass = AR.surface?.card || 'glass-card';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
   const title = esc(comp.displayTitle || 'Transcript');
   const secClass = sectionOnly('py-16');
   return (
     <section class={secClass} data-component-type="video-transcript" data-animate="fade-up">
       <div class={`@container ${maxW} mx-auto px-8`}>
-        <div class="bg-surface-container rounded-3xl overflow-hidden aspect-video flex items-center justify-center mb-6">
+        <div class={`bg-surface-container ${imgRound} overflow-hidden aspect-video flex items-center justify-center mb-6`}>
           <span class="material-symbols-outlined text-6xl text-on-surface-variant">play_circle</span>
         </div>
-        <details class="bg-surface-container-low rounded-2xl">
+        <details class={`${cardClass} ${cardRound}`}>
           <summary class="p-6 cursor-pointer font-bold flex justify-between items-center">
             <span dangerouslySetInnerHTML={{ __html: title }} />
             <span class="material-symbols-outlined">expand_more</span>
@@ -1053,7 +1099,8 @@ export function VideoTranscript({ comp, maxW }: { comp: Component; maxW: string 
 
 // ─── ImageGallery ────────────────────────────────────────────────────
 export function ImageGallery({ comp, maxW }: { comp: Component; maxW: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
   const title = esc(comp.displayTitle || '');
   const items = comp._items || [];
   const secClass = sectionOnly('py-16');
@@ -1067,7 +1114,7 @@ export function ImageGallery({ comp, maxW }: { comp: Component; maxW: string }) 
             const imgAlt = esc(item._graphic?.alt || (item as any).caption || '');
             const caption = esc((item as any).caption || '');
             return (
-              <div class="bg-surface-container rounded-2xl overflow-hidden">
+              <div class={`bg-surface-container ${imgRound} overflow-hidden`}>
                 {imgSrc
                   ? <div class="aspect-square"><img alt={imgAlt} class="w-full h-full object-cover" src={imgSrc} /></div>
                   : <div class="aspect-square flex items-center justify-center"><span class="material-symbols-outlined text-4xl text-on-surface-variant">image</span></div>
@@ -1084,7 +1131,10 @@ export function ImageGallery({ comp, maxW }: { comp: Component; maxW: string }) 
 
 // ─── LabeledImage ────────────────────────────────────────────────────
 export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
-  const { embedImage } = useRender();
+  const { AR, embedImage } = useRender();
+  const imgRound = AR.borderRadius?.image || 'rounded-2xl';
+  const cardClass = AR.surface?.card || 'glass-card';
+  const cardRound = AR.borderRadius?.card || 'rounded-2xl';
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large || '') : '';
@@ -1097,10 +1147,10 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
         <div class={`@container ${maxW} mx-auto px-8`}>
           {title && <h2 class="font-headline text-h2 mb-12" dangerouslySetInnerHTML={{ __html: title }} />}
           <div class="flex flex-col @3xl:flex-row gap-8" data-animate="fade-up">
-            <div class="flex-1 relative bg-surface-container rounded-3xl overflow-hidden min-h-[300px]">
-              {imgSrc ? <img alt={imgAlt} class="w-full h-full object-cover rounded-3xl" src={imgSrc} /> : <div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>}
+            <div class={`flex-1 relative bg-surface-container ${imgRound} overflow-hidden min-h-[300px]`}>
+              {imgSrc ? <img alt={imgAlt} class={`w-full h-full object-cover ${imgRound}`} src={imgSrc} /> : <div class={`w-full h-[400px] bg-surface-container ${imgRound} flex items-center justify-center`}><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>}
             </div>
-            <div class="@3xl:w-80 flex-shrink-0 glass-card rounded-2xl p-4 space-y-1 self-start">
+            <div class={`@3xl:w-80 flex-shrink-0 ${cardClass} ${cardRound} p-4 space-y-1 self-start`}>
               {markers.map((m: any, i: number) => (
                 <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-surface-container/50 transition-colors">
                   <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">{i + 1}</div>
@@ -1123,8 +1173,8 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
     <section class={secClass} data-component-type="labeled-image">
       <div class={`@container ${maxW} mx-auto px-8`}>
         {title && <h2 class="font-headline text-h2 mb-12" dangerouslySetInnerHTML={{ __html: title }} />}
-        <div class="relative bg-surface-container rounded-3xl overflow-hidden min-h-[300px]" data-animate="clip-up">
-          {imgSrc ? <img alt={imgAlt} class="w-full max-h-[65vh] object-cover rounded-3xl" src={imgSrc} /> : <div class="w-full h-[400px] bg-surface-container rounded-3xl flex items-center justify-center"><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>}
+        <div class={`relative bg-surface-container ${imgRound} overflow-hidden min-h-[300px]`} data-animate="clip-up">
+          {imgSrc ? <img alt={imgAlt} class={`w-full max-h-[65vh] object-cover ${imgRound}`} src={imgSrc} /> : <div class={`w-full h-[400px] bg-surface-container ${imgRound} flex items-center justify-center`}><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>}
           {hasImage && markers.map((m: any, i: number) => (
             <div class="absolute group z-10" style={`left:${m.x}%;top:${m.y}%`}>
               <div class="w-8 h-8 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-125 transition-transform flex items-center justify-center text-on-primary text-xs font-bold">{i + 1}</div>
@@ -1135,7 +1185,7 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
         {!hasImage && markers.length > 0 && (
           <div class="grid grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-4 gap-4 mt-8">
             {markers.map((m: any, i: number) => (
-              <div class="glass-card rounded-xl p-4 flex items-center gap-3 border border-outline-variant/20">
+              <div class={`${cardClass} ${cardRound} p-4 flex items-center gap-3`}>
                 <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">{i + 1}</div>
                 <span class="text-sm font-medium" data-edit-path={`_markers.${i}.label`}>{esc(m.label || '')}</span>
               </div>
@@ -1149,6 +1199,10 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
 
 // ─── Divider ─────────────────────────────────────────────────────────
 export function Divider({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
+  const { AR } = useRender();
+  const divCfg = (AR as any).divider || {};
+  const lineColor = divCfg.lineColor || 'bg-outline-variant/20';
+  const iconColor = divCfg.iconColor || 'text-on-surface-variant/40';
   const style = variant || (comp as any).style || 'line';
   const icon = esc((comp as any).icon || 'more_horiz');
 
@@ -1159,22 +1213,24 @@ export function Divider({ comp, variant, maxW }: { comp: Component; variant: str
     return (
       <section class="py-4" data-component-type="divider">
         <div class={`@container ${maxW} mx-auto px-8 flex items-center gap-4`}>
-          <div class="flex-1 h-px bg-outline-variant/20" />
-          <span class="material-symbols-outlined text-on-surface-variant/40 text-xl">{icon}</span>
-          <div class="flex-1 h-px bg-outline-variant/20" />
+          <div class={`flex-1 h-px ${lineColor}`} />
+          <span class={`material-symbols-outlined ${iconColor} text-xl`}>{icon}</span>
+          <div class={`flex-1 h-px ${lineColor}`} />
         </div>
       </section>
     );
   }
   return (
     <section class="py-4" data-component-type="divider">
-      <div class={`@container ${maxW} mx-auto px-8`}><hr class="border-0 h-px bg-outline-variant/20" /></div>
+      <div class={`@container ${maxW} mx-auto px-8`}><hr class={`border-0 h-px ${lineColor}`} /></div>
     </section>
   );
 }
 
 // ─── Callout ─────────────────────────────────────────────────────────
 export function Callout({ comp, variant, maxW }: { comp: Component; variant: string; maxW: string }) {
+  const { AR } = useRender();
+  const coCfg = (AR as any).callout || {};
   const title = esc(comp.displayTitle || '');
   const body = comp.body || '';
   const secClass = sectionOnly('py-16');
@@ -1182,16 +1238,27 @@ export function Callout({ comp, variant, maxW }: { comp: Component; variant: str
   const iconMap: Record<string, string> = {
     info: 'info', warning: 'warning', tip: 'tips_and_updates', success: 'check_circle',
   };
-  const cfg = { icon: iconMap[calloutType] || 'info', border: 'border-primary', bg: 'bg-primary/5', iconColor: 'text-primary' };
+  const icon = iconMap[calloutType] || 'info';
+  const cardRound = AR.borderRadius?.card || 'rounded-r-xl';
+
+  // Default per-type styling (semantic colors, no MD3 dependency)
+  const defaults: Record<string, string> = {
+    info: 'bg-primary/5 border-l-4 border-primary',
+    warning: 'bg-surface-container border-l-4 border-outline',
+    tip: 'bg-primary/10 border-l-4 border-primary',
+    success: 'bg-surface-container border-l-4 border-primary',
+  };
+  // AR provides full class string per callout type, overriding defaults
+  const wrapperClass = coCfg[calloutType] || defaults[calloutType] || defaults.info;
 
   return (
     <section class={secClass} data-component-type="callout">
       <div class={`@container ${maxW} mx-auto px-8`}>
-        <div class={`border-l-4 ${cfg.border} ${cfg.bg} rounded-r-xl p-6 @3xl:p-8`} data-animate="fade-up">
+        <div class={`${wrapperClass} ${cardRound} p-6 @3xl:p-8`} data-animate="fade-up">
           <div class="flex items-start gap-4">
-            <span class={`material-symbols-outlined ${cfg.iconColor} text-2xl flex-shrink-0 mt-0.5`}>{cfg.icon}</span>
+            <span class="material-symbols-outlined text-2xl flex-shrink-0 mt-0.5">{icon}</span>
             <div>
-              {title && <h4 class="font-headline text-h4 text-on-surface mb-2" dangerouslySetInnerHTML={{ __html: title }} />}
+              {title && <h4 class="font-headline text-h4 mb-2" dangerouslySetInnerHTML={{ __html: title }} />}
               <div class="text-body text-on-surface-variant" dangerouslySetInnerHTML={{ __html: body }} />
             </div>
           </div>

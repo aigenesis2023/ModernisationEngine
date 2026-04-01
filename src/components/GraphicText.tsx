@@ -33,7 +33,7 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
                 <div class="w-full h-full bg-surface-container" />
               )}
             </div>
-            <div class={`relative @3xl:absolute ${align === 'left' ? '@3xl:left-0' : '@3xl:right-0'} @3xl:top-1/2 @3xl:-translate-y-1/2 @3xl:w-[55%] glass-card ${cardRound} p-8 @3xl:p-10 mt-[-2rem] @3xl:mt-0 mx-4 @3xl:mx-0`}>
+            <div class={`relative @3xl:absolute ${align === 'left' ? '@3xl:left-0' : '@3xl:right-0'} @3xl:top-1/2 @3xl:-translate-y-1/2 @3xl:w-[55%] ${cardSurface} ${cardRound} p-8 @3xl:p-10 mt-[-2rem] @3xl:mt-0 mx-4 @3xl:mx-0`}>
               <h2 class="font-headline text-h2 tracking-tight mb-4" dangerouslySetInnerHTML={{ __html: title }} />
               <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
             </div>
@@ -44,6 +44,7 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
   }
 
   if (variant === 'full-overlay') {
+    // Same principle as Hero/FullBleed: image + dark scrim + white text. Always readable.
     const gradientDir = align === 'left' ? 'bg-gradient-to-r' : 'bg-gradient-to-l';
     return (
       <section class="relative min-h-[60vh] flex items-center overflow-hidden" data-component-type="graphic-text">
@@ -52,11 +53,11 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
         ) : (
           <div class="absolute inset-0 bg-surface-container" />
         )}
-        <div class={`absolute inset-0 ${gradientDir} from-background via-background/85 to-background/20`} />
+        <div class={`absolute inset-0 ${gradientDir} from-black/85 via-black/60 to-black/10`} />
         <div class={`@container w-full ${maxW} mx-auto px-8 relative z-10 py-20`} data-animate="fade-up">
           <div class={`w-full @3xl:w-1/2 ${align === 'right' ? '@3xl:ml-auto' : ''}`}>
-            <h2 class="font-headline text-h2 tracking-tight mb-6" dangerouslySetInnerHTML={{ __html: title }} />
-            <div class="text-body leading-snug text-on-surface-variant space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
+            <h2 class="font-headline text-h2 tracking-tight mb-6 text-white" dangerouslySetInnerHTML={{ __html: title }} />
+            <div class="text-body leading-snug text-white/80 space-y-4" dangerouslySetInnerHTML={{ __html: bodyText }} />
           </div>
         </div>
       </section>

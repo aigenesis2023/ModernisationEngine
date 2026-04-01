@@ -87,11 +87,54 @@ async function extractCSSTokens(page) {
         .filter(item => item.color || item.backgroundColor);
     };
 
+    // Broader card detection: class-based + structural heuristic
+    // Many modern sites (Framer, Webflow) use generic divs without card/panel classes.
+    // The heuristic finds visible divs with border-radius or box-shadow that are
+    // smaller than full-width sections — these are likely cards/containers.
+    const cardsByClass = sample('[class*="card"], [class*="panel"], [class*="tile"], [class*="box"], [class*="feature"], [class*="service"], [class*="item"], article');
+    let cardLike = [];
+    if (cardsByClass.length === 0) {
+      cardLike = Array.from(document.querySelectorAll('div, li'))
+        .filter(el => {
+          const s = getComputedStyle(el);
+          if (s.display === 'none' || s.visibility === 'hidden' || parseFloat(s.opacity) === 0) return false;
+          const bg = s.backgroundColor;
+          if (!bg || bg === 'rgba(0, 0, 0, 0)' || bg === 'transparent') return false;
+          const hasRadius = s.borderRadius && s.borderRadius !== '0px';
+          const hasShadow = s.boxShadow && s.boxShadow !== 'none';
+          const hasBorder = s.borderWidth && s.borderWidth !== '0px';
+          if (!hasRadius && !hasShadow && !hasBorder) return false;
+          const rect = el.getBoundingClientRect();
+          if (rect.width > window.innerWidth * 0.85) return false; // skip full-width sections
+          if (rect.height < 50 || rect.width < 120) return false; // skip tiny elements
+          return true;
+        })
+        .slice(0, 15)
+        .map(el => {
+          const s = getComputedStyle(el);
+          const fontFamily = s.fontFamily.split(',')[0].replace(/['"]/g, '').trim();
+          return {
+            color: rgbToHex(s.color),
+            backgroundColor: rgbToHex(s.backgroundColor),
+            fontFamily: fontFamily || null,
+            fontWeight: s.fontWeight,
+            fontSize: s.fontSize,
+            borderRadius: s.borderRadius !== '0px' ? s.borderRadius : null,
+            boxShadow: s.boxShadow !== 'none' ? s.boxShadow : null,
+            borderColor: rgbToHex(s.borderColor),
+            borderWidth: s.borderWidth !== '0px' ? s.borderWidth : null,
+            textTransform: s.textTransform !== 'none' ? s.textTransform : null,
+            padding: s.padding,
+          };
+        })
+        .filter(item => item.color || item.backgroundColor);
+    }
+
     return {
       buttons: sample('button, [role="button"], a[class*="btn"], [class*="button"]:not(section):not(div > div)'),
       headings: sample('h1, h2, h3'),
       paragraphs: sample('p'),
-      cards: sample('[class*="card"], [class*="panel"], [class*="tile"], [class*="box"]'),
+      cards: cardsByClass.length > 0 ? cardsByClass : cardLike,
       backgrounds: sample('section, main, header, [class*="hero"], [class*="section"]'),
       links: sample('a:not([class*="btn"]):not([class*="button"])'),
       inputs: sample('input, textarea, select'),
@@ -672,7 +715,7 @@ function computeBackgroundAlt(bgHex, isDark) {
  * Maps the CSS extraction summary to all CSS-derivable fields of brand-spec.json.
  * Vision AI fills the rest (colorStrategy, archetype, surfaceStyle, imageStyle, etc.).
  */
-function computeCssDerivedSpec(summary, isDark, dembrandtPalette) {
+function computeCssDerivedSpec(summary, isDark, dembrandtPalette, rawCss) {
   // ── Three-source cascade for primary accent color ──────────────────
   // 1. CSS accent (if chromatic) → 2. dembrandt high-confidence → 3. gray fallback
   const isChromatic = (hex) => {
@@ -743,10 +786,43 @@ function computeCssDerivedSpec(summary, isDark, dembrandtPalette) {
     }
   }
   const onBackground = summary.headingTextColor || summary.textColor || (isDark ? '#ffffff' : '#1a1a1a');
-  // WCAG AA threshold: white text on bg passes only when bg luminance ≤ 0.18.
-  // Above that, dark text gives better contrast. Use 0.18 (not 0.4) to avoid
-  // low-contrast white-on-orange situations.
-  const onPrimary = hexLuminance(primary) > 0.18 ? '#1a1a1a' : '#ffffff';
+
+  // onPrimary: what text color does the brand use on its primary/accent color?
+  // Priority 1: Observe from CSS — check text/heading elements on primary-colored backgrounds.
+  // Priority 2: Fall back to luminance threshold (0.35 — biased toward white, since vivid
+  //              brand colors like orange/red/blue almost always use white text).
+  let onPrimary = null;
+  const primaryLower = primary.toLowerCase();
+  if (rawCss) {
+    const sections = ['headings', 'paragraphs', 'buttons', 'links', 'navItems'];
+    for (const section of sections) {
+      for (const item of (rawCss[section] || [])) {
+        if (item.backgroundColor && item.backgroundColor.toLowerCase() === primaryLower && item.color) {
+          if (!['#0000ee', '#0000ff'].includes(item.color.toLowerCase())) {
+            onPrimary = item.color;
+            break;
+          }
+        }
+      }
+      if (onPrimary) break;
+    }
+  }
+  if (onPrimary) {
+    console.log(`[onPrimary] Observed from CSS: ${onPrimary} on ${primary}`);
+  } else {
+    // Fallback: WCAG contrast ratio. Compute contrast of white AND dark against primary,
+    // pick whichever has higher contrast. This is mathematically correct for ANY color:
+    // yellow → dark text (12.9:1 vs 1.4:1), red → white (5.9:1 vs 2.6:1),
+    // blue → white (4.7:1 vs 3.7:1), cyan → dark (7.2:1 vs 2.1:1).
+    const contrastRatio = (hex1, hex2) => {
+      const l1 = hexLuminance(hex1), l2 = hexLuminance(hex2);
+      return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+    };
+    const whiteContrast = contrastRatio(primary, '#ffffff');
+    const darkContrast = contrastRatio(primary, '#1a1a1a');
+    onPrimary = whiteContrast >= darkContrast ? '#ffffff' : '#1a1a1a';
+    console.log(`[onPrimary] WCAG fallback: white ${whiteContrast.toFixed(2)}:1 vs dark ${darkContrast.toFixed(2)}:1 → ${onPrimary}`);
+  }
   const cardSurface = summary.cardSurfaceColor || null;
   const cardBorder = summary.cardBorderColor || null;
 
@@ -1243,7 +1319,7 @@ async function main() {
       // Also write brand-spec prompt
       const cssSummary = extractedCSS?.summary || extractedCSS?.summary;
       if (cssSummary) {
-        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
+        const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette, extractedCSS?.raw);
         writeBrandSpecPrompt(cssDerivedSpec);
       }
       process.exit(0);
@@ -1260,7 +1336,7 @@ async function main() {
     // Also write brand-spec prompt for subagent
     const cssSummary = extractedCSS?.summary;
     if (cssSummary) {
-      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
+      const cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette, extractedCSS?.raw);
       writeBrandSpecPrompt(cssDerivedSpec);
       console.log('\nSpawn a SECOND subagent to:');
       console.log('  1. Read engine/output/brand-spec-prompt.txt');
@@ -1281,7 +1357,7 @@ async function main() {
   const cssSummary = extractedCSS?.summary;
   let cssDerivedSpec = null;
   if (cssSummary) {
-    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette);
+    cssDerivedSpec = computeCssDerivedSpec(cssSummary, detectedIsDark, dembrandtPalette, extractedCSS?.raw);
   }
 
   if (specReady) {

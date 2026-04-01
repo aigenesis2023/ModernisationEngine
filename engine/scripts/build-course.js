@@ -648,7 +648,7 @@ function fillHero(comp, variant) {
   const imgSrc = comp._graphic ? embedImage(comp._graphic.large) : '';
   const imgAlt = esc(comp._graphic?.alt || '');
 
-  const overlayGradient = h.overlayGradient || 'bg-gradient-to-t from-surface-dim via-surface-dim/80 to-surface-dim/40';
+  const overlayGradient = h.overlayGradient || 'bg-gradient-to-t from-black/80 via-black/50 to-black/20';
   const imgVisuals = h.imgVisuals || 'mix-blend-overlay opacity-40';
 
   const btn1Bg = h.btn1Bg || 'bg-primary';
@@ -676,7 +676,7 @@ ${buttons}
 </div>
 <div class="relative hidden md:block">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}"/>` : '<div class="absolute inset-0 bg-surface-container"></div>'}
-<div class="absolute inset-0 bg-gradient-to-r from-background via-background/60 to-transparent"></div>
+<div class="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/10"></div>
 </div>
 </div>
 </section>`;
@@ -934,11 +934,11 @@ ${imgSrc ? `<img alt="${imgAlt}" class="w-full h-full object-cover" src="${imgSr
     const gradientDir = align === 'left' ? 'bg-gradient-to-r' : 'bg-gradient-to-l';
     return `<section class="relative min-h-[60vh] flex items-center overflow-hidden" data-component-type="graphic-text">
 ${imgSrc ? `<img alt="${imgAlt}" class="absolute inset-0 w-full h-full object-cover" src="${imgSrc}" data-parallax/>` : '<div class="absolute inset-0 bg-surface-container"></div>'}
-<div class="absolute inset-0 ${gradientDir} from-background via-background/85 to-background/20"></div>
+<div class="absolute inset-0 ${gradientDir} from-black/85 via-black/60 to-black/10"></div>
 <div class="${maxW} mx-auto px-8 relative z-10 py-20" data-animate="fade-up">
 <div class="md:w-1/2 ${align === 'right' ? 'md:ml-auto' : ''}">
-<h2 class="font-headline text-h2 tracking-tight mb-6">${title}</h2>
-<div class="text-body-lg text-on-surface-variant leading-normal space-y-4">${bodyText}</div>
+<h2 class="font-headline text-h2 tracking-tight mb-6 text-white">${title}</h2>
+<div class="text-body-lg text-white/80 leading-normal space-y-4">${bodyText}</div>
 </div>
 </div>
 </section>`;

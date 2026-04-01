@@ -38,7 +38,7 @@ export function MCQ({ comp, variant }: Props) {
   // Badge pill for the "Knowledge Check" label
   const badgeClass = mc(
     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-widest',
-    m.badgeBg || 'bg-primary/10 border border-primary/25 text-on-surface'
+    m.badgeBg || 'bg-primary text-on-primary'
   );
 
   // Draw metadata

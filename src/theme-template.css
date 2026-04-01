@@ -300,6 +300,10 @@ img, video, iframe { max-width: 100%; }
 /* Data table */
 table th { text-align: left; }
 
+/* Focus ring: replace browser purple with brand primary */
+*:focus { outline: none; }
+*:focus-visible { outline: 2px solid {{PRIMARY}}; outline-offset: 2px; }
+
 /* Textarea focus glow */
 textarea:focus { box-shadow: 0 0 0 3px {{SECONDARY}}20; }
 

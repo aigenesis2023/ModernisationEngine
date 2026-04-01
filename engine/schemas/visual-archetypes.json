@@ -41,7 +41,7 @@
         "style": "glass",
         "card": "glass-card",
         "cardAlt": "bg-surface-container/60 border border-outline-variant/10",
-        "overlay": "bg-gradient-to-r from-surface-dim via-surface-dim/80 to-transparent",
+        "overlay": "bg-gradient-to-r from-black/80 via-black/50 to-transparent",
         "imgBlend": "mix-blend-overlay opacity-35"
       },
 
@@ -63,7 +63,7 @@
 
       "hero": {
         "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
-        "overlayGradient": "bg-gradient-to-t from-surface-dim via-surface-dim/60 to-surface-dim/20",
+        "overlayGradient": "bg-gradient-to-t from-black/80 via-black/50 to-black/15",
         "imgVisuals": "opacity-80",
         "btn1Bg": "bg-primary-container",
         "btn1Text": "text-on-primary-container",
@@ -152,11 +152,35 @@
         "accentBorder": "border-l-2 border-primary/40"
       },
 
+      "processFlow": {
+        "cardBg": "glass-card",
+        "cardRound": "rounded-2xl",
+        "connectorColor": "text-outline-variant/40",
+        "firstBorder": "border-primary",
+        "lastBorder": "border-primary",
+        "midBorder": "border-outline-variant/20",
+        "stepNumActive": "text-primary",
+        "stepNumMuted": "text-primary/30"
+      },
+
+      "narrative": {
+        "cardBg": "glass-card",
+        "cardRound": "rounded-[2.5rem]",
+        "navPrev": "w-11 h-11 rounded-full border border-outline-variant/30 flex items-center justify-center hover:bg-surface-container transition-colors",
+        "navNext": "w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center"
+      },
+
+      "fullBleed": {
+        "overlayCenter": "bg-black/60",
+        "overlayLeft": "bg-gradient-to-r from-black/90 via-black/50 to-transparent",
+        "overlayRight": "bg-gradient-to-l from-black/90 via-black/50 to-transparent"
+      },
+
       "callout": {
         "info": "bg-secondary/10 border-l-4 border-secondary text-on-surface",
-        "warning": "bg-tertiary/10 border-l-4 border-tertiary text-on-surface",
+        "warning": "bg-surface-container border-l-4 border-outline text-on-surface",
         "tip": "bg-primary/10 border-l-4 border-primary text-on-surface",
-        "success": "bg-secondary-container/30 border-l-4 border-secondary text-on-surface"
+        "success": "bg-surface-container border-l-4 border-secondary text-on-surface"
       }
     },
 
@@ -198,7 +222,7 @@
         "style": "flat",
         "card": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardAlt": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
-        "overlay": "bg-gradient-to-t from-surface-dim/90 via-surface-dim/60 to-transparent",
+        "overlay": "bg-gradient-to-t from-black/70 via-black/40 to-transparent",
         "imgBlend": "opacity-50"
       },
 
@@ -220,7 +244,7 @@
 
       "hero": {
         "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
-        "overlayGradient": "bg-gradient-to-t from-surface-dim/90 via-surface-dim/60 to-transparent",
+        "overlayGradient": "bg-gradient-to-t from-black/85 via-black/55 to-black/10",
         "imgVisuals": "opacity-50",
         "btn1Bg": "bg-primary",
         "btn1Text": "text-on-primary",
@@ -309,9 +333,33 @@
         "accentBorder": "border-b border-outline-variant/20"
       },
 
+      "processFlow": {
+        "cardBg": "bg-surface-container/50",
+        "cardRound": "rounded-lg",
+        "connectorColor": "text-outline-variant/30",
+        "firstBorder": "border-primary/60",
+        "lastBorder": "border-primary/60",
+        "midBorder": "border-outline-variant/15",
+        "stepNumActive": "text-primary/70",
+        "stepNumMuted": "text-on-surface-variant/30"
+      },
+
+      "narrative": {
+        "cardBg": "bg-surface-container/50 border border-outline-variant/10",
+        "cardRound": "rounded-2xl",
+        "navPrev": "w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-colors",
+        "navNext": "w-10 h-10 rounded-full bg-primary/80 text-on-primary flex items-center justify-center"
+      },
+
+      "fullBleed": {
+        "overlayCenter": "bg-black/50",
+        "overlayLeft": "bg-gradient-to-r from-black/80 via-black/40 to-transparent",
+        "overlayRight": "bg-gradient-to-l from-black/80 via-black/40 to-transparent"
+      },
+
       "callout": {
         "info": "bg-surface-container border-l-4 border-secondary/60 text-on-surface",
-        "warning": "bg-surface-container border-l-4 border-tertiary/60 text-on-surface",
+        "warning": "bg-surface-container border-l-4 border-outline/60 text-on-surface",
         "tip": "bg-surface-container border-l-4 border-primary/60 text-on-surface",
         "success": "bg-surface-container border-l-4 border-secondary/40 text-on-surface"
       }
@@ -355,7 +403,7 @@
         "style": "flat",
         "card": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardAlt": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
-        "overlay": "bg-gradient-to-t from-surface-dim via-surface-dim/75 to-surface-dim/30",
+        "overlay": "bg-gradient-to-t from-black/75 via-black/45 to-black/15",
         "imgBlend": "opacity-60"
       },
 
@@ -377,7 +425,7 @@
 
       "hero": {
         "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
-        "overlayGradient": "bg-gradient-to-t from-surface-dim via-surface-dim/75 to-surface-dim/30",
+        "overlayGradient": "bg-gradient-to-t from-black/80 via-black/50 to-black/20",
         "imgVisuals": "opacity-60",
         "btn1Bg": "bg-primary",
         "btn1Text": "text-on-primary",
@@ -466,9 +514,33 @@
         "accentBorder": "border-l-3 border-primary/50"
       },
 
+      "processFlow": {
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
+        "cardRound": "rounded-xl",
+        "connectorColor": "text-outline-variant/40",
+        "firstBorder": "border-primary/60",
+        "lastBorder": "border-primary/60",
+        "midBorder": "border-outline-variant/20",
+        "stepNumActive": "text-primary",
+        "stepNumMuted": "text-on-surface-variant/40"
+      },
+
+      "narrative": {
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
+        "cardRound": "rounded-2xl",
+        "navPrev": "w-11 h-11 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-colors",
+        "navNext": "w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center"
+      },
+
+      "fullBleed": {
+        "overlayCenter": "bg-black/55",
+        "overlayLeft": "bg-gradient-to-r from-black/85 via-black/45 to-transparent",
+        "overlayRight": "bg-gradient-to-l from-black/85 via-black/45 to-transparent"
+      },
+
       "callout": {
         "info": "bg-surface-container border border-secondary/30 border-l-4 border-l-secondary text-on-surface",
-        "warning": "bg-surface-container border border-tertiary/30 border-l-4 border-l-tertiary text-on-surface",
+        "warning": "bg-surface-container border border-outline/30 border-l-4 border-l-outline text-on-surface",
         "tip": "bg-surface-container border border-primary/30 border-l-4 border-l-primary text-on-surface",
         "success": "bg-surface-container border border-secondary/20 border-l-4 border-l-secondary/70 text-on-surface"
       }
@@ -545,7 +617,7 @@
         "style": "flat",
         "card": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/80",
         "cardAlt": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/60",
-        "overlay": "bg-gradient-to-t from-surface-dim/95 via-surface-dim/70 to-transparent",
+        "overlay": "bg-gradient-to-t from-black/90 via-black/60 to-transparent",
         "imgBlend": "opacity-70"
       },
 
@@ -567,7 +639,7 @@
 
       "hero": {
         "sectionClass": "relative min-h-screen flex items-center overflow-hidden",
-        "overlayGradient": "bg-gradient-to-t from-surface-dim/95 via-surface-dim/70 to-transparent",
+        "overlayGradient": "bg-gradient-to-t from-black/90 via-black/65 to-black/10",
         "imgVisuals": "opacity-70",
         "btn1Bg": "bg-primary",
         "btn1Text": "text-on-primary font-black uppercase tracking-widest",
@@ -656,9 +728,33 @@
         "accentBorder": "border-l-8 border-primary"
       },
 
+      "processFlow": {
+        "cardBg": "bg-background border-2 border-on-surface/60",
+        "cardRound": "rounded-none",
+        "connectorColor": "text-on-surface/40",
+        "firstBorder": "border-primary",
+        "lastBorder": "border-primary",
+        "midBorder": "border-on-surface/30",
+        "stepNumActive": "text-primary font-black",
+        "stepNumMuted": "text-on-surface/40 font-black"
+      },
+
+      "narrative": {
+        "cardBg": "bg-background border-2 border-on-surface/80",
+        "cardRound": "rounded-none",
+        "navPrev": "w-11 h-11 border-2 border-on-surface/60 flex items-center justify-center hover:border-primary transition-colors",
+        "navNext": "w-11 h-11 bg-primary text-on-primary flex items-center justify-center font-black"
+      },
+
+      "fullBleed": {
+        "overlayCenter": "bg-black/70",
+        "overlayLeft": "bg-gradient-to-r from-black/95 via-black/60 to-transparent",
+        "overlayRight": "bg-gradient-to-l from-black/95 via-black/60 to-transparent"
+      },
+
       "callout": {
         "info": "bg-background border-l-8 border-primary border-2 border-on-surface/40 text-on-surface font-bold",
-        "warning": "bg-background border-l-8 border-tertiary border-2 border-on-surface/40 text-on-surface font-bold",
+        "warning": "bg-background border-l-8 border-outline border-2 border-on-surface/40 text-on-surface font-bold",
         "tip": "bg-primary text-on-primary border-2 border-on-surface/80",
         "success": "bg-background border-l-8 border-secondary border-2 border-on-surface/40 text-on-surface font-bold"
       }

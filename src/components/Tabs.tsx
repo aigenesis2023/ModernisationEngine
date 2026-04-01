@@ -19,7 +19,7 @@ export function Tabs({ comp, variant, maxW }: Props) {
 
   const tabPad = tabCfg.tabPad || 'px-6 py-3';
   const tabRound = tabCfg.tabRound || AR.borderRadius?.pill || 'rounded-full';
-  const activeBtn = `${tabPad} ${tabRound} ${tabCfg.activeTabBg || 'bg-primary-container text-on-primary-container font-bold text-sm uppercase tracking-wider'}`;
+  const activeBtn = `${tabPad} ${tabRound} ${tabCfg.activeTabBg || 'bg-primary text-on-primary font-bold text-sm uppercase tracking-wider'}`;
   const inactiveBtn = `${tabPad} ${tabRound} ${tabCfg.inactiveBtn || 'glass-card hover:bg-surface-container text-on-surface-variant font-bold text-sm uppercase tracking-wider'}`;
 
   if (variant === 'vertical') {

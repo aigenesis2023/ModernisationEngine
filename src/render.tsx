@@ -254,7 +254,10 @@ function assembleSection(
     const rhythm = ((AR as any).surfaceRhythm || []) as string[];
 
     // Phase 4b: AI-set sectionBg takes priority over frequency formula
-    const sectionBg = (section as any).sectionBg as string | undefined;
+    // BUT: if brand-spec says accentSectionBg=false, ignore accent overrides
+    const rawSectionBg = (section as any).sectionBg as string | undefined;
+    const sectionBg = (rawSectionBg === 'accent' && colorStrategy && !colorStrategy.accentSectionBg)
+      ? 'default' : rawSectionBg;
 
     if (sectionBg === 'accent') {
       isAccentSection = true;

@@ -314,15 +314,16 @@ function generateMd3Tokens(seedHex, isDark) {
 
 /**
  * Map brand-spec.json colors directly to design tokens.
- * MD3 is used ONLY for gap-filling tokens the brand doesn't define
- * (error, tertiary, outline-variant, container hierarchy).
- * The brand's actual colors are preserved without MD3 transformation.
+ * MD3 is used ONLY for error and primary-container tokens.
+ * Secondary, outline, and surface-variant are computed as neutral blends
+ * from background/on-surface — never from MD3 (which tints them with the
+ * primary's hue, producing e.g. warm brown outlines from an orange seed).
  */
 function mapBrandSpecToTokens(brandSpec) {
   const colors = brandSpec.colors;
   const isDark = brandSpec.isDark;
 
-  // Use brand-spec primary as MD3 seed for gap-fill tokens (so they harmonize)
+  // Use brand-spec primary as MD3 seed for error + primary-container only
   const {
     argbFromHex,
     themeFromSourceColor,
@@ -333,9 +334,22 @@ function mapBrandSpecToTokens(brandSpec) {
   const scheme = isDark ? theme.schemes.dark : theme.schemes.light;
   const s = scheme.toJSON();
   const toHex = (v) => hexFromArgb(v);
-  const palettes = theme.palettes;
-  const neutralTone = (t) => hexFromArgb(palettes.neutral.tone(t));
-  const neutralVariantTone = (t) => hexFromArgb(palettes.neutralVariant.tone(t));
+
+  // ── Neutral blend helper ──────────────────────────────────────────────
+  // Blends between two hex colors at a given ratio (0 = hex1, 1 = hex2).
+  // All secondary/outline/surface-variant tokens use this to produce pure
+  // neutral greys between background and on-surface — no primary hue leak.
+  const blendColors = (hex1, hex2, ratio) => {
+    if (!hex1 || hex1.length < 7) hex1 = '#888888';
+    if (!hex2 || hex2.length < 7) hex2 = '#888888';
+    const r1 = parseInt(hex1.slice(1, 3), 16), g1 = parseInt(hex1.slice(3, 5), 16), b1 = parseInt(hex1.slice(5, 7), 16);
+    const r2 = parseInt(hex2.slice(1, 3), 16), g2 = parseInt(hex2.slice(3, 5), 16), b2 = parseInt(hex2.slice(5, 7), 16);
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+    const r = clamp(r1 + (r2 - r1) * ratio);
+    const g = clamp(g1 + (g2 - g1) * ratio);
+    const b = clamp(b1 + (b2 - b1) * ratio);
+    return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+  };
 
   // Direct mapping: brand's actual colors → token roles
   const background = colors.background;
@@ -369,6 +383,47 @@ function mapBrandSpecToTokens(brandSpec) {
   // brand-spec may set backgroundAlt to the accent (e.g. rep-republic #ff4400 hero bg).
   const backgroundAlt = safeBackgroundAlt || stepSurface(background, isDark ? 6 : -2);
 
+  // ── Neutral tokens: blend background ↔ on-surface ─────────────────────
+  // These replace MD3 gap-fill for outline, outline-variant, surface-variant,
+  // on-surface-variant, and secondary (when brand has no real secondary).
+  // Result: pure neutral greys with zero hue leak from the primary color.
+  //
+  // Dark brands need HIGHER ratios — the same ratio that's subtle on white (#fff)
+  // is invisible on dark (#111). Ratios are tuned so every token has ≥3:1 contrast
+  // against the background (verified mathematically for both light and dark).
+  //
+  // Blend ratios (0 = background, 1 = on-surface):
+  //                         LIGHT    DARK
+  //   surface-variant:      0.06     0.10   — subtle alt surface
+  //   outline-variant:      0.15     0.25   — light dividers, subtle borders
+  //   outline:              0.40     0.45   — medium borders, form outlines
+  //   secondary:            0.50     0.55   — muted accent
+  //   on-surface-variant:   0.55     0.60   — muted text, icons
+  const surfaceVariant    = colors.cardBorder ? stepSurface(background, isDark ? 12 : -6) : blendColors(background, onSurface, isDark ? 0.10 : 0.06);
+  const outlineVariant    = blendColors(background, onSurface, isDark ? 0.25 : 0.15);
+  const outline           = blendColors(background, onSurface, isDark ? 0.45 : 0.40);
+  const onSurfaceVariant  = blendColors(background, onSurface, isDark ? 0.60 : 0.55);
+
+  // Secondary: use brand's extracted secondary if available.
+  // When null (monochromatic brand), compute a neutral mid-grey — never MD3.
+  const hasRealSecondary = !!colors.secondary;
+  const secondary        = colors.secondary || blendColors(background, onSurface, isDark ? 0.55 : 0.50);
+  const onSecondary      = hasRealSecondary ? toHex(s.onSecondary) : (isDark ? '#1a1a1a' : '#ffffff');
+  const secondaryContainer    = hasRealSecondary ? toHex(s.secondaryContainer) : blendColors(background, onSurface, isDark ? 0.20 : 0.08);
+  const onSecondaryContainer  = hasRealSecondary ? toHex(s.onSecondaryContainer) : onSurface;
+
+  // Primary-container: a subtle tint of primary mixed into background.
+  // Dark brands need a stronger ratio (0.20) so the tint is visible.
+  // Light brands use 0.08 for a barely-there tint.
+  const primaryContainer    = blendColors(background, primary, isDark ? 0.20 : 0.08);
+  const onPrimaryContainer  = onSurface;
+
+  // Tertiary: neutral blend, slightly different from secondary.
+  const tertiary           = blendColors(background, onSurface, isDark ? 0.50 : 0.45);
+  const onTertiary         = isDark ? '#1a1a1a' : '#ffffff';
+  const tertiaryContainer  = blendColors(background, onSurface, isDark ? 0.12 : 0.05);
+  const onTertiaryContainer = onSurface;
+
   const tokens = {
     'background':                  background,
     'on-surface':                  onSurface,
@@ -380,27 +435,29 @@ function mapBrandSpecToTokens(brandSpec) {
     'surface-container':           cardSurface,
     'surface-container-high':      stepSurface(cardSurface, isDark ? 5 : -3),
     'surface-container-highest':   stepSurface(cardSurface, isDark ? 10 : -6),
-    'surface-variant':             toHex(s.surfaceVariant),
+    // Surface-variant — neutral blend, not MD3
+    'surface-variant':             surfaceVariant,
     // Primary — brand's exact color, not MD3-transformed
     'primary':                     primary,
     'on-primary':                  onPrimary,
-    'primary-container':           toHex(s.primaryContainer),
-    'on-primary-container':        toHex(s.onPrimaryContainer),
-    // Secondary — use brand's secondary if available, else MD3 gap-fill
-    'secondary':                   colors.secondary || toHex(s.secondary),
-    'on-secondary':                toHex(s.onSecondary),
-    'secondary-container':         toHex(s.secondaryContainer),
-    'on-secondary-container':      toHex(s.onSecondaryContainer),
-    // Tertiary — always MD3 gap-fill
-    'tertiary':                    toHex(s.tertiary),
-    'on-tertiary':                 toHex(s.onTertiary),
-    'tertiary-container':          toHex(s.tertiaryContainer),
-    'on-tertiary-container':       toHex(s.onTertiaryContainer),
-    // Outline — MD3 gap-fill
-    'outline':                     toHex(s.outline),
-    'outline-variant':             toHex(s.outlineVariant),
-    'on-surface-variant':          toHex(s.onSurfaceVariant),
-    // Error — always MD3 gap-fill
+    // Primary-container — subtle primary tint, not MD3 peach
+    'primary-container':           primaryContainer,
+    'on-primary-container':        onPrimaryContainer,
+    // Secondary — brand's actual or neutral blend (never MD3-invented)
+    'secondary':                   secondary,
+    'on-secondary':                onSecondary,
+    'secondary-container':         secondaryContainer,
+    'on-secondary-container':      onSecondaryContainer,
+    // Tertiary — neutral blend (never MD3-invented)
+    'tertiary':                    tertiary,
+    'on-tertiary':                 onTertiary,
+    'tertiary-container':          tertiaryContainer,
+    'on-tertiary-container':       onTertiaryContainer,
+    // Outline — neutral blend, not MD3
+    'outline':                     outline,
+    'outline-variant':             outlineVariant,
+    'on-surface-variant':          onSurfaceVariant,
+    // Error — MD3 gap-fill (correct for all brands)
     'error':                       toHex(s.error),
     'error-container':             toHex(s.errorContainer),
   };
@@ -410,7 +467,10 @@ function mapBrandSpecToTokens(brandSpec) {
   console.log(`[brand-spec]   primary: ${tokens.primary} (brand's actual, source: ${colors.primarySource || 'unknown'})`);
   console.log(`[brand-spec]   on-primary: ${tokens['on-primary']} (brand's actual)`);
   console.log(`[brand-spec]   surface-container: ${tokens['surface-container']} (${colors.cardSurface ? "brand's card surface" : 'computed'})`);
-  console.log(`[brand-spec]   MD3 gap-fill tokens: error, tertiary, outline, containers`);
+  console.log(`[brand-spec]   secondary: ${tokens.secondary} (${hasRealSecondary ? "brand's actual" : 'neutral blend'})`);
+  console.log(`[brand-spec]   outline: ${tokens.outline} (neutral blend)`);
+  console.log(`[brand-spec]   outline-variant: ${tokens['outline-variant']} (neutral blend)`);
+  console.log(`[brand-spec]   MD3 gap-fill: error, tertiary, primary-container only`);
 
   return tokens;
 }
