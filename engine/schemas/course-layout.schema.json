@@ -87,6 +87,11 @@
           "enum": ["standard", "narrow", "wide", "full"],
           "description": "Controls the max-width of this section's content. standard=max-w-6xl (default), narrow=max-w-3xl (focused reading), wide=max-w-7xl (visual components), full=edge-to-edge background with contained inner content."
         },
+        "sectionBg": {
+          "type": "string",
+          "enum": ["default", "accent"],
+          "description": "Section background treatment. 'accent' = brand primary color background. 'default' = brand background (white/dark). When absent, falls back to frequency formula. AI sets this per section based on content type."
+        },
         "components": {
           "type": "array",
           "description": "Ordered components within this section. 1-6 components per section.",

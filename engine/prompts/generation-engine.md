@@ -300,6 +300,24 @@ Not every section should use the same content width. Set `"sectionWidth"` on eac
 
 ---
 
+## Section Background — Accent vs Default
+
+Set `"sectionBg"` on each section to control whether it gets the brand's accent color background or the default background:
+
+| Value | When to Use |
+|---|---|
+| `"accent"` | **Impact sections:** stat-callout, pullquote, key-term, full-bleed — sections where bold brand color creates visual emphasis. Use for 2-4 sections per course. |
+| `"default"` | **Interactive/dense sections:** MCQ, flashcard, tabs, accordion, checklist, data-table, comparison, branching — sections where readability and interaction are priority. Also text-heavy sections. |
+
+**Rules:**
+- Hero (section-00) does NOT need sectionBg — it controls its own background
+- **Never** set `"accent"` on sections containing MCQ, flashcard, or tabs — these need high-contrast readable surfaces for interaction
+- **Never** put two accent sections back-to-back — space them with 2+ default sections between
+- Use accent sections to create **visual punctuation** — a bold brand-color moment that breaks up the scroll
+- When in doubt, use `"default"` — accent sections should be intentional highlights, not routine
+
+---
+
 ## Anti-Patterns (What NOT to Do)
 
 These are the hallmarks of mediocre AI-generated courses. Avoid them:
@@ -447,6 +465,7 @@ Components are organised into 6 categories. When designing a section, ask yourse
 - For each section, choose a section pattern (or create a new one) and select components
 - Select the best layout variant for each component (see Layout Variants section)
 - Set sectionWidth per section for visual rhythm (see Section Width section)
+- Set sectionBg per section for background treatment (see Section Background section)
 - Write content shaped for each component — component and content are ONE thought
 - Draw from multiple content areas per section as needed — don't mirror the research structure
 - Write image prompts for every visual component
@@ -509,6 +528,7 @@ Output a single JSON object matching the `course-layout.schema.json` schema:
       "sectionId": "section-00",
       "title": "",
       "sectionWidth": "full",
+      "sectionBg": "default",
       "components": [
         {
           "componentId": "comp-000",
@@ -564,6 +584,9 @@ Before finalizing your output, verify:
 - [ ] divider components used sparingly (0-4) at natural topic transitions
 - [ ] Components with variants use at least 2 different variants per type (no same variant 3+ times)
 - [ ] At least 3 different sectionWidth values used across the course (not all standard)
+- [ ] sectionBg set on every section: 2-4 accent sections for visual punctuation, rest default
+- [ ] No accent sections containing MCQ, flashcard, or tabs
+- [ ] No two accent sections back-to-back
 - [ ] Variant choices match content (read when_to_use guidance in component-library.json)
 
 **Content:**

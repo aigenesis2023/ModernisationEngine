@@ -365,7 +365,9 @@ function mapBrandSpecToTokens(brandSpec) {
   // Light brand: step slightly darker from background (#ffffff → #f8f8f8)
   // Dark brand: step slightly lighter from background (#0a0a0a → #161616)
   const cardSurface = colors.cardSurface || safeBackgroundAlt || stepSurface(background, isDark ? 8 : -4);
-  const backgroundAlt = colors.backgroundAlt || stepSurface(background, isDark ? 6 : -2);
+  // backgroundAlt must be a neutral step from background — never the accent/primary color.
+  // brand-spec may set backgroundAlt to the accent (e.g. rep-republic #ff4400 hero bg).
+  const backgroundAlt = safeBackgroundAlt || stepSurface(background, isDark ? 6 : -2);
 
   const tokens = {
     'background':                  background,
@@ -473,7 +475,7 @@ function extractRawFonts(summary) {
  * prompt and return null (caller should exit and wait for --fonts-ready).
  * If all available, return the font object directly.
  */
-async function resolveFonts(extractedCss, brandDesignPath, screenshotPath) {
+async function resolveFonts(extractedCss, brandDesignPath, screenshotPath, brandSpecTypo) {
   const summary = extractedCss.summary || {};
   const raw = extractedCss.raw || {};
   const rawFonts = extractRawFonts(summary);
@@ -521,6 +523,9 @@ ${brandDesign}
 - Headline font (not on Google Fonts): ${rawFonts.headline || 'unknown'}
 - Body font (not on Google Fonts): ${rawFonts.body || 'unknown'}
 - Font weights the brand uses: ${usedWeights.length ? usedWeights.join(', ') : 'unknown'}
+- Headline typography character: ${brandSpecTypo?.headlineCharacter || 'unknown'} (from brand analysis)
+- Body typography character: ${brandSpecTypo?.bodyCharacter || 'unknown'} (from brand analysis)
+- Headline weight: ${brandSpecTypo?.headlineWeight || 'unknown'}
 - Border radius character: ${summary.dominantBorderRadius || 'unknown'} (pill = friendly/modern, sharp = minimal/editorial)
 - Brand accent colours: ${(summary.accentColors || []).map(c => c.hex).join(', ') || 'none detected'}
 - Dark or light brand: ${(summary.backgroundColors || []).some(c => {
@@ -535,7 +540,7 @@ Look at the screenshot. Read the brand description carefully.
 Pick the single best Google Font for HEADLINES and the single best for BODY TEXT.
 
 Prioritise:
-1. Aesthetic fit — it should feel like it belongs on this website, not like a substitute
+1. **Typography CHARACTER match** — match the FEEL of the original: if the headline is "heavy-condensed" or "bold-geometric", pick a condensed/display Google Font (e.g. Oswald, Big Shoulders Display, Anton, Bebas Neue, Barlow Condensed), NOT a standard-weight sans-serif. If "light-elegant", pick a light/thin typeface. The character descriptor above is the strongest signal.
 2. Weight coverage — must support all weights in the list above: ${usedWeights.join(', ')}
 3. Quality — choose fonts that look premium at both display (60px+) and body (16px) sizes
 
@@ -544,6 +549,7 @@ Rules:
 - Verify weight availability before suggesting (use web search if needed)
 - If the brand has only one font, you may suggest the same font for both headline and body
 - Do not suggest Inter or Roboto unless the brand is genuinely corporate/neutral
+- For headline character "heavy-condensed" or "bold-geometric": MUST pick a condensed or display face. Standard sans-serifs (Inter, DM Sans, Source Sans) are WRONG for these.
 
 Write your answer as a JSON file at: engine/output/font-match.json
 
@@ -799,6 +805,15 @@ async function main() {
   const summary = extractedCss.summary || {};
   console.log(`[ok] Loaded extracted-css.json from: ${extractedCss.sourceUrl}`);
 
+  // ── Load brand-spec typography for font matching guidance ──
+  let brandSpecTypo = null;
+  if (fs.existsSync(BRAND_SPEC)) {
+    try {
+      const specForTypo = JSON.parse(fs.readFileSync(BRAND_SPEC, 'utf-8'));
+      brandSpecTypo = specForTypo.typography || null;
+    } catch (e) { /* ignore parse errors — font matching can proceed without */ }
+  }
+
   // ── Resolve fonts (check Google Fonts availability, subagent if needed) ──
   const brandDesignPath = path.join(OUTPUT_DIR, 'brand-design.md');
   let fonts;
@@ -817,7 +832,7 @@ async function main() {
     if (match.bodyReasoning)    console.log(`[fonts]   body reasoning: ${match.bodyReasoning}`);
   } else {
     // First run: check Google Fonts availability
-    fonts = await resolveFonts(extractedCss, brandDesignPath, SCREENSHOT);
+    fonts = await resolveFonts(extractedCss, brandDesignPath, SCREENSHOT, brandSpecTypo);
     if (!fonts) {
       // Subagent needed — prompt written, exit cleanly
       process.exit(0);

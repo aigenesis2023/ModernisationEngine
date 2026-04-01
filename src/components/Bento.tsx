@@ -12,7 +12,7 @@ export function Bento({ comp, variant, maxW }: Props) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
   const bentoCfg = AR.bento || {};
-  const cardBgs = bentoCfg.cardBgs || ['glass-card', 'bg-surface-container-low', 'bg-surface-container-high', 'glass-card'];
+  const cardBgs = bentoCfg.cardBgs || ['glass-card', 'bg-[var(--ctx-card-bg)]', 'bg-[var(--ctx-card-bg)]', 'glass-card'];
   const imgHover = bentoCfg.imgHover || 'group-hover:scale-110 transition-transform duration-700';
   const cardRound = AR.borderRadius?.card || 'rounded-xl';
 

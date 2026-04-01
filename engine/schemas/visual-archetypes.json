@@ -127,7 +127,7 @@
       },
 
       "bento": {
-        "cardBgs": ["bg-surface-container-low", "glass-card", "bg-surface-container-high", "bg-surface-container"],
+        "cardBgs": ["bg-[var(--ctx-card-bg)]", "glass-card", "bg-[var(--ctx-card-bg)]", "glass-card"],
         "cardShadows": ["", "", "", ""],
         "imgHover": "group-hover:scale-110 transition-transform duration-700"
       },
@@ -196,8 +196,8 @@
 
       "surface": {
         "style": "flat",
-        "card": "bg-surface-container border border-outline-variant/10",
-        "cardAlt": "bg-surface-container-low border border-outline-variant/10",
+        "card": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
+        "cardAlt": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "overlay": "bg-gradient-to-t from-surface-dim/90 via-surface-dim/60 to-transparent",
         "imgBlend": "opacity-50"
       },
@@ -229,7 +229,7 @@
       },
 
       "mcq": {
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-2xl",
         "cardPad": "p-8 md:p-10",
         "choiceBg": "bg-surface-container-low border border-outline-variant/15",
@@ -247,7 +247,7 @@
       },
 
       "flashcard": {
-        "frontBg": "bg-surface-container border border-outline-variant/10",
+        "frontBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "frontRound": "rounded-2xl",
         "backBg": "bg-primary-container",
         "backText": "text-on-primary-container",
@@ -270,7 +270,7 @@
       },
 
       "checklist": {
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-2xl",
         "inputClass": "bg-surface-container-low border-outline-variant text-primary rounded",
         "labelHover": "hover:bg-surface-container-high transition-colors"
@@ -284,14 +284,14 @@
       },
 
       "bento": {
-        "cardBgs": ["bg-surface-container", "bg-surface-container-low", "bg-surface-container-high", "bg-surface-container"],
+        "cardBgs": ["bg-[var(--ctx-card-bg)]", "bg-[var(--ctx-card-bg)]", "glass-card", "bg-[var(--ctx-card-bg)]"],
         "cardShadows": ["", "", "", ""],
         "imgHover": "group-hover:scale-105 transition-transform duration-500"
       },
 
       "stat": {
         "numColor": "text-primary",
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-xl"
       },
 
@@ -304,7 +304,7 @@
       },
 
       "keyTerm": {
-        "cardBg": "bg-surface-container-low border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-xl",
         "accentBorder": "border-b border-outline-variant/20"
       },
@@ -353,8 +353,8 @@
 
       "surface": {
         "style": "flat",
-        "card": "bg-surface-container border border-outline-variant/10",
-        "cardAlt": "bg-surface-container-low border border-outline-variant/10",
+        "card": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
+        "cardAlt": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "overlay": "bg-gradient-to-t from-surface-dim via-surface-dim/75 to-surface-dim/30",
         "imgBlend": "opacity-60"
       },
@@ -386,7 +386,7 @@
       },
 
       "mcq": {
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-3xl",
         "cardPad": "p-8 md:p-10",
         "choiceBg": "bg-surface-container-low border border-outline-variant/15",
@@ -404,7 +404,7 @@
       },
 
       "flashcard": {
-        "frontBg": "bg-surface-container border border-outline-variant/10",
+        "frontBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "frontRound": "rounded-3xl",
         "backBg": "bg-primary-container",
         "backText": "text-on-primary-container",
@@ -427,7 +427,7 @@
       },
 
       "checklist": {
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-3xl",
         "inputClass": "bg-surface-container-low border-outline-variant text-primary rounded-sm",
         "labelHover": "hover:bg-surface-container-high transition-colors"
@@ -441,14 +441,14 @@
       },
 
       "bento": {
-        "cardBgs": ["bg-surface-container", "bg-surface-container-low", "bg-surface-container-high", "bg-surface-container"],
+        "cardBgs": ["bg-[var(--ctx-card-bg)]", "bg-[var(--ctx-card-bg)]", "glass-card", "bg-[var(--ctx-card-bg)]"],
         "cardShadows": ["shadow-sm", "", "shadow-sm", ""],
         "imgHover": "group-hover:scale-105 transition-transform duration-600"
       },
 
       "stat": {
         "numColor": "text-primary",
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-2xl"
       },
 
@@ -461,7 +461,7 @@
       },
 
       "keyTerm": {
-        "cardBg": "bg-surface-container border border-outline-variant/10",
+        "cardBg": "bg-[var(--ctx-card-bg)] border border-outline-variant/10",
         "cardRound": "rounded-2xl",
         "accentBorder": "border-l-3 border-primary/50"
       },
@@ -499,7 +499,7 @@
       "_description": "Soft, approachable, friendly. Organic shapes. Warm surfaces. Soft gradients.",
       "_extends": "editorial",
       "_overrides": {
-        "surface.card": "bg-surface-container/80 border border-outline-variant/15",
+        "surface.card": "bg-[var(--ctx-card-bg)] border border-outline-variant/15",
         "accent.intensity": "medium",
         "shadow.card": "shadow-lg shadow-black/5"
       }
@@ -543,8 +543,8 @@
 
       "surface": {
         "style": "flat",
-        "card": "bg-surface-container border-2 border-on-surface/80",
-        "cardAlt": "bg-surface-container-low border-2 border-on-surface/60",
+        "card": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/80",
+        "cardAlt": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/60",
         "overlay": "bg-gradient-to-t from-surface-dim/95 via-surface-dim/70 to-transparent",
         "imgBlend": "opacity-70"
       },
@@ -576,7 +576,7 @@
       },
 
       "mcq": {
-        "cardBg": "bg-surface-container border-2 border-on-surface/80",
+        "cardBg": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/80",
         "cardRound": "rounded-none",
         "cardPad": "p-8 md:p-10",
         "choiceBg": "bg-background border-2 border-on-surface/60",
@@ -594,7 +594,7 @@
       },
 
       "flashcard": {
-        "frontBg": "bg-surface-container border-2 border-on-surface/80",
+        "frontBg": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/80",
         "frontRound": "rounded-none",
         "backBg": "bg-primary",
         "backText": "text-on-primary",
@@ -617,7 +617,7 @@
       },
 
       "checklist": {
-        "cardBg": "bg-surface-container border-2 border-on-surface/80",
+        "cardBg": "bg-[var(--ctx-card-bg)] border-2 border-on-surface/80",
         "cardRound": "rounded-none",
         "inputClass": "bg-background border-2 border-on-surface text-primary rounded-none",
         "labelHover": "hover:bg-primary/10 transition-colors"
@@ -631,7 +631,7 @@
       },
 
       "bento": {
-        "cardBgs": ["bg-primary", "bg-surface-container", "bg-surface-container-low", "bg-background"],
+        "cardBgs": ["bg-primary", "bg-[var(--ctx-card-bg)]", "bg-[var(--ctx-card-bg)]", "bg-background"],
         "cardShadows": ["", "", "", ""],
         "imgHover": "group-hover:scale-103 transition-transform duration-300"
       },

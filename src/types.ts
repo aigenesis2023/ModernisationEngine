@@ -15,6 +15,7 @@ export interface Section {
   title?: string;
   sectionId?: string;
   sectionWidth?: 'narrow' | 'standard' | 'wide' | 'full';
+  sectionBg?: 'default' | 'accent';
   showIf?: Record<string, string>;
   components: Component[];
 }

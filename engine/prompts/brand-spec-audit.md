@@ -22,8 +22,9 @@ Answer each question with the specified value type. Do not add commentary — ju
 ### Color Strategy (Q1–Q6)
 
 **Q1. accentSectionBg** (boolean)
-Does the brand use its accent/primary color as full-width section backgrounds?
-Look for: large colored bands spanning the page width behind content sections.
+Does the brand use its accent/primary color as FULL-WIDTH SECTION BACKGROUNDS covering >30% of the viewport height?
+Look for: large solid-colored bands spanning the full page width behind content sections (text, cards, stats).
+**These do NOT qualify:** a hero gradient that fades to another color, a colored top bar or navigation, a colored button or CTA strip, a thin accent border or divider, or a background that only appears behind a single small element. Only solid full-width content sections count.
 → `true` or `false`
 
 **Q2. cardsOnAccentBg** (string: "cards" | "direct" | "none")

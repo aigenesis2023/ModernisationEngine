@@ -812,6 +812,8 @@ function computeCssDerivedSpec(summary, isDark, dembrandtPalette) {
     },
     isDark,
     primarySource,
+    // Internal: raw CSS background colors for cross-validation in mergeBrandSpec()
+    _backgroundColors: summary.backgroundColors || [],
   };
 }
 
@@ -937,11 +939,22 @@ RESPOND WITH ONLY THE JSON OBJECT. No markdown fences, no explanation.`,
 function mergeBrandSpec(cssDerivedSpec, visionResult) {
   const warnings = [];
 
-  // Cross-validation 1: accentSectionBg vs CSS backgrounds
-  // If Vision says no accent sections but CSS found primary as a section background
-  if (!visionResult.accentSectionBg && cssDerivedSpec.colors.primary) {
-    // Check if primary appears in background colors (would need raw data — skip for now, just note)
-    // This is a soft check — Vision AI is the authority for strategy questions
+  // Cross-validation 1: accentSectionBg — CSS volume check
+  // If Vision says accent sections exist, but CSS extraction shows the primary color
+  // only on small interactive elements (buttons, links) and NOT on section backgrounds,
+  // override to false. This catches hero gradients and colored bars being misclassified.
+  if (visionResult.accentSectionBg && cssDerivedSpec.colors.primary && cssDerivedSpec._backgroundColors) {
+    const primary = cssDerivedSpec.colors.primary.toLowerCase();
+    const bgColors = cssDerivedSpec._backgroundColors.map(c => (c.hex || '').toLowerCase());
+    const primaryInBg = bgColors.includes(primary);
+    if (!primaryInBg) {
+      warnings.push(
+        `accentSectionBg override: Vision AI said true, but CSS extraction found primary (${primary}) ` +
+        `only on interactive elements — not on any section backgrounds (${bgColors.join(', ') || 'none'}). ` +
+        `Overriding to false. The brand likely uses accent only for buttons/icons/borders, not full sections.`
+      );
+      visionResult.accentSectionBg = false;
+    }
   }
 
   // Cross-validation 2: isDark — CSS is ground truth for luminance

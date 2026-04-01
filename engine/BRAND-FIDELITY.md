@@ -428,7 +428,7 @@ Test brands: rep-republic (vivid orange, neo-brutalist), sprig (dark, cyan, tech
 
 **EXIT CRITERIA MET (2026-03-31).** Tested: rep-republic (light, orange, neo-brutalist), darkfolio (dark, purple, tech-modern), coursesite (light, lavender, minimalist). All strategy flags verified accurate. Prompt tuned for Q2/Q3 hybrid pattern (cards + headings on accent). Merge logic fixed for textDirectlyOnAccent mapping. Known limitation: CSS extraction misses accent colors from gradients/images — Phase 2 concern.
 
-### Phase 2: Direct Color Extraction (Replace MD3)
+### Phase 2: Direct Color Extraction (Replace MD3) ✅ COMPLETE
 
 #### Phase 2a-revised: dembrandt Color Extraction (replaces Vibrant.js)
 
@@ -470,13 +470,13 @@ CSS extraction misses accent colors from gradients and images (confirmed: course
 - Update `qa-course.js` if token structure changes (AUDIT 7)
 - Test: do surfaces match the brand's actual backgrounds? Is the primary color the exact hex from the brand?
 
-### Phase 3: Adaptive Color Application
+### Phase 3: Adaptive Color Application ✅ COMPLETE
 - Refactor surfaceRhythm in `render.tsx` to read `colorStrategy` flags
 - When `cardsOnAccentBg: true`, components on primary sections render in neutral cards
 - When `textDirectlyOnAccent: false`, only headings/stats appear on accent bg
 - Test: does the Rep Republic output match the brand's card-on-orange pattern?
 
-### Phase 4: Clean Color Architecture
+### Phase 4: Clean Color Architecture ✅ COMPLETE
 
 **Goal:** Make the engine work correctly for ANY brand URL by eliminating the two systemic problems that remain after Phase 3: (1) invented tinted surfaces from MD3, and (2) position-locked section backgrounds that fight the authoring layer.
 
@@ -514,7 +514,7 @@ Nothing else. No derived tints. No `surface-container-high`. Components always s
 
 ---
 
-#### Phase 4b: AI-set section backgrounds (replace frequency formula)
+#### Phase 4b: AI-set section backgrounds (replace frequency formula) ✅ COMPLETE
 
 **Problem:** Section backgrounds assigned by `(sectionIndex - 1) % frequency === 0`. Locks accent sections to positions 1, 4, 7, 10... regardless of content. Fights the authoring layer — adding a section shifts all downstream bg assignments.
 
@@ -534,7 +534,7 @@ Nothing else. No derived tints. No `surface-container-high`. Components always s
 
 ---
 
-#### Phase 4c: data-context cascade (contextual component tokens)
+#### Phase 4c: data-context cascade (contextual component tokens) ✅ COMPLETE
 
 **Problem:** `.card-on-accent` in theme-template.css resets `--color-on-surface` via CSS variable overrides. This works for most cases but Tailwind v4 bakes some fractional opacity utilities as static `color-mix()` calls, making cascade overrides unreliable in edge cases. More importantly, new components added in the authoring layer need automatic correct behaviour in any section context — not per-component logic.
 
@@ -565,7 +565,7 @@ Components that render inside sections use `bg-[var(--ctx-card-bg)]` for their c
 
 ---
 
-#### Phase 4d: Vision AI volume check (accent over-classification)
+#### Phase 4d: Vision AI volume check (accent over-classification) ✅ COMPLETE
 
 **Problem:** Vision AI classifies coursesite as `accentSectionBg: true` because the hero gradient "looks purple". The actual criterion should be: does the brand use its primary as a FULL SECTION BACKGROUND, or only as a small accent element (button, icon, border)?
 
@@ -579,11 +579,12 @@ Also cross-validate: if CSS extraction shows primary only on small elements (but
 
 ---
 
-### Phase 5: Shape/Typography Refinement
-- Ensure archetype recipes drive shape only (not color strategy)
-- Improve font substitution for condensed/display faces
-- Expand font weight range to 100-900
-- Flow image treatment (`brand-spec.json imageStyle`) into generate-images.js prompts
+### Phase 5: Shape/Typography Refinement ✅ COMPLETE
+
+- ✅ Archetype recipes audited — all card backgrounds use `--ctx-card-bg`, remaining `bg-surface-container` uses are hover states, inputs, tabs, callouts (functional, not card surfaces)
+- ✅ Font substitution prompt improved — `resolveFonts()` now receives `brandSpecTypo` (headlineCharacter, bodyCharacter, headlineWeight). Prompt prioritises typography CHARACTER match over generic aesthetic fit. Explicit rule: "heavy-condensed" or "bold-geometric" → MUST pick condensed/display face.
+- ✅ Font weight range expanded to 100-900 (was 300-700) in both `generateHeadV4()` Google Fonts URLs in build-course.js
+- ✅ Image treatment flows from brand-spec.json — `generate-images.js` reads `imageStyle.treatment`, `colorTemp`, `contrast` from brand-spec.json (structured) with brand-design.md prose as fallback
 
 ### Multi-Brand Validation (after each phase)
 Test brands: darkfolio (dark, purple), coursesite (light, lavender-purple), rep-republic (light, vivid orange neo-brutalist). *(sprig, crimzon, landio, najaf Framer sites are DOWN as of 2026-03-31.)*
@@ -616,3 +617,8 @@ Score: side-by-side brand URL vs course output. Focus on: color accuracy, typogr
 | 2026-03-31 | Phase 3: Adaptive color application. colorStrategy passed to RenderContext. surfaceRhythm respects accentSectionBg/frequency flags. .card-on-accent CSS reset for neutral cards on accent sections. Components wrapped in cards when cardsOnAccentBg is true. | Phase 3 | **COMPLETE** |
 | 2026-03-31 | Phase 4 plan locked: Clean Color Architecture. Two bg states only (background + primary). AI-set sectionBg in course-layout.json. data-context cascade. Remove all MD3 surface tinting. | Phase 4 | **PLANNED** |
 | 2026-03-31 | Phase 4a: Removed MD3 neutralVariantTone() fallbacks from mapBrandSpecToTokens(). stepSurface() moved before cardSurface. surface-container and surface-container-low now derive from brand background only. Kills peach/salmon tinting for vivid primary brands. | Phase 4a | **COMPLETE** |
+| 2026-04-01 | Phase 4b: AI-set section backgrounds. Added `sectionBg` field ("accent"/"default") to course-layout.schema.json + types.ts. Updated generation-engine.md with rules (accent for stat-callout/pullquote/key-term, default for MCQ/flashcard/tabs). render.tsx assembleSection() respects sectionBg with frequency formula as fallback. | Phase 4b | **COMPLETE** |
+| 2026-04-01 | Phase 4c: Universal component colour contract. Added `--ctx-card-bg`/`--ctx-card-text`/`--ctx-card-text-muted` to theme-template.css (:root + [data-context="accent"] override). Added `data-context="accent"` to accent section wrappers in render.tsx. Updated glass-card to use `color-mix(--ctx-card-bg, 80%)`. Replaced `bg-surface-container` with `bg-[var(--ctx-card-bg)]` across all archetype card configs (surface.card, cardBg, frontBg, bento.cardBgs). QA passed (0 errors). | Phase 4c | **COMPLETE** |
+| 2026-04-01 | Phase 4d: Vision AI volume check. Updated Q1 in brand-spec-audit.md with >30% viewport threshold + explicit exclusions (hero gradients, buttons, top bars). Added CSS cross-validation in mergeBrandSpec(): if primary only appears on interactive elements (buttons, links) and NOT on section backgrounds, force-overrides accentSectionBg to false. Added `_backgroundColors` to computeCssDerivedSpec() return for the check. | Phase 4d | **COMPLETE** |
+| 2026-04-01 | Full run: rep-republic (biohacking + longevity). Found surface-container-low bug: backgroundAlt was #ff4400 (accent), making tabs/stat-callout sections orange. Fixed: backgroundAlt now uses safeBackgroundAlt (filters out primary) with stepSurface fallback. Also found isDark misclassification (brand-describe agent called it dark due to hero, CSS said light). Fixed manually; root cause is brand-describe agent not respecting CSS theme detection. | Bug fix | **COMPLETE** |
+| 2026-04-01 | Phase 5: Shape/Typography Refinement. (1) Archetype audit clean — all card bgs use --ctx-card-bg. (2) Font substitution prompt improved: receives brandSpecTypo (headlineCharacter, bodyCharacter, headlineWeight), prioritises character match, explicit condensed/display rule. (3) Google Fonts weight range expanded 100-900 (was 300-700). (4) generate-images.js reads brand-spec.json imageStyle (treatment/colorTemp/contrast) directly, falls back to brand-design.md. QA passed. | Phase 5 | **COMPLETE** |

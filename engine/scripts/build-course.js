@@ -221,7 +221,7 @@ function generateHead(tokens, courseTitle) {
   // Google Fonts URL — request both font families with useful weights
   const fontFamilies = [...new Set([headlineFont, bodyFont, labelFont])];
   const googleFontsUrl = 'https://fonts.googleapis.com/css2?' +
-    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@300;400;500;600;700`).join('&') +
+    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@100;200;300;400;500;600;700;800;900`).join('&') +
     '&display=swap';
 
   // ── Typography scale — brand weight + engine defaults ────────────
@@ -597,7 +597,7 @@ function generateHeadV4(tokens, courseTitle, compiledCSS) {
 
   const fontFamilies = [...new Set([headlineFont, bodyFont, labelFont])];
   const googleFontsUrl = 'https://fonts.googleapis.com/css2?' +
-    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@300;400;500;600;700`).join('&') +
+    fontFamilies.map(f => `family=${f.replace(/ /g, '+')}:wght@100;200;300;400;500;600;700;800;900`).join('&') +
     '&display=swap';
 
   return `<meta charset="utf-8"/>

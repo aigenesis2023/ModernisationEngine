@@ -252,7 +252,24 @@ function assembleSection(
     const { AR, colorStrategy } = useRender();
     sectionColorStrategy = colorStrategy;
     const rhythm = ((AR as any).surfaceRhythm || []) as string[];
-    if (rhythm.length > 0) {
+
+    // Phase 4b: AI-set sectionBg takes priority over frequency formula
+    const sectionBg = (section as any).sectionBg as string | undefined;
+
+    if (sectionBg === 'accent') {
+      isAccentSection = true;
+      rhythmBg = 'bg-primary';
+    } else if (sectionBg === 'default') {
+      isAccentSection = false;
+      // Use safe neutral rhythm for explicitly default sections
+      if (rhythm.length > 0) {
+        const safeRhythm = rhythm.filter(cls =>
+          !cls.includes('bg-primary') && !cls.includes('bg-surface-container')
+        );
+        rhythmBg = safeRhythm.length > 0 ? safeRhythm[(sectionIndex - 1) % safeRhythm.length] : '';
+      }
+    } else if (rhythm.length > 0) {
+      // Fallback: existing frequency formula for layouts without sectionBg
       if (!colorStrategy) {
         rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
       } else if (!colorStrategy.accentSectionBg) {
@@ -264,10 +281,6 @@ function assembleSection(
         if (isAccentSection) {
           rhythmBg = 'bg-primary';
         } else {
-          // When brand uses accent sections, non-accent sections must use only safe neutral
-          // backgrounds. bg-surface-container-* classes can resolve to orange-tinted colors
-          // for brands where surface-container = primary (e.g. rep-republic). Filter them out
-          // and use only bg-background and bg-surface-* that don't derive from primary.
           const safeRhythm = rhythm.filter(cls =>
             !cls.includes('bg-primary') && !cls.includes('bg-surface-container')
           );
@@ -348,7 +361,8 @@ function assembleSection(
   // rhythmBg was pre-computed above (before the component loop) so card wrapping
   // could be applied at component render time instead of via post-hoc regex.
   if (rhythmBg) {
-    sectionBlock = `<div class="${rhythmBg}">\n${sectionBlock}\n</div>`;
+    const contextAttr = isAccentSection ? ' data-context="accent"' : '';
+    sectionBlock = `<div class="${rhythmBg}"${contextAttr}>\n${sectionBlock}\n</div>`;
   }
 
   if (section.showIf && Object.keys(section.showIf).length > 0) {

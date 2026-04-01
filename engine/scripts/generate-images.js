@@ -353,16 +353,45 @@ async function main() {
   }
   const layout = JSON.parse(fs.readFileSync(LAYOUT_PATH, 'utf-8'));
 
-  // Determine image treatment from brand description (written by Phase 2)
+  // Determine image treatment — prefer brand-spec.json (structured), fall back to brand-design.md (prose)
   let treatment;
+  const BRAND_SPEC_PATH = path.resolve('engine/output/brand-spec.json');
 
-  if (fs.existsSync(BRAND_DESIGN_PATH)) {
+  if (fs.existsSync(BRAND_SPEC_PATH)) {
+    try {
+      const spec = JSON.parse(fs.readFileSync(BRAND_SPEC_PATH, 'utf-8'));
+      const img = spec.imageStyle || {};
+      const parts = [];
+      // Treatment
+      const treatmentMap = {
+        'dramatic-dark': 'dramatic low-key lighting, deep shadows',
+        'bright-airy': 'clean bright natural lighting, soft even illumination',
+        'monochrome': 'desaturated monochrome tones, muted palette',
+        'illustrated': 'clean vector illustration style',
+      };
+      parts.push(treatmentMap[img.treatment] || 'balanced professional lighting');
+      // Color temperature
+      if (img.colorTemp === 'warm') parts.push('warm colour tones');
+      else if (img.colorTemp === 'cool') parts.push('cool blue-toned palette');
+      // Contrast
+      if (img.contrast === 'high') parts.push('dynamic artistic composition');
+      else if (img.contrast === 'low') parts.push('soft subtle composition');
+      treatment = parts.join(', ');
+      console.log(`Image treatment (from brand-spec.json): ${treatment}\n`);
+    } catch (e) {
+      treatment = null; // fall through to brand-design.md
+    }
+  }
+
+  if (!treatment && fs.existsSync(BRAND_DESIGN_PATH)) {
     const brandDescription = fs.readFileSync(BRAND_DESIGN_PATH, 'utf-8');
     treatment = extractTreatmentFromDescription(brandDescription);
-    console.log(`Image treatment: ${treatment}\n`);
-  } else {
+    console.log(`Image treatment (from brand-design.md): ${treatment}\n`);
+  }
+
+  if (!treatment) {
     treatment = 'balanced professional lighting, clean composition';
-    console.log(`brand-design.md not found — using default treatment: ${treatment}\n`);
+    console.log(`No brand data found — using default treatment: ${treatment}\n`);
   }
 
   // Clear existing images — always regenerate
