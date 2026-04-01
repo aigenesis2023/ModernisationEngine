@@ -818,6 +818,10 @@ ${templateLibraryHtml}
 </main>
 
 <script type="application/json" id="course-data">${JSON.stringify(layout).replace(/<\//g, '<\\/')}</script>
+<script type="application/json" id="surface-rhythm">${JSON.stringify({
+  rhythm: AR.surfaceRhythm || [],
+  accentSectionBg: colorStrategy?.accentSectionBg ?? true,
+}).replace(/<\//g, '<\\/')}</script>
 <script type="application/json" id="category-meta">${JSON.stringify({
   map: CATEGORY_MAP,
   colors: {

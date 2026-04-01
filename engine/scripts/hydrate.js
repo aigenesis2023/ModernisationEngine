@@ -1165,6 +1165,65 @@
       var catColors = categoryMeta.colors || {};
       var catLabels = categoryMeta.labels || {};
 
+      // ── Surface rhythm recalculation ────────────────────────────────────
+      // Reads the rhythm array embedded at build time and reapplies section
+      // backgrounds based on current DOM order. Called after every authoring
+      // mutation (add, delete, reorder, add-section).
+      var surfaceRhythmData = { rhythm: [], accentSectionBg: true };
+      var rhythmEl = document.getElementById('surface-rhythm');
+      if (rhythmEl) {
+        try { surfaceRhythmData = JSON.parse(rhythmEl.textContent); } catch(e) {}
+      }
+
+      function recalcSectionBackgrounds() {
+        var rhythm = surfaceRhythmData.rhythm || [];
+        if (rhythm.length === 0) return;
+        var allowAccent = surfaceRhythmData.accentSectionBg !== false;
+
+        // Build the neutral rhythm (no bg-primary, no bg-surface-container)
+        var neutralRhythm = rhythm.filter(function(cls) {
+          return cls.indexOf('bg-primary') === -1 && cls.indexOf('bg-surface-container') === -1;
+        });
+        if (neutralRhythm.length === 0) neutralRhythm = rhythm;
+
+        // All rhythm classes that might be on a wrapper (for removal)
+        var allBgClasses = rhythm.concat(['bg-primary']);
+
+        // Walk all course section wrappers in DOM order
+        var wrappers = document.querySelectorAll('[data-course-section]');
+        var nonHeroIndex = 0;
+        wrappers.forEach(function(wrapper) {
+          // Strip old background classes
+          allBgClasses.forEach(function(cls) { wrapper.classList.remove(cls); });
+          wrapper.removeAttribute('data-context');
+
+          // Check if this section has sectionBg override in courseData
+          var sectionId = wrapper.getAttribute('data-course-section');
+          var sectionBg = null;
+          if (courseData && courseData.sections) {
+            for (var i = 0; i < courseData.sections.length; i++) {
+              if (courseData.sections[i].sectionId === sectionId) {
+                sectionBg = courseData.sections[i].sectionBg || null;
+                break;
+              }
+            }
+          }
+
+          // Apply background
+          if (sectionBg === 'accent' && allowAccent) {
+            wrapper.classList.add('bg-primary');
+            wrapper.setAttribute('data-context', 'accent');
+          } else if (sectionBg === 'default' || !allowAccent) {
+            var cls = neutralRhythm[nonHeroIndex % neutralRhythm.length];
+            if (cls) wrapper.classList.add(cls);
+          } else {
+            var cls = neutralRhythm[nonHeroIndex % neutralRhythm.length];
+            if (cls) wrapper.classList.add(cls);
+          }
+          nonHeroIndex++;
+        });
+      }
+
       var authoringActive = false;
       var entries = [];
 
@@ -1538,6 +1597,7 @@
             if (idx > -1) entries.splice(idx, 1);
             entry.wrapper.remove();
             console.log('Authoring: deleted ' + entry.compType + ' section');
+            recalcSectionBackgrounds();
           });
 
           // Move block handlers (component = individual move, heading = section move)
@@ -1759,11 +1819,16 @@
           '</div>';
         headingEl.style.opacity = '1';
 
-        // Insert into DOM (before initEntries wraps it)
+        // Wrap in a data-course-section div so recalcSectionBackgrounds can style it
+        var sectionWrapper = document.createElement('div');
+        sectionWrapper.setAttribute('data-course-section', newSectionId);
+        sectionWrapper.appendChild(headingEl);
+
+        // Insert into DOM (before initEntries wraps inner elements)
         if (insertAfterWrapper && insertAfterWrapper.nextSibling) {
-          insertAfterWrapper.parentElement.insertBefore(headingEl, insertAfterWrapper.nextSibling);
+          insertAfterWrapper.parentElement.insertBefore(sectionWrapper, insertAfterWrapper.nextSibling);
         } else if (insertAfterWrapper) {
-          insertAfterWrapper.parentElement.appendChild(headingEl);
+          insertAfterWrapper.parentElement.appendChild(sectionWrapper);
         }
 
         // Let initEntries wrap it with toolbar
@@ -1783,6 +1848,7 @@
         insertAddButtons();
         showAddButtons(true);
         console.log('Authoring: added section heading (id: ' + newSectionId + ')');
+        recalcSectionBackgrounds();
       }
 
       function addComponent(type, insertAfterWrapper) {
@@ -1901,6 +1967,7 @@
         insertAddButtons();
         showAddButtons(true);
         console.log('Authoring: added ' + type + ' (id: ' + newId + ')');
+        recalcSectionBackgrounds();
       }
 
       // Placeholder JSON for new components (matches template library data)
@@ -2139,6 +2206,7 @@
         insertAddButtons();
         showAddButtons(true);
         console.log('Authoring: moved ' + compId + (direction === -1 ? ' up' : ' down'));
+        recalcSectionBackgrounds();
       }
 
       // ── Swap using cloned DOM nodes ───────────────────────────────────

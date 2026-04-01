@@ -259,24 +259,20 @@ function assembleSection(
     const sectionBg = (rawSectionBg === 'accent' && colorStrategy && !colorStrategy.accentSectionBg)
       ? 'default' : rawSectionBg;
 
+    // Neutral rhythm: exclude only bg-primary (keep all surface variants)
+    const neutralRhythm = rhythm.filter(cls => cls !== 'bg-primary');
+
     if (sectionBg === 'accent') {
       isAccentSection = true;
       rhythmBg = 'bg-primary';
     } else if (sectionBg === 'default') {
       isAccentSection = false;
-      // Use safe neutral rhythm for explicitly default sections
-      if (rhythm.length > 0) {
-        const safeRhythm = rhythm.filter(cls =>
-          !cls.includes('bg-primary') && !cls.includes('bg-surface-container')
-        );
-        rhythmBg = safeRhythm.length > 0 ? safeRhythm[(sectionIndex - 1) % safeRhythm.length] : '';
-      }
+      rhythmBg = neutralRhythm.length > 0 ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length] : '';
     } else if (rhythm.length > 0) {
       // Fallback: existing frequency formula for layouts without sectionBg
       if (!colorStrategy) {
         rhythmBg = rhythm[(sectionIndex - 1) % rhythm.length];
       } else if (!colorStrategy.accentSectionBg) {
-        const neutralRhythm = rhythm.filter(cls => !cls.includes('bg-primary'));
         rhythmBg = neutralRhythm.length > 0 ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length] : '';
       } else {
         const freq = colorStrategy.accentSectionFrequency || 3;
@@ -284,10 +280,7 @@ function assembleSection(
         if (isAccentSection) {
           rhythmBg = 'bg-primary';
         } else {
-          const safeRhythm = rhythm.filter(cls =>
-            !cls.includes('bg-primary') && !cls.includes('bg-surface-container')
-          );
-          rhythmBg = safeRhythm.length > 0 ? safeRhythm[(sectionIndex - 1) % safeRhythm.length] : '';
+          rhythmBg = neutralRhythm.length > 0 ? neutralRhythm[(sectionIndex - 1) % neutralRhythm.length] : '';
         }
       }
     }
@@ -363,9 +356,12 @@ function assembleSection(
   // ── Apply surfaceRhythm background to non-hero sections ──────────────
   // rhythmBg was pre-computed above (before the component loop) so card wrapping
   // could be applied at component render time instead of via post-hoc regex.
-  if (rhythmBg) {
+  // Every non-hero section gets a data-course-section wrapper (even without a bg class)
+  // so hydrate.js can recalculate backgrounds when the authoring layer mutates sections.
+  if (sectionIndex > 0) {
     const contextAttr = isAccentSection ? ' data-context="accent"' : '';
-    sectionBlock = `<div class="${rhythmBg}"${contextAttr}>\n${sectionBlock}\n</div>`;
+    const bgClass = rhythmBg || '';
+    sectionBlock = `<div class="${bgClass}"${contextAttr} data-course-section="${sectionId}">\n${sectionBlock}\n</div>`;
   }
 
   if (section.showIf && Object.keys(section.showIf).length > 0) {

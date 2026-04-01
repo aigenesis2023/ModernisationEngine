@@ -207,7 +207,7 @@ async function fetchStockPhoto(prompt, dimensions, outputFilename, pexelsQuery =
 // ─── Image generation via SiliconFlow (Tongyi Z-Image-Turbo) ─────────
 async function generateImageSiliconFlow(prompt, dimensions, outputFilename) {
   const { width, height } = dimensions;
-  const enhancedPrompt = `${prompt}, high resolution, sharp details, no text overlays, no watermarks`;
+  const enhancedPrompt = `${prompt}, photorealistic, high resolution, sharp details, no text overlays, no watermarks, no cartoon, no illustration, no anime, no drawing, no sketch, no vector art`;
 
   // SiliconFlow accepts specific image sizes — snap to nearest valid size
   const imageSize = `${width}x${height}`;
@@ -367,7 +367,7 @@ async function main() {
         'dramatic-dark': 'dramatic low-key lighting, deep shadows',
         'bright-airy': 'clean bright natural lighting, soft even illumination',
         'monochrome': 'desaturated monochrome tones, muted palette',
-        'illustrated': 'clean vector illustration style',
+        'illustrated': 'dramatic low-key lighting, stylised atmosphere',
       };
       parts.push(treatmentMap[img.treatment] || 'balanced professional lighting');
       // Color temperature

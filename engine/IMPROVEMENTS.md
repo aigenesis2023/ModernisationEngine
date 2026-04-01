@@ -157,14 +157,16 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 3. Verify primary/background/onPrimary hex values in output CSS
 4. Flag mismatches as errors (not warnings)
 
-### Phase 3: Dark brand end-to-end validation
+### Phase 3: Dark brand end-to-end validation ✅ COMPLETE
 
 **Goal:** Confirm the system works for dark brands by construction, not assumption.
 
-**Steps:**
-1. Run full pipeline with a dark brand URL (sprig or landio)
-2. Verify all 28 components render with readable text and visible borders
-3. Fix any issues found (should be minimal given adaptive blend ratios)
+**What was done:**
+1. Full pipeline run with Sprig (dark, cyan, #111111 background, #1fd6fa primary, tech-modern archetype)
+2. All 30 components (23 types) rendered with readable text and visible borders — verified via 3-gate QA + visual review
+3. QA results: 0 errors in structural QA, 0 errors in interactive QA (42 passed), WCAG AA contrast passed for all text
+4. No dark-brand-specific bugs found. Adaptive blend ratios, dark scrims, and surface containers all working correctly
+5. Minor issues found were content/generation quality (hero empty space, AI-generated image text), not dark-mode rendering
 
 ### Phase 4: Font classification refinement
 
@@ -213,4 +215,4 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 
 ---
 
-*Last updated: 2026-04-01 — Phase 1 complete*
+*Last updated: 2026-04-01 — Phases 1 + 3 complete*

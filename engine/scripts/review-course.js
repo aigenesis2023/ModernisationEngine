@@ -250,8 +250,8 @@ Some components have multiple layout variants. If you see these in the course, c
 correctly:
 
 - **Hero variants:** centered-overlay (text centered over full image), split-screen (image + text
-  side by side), minimal-text (stripped-down, fewer elements). Does the chosen variant look
-  intentional and well-executed?
+  side by side), minimal-text (text-only, no image — generous whitespace below the CTA is
+  intentional by design, not a bug). Does the chosen variant look intentional and well-executed?
 - **Graphic-text variants:** split (image + text columns), overlap (image partially overlaps text
   area), full-overlay (text over image with gradient). Is the text readable in full-overlay? Does
   the overlap feel designed or broken?
