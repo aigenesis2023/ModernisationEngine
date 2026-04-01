@@ -110,7 +110,8 @@ export function TextInput({ comp, maxW }: { comp: Component; maxW: string }) {
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16 bg-surface-container-low');
   const cardClass = `${AR.surface?.card || 'glass-card'} p-6 @3xl:p-12 ${AR.borderRadius?.cardLarge || 'rounded-3xl'}`;
-  const inputClass = 'w-full bg-surface-container-lowest border-outline-variant/20 rounded-xl p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary';
+  const inputRound = AR.borderRadius?.input || AR.borderRadius?.card || 'rounded-xl';
+  const inputClass = `w-full bg-surface-container-lowest border-outline-variant/20 ${inputRound} p-4 focus:ring-2 focus:ring-secondary/50 focus:border-secondary`;
 
   return (
     <section class={secClass} data-component-type="textinput" data-animate="fade-up">
@@ -124,7 +125,7 @@ export function TextInput({ comp, maxW }: { comp: Component; maxW: string }) {
                 <textarea class={`${inputClass} min-h-[80px] resize-y`} placeholder={item.placeholder || ''} rows={2} />
               </div>
             ))}
-            <button class="btn-primary px-8 py-4 rounded-xl font-bold text-on-primary w-full">Submit</button>
+            <button class={`btn-primary px-8 py-4 ${AR.borderRadius?.button || 'rounded-xl'} font-bold text-on-primary w-full`}>Submit</button>
           </div>
         </div>
       </div>
@@ -207,7 +208,7 @@ export function Branching({ comp, variant, maxW }: { comp: Component; variant: s
           {bodyText && <p class="text-body-lg text-on-surface-variant mb-8 italic">{bodyText}</p>}
           <div class="flex flex-col gap-3" data-animate-stagger="fade-up">
             {items.map((item, i) => (
-              <button class={`group flex items-start gap-5 p-5 @3xl:p-6 ${btnBg} rounded-xl text-left ${btnVisuals} w-full`}>
+              <button class={`group flex items-start gap-5 p-5 @3xl:p-6 ${btnBg} ${btnRound} text-left ${btnVisuals} w-full`}>
                 <div class={`w-10 h-10 rounded-full ${letterBg} flex-shrink-0 flex items-center justify-center ${letterText} font-bold`}>{String.fromCharCode(65 + i)}</div>
                 <div class="flex-1 min-w-0">
                   <div class="text-h4 text-on-surface" data-edit-path={`_items.${i}.title`} dangerouslySetInnerHTML={{ __html: esc(item.title || '') }} />
@@ -609,6 +610,7 @@ export function Checklist({ comp, variant, maxW }: { comp: Component; variant: s
   const cardClass = mc((clCfg as any).cardBg || AR.surface?.card || 'glass-card', 'p-6 @3xl:p-8', (clCfg as any).cardRound || AR.borderRadius?.cardLarge || 'rounded-3xl');
   const inputClass = (clCfg as any).inputClass || 'w-7 h-7 rounded border-outline-variant text-secondary focus:ring-secondary bg-transparent cursor-pointer';
   const labelHover = (clCfg as any).labelHover || 'hover:bg-surface-variant/50 transition-colors';
+  const itemRound = AR.borderRadius?.card || 'rounded-xl';
 
   if (variant === 'card-style') {
     return (
@@ -637,7 +639,7 @@ export function Checklist({ comp, variant, maxW }: { comp: Component; variant: s
             <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
             <div class="space-y-2">
               {items.map((item, i) => (
-                <label class={`flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}`}>
+                <label class={`flex items-center gap-5 p-5 ${itemRound} cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}`}>
                   <div class="w-8 h-8 rounded-full bg-primary/10 flex-shrink-0 flex items-center justify-center text-primary font-bold text-sm">{i + 1}</div>
                   <input class={inputClass} type="checkbox" />
                   <span class="text-on-surface font-medium" data-edit-path={`_items.${i}.text`}>{esc(item.text || item.title || '')}</span>
@@ -659,7 +661,7 @@ export function Checklist({ comp, variant, maxW }: { comp: Component; variant: s
           <h2 class="font-headline text-h2 mb-8" dangerouslySetInnerHTML={{ __html: title }} />
           <div class="space-y-2">
             {items.map((item, i) => (
-              <label class={`flex items-center gap-5 p-5 rounded-xl cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}`}>
+              <label class={`flex items-center gap-5 p-5 ${itemRound} cursor-pointer group bg-surface-container/30 border border-outline-variant/10 ${labelHover}`}>
                 <input class={inputClass} type="checkbox" />
                 <span class="text-on-surface font-medium" data-edit-path={`_items.${i}.text`}>{esc(item.text || item.title || '')}</span>
               </label>
@@ -755,7 +757,7 @@ export function Narrative({ comp, variant, maxW }: { comp: Component; variant: s
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16').replace(/\bpy-(\d+)\b/g, (_m: string, n: string) => parseInt(n) > 16 ? 'py-16' : _m);
   const cardClass = nCfg.cardBg || AR.surface?.card || 'glass-card';
-  const cardRound = nCfg.cardRound || 'rounded-[2.5rem]';
+  const cardRound = nCfg.cardRound || AR.borderRadius?.cardLarge || 'rounded-[2.5rem]';
   const navPrev = nCfg.navPrev || 'w-11 h-11 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container transition-colors';
   const navNext = nCfg.navNext || 'w-11 h-11 rounded-full bg-primary text-on-primary flex items-center justify-center';
 
@@ -1152,7 +1154,7 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
             </div>
             <div class={`@3xl:w-80 flex-shrink-0 ${cardClass} ${cardRound} p-4 space-y-1 self-start`}>
               {markers.map((m: any, i: number) => (
-                <div class="flex items-start gap-4 p-4 rounded-xl hover:bg-surface-container/50 transition-colors">
+                <div class={`flex items-start gap-4 p-4 ${AR.borderRadius?.card || 'rounded-xl'} hover:bg-surface-container/50 transition-colors`}>
                   <div class="w-8 h-8 rounded-full bg-primary flex-shrink-0 flex items-center justify-center text-on-primary text-xs font-bold">{i + 1}</div>
                   <div>
                     <div class="font-bold text-on-surface text-sm" data-edit-path={`_markers.${i}.label`}>{esc(m.label || '')}</div>
@@ -1177,8 +1179,8 @@ export function LabeledImage({ comp, variant, maxW }: { comp: Component; variant
           {imgSrc ? <img alt={imgAlt} class={`w-full max-h-[65vh] object-cover ${imgRound}`} src={imgSrc} /> : <div class={`w-full h-[400px] bg-surface-container ${imgRound} flex items-center justify-center`}><span class="material-symbols-outlined text-6xl text-on-surface-variant/30">image</span></div>}
           {hasImage && markers.map((m: any, i: number) => (
             <div class="absolute group z-10" style={`left:${m.x}%;top:${m.y}%`}>
-              <div class="w-8 h-8 rounded-full bg-primary border-2 border-white shadow-lg cursor-pointer hover:scale-125 transition-transform flex items-center justify-center text-on-primary text-xs font-bold">{i + 1}</div>
-              <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2 glass-card rounded-xl text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">{esc(m.label || '')}</div>
+              <div class={`w-8 h-8 rounded-full bg-primary border-2 border-white ${AR.shadow?.card || 'shadow-lg'} cursor-pointer hover:scale-125 transition-transform flex items-center justify-center text-on-primary text-xs font-bold`}>{i + 1}</div>
+              <div class={`absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-4 py-2 glass-card ${AR.borderRadius?.card || 'rounded-xl'} text-sm font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none`}>{esc(m.label || '')}</div>
             </div>
           ))}
         </div>

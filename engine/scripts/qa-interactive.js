@@ -19,6 +19,7 @@ const path = require('path');
 const ROOT = path.resolve(__dirname, '..', '..');
 const COURSE_PATH = path.resolve(ROOT, 'engine/output/course.html');
 const LAYOUT_PATH = path.resolve(ROOT, 'engine/output/course-layout.json');
+const TOKENS_PATH = path.resolve(ROOT, 'engine/output/design-tokens.json');
 
 const errors = [];
 const warnings = [];
@@ -1676,7 +1677,73 @@ async function run() {
   }
 
   // ═══════════════════════════════════════════════════════════════════
-  //  TEST 32: Variant coverage and correctness
+  //  TEST 32: Brand fidelity — rendered fonts match declared fonts
+  // ═══════════════════════════════════════════════════════════════════
+  console.log('Testing brand fidelity (rendered fonts)...');
+  try {
+    const tokens = JSON.parse(fs.readFileSync(TOKENS_PATH, 'utf-8'));
+    const declaredHeadline = tokens.fonts?.headline;
+    const declaredBody = tokens.fonts?.body;
+
+    if (declaredHeadline) {
+      const renderedHeadline = await page.evaluate(() => {
+        const h = document.querySelector('h1, h2');
+        return h ? getComputedStyle(h).fontFamily : null;
+      });
+      if (renderedHeadline && renderedHeadline.toLowerCase().includes(declaredHeadline.toLowerCase())) {
+        pass('BRAND', `Headline font renders as "${declaredHeadline}" ✓`);
+      } else {
+        fail('BRAND', `Headline font mismatch: declared "${declaredHeadline}", rendered "${renderedHeadline}"`);
+      }
+    }
+
+    if (declaredBody) {
+      const renderedBody = await page.evaluate(() => {
+        const p = document.querySelector('p');
+        return p ? getComputedStyle(p).fontFamily : null;
+      });
+      if (renderedBody && renderedBody.toLowerCase().includes(declaredBody.toLowerCase())) {
+        pass('BRAND', `Body font renders as "${declaredBody}" ✓`);
+      } else {
+        fail('BRAND', `Body font mismatch: declared "${declaredBody}", rendered "${renderedBody}"`);
+      }
+    }
+
+    // Verify primary color renders correctly via CSS custom property
+    const declaredPrimary = tokens.colors?.primary;
+    if (declaredPrimary) {
+      const renderedPrimary = await page.evaluate(() => {
+        // Read the CSS custom property directly — most reliable
+        const val = getComputedStyle(document.documentElement).getPropertyValue('--color-primary').trim();
+        if (!val) return null;
+        // val may be hex, rgb, or oklch — try to extract hex if possible
+        if (val.startsWith('#')) return val;
+        const match = val.match(/rgb\((\d+),?\s*(\d+),?\s*(\d+)\)/);
+        if (match) return '#' + [match[1], match[2], match[3]].map(n => parseInt(n).toString(16).padStart(2, '0')).join('');
+        return val; // return as-is (oklch etc)
+      });
+      // Expand 3-char hex shorthand (#f40 → #ff4400)
+      const expandHex = (h) => {
+        if (!h) return h;
+        const m = h.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])$/i);
+        return m ? `#${m[1]}${m[1]}${m[2]}${m[2]}${m[3]}${m[3]}` : h;
+      };
+      const normDeclared = expandHex(declaredPrimary).toLowerCase();
+      const normRendered = expandHex(renderedPrimary).toLowerCase();
+      if (normRendered === normDeclared) {
+        pass('BRAND', `Primary color renders as ${declaredPrimary} ✓`);
+      } else if (renderedPrimary) {
+        warn('BRAND', `Primary color: declared ${declaredPrimary}, CSS property resolves to "${renderedPrimary}" (may be different color space)`);
+      } else {
+        warn('BRAND', 'Could not read --color-primary CSS custom property');
+      }
+    }
+  } catch (e) {
+    warn('BRAND', `Brand fidelity check error: ${e.message}`);
+  }
+
+  // ═══════════════════════════════════════════════════════════════════
+  //  TEST 33: Variant coverage and correctness
   // ═══════════════════════════════════════════════════════════════════
   console.log('Testing variant coverage...');
   // This test reads course-layout.json (Node-side) to check which variants

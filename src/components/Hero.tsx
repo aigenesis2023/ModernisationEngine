@@ -69,22 +69,18 @@ export function Hero({ comp, variant }: Props) {
   }
 
   if (variant === 'minimal-text') {
-    // Minimal-text: subtle image + lighter scrim for a restrained hero
+    // Minimal-text: text-only hero — no image, brand background + brand text colors
     return (
-      <section class="relative min-h-screen flex items-center overflow-hidden" data-component-type="hero">
-        {imgSrc ? (
-          <img alt={imgAlt} class="absolute inset-0 w-full h-full object-cover opacity-30" src={imgSrc} />
-        ) : null}
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10" />
+      <section class="relative min-h-screen flex items-center overflow-hidden bg-background" data-component-type="hero">
         <div class="@container w-full relative z-10 max-w-7xl mx-auto px-8 @3xl:px-16 py-20">
           <div class="border-l-4 border-primary pl-8 @3xl:pl-12">
             <h1
-              class="font-headline text-display md:text-display-xl mb-8 pb-1 text-white"
+              class="font-headline text-display md:text-display-xl mb-8 pb-1 text-on-surface"
               data-animate="fade-up"
               data-text-reveal
               dangerouslySetInnerHTML={{ __html: title }}
             />
-            <p class="text-body-lg text-white/80 max-w-3xl mb-12" data-animate="fade-up">
+            <p class="text-body-lg text-on-surface-variant max-w-3xl mb-12" data-animate="fade-up">
               {bodyText}
             </p>
             <div class="flex gap-4 flex-wrap" data-animate="fade-up">

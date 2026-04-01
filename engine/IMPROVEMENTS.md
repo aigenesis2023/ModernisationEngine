@@ -18,13 +18,13 @@ A user inputs a **brand URL** and a **topic**. The engine produces a complete co
 - Does it work for **monochromatic brands** AND **multi-color brands**?
 - Does it affect any **image+text overlay** pattern?
 - Does the **authoring layer** still swap variants correctly?
-- Is it applied to **BOTH rendering paths** (Preact components AND build-course.js fill functions)?
+- ~~Is it applied to BOTH rendering paths?~~ ✅ Single rendering path now (Preact only)
 
 ---
 
-## CRITICAL ARCHITECTURAL PROBLEM: DUAL RENDERING PATHS
+## ~~CRITICAL ARCHITECTURAL PROBLEM: DUAL RENDERING PATHS~~ ✅ RESOLVED
 
-**This is the #1 issue in the system.** Every other improvement is undermined until this is resolved.
+**This was the #1 issue in the system.** It has been eliminated — see Phase 1 below.
 
 ### What's happening
 
@@ -124,27 +124,28 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 - [x] MCQ badge uses bg-primary text-on-primary
 - [x] Section backgrounds respect colorStrategy
 
-### NOT done
-- [ ] **build-course.js fill functions are OUT OF SYNC** — all 28 fill functions still have old code. This breaks variant swapping in the authoring layer.
+### Phase 1 DONE
+- [x] **Dual rendering path eliminated.** All 28 fill functions + `buildSectionsLegacy` + `--legacy` flag deleted from build-course.js (~1912 lines removed). `renderComponentVariant()` in src/render.tsx was already generating all variant `<template>` tags via Preact. Dead helpers (`stripTags`, `sectionOnly`, `mc`) also removed. Build output is byte-for-byte identical (body HTML verified via md5sum). build-course.js: 2927 → 852 lines.
 
 ---
 
 ## THE PLAN — IN ORDER
 
-### Phase 1: Eliminate dual rendering path (BLOCKING)
+### Phase 1: Eliminate dual rendering path ✅ COMPLETE
 
 **Goal:** One rendering engine. All variants rendered by Preact. Fill functions deleted.
 
-**Steps:**
-1. Export `renderComponentVariant(comp, variant, context)` from the Preact SSR bundle (src/render.tsx)
-2. In build-course.js, replace `fillComponentVariant()` calls with `renderComponentVariant()` calls
-3. Verify all 56 variants render correctly through Preact
-4. Delete all 28 fillXxx() functions from build-course.js (~1600 lines)
-5. Verify authoring panel variant swapping works for all components
+**What was done:**
+1. `renderComponentVariant()` was already exported from src/render.tsx and generating `<template>` tags
+2. build-course.js already used Preact SSR as default — fill functions were only reachable via `--legacy` flag
+3. Deleted all 28 `fillXxx()` functions, `fillComponentVariant()`, `fillComponent()`, `buildSectionsLegacy()`, legacy `buildNav()` (~1912 lines)
+4. Removed `--legacy` flag, dead helpers (`stripTags`, `sectionOnly`, `mc`)
+5. Preserved `CATEGORY_MAP` (needed for authoring panel metadata in build output)
+6. Verified: body HTML byte-for-byte identical before/after (only Tailwind CSS compilation order differs)
+7. QA: 0 errors in qa-course.js, 38/38 functional tests pass in qa-interactive.js
+8. Pre-existing contrast warnings (21) are color token issues, not rendering path issues
 
-**Verification:** Open Edit panel → swap every variant of every interactive component → confirm no visual breakage.
-
-**Impact:** Fixes the variant inconsistency problem permanently. Every future Preact fix automatically applies to all variants.
+**Impact:** Every fix to a Preact component now automatically applies to all variants. No sync debt.
 
 ### Phase 2: Brand fidelity QA gate
 
@@ -212,4 +213,4 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 
 ---
 
-*Last updated: 2026-04-01*
+*Last updated: 2026-04-01 — Phase 1 complete*

@@ -872,6 +872,46 @@ function checkDesignIntegrity(html, contract, tokens) {
     warn('DESIGN', 'No archetype set in design-tokens.json — using default recipe');
   }
 
+  // ── Brand fidelity: verify token hex values appear in compiled CSS ──
+  const colors = tokens.colors || {};
+  // Extract the compiled CSS from the <style> tag in the HTML
+  const styleMatch = html.match(/<style>([\s\S]*?)<\/style>/);
+  const compiledCSS = styleMatch ? styleMatch[1] : '';
+  if (compiledCSS) {
+    const criticalTokens = ['primary', 'background', 'on-surface', 'on-primary', 'surface-container'];
+    let tokenMatches = 0;
+    let tokenMisses = 0;
+    for (const name of criticalTokens) {
+      const hex = colors[name];
+      if (!hex) continue;
+      // Normalise hex for comparison: CSS may use lowercase
+      const hexLower = hex.toLowerCase();
+      if (compiledCSS.toLowerCase().includes(hexLower)) {
+        tokenMatches++;
+      } else {
+        fail('BRAND', `Token "${name}" (${hex}) not found in compiled CSS — color may be lost`);
+        tokenMisses++;
+      }
+    }
+    if (tokenMisses === 0 && tokenMatches > 0) {
+      pass('BRAND', `All ${tokenMatches} critical color tokens verified in compiled CSS`);
+    }
+
+    // Verify font families appear in compiled CSS
+    if (headlineFont && compiledCSS.includes(headlineFont)) {
+      pass('BRAND', `Headline font "${headlineFont}" declared in compiled CSS`);
+    } else if (headlineFont) {
+      fail('BRAND', `Headline font "${headlineFont}" not found in compiled CSS — may use fallback`);
+    }
+    if (bodyFont && compiledCSS.includes(bodyFont)) {
+      pass('BRAND', `Body font "${bodyFont}" declared in compiled CSS`);
+    } else if (bodyFont) {
+      fail('BRAND', `Body font "${bodyFont}" not found in compiled CSS — may use fallback`);
+    }
+  } else {
+    warn('BRAND', 'No <style> tag found — cannot verify token-to-CSS fidelity');
+  }
+
   // Legacy: check design-contract.json if present (Stitch-era, optional)
   if (contract) {
     const expectedContractTypes = ['hero', 'accordion', 'mcq', 'tabs', 'flashcard', 'checklist'];

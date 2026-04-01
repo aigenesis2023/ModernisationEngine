@@ -1,4 +1,5 @@
 import { esc, sectionOnly } from '../utils.js';
+import { useRender } from '../context.js';
 import type { Component } from '../types.js';
 
 interface Props {
@@ -8,6 +9,7 @@ interface Props {
 }
 
 export function Text({ comp, variant, maxW }: Props) {
+  const { AR } = useRender();
   const title = esc(comp.displayTitle || '');
   const secClass = sectionOnly('py-16');
   const textW = maxW === 'max-w-3xl' ? 'max-w-3xl' : 'max-w-6xl';
@@ -30,7 +32,7 @@ export function Text({ comp, variant, maxW }: Props) {
     return (
       <section class={secClass} data-component-type="text" data-animate="fade-up">
         <div class={`@container ${textW} mx-auto px-8`}>
-          <div class="border-l-4 border-primary bg-surface-container/50 rounded-r-2xl p-8 @3xl:p-10">
+          <div class={`border-l-4 border-primary bg-surface-container/50 ${AR.borderRadius?.card || 'rounded-r-2xl'} p-8 @3xl:p-10`}>
             {title && <h2 class="font-headline text-h3 mb-4" dangerouslySetInnerHTML={{ __html: title }} />}
             <div
               class="space-y-4 text-body-lg text-on-surface-variant"
