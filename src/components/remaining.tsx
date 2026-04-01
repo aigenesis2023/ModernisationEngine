@@ -341,7 +341,7 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
 
   // ── Side-by-side list format (AI-generated: columns[].items[]) ──────
   if (hasItemsFormat) {
-    const colColors = ['text-primary', 'text-on-surface', 'text-on-surface-variant'];
+    const colColors = ['text-on-surface', 'text-on-surface', 'text-on-surface-variant'];
     const colBorders = ['border-primary/30', 'border-outline-variant', 'border-outline-variant/50'];
     const colBgs = ['bg-primary/5', 'bg-surface-container', 'bg-surface-container-low'];
 
@@ -442,8 +442,8 @@ export function Comparison({ comp, variant, maxW }: { comp: Component; variant: 
           <h2 class="font-headline text-h2 mb-8 text-center" dangerouslySetInnerHTML={{ __html: title }} />
           {body && <p class="text-center text-on-surface-variant mb-8">{stripTags(body)}</p>}
           <div class="flex justify-between mb-6 px-4">
-            <span class="font-headline text-h4 text-primary" data-edit-path="columns.0.label">{esc(columns[0].label || columns[0].title || '')}</span>
-            <span class="font-headline text-h4 text-secondary" data-edit-path="columns.1.label">{esc(columns[1].label || columns[1].title || '')}</span>
+            <span class="font-headline text-h4 text-on-surface" data-edit-path="columns.0.label">{esc(columns[0].label || columns[0].title || '')}</span>
+            <span class="font-headline text-h4 text-on-surface-variant" data-edit-path="columns.1.label">{esc(columns[1].label || columns[1].title || '')}</span>
           </div>
           <div class="space-y-3">
             {rows.map((row: any, ri: number) => {

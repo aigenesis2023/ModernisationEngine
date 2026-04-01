@@ -13,10 +13,16 @@ export function esc(s: string | undefined | null): string {
     .replace(/"/g, '&quot;');
 }
 
-/** Strip all HTML tags (same as stripTags() in build-course.js) */
+/** Strip all HTML tags and decode common entities */
 export function stripTags(html: string | undefined | null): string {
   if (!html) return '';
-  return html.replace(/<[^>]*>/g, '');
+  return html.replace(/<[^>]*>/g, '')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
 }
 
 

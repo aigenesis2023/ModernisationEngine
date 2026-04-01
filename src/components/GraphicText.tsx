@@ -51,9 +51,9 @@ export function GraphicText({ comp, index, variant, maxW }: Props) {
         {imgSrc ? (
           <img alt={imgAlt} class="absolute inset-0 w-full h-full object-cover" src={imgSrc} data-parallax />
         ) : (
-          <div class="absolute inset-0 bg-surface-container" />
+          <div class="absolute inset-0 bg-on-surface" />
         )}
-        <div class={`absolute inset-0 ${gradientDir} from-black/85 via-black/60 to-black/10`} />
+        <div class={`absolute inset-0 ${gradientDir} from-black/85 via-black/60 to-black/30`} />
         <div class={`@container w-full ${maxW} mx-auto px-8 relative z-10 py-20`} data-animate="fade-up">
           <div class={`w-full @3xl:w-1/2 ${align === 'right' ? '@3xl:ml-auto' : ''}`}>
             <h2 class="font-headline text-h2 tracking-tight mb-6 text-white" dangerouslySetInnerHTML={{ __html: title }} />

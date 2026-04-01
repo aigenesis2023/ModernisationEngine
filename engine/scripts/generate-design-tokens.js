@@ -354,7 +354,7 @@ function mapBrandSpecToTokens(brandSpec) {
   // Direct mapping: brand's actual colors → token roles
   const background = colors.background;
   const primary = colors.primary;
-  const onPrimary = colors.onPrimary;
+  // onPrimary set below after contrast safety check
 
   // Safety: if onBackground has poor contrast against background, it was likely
   // extracted from a hero/overlay section and is wrong for general text.
@@ -382,6 +382,24 @@ function mapBrandSpecToTokens(brandSpec) {
   } else {
     onSurface = isDark ? '#f5f5f5' : '#1a1a1a';
   }
+
+  // Safety: if onPrimary has poor contrast against primary, override with WCAG-safe choice
+  let onPrimarySafe = colors.onPrimary;
+  if (onPrimarySafe && primary) {
+    const cr = contrastRatio(onPrimarySafe, primary);
+    if (cr < 3) {
+      // Pick whichever of white/dark has better contrast on primary
+      const crWhite = contrastRatio('#ffffff', primary);
+      const crDark = contrastRatio('#1a1a1a', primary);
+      onPrimarySafe = crWhite > crDark ? '#ffffff' : '#1a1a1a';
+      console.log(`[brand-spec]   ⚠️  onPrimary ${colors.onPrimary} has only ${cr.toFixed(1)}:1 contrast vs primary ${primary} — overriding to ${onPrimarySafe}`);
+    }
+  } else {
+    const crWhite = contrastRatio('#ffffff', primary);
+    const crDark = contrastRatio('#1a1a1a', primary);
+    onPrimarySafe = crWhite > crDark ? '#ffffff' : '#1a1a1a';
+  }
+  const onPrimary = onPrimarySafe;
 
   // Surface hierarchy: compute from brand background (not MD3)
   // For light brands: slightly darker steps. For dark brands: slightly lighter steps.
@@ -424,11 +442,11 @@ function mapBrandSpecToTokens(brandSpec) {
   //   outline-variant:      0.15     0.25   — light dividers, subtle borders
   //   outline:              0.40     0.45   — medium borders, form outlines
   //   secondary:            0.50     0.55   — muted accent
-  //   on-surface-variant:   0.55     0.60   — muted text, icons
+  //   on-surface-variant:   0.65     0.60   — muted text, icons (must pass 4.5:1 on surface-container)
   const surfaceVariant    = colors.cardBorder ? stepSurface(background, isDark ? 12 : -6) : blendColors(background, onSurface, isDark ? 0.10 : 0.06);
   const outlineVariant    = blendColors(background, onSurface, isDark ? 0.25 : 0.15);
   const outline           = blendColors(background, onSurface, isDark ? 0.45 : 0.40);
-  const onSurfaceVariant  = blendColors(background, onSurface, isDark ? 0.60 : 0.55);
+  const onSurfaceVariant  = blendColors(background, onSurface, isDark ? 0.60 : 0.65);
 
   // Secondary: use brand's extracted secondary if available.
   // When null (monochromatic brand), compute a neutral mid-grey — never MD3.

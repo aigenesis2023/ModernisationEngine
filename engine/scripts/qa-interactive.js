@@ -1140,6 +1140,14 @@ async function run() {
       var comp = el.closest('[data-component-type]');
       var compType = comp ? comp.getAttribute('data-component-type') : '';
       if (compType === 'hero' || compType === 'full-bleed') return;
+      // graphic-text full-overlay uses image bg + dark scrim over image — getEffectiveBg can't detect
+      // sibling scrims. Detect overlay pattern: relative section with absolute-positioned img child.
+      if (compType === 'graphic-text' && comp) {
+        var imgs = comp.querySelectorAll('img');
+        for (var ii = 0; ii < imgs.length; ii++) {
+          if (window.getComputedStyle(imgs[ii]).position === 'absolute') return;
+        }
+      }
       // Skip hidden tab panels / slides
       var hiddenParent = el.closest('[data-tab-panel], [data-slide]');
       if (hiddenParent && (hiddenParent.style.display === 'none' || hiddenParent.offsetHeight === 0)) return;

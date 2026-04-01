@@ -1,1 +1,7 @@
-biohacking and longevity
+Quantum Computing: From Theory to Real-World Impact
+
+A comprehensive exploration of quantum computing — how it works, why it matters, and where it's heading. Covers the fundamental principles (qubits, superposition, entanglement), key quantum algorithms (Shor's, Grover's), current hardware approaches (superconducting, trapped ion, photonic), real-world applications (cryptography, drug discovery, optimization, materials science), the quantum advantage debate, and the road ahead including error correction and fault tolerance.
+
+Target audience: Professionals and curious learners with no prior quantum physics background
+Difficulty: Intermediate (accessible entry, builds to advanced concepts)
+Estimated duration: ~45 minutes
