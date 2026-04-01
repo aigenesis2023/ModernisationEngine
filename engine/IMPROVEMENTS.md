@@ -168,6 +168,20 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 4. No dark-brand-specific bugs found. Adaptive blend ratios, dark scrims, and surface containers all working correctly
 5. Minor issues found were content/generation quality (hero empty space, AI-generated image text), not dark-mode rendering
 
+**Additional fixes discovered during Phase 3 validation (branch: improvements2):**
+
+6. **Surface rhythm bug fix (render.tsx):** The substring filter `!cls.includes('bg-surface-container')` was matching `bg-surface-container-lowest` and `bg-surface-container-low`, collapsing ALL sections to the same `bg-surface-dim` shade when `accentSectionBg: false`. Changed to exact match `cls !== 'bg-primary'`. The rhythm was never actually cycling for any non-accent brand.
+
+7. **Section background recalculation for authoring layer:** Added `data-course-section` attribute to non-hero section wrappers in render.tsx. Embedded surfaceRhythm array + accentSectionBg flag as `<script id="surface-rhythm">` JSON block in build-course.js. Added `recalcSectionBackgrounds()` in hydrate.js that reapplies section backgrounds after authoring mutations (add/delete/reorder/add-section).
+
+8. **Section heading visual break:** Section headings now wrapped in `<div class="bg-background">` inside the surface rhythm wrapper, so they visually punch through with the base background color. Creates clear visual separation. Heading width locked to `max-w-6xl` regardless of section width for consistency.
+
+9. **Image generation: no illustrations:** `illustrated` treatment in generate-images.js now maps to `"dramatic low-key lighting, stylised atmosphere"` instead of vector illustration style. Every prompt includes `photorealistic` and negative terms (`no cartoon, no illustration, no anime, no drawing, no sketch, no vector art`).
+
+10. **graphic-text width cap:** Added `graphic-text` to `NEEDS_STANDARD` set in src/utils.ts so it caps at `max-w-6xl` in wide sections.
+
+11. **Review prompt update:** Updated review-course.js to note that minimal-text hero variant intentionally has generous whitespace.
+
 ### Phase 4: Font classification refinement
 
 **Goal:** Improve font substitution accuracy for condensed display fonts.
@@ -215,4 +229,4 @@ These fixes are correct in the Preact rendering path. They do NOT yet apply to v
 
 ---
 
-*Last updated: 2026-04-01 — Phases 1 + 3 complete*
+*Last updated: 2026-04-01 — Phases 1 + 3 complete (+ additional fixes in improvements2 branch)*

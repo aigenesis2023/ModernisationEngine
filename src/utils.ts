@@ -64,6 +64,7 @@ export const NEEDS_STANDARD = new Set([
   'mcq', 'branching', 'flashcard', 'bento', 'comparison', 'data-table',
   'tabs', 'checklist', 'narrative', 'process-flow', 'image-gallery',
   'labeled-image', 'timeline', 'key-term', 'accordion', 'stat-callout',
+  'graphic-text',
 ]);
 
 export const INTERACTIVE_TYPES = new Set([

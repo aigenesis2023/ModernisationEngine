@@ -329,13 +329,13 @@ function assembleSection(
   const secMaxW = getSectionMaxW(sectionWidth);
 
   const titleBar = sectionTitle
-    ? `<section class="${secMaxW} mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-id="heading-${sectionId}" data-component-type="section-heading" data-section-index="${sectionIndex}" data-component-index="-1">
+    ? `<div class="bg-background"><section class="max-w-6xl mx-auto px-8 pt-24 pb-8" id="${sectionId}"${trackAttr} data-component-id="heading-${sectionId}" data-component-type="section-heading" data-section-index="${sectionIndex}" data-component-index="-1">
 <div class="flex items-center gap-6">
 <div class="h-px flex-1 bg-gradient-to-r from-primary/60 to-transparent"></div>
 <h2 class="font-headline text-label-text uppercase text-on-surface" data-edit-path="title">${esc(sectionTitle)}</h2>
 <div class="h-px flex-1 bg-gradient-to-l from-primary/60 to-transparent"></div>
 </div>
-</section>`
+</section></div>`
     : '';
 
   const wrapped = componentHtmls.map((h, i) => {
