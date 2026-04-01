@@ -132,6 +132,7 @@ async function extractCSSTokens(page) {
 
     return {
       buttons: sample('button, [role="button"], a[class*="btn"], [class*="button"]:not(section):not(div > div)'),
+      heroHeadings: sample('h1', 5),
       headings: sample('h1, h2, h3'),
       paragraphs: sample('p'),
       cards: cardsByClass.length > 0 ? cardsByClass : cardLike,
@@ -162,6 +163,7 @@ async function extractCSSTokens(page) {
   const textCandidates = {};     // colors from paragraph/body text
   const headingColors = {};
   const headingFonts = {};
+  const heroFonts = {};
 
   const processItems = (items, context) => {
     for (const item of items) {
@@ -185,6 +187,7 @@ async function extractCSSTokens(page) {
       if (item.fontFamily) {
         countValue(allFonts, item.fontFamily);
         if (context === 'headings') countValue(headingFonts, item.fontFamily);
+        if (context === 'heroHeadings') countValue(heroFonts, item.fontFamily);
       }
       if (item.borderRadius) countValue(allRadii, item.borderRadius);
       if (item.boxShadow) countValue(allShadows, item.boxShadow);
@@ -192,6 +195,7 @@ async function extractCSSTokens(page) {
   };
 
   processItems(extracted.buttons || [], 'buttons');
+  processItems(extracted.heroHeadings || [], 'heroHeadings');
   processItems(extracted.headings || [], 'headings');
   processItems(extracted.paragraphs || [], 'paragraphs');
   processItems(extracted.links || [], 'links');
@@ -241,6 +245,8 @@ async function extractCSSTokens(page) {
   // Font role classification:
   // - Headline: font most frequently seen on h1/h2/h3 headings (skip generic fallbacks)
   // - Body: most frequent REAL font overall that isn't the headline font
+  const heroFontEntry = sortedByCount(heroFonts).find(([f]) => !GENERIC_FONTS.has(f));
+  const heroFont = heroFontEntry?.[0] || null;
   const headlineFontEntry = sortedByCount(headingFonts).find(([f]) => !GENERIC_FONTS.has(f));
   const headlineFont = headlineFontEntry?.[0] || null;
   const bodyFontEntry = sortedByCount(allFonts).find(([f]) => f !== headlineFont && !GENERIC_FONTS.has(f));
@@ -278,6 +284,14 @@ async function extractCSSTokens(page) {
   const cardBorderColor = sortedByCount(cardBorderMap)[0]?.[0] || null;
   const cardBorderWidth = sortedByCount(cardBorderWidthMap)[0]?.[0] || null;
 
+  // Hero font weight (from H1 elements specifically)
+  const heroWeights = (extracted.heroHeadings || [])
+    .map(h => parseInt(h.fontWeight, 10))
+    .filter(w => !isNaN(w));
+  const avgHeroWeight = heroWeights.length > 0
+    ? Math.round(heroWeights.reduce((a, b) => a + b, 0) / heroWeights.length)
+    : null;
+
   // Average heading weight
   const headingWeights = (extracted.headings || [])
     .map(h => parseInt(h.fontWeight, 10))
@@ -309,6 +323,7 @@ async function extractCSSTokens(page) {
   const buttonBorderWidth = sortedByCount(buttonBorderWidthMap)[0]?.[0] || null;
 
   const summary = {
+    heroFont,
     headlineFont,
     bodyFont,
     dominantBorderRadius,
@@ -321,6 +336,7 @@ async function extractCSSTokens(page) {
     cardSurfaceColor,
     cardBorderColor,
     cardBorderWidth,
+    avgHeroWeight,
     avgHeadingWeight,
     avgBodyWeight,
     dominantHeadingTransform,
@@ -332,6 +348,7 @@ async function extractCSSTokens(page) {
 
   console.log(`  Colors found: ${Object.keys(allColors).length} unique`);
   console.log(`  Accent candidates: ${accentColors.length} saturated colors`);
+  console.log(`  Hero font: ${heroFont && heroFont !== headlineFont ? heroFont : '(same as headline)'}`);
   console.log(`  Headline font: ${headlineFont || '(not detected)'}`);
   console.log(`  Body font: ${bodyFont || '(not detected)'}`);
   console.log(`  Border radii: ${Object.keys(allRadii).length} unique values`);
@@ -384,6 +401,8 @@ async function takeScreenshotAndDetectTheme(url) {
 
   console.log(`Navigating to ${url}...`);
   await page.goto(url, { waitUntil: 'networkidle', timeout: 30000 });
+  // Wait for web fonts to load (critical for brand typography detection)
+  await page.evaluate(() => document.fonts.ready).catch(() => {});
   // Extra wait for animations and lazy-loaded content
   await page.waitForTimeout(2000);
 
@@ -1183,6 +1202,7 @@ function saveOutputs(url, description, detectedIsDark, extractedCSS) {
     // Print summary for immediate inspection
     const s = extractedCSS.summary;
     console.log('\n--- CSS Token Summary ---');
+    console.log(`  Hero font:         ${s.heroFont && s.heroFont !== s.headlineFont ? s.heroFont : '(same as headline)'}`);
     console.log(`  Headline font:     ${s.headlineFont || 'not detected'}`);
     console.log(`  Body font:         ${s.bodyFont || 'not detected'}`);
     console.log(`  Border radius:     ${s.dominantBorderRadius || 'not detected'}`);

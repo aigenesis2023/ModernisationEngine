@@ -355,7 +355,33 @@ function mapBrandSpecToTokens(brandSpec) {
   const background = colors.background;
   const primary = colors.primary;
   const onPrimary = colors.onPrimary;
-  const onSurface = colors.onBackground;
+
+  // Safety: if onBackground has poor contrast against background, it was likely
+  // extracted from a hero/overlay section and is wrong for general text.
+  // Fall back to dark text on light bg, light text on dark bg.
+  const luminance = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255;
+    const g = parseInt(hex.slice(3, 5), 16) / 255;
+    const b = parseInt(hex.slice(5, 7), 16) / 255;
+    const toLinear = (c) => c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
+  };
+  const contrastRatio = (hex1, hex2) => {
+    const l1 = luminance(hex1), l2 = luminance(hex2);
+    const lighter = Math.max(l1, l2), darker = Math.min(l1, l2);
+    return (lighter + 0.05) / (darker + 0.05);
+  };
+  let onSurface = colors.onBackground;
+  if (onSurface && background) {
+    const cr = contrastRatio(onSurface, background);
+    if (cr < 3) {
+      const fallback = isDark ? '#f5f5f5' : '#1a1a1a';
+      console.log(`[brand-spec]   ⚠️  onBackground ${onSurface} has only ${cr.toFixed(1)}:1 contrast vs background ${background} — overriding to ${fallback}`);
+      onSurface = fallback;
+    }
+  } else {
+    onSurface = isDark ? '#f5f5f5' : '#1a1a1a';
+  }
 
   // Surface hierarchy: compute from brand background (not MD3)
   // For light brands: slightly darker steps. For dark brands: slightly lighter steps.
@@ -580,6 +606,8 @@ Your job is to find the best replacement(s) that will look premium and feel nati
 ${brandDesign}
 
 ## Typography signals extracted from the brand website
+- Hero font (H1 — often a display face): ${summary.heroFont && summary.heroFont !== rawFonts.headline ? summary.heroFont + ' (DIFFERENT from headline)' : '(same as headline)'}
+- Hero font weight: ${summary.avgHeroWeight || 'unknown'}
 - Headline font (not on Google Fonts): ${rawFonts.headline || 'unknown'}
 - Body font (not on Google Fonts): ${rawFonts.body || 'unknown'}
 - Font weights the brand uses: ${usedWeights.length ? usedWeights.join(', ') : 'unknown'}
@@ -609,7 +637,9 @@ Rules:
 - Verify weight availability before suggesting (use web search if needed)
 - If the brand has only one font, you may suggest the same font for both headline and body
 - Do not suggest Inter or Roboto unless the brand is genuinely corporate/neutral
-- For headline character "heavy-condensed" or "bold-geometric": MUST pick a condensed or display face. Standard sans-serifs (Inter, DM Sans, Source Sans) are WRONG for these.
+- For headline character "heavy-display": MUST pick an ultra-bold display face with 800-900 weight support (e.g. Plus Jakarta Sans ExtraBold, Space Grotesk Bold, Sora ExtraBold). The font should look commanding at 60px+.
+- For headline character "heavy-condensed": MUST pick a condensed or display face (e.g. Oswald, Big Shoulders Display, Anton, Bebas Neue, Barlow Condensed). Standard sans-serifs are WRONG.
+- For headline character "bold-geometric": pick a bold geometric sans (e.g. Montserrat Bold, Outfit Bold, Poppins Bold). Standard-weight sans-serifs are WRONG.
 
 Write your answer as a JSON file at: engine/output/font-match.json
 

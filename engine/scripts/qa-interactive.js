@@ -45,6 +45,7 @@ async function run() {
 
   // Load course and wait for hydrate.js to run
   await page.goto(`file://${COURSE_PATH}`, { waitUntil: 'networkidle' });
+  await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(2000); // Let GSAP animations settle
 
   // ═══════════════════════════════════════════════════════════════════

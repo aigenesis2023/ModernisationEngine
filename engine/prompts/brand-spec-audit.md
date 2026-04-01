@@ -77,8 +77,9 @@ What is the dominant surface treatment?
 **Q8. typographyCharacter** (object with two fields)
 Observe the headline and body typography character:
 
-**headlineCharacter** (string): "heavy-condensed" | "bold-geometric" | "light-elegant" | "standard-sans" | "serif"
-- "heavy-condensed" = thick, tightly-spaced, high-impact display type (e.g., Clash Grotesk, Bebas Neue)
+**headlineCharacter** (string): "heavy-display" | "heavy-condensed" | "bold-geometric" | "light-elegant" | "standard-sans" | "serif"
+- "heavy-display" = ultra-bold, large-scale hero/banner type — often a different font or weight from regular headings, designed to dominate the viewport (e.g., 800-900 weight, wide/extended, or a dedicated display face)
+- "heavy-condensed" = thick, tightly-spaced, high-impact condensed display type (e.g., Clash Grotesk, Bebas Neue)
 - "bold-geometric" = bold but standard-width geometric sans (e.g., Montserrat Bold, Inter Bold)
 - "light-elegant" = thin, airy, elegant sans-serif (e.g., Helvetica Light, Futura Light)
 - "standard-sans" = regular weight, neutral sans-serif (e.g., Inter, Roboto, Open Sans)

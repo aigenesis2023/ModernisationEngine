@@ -68,6 +68,7 @@ async function main() {
   const desktopPage = await browser.newPage();
   await desktopPage.setViewportSize({ width: 1440, height: 900 });
   await desktopPage.goto(`file://${COURSE_PATH}`, { waitUntil: 'networkidle' });
+  await desktopPage.evaluate(() => document.fonts.ready);
   await desktopPage.waitForTimeout(2000);
 
   // Screenshot each section
@@ -119,6 +120,7 @@ async function main() {
   const mobilePage = await browser.newPage();
   await mobilePage.setViewportSize({ width: 390, height: 844 });
   await mobilePage.goto(`file://${COURSE_PATH}`, { waitUntil: 'networkidle' });
+  await mobilePage.evaluate(() => document.fonts.ready);
   await mobilePage.waitForTimeout(2000);
 
   // Mobile hero
